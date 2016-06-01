@@ -41,7 +41,6 @@ trait SeattleSpec extends MoleculeSpec with DatomicFacade {
   def loadSeattle(version: Int): Connection = {
     implicit val conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
     // Insert data
-//        Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
 
     conn
