@@ -8,7 +8,7 @@ import scala.language.postfixOps
 
 class Aggregates extends MoleculeSpec {
 
-  implicit val conn = load(AggregatesSchema, "Aggregates")
+  implicit val conn = recreateDbFrom(AggregatesSchema, "Aggregates")
 
   val planets  = Seq("Sun", "Jupiter", "Saturn", "Uranus", "Neptune", "Earth", "Venus", "Mars", "Ganymede", "Titan", "Mercury", "Callisto", "Io", "Moon", "Europa", "Triton", "Eris")
   val radiuses = Seq(696000.0, 69911.0, 58232.0, 25362.0, 24622.0, 6371.0, 6051.8, 3390.0, 2631.2, 2576.0, 2439.7, 2410.3, 1821.5, 1737.1, 1561.0, 1353.4, 1163.0)

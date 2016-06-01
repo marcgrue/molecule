@@ -14,7 +14,7 @@ import org.specs2.specification.Scope
 import scala.language.reflectiveCalls
 
 class PartitionSetup extends Scope with DatomicFacade {
-  implicit val conn = load(PartitionTestSchema)
+  implicit val conn = recreateDbFrom(PartitionTestSchema)
 }
 
 class Partition extends MoleculeSpec {

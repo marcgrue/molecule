@@ -599,10 +599,12 @@ object MoleculeBoilerplate {
     val nsTraitsOut = (0 to outArity).map(nsTrait(namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
     val outFile: String =
       s"""/*
-          |* AUTO-GENERATED CODE - DON'T CHANGE!
+          |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$Ns`
           |*
-          |* Manual changes to this file will likely break molecules!
-          |* Instead, change the molecule definition file(s) and recompile your project with `sbt compile`.
+          |* To change:
+          |* 1. edit schema definition file in `${d.pkg}.schema/`
+          |* 2. `sbt compile` in terminal
+          |* 3. Refresh and re-compile project in IDE
           |*/
           |package ${d.pkg}.dsl.${firstLow(d.domain)}
           |import molecule.dsl.schemaDSL._
@@ -627,10 +629,12 @@ object MoleculeBoilerplate {
     val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
       val inFile: String =
         s"""/*
-            |* AUTO-GENERATED CODE - DON'T CHANGE!
+            |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$Ns`
             |*
-            |* Manual changes to this file will likely break molecules!
-            |* Instead, change the molecule definition file(s) and recompile your project with `sbt compile`.
+            |* To change:
+            |* 1. edit schema definition file in `${d.pkg}.schema/`
+            |* 2. `sbt compile` in terminal
+            |* 3. Refresh and re-compile project in IDE
             |*/
             |package ${d.pkg}.dsl.${firstLow(d.domain)}
             |import molecule.dsl.schemaDSL._
@@ -644,11 +648,11 @@ object MoleculeBoilerplate {
     (outFile, inFiles)
   }
 
-  def generate(srcManaged: File, domainDirs: Seq[String], allIndexed: Boolean = true): Seq[File] = {
+  def generate(codeDir: File, managedDir: File, defDirs: Seq[String], allIndexed: Boolean = true): Seq[File] = {
     // Loop domain directories
-    val files = domainDirs flatMap { domainDir =>
-      val definitionFiles = sbt.IO.listFiles(new File(domainDir) / "schema").filter(f => f.isFile && f.getName.endsWith("Definition.scala"))
-      assert(definitionFiles.nonEmpty, "Found no definition files in path: " + domainDir)
+    val files = defDirs flatMap { defDir =>
+      val definitionFiles = sbt.IO.listFiles(codeDir / defDir / "schema").filter(f => f.isFile && f.getName.endsWith("Definition.scala"))
+      assert(definitionFiles.nonEmpty, "Found no definition files in path: " + codeDir / defDir)
 
       // Loop definition files in each domain directory
       definitionFiles flatMap { definitionFile =>
@@ -656,17 +660,17 @@ object MoleculeBoilerplate {
         val d = resolve(d0)
 
         // Write schema file
-        val schemaFile: File = d.pkg.split('.').toList.foldLeft(srcManaged)((dir, pkg) => dir / pkg) / "schema" / s"${d.domain}Schema.scala"
+        val schemaFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "schema" / s"${d.domain}Schema.scala"
         IO.write(schemaFile, schemaBody(d))
 
         // Write namespace files
         val namespaceFiles = d.nss.flatMap { ns =>
           val (outBody, inBodies) = namespaceBodies(d, ns)
-          val outFile: File = d.pkg.split('.').toList.foldLeft(srcManaged)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
+          val outFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
           IO.write(outFile, outBody)
 
           val inFiles = inBodies.map { case (i, inBody) =>
-            val inFile: File = d.pkg.split('.').toList.foldLeft(srcManaged)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}_in$i.scala"
+            val inFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}_in$i.scala"
             IO.write(inFile, inBody)
             inFile
           }

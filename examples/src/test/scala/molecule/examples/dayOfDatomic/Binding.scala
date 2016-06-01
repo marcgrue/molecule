@@ -7,7 +7,7 @@ import molecule.util.MoleculeSpec
 
 class Binding extends MoleculeSpec {
 
-  implicit val conn = load(SocialNewsSchema, "Binding")
+  implicit val conn = recreateDbFrom(SocialNewsSchema, "Binding")
 
   // Input molecules returning only the entity id (`e`).
   // (Underscore-suffixed attribute names are not returned in the result set)

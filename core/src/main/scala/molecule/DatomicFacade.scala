@@ -27,7 +27,7 @@ trait DatomicFacade extends ArgProperties {
 
   // Create database and load schema ========================================
 
-  def load(tx: Transaction, identifier: String = "", protocol: String = "mem"): Connection = {
+  def recreateDbFrom(tx: Transaction, identifier: String = "", protocol: String = "mem"): Connection = {
     val id = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {

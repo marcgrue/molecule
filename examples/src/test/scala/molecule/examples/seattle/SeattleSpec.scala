@@ -32,14 +32,14 @@ trait SeattleSpec extends MoleculeSpec with DatomicFacade {
 
 //  class SeattleSetup extends Scope with NoLanguageFeatures with DatomicFacade {
   class SeattleSetup extends Scope with DatomicFacade {
-    implicit val conn = load(SeattleSchema)
+    implicit val conn = recreateDbFrom(SeattleSchema)
     // Insert data
     //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
   def loadSeattle(version: Int): Connection = {
-    implicit val conn = load(SeattleSchema, "resources/seattle" + version)
+    implicit val conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
     // Insert data
 //        Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData

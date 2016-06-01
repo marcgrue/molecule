@@ -1,8 +1,6 @@
-
-
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.6.2",
+  version := "0.6.3",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -22,6 +20,17 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   unmanagedSourceDirectories in Test <<= (scalaSource in Test) (Seq(_))
 )
 
+lazy val defDirsCore = Seq(
+  "molecule/part",
+  "molecule/util"
+)
+lazy val defDirsExamples = Seq(
+  "molecule/examples/dayOfDatomic",
+  "molecule/examples/seattle",
+  "molecule/examples/mbrainz",
+  "molecule/examples/graph"
+)
+
 
 lazy val molecule = project.in(file("."))
   .settings(moduleName := "molecule-root")
@@ -38,44 +47,67 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   .settings(moduleName := "molecule-coretest")
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
+  // Generate boilerplate
+  .settings(definitionDirectories(defDirsCore))
+  .settings(taskKey[Unit]("Create jar") <<= makeJar(defDirsCore))
 
-  // Add schema definition directories
-  .settings(Seq(definitionDirectories(
-  "coretest/src/main/scala/molecule/part",
-  "coretest/src/main/scala/molecule/util"
-)))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .settings(moduleName := "molecule-examples")
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
-
-  // Add schema definition directories
-  .settings(Seq(definitionDirectories(
-    "examples/src/main/scala/molecule/examples/dayOfDatomic",
-    "examples/src/main/scala/molecule/examples/seattle",
-    "examples/src/main/scala/molecule/examples/mbrainz",
-    "examples/src/main/scala/molecule/examples/graph"
-  )))
+  // Generate boilerplate
+  .settings(definitionDirectories(defDirsExamples))
+  .settings(taskKey[Unit]("Create jar") <<= makeJar(defDirsExamples))
 
 
-def definitionDirectories(domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
-    val sourceDir = (sourceManaged in Compile).value
 
-    // generate source files
-    val sourceFiles = MoleculeBoilerplate.generate(sourceDir, domainDirs.toSeq)
+def definitionDirectories(defDirs: Seq[String]) = sourceGenerators in Compile += Def.task[Seq[File]] {
+  val codeDir = (scalaSource in Compile).value
+  val managedDir = (sourceManaged in Compile).value
+  val srcFiles = MoleculeBoilerplate.generate(codeDir, managedDir, defDirs)
+  val cache = FileFunction.cached(
+    streams.value.cacheDirectory / "moleculeBoilerplate",
+    inStyle = FilesInfo.hash,
+    outStyle = FilesInfo.hash
+  ) {
+    in: Set[File] => srcFiles.toSet
+  }
+  cache(srcFiles.toSet).toSeq
+}.taskValue
 
-    // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
-    val cache = FileFunction.cached(
-      streams.value.cacheDirectory / "moleculeBoilerplate",
-      inStyle = FilesInfo.lastModified,
-      outStyle = FilesInfo.hash
-    ) {
-      in: Set[File] => sourceFiles.toSet
-    }
-    cache(sourceFiles.toSet).toSeq
-  }.taskValue
 
+def makeJar(domainDirs: Seq[String]) = Def.task {
+  val sourceDir = (sourceManaged in Compile).value
+  val targetDir = (classDirectory in Compile).value
+  val moduleDirName = baseDirectory.value.toString.split("/").last
+
+  // Create jar from generated source files
+  val srcJar = new File(baseDirectory.value + "/lib/" + moduleDirName + "-sources.jar/")
+  val srcFilesData = files2TupleRec("", sourceDir, ".scala")
+  sbt.IO.jar(srcFilesData, srcJar, new java.util.jar.Manifest)
+
+  // Create jar from class files compiled from generated source files
+  val targetJar = new File(baseDirectory.value + "/lib/" + moduleDirName + ".jar/")
+  val targetFilesData = files2TupleRec("", targetDir, ".class")
+  sbt.IO.jar(targetFilesData, targetJar, new java.util.jar.Manifest)
+
+  // Cleanup now obsolete generated code
+  domainDirs.foreach { dir =>
+    sbt.IO.delete(sourceDir / dir)
+    sbt.IO.delete(targetDir / dir)
+  }
+}.triggeredBy(compile in Compile)
+
+
+def files2TupleRec(pathPrefix: String, dir: File, tpe: String): Seq[Tuple2[File, String]] = {
+  sbt.IO.listFiles(dir) flatMap { f =>
+    if (f.isFile && f.name.endsWith(tpe))
+      Seq((f, s"${pathPrefix}${f.getName}"))
+    else
+      files2TupleRec(s"${pathPrefix}${f.getName}/", f, tpe)
+  }
+}
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 lazy val releases = "Sonatype OSS Staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2/"

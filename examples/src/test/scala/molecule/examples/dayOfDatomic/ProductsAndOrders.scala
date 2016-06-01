@@ -21,7 +21,7 @@ class ProductsAndOrders extends MoleculeSpec {
     // See: http://blog.datomic.com/2013/06/component-entities.html
 
     // Make db
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
@@ -58,7 +58,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, 1 level" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
@@ -104,7 +104,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, 1 level, with non-asserted values" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId, licoriceId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky", "Licorice").eids
@@ -203,7 +203,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Mixing nested and adjacent data" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Template for Order with multiple nested LineItems, optional quantity and adjacent `Product.description`
     val order = m(Order.orderid.LineItems * LineItem.price.quantity$.Product.description)
@@ -269,7 +269,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, 2 levels" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
@@ -321,7 +321,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, 2 levels, multiple attrs" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
@@ -379,7 +379,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, 3 levels" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
@@ -456,7 +456,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, empty data sets" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert 2 products
     val whiskyId = Product.description.insert("Cheap Whisky").eid
@@ -501,7 +501,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
   "Nested Data, non-asserted values" >> {
 
-    implicit val conn = load(ProductsOrderSchema)
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
 
     // Insert product
     val whiskyId = Product.description.insert("Cheap Whisky").eid
