@@ -85,16 +85,16 @@ allows you to
 
 ## Dependency in your project
 
-Molecule 0.6.2 for Scala 2.11.8 is available at
+Molecule 0.6.3 for Scala 2.11.8 is available at
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.11/)
- so that you can add a dependency in your sbt file to `"org.scalamolecule" %% "molecule" % "0.6.2"`.
+ so that you can add a dependency in your sbt file to `"org.scalamolecule" %% "molecule" % "0.6.3"`.
 
 Since Molecule generates boilerplate code from your definitions it also needs to have the `MoleculeBoilerplate.scala` file 
 in your project folder. Please have a look at how the sbt build file
  of the Molecule project itself puts things together and simply copy that to your own project:
 
 2. Setup your sbt build file [as in Molecule](https://github.com/scalamolecule/molecule/blob/master/project/build.scala):
-    - Add library dependency `"org.scalamolecule" %% "molecule" % "0.6.2"`
+    - Add library dependency `"org.scalamolecule" %% "molecule" % "0.6.3"`
     - List directories where you have your [definition file(s)][setup]
 3. [Define schema][schema]
 4. `sbt compile`
