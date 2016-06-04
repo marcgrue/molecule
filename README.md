@@ -14,23 +14,38 @@ Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [
 4. Open in your IDE
 5. Run tests and poke around...
 
-   
-### Read more
 
-- [Introduction](http://scalamolecule.org/home/introduction) to Datomic/Molecule
-- [Setup Database](http://scalamolecule.org/manual/setup): initiate a Datomic database and create a database schema with Molecule
-- [Populate Database](http://scalamolecule.org/manual/insert): populate a Datomic database with Molecule
-- [Molecule Seattle tutorial](http://scalamolecule.org/tutorials/seattle) examples of using Molecule (based on the 
-[Datomic Seattle tutorial](http://docs.datomic.com/tutorial.html))
+## Use in your own project
 
+For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
 
-### Download and test
+```scala
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.1.0")
+```
 
-1. `git clone https://github.com/scalamolecule/molecule.git`
-2. `cd molecule`
-3. `sbt compile`
-4. Open in your IDE
-5. Run tests and poke around...
+Add the following in your `build.sbt`:
+
+```scala
+lazy val yourProject = project.in(file("demo"))
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    resolvers ++= Seq(
+      "datomic" at "http://files.datomic.com/maven",
+      "clojars" at "http://clojars.org/repo",
+      Resolver.sonatypeRepo("releases"),
+      "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
+    ),
+    libraryDependencies ++= Seq(
+      "org.scalamolecule" %% "molecule" % "0.7.0",
+      "com.datomic" % "datomic-free" % "0.9.5359"
+    ),
+    moleculeSchemas := Seq("demo") // paths to your schema definition files...
+  )
+```
+Molecule 0.7.0 for Scala 2.11.8 is available at 
+[Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.11/).
+
+[Getting started](http://scalamolecule.org/manual/getting-started)...
 
 
 # What Molecule does
@@ -82,26 +97,14 @@ allows you to
 - Focus more on your domain and less on queries
 
 
+   
+### Read more
 
-## Dependency in your project
-
-Molecule 0.6.3 for Scala 2.11.8 is available at
-[Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.11/)
- so that you can add a dependency in your sbt file to `"org.scalamolecule" %% "molecule" % "0.6.3"`.
-
-Since Molecule generates boilerplate code from your definitions it also needs to have the `MoleculeBoilerplate.scala` file 
-in your project folder. Please have a look at how the sbt build file
- of the Molecule project itself puts things together and simply copy that to your own project:
-
-2. Setup your sbt build file [as in Molecule](https://github.com/scalamolecule/molecule/blob/master/project/build.scala):
-    - Add library dependency `"org.scalamolecule" %% "molecule" % "0.6.3"`
-    - List directories where you have your [definition file(s)][setup]
-3. [Define schema][schema]
-4. `sbt compile`
-5. Open in your IDE
-6. [Setup your database][setup]
-7. [Populate your database][populate] with data
-8. [Make molecule queries][tutorial]
+- [Introduction](http://scalamolecule.org/home/introduction) to Datomic/Molecule
+- [Getting started](http://scalamolecule.org/manual/getting-started): define schema an initiate a Datomic database
+- [Populate Database](http://scalamolecule.org/manual/insert): populate a Datomic database with Molecule
+- [Molecule Seattle tutorial](http://scalamolecule.org/tutorials/seattle) examples of using Molecule (based on the 
+[Datomic Seattle tutorial](http://docs.datomic.com/tutorial.html))
 
 
 #### Author

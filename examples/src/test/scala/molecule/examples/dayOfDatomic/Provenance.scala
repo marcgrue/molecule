@@ -8,6 +8,7 @@ import scala.language.reflectiveCalls
 
 class Provenance extends MoleculeSpec {
 
+
   "Transaction meta data" in new SocialNewsSetup {
 
     val ecURL = "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html"
@@ -18,9 +19,11 @@ class Provenance extends MoleculeSpec {
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html")
     )
     tx1.eids === List(17592186045450L, 17592186045451L, 13194139534345L)
-    val storyId = tx1.eid
 
+    // `eid` is simply a convenience method taking the head element of `eids` - only use it when you know `eids` returns values!
+    val storyId = tx1.eid
     storyId === 17592186045450L
+
 
     // Ed fixes the spelling error
     Story(storyId).title("ElastiCache in 5 minutes").tx_(Source.user(ed)).update
@@ -54,7 +57,6 @@ class Provenance extends MoleculeSpec {
 
 
     // How is transaction meta data transacted?
-
     m(Story.title.url.tx_(Source.user_(stu).usecase_("MyUseCase"))) -->
       Model(List(
         Atom("story", "title", "String", 1, VarValue, None, List(), List()),

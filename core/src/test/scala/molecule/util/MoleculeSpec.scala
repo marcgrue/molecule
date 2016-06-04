@@ -82,6 +82,12 @@ trait MoleculeSpec extends Specification with DatomicFacade {
           val tx = Model2Transaction(conn, model).insertStmts(data).flatten
           formatTx(tx) === txString
         }
+        // Debug
+        def --->(txString: String) = {
+          val tx = Model2Transaction(conn, model).insertStmts(data).flatten
+          tx foreach println
+          formatTx(tx) === txString
+        }
       }
     }
 

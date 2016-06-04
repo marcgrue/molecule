@@ -658,11 +658,11 @@ class Insert extends CoreSpec {
     // we can start asserting those 22 facts, then use the returned eid
     // to continue (here shown with only 1 fact):
 
-    // Insert maximum of 22 facts
-    val eid = Ns.str.insert("a").eid
+// Insert maximum of 22 facts
+val eid = Ns.str.insert("a").eid
 
-    // Use entity id to continue adding more values
-    Ns.e.int.insert(eid, 42)
+// Use entity id to continue adding more values
+Ns.e.int.insert(eid, 42)
 
     // Only a single entity has been created
     Ns.e.str.int.get === List(
