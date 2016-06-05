@@ -305,6 +305,38 @@ class Insert extends CoreSpec {
             ":ref2/str2" -> "c2"),
           ":ref1/str1" -> "b1"),
         ":ns/str" -> "a0")
+
+
+      // We can limit the depth of the retrieved graph
+
+      a0b1c2.touch(3) === Map(
+        ":db/id" -> 17592186045452L,
+        ":ns/ref1" -> Map(
+          ":db/id" -> 17592186045453L,
+          ":ref1/ref2" -> Map(
+            ":db/id" -> 17592186045454L,
+            ":ref2/str2" -> "c2"),
+          ":ref1/str1" -> "b1"),
+        ":ns/str" -> "a0")
+
+      a0b1c2.touch(2) === Map(
+        ":db/id" -> 17592186045452L,
+        ":ns/ref1" -> Map(
+          ":db/id" -> 17592186045453L,
+          ":ref1/ref2" -> 17592186045454L,
+          ":ref1/str1" -> "b1"),
+        ":ns/str" -> "a0")
+
+      a0b1c2.touch(1) === Map(
+        ":db/id" -> 17592186045452L,
+        ":ns/ref1" -> 17592186045453L,
+        ":ns/str" -> "a0")
+
+      // Use `touchQuoted` to generate a quoted graph that you can paste into your tests
+      a0b1c2.touchQuoted(1) === Map(
+        "\n\":db/id\"" -> "17592186045452L",
+        "\n\":ns/ref1\"" -> "17592186045453L",
+        "\n\":ns/str\"" -> "\"a0\"")
     }
 
 
@@ -658,11 +690,11 @@ class Insert extends CoreSpec {
     // we can start asserting those 22 facts, then use the returned eid
     // to continue (here shown with only 1 fact):
 
-// Insert maximum of 22 facts
-val eid = Ns.str.insert("a").eid
+    // Insert maximum of 22 facts
+    val eid = Ns.str.insert("a").eid
 
-// Use entity id to continue adding more values
-Ns.e.int.insert(eid, 42)
+    // Use entity id to continue adding more values
+    Ns.e.int.insert(eid, 42)
 
     // Only a single entity has been created
     Ns.e.str.int.get === List(

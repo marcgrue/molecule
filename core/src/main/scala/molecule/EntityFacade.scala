@@ -1,5 +1,5 @@
 package molecule
-import java.util.{Collection => jCollection, Date, List => jList, Map => jMap, UUID}
+import java.util.{Date, UUID, Collection => jCollection, List => jList, Map => jMap}
 
 import datomic._
 import molecule.util.Debug
@@ -19,10 +19,13 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   // Touch ...........................................................................
 
-  def touch: Map[String, Any] = toMap
+  def touch: Map[String, Any] = asMap()
+  def touch(maxDepth: Int = 5): Map[String, Any] = asMap(1, maxDepth)
 
   // Format touch output for tests...
-  def touch2: Map[_, _] = toMap.map(p => s"""\n"${p._1}"""" -> formatEntity(p._2)).toMap
+  def touchQuoted: Map[_, _] = touchQuoted()
+  def touchQuoted(maxDepth: Int = 5): Map[_, _] = asMap(1, maxDepth).map(p => s"""\n"${p._1}"""" -> formatEntity(p._2))
+
   def formatEntity(value: Any): Any = value match {
     case s: String               => s""""$s""""
     case l: Long                 => if (l > Int.MaxValue) s"${l}L" else l // presuming we used Int... - todo: how to get Int from touch?
@@ -32,7 +35,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case other                   => other
   }
 
-  def toMap: Map[String, Any] = {
+  def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
     val builder = Map.newBuilder[String, Any]
     val iter = entity.keySet.toList.sorted.asJava.iterator()
 
@@ -40,7 +43,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     builder += ":db/id" -> entity.get(":db/id")
     while (iter.hasNext) {
       val key = iter.next()
-      val scalaValue = toScala(entity.get(key))
+      val scalaValue = toScala(entity.get(key), depth, maxDepth)
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
           case m1: Map[_, _] if m1.containsKey(":db/id") =>
@@ -56,6 +59,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     }
     builder.result()
   }
+
 
   // Entity api from ValueAttribute (typed) .................................................................
 
@@ -81,7 +85,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
       case null                                    => None
       case results: clojure.lang.PersistentHashSet => results.head match {
         case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some((results.toList map toScala).toSet.asInstanceOf[A])
+        case manySet             => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[A])
       }
       case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
     }
@@ -91,7 +95,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
       case null                                    => None
       case results: clojure.lang.PersistentHashSet => results.head match {
         case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some((results.toList map toScala).toSet.asInstanceOf[A])
+        case manySet             => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[A])
       }
       case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
     }
@@ -122,17 +126,14 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S], t: VA[T], u: VA[U]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S], Op[T], Op[U]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s), apply(t), apply(u))
   def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S], t: VA[T], u: VA[U], v: VA[V]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S], Op[T], Op[U], Op[V]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s), apply(t), apply(u), apply(v))
 
-  //  def andMaybe[A](attr: Z[A]): Option[A] =
-
 
   // Entity api from string (typed) .................................................................
-
 
   def getTyped[T](kw: String): Option[T] = entity.get(kw) match {
     case null                                    => None
     case results: clojure.lang.PersistentHashSet => results.head match {
       case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[T])
-      case manyValue           => Some((results.toList map toScala).toSet.asInstanceOf[T])
+      case manyValue           => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[T])
     }
     case result                                  => Some(toScala(result).asInstanceOf[T])
   }
@@ -147,7 +148,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case null                                    => None
     case results: clojure.lang.PersistentHashSet => results.head match {
       case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted)
-      case manyValue           => Some((results.toList map toScala).toSet)
+      case manyValue           => Some(results.toList.map(toScala(_)).toSet)
     }
     case result                                  => Some(toScala(result))
   }
@@ -155,7 +156,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   // Conversions ..........................................................................
 
-  private[molecule] def toScala(v: Any): Any = v match {
+  private[molecule] def toScala(v: Any, depth: Int = 1, maxDepth: Int = 5): Any = v match {
     // :db.type/string
     case s: java.lang.String => s
     // :db.type/boolean
@@ -183,11 +184,12 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     // :db.type/bytes
     case bytes: Array[Byte] => bytes
     // an entity map
-    case e: datomic.Entity => new EntityFacade(e, conn, e.get(":db/id")).toMap
+    case e: datomic.Entity if depth < maxDepth => new EntityFacade(e, conn, e.get(":db/id")).asMap(depth + 1, maxDepth)
+    case e: datomic.Entity                     => e.get(":db/id")
 
     // :db.type/keyword
-    case set: clojure.lang.PersistentHashSet =>
-      set.toList map toScala
+    case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.toList.map(toScala(_, depth + 1, maxDepth))
+    case set: clojure.lang.PersistentHashSet                     => set
 
     // a collection
     case coll: java.util.Collection[_] =>
@@ -195,13 +197,16 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
         override def iterator = new Iterator[Any] {
           private val jIter = coll.iterator.asInstanceOf[java.util.Iterator[AnyRef]]
           override def hasNext = jIter.hasNext
-          override def next() = toScala(jIter.next())
+          override def next() = if (depth < maxDepth)
+            toScala(jIter.next(), depth + 1, maxDepth)
+          else
+            jIter.next()
         }
         override def isEmpty = coll.isEmpty
         override def size = coll.size
         override def toString = coll.toString
       }
-    // otherwise
-    case v => throw new RuntimeException("[DatomicFacade:Convert:toScala] Unexpected Datalog type to convert: " + v.getClass.toString)
+
+    case unexpected => throw new RuntimeException("[DatomicFacade:Convert:toScala] Unexpected Datalog type to convert: " + unexpected.getClass.toString)
   }
 }
