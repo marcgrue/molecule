@@ -1,4 +1,5 @@
 package molecule
+package transaction
 
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}

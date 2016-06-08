@@ -588,8 +588,7 @@ object Model2Query extends Helpers {
 
         case TxModel(elements) =>
           val (q2, e2, v2, ns2, attr2, refNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
-            case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
-              make(query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+            case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) => make(query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }
           (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
 

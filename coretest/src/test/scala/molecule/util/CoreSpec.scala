@@ -47,34 +47,37 @@ class CoreSpec extends MoleculeSpec with DatomicFacade {
   lazy val (str9, int9, long9, float9, double9, bool9, enum9) = ("i", 9, 9L, 9.0f, 9.0, true, "enum9")
 
 
-  lazy val (strs0, ints0, longs0, floats0, doubles0, dates0, uuids0, uris0, enums0) = (
+  lazy val (strs0, ints0, longs0, floats0, doubles0, bools0, dates0, uuids0, uris0, enums0) = (
     Set(str0),
     Set(int0),
     Set(long0),
     Set(float0),
     Set(double0),
+    Set(bool0),
     Set(date0),
     Set(uuid0),
     Set(uri0),
     Set(enum0))
 
-  lazy val (strs1, ints1, longs1, floats1, doubles1, dates1, uuids1, uris1, enums1) = (
+  lazy val (strs1, ints1, longs1, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1) = (
     Set(str1),
     Set(int1),
     Set(long1),
     Set(float1),
     Set(double1),
+    Set(bool1),
     Set(date1),
     Set(uuid1),
     Set(uri1),
     Set(enum1))
 
-  lazy val (strs2, ints2, longs2, floats2, doubles2, dates2, uuids2, uris2, enums2) = (
+  lazy val (strs2, ints2, longs2, floats2, doubles2, bools2, dates2, uuids2, uris2, enums2) = (
     Set(str1, str2),
     Set(int1, int2),
     Set(long1, long2),
     Set(float1, float2),
     Set(double1, double2),
+    Set(bool1, bool2),
     Set(date1, date2),
     Set(uuid1, uuid2),
     Set(uri1, uri2),

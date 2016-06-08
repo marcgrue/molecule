@@ -138,6 +138,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   implicit val liftGeneric = Liftable[Generic] {
     case AttrVar(v)      => q"AttrVar($v)"
     case TxValue         => q"TxValue"
+    case TxValue_        => q"TxValue_"
     case TxTValue        => q"TxTValue"
     case TxInstantValue  => q"TxInstantValue"
     case OpValue         => q"OpValue"
@@ -152,6 +153,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case NoValue          => q"NoValue"
     case AttrVar(v)       => q"AttrVar($v)"
     case TxValue          => q"TxValue"
+    case TxValue_         => q"TxValue_"
     case TxTValue         => q"TxTValue"
     case TxInstantValue   => q"TxInstantValue"
     case NsValue(values)  => q"NsValue(Seq(..$values))"

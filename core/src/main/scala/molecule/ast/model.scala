@@ -74,6 +74,7 @@ object model {
   sealed trait Generic extends Value
   case class AttrVar(v: String) extends Generic
   case object TxValue extends Generic
+  case object TxValue_ extends Generic
   case object TxTValue extends Generic
   case object TxInstantValue extends Generic
   case object OpValue extends Generic

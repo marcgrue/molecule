@@ -1,4 +1,6 @@
 package molecule
+package ref
+
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec, expectCompileError}
 
@@ -105,7 +107,7 @@ class SelfJoin extends CoreSpec {
     // since a card-one attribute naturally can't have multiple values.
     expectCompileError(
       """Ns.str("str1" and "str2").get""",
-      "[Dsl2Model:apply (3)] Card-one attribute `str` cannot return multiple values.\n"
+      "[Dsl2Model:apply (4)] Card-one attribute `str` cannot return multiple values.\n"
         + "A tacet attribute can though have AND expressions to make a self-join.\n"
         + "If you want this, please make the attribute tacet by appending an underscore: `str_`")
   }

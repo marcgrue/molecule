@@ -1,4 +1,6 @@
 package molecule
+package basics
+
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.util.dsl.coreTest._

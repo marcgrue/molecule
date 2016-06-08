@@ -17,16 +17,23 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   def retract = conn.transact(Util.list(Util.list(":db.fn/retractEntity", id))).get()
 
 
-  // Touch ...........................................................................
+  // Touch - traverse entity attributes ...........................................................
 
-  def touch: Map[String, Any] = asMap()
-  def touch(maxDepth: Int = 5): Map[String, Any] = asMap(1, maxDepth)
+  // Default to Map - useful for lookup
+  def touch: Map[String, Any] = traverse().toMap
+  def touch(maxDepth: Int = 5): Map[String, Any] = traverse(1, maxDepth).toMap
 
-  // Format touch output for tests...
-  def touchQuoted: Map[_, _] = touchQuoted()
-  def touchQuoted(maxDepth: Int = 5): Map[_, _] = asMap(1, maxDepth).map(p => s"""\n"${p._1}"""" -> formatEntity(p._2))
+  // Lists keep order - useful for tests
+  def touchList: List[(String, Any)] = traverse()
+  def touchList(maxDepth: Int = 5): List[(String, Any)] = traverse(1, maxDepth)
 
-  def formatEntity(value: Any): Any = value match {
+  // Quote output for tests...
+//  def touchListQ: List[(String, Any)] = touchListQ()
+//  def touchListQ(maxDepth: Int = 5): List[(String, Any)] = traverse(1, maxDepth).map(p => s"""\n"${p._1}"""" -> formatEntity(p._2))
+  def touchListQ: List[String] = touchListQ()
+  def touchListQ(maxDepth: Int = 5): List[String] = traverse(1, maxDepth).map(p => s"""\n"${p._1}" -> ${formatEntity(p._2)}""")
+
+  private def formatEntity(value: Any): Any = value match {
     case s: String               => s""""$s""""
     case l: Long                 => if (l > Int.MaxValue) s"${l}L" else l // presuming we used Int... - todo: how to get Int from touch?
     case l: Seq[_]               => l map formatEntity
@@ -35,11 +42,11 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case other                   => other
   }
 
-  def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
-    val builder = Map.newBuilder[String, Any]
+  private def traverse(depth: Int = 1, maxDepth: Int = 5): List[(String, Any)] = {
+    val builder = List.newBuilder[(String, Any)]
     val iter = entity.keySet.toList.sorted.asJava.iterator()
 
-    // Add id also
+    // Add id first
     builder += ":db/id" -> entity.get(":db/id")
     while (iter.hasNext) {
       val key = iter.next()
@@ -184,7 +191,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     // :db.type/bytes
     case bytes: Array[Byte] => bytes
     // an entity map
-    case e: datomic.Entity if depth < maxDepth => new EntityFacade(e, conn, e.get(":db/id")).asMap(depth + 1, maxDepth)
+    case e: datomic.Entity if depth < maxDepth => new EntityFacade(e, conn, e.get(":db/id")).traverse(depth + 1, maxDepth)
     case e: datomic.Entity                     => e.get(":db/id")
 
     // :db.type/keyword

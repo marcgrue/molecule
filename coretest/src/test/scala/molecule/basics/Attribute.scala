@@ -1,4 +1,5 @@
 package molecule
+package basics
 
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}

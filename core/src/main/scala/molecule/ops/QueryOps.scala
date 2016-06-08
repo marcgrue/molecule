@@ -36,6 +36,7 @@ object QueryOps extends Helpers {
       val genericVars = gs.flatMap {
         case AttrVar(v)     => Some(Var(attrV))
         case TxValue        => Some(Var("tx"))
+        case TxValue_       => None
         case TxTValue       => Some(Var("txT"))
         case TxInstantValue => Some(Var("txInst"))
         case OpValue        => Some(Var("op"))
@@ -82,7 +83,7 @@ object QueryOps extends Helpers {
       else {
         val extendedClause = if (gs.contains(OpValue))
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Var("op"))
-        else if (gs.contains(TxValue) || gs.contains(TxTValue) || gs.contains(TxInstantValue))
+        else if (gs.contains(TxValue) || gs.contains(TxValue_) || gs.contains(TxTValue) || gs.contains(TxInstantValue))
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), NoBinding)
         else
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, NoBinding, NoBinding)

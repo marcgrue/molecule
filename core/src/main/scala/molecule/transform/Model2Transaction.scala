@@ -26,7 +26,14 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     Peer.q(query, db, id.asInstanceOf[Object]).map(_.get(0))
   }
 
+
   val stmtsModel: Seq[Statement] = {
+
+    def resolveTx(elements: Seq[Element]) = elements.foldLeft('tx: Any, Seq[Statement]()) {
+      case ((eSlot1, stmts1), a@Atom(ns, name, _, _, VarValue, _, _, _)) => throw new RuntimeException(
+        s"[Model2Transaction:stmtsModel] Missing transaction annotation value for `${ns.capitalize}.$name`")
+      case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
+    }._2
 
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
       case ('_, Meta(ns, "", "e", _, EntValue))            => ('arg, stmts)
@@ -52,9 +59,10 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ('e, Atom(ns, name, _, _, VarValue, _, _, _))             => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
       case ('e, Atom(ns, name, _, _, value, prefix, _, _))           => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix)))
       case ('e, Bond(ns, refAttr, refNs, _))                         => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
-      case ('e, TxModel(elements))                                   => ('e, stmts ++ elements.foldLeft('tx: Any, Seq[Statement]()) {
-        case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
-      }._2)
+
+      // Transaction annotations
+      case ('_, TxModel(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxModel(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
       case ('tx, Atom(ns, name, _, _, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
@@ -255,21 +263,25 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
 
-  def saveStmts(): Seq[Statement] = stmtsModel.foldLeft(0, Seq[Statement]()) {
-    case ((i, stmts), stmt) =>
-      val j = i + 1
-      stmt match {
-        case Add('tempId, a, Values(vs, prefix)) => (j, valueStmts(stmts, tempId(a), a, vs, prefix))
-        case Add('e, a, Values(vs, prefix))      => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix))
-        case Add('e, a, 'tempId)                 => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a)))
-        case Add(id, a, 'tempId)                 => (i, valueStmts(stmts, id, a, tempId(a)))
-        case Add('e, a, refNs: String)           => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
-        case Add('v, a, Values(vs, prefix))      => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix))
-        case Retract(e, a, v)                    => (i, stmts)
-        case Add(_, a, 'arg)                     => sys.error(s"[Model2Transaction:saveStmts] Attribute `$a` needs a value applied")
-        case unexpected                          => sys.error("[Model2Transaction:saveStmts] Unexpected save statement: " + unexpected)
-      }
-  }._2
+  def saveStmts(): Seq[Statement] = {
+    val txId = tempId("tx")
+    stmtsModel.foldLeft(0, Seq[Statement]()) {
+      case ((i, stmts), stmt) =>
+        val j = i + 1
+        stmt match {
+          case Add('tempId, a, Values(vs, prefix)) => (j, valueStmts(stmts, tempId(a), a, vs, prefix))
+          case Add('e, a, Values(vs, prefix))      => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix))
+          case Add('e, a, 'tempId)                 => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a)))
+          case Add(id, a, 'tempId)                 => (i, valueStmts(stmts, id, a, tempId(a)))
+          case Add('e, a, refNs: String)           => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
+          case Add('v, a, Values(vs, prefix))      => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix))
+          case Add('tx, a, Values(vs, prefix))     => (j, valueStmts(stmts, txId, a, vs, prefix))
+          case Retract(e, a, v)                    => (i, stmts)
+          case Add(_, a, 'arg)                     => sys.error(s"[Model2Transaction:saveStmts] Attribute `$a` needs a value applied")
+          case unexpected                          => sys.error("[Model2Transaction:saveStmts] Unexpected save statement: " + unexpected)
+        }
+    }._2
+  }
 
 
   def updateStmts(): Seq[Statement] = {
@@ -297,7 +309,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     dataStmts ++ txStmts
   }
 
-
   private def untupleNestedArgss(stmts: Seq[Any], arg0: Any): Seq[Seq[Any]] = {
     val (argArity, arg) = arg0 match {
       case a: Seq[_]  => a.head match {
@@ -321,30 +332,31 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       s"Arguments  (arity $argArity): " + arg.mkString("\n  ", "\n  ", "\n"))
 
     // Todo: can we convert tuples more elegantly?
-    arg map {
-      case t: (_, _)                                                             => Seq(t._1, t._2)
-      case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
-      case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)
-      case t: (_, _, _, _, _)                                                    => Seq(t._1, t._2, t._3, t._4, t._5)
-      case t: (_, _, _, _, _, _)                                                 => Seq(t._1, t._2, t._3, t._4, t._5, t._6)
-      case t: (_, _, _, _, _, _, _)                                              => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7)
-      case t: (_, _, _, _, _, _, _, _)                                           => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8)
-      case t: (_, _, _, _, _, _, _, _, _)                                        => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9)
-      case t: (_, _, _, _, _, _, _, _, _, _)                                     => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10)
-      case t: (_, _, _, _, _, _, _, _, _, _, _)                                  => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _)                               => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _)                            => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _)                         => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                      => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                   => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)             => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)    => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21, t._22)
-      case l: Seq[_]                                                             => l
-      case a                                                                     => Seq(a)
-    }
+    //    arg map {
+    //      case t: (_, _)                                                             => Seq(t._1, t._2)
+    //      case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
+    //      case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)
+    //      case t: (_, _, _, _, _)                                                    => Seq(t._1, t._2, t._3, t._4, t._5)
+    //      case t: (_, _, _, _, _, _)                                                 => Seq(t._1, t._2, t._3, t._4, t._5, t._6)
+    //      case t: (_, _, _, _, _, _, _)                                              => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7)
+    //      case t: (_, _, _, _, _, _, _, _)                                           => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8)
+    //      case t: (_, _, _, _, _, _, _, _, _)                                        => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9)
+    //      case t: (_, _, _, _, _, _, _, _, _, _)                                     => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _)                                  => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _)                               => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _)                            => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _)                         => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                      => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                   => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)             => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)    => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21)
+    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21, t._22)
+    //      case l: Seq[_]                                                             => l
+    //      case a                                                                     => Seq(a)
+    //    }
+    arg map tupleToSeq
   }
 }

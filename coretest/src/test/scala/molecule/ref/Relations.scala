@@ -1,6 +1,6 @@
 package molecule
-import molecule._
-import molecule.part.dsl.partitionTest.{gen_Profession, lit_Book}
+package ref
+
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec, expectCompileError}
 

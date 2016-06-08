@@ -1,8 +1,8 @@
 package molecule
+package ref
 
-import molecule._
 import molecule.util.dsl.coreTest._
-import molecule.util.{CoreSetup, CoreSpec, expectCompileError}
+import molecule.util.{CoreSetup, CoreSpec}
 
 
 class Nested extends CoreSpec {

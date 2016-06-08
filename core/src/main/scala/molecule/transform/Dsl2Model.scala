@@ -9,7 +9,7 @@ import scala.reflect.macros.whitebox.Context
 
 trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 70, 77)
+  val x = DebugMacro("Dsl2Model", 30, 77)
   //  val x = Debug("Dsl2Model", 30, 32, true)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
@@ -18,6 +18,11 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def traverse(prev: Tree, element: Element): Seq[Element] = {
     //    x(1, prev, element)
     if (prev.isAttr || prev.symbol.isMethod) resolve(prev) :+ element else Seq(element)
+  }
+
+  def traverse(prev: Tree, elements: Seq[Element]): Seq[Element] = {
+    //    x(1, prev, element)
+    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) ++ elements else elements
   }
 
   def kw(kwTree: Tree): (String, String) = (kwTree.toString(): String) match {
@@ -56,14 +61,23 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Tx ----------------------------------
 
-    // Db.txInstant etc.. (all database transactions)
+    // Internal predefined db functions
     case q"$prev.Db.tx"        => traverse(q"$prev", Atom("db", "tx", "Long", 1, VarValue))
     case q"$prev.Db.txT"       => traverse(q"$prev", Atom("db", "txT", "Long", 1, VarValue))
     case q"$prev.Db.txInstant" => traverse(q"$prev", Atom("db", "txInstant", "Long", 1, VarValue))
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
+    // Transaction meta data
     case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxModel(resolve(q"$txMolecule")))
     case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxModel(resolve(q"$txMolecule")))
+    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxModel(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
+    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxModel(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
+
+    // Tacet transaction attributes not allowed
+    case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
+    case q"$prev.txT_"       => abort(s"[Dsl2Model:dslStructure] Tacet `txT_` not allowed since all datoms have a txT value")
+    case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacet `txInstant_` not allowed since all datoms have a txInstant value")
+    case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacet `op_` not allowed since all datoms have a `op value")
 
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
@@ -411,6 +425,19 @@ object Dsl2Model {
       case _       => "ok"
     }
 
+    // No attributes after TxModel
+    def txError(s: String) = abort(s"[Dsl2Model:apply (2)] Molecule not allowed to have any attributes after transaction annotation. Found" + s)
+    elements0.foldLeft(0) {
+      case (0, e: TxModel)                        => 1
+      case (1, Atom(_, "attr", _, _, _, _, _, _)) => txError(s" attribute `a`")
+      case (1, Meta(_, _, "e", _, _))             => txError(s" attribute `e`")
+      case (1, Meta(_, _, "v", _, _))             => txError(s" attribute `v`")
+      case (1, Atom(_, name, _, _, _, _, _, _))   => txError(s" attribute `$name`")
+      case (1, Bond(_, name, _, _))               => txError(s" reference `${name.capitalize}`")
+      case (1, e)                                 => txError(s": " + e)
+      case _                                      => 0
+    }
+
     // Molecule should at least have one mandatory attribute
     elements0.collectFirst {
       case a@Atom(_, name, _, _, _, _, _, _) if name.last != '$' => a
@@ -418,16 +445,16 @@ object Dsl2Model {
       case g: Group                                              => g
       case m@Meta(_, "txInstant", _, _, _)                       => m
     } getOrElse
-      abort(s"[Dsl2Model:apply (2)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
+      abort(s"[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
 
     // Only tacet attributes allowed to have AND semantics for self-joins
     def checkAndSemantics(elements: Seq[Element]): Unit = elements foreach {
       case a@Atom(_, name, _, 1, And(_), _, _, _) if name.last != '_' =>
-        abort(s"[Dsl2Model:apply (3)] Card-one attribute `$name` cannot return multiple values.\n" +
+        abort(s"[Dsl2Model:apply (4)] Card-one attribute `$name` cannot return multiple values.\n" +
           "A tacet attribute can though have AND expressions to make a self-join.\n" +
           s"If you want this, please make the attribute tacet by appending an underscore: `${name}_`")
       case a@Atom(_, name, _, 3, And(_), _, _, _) if name.last != '_' =>
-        abort(s"[Dsl2Model:apply (4)] Map attribute `$name` is to be considered a card-one container for keyed variations of one value and " +
+        abort(s"[Dsl2Model:apply (5)] Map attribute `$name` is to be considered a card-one container for keyed variations of one value and " +
           """can semantically therefore not return "multiple values".""" +
           "\nA tacet map attribute can though have AND expressions to make a self-join.\n" +
           s"If you want this, please make the map attribute tacet by appending an underscore: `${name}_`")
@@ -448,12 +475,17 @@ object Dsl2Model {
         case a: Atom                                                                      => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
         case m@Meta(_, _, "e", g, v1)                                                     => (m +: es, g +: gs, v1)
         case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
+        case txm@TxModel(txElems)                                                         => txElems.head match {
+          case m@Meta(_, _, _, TxValue, _) => (txm +: es, TxValue +: gs, NoValue)
+          case _                           => (txm +: es, TxValue_ +: gs, NoValue)
+        }
         case other                                                                        => (other +: es, gs, v)
       }
     }._1
 
     val model = Model(elements1)
-    //        inst(c).x(30, dsl, elements0, elements1, model)
+    //            inst(c).x(30, dsl, elements0, elements1, model)
+    //            inst(c).x(30, elements0, elements1)
     //        inst(c).x(30, model)
 
     model
