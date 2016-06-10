@@ -1,5 +1,4 @@
 package molecule.examples.dayOfDatomic
-import datomic.Peer
 import molecule._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
@@ -397,19 +396,21 @@ class ProductsAndOrders extends MoleculeSpec {
       ))
     ) eid
 
-    // 3 levels of nested data entered
+    /* 3 levels of nested data entered*/
     orderId.touch === Map(
       ":db/id" -> 17592186045422L,
       ":order/lineItems" -> List(
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045424L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045425L, ":person/name" -> "Marc Grue")),
-            ":comment/descr" -> "1a",
-            ":comment/text" -> "first"),
-          Map(":db/id" -> 17592186045426L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045427L, ":person/name" -> "Marc Grue")),
-            ":comment/descr" -> "1b",
-            ":comment/text" -> "product")),
+        Map(
+          ":lineItem/comments" -> List(
+            Map(
+              ":db/id" -> 17592186045424L, ":comment/authors" -> List(
+                Map(":db/id" -> 17592186045425L, ":person/name" -> "Marc Grue")),
+              ":comment/descr" -> "1a",
+              ":comment/text" -> "first"),
+            Map(":db/id" -> 17592186045426L, ":comment/authors" -> List(
+              Map(":db/id" -> 17592186045427L, ":person/name" -> "Marc Grue")),
+              ":comment/descr" -> "1b",
+              ":comment/text" -> "product")),
           ":lineItem/price" -> 48.0,
           ":lineItem/quantity" -> 1,
           ":lineItem/product" ->
@@ -435,10 +436,6 @@ class ProductsAndOrders extends MoleculeSpec {
             Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045428L)),
       ":order/orderid" -> 23)
-
-
-
-
 
     m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
       (23, List(
@@ -531,7 +528,7 @@ class ProductsAndOrders extends MoleculeSpec {
           ":lineItem/price" -> 38.0,
           ":lineItem/quantity" -> 2,
           ":lineItem/product" ->
-          Map(":db/id" -> 17592186045419L, ":product/description" -> "Cheap Whisky"),
+            Map(":db/id" -> 17592186045419L, ":product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045422L)),
       ":order/orderid" -> 23)
 

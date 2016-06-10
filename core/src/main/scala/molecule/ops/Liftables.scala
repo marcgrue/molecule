@@ -184,7 +184,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   implicit val liftReBond     = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
   implicit val liftTransitive = Liftable[Transitive] { r => q"Transitive(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.depth}, ${r.prevVar})" }
   implicit val liftMeta       = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
-  implicit val liftGroup      = Liftable[Group] { g0 =>
+  implicit val liftGroup      = Liftable[Nested] { g0 =>
     val es0 = g0.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -192,7 +192,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case r: Transitive => q"$r"
       case Self          => q"Self"
       case m: Meta       => q"$m"
-      case g1: Group     => {
+      case g1: Nested    => {
         val es1 = g1.elements map {
           case a: Atom       => q"$a"
           case b: Bond       => q"$b"
@@ -201,12 +201,12 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
           case Self          => q"Self"
           case m: Meta       => q"$m"
         }
-        q"Group(${g1.ref}, Seq(..$es1))"
+        q"Nested(${g1.bond}, Seq(..$es1))"
       }
     }
-    q"Group(${g0.ref}, Seq(..$es0))"
+    q"Nested(${g0.bond}, Seq(..$es0))"
   }
-  implicit val liftTxModel    = Liftable[TxModel] { tm =>
+  implicit val liftTxMetaData    = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -216,10 +216,10 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case m: Meta       => q"$m"
       case q"$e"         => e
     }
-    q"TxModel(Seq(..$es))"
+    q"TxMetaData(Seq(..$es))"
   }
 
-  implicit val liftFreeModel = Liftable[FreeModel] { fm =>
+  implicit val liftComposite = Liftable[Composite] { fm =>
     val es = fm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -229,7 +229,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case m: Meta       => q"$m"
       case q"$e"         => e
     }
-    q"FreeModel(Seq(..$es))"
+    q"Composite(Seq(..$es))"
   }
 
   implicit val liftListOfElements = Liftable[Seq[Element]] { elements =>
@@ -239,10 +239,10 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case r: ReBond     => q"$r"
       case r: Transitive => q"$r"
       case Self          => q"Self"
-      case g: Group      => q"$g"
+      case g: Nested     => q"$g"
       case m: Meta       => q"$m"
-      case t: TxModel    => q"$t"
-      case fm: FreeModel => q"$fm"
+      case t: TxMetaData => q"$t"
+      case c: Composite => q"$c"
     }
     q"Seq(..$es)"
   }
@@ -253,10 +253,10 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case ReBond(backRef, refAttr, refNs, distinct, prevVar)      => q"ReBond($backRef, $refAttr, $refNs, $distinct, $prevVar)"
     case Transitive(backRef, refAttr, refNs, level, prevVar)     => q"Transitive($backRef, $refAttr, $refNs, $level, $prevVar)"
     case Self                                                    => q"Self"
-    case Group(ref, elements)                                    => q"Group($ref, $elements)"
+    case Nested(ref, elements)                                   => q"Nested($ref, $elements)"
     case Meta(ns, attr, kind, generic, value)                    => q"Meta($ns, $attr, $kind, $generic, $value)"
-    case TxModel(elements)                                       => q"TxModel($elements)"
-    case FreeModel(elements)                                     => q"FreeModel($elements)"
+    case TxMetaData(elements)                                    => q"TxMetaData($elements)"
+    case Composite(elements)                                     => q"Composite($elements)"
     case EmptyElement                                            => q"EmptyElement"
   }
 

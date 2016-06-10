@@ -68,10 +68,10 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
     // Transaction meta data
-    case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxModel(resolve(q"$txMolecule")))
-    case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxModel(resolve(q"$txMolecule")))
-    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxModel(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
-    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxModel(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
+    case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
+    case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
+    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxMetaData(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
+    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxMetaData(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
 
     // Tacet transaction attributes not allowed
     case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
@@ -164,28 +164,28 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Nested ------------------------
 
-    case t@q"$prev.e.apply[..$types]($nested)" if !q"$prev".isRef  => Seq(Group(Bond("", "", "", 2), Meta("", "", "e", NoValue, EntValue) +: resolve(nested)))
-    case t@q"$prev.e_.apply[..$types]($nested)" if !q"$prev".isRef => Seq(Group(Bond("", "", "", 2), resolve(nested)))
+    case t@q"$prev.e.apply[..$types]($nested)" if !q"$prev".isRef  => Seq(Nested(Bond("", "", "", 2), Meta("", "", "e", NoValue, EntValue) +: resolve(nested)))
+    case t@q"$prev.e_.apply[..$types]($nested)" if !q"$prev".isRef => Seq(Nested(Bond("", "", "", 2), resolve(nested)))
 
     case t@q"$prev.e.$manyRef.*[..$types]($nested)"                               => traverse(q"$prev.e", nested1(q"$prev", manyRef, nested))
     case t@q"$prev.$manyRef.*[..$types]($nested)"                                 => traverse(q"$prev", nested1(q"$prev", manyRef, nested))
-    case t@q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef => Seq(Group(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), nested)))
+    case t@q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef => Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), nested)))
     case t@q"$prev.$manyRef.apply[..$types]($nested)"                             => traverse(q"$prev", nested1(prev, manyRef, nested))
 
 
-    // Free -----------------------------
+    // Composite -----------------------------
 
     case t@q"$prev.~[..$types]($next)" =>
       val prevElements = resolve(q"$prev")
-      val prevFreeModels = prevElements.collect { case fm: FreeModel => fm }
-      if (prevFreeModels.isEmpty) {
-        val lookForward = traverse(q"$prev", Seq(FreeModel(prevElements), FreeModel(resolve(q"$next"))))
-        val freeModels = lookForward.collect { case fm: FreeModel => fm }
+      val prevComposites = prevElements.collect { case c: Composite => c }
+      if (prevComposites.isEmpty) {
+        val lookForward = traverse(q"$prev", Seq(Composite(prevElements), Composite(resolve(q"$next"))))
+        val composites = lookForward.collect { case fm: Composite => fm }
         //        x(18, prevElements, resolve(q"$next"), lookForward, freeModels)
-        freeModels
+        composites
       } else {
-        //        x(19, prevElements, resolve(q"$next"), prevFreeModels)
-        prevFreeModels :+ FreeModel(resolve(q"$next"))
+        //        x(19, prevElements, resolve(q"$next"), prevComposites)
+        prevComposites :+ Composite(resolve(q"$next"))
       }
 
     case other => abort(s"[Dsl2Model:dslStructure] Unexpected DSL structure: $other\n${showRaw(other)}")
@@ -248,7 +248,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nested)
-    val group = Group(Bond(parentNs.toString, firstLow(manyRef), refNext, 2), nestedElems)
+    val group = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2), nestedElems)
     //    x(28, prev, parentNs, nestedElems, group, refNext)
     group
   }
@@ -441,10 +441,10 @@ object Dsl2Model {
       case _       => "ok"
     }
 
-    // No attributes after TxModel
+    // No attributes after TxMetaData
     def txError(s: String) = abort(s"[Dsl2Model:apply (2)] Molecule not allowed to have any attributes after transaction annotation. Found" + s)
     elements0.foldLeft(0) {
-      case (0, e: TxModel)                        => 1
+      case (0, e: TxMetaData)                     => 1
       case (1, Atom(_, "attr", _, _, _, _, _, _)) => txError(s" attribute `a`")
       case (1, Meta(_, _, "e", _, _))             => txError(s" attribute `e`")
       case (1, Meta(_, _, "v", _, _))             => txError(s" attribute `v`")
@@ -458,9 +458,9 @@ object Dsl2Model {
     elements0.collectFirst {
       case a@Atom(_, name, _, _, _, _, _, _) if name.last != '$' => a
       case b: Bond                                               => b
-      case g: Group                                              => g
+      case g: Nested                                             => g
       case m@Meta(_, "txInstant", _, _, _)                       => m
-      case fm: FreeModel                                         => fm
+      case fm: Composite                                         => fm
     } getOrElse
       abort(s"[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
 
@@ -475,7 +475,7 @@ object Dsl2Model {
           """can semantically therefore not return "multiple values".""" +
           "\nA tacet map attribute can though have AND expressions to make a self-join.\n" +
           s"If you want this, please make the map attribute tacet by appending an underscore: `${name}_`")
-      case Group(bond, elements2)                                     => checkAndSemantics(elements2)
+      case Nested(bond, elements2)                                    => checkAndSemantics(elements2)
       case _                                                          => "ok"
     }
     checkAndSemantics(elements0)
@@ -488,15 +488,15 @@ object Dsl2Model {
       element match {
         case a: Atom if a.name != "attr" && gs.contains(NsValue) && !gs.contains(AttrVar) => abort(s"[Dsl2Model:apply (6)] `ns` needs to have a generic `a` before")
         case a: Atom if gs.isEmpty                                                        => (a +: es, Nil, NoValue)
-        case a: Atom if a.name == "attr"                                                  => (a.copy(gs = a.gs ++ gs, value = v) +: es, Nil, NoValue)
-        case a: Atom                                                                      => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
-        case m@Meta(_, _, "e", g, v1)                                                     => (m +: es, g +: gs, v1)
-        case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
-        case txm@TxModel(txElems)                                                         => txElems.head match {
+        case a: Atom if a.name == "attr" => (a.copy(gs = a.gs ++ gs, value = v) +: es, Nil, NoValue)
+        case a: Atom                     => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
+        case m@Meta(_, _, "e", g, v1)    => (m +: es, g +: gs, v1)
+        case Meta(_, _, _, g, v1)        => (es, g +: gs, v1)
+        case txm@TxMetaData(txElems)     => txElems.head match {
           case m@Meta(_, _, _, TxValue, _) => (txm +: es, TxValue +: gs, NoValue)
           case _                           => (txm +: es, TxValue_ +: gs, NoValue)
         }
-        case other                                                                        => (other +: es, gs, v)
+        case other                       => (other +: es, gs, v)
       }
     }._1
 

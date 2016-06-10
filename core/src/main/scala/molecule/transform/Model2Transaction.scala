@@ -42,7 +42,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ('_, Atom(ns, name, _, _, value, prefix, _, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix)))
       case ('_, Bond(ns, refAttr, refNs, _))               => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs"))
 
-      case (e, Group(Bond(ns, refAttr, _, _), elements)) =>
+      case (e, Nested(Bond(ns, refAttr, _, _), elements)) =>
         val nested = elements.foldLeft('v: Any, Seq[Statement]()) {
           case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
         }._2
@@ -61,8 +61,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ('e, Bond(ns, refAttr, refNs, _))                         => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
 
       // Transaction annotations
-      case ('_, TxModel(elements)) => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxModel(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
       case ('tx, Atom(ns, name, _, _, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
@@ -82,7 +82,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
 
-      case (e, fm: FreeModel) => sys.error(s"[Model2Transaction:stmtsModel] Free models are only for getting data:\nMODEL: $model \nPAIR: ($e, $fm)\nSTMTS: $stmts")
+      case (e, fm: Composite) => sys.error(s"[Model2Transaction:stmtsModel] Free models are only for getting data:\nMODEL: $model \nPAIR: ($e, $fm)\nSTMTS: $stmts")
       case (e, elem)          => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
     }
 
@@ -92,7 +92,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '$' => a.copy(name = attr.init)
       case b@Bond(_, attr, _, _) if attr.last == '$'             => b.copy(refAttr = attr.init)
       case t@Transitive(_, attr, _, _, _) if attr.last == '$'    => t.copy(refAttr = attr.init)
-      case Group(ref, es)                                        => Group(ref, replace$(es))
+      case Nested(ref, es)                                       => Nested(ref, replace$(es))
       case other                                                 => other
     }
     val model1 = Model(replace$(model.elements))

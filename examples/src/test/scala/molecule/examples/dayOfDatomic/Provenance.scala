@@ -25,7 +25,7 @@ class Provenance extends MoleculeSpec {
       Model(List(
         Atom("story", "title", "String", 1, VarValue, None, List(), List()),
         Atom("story", "url", "String", 1, VarValue, None, List(TxValue_), List()),
-        TxModel(List(
+        TxMetaData(List(
           Atom("source", "user_", "Long", 1, Eq(List(17592186045423L)), None, List(), List()),
           Atom("source", "usecase_", "String", 1, Eq(List("AddStories")), None, List(), List())))
       )) -->
@@ -39,8 +39,8 @@ class Provenance extends MoleculeSpec {
         |  List(  :db/add,   #db/id[:db.part/user -1000001],   :story/url     ,   http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html  )
         |  List(  :db/add,   #db/id[:db.part/user -1000002],   :story/title   ,   Keep Chocolate Love Atomic                                     )
         |  List(  :db/add,   #db/id[:db.part/user -1000002],   :story/url     ,   http://blog.datomic.com/2012/08/atomic-chocolate.html          )
-        |  List(  :db/add,   #db/id[:db.part/tx -1000049],   :source/user   ,   17592186045423                                                 )
-        |  List(  :db/add,   #db/id[:db.part/tx -1000049],   :source/usecase,   AddStories                                                     )
+        |  List(  :db/add,   #db/id[:db.part/tx -1001181],   :source/user   ,   17592186045423                                                 )
+        |  List(  :db/add,   #db/id[:db.part/tx -1001181],   :source/usecase,   AddStories                                                     )
         |)""".stripMargin
 
     // Two story entities and one transaction entity is created
@@ -157,14 +157,14 @@ class Provenance extends MoleculeSpec {
       Model(List(
         Meta("story", "", "e", NoValue, Eq(List(17592186045450L))),
         Atom("story", "title", "String", 1, Eq(List("ElastiCache in 5 minutes")), None, List(TxValue_), List()),
-        TxModel(List(
+        TxMetaData(List(
           Atom("source", "user", "Long", 1, Eq(List(17592186045424L)), None, List(), List()),
           Atom("source", "usecase_", "String", 1, Eq(List("UpdateStory")), None, List(), List()))))
       ) -->
       """List(
         |  List(  :db/add,   17592186045450,   :story/title   ,   ElastiCache in 5 minutes  )
-        |  List(  :db/add,   #db/id[:db.part/tx -1000051],   :source/user   ,   17592186045424            )
-        |  List(  :db/add,   #db/id[:db.part/tx -1000051],   :source/usecase,   UpdateStory               )
+        |  List(  :db/add,   #db/id[:db.part/tx -1001183],   :source/user   ,   17592186045424            )
+        |  List(  :db/add,   #db/id[:db.part/tx -1001183],   :source/usecase,   UpdateStory               )
         |)""".stripMargin
 
 

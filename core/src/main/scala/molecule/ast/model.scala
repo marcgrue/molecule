@@ -7,16 +7,16 @@ object model {
       def draw(elements: Seq[Element], indent: Int): Seq[String] = {
         val s = "  " * indent
         elements map {
-          case Group(bond, nestedElements) =>
-            s"""|Group(
+          case Nested(bond, nestedElements) =>
+            s"""|Nested(
                 |$s  $bond,
                 |$s  List(
                 |$s    ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
-          case TxModel(nestedElements)     =>
-            s"""|TxModel(List(
+          case TxMetaData(nestedElements)   =>
+            s"""|TxMetaData(List(
                 |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
-          case FreeModel(elements)     =>
-            s"""|FreeModel(List(
+          case Composite(elements)          =>
+            s"""|Composite(List(
                 |$s  ${draw(elements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
           case other                       => s"$other"
         }
@@ -40,12 +40,12 @@ object model {
   case class Bond(ns: String, refAttr: String, refNs: String = "", card: Int) extends Element
   case class ReBond(backRef: String, refAttr: String, refNs: String = "", distinct: Boolean = false, prevVar: String = "") extends Element
   case class Transitive(backRef: String, refAttr: String, refNs: String, depth: Int = 1, prevVar: String = "") extends Element
-  case class Group(ref: Bond, elements: Seq[Element]) extends Element
+  case class Nested(bond: Bond, elements: Seq[Element]) extends Element
   case object Self extends Element
 
   case class Meta(ns: String, attr: String, kind: String, generic: Generic, value: Value) extends Element
-  case class TxModel(elements: Seq[Element]) extends Element
-  case class FreeModel(elements: Seq[Element]) extends Element
+  case class TxMetaData(elements: Seq[Element]) extends Element
+  case class Composite(elements: Seq[Element]) extends Element
 
   case object EmptyElement extends Element
 
@@ -127,7 +127,7 @@ object model {
   def curNs(e: Element) = e match {
     case Atom(ns, _, _, _, _, _, _, _) => ns
     case Bond(ns, _, _, _)             => ns
-    case Group(Bond(ns, _, _, _), _)   => ns
+    case Nested(Bond(ns, _, _, _), _)  => ns
     case Meta(ns, _, _, _, _)          => ns
     case unexpected                    => sys.error("[model:curNs] Unexpected element: " + unexpected)
   }

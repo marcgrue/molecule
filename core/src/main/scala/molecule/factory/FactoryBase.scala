@@ -19,10 +19,15 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
 
     val model: Model = Dsl2Model(c)(dsl)
 
+//    val isNested = model.elements.collectFirst {
+//      case n: Nested if !n.bond.ns.isEmpty => "nested"
+//      case c: Composite                    => "composite"
+//    } getOrElse
+
     val modelE: Model = {
       def recurse(e: Element): Element = e match {
-        case g: Group => Group(g.ref, Meta("", "", "e", NoValue, IndexVal) +: (g.elements map recurse))
-        case other    => other
+        case g: Nested => Nested(g.bond, Meta("", "", "e", NoValue, IndexVal) +: (g.elements map recurse))
+        case other     => other
       }
       Model(Meta("", "", "e", NoValue, IndexVal) +: (model.elements map recurse))
     }
@@ -60,8 +65,8 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Mapping(pairs), _, _, keyIdents) => mapIdents(pairs ++ keyIdents)
         case atom@Atom(_, _, _, _, Keys(idents), _, _, keyIdents)   => mapIdents(idents ++ keyIdents)
         case meta@Meta(_, _, _, _, Eq(idents))                      => mapIdents(idents)
-        case Group(_, nestedElements)                               => mapIdentifiers(nestedElements, identifiers0)
-        case TxModel(txElements)                                    => mapIdentifiers(txElements, identifiers0)
+        case Nested(_, nestedElements)                              => mapIdentifiers(nestedElements, identifiers0)
+        case TxMetaData(txElements)                                 => mapIdentifiers(txElements, identifiers0)
       }).flatten
       (identifiers0 ++ newIdentifiers).distinct
     }
@@ -119,8 +124,8 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Mapping(idents), _, _, keyIdents) => atom.copy(value = Mapping(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Keys(idents), _, _, _)            => atom.copy(value = Keys(getValues(idents).asInstanceOf[Seq[String]]))
         case meta@Meta(_, _, _, _, Eq(idents))                       => meta.copy(value = Eq(getValues(idents)))
-        case Group(ns, nestedElements)                               => Group(ns, resolveIdentifiers(nestedElements))
-        case TxModel(txElements)                                     => TxModel(resolveIdentifiers(txElements))
+        case Nested(ns, nestedElements)                               => Nested(ns, resolveIdentifiers(nestedElements))
+        case TxMetaData(txElements)                                     => TxMetaData(resolveIdentifiers(txElements))
         case other                                                   => other
       }
 
@@ -593,11 +598,11 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         } else {
           val flatModel = {
             def recurse(element: Element): Seq[Element] = element match {
-              case g: Group                                            => g.elements flatMap recurse
-              case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_'  => Seq()
-              case a: Atom                                             => Seq(a)
-              case m: Meta                                             => Seq(m)
-              case other                                               => Seq()
+              case n: Nested                                             => n.elements flatMap recurse
+              case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
+              case a: Atom                                               => Seq(a)
+              case m: Meta                                               => Seq(m)
+              case other                                                 => Seq()
             }
             val elements = modelE.elements flatMap recurse
             if (elements.size != queryE.f.outputs.size)

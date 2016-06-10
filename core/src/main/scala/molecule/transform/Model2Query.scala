@@ -568,7 +568,7 @@ object Model2Query extends Helpers {
 
         case Self => (query, w, y, prevNs, prevAttr, prevRefNs)
 
-        case Group(b@Bond(ns, refAttr, refNs, _), elements) =>
+        case Nested(b@Bond(ns, refAttr, refNs, _), elements) =>
           val (e2, elements2) = if (ns == "") (e, elements) else (w, b +: elements)
           val (q2, _, v2, ns2, attr2, refNs2) = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
             case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
@@ -586,23 +586,23 @@ object Model2Query extends Helpers {
         case Meta(ns, attr, "e", NoValue, _)        => (resolve(query, v, w, element), e, w, ns, attr, "")
         case Meta(ns, attr, _, _, _)                => (resolve(query, e, v, element), e, v, ns, attr, "")
 
-        case TxModel(elements) =>
+        case TxMetaData(elements) =>
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
             case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
-        case FreeModel(elements) =>
+        case Composite(elements) =>
           val eid = if(query.wh.clauses.isEmpty) e else query.wh.clauses.head match {
             case DataClause(_, Var(firstE),_,_,_,_) => firstE
-            case otherClause => sys.error(s"[Model2Query:make(FreeModel)] Couldn't find `e` from first clause: " + otherClause)
+            case otherClause => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
           }
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
             case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
-//        case FreeModel(elementss) =>
+//        case Composite(elementss) =>
 //          // Loop molecules
 //          val (q4, e4, v4, prevNs4, prevAttr4, prevRefNs4) = elementss.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
 //            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), elements) => {
@@ -623,7 +623,7 @@ object Model2Query extends Helpers {
     def postProcess(q: Query) = {
       def getAndAtoms(elements: Seq[Element]): Seq[Atom] = elements flatMap {
         case a@Atom(_, _, _, 2, And(andValues), _, _, _) => Seq(a)
-        case Group(_, elements2)                         => getAndAtoms(elements2)
+        case Nested(_, elements2)                        => getAndAtoms(elements2)
         case _                                           => Nil
       }
 

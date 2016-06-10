@@ -20,29 +20,56 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   // Touch - traverse entity attributes ...........................................................
 
   // Default to Map - useful for lookup
-  def touch: Map[String, Any] = traverse().toMap
-  def touch(maxDepth: Int = 5): Map[String, Any] = traverse(1, maxDepth).toMap
+  def touch: Map[String, Any] = asMap()
+  def touch(maxDepth: Int = 5): Map[String, Any] = asMap(1, maxDepth)
+
+  def touchQ: String = touchQ()
+  def touchQ(maxDepth: Int = 5): String = asMap(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("Map(\n", ",\n", ")")
 
   // Lists keep order - useful for tests
-  def touchList: List[(String, Any)] = traverse()
-  def touchList(maxDepth: Int = 5): List[(String, Any)] = traverse(1, maxDepth)
+  def touchList: List[(String, Any)] = asList()
+  def touchList(maxDepth: Int = 5): List[(String, Any)] = asList(1, maxDepth)
 
   // Quote output for tests...
-//  def touchListQ: List[(String, Any)] = touchListQ()
-//  def touchListQ(maxDepth: Int = 5): List[(String, Any)] = traverse(1, maxDepth).map(p => s"""\n"${p._1}"""" -> formatEntity(p._2))
-  def touchListQ: List[String] = touchListQ()
-  def touchListQ(maxDepth: Int = 5): List[String] = traverse(1, maxDepth).map(p => s"""\n"${p._1}" -> ${formatEntity(p._2)}""")
+  def touchListQ: String = touchListQ()
+  def touchListQ(maxDepth: Int = 5): String = asList(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("List(\n", ",\n", ")")
 
   private def formatEntity(value: Any): Any = value match {
     case s: String               => s""""$s""""
     case l: Long                 => if (l > Int.MaxValue) s"${l}L" else l // presuming we used Int... - todo: how to get Int from touch?
+    case s: Set[_]               => s map formatEntity
     case l: Seq[_]               => l map formatEntity
     case m: Map[_, _]            => "\n" + m.map(p => s""""${p._1}"""" -> formatEntity(p._2))
     case (s: String, value: Any) => s""""$s"""" -> formatEntity(value)
     case other                   => other
   }
 
-  private def traverse(depth: Int = 1, maxDepth: Int = 5): List[(String, Any)] = {
+  def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
+    val builder = Map.newBuilder[String, Any]
+    val iter = entity.keySet.toList.sorted.asJava.iterator()
+
+    // Add id also
+    builder += ":db/id" -> entity.get(":db/id")
+    while (iter.hasNext) {
+      val key = iter.next()
+      val scalaValue = toScala(entity.get(key), depth, maxDepth, "Map")
+      val sortedValue = scalaValue match {
+        case l: Seq[_] => l.head match {
+          case m1: Map[_, _] if m1.containsKey(":db/id") =>
+            val indexedRefMaps: Seq[(Long, Map[String, Any])] = l.map {
+              case m2: Map[_, _] => m2.get(":db/id").asInstanceOf[Long] -> m2.asInstanceOf[Map[String, Any]]
+            }
+            indexedRefMaps.sortBy(_._1).map(_._2)
+          case _                                         => l
+        }
+        case other     => other
+      }
+      builder += (key -> sortedValue)
+    }
+    builder.result()
+  }
+
+  private def asList(depth: Int = 1, maxDepth: Int = 5): List[(String, Any)] = {
     val builder = List.newBuilder[(String, Any)]
     val iter = entity.keySet.toList.sorted.asJava.iterator()
 
@@ -50,7 +77,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     builder += ":db/id" -> entity.get(":db/id")
     while (iter.hasNext) {
       val key = iter.next()
-      val scalaValue = toScala(entity.get(key), depth, maxDepth)
+      val scalaValue = toScala(entity.get(key), depth, maxDepth, "List")
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
           case m1: Map[_, _] if m1.containsKey(":db/id") =>
@@ -163,7 +190,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   // Conversions ..........................................................................
 
-  private[molecule] def toScala(v: Any, depth: Int = 1, maxDepth: Int = 5): Any = v match {
+  private[molecule] def toScala(v: Any, depth: Int = 1, maxDepth: Int = 5, tpe: String = "Map"): Any = v match {
     // :db.type/string
     case s: java.lang.String => s
     // :db.type/boolean
@@ -188,15 +215,17 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case u: java.net.URI => u
     // :db.type/keyword
     case kw: clojure.lang.Keyword => kw.toString // Clojure Keywords not used in Molecule
+
     // :db.type/bytes
     case bytes: Array[Byte] => bytes
     // an entity map
-    case e: datomic.Entity if depth < maxDepth => new EntityFacade(e, conn, e.get(":db/id")).traverse(depth + 1, maxDepth)
-    case e: datomic.Entity                     => e.get(":db/id")
+    case e: datomic.Entity if depth < maxDepth && tpe == "Map"  => new EntityFacade(e, conn, e.get(":db/id")).asMap(depth + 1, maxDepth)
+    case e: datomic.Entity if depth < maxDepth && tpe == "List" => new EntityFacade(e, conn, e.get(":db/id")).asList(depth + 1, maxDepth)
+    case e: datomic.Entity                                      => e.get(":db/id").asInstanceOf[Long]
 
     // :db.type/keyword
-    case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.toList.map(toScala(_, depth + 1, maxDepth))
-    case set: clojure.lang.PersistentHashSet                     => set
+    case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.toList.map(toScala(_, depth, maxDepth, tpe))
+    case set: clojure.lang.PersistentHashSet                     => set.toList.map(toScala(_, depth, maxDepth, tpe).asInstanceOf[Long]).toSet
 
     // a collection
     case coll: java.util.Collection[_] =>
@@ -205,7 +234,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
           private val jIter = coll.iterator.asInstanceOf[java.util.Iterator[AnyRef]]
           override def hasNext = jIter.hasNext
           override def next() = if (depth < maxDepth)
-            toScala(jIter.next(), depth + 1, maxDepth)
+            toScala(jIter.next(), depth, maxDepth, tpe)
           else
             jIter.next()
         }

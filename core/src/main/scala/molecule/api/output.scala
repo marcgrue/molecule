@@ -40,7 +40,7 @@ trait Molecule extends DatomicFacade {
     def recurse1(elements: Seq[Element]): Seq[Element] = elements flatMap {
       case a: Atom if a.name.last == '_' => throw new RuntimeException(
         s"[output.Molecule:modelCheck] Underscore-suffixed attributes like `${a.name}` not allowed in insert molecules.")
-      case Group(ref, es)                => recurse1(es)
+      case Nested(ref, es)               => recurse1(es)
       case e: Element                    => Seq(e)
     }
     recurse1(_model.elements)
@@ -56,19 +56,19 @@ trait Molecule extends DatomicFacade {
     def recurse2(elements: Seq[Element]): (Element, Seq[Element], String) = elements.foldLeft((null:Element, Seq[Element](), "")) {
       case ((prevElem, attrs, ns0), e) =>
       e match {
-        case a: Atom if a.name.last != '$'                   => (a, attrs :+ a, getNs(a.ns))
-        case a: Atom                                         => (a, attrs, getNs(a.ns))
-        case b: Bond if attrs.isEmpty                        => abortNs(2, getNs(b.ns))
-        case b: Bond                                         => (b, Nil, getNs(b.ns))
-        case r@ReBond(ns1, _, _, _, _)                       => (r, attrs :+ r, getNs(ns1))
-        case g@Group(ref, es) if prevElem.isInstanceOf[Bond] => abortNs(5, prevElem.asInstanceOf[Bond].refAttr.capitalize)
-        case g@Group(ref, es)                                => {
+        case a: Atom if a.name.last != '$'                    => (a, attrs :+ a, getNs(a.ns))
+        case a: Atom                                          => (a, attrs, getNs(a.ns))
+        case b: Bond if attrs.isEmpty                         => abortNs(2, getNs(b.ns))
+        case b: Bond                                          => (b, Nil, getNs(b.ns))
+        case r@ReBond(ns1, _, _, _, _)                        => (r, attrs :+ r, getNs(ns1))
+        case g@Nested(ref, es) if prevElem.isInstanceOf[Bond] => abortNs(5, prevElem.asInstanceOf[Bond].refAttr.capitalize)
+        case g@Nested(ref, es)                                => {
 //          x(1, e, attrs, prevElem, ref, es)
           val (_, nested, ns1) = recurse2(es)
           if (nested.isEmpty) abortNs(3, ns1) else (g, nested, ns1)
         }
-        case m@Meta(ns1, _, "e", NoValue, _)                 => (m, attrs :+ m, getNs(ns1))
-        case _                                               => (e, attrs, ns0)
+        case m@Meta(ns1, _, "e", NoValue, _)                  => (m, attrs :+ m, getNs(ns1))
+        case _                                                => (e, attrs, ns0)
       }
     }
     val (_, elements, ns) = recurse2(_model.elements)

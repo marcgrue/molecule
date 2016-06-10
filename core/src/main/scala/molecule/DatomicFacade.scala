@@ -133,7 +133,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
   private[molecule] def insert_(conn: Connection, model: Model, dataRows: Seq[Seq[Any]] = Seq()): Tx = {
     val transformer = Model2Transaction(conn, model)
     val stmtss = transformer.insertStmts(dataRows)
-    x(2, model, transformer.stmtsModel, dataRows, stmtss)
+//    x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
     //        x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
@@ -158,7 +158,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
     val txStmts = if(txMolecules.nonEmpty) {
       val txElements = txMolecules.flatMap(_._model.elements)
-      val txModel = Model(Seq(TxModel(txElements)))
+      val txModel = Model(Seq(TxMetaData(txElements)))
       val txTransformer = Model2Transaction(conn, txModel)
       txTransformer.saveStmts()
     } else Nil

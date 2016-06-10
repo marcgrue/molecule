@@ -36,15 +36,15 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
           }
 
           case l: List[_] if max      => indent + "List(" + l.mkString(",   ") + ")"
-          case l: List[_]             => indent + "List(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case l: jList[_] if max     => indent + "JavaList(" + l.mkString(",   ") + ")"
-          case l: jList[_]            => indent + "JavaList(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case l: Map[_, _] if max    => indent + "Map(" + l.mkString(",   ") + ")"
-          case l: Map[_, _]           => indent + "Map(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case Group(bond, nested)    => indent + "Group(\n" + (bond +: nested).zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case TxModel(nested)        => indent + "TxModel(\n" + nested.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case FreeModel(elements)    => indent + "FreeModel(\n" + elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-          case m: Model               => indent + "Model(\n" + m.elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case l: List[_]           => indent + "List(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case l: jList[_] if max   => indent + "JavaList(" + l.mkString(",   ") + ")"
+          case l: jList[_]          => indent + "JavaList(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case l: Map[_, _] if max  => indent + "Map(" + l.mkString(",   ") + ")"
+          case l: Map[_, _]         => indent + "Map(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case Nested(bond, nested) => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case TxMetaData(elements) => indent + "TxMetaData(\n" + elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case Composite(elements)  => indent + "Composite(\n" + elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
+          case m: Model             => indent + "Model(\n" + m.elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
           case m: java.util.Map[_, _] => {
             if (m.size() == 4 && m.keys.map(_.toString).contains(":db-before")) {
               val tx = m.toList
