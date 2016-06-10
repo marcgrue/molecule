@@ -92,7 +92,6 @@ trait MoleculeOut[T] extends MoleculeOutBase
 abstract class Molecule0(val _model: Model, val _query: Query) extends Molecule
 
 abstract class Molecule1[A](val _model: Model, val _query: Query) extends Molecule with MoleculeOut[A] {
-//abstract class Molecule1[A](val _model: Model, val _query: Query) extends Molecule {
   def get        (implicit conn: Connection): Seq[A]
   def getE       (implicit conn: Connection): Seq[(Long, A)]
   def get(n: Int)(implicit conn: Connection): Seq[A]    = get(conn).take(n)

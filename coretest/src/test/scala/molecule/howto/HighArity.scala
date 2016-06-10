@@ -256,11 +256,11 @@ class HighArity extends CoreSpec {
     "1 level" in new CoreSetup {
 
       val List(e1, e2, txId) = insert(
-        Ns.int.str, Ref1.int1.str1
+        Ns.int.str, Ref1.str1.int1
       )(
         Seq(
-          ((1, "a"), (11, "aa")),
-          ((2, "b"), (22, "bb"))
+          ((1, "a"), ("aa", 11)),
+          ((2, "b"), ("bb", 22))
         )
       )(
         Ref2.str2_("Tx meta data")
@@ -324,9 +324,14 @@ class HighArity extends CoreSpec {
 //        m(Ns.int.str ~ Ref2.str2).debug
 
 
-      m(Ns.int.str ~ Ref1.int1.str1).get === List(
-        ((1, "a"), (11, "aa")),
-        ((2, "b"), (22, "bb"))
+      m(Ns.int.str ~ Ref1.str1.int1).get.sorted === List(
+        ((1, "a"), ("aa", 11)),
+        ((2, "b"), ("bb", 22))
+      )
+
+      m(Ns.int.str ~ Ref1.str1.int1.tx_(Ref2.str2)).get.sorted === List(
+        ((1, "a"), ("aa", 11, "Tx meta data")),
+        ((2, "b"), ("bb", 22, "Tx meta data"))
       )
 
 //      m(Ns.int.str ~ Ref1.int1.str1.tx_(Ref2.str2)).get === List(

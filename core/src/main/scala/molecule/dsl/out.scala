@@ -23,9 +23,9 @@ trait Out_2[Ns2[_, _], Ns3[_, _, _], In1_2[_, _, _], In1_3[_, _, _, _], A, B]
     with Aggregate2[Ns2, A, B]
     with Branch2[Ns2, Ns3, A, B] {
 
-  def ~[a      ] (nested: NS1 [a      ]): Free2[(A, B), a        ] = ???
-  def ~[a, b   ] (nested: NS2 [a, b   ]): Free2[(A, B), (a, b   )] = ???
-  def ~[a, b, c] (nested: NS3 [a, b, c]): Free2[(A, B), (a, b, c)] = ???
+  def ~[a      ] (molecule: NS1 [a      ]): Free2[(A, B), a        ] = ???
+  def ~[a, b   ] (molecule: NS2 [a, b   ]): Free2[(A, B), (a, b   )] = ???
+  def ~[a, b, c] (molecule: NS3 [a, b, c]): Free2[(A, B), (a, b, c)] = ???
 }
 
 

@@ -62,8 +62,8 @@ trait Free2[A, B] extends Free {
 //  def ~[a, b                                                            ] (nested: NS2 [a, b                                                            ]): Ns3[A, B, (a, b                                                            )] = ???
 //  def ~[a, b                                                            ] (nested: NS2 [a, b                                                            ]): Ns3[A, B, (a, b                                                            )] = ???
 
-  def ~[a, b    ] (nested: NS2 [a, b]): Free3[A, B, (a, b)] = ???
-  def ~[a, b, c ] (nested: NS3 [a, b, c  ]): Free2[(A, B), (a, b, c   )] = ???
+  def ~[a, b    ] (molecule: NS2 [a, b   ]): Free3[A, B, (a, b)] = ???
+  def ~[a, b, c ] (molecule: NS3 [a, b, c]): Free2[(A, B), (a, b, c   )] = ???
 //
 //  def ~[a, b, c, d                                                      ] (nested: NS4 [a, b, c, d                                                      ]): Ns3[A, B, Seq[(a, b, c, d                                                      )]] = ???
 //  def ~[a, b, c, d, e                                                   ] (nested: NS5 [a, b, c, d, e                                                   ]): Ns3[A, B, Seq[(a, b, c, d, e                                                   )]] = ???

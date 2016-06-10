@@ -31,23 +31,29 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
         def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
         def debugE(implicit conn: Connection): Unit              = debugMolecule(conn, modelE, queryE)
 
-        def get(implicit conn: Connection): Seq[(..$OutTypes)] = {
-          val isNested: Boolean = model.elements.foldLeft(false) {
-            case (result, Nested(Bond("","","", 2), _)) => false
-            case (result, n: Nested)                    => true
-            case (result, _)                            => result
-          }
-//          println(modelE)
-//          println("-------------")
-//          println(queryE)
-//          println("-------------")
-//          println(queryE.datalog)
+        def get(implicit conn: Connection): Seq[(..$OutTypes)] = model.elements.collectFirst {
+          case n: Nested if !n.bond.ns.isEmpty => ${castNestedTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes)}
+        } getOrElse results(conn, model, query).map(data => (..${castTpl(q"query", q"data", OutTypes)}))
 
-          if (isNested)
-            ${castNestedTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes)}
-          else
-            results(conn, model, query).map(data => (..${castTpl(q"query", q"data", OutTypes)}))
-        }
+        def debug(implicit conn: Connection): Unit             = debugMolecule(conn, model, query)
+      }
+    """
+    )
+  }
+
+  def fromXtuples(dsl: c.Expr[NS], OutTypes: Type*) = {
+    val MoleculeTpe = molecule_o(OutTypes.size)
+    val OutTypes2 = if (OutTypes.size == 22) OutTypes else c.typeOf[Long] +: OutTypes
+    expr(
+      q"""
+      ..${basics(dsl)}
+      new $MoleculeTpe[..$OutTypes](model, query) {
+        def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
+        def debugE(implicit conn: Connection): Unit              = debugMolecule(conn, modelE, queryE)
+
+        def get(implicit conn: Connection): Seq[(..$OutTypes)] =
+          results(conn, model, query).map(data => (..${castComposite(q"query", q"data", OutTypes)}))
+
         def debug(implicit conn: Connection): Unit             = debugMolecule(conn, model, query)
       }
     """
@@ -55,19 +61,18 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
   }
 }
 
-
 object MakeMolecule {
   def build(c0: Context) = new {val c: c0.type = c0} with MakeMolecule[c0.type]
 
   def from2tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Free2[T1, T2]])
   : c.Expr[Molecule2[T1, T2]] =
-    build(c).fromXattrs(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2])
+    build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2])
 
   def from3tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Free3[T1, T2, T3]])
   : c.Expr[Molecule3[T1, T2, T3]] =
-    build(c).fromXattrs(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3])
+    build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3])
 
 
 
