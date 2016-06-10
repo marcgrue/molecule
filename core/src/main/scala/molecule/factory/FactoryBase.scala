@@ -601,7 +601,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
             }
             val elements = modelE.elements flatMap recurse
             if (elements.size != queryE.f.outputs.size)
-              sys.error("[FactoryBase:castTplsNested]  Flattened model elements (" + elements.size + ") don't match query outputs (" + queryE.f.outputs.size + "):\n" +
+              sys.error("[FactoryBase:castNestedTpls]  Flattened model elements (" + elements.size + ") don't match query outputs (" + queryE.f.outputs.size + "):\n" +
                 modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + queryE + "\n----------------\n")
             elements
           }

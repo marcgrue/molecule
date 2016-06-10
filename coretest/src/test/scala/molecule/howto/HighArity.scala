@@ -1,7 +1,7 @@
 package molecule
 package howto
 
-import molecule.util.dsl.coreTest.Ns
+import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}
 
 class HighArity extends CoreSpec {
@@ -75,337 +75,429 @@ class HighArity extends CoreSpec {
     ":ns/uuids" -> List(uuid2)
   )
 
-  "Split + transaction meta data" >> {
-
-
-    "Split into 2" in new CoreSetup {
-
-      // Inserting high-arity data
-      val List(e1, e2, txId) = splitInsertTx(
-        // Two sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats,
-        Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Two sub-lists of unzipped data tuples type-safely matching the two molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f))
-        ),
-        Seq(
-          (1, Set(2, 3), 1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (4, Set(5, 6), 4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-
-      )(
-        // Transaction meta data
-        Ns.str_("use case").strs_(Set("John, Lisa"))
-      ).eids
-
-      // Note how this creates only two entities and a single transaction entity! 
-      // Each matching line of the two sub-lists are merged at runtime to be inserted as
-      // one set of attribute values for an entity. Let's confirm it:
-
-      e1.touchList === entity1data
-
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 2
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-
-      // Transaction meta data
-      Ns.str_.tx_(Ns.str).get === List("use case")
-    }
-
-
-    "Split into 3" in new CoreSetup {
-
-      val List(e1, e2, txId) = splitInsertTx(
-        // Three sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums,
-        Ns.float.floats.int.ints.long.longs.ref1,
-        Ns.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Three sub-lists of split data tuples type-safely matching the three sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
-        ),
-        Seq(
-          (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 101L),
-          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 201L)
-        ),
-        Seq(
-          (102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      )(
-        // Transaction meta data
-        Ns.str_("use case").strs_(Set("John, Lisa"))
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-
-      // Transaction meta data
-      Ns.str_.tx_(Ns.str).get === List("use case")
-    }
-
-
-    "Split into 4" in new CoreSetup {
-
-      val List(e1, e2, txId) = splitInsertTx(
-        // Four sub-molecules
-        Ns.bool.bools.date.dates.double.doubles,
-        Ns.enum.enums.float.floats.int.ints,
-        Ns.long.longs.ref1.refSub1.str.strs,
-        Ns.uri.uris.uuid.uuids
-      )(
-        // Four sub-lists of split data tuples type-safely matching the four sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0)),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0))
-        ),
-        Seq(
-          ("enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f), 1, Set(2, 3)),
-          ("enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f), 4, Set(5, 6))
-        ),
-        Seq(
-          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
-          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
-        ),
-        Seq(
-          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      )(
-        Ns.str_("use case").strs_(Set("John, Lisa"))
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-
-      // Transaction meta data
-      Ns.str_.tx_(Ns.str).get === List("use case")
-    }
-
-
-    "Split into 5" in new CoreSetup {
-
-      val List(e1, e2, txId) = splitInsertTx(
-        // Five sub-molecules
-        Ns.bool.bools.date.dates,
-        Ns.double.doubles.enum.enums,
-        Ns.float.floats.int.ints,
-        Ns.long.longs.ref1.refSub1.str.strs,
-        Ns.uri.uris.uuid.uuids
-      )(
-        // Five sub-lists of split data tuples type-safely matching the five sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3)),
-          (false, Set(false), date4, Set(date5, date6))
-        ),
-        Seq(
-          (1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-          (4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
-        ),
-        Seq(
-          (1f, Set(2f, 3f), 1, Set(2, 3)),
-          (4f, Set(5f, 6f), 4, Set(5, 6))
-        ),
-        Seq(
-          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
-          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
-        ),
-        Seq(
-          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      )(
-        Ns.str_("use case").strs_(Set("John, Lisa"))
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 2 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-
-      // Transaction meta data
-      Ns.str_.tx_(Ns.str).get === List("use case")
-    }
-  }
-
-
-  "Split" >> {
-
-    "Split into 2" in new CoreSetup {
-
-      // Inserting high-arity data
-      val List(e1, e2) = splitInsert(
-        // Two sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats,
-        Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Two sub-lists of unzipped data tuples type-safely matching the two molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f))
-        ),
-        Seq(
-          (1, Set(2, 3), 1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (4, Set(5, 6), 4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      ).eids
-
-      // Note how this creates only two entities and a single transaction entity! 
-      // Each matching line of the two sub-lists are merged at runtime to be inserted as
-      // one set of attribute values for an entity. Let's confirm it:
-
-      e1.touchList === entity1data
-
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 2
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-    }
-
-
-    "Split into 3" in new CoreSetup {
-
-      val List(e1, e2) = splitInsert(
-        // Three sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums,
-        Ns.float.floats.int.ints.long.longs.ref1,
-        Ns.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Three sub-lists of split data tuples type-safely matching the three sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
-        ),
-        Seq(
-          (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 101L),
-          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 201L)
-        ),
-        Seq(
-          (102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-    }
-
-
-    "Split into 4" in new CoreSetup {
-
-      val List(e1, e2) = splitInsert(
-        // Four sub-molecules
-        Ns.bool.bools.date.dates.double.doubles,
-        Ns.enum.enums.float.floats.int.ints,
-        Ns.long.longs.ref1.refSub1.str.strs,
-        Ns.uri.uris.uuid.uuids
-      )(
-        // Four sub-lists of split data tuples type-safely matching the four sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0)),
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0))
-        ),
-        Seq(
-          ("enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f), 1, Set(2, 3)),
-          ("enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f), 4, Set(5, 6))
-        ),
-        Seq(
-          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
-          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
-        ),
-        Seq(
-          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 1 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-    }
-
-
-    "Split into 5" in new CoreSetup {
-
-      val List(e1, e2) = splitInsert(
-        // Five sub-molecules
-        Ns.bool.bools.date.dates,
-        Ns.double.doubles.enum.enums,
-        Ns.float.floats.int.ints,
-        Ns.long.longs.ref1.refSub1.str.strs,
-        Ns.uri.uris.uuid.uuids
-      )(
-        // Five sub-lists of split data tuples type-safely matching the five sub-molecules above!
-        Seq(
-          (true, Set(true), date1, Set(date2, date3)),
-          (false, Set(false), date4, Set(date5, date6))
-        ),
-        Seq(
-          (1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-          (4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
-        ),
-        Seq(
-          (1f, Set(2f, 3f), 1, Set(2, 3)),
-          (4f, Set(5f, 6f), 4, Set(5, 6))
-        ),
-        Seq(
-          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
-          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
-        ),
-        Seq(
-          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
-          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        )
-      ).eids
-
-      // Entity 1
-      e1.touchList === entity1data
-
-      // Entity 2
-      Ns(e2).double.doubles.str.strs.get === List(
-        // Values from sub-list 2 have been merged with values from sub-list 3
-        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
-      )
-    }
-  }
-
-
-
-  //  "Reference annotations" in new CoreSetup {ok}
+  //  "Split + transaction meta data" >> {
   //
+  //
+  //    "Split into 2" in new CoreSetup {
+  //
+  //      // Inserting high-arity data
+  //      val List(e1, e2, txId) = splitInsertTx(
+  //        // Two sub-molecules
+  //        Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats,
+  //        Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids
+  //      )(
+  //        // Two sub-lists of unzipped data tuples type-safely matching the two molecules above!
+  //        Seq(
+  //          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
+  //          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f))
+  //        ),
+  //        Seq(
+  //          (1, Set(2, 3), 1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
+  //          (4, Set(5, 6), 4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+  //        )
+  //
+  //      )(
+  //        // Transaction meta data
+  //        Ns.str_("use case").strs_(Set("John, Lisa"))
+  //      ).eids
+  //
+  //      // Note how this creates only two entities and a single transaction entity!
+  //      // Each matching line of the two sub-lists are merged at runtime to be inserted as
+  //      // one set of attribute values for an entity. Let's confirm it:
+  //
+  //      e1.touchList === entity1data
+  //
+  //      Ns(e2).double.doubles.str.strs.get === List(
+  //        // Values from sub-list 1 have been merged with values from sub-list 2
+  //        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
+  //      )
+  //
+  //      // Transaction meta data
+  //      Ns.str_.tx_(Ns.str).get === List("use case")
+  //    }
+  //
+  //
+  //    "Split into 3" in new CoreSetup {
+  //
+  //      val List(e1, e2, txId) = splitInsertTx(
+  //        // Three sub-molecules
+  //        Ns.bool.bools.date.dates.double.doubles.enum.enums,
+  //        Ns.float.floats.int.ints.long.longs.ref1,
+  //        Ns.refSub1.str.strs.uri.uris.uuid.uuids
+  //      )(
+  //        // Three sub-lists of split data tuples type-safely matching the three sub-molecules above!
+  //        Seq(
+  //          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+  //          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
+  //        ),
+  //        Seq(
+  //          (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 101L),
+  //          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 201L)
+  //        ),
+  //        Seq(
+  //          (102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
+  //          (202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+  //        )
+  //      )(
+  //        // Transaction meta data
+  //        Ns.str_("use case").strs_(Set("John, Lisa"))
+  //      ).eids
+  //
+  //      // Entity 1
+  //      e1.touchList === entity1data
+  //
+  //      // Entity 2
+  //      Ns(e2).double.doubles.str.strs.get === List(
+  //        // Values from sub-list 1 have been merged with values from sub-list 3
+  //        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
+  //      )
+  //
+  //      // Transaction meta data
+  //      Ns.str_.tx_(Ns.str).get === List("use case")
+  //    }
+  //
+  //
+  //    "Split into 4" in new CoreSetup {
+  //
+  //      val List(e1, e2, txId) = splitInsertTx(
+  //        // Four sub-molecules
+  //        Ns.bool.bools.date.dates.double.doubles,
+  //        Ns.enum.enums.float.floats.int.ints,
+  //        Ns.long.longs.ref1.refSub1.str.strs,
+  //        Ns.uri.uris.uuid.uuids
+  //      )(
+  //        // Four sub-lists of split data tuples type-safely matching the four sub-molecules above!
+  //        Seq(
+  //          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0)),
+  //          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0))
+  //        ),
+  //        Seq(
+  //          ("enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f), 1, Set(2, 3)),
+  //          ("enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f), 4, Set(5, 6))
+  //        ),
+  //        Seq(
+  //          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
+  //          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
+  //        ),
+  //        Seq(
+  //          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
+  //          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+  //        )
+  //      )(
+  //        Ns.str_("use case").strs_(Set("John, Lisa"))
+  //      ).eids
+  //
+  //      // Entity 1
+  //      e1.touchList === entity1data
+  //
+  //      // Entity 2
+  //      Ns(e2).double.doubles.str.strs.get === List(
+  //        // Values from sub-list 1 have been merged with values from sub-list 3
+  //        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
+  //      )
+  //
+  //      // Transaction meta data
+  //      Ns.str_.tx_(Ns.str).get === List("use case")
+  //    }
+  //
+  //
+  //    "Split into 5" in new CoreSetup {
+  //
+  //      val List(e1, e2, txId) = splitInsertTx(
+  //        // Five sub-molecules
+  //        Ns.bool.bools.date.dates,
+  //        Ns.double.doubles.enum.enums,
+  //        Ns.float.floats.int.ints,
+  //        Ns.long.longs.ref1.refSub1.str.strs,
+  //        Ns.uri.uris.uuid.uuids
+  //      )(
+  //        // Five sub-lists of split data tuples type-safely matching the five sub-molecules above!
+  //        Seq(
+  //          (true, Set(true), date1, Set(date2, date3)),
+  //          (false, Set(false), date4, Set(date5, date6))
+  //        ),
+  //        Seq(
+  //          (1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+  //          (4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"))
+  //        ),
+  //        Seq(
+  //          (1f, Set(2f, 3f), 1, Set(2, 3)),
+  //          (4f, Set(5f, 6f), 4, Set(5, 6))
+  //        ),
+  //        Seq(
+  //          (1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c")),
+  //          (4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"))
+  //        ),
+  //        Seq(
+  //          (uri1, Set(uri2, uri3), uuid1, Set(uuid2)),
+  //          (uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+  //        )
+  //      )(
+  //        Ns.str_("use case").strs_(Set("John, Lisa"))
+  //      ).eids
+  //
+  //      // Entity 1
+  //      e1.touchList === entity1data
+  //
+  //      // Entity 2
+  //      Ns(e2).double.doubles.str.strs.get === List(
+  //        // Values from sub-list 2 have been merged with values from sub-list 3
+  //        (4.0, Set(5.0, 6.0), "d", Set("e", "f"))
+  //      )
+  //
+  //      // Transaction meta data
+  //      Ns.str_.tx_(Ns.str).get === List("use case")
+  //    }
+  //  }
+
+
+  "Split references" >> {
+
+    "1 level" in new CoreSetup {
+
+      val List(e1, e2, txId) = insert(
+        Ns.int.str, Ref1.int1.str1
+      )(
+        Seq(
+          ((1, "a"), (11, "aa")),
+          ((2, "b"), (22, "bb"))
+        )
+      )(
+        Ref2.str2_("Tx meta data")
+      ).eids
+//
+//
+//      e1.touchList === List(
+//        ":db/id" -> 17592186045445L,
+//        ":ns/int" -> 1,
+//        ":ns/str" -> "a",
+//        ":ref1/int1" -> 11,
+//        ":ref1/str1" -> "aa")
+//
+//      e2.touchList === List(
+//        ":db/id" -> 17592186045446L,
+//        ":ns/int" -> 2,
+//        ":ns/str" -> "b",
+//        ":ref1/int1" -> 22,
+//        ":ref1/str1" -> "bb")
+//
+//      txId.touchList === List(
+//        ":db/id" -> 13194139534340L,
+//        ":db/txInstant" -> txId(":db/txInstant").get,
+//        ":ref2/str2" -> "Tx meta data")
+//
+//      Ns.int.str.get.sorted === List(
+//        (1, "a"),
+//        (2, "b")
+//      )
+//      Ref1.int1.str1.get.sorted === List(
+//        (11, "aa"),
+//        (22, "bb")
+//      )
+//
+//      // Transaction meta data accessed through both namespaces
+//      Ns.int_.tx_(Ref2.str2).get === List("Tx meta data")
+//      Ref1.int1_.tx_(Ref2.str2).get === List("Tx meta data")
+
+//      import dsl.schemaDSL._
+//      import dsl._
+
+//      val nested: (Int, String, Seq[(Int, String)]) = m(Ns.int.str.Refs1 * Ref1.int1.str1).one
+//
+////      val free1 = Ns.int.str.~(42)
+////      val free2: Int = Ns.int.str.~(Ref1.str1.int1)
+//
+//      val xx: NS3[String, Int, String] = Ref1.str1.int1.enum1
+//
+//      val free2: Free2[(Int, String), (String, Int, String)] = Ns.int.str ~ Ref1.str1.int1.enum1
+//
+//      val free3: Free3[(Int, String), (String, Int, String), (String, Int)] = Ns.int.str ~ Ref1.str1.int1.enum1 ~ Ref2.str2.int2
+
+//      val free2: ((Int, String), (String, Int)) = m(Ns.int.str ~ Ref1.str1.int1).one
+
+//      val free2a: ((Int, String), (String, Int, String)) = m(Ns.int.str ~ Ref1.str1.int1.enum1).one
+
+//      val free3a: Seq[((Int, String), (String, Int, String), (String, Int))] =
+//        m(Ref1.int1.str1.tx_(Ref2.str2)).debug
+
+//        m(Ns.int.str.tx_(Ref2.str2)).debug
+//        m(Ns.int.str ~ Ref2.str2).debug
+
+
+      m(Ns.int.str ~ Ref1.int1.str1).get === List(
+        ((1, "a"), (11, "aa")),
+        ((2, "b"), (22, "bb"))
+      )
+
+//      m(Ns.int.str ~ Ref1.int1.str1.tx_(Ref2.str2)).get === List(
+//        ((1, "a"), (11, "aa")),
+//        ((2, "b"), (22, "bb"))
+//      )
+//
+//      m(Ns.int.str.tx_(Ref2.str2) ~ Ref1.int1.str1).get === List(
+//        ((1, "a"), (11, "aa")),
+//        ((2, "b"), (22, "bb"))
+//      )
+//        m(Ns.int.str ~ Ref1.str1.int1.enum1 ~ Ref2.str2.int2).debug
+
+//      val free3a: ((Int, String), (String, Int, String), (String, Int)) = Ns.int.str ~ Ref1.str1.int1.enum1 ~ Ref2.str2.int2 one
+
+//      val free3: ((Int, String), (String, Int)) = m(Ns.int.str ~ Ref1.str1.int1).one
+//
+//      val free4: ((Int, String), (String, Int), (String, Int, String)) = m(
+//        Ns.int.str ~ Ref1.str1.int1 ~ Ref1.str1.int1.enum1).one
+
+
+
+    }
+
+//    "1 level" in new CoreSetup {
+//
+//      // Saving one entity with attribute values from unrelated namespaces
+//      val List(e1, e2, txId) = insert(
+//        Ns.int, Ref2.int2.str2
+//      )(
+//        Seq(
+//          (1, (11, "aa")),
+//          (2, (22, "bb"))
+//        )
+//      )(
+//        Ref1.str1_("Tx meta data")
+//      ).eids
+//
+//
+//      e1.touchList === List(
+//        ":db/id" -> 17592186045445L,
+//        ":ns/int" -> 1,
+//        ":ref2/int2" -> 11,
+//        ":ref2/str2" -> "aa")
+//
+//      e2.touchList === List(
+//        ":db/id" -> 17592186045446L,
+//        ":ns/int" -> 2,
+//        ":ref2/int2" -> 22,
+//        ":ref2/str2" -> "bb")
+//
+//      txId.touchList === List(
+//        ":db/id" -> 13194139534340L,
+//        ":db/txInstant" -> txId(":db/txInstant").get,
+//        ":ref1/str1" -> "Tx meta data")
+//
+//      Ns.int.get.sorted === List(
+//        1,
+//        2
+//      )
+//      Ref2.int2.str2.get.sorted === List(
+//        (11, "aa"),
+//        (22, "bb")
+//      )
+//
+//      // Transaction meta data accessed through both namespaces
+//      Ns.int_.tx_(Ref1.str1).get === List("Tx meta data")
+//      Ref2.int2_.tx_(Ref1.str1).get === List("Tx meta data")
+//
+////      Ns(42L).str.debug
+//
+////      val xx: Seq[(String, (Int, String))] = get(Ns.str, Ref1.int1.str1)
+//
+////      println(Ref1(42L).int1.str1._model)
+////      println(Ref1(42L).int1.str1._query)
+////      println("------------")
+////      println(Ns.str.Ref1.int1.str1._model)
+////      println(Ns.str.Ref1.int1.str1._query)
+////      println("------------")
+//
+//
+//      datomic.Peer.q(
+//        """
+//          |[:find  ?b ?c ?d
+//          | :where [?a :ns/int ?b]
+//          |        [?a :ref2/int2 ?c]
+//          |        [?a :ref2/str2 ?d]]
+//        """.stripMargin, conn.db).toString === """[[1 11 "aa"], [2 22 "bb"]]"""
+//
+//            get(Ns.int, Ref2.int2.str2) === Seq(
+//              (1, (11, "aa")),
+//              (2, (22, "bb"))
+//            )
+//
+////      get(Ns.str, Ref1.int1.str1.tx_(Ref2.str2)) === Seq(
+////        (1, (11, "aa", "Tx meta data")),
+////        (2, (22, "bb", "Tx meta data"))
+////      )
+//    }
+
+    //    "1 level" in new CoreSetup {
+    //
+    //      splitInsert(
+    //        Ns.str.Ref1.str1,
+    //        Ref1.int1.enum1
+    //      )(
+    //        Seq(
+    //          ("a", "r"),
+    //          ("b", "s")
+    //        ),
+    //        Seq(
+    //          (1, "enum11"),
+    //          (2, "enum12")
+    //        )
+    //      ).eids
+    //
+    //      Ns.str.Ref1.str1.int1.enum1.get === List(
+    //        ("b", "s", 2, "enum12"),
+    //        ("a", "r", 1, "enum11")
+    //      )
+    //    }
+    //
+    //    "2 levels" in new CoreSetup {
+    //
+    //      splitInsert(
+    //        Ns.str.Ref1.str1,
+    //        Ref1.int1.Ref2.str2,
+    //        Ref2.int2.enum2
+    //      )(
+    //        Seq(
+    //          ("a", "aa"),
+    //          ("b", "bb")
+    //        ),
+    //        Seq(
+    //          (1, "aaa"),
+    //          (2, "bbb")
+    //        ),
+    //        Seq(
+    //          (3, "enum21"),
+    //          (4, "enum22")
+    //        )
+    //      ).eids
+    //
+    //      Ns.str.Ref1.str1.int1.Ref2.str2.int2.enum2.get === List(
+    //        ("a", "aa", 1, "aaa", 3, "enum21"),
+    //        ("b", "bb", 2, "bbb", 4, "enum22")
+    //      )
+    //    }
+    //
+    //    "2 levels" in new CoreSetup {
+    //
+    //      splitInsert(
+    //        Ns.str.Refs1 * Ref1.str1,
+    //        Ref1.int1.str1
+    //      )(
+    //        Seq(
+    //          ("a", "aa"),
+    //          ("b", "bb")
+    //        ),
+    //        Seq(
+    //          (1, "aaa"),
+    //          (2, "bbb")
+    //        )
+    //      ).eids
+    //
+    //      Ns.str.Ref1.str1.int1.Ref2.str2.int2.enum2.get === List(
+    //        ("a", "aa", 1, "aaa", 3, "enum21"),
+    //        ("b", "bb", 2, "bbb", 4, "enum22")
+    //      )
+    //    }
+  }
   //  "Nested annotations" in new CoreSetup {ok}
   //
   //  "Modifying annotations" in new CoreSetup {ok}

@@ -141,68 +141,68 @@ class TransactionAnnotations extends CoreSpec {
 //    val List(e1, e2, txId) =
 
 
-    splitInsertTx(
-//        Ns.str.date,
-//        Ns.strs.ints
-        Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1,
-        Ns.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums
-      )(
-        data1,
-        data2
-      )(
-        // Transaction meta data can be split up in sub-molecules too, independent of
-        // the above split of molecules/data
-        Ns
-          .bool_(true)
-          .bools_(Set(false))
-          .date_(date7)
-          .dates_(Set(date8, date9))
-          .double_(7.0)
-          .doubles_(Set(8.0, 9.0))
-          .enum_(enum7)
-          .enums_(Set(enum8, enum9))
-          .float_(7f)
-          .floats_(Set(8f, 9f))
-          .int_(7)
-          .ints_(Set(8, 9)),
-        Ns
-          .long_(7L)
-          .longs_(Set(8L, 9L))
-          .ref1_(701L)
-          .refSub1_(702L)
-          .str_("use case")
-          .strs_(Set("John, Lisa"))
-          .uri_(uri7)
-          .uris_(Set(uri8, uri9))
-          .uuid_(uuid7)
-          .uuids_(Set(uuid8))
-
-//        Ns.str_("user: Marc").int_(42)
-//          Ns
-//                .str_(str1)
-//                .int_(int1)
-//                .long_(long1)
-//                .float_(float1)
-//                .double_(double1)
-//                .bool_(bool1)
-//                .date_(date1)
-//                .uuid_(uuid1)
-//                .uri_(uri1)
-//                .enum_(enum1)
-//                .ref1_(10L)
-//                .refSub1_(20L),
-//          Ns
-//                .strs_(strs1)
-//                .ints_(ints1)
-//                .longs_(longs1)
-//                .floats_(floats1)
-//                .doubles_(doubles1)
-//                .bools_(bools1)
-//                .dates_(dates1)
-//                .uuids_(uuids1)
-//                .uris_(uris1)
-//                .enums_(enums1)
-      ).eids === 7
+//    splitInsertTx(
+////        Ns.str.date,
+////        Ns.strs.ints
+//        Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1,
+//        Ns.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums
+//      )(
+//        data1,
+//        data2
+//      )(
+//        // Transaction meta data can be split up in sub-molecules too, independent of
+//        // the above split of molecules/data
+//        Ns
+//          .bool_(true)
+//          .bools_(Set(false))
+//          .date_(date7)
+//          .dates_(Set(date8, date9))
+//          .double_(7.0)
+//          .doubles_(Set(8.0, 9.0))
+//          .enum_(enum7)
+//          .enums_(Set(enum8, enum9))
+//          .float_(7f)
+//          .floats_(Set(8f, 9f))
+//          .int_(7)
+//          .ints_(Set(8, 9)),
+//        Ns
+//          .long_(7L)
+//          .longs_(Set(8L, 9L))
+//          .ref1_(701L)
+//          .refSub1_(702L)
+//          .str_("use case")
+//          .strs_(Set("John, Lisa"))
+//          .uri_(uri7)
+//          .uris_(Set(uri8, uri9))
+//          .uuid_(uuid7)
+//          .uuids_(Set(uuid8))
+//
+////        Ns.str_("user: Marc").int_(42)
+////          Ns
+////                .str_(str1)
+////                .int_(int1)
+////                .long_(long1)
+////                .float_(float1)
+////                .double_(double1)
+////                .bool_(bool1)
+////                .date_(date1)
+////                .uuid_(uuid1)
+////                .uri_(uri1)
+////                .enum_(enum1)
+////                .ref1_(10L)
+////                .refSub1_(20L),
+////          Ns
+////                .strs_(strs1)
+////                .ints_(ints1)
+////                .longs_(longs1)
+////                .floats_(floats1)
+////                .doubles_(doubles1)
+////                .bools_(bools1)
+////                .dates_(dates1)
+////                .uuids_(uuids1)
+////                .uris_(uris1)
+////                .enums_(enums1)
+//      ).eids === 7
 
 
     //      .apply(Seq((str1, int1)))

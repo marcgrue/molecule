@@ -10,7 +10,7 @@ import molecule.ast.query._
 import molecule.ast.transaction.{Statement, _}
 import molecule.dsl.Transaction
 import molecule.ops.QueryOps._
-import molecule.transform.{Model2Transaction, Query2String}
+import molecule.transform._
 import molecule.util._
 import org.specs2.main.ArgProperties
 
@@ -130,7 +130,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
   // Manipulation ..........................................................................
 
-  protected[molecule] def insert(conn: Connection, model: Model, dataRows: Seq[Seq[Any]] = Seq()): Tx = {
+  private[molecule] def insert_(conn: Connection, model: Model, dataRows: Seq[Seq[Any]] = Seq()): Tx = {
     val transformer = Model2Transaction(conn, model)
     val stmtss = transformer.insertStmts(dataRows)
     x(2, model, transformer.stmtsModel, dataRows, stmtss)
@@ -138,6 +138,9 @@ trait DatomicFacade extends Helpers with ArgProperties {
     //        x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
   }
+
+
+  // Free model
 
   private def mkStmtss(conn: Connection, model: Model, data: Seq[Any]) = {
     val transformer = Model2Transaction(conn, model)
@@ -147,45 +150,9 @@ trait DatomicFacade extends Helpers with ArgProperties {
     stmtss
   }
 
-  /*
-    To avoid heavy compilation time or 22+ arities we can organize high-arity data sets into
-    lists of evenly distributed sub-tuples of the same data. These sub-lists can then be type-checked
-    against lower-arity sub-molecules with lower impact on compilation time:
-
-    Ns.a.b.c.d.e .. aa  - too big
-
-    Na.a.b.c
-    Seq(
-      (a1, b1, c1)
-      (a2, b2, c2)
-    )
-
-    Ns.d.e .. aa
-    Seq(                    <-- should have the same length as the first sub-list (2 tuples)
-      (d1, e1, ... aa1)
-      (d2, e2, ... aa2)
-    )
-
-    Here we zip the lists of sub-tuples to lists of un-typed lists before saving
-
-    Seq(
-      Seq(a1, b1, c1, d1, e1, ... aa1),
-      Seq(a2, b2, c2, d2, e2, ... aa2)
-    )
-  */
-  private def zipTuples(tupleSeqs: List[Seq[Any]]): Seq[Seq[Any]] = {
-    tupleSeqs forall (seq => if (seq.size != tupleSeqs.head.size)
-      throw new RuntimeException(
-        s"""Sub-lists should have the same size (being unzipped from a main list).
-           |Found ${seq.size} tuples in one sub-list and ${tupleSeqs.head.size} in another.""".stripMargin) else true)
-
-    tupleSeqs.transpose.map(_ flatMap tupleToSeq)
-  }
-
-
-  private def zipUnzipped(molecules: MoleculeOutBase*)(dataSeqs: Seq[Any]*)(txMolecules: Seq[Molecule0])(implicit conn: Connection): Tx = {
+  private def insertMerged(molecules: MoleculeOutBase*)(tupleTuples: Seq[Any])(txMolecules: Seq[Molecule0])(implicit conn: Connection): Tx = {
     val dataModel = Model(molecules.flatMap(_._model.elements))
-    val data = zipTuples(dataSeqs.toList)
+    val data = (tupleTuples map tupleToSeq).map(_ flatMap tupleToSeq)
     val dataStmtss = mkStmtss(conn, dataModel, data)
     val dataTransformer = Model2Transaction(conn, dataModel)
 
@@ -198,38 +165,27 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
     val stmtss = dataStmtss :+ txStmts
 
-//    x(4, stmtss)
+    x(4, stmtss)
+//    x(4, molecules(0)._model, molecules(1)._model, dataModel)
     Tx(conn, stmtss)
   }
 
-  // With transaction meta data
+  def insert[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])
+    (data: Seq[(T1, T2)])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
+    insertMerged(m1, m2)(data)(txMolecules)(conn)
 
-  def splitInsertTx[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])(d1: Seq[T1], d2: Seq[T2])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2)(d1, d2)(txMolecules)(conn)
+  def insert[T1, T2, T3](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3])
+    (data: Seq[(T1, T2, T3)])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
+    insertMerged(m1, m2, m3)(data)(txMolecules)(conn)
 
-  def splitInsertTx[T1, T2, T3](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3)(d1, d2, d3)(txMolecules)(conn)
+  def insert[T1, T2, T3, T4](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4])
+    (data: Seq[(T1, T2, T3, T4)])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
+    insertMerged(m1, m2, m3, m4)(data)(txMolecules)(conn)
 
-  def splitInsertTx[T1, T2, T3, T4](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3], d4: Seq[T4])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3, m4)(d1, d2, d3, d4)(txMolecules)(conn)
+  def insert[T1, T2, T3, T4, T5](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4], m5: MoleculeOut[T5])
+    (data: Seq[(T1, T2, T3, T4, T5)])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
+    insertMerged(m1, m2, m3, m4, m5)(data)(txMolecules)(conn)
 
-  def splitInsertTx[T1, T2, T3, T4, T5](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4], m5: MoleculeOut[T5])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3], d4: Seq[T4], d5: Seq[T5])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3, m4, m5)(d1, d2, d3, d4, d5)(txMolecules)(conn)
-
-
-  // Without transaction meta data
-
-  def splitInsert[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])(d1: Seq[T1], d2: Seq[T2])(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2)(d1, d2)(Nil)(conn)
-
-  def splitInsert[T1, T2, T3](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3])(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3)(d1, d2, d3)(Nil)(conn)
-
-  def splitInsert[T1, T2, T3, T4](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3], d4: Seq[T4])(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3, m4)(d1, d2, d3, d4)(Nil)(conn)
-
-  def splitInsert[T1, T2, T3, T4, T5](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4], m5: MoleculeOut[T5])(d1: Seq[T1], d2: Seq[T2], d3: Seq[T3], d4: Seq[T4], d5: Seq[T5])(implicit conn: Connection): Tx =
-    zipUnzipped(m1, m2, m3, m4, m5)(d1, d2, d3, d4, d5)(Nil)(conn)
 
 
   protected[molecule] def save(conn: Connection, model: Model): Tx = {

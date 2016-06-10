@@ -82,7 +82,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
 
-      case (e, elem) => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
+      case (e, fm: FreeModel) => sys.error(s"[Model2Transaction:stmtsModel] Free models are only for getting data:\nMODEL: $model \nPAIR: ($e, $fm)\nSTMTS: $stmts")
+      case (e, elem)          => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
     }
 
     def replace$(elements: Seq[Element]): Seq[Element] = elements map {

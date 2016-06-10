@@ -9,19 +9,19 @@ import scala.reflect.macros.whitebox.Context
 
 trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 30, 77)
+  val x = DebugMacro("Dsl2Model", 18, 77)
   //  val x = Debug("Dsl2Model", 30, 32, true)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
     tree, (t: Tree) => abort(s"[Dsl2Model:resolve] Unexpected tree: $t\nRAW: ${showRaw(t)}"))
 
   def traverse(prev: Tree, element: Element): Seq[Element] = {
-    //    x(1, prev, element)
+    //        x(1, prev, element)
     if (prev.isAttr || prev.symbol.isMethod) resolve(prev) :+ element else Seq(element)
   }
 
   def traverse(prev: Tree, elements: Seq[Element]): Seq[Element] = {
-    //    x(1, prev, element)
+    //        x(2, prev, elements)
     if (prev.isAttr || prev.symbol.isMethod) resolve(prev) ++ elements else elements
   }
 
@@ -171,6 +171,22 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case t@q"$prev.$manyRef.*[..$types]($nested)"                                 => traverse(q"$prev", nested1(q"$prev", manyRef, nested))
     case t@q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef => Seq(Group(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), nested)))
     case t@q"$prev.$manyRef.apply[..$types]($nested)"                             => traverse(q"$prev", nested1(prev, manyRef, nested))
+
+
+    // Free -----------------------------
+
+    case t@q"$prev.~[..$types]($next)" =>
+      val prevElements = resolve(q"$prev")
+      val prevFreeModels = prevElements.collect { case fm: FreeModel => fm }
+      if (prevFreeModels.isEmpty) {
+        val lookForward = traverse(q"$prev", Seq(FreeModel(prevElements), FreeModel(resolve(q"$next"))))
+        val freeModels = lookForward.collect { case fm: FreeModel => fm }
+        //        x(18, prevElements, resolve(q"$next"), lookForward, freeModels)
+        freeModels
+      } else {
+        //        x(19, prevElements, resolve(q"$next"), prevFreeModels)
+        prevFreeModels :+ FreeModel(resolve(q"$next"))
+      }
 
     case other => abort(s"[Dsl2Model:dslStructure] Unexpected DSL structure: $other\n${showRaw(other)}")
   }
@@ -444,6 +460,7 @@ object Dsl2Model {
       case b: Bond                                               => b
       case g: Group                                              => g
       case m@Meta(_, "txInstant", _, _, _)                       => m
+      case fm: FreeModel                                         => fm
     } getOrElse
       abort(s"[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
 
@@ -486,7 +503,7 @@ object Dsl2Model {
     val model = Model(elements1)
     //            inst(c).x(30, dsl, elements0, elements1, model)
     //            inst(c).x(30, elements0, elements1)
-    //        inst(c).x(30, model)
+    //            inst(c).x(30, model)
 
     model
   }

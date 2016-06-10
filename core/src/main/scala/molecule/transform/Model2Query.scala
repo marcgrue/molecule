@@ -87,7 +87,7 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 4, value, _, gs, key :: Nil) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.slice(0, attr0.length - 2))
           value match {
-            case Qm                => q
+            case Qm => q
               .in(v + "Value", a)
               .where(e, a, v, gs)
               .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
@@ -99,7 +99,7 @@ object Model2Query extends Helpers {
               .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
               .func(".matches ^String", Seq(Var(v), Var(v1)))
 
-            case Neq(Seq(Qm))      => q
+            case Neq(Seq(Qm)) => q
               .in(v + "Value", a)
               .where(e, a, v, gs)
               .func("str", Seq(Val(s"(?!($key)@("), Var(v + "Value"), Val(")$).*")), ScalarBinding(Var(v1)))
@@ -142,7 +142,7 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 4, value, _, gs, key :: Nil) => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case Qm                => q
+            case Qm => q
               .find(v3, gs)
               .in(v + "Value", a)
               .where(e, a, v, gs)
@@ -160,7 +160,7 @@ object Model2Query extends Helpers {
               .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
               .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
 
-            case Neq(Seq(Qm))      => q
+            case Neq(Seq(Qm)) => q
               .find(v3, gs)
               .in(v + "Value", a)
               .where(e, a, v, gs)
@@ -207,9 +207,9 @@ object Model2Query extends Helpers {
               .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
               .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
 
-            case Neq(args)                     => q.find(v, gs).where(e, a, v, gs).matches(v, Seq(key), "(?!(" + args.map(f).mkString("|") + ")$).*")
+            case Neq(args) => q.find(v, gs).where(e, a, v, gs).matches(v, Seq(key), "(?!(" + args.map(f).mkString("|") + ")$).*")
 
-            case other                         => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
+            case other => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
           }
         }
 
@@ -587,10 +587,33 @@ object Model2Query extends Helpers {
         case Meta(ns, attr, _, _, _)                => (resolve(query, e, v, element), e, v, ns, attr, "")
 
         case TxModel(elements) =>
-          val (q2, e2, v2, ns2, attr2, refNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
-            case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) => make(query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+          val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
+            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }
-          (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
+          (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
+
+        case FreeModel(elements) =>
+          val eid = if(query.wh.clauses.isEmpty) e else query.wh.clauses.head match {
+            case DataClause(_, Var(firstE),_,_,_,_) => firstE
+            case otherClause => sys.error(s"[Model2Query:make(FreeModel)] Couldn't find `e` from first clause: " + otherClause)
+          }
+          val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
+            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+          }
+          (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
+
+//        case FreeModel(elementss) =>
+//          // Loop molecules
+//          val (q4, e4, v4, prevNs4, prevAttr4, prevRefNs4) = elementss.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
+//            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), elements) => {
+//              // Loop elements of each molecule
+//              val (q3, e3, v3, prevNs3, prevAttr3, prevRefNs3) = elements.foldLeft((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1)) {
+//                case ((q2, e2, v2, prevNs2, prevAttr2, prevRefNs2), element) => make(q2, element, e2, v2, prevNs2, prevAttr2, prevRefNs2)
+//              }
+//              (q3, e3, nextChar(v3, 1), prevNs3, prevAttr3, prevRefNs3)
+//            }
+//          }
+//          (q4, e4, nextChar(v4, 1), prevNs4, prevAttr4, prevRefNs4)
 
         case other => sys.error("[Model2Query:make] Unresolved query variables from model: " +(other, e, v, prevNs, prevAttr, prevRefNs))
       }

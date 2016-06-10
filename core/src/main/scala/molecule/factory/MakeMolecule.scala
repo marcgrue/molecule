@@ -59,6 +59,18 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
 object MakeMolecule {
   def build(c0: Context) = new {val c: c0.type = c0} with MakeMolecule[c0.type]
 
+  def from2tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag]
+  (c: Context)(dsl: c.Expr[Free2[T1, T2]])
+  : c.Expr[Molecule2[T1, T2]] =
+    build(c).fromXattrs(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2])
+
+  def from3tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag]
+  (c: Context)(dsl: c.Expr[Free3[T1, T2, T3]])
+  : c.Expr[Molecule3[T1, T2, T3]] =
+    build(c).fromXattrs(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3])
+
+
+
   def from0attr[Ns0: c.WeakTypeTag, Ns1[_], In1_0[_], In1_1[_, _]]
   (c: Context)(dsl: c.Expr[Out_0[Ns0, Ns1, In1_0, In1_1]])
   : c.Expr[Molecule0] =
@@ -216,4 +228,5 @@ object MakeMolecule {
   (c: Context)(dsl: c.Expr[Out_22[Ns22, Ns23, In1_22, In1_23, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]])
   : c.Expr[Molecule22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H], c.weakTypeOf[I], c.weakTypeOf[J], c.weakTypeOf[K], c.weakTypeOf[L], c.weakTypeOf[M], c.weakTypeOf[N], c.weakTypeOf[O], c.weakTypeOf[P], c.weakTypeOf[Q], c.weakTypeOf[R], c.weakTypeOf[S], c.weakTypeOf[T], c.weakTypeOf[U], c.weakTypeOf[V])
+
 }

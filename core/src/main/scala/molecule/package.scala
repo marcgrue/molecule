@@ -13,6 +13,10 @@ import scala.language.higherKinds
 package object molecule {
 
   // Generic interfaces
+//import dsl.schemaDSL._
+
+  implicit def m[T1, T2](dsl: Free2[T1, T2]): Molecule2[T1, T2] = macro MakeMolecule.from2tuples[T1, T2]
+  implicit def m[T1, T2, T3](dsl: Free3[T1, T2, T3]): Molecule3[T1, T2, T3] = macro MakeMolecule.from3tuples[T1, T2, T3]
 
   implicit def m[Ns0, Ns1[_], In1_0[_], In1_1[_,_]](dsl: Out_0[Ns0, Ns1, In1_0, In1_1]): Molecule0 = macro MakeMolecule.from0attr[Ns0, Ns1, In1_0, In1_1]
   implicit def m[Ns1[_], Ns2[_,_], In1_1[_,_], In1_2[_,_,_], A](dsl: Out_1[Ns1, Ns2, In1_1, In1_2, A]): Molecule1[A] = macro MakeMolecule.from1attr[Ns1, Ns2, In1_1, In1_2, A]

@@ -14,7 +14,10 @@ object model {
                 |$s    ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
           case TxModel(nestedElements)     =>
             s"""|TxModel(List(
-                |$s    ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
+                |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
+          case FreeModel(elements)     =>
+            s"""|FreeModel(List(
+                |$s  ${draw(elements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
           case other                       => s"$other"
         }
       }
@@ -32,7 +35,7 @@ object model {
     value: Value,
     enumPrefix: Option[String] = None,
     gs: Seq[Generic] = Nil,
-    keys: Seq[String]= Nil
+    keys: Seq[String] = Nil
   ) extends Element
   case class Bond(ns: String, refAttr: String, refNs: String = "", card: Int) extends Element
   case class ReBond(backRef: String, refAttr: String, refNs: String = "", distinct: Boolean = false, prevVar: String = "") extends Element
@@ -42,6 +45,7 @@ object model {
 
   case class Meta(ns: String, attr: String, kind: String, generic: Generic, value: Value) extends Element
   case class TxModel(elements: Seq[Element]) extends Element
+  case class FreeModel(elements: Seq[Element]) extends Element
 
   case object EmptyElement extends Element
 
@@ -116,16 +120,16 @@ object model {
 
   trait Exp3[T1, T2, T3] extends Expression
   case class And3[T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]
-  case class Or3 [T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]
+  case class Or3[T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]
 
   // Convenience methods .........................
 
   def curNs(e: Element) = e match {
-    case Atom(ns, _, _, _, _, _, _,_)  => ns
-    case Bond(ns, _, _, _)           => ns
-    case Group(Bond(ns, _, _, _), _) => ns
-    case Meta(ns, _, _, _, _)        => ns
-    case unexpected                  => sys.error("[model:curNs] Unexpected element: " + unexpected)
+    case Atom(ns, _, _, _, _, _, _, _) => ns
+    case Bond(ns, _, _, _)             => ns
+    case Group(Bond(ns, _, _, _), _)   => ns
+    case Meta(ns, _, _, _, _)          => ns
+    case unexpected                    => sys.error("[model:curNs] Unexpected element: " + unexpected)
   }
 }
 
