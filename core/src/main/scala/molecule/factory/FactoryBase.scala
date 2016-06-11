@@ -376,22 +376,85 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
   def castTpl(query: Tree, row: Tree, tpes: Seq[Type]): Seq[Tree] = tpes.zipWithIndex.map { case (tpe, i) => cast(query, row, tpe, i) }
 
   def castComposite(query: Tree, row: Tree, tupleTypes: Seq[Type]): Seq[Tree] = {
-    tupleTypes.foldLeft(Seq.empty[Tree], 0) { case ((acc, tupleNo), tupleType) =>
-      tupleType match {
 
-        case tuple3 if tuple3 <:< weakTypeOf[(_, _, _)] =>
-          val types = tuple3.baseType(weakTypeOf[(_, _, _)].typeSymbol).typeArgs
-          val values = types.zipWithIndex.map { case (tpe, i) => cast(query, row, tpe, tupleNo + i) }
-          (acc :+ q"(..$values).asInstanceOf[$tuple3]", tupleNo + 3)
-
-        case tuple2 if tuple2 <:< weakTypeOf[(_, _)] =>
-          val types = tuple2.baseType(weakTypeOf[(_, _)].typeSymbol).typeArgs
-          val values = types.zipWithIndex.map { case (tpe, i) => cast(query, row, tpe, tupleNo + i) }
-          (acc :+ q"(..$values).asInstanceOf[$tuple2]", tupleNo + 2)
-
-
-        case other => sys.error("[FactoryBase:castComposite] Unexpected tuple type: " + other.toString)
+    def castValues(types: Seq[Type], tupleIndex: Int, tupleArity: Int): (Seq[Tree], Int) = {
+      val values: Seq[Tree] = types.zipWithIndex.map { case (valueType, i) =>
+        cast(query, row, valueType, tupleIndex + i)
       }
+      (values, tupleArity)
+    }
+
+    tupleTypes.foldLeft(Seq.empty[Tree], 0) { case ((acc, tupleIndex), tupleType0) =>
+
+      val (values, arity) = tupleType0 match {
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 22)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 21)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 20)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 19)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 18)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 17)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 16)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 15)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 14)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 13)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 12)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 11)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 10)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 9)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 8)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 7)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 6)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _, _)].typeSymbol).typeArgs, tupleIndex, 5)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _, _)].typeSymbol).typeArgs, tupleIndex, 4)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _, _)].typeSymbol).typeArgs, tupleIndex, 3)
+
+        case tupleType if tupleType <:< weakTypeOf[(_, _)] =>
+          castValues(tupleType.baseType(weakTypeOf[(_, _)].typeSymbol).typeArgs, tupleIndex, 2)
+
+        case valueType => (Seq(q"${cast(query, row, valueType, tupleIndex)}"), 1)
+      }
+
+      (acc :+ q"(..$values).asInstanceOf[$tupleType0]", tupleIndex + arity)
     }._1
   }
 

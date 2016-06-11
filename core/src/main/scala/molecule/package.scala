@@ -12,11 +12,7 @@ import scala.language.higherKinds
 
 package object molecule {
 
-  // Generic interfaces
-//import dsl.schemaDSL._
-
-  implicit def m[T1, T2](dsl: Free2[T1, T2]): Molecule2[T1, T2] = macro MakeMolecule.from2tuples[T1, T2]
-  implicit def m[T1, T2, T3](dsl: Free3[T1, T2, T3]): Molecule3[T1, T2, T3] = macro MakeMolecule.from3tuples[T1, T2, T3]
+  // Output molecules
 
   implicit def m[Ns0, Ns1[_], In1_0[_], In1_1[_,_]](dsl: Out_0[Ns0, Ns1, In1_0, In1_1]): Molecule0 = macro MakeMolecule.from0attr[Ns0, Ns1, In1_0, In1_1]
   implicit def m[Ns1[_], Ns2[_,_], In1_1[_,_], In1_2[_,_,_], A](dsl: Out_1[Ns1, Ns2, In1_1, In1_2, A]): Molecule1[A] = macro MakeMolecule.from1attr[Ns1, Ns2, In1_1, In1_2, A]
@@ -124,6 +120,31 @@ package object molecule {
   implicit def m[In3_22[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In3_23[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In4_22[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In4_23[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](inputDsl: In_3_22[In3_22, In3_23, In4_22, In4_23, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]): InputMolecule_3_22[I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = macro MakeInputMolecule.await_3_22[In3_22, In3_23, In4_22, In4_23, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]
 
 
+  // Composites
+
+  implicit def m[T1, T2](dsl: Composite2[T1, T2]): Molecule2[T1, T2] = macro MakeMolecule.from2tuples[T1, T2]
+  implicit def m[T1, T2, T3](dsl: Composite3[T1, T2, T3]): Molecule3[T1, T2, T3] = macro MakeMolecule.from3tuples[T1, T2, T3]
+  implicit def m[T1, T2, T3, T4](dsl: Composite4[T1, T2, T3, T4]): Molecule4[T1, T2, T3, T4] = macro MakeMolecule.from4tuples[T1, T2, T3, T4]
+  implicit def m[T1, T2, T3, T4, T5](dsl: Composite5[T1, T2, T3, T4, T5]): Molecule5[T1, T2, T3, T4, T5] = macro MakeMolecule.from5tuples[T1, T2, T3, T4, T5]
+  implicit def m[T1, T2, T3, T4, T5, T6](dsl: Composite6[T1, T2, T3, T4, T5, T6]): Molecule6[T1, T2, T3, T4, T5, T6] = macro MakeMolecule.from6tuples[T1, T2, T3, T4, T5, T6]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7](dsl: Composite7[T1, T2, T3, T4, T5, T6, T7]): Molecule7[T1, T2, T3, T4, T5, T6, T7] = macro MakeMolecule.from7tuples[T1, T2, T3, T4, T5, T6, T7]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite8[T1, T2, T3, T4, T5, T6, T7, T8]): Molecule8[T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeMolecule.from8tuples[T1, T2, T3, T4, T5, T6, T7, T8]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite9[T1, T2, T3, T4, T5, T6, T7, T8, T9]): Molecule9[T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeMolecule.from9tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): Molecule10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeMolecule.from10tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): Molecule11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeMolecule.from11tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): Molecule12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeMolecule.from12tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): Molecule13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeMolecule.from13tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): Molecule14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeMolecule.from14tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): Molecule15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeMolecule.from15tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): Molecule16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeMolecule.from16tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): Molecule17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeMolecule.from17tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): Molecule18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeMolecule.from18tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](dsl: Composite19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): Molecule19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro MakeMolecule.from19tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](dsl: Composite20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): Molecule20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = macro MakeMolecule.from20tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](dsl: Composite21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]): Molecule21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21] = macro MakeMolecule.from21tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]
+  implicit def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](dsl: Composite22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]): Molecule22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22] = macro MakeMolecule.from22tuples[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]
+
+
   // Attribute expressions
 
   implicit def string2Model (v: String ): TermValue[String]  = TermValue(v)
@@ -145,9 +166,6 @@ package object molecule {
   implicit def dateSet2Model   (set: Set[Date]   ): TermValue[Set[Date]]    = TermValue(set)
   implicit def uuidSet2Model   (set: Set[UUID]   ): TermValue[Set[UUID]]    = TermValue(set)
   implicit def uriSet2Model    (set: Set[URI]    ): TermValue[Set[URI]]     = TermValue(set)
-
-//  implicit def strPair2Model    (pair: (String, String)): TermValue[(String, String)]  = TermValue(pair)
-//  implicit def intPair2Model    (pair: (String, Int   )): TermValue[(String, Int)]     = TermValue(pair)
 
   implicit def tuple2Model[A, B](tpl: (A, B)): TermValue[(A, B)] = TermValue(tpl)
 

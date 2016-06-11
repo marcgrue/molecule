@@ -24,7 +24,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   def touch(maxDepth: Int = 5): Map[String, Any] = asMap(1, maxDepth)
 
   def touchQ: String = touchQ()
-  def touchQ(maxDepth: Int = 5): String = asMap(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("Map(\n", ",\n", ")")
+  def touchQ(maxDepth: Int = 5): String = asMap(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("Map(\n  ", ",\n  ", "\n)")
 
   // Lists keep order - useful for tests
   def touchList: List[(String, Any)] = asList()
@@ -32,7 +32,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   // Quote output for tests...
   def touchListQ: String = touchListQ()
-  def touchListQ(maxDepth: Int = 5): String = asList(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("List(\n", ",\n", ")")
+  def touchListQ(maxDepth: Int = 5): String = asList(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("List(\n  ", ",\n  ", "\n)")
 
   private def formatEntity(value: Any): Any = value match {
     case s: String               => s""""$s""""
