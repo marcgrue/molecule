@@ -62,6 +62,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case meta@Meta(_, _, _, _, Eq(idents))                      => mapIdents(idents)
         case Nested(_, nestedElements)                              => mapIdentifiers(nestedElements, identifiers0)
         case TxMetaData(txElements)                                 => mapIdentifiers(txElements, identifiers0)
+        case TxMetaData_(txElements)                                => mapIdentifiers(txElements, identifiers0)
       }).flatten
       (identifiers0 ++ newIdentifiers).distinct
     }
@@ -119,8 +120,9 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Mapping(idents), _, _, keyIdents) => atom.copy(value = Mapping(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Keys(idents), _, _, _)            => atom.copy(value = Keys(getValues(idents).asInstanceOf[Seq[String]]))
         case meta@Meta(_, _, _, _, Eq(idents))                       => meta.copy(value = Eq(getValues(idents)))
-        case Nested(ns, nestedElements)                               => Nested(ns, resolveIdentifiers(nestedElements))
-        case TxMetaData(txElements)                                     => TxMetaData(resolveIdentifiers(txElements))
+        case Nested(ns, nestedElements)                              => Nested(ns, resolveIdentifiers(nestedElements))
+        case TxMetaData(txElements)                                  => TxMetaData(resolveIdentifiers(txElements))
+        case TxMetaData_(txElements)                                 => TxMetaData_(resolveIdentifiers(txElements))
         case other                                                   => other
       }
 
@@ -589,26 +591,9 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         resolve(Seq(nestedTpe), i)
 
       case (tpe, i) => q"${cast(query, row, tpe, entityIndex + 1 + i)}"
-      //        q"""
-      //           println("  A " + $entityIndex + " tpes: " + ${tpes.toString} + " tpe: " + ${tpe.toString})
-      //
-      //           val result = ${cast(query, row, tpe, entityIndex + 1 + i)}
-      //
-      //           println("Result A " +  $entityIndex + "  " + $i + " : " + result)
-      //           result
-      //          """
     }
     q"(..$values).asInstanceOf[(..$tpes)]"
-    //    q"""
-    //      println("Types: " + ${tpes.toString})
-    //
-    //      val result = (..$values).asInstanceOf[(..$tpes)]
-    //
-    //      println("Result A  " + $entityIndex + "    : " + result)
-    //      result
-    //    """
   }
-
 
   def castNestedTpls(query: Tree, rows: Tree, tpes: Seq[Type]) = {
     q"""

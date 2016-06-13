@@ -5,7 +5,7 @@ import java.util.{Date, List => jList, Map => jMap}
 import datomic._
 import datomic.db.Db
 import molecule.api.{Molecule0, MoleculeOut, MoleculeOutBase}
-import molecule.ast.model._
+import molecule.ast.model.{Model, Atom, Bond, TxMetaData}
 import molecule.ast.query._
 import molecule.ast.transaction.{Statement, _}
 import molecule.dsl.Transaction
@@ -133,14 +133,14 @@ trait DatomicFacade extends Helpers with ArgProperties {
   private[molecule] def insert_(conn: Connection, model: Model, dataRows: Seq[Seq[Any]] = Seq()): Tx = {
     val transformer = Model2Transaction(conn, model)
     val stmtss = transformer.insertStmts(dataRows)
-//    x(2, model, transformer.stmtsModel, dataRows, stmtss)
+//        x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
     //        x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
   }
 
 
-  // Free model
+  // Composite inserts .................................
 
   private def mkStmtss(conn: Connection, model: Model, data: Seq[Any]) = {
     val transformer = Model2Transaction(conn, model)
@@ -152,11 +152,28 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
   private def insertMerged(molecules: MoleculeOutBase*)(tupleTuples: Seq[Any])(txMolecules: Seq[Molecule0])(implicit conn: Connection): Tx = {
     val dataModel = Model(molecules.flatMap(_._model.elements))
+
+    // Prevent attribute conflicts
+    dataModel.elements.foldLeft(Seq.empty[String]) {
+      case (attrs, Atom(ns, attr, _, _, _, _, _, _)) if attrs.contains(s"$ns/$attr") =>
+        throw new RuntimeException(s"[DatomicFacade:insertMerged] Can't insert same attribute :$ns/$attr twice")
+      case (attrs, Atom(ns, attr, _, _, _, _, _, _))                                 => attrs :+ s"$ns/$attr"
+      case (attrs, _)                                                                => Nil // Start over within next namespace
+    }
+
+    // Prevent reference conflicts
+    dataModel.elements.foldLeft(Seq.empty[String]) {
+      case (refs, Bond(ns, refAttr, _, _)) if refs.contains(s"$ns/$refAttr") =>
+        throw new RuntimeException(s"[DatomicFacade:insertMerged] Can't insert with same reference :$ns/$refAttr twice")
+      case (refs, Bond(ns, refAttr, _, _))                             => refs :+ s"$ns/$refAttr"
+      case (refs, _)                                                   => refs
+    }
+
     val data = (tupleTuples map tupleToSeq).map(_ flatMap tupleToSeq)
     val dataStmtss = mkStmtss(conn, dataModel, data)
     val dataTransformer = Model2Transaction(conn, dataModel)
 
-    val txStmts = if(txMolecules.nonEmpty) {
+    val txStmts = if (txMolecules.nonEmpty) {
       val txElements = txMolecules.flatMap(_._model.elements)
       val txModel = Model(Seq(TxMetaData(txElements)))
       val txTransformer = Model2Transaction(conn, txModel)
@@ -165,8 +182,8 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
     val stmtss = dataStmtss :+ txStmts
 
-//    x(4, stmtss)
-//    x(4, molecules(0)._model, molecules(1)._model, dataModel)
+    //    x(4, stmtss)
+    //    x(4, molecules(0)._model, molecules(1)._model, dataModel)
     Tx(conn, stmtss)
   }
 
@@ -254,6 +271,8 @@ trait DatomicFacade extends Helpers with ArgProperties {
     (data: Seq[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22)])(txMolecules: Molecule0*)(implicit conn: Connection): Tx =
     insertMerged(m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22)(data)(txMolecules)(conn)
 
+
+  // Other manipulations
 
   protected[molecule] def save(conn: Connection, model: Model): Tx = {
     val transformer = Model2Transaction(conn, model)

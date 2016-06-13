@@ -26,9 +26,10 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   def touchQ: String = touchQ()
   def touchQ(maxDepth: Int = 5): String = asMap(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("Map(\n  ", ",\n  ", "\n)")
 
-  // Lists keep order - useful for tests
-  def touchList: List[(String, Any)] = asList()
-  def touchList(maxDepth: Int = 5): List[(String, Any)] = asList(1, maxDepth)
+  // Lists keep order - useful for tests.
+  def touchList: List[(String, Any)] = asList(1, 5)
+  // Todo: avoid implicit apply method of scala.collection.LinearSeqOptimized
+  def touchList(maxDepth: Int = 5, overloadHack: Int = 42): List[(String, Any)] = asList(1, maxDepth)
 
   // Quote output for tests...
   def touchListQ: String = touchListQ()
@@ -44,7 +45,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case other                   => other
   }
 
-  def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
+  private def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
     val builder = Map.newBuilder[String, Any]
     val iter = entity.keySet.toList.sorted.asJava.iterator()
 
@@ -80,12 +81,26 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
       val scalaValue = toScala(entity.get(key), depth, maxDepth, "List")
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
-          case m1: Map[_, _] if m1.containsKey(":db/id") =>
-            val indexedRefMaps: Seq[(Long, Map[String, Any])] = l.map {
-              case m2: Map[_, _] => m2.get(":db/id").asInstanceOf[Long] -> m2.asInstanceOf[Map[String, Any]]
-            }
-            indexedRefMaps.sortBy(_._1).map(_._2)
-          case _                                         => l
+          case l0: Seq[_] => l0.head match {
+            case pair: (_, _) => // Now we now we have a Seq of Seq with pairs
+              // Make typed Seq
+              val typedSeq: Seq[Seq[(String, Any)]] = l.collect {
+                case l1: Seq[_] => l1.collect {
+                  case (k: String, v) => (k, v)
+                }
+              }
+              if (typedSeq.head.map(_._1).contains(":db/id")) {
+                // We now know we have :db/id's to sort on
+                val indexedRefLists: Seq[(Long, Seq[(String, Any)])] = typedSeq.map {
+                  subSeq => subSeq.toMap.get(":db/id").get.asInstanceOf[Long] -> subSeq
+                }
+                // Sort sub Seq's by :db/id
+                indexedRefLists.sortBy(_._1).map(_._2)
+              } else {
+                typedSeq
+              }
+          }
+          case _          => l
         }
         case other     => other
       }

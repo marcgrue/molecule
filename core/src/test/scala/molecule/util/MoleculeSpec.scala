@@ -2,7 +2,7 @@ package molecule.util
 import datomic.Connection
 import molecule.DatomicFacade
 import molecule.api.{InputMolecule, Molecule}
-import molecule.ast.model._
+import molecule.ast.model.Model
 import molecule.ast.query._
 import molecule.ast.transaction._
 import molecule.transform.{Model2Transaction, Query2String}
@@ -25,14 +25,18 @@ trait MoleculeSpec extends Specification with DatomicFacade {
     val longestValue = tx.map(stmt => stmt.v.toString.length).max
 
     // Increment temporary ids in a controlled way so that we can test
-    val ids = tx.foldLeft(Map[String, String]()) { case (ids, stmt) =>
+    val ids = tx.foldLeft(Map[String, String]()) { case (idStmts, stmt) =>
       val rawId = stmt.e.toString
       rawId match {
         case r"#db/id\[:db.part/user -\d{7}\]" =>
-          if (ids.contains(rawId)) ids else ids + (rawId -> ("#db/id[:db.part/user -" + (1000001 + ids.size) + "]"))
+          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> ("#db/id[:db.part/user -" + (1000001 + idStmts.size) + "]"))
+        case r"#db/id\[:db.part/tx -\d{7}\]" =>
+          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> ("#db/id[:db.part/tx   -" + (1000001 + idStmts.size) + "]"))
+        case r"(\d{14})$id" =>
+          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> (id + "                "))
         case r"#db/id\[:(\w+)$part -\d{7}\]" =>
-          if (ids.contains(rawId)) ids else ids + (rawId -> (s"#db/id[:$part -" + (1000001 + ids.size) + "]"))
-        case other                             => ids + (other.toString -> other.toString)
+          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> (s"#db/id[:$part -" + (1000001 + idStmts.size) + "]"))
+        case other                             => idStmts + (other.toString -> other.toString)
       }
     }
     val tx2 = tx.map { stmt =>
@@ -46,7 +50,7 @@ trait MoleculeSpec extends Specification with DatomicFacade {
       )
     }
 
-    tx2.map(l => l.mkString("List(  ", ",   ", "  )")).mkString("List(\n  ", "\n  ", "\n)")
+    tx2.map(l => l.mkString("List(", ",  ", ")")).mkString("List(\n  ", ",\n  ", "\n)")
   }
 
   def formatInputs(query: Query) = {

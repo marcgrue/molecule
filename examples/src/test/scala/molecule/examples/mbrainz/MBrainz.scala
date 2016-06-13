@@ -7,13 +7,15 @@ import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
 /*
-  Start Datomic transactor first (replace first part of path to where you have the datomic download)
+  Download free Datomic verson to your machine and download the mbrainz-sample data set (see links below)
+
+  Start Datomic transactor first (replace first part of path to where you have the datomic download):
 
   cd [datomic-download]
   bin/transactor config/samples/dev-transactor-template.properties
 
   [first time (replace full path):]
-  bin/datomic restore-db file:///Users/mg/lib/datomic/datomic-pro-0.9.5359/mbrainz-1968-1973 datomic:dev://localhost:4334/mbrainz-1968-1973
+  bin/datomic restore-db file:///Users/mg/lib/datomic/datomic-free-0.9.5372/mbrainz-1968-1973 datomic:free://localhost:4334/mbrainz-1968-1973
 
   Remember to add -Xmx2g -server to IDE compiler settings ("Additional build process VM options)
   Also, ensure the same java version is used in IDE
@@ -26,7 +28,7 @@ import scala.language.postfixOps
 
 class MBrainz extends MoleculeSpec {
 
-  implicit val conn = Peer.connect("datomic:dev://localhost:4334/mbrainz-1968-1973")
+  implicit val conn = Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973")
 
 
   "Data" >> {

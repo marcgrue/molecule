@@ -1,6 +1,7 @@
 package molecule.util
 
 import molecule.ast.model._
+
 import scala.reflect.macros.whitebox.Context
 
 trait MacroHelpers[Ctx <: Context] {
@@ -52,26 +53,27 @@ trait MacroHelpers[Ctx <: Context] {
         def traverse(x: Any, level: Int, i: Int): String = {
           val indent = if (i == 0) "" else "  " * level + i + "          "
           x match {
-            case l: List[_]           => indent + "List(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case l: Map[_, _]         => indent + "Map(\n" + l.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case Nested(bond, nested) => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case TxMetaData(elements) => indent + "TxMetaData(\n" + elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case Composite(elements)  => indent + "Composite(\n" + elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case m: Model             => indent + "Model(\n" + m.elements.zipWithIndex.map {case (y, j) => traverse(y, level + 1, j + 1)}.mkString("\n") + ")"
-            case (a, b)              => {
+            case l: List[_]            => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case l: Map[_, _]          => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case Nested(bond, nested)  => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case TxMetaData(elements)  => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case TxMetaData_(elements) => indent + "TxMetaData_(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case Composite(elements)   => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case m: Model              => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case (a, b)                => {
               val bb = b match {
                 case it: Iterable[_] => traverse(it, level, 0)
                 case other           => other
               }
               indent + s"$a -> " + bb
             }
-            case value                => indent + value
+            case value                 => indent + value
           }
         }
 
         c.warning(c.enclosingPosition, s"## $id ## $clazz \n" +
           //        println(s"##$id: $clazz \n" +
-          params.toList.zipWithIndex.map {case (e, i) => traverse(e, 0, i + 1)}
+          params.toList.zipWithIndex.map { case (e, i) => traverse(e, 0, i + 1) }
             .mkString("\n------------------------------------------------\n") +
           s"\n====================================================== \n$stackTrace")
       }

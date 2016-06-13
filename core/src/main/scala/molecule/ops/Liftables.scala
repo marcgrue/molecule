@@ -206,7 +206,8 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     }
     q"Nested(${g0.bond}, Seq(..$es0))"
   }
-  implicit val liftTxMetaData    = Liftable[TxMetaData] { tm =>
+
+  implicit val liftTxMetaData = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -217,6 +218,18 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case q"$e"         => e
     }
     q"TxMetaData(Seq(..$es))"
+  }
+  implicit val liftTxMetaData_ = Liftable[TxMetaData_] { tm =>
+    val es = tm.elements map {
+      case a: Atom       => q"$a"
+      case b: Bond       => q"$b"
+      case r: ReBond     => q"$r"
+      case r: Transitive => q"$r"
+      case Self          => q"Self"
+      case m: Meta       => q"$m"
+      case q"$e"         => e
+    }
+    q"TxMetaData_(Seq(..$es))"
   }
 
   implicit val liftComposite = Liftable[Composite] { fm =>
@@ -234,15 +247,16 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
 
   implicit val liftListOfElements = Liftable[Seq[Element]] { elements =>
     val es = elements map {
-      case a: Atom       => q"$a"
-      case b: Bond       => q"$b"
-      case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
-      case Self          => q"Self"
-      case g: Nested     => q"$g"
-      case m: Meta       => q"$m"
-      case t: TxMetaData => q"$t"
-      case c: Composite => q"$c"
+      case a: Atom        => q"$a"
+      case b: Bond        => q"$b"
+      case r: ReBond      => q"$r"
+      case r: Transitive  => q"$r"
+      case Self           => q"Self"
+      case g: Nested      => q"$g"
+      case m: Meta        => q"$m"
+      case t: TxMetaData  => q"$t"
+      case t: TxMetaData_ => q"$t"
+      case c: Composite   => q"$c"
     }
     q"Seq(..$es)"
   }
@@ -256,6 +270,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Nested(ref, elements)                                   => q"Nested($ref, $elements)"
     case Meta(ns, attr, kind, generic, value)                    => q"Meta($ns, $attr, $kind, $generic, $value)"
     case TxMetaData(elements)                                    => q"TxMetaData($elements)"
+    case TxMetaData_(elements)                                   => q"TxMetaData_($elements)"
     case Composite(elements)                                     => q"Composite($elements)"
     case EmptyElement                                            => q"EmptyElement"
   }

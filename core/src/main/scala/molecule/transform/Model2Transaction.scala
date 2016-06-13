@@ -31,7 +31,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
     def resolveTx(elements: Seq[Element]) = elements.foldLeft('tx: Any, Seq[Statement]()) {
       case ((eSlot1, stmts1), a@Atom(ns, name, _, _, VarValue, _, _, _)) => throw new RuntimeException(
-        s"[Model2Transaction:stmtsModel] Missing transaction annotation value for `${ns.capitalize}.$name`")
+        s"[Model2Transaction:stmtsModel] Please apply transaction meta data directly to transaction attribute: `${ns.capitalize}.$name(<metadata>)`")
       case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
     }._2
 
@@ -61,8 +61,10 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ('e, Bond(ns, refAttr, refNs, _))                         => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
 
       // Transaction annotations
-      case ('_, TxMetaData(elements)) => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxMetaData(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
       case ('tx, Atom(ns, name, _, _, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
@@ -82,8 +84,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
 
-      case (e, fm: Composite) => sys.error(s"[Model2Transaction:stmtsModel] Free models are only for getting data:\nMODEL: $model \nPAIR: ($e, $fm)\nSTMTS: $stmts")
-      case (e, elem)          => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
+      case (e, c: Composite) => sys.error(s"[Model2Transaction:stmtsModel] Composites are only for getting data:\nMODEL: $model \nPAIR: ($e, $c)\nSTMTS: $stmts")
+      case (e, elem)         => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
     }
 
     def replace$(elements: Seq[Element]): Seq[Element] = elements map {
@@ -332,32 +334,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       s"Arguments0                  : " + arg0 +
       s"Arguments  (arity $argArity): " + arg.mkString("\n  ", "\n  ", "\n"))
 
-    // Todo: can we convert tuples more elegantly?
-    //    arg map {
-    //      case t: (_, _)                                                             => Seq(t._1, t._2)
-    //      case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
-    //      case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)
-    //      case t: (_, _, _, _, _)                                                    => Seq(t._1, t._2, t._3, t._4, t._5)
-    //      case t: (_, _, _, _, _, _)                                                 => Seq(t._1, t._2, t._3, t._4, t._5, t._6)
-    //      case t: (_, _, _, _, _, _, _)                                              => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7)
-    //      case t: (_, _, _, _, _, _, _, _)                                           => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8)
-    //      case t: (_, _, _, _, _, _, _, _, _)                                        => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9)
-    //      case t: (_, _, _, _, _, _, _, _, _, _)                                     => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _)                                  => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _)                               => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _)                            => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _)                         => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                      => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                   => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)             => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)    => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21)
-    //      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21, t._22)
-    //      case l: Seq[_]                                                             => l
-    //      case a                                                                     => Seq(a)
-    //    }
     arg map tupleToSeq
   }
 }

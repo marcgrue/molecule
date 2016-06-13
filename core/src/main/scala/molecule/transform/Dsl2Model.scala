@@ -68,10 +68,10 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
     // Transaction meta data
-    case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
-    case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
-    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxMetaData(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
-    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxMetaData(Meta("db", "tx", "tx", TxValue, NoValue) +: resolve(q"$txMolecule")))
+    case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxMetaData_(resolve(q"$txMolecule")))
+    case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData_(resolve(q"$txMolecule")))
+    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
+    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
 
     // Tacet transaction attributes not allowed
     case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
@@ -428,21 +428,25 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
 object Dsl2Model {
   def inst(c0: Context) = new {val c: c0.type = c0} with Dsl2Model[c0.type]
+
+  // Main dsl-converter + post-checks of created model
   def apply(c: Context)(dsl: c.Expr[NS]): Model = {
+
+    // Raw model
     val elements0 = inst(c).resolve(dsl.tree)
 
-    def abort(msg: String) = c.abort(c.enclosingPosition, msg)
+    def abort(i: Int, msg: String) = c.abort(c.enclosingPosition, s"[Dsl2Model:apply ($i)] " + msg)
 
     // Sanity checks .......................................................................
 
     // Avoid ending with a ref
     elements0.last match {
-      case b: Bond => abort(s"[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add a one or more attribute to the reference.")
+      case b: Bond => abort(1, s"Molecule not allowed to end with a reference. Please add a one or more attribute to the reference.")
       case _       => "ok"
     }
 
     // No attributes after TxMetaData
-    def txError(s: String) = abort(s"[Dsl2Model:apply (2)] Molecule not allowed to have any attributes after transaction annotation. Found" + s)
+    def txError(s: String) = abort(2, s"Molecule not allowed to have any attributes after transaction annotation. Found" + s)
     elements0.foldLeft(0) {
       case (0, e: TxMetaData)                     => 1
       case (1, Atom(_, "attr", _, _, _, _, _, _)) => txError(s" attribute `a`")
@@ -460,18 +464,18 @@ object Dsl2Model {
       case b: Bond                                               => b
       case g: Nested                                             => g
       case m@Meta(_, "txInstant", _, _, _)                       => m
-      case fm: Composite                                         => fm
-    } getOrElse
-      abort(s"[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
+      case c: Composite                                          => c
+    } getOrElse abort(3, s"Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
+
 
     // Only tacet attributes allowed to have AND semantics for self-joins
     def checkAndSemantics(elements: Seq[Element]): Unit = elements foreach {
       case a@Atom(_, name, _, 1, And(_), _, _, _) if name.last != '_' =>
-        abort(s"[Dsl2Model:apply (4)] Card-one attribute `$name` cannot return multiple values.\n" +
+        abort(4, s"Card-one attribute `$name` cannot return multiple values.\n" +
           "A tacet attribute can though have AND expressions to make a self-join.\n" +
           s"If you want this, please make the attribute tacet by appending an underscore: `${name}_`")
       case a@Atom(_, name, _, 3, And(_), _, _, _) if name.last != '_' =>
-        abort(s"[Dsl2Model:apply (5)] Map attribute `$name` is to be considered a card-one container for keyed variations of one value and " +
+        abort(5, s"Map attribute `$name` is to be considered a card-one container for keyed variations of one value and " +
           """can semantically therefore not return "multiple values".""" +
           "\nA tacet map attribute can though have AND expressions to make a self-join.\n" +
           s"If you want this, please make the map attribute tacet by appending an underscore: `${name}_`")
@@ -480,23 +484,50 @@ object Dsl2Model {
     }
     checkAndSemantics(elements0)
 
+    // Nested molecules not allowed in composites (for now - todo: implement!)
+    elements0.collect {
+      case c: Composite => c.elements collectFirst {
+        case n: Nested => abort(6, "Nested molecules in composites not yet implemented (todo)")
+      }
+    }
 
     // Resolve generic elements ............................................................
 
     // Transfer generic values from Meta elements to Atoms and skip Meta elements
     val elements1 = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
       element match {
-        case a: Atom if a.name != "attr" && gs.contains(NsValue) && !gs.contains(AttrVar) => abort(s"[Dsl2Model:apply (6)] `ns` needs to have a generic `a` before")
+        case a: Atom if a.name != "attr" && gs.contains(NsValue) && !gs.contains(AttrVar) => abort(7, s"`ns` needs to have a generic `a` before")
         case a: Atom if gs.isEmpty                                                        => (a +: es, Nil, NoValue)
-        case a: Atom if a.name == "attr" => (a.copy(gs = a.gs ++ gs, value = v) +: es, Nil, NoValue)
-        case a: Atom                     => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
-        case m@Meta(_, _, "e", g, v1)    => (m +: es, g +: gs, v1)
-        case Meta(_, _, _, g, v1)        => (es, g +: gs, v1)
-        case txm@TxMetaData(txElems)     => txElems.head match {
-          case m@Meta(_, _, _, TxValue, _) => (txm +: es, TxValue +: gs, NoValue)
-          case _                           => (txm +: es, TxValue_ +: gs, NoValue)
+        case a: Atom if a.name == "attr"                                                  => (a.copy(gs = a.gs ++ gs, value = v) +: es, Nil, NoValue)
+        case a: Atom                                                                      => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
+        case m@Meta(_, _, "e", g, v1)                                                     => (m +: es, g +: gs, v1)
+        case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
+        case txmd@TxMetaData(txElems)                                                     => (txmd +: es, TxValue +: gs, NoValue)
+        case txmd@TxMetaData_(txElems)                                                    => (txmd +: es, TxValue_ +: gs, NoValue)
+        case com@Composite(compositeElems) => compositeElems.last match {
+          case txmd: TxMetaData  => {
+            // Add TxValue internally to previous Atom
+            val baseElems = compositeElems.init
+            val atomWithTxValue = baseElems.last match {
+              case a: Atom    => a.copy(gs = a.gs :+ TxValue)
+              case unexpected => abort(8, "Expected attribute before `tx`. Found: " + unexpected)
+            }
+            val compositeWithTx = Composite(baseElems.init :+ atomWithTxValue :+ txmd)
+            (compositeWithTx +: es, gs, v)
+          }
+          case txmd: TxMetaData_ => {
+            // Add TxValue internally to previous Atom
+            val baseElems = compositeElems.init
+            val atomWithTxValue = baseElems.last match {
+              case a: Atom    => a.copy(gs = a.gs :+ TxValue_)
+              case unexpected => abort(9, "Expected attribute before `tx_`. Found: " + unexpected)
+            }
+            val compositeWithTx = Composite(baseElems.init :+ atomWithTxValue :+ txmd)
+            (compositeWithTx +: es, gs, v)
+          }
+          case other             => (com +: es, gs, v)
         }
-        case other                       => (other +: es, gs, v)
+        case other                         => (other +: es, gs, v)
       }
     }._1
 

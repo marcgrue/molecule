@@ -447,17 +447,17 @@ class SeattleQueryTests extends SeattleSpec {
       //
       //           action             temp id                   attribute                 value
       """List(
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/name        ,   AAA                             )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/url         ,   myUrl                           )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/type        ,   :community.type/twitter         )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/orgtype     ,   :community.orgtype/personal     )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/category    ,   my                              )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/category    ,   favorites                       )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/neighborhood,   #db/id[:db.part/user -1000002]  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000002],   :neighborhood/name     ,   myNeighborhood                  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000002],   :neighborhood/district ,   #db/id[:db.part/user -1000003]  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000003],   :district/name         ,   myDistrict                      )
-        |  List(  :db/add,   #db/id[:db.part/user -1000003],   :district/region       ,   :district.region/nw             )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  AAA                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  myUrl                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/twitter       ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/personal   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  my                            ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  favorites                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  myNeighborhood                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  myDistrict                    ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/nw           )
         |)""".stripMargin
 
 
@@ -475,27 +475,27 @@ class SeattleQueryTests extends SeattleSpec {
       ) -->
       // Semantically identical to the previous transaction
       """List(
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/name        ,   DDD Blogging Georgetown                        )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/url         ,   http://www.blogginggeorgetown.com/             )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/type        ,   :community.type/blog                           )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/orgtype     ,   :community.orgtype/commercial                  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/category    ,   DD cat 1                                       )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/category    ,   DD cat 2                                       )
-        |  List(  :db/add,   #db/id[:db.part/user -1000001],   :community/neighborhood,   #db/id[:db.part/user -1000002]                 )
-        |  List(  :db/add,   #db/id[:db.part/user -1000002],   :neighborhood/name     ,   DD Georgetown                                  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000002],   :neighborhood/district ,   #db/id[:db.part/user -1000003]                 )
-        |  List(  :db/add,   #db/id[:db.part/user -1000003],   :district/name         ,   Greater Duwamish                               )
-        |  List(  :db/add,   #db/id[:db.part/user -1000003],   :district/region       ,   :district.region/s                             )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/name        ,   DDD Interbay District Blog                     )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/url         ,   http://interbayneighborhood.neighborlogs.com/  )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/type        ,   :community.type/blog                           )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/orgtype     ,   :community.orgtype/community                   )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/category    ,   DD cat 3                                       )
-        |  List(  :db/add,   #db/id[:db.part/user -1000004],   :community/neighborhood,   #db/id[:db.part/user -1000005]                 )
-        |  List(  :db/add,   #db/id[:db.part/user -1000005],   :neighborhood/name     ,   DD Interbay                                    )
-        |  List(  :db/add,   #db/id[:db.part/user -1000005],   :neighborhood/district ,   #db/id[:db.part/user -1000006]                 )
-        |  List(  :db/add,   #db/id[:db.part/user -1000006],   :district/name         ,   Magnolia/Queen Anne                            )
-        |  List(  :db/add,   #db/id[:db.part/user -1000006],   :district/region       ,   :district.region/w                             )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  DDD Blogging Georgetown                      ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  http://www.blogginggeorgetown.com/           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/commercial                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 1                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 2                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  DD Georgetown                                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  Greater Duwamish                             ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/s                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/name        ,  DDD Interbay District Blog                   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/url         ,  http://interbayneighborhood.neighborlogs.com/),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/type        ,  :community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/orgtype     ,  :community.orgtype/community                 ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/category    ,  DD cat 3                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/neighborhood,  #db/id[:db.part/user -1000005]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/name     ,  DD Interbay                                  ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/district ,  #db/id[:db.part/user -1000006]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/name         ,  Magnolia/Queen Anne                          ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/region       ,  :district.region/w                           )
         |)""".stripMargin
   }
 
@@ -512,8 +512,8 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
       """List(
-        |  List(  :db/add,   17592186045886,   :community/name,   belltown 2  )
-        |  List(  :db/add,   17592186045886,   :community/url ,   url 2       )
+        |  List(:db/add,  17592186045886                ,  :community/name,  belltown 2),
+        |  List(:db/add,  17592186045886                ,  :community/url ,  url 2     )
         |)""".stripMargin
 
 
@@ -524,8 +524,8 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category("news" -> "Cool news")
     ) -->
       """List(
-        |  List(  :db/retract,   17592186045886,   :community/category,   news       )
-        |  List(  :db/add    ,   17592186045886,   :community/category,   Cool news  )
+        |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
+        |  List(:db/add    ,  17592186045886                ,  :community/category,  Cool news)
         |)""".stripMargin
 
 
@@ -537,10 +537,10 @@ class SeattleQueryTests extends SeattleSpec {
       )
     ) -->
       """List(
-        |  List(  :db/retract,   17592186045886,   :community/category,   Cool news          )
-        |  List(  :db/add    ,   17592186045886,   :community/category,   Super cool news    )
-        |  List(  :db/retract,   17592186045886,   :community/category,   events             )
-        |  List(  :db/add    ,   17592186045886,   :community/category,   Super cool events  )
+        |  List(:db/retract,  17592186045886                ,  :community/category,  Cool news        ),
+        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool news  ),
+        |  List(:db/retract,  17592186045886                ,  :community/category,  events           ),
+        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -549,7 +549,7 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category.add("extra category")
     ) -->
       """List(
-        |  List(  :db/add,   17592186045886,   :community/category,   extra category  )
+        |  List(:db/add,  17592186045886                ,  :community/category,  extra category)
         |)""".stripMargin
 
 
@@ -558,7 +558,7 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category.remove("Super cool events")
     ) -->
       """List(
-        |  List(  :db/retract,   17592186045886,   :community/category,   Super cool events  )
+        |  List(:db/retract,  17592186045886                ,  :community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -570,10 +570,10 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).name("belltown 3").url().category()
     ) -->
       """List(
-        |  List(  :db/add    ,   17592186045886,   :community/name    ,   belltown 3                      )
-        |  List(  :db/retract,   17592186045886,   :community/url     ,   http://www.belltownpeople.com/  )
-        |  List(  :db/retract,   17592186045886,   :community/category,   news                            )
-        |  List(  :db/retract,   17592186045886,   :community/category,   events                          )
+        |  List(:db/add    ,  17592186045886                ,  :community/name    ,  belltown 3                    ),
+        |  List(:db/retract,  17592186045886                ,  :community/url     ,  http://www.belltownpeople.com/),
+        |  List(:db/retract,  17592186045886                ,  :community/category,  news                          ),
+        |  List(:db/retract,  17592186045886                ,  :community/category,  events                        )
         |)""".stripMargin
   }
 }

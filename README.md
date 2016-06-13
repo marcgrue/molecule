@@ -36,13 +36,13 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.7.0",
-      "com.datomic" % "datomic-free" % "0.9.5359"
+      "org.scalamolecule" %% "molecule" % "0.8.0",
+      "com.datomic" % "datomic-free" % "0.9.5372"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
   )
 ```
-Molecule 0.7.0 for Scala 2.11.8 is available at 
+Molecule 0.8.0 for Scala 2.11.8 is available at 
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.11/).
 
 [Getting started](http://scalamolecule.org/manual/getting-started)...

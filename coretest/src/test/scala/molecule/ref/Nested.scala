@@ -5,7 +5,7 @@ import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}
 
 
-class Nested extends CoreSpec {
+class NestedTests extends CoreSpec {
 
   "Nested enum after ref" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.enum1) insert List(("d", List("enum11")))

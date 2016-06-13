@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.7.0",
+  version := "0.8.0",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -12,7 +12,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.datomic" % "datomic-pro" % "0.9.5359",
+    "com.datomic" % "datomic-free" % "0.9.5372",
     "org.specs2" %% "specs2" % "2.4.11"
   ),
   // Remove Java directories
@@ -39,7 +39,7 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   .settings(
     moduleName := "molecule-coretest",
     moleculeSchemas := Seq(
-      "molecule/part",
+      "molecule/partition",
       "molecule/util"
     )
   )

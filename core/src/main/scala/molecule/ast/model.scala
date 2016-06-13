@@ -14,7 +14,10 @@ object model {
                 |$s    ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
           case TxMetaData(nestedElements)   =>
             s"""|TxMetaData(List(
-                |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
+                |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
+          case TxMetaData_(nestedElements)   =>
+            s"""|TxMetaData_(List(
+                |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
           case Composite(elements)          =>
             s"""|Composite(List(
                 |$s  ${draw(elements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
@@ -45,6 +48,7 @@ object model {
 
   case class Meta(ns: String, attr: String, kind: String, generic: Generic, value: Value) extends Element
   case class TxMetaData(elements: Seq[Element]) extends Element
+  case class TxMetaData_(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
 
   case object EmptyElement extends Element

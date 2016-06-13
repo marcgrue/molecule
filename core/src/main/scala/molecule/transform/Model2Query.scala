@@ -592,6 +592,12 @@ object Model2Query extends Helpers {
           }
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
+        case TxMetaData_(elements) =>
+          val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
+            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+          }
+          (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
+
         case Composite(elements) =>
           val eid = if(query.wh.clauses.isEmpty) e else query.wh.clauses.head match {
             case DataClause(_, Var(firstE),_,_,_,_) => firstE
@@ -601,19 +607,6 @@ object Model2Query extends Helpers {
             case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
-
-//        case Composite(elementss) =>
-//          // Loop molecules
-//          val (q4, e4, v4, prevNs4, prevAttr4, prevRefNs4) = elementss.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
-//            case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), elements) => {
-//              // Loop elements of each molecule
-//              val (q3, e3, v3, prevNs3, prevAttr3, prevRefNs3) = elements.foldLeft((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1)) {
-//                case ((q2, e2, v2, prevNs2, prevAttr2, prevRefNs2), element) => make(q2, element, e2, v2, prevNs2, prevAttr2, prevRefNs2)
-//              }
-//              (q3, e3, nextChar(v3, 1), prevNs3, prevAttr3, prevRefNs3)
-//            }
-//          }
-//          (q4, e4, nextChar(v4, 1), prevNs4, prevAttr4, prevRefNs4)
 
         case other => sys.error("[Model2Query:make] Unresolved query variables from model: " +(other, e, v, prevNs, prevAttr, prevRefNs))
       }

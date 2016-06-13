@@ -2,14 +2,12 @@ package molecule.perf
 
 import molecule._
 import molecule.util.MoleculeSpec
-import molecule.util.dsl.coreTest._
 import molecule.util.schema.CoreTestSchema
 
-class compilationPerf extends MoleculeSpec with DatomicFacade {
+class CompilationPerf extends MoleculeSpec with DatomicFacade {
 
-  /*
-  Simple (un-scientific) compilation time tests with increasing arity molecules.
-  */
+  // Simple (un-scientific) compilation time tests with increasing arity molecules.
+
 
   implicit val conn = recreateDbFrom(CoreTestSchema)
   /*
@@ -29,7 +27,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   1 343
   */
 
-//  m(Ns.str)
+  //  m(Ns.str)
   /*
   Arity 1
 
@@ -45,7 +43,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 577
   */
 
-//  m(Ns.str.int)
+  //  m(Ns.str.int)
   /*
   Arity 2
 
@@ -61,7 +59,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 764
   */
 
-//  m(Ns.str.int.long)
+  //  m(Ns.str.int.long)
   /*
   Arity 3
 
@@ -77,7 +75,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 604
   */
 
-//  m(Ns.str.int.long.float)
+  //  m(Ns.str.int.long.float)
   /*
   Arity 4
 
@@ -93,7 +91,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 745
   */
 
-//  m(Ns.str.int.long.float.double)
+  //  m(Ns.str.int.long.float.double)
   /*
   Arity 5
 
@@ -110,7 +108,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 681
   */
 
-//  m(Ns.str.int.long.float.double.bool)
+  //  m(Ns.str.int.long.float.double.bool)
   /*
   Arity 6
 
@@ -126,7 +124,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
   2 880
   */
 
-//  m(Ns.str.int.long.float.double.bool.date)
+  //  m(Ns.str.int.long.float.double.bool.date)
   /*
   Arity 7
 
@@ -142,7 +140,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 3 333
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid)
   /*
   Arity 8
 
@@ -158,7 +156,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 3 179
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri)
   /*
   Arity 9
 
@@ -174,7 +172,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 3 657
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum)
   /*
   Arity 10
 
@@ -190,7 +188,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 3 327
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs)
   /*
   Arity 11
 
@@ -206,7 +204,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 4 279
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints)
   /*
   Arity 12
 
@@ -222,7 +220,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 4 651
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs)
   /*
   Arity 13
 
@@ -238,7 +236,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 7 476
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats)
   /*
   Arity 14
 
@@ -255,7 +253,7 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 10 710
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles)
   /*
   Arity 15
 
@@ -266,50 +264,109 @@ class compilationPerf extends MoleculeSpec with DatomicFacade {
 16 831
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools)
   /*
   Arity 16
 
 29 798
 
   */
+  // Same molecule as above split into a composite
+  //  m(Ns.str.int.long.float.double.bool.date.uuid ~ Ns.uri.enum.strs.ints.longs.floats.doubles.bools)
+  /*
+  Composite arity 8 + 8 makes compilation fast again
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates)
+3 308
+3 614
+3 532
+3 460
+3 886
+
+  */
+
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates)
   /*
   Arity 17
 
 55 987
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids)
   /*
   Arity 18
 
 101 013  -  1m 41s 13ms
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris)
   /*
   Arity 19
 224 098  -  3m 44s 98ms
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums)
   /*
   Arity 20
 278 547  -  4m 38 547
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.ref1)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum ~ Ns.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums)
   /*
-  Arity 21
+  Arity 10 + 10
+
+10 306
+7 819
+7 635
+7 273
+  */
+
+  //  m(Ns.str.int.long.float.double.bool.date ~ Ns.uuid.uri.enum.strs.ints.longs.floats ~ Ns.doubles.bools.dates.uuids.uris.enums)
+  /*
+  Arity 7 + 7 + 6   - even faster!
+
+5 284
+5 472
+5 113
 
   */
 
-//  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.ref1.refs1)
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.ref1)
+  /*
+  Arity 21
+
+  ???
+
+  */
+
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.ref1.refs1)
   /*
   Arity 22
 
+  ???
+
+  */
+
+  //  m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.strs ~ Ns.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.ref1.refs1)
+  /*
+  Arity 11 + 11
+
+11 960
+8 711
+11 706
+8 985
+8 662
+
+  */
+
+  //  m(Ns.str.int.long.float.double.bool.date.uuid ~ Ns.uri.enum.strs.ints.longs.floats.doubles ~ Ns.bools.dates.uuids.uris.enums.ref1.refs1)
+  /*
+  Arity 8 + 7 + 7
+
+8 259
+7 521
+7 885
+7 928
+8 350
 
   */
 }
