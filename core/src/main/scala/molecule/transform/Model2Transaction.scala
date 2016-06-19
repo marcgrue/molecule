@@ -307,7 +307,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     val txId = tempId("tx")
     val txStmts: Seq[Statement] = txStmts0.foldLeft(Seq[Statement]()) {
       case (stmts, Add('tx, a, Values(vs, prefix))) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                      => sys.error("[Model2Transaction:insertStmts:txStmts] Unexpected insert statement: " + unexpected)
+      case (stmts, unexpected)                      => sys.error("[Model2Transaction:updateStmts:txStmts] Unexpected insert statement: " + unexpected)
     }
     dataStmts ++ txStmts
   }
@@ -315,13 +315,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   private def untupleNestedArgss(stmts: Seq[Any], arg0: Any): Seq[Seq[Any]] = {
     val (argArity, arg) = arg0 match {
       case a: Seq[_]  => a.head match {
-        case None       => sys.error("[Model2Transaction:nestedData] Please use `List()` instead of `List(None)` for nested null values.")
-        case null       => sys.error("[Model2Transaction:nestedData] Please use `List()` instead of `List(null)` for nested null values.")
+        case None       => sys.error("[Model2Transaction:untupleNestedArgss] Please use `List()` instead of `List(None)` for nested null values.")
+        case null       => sys.error("[Model2Transaction:untupleNestedArgss] Please use `List()` instead of `List(null)` for nested null values.")
         case p: Product => (p.productArity, a)
         case l: Seq[_]  => (l.size, a)
         case _          => (1, a)
       }
-      case unexpected => sys.error("[Model2Transaction:nestedData] Unexpected data: " + unexpected)
+      case unexpected => sys.error("[Model2Transaction:untupleNestedArgss] Unexpected data: " + unexpected)
     }
     val argStmts = stmts.collect {
       case a@Add(_, _, 'arg)                => a
@@ -329,7 +329,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case a@Add(_, _, nestedStmts: Seq[_]) => a
     }
     val stmtsSize = argStmts.size
-    assert(argArity == stmtsSize, s"[Model2Transaction:nestedData] Arity of statements and arguments should match. Found: \n" +
+    assert(argArity == stmtsSize, s"[Model2Transaction:untupleNestedArgss] Arity of statements and arguments should match. Found: \n" +
       s"Statements (arity $stmtsSize): " + stmts.mkString("\n  ", "\n  ", "\n") +
       s"Arguments0                  : " + arg0 +
       s"Arguments  (arity $argArity): " + arg.mkString("\n  ", "\n  ", "\n"))

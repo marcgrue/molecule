@@ -97,7 +97,8 @@ object schemaDSL {
   }
 
   trait OneRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
-    def apply(value: Long): Ns with Attr = ???
+    def apply(ref: Long)      : Ns with Attr = ???
+    def apply(refs: Seq[Long]): Ns with Attr = ???
   }
 
   trait ManyRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
@@ -360,4 +361,8 @@ object schemaDSL {
   }
   trait IsComponent
   trait NoHistory
+
+  // Molecule-related options
+  trait Bidirectional[revRef]
+  trait ReverseRef[bidirectRef]
 }

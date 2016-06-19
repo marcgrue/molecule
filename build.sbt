@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.8.0",
+  version := "0.8.1-SNAPSHOT",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -34,29 +34,52 @@ lazy val moleculeCore = project.in(file("core"))
 
 lazy val moleculeCoretest = project.in(file("coretest"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
-  .settings(
-    moduleName := "molecule-coretest",
-    moleculeSchemas := Seq(
-      "molecule/partition",
-      "molecule/util"
-    )
-  )
+//  .settings(
+//    moduleName := "molecule-coretest",
+//    moleculeSchemas := Seq(
+//      "molecule/partition",
+//      "molecule/util"
+//    )
+//  )
+  // Add schema definition directories for boilerplate testing
+  .settings(Seq(definitionDirectories(
+    "molecule/boilerplate"
+  )))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
-  .settings(
-    moduleName := "molecule-examples",
-    moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/graph",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
-    )
-  )
+//  .settings(
+//    moduleName := "molecule-examples",
+//    moleculeSchemas := Seq(
+//      "molecule/examples/dayOfDatomic",
+//      "molecule/examples/gremlin",
+//      "molecule/examples/mbrainz",
+//      "molecule/examples/seattle"
+//    )
+//  )
+
+
+def definitionDirectories(domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
+    val codeDir = (scalaSource in Compile).value
+    val sourceDir = (sourceManaged in Compile).value
+
+    // generate source files
+    val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq)
+
+    // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
+    val cache = FileFunction.cached(
+      streams.value.cacheDirectory / "moleculeBoilerplateTesting",
+      inStyle = FilesInfo.lastModified,
+      outStyle = FilesInfo.hash
+    ) {
+      in: Set[File] => sourceFiles.toSet
+    }
+    cache(sourceFiles.toSet).toSeq
+  }.taskValue
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

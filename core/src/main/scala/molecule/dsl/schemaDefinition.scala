@@ -7,26 +7,25 @@ object schemaDefinition {
   // Annotation for arities of molecule inputs and outputs
   class InOut(inputArity: Int = 3, outputArity: Int = 8) extends StaticAnnotation
 
-  // Todo: Use phantom types to build valid combinations (checkout how Rogue does it)
-
+  trait Bidirectional
 
   private[molecule] sealed trait scalarAttr[T] {
-    def doc(s: String): T = ???
-    val indexed  : T = ???
-    val noHistory: T = ???
-    val uniqueValue   : oneString = ???
-    val uniqueIdentity: oneString = ???
+    lazy val doc: String => T = (s: String) => ???
+    lazy val indexed       : T         = ???
+    lazy val noHistory     : T         = ???
+    lazy val uniqueValue   : oneString = ???
+    lazy val uniqueIdentity: oneString = ???
   }
 
 
   // String
   object oneString extends oneString
   trait oneString extends scalarAttr[oneString] {
-    val fullTextSearch: oneString = ???
+    lazy val fullTextSearch: oneString = ???
   }
   object manyString extends manyString
   trait manyString extends scalarAttr[manyString] {
-    val fullTextSearch: manyString = ???
+    lazy val fullTextSearch: manyString = ???
   }
   object mapString extends mapString
   trait mapString extends scalarAttr[mapString] {
@@ -40,14 +39,14 @@ object schemaDefinition {
   // Number .....................
   trait number[T] extends scalarAttr[T] {
     // One by one
-    val count   : T = ???
-    val avg     : T = ???
-    val median  : T = ???
-    val variance: T = ???
-    val stddev  : T = ???
+    lazy val count   : T = ???
+    lazy val avg     : T = ???
+    lazy val median  : T = ???
+    lazy val variance: T = ???
+    lazy val stddev  : T = ???
 
     // All
-    val aggregates: T = ???
+    lazy val aggregates: T = ???
   }
 
   // Int
@@ -147,16 +146,24 @@ object schemaDefinition {
 
   // Ref
 
-  object one {
-    def apply[NS] = this
-    def doc(s: String) = this
-    lazy val subComponent = this
+  private[molecule] trait ref {
+    lazy val doc = (s: String) => this
   }
 
+  private[molecule] trait one[Ns] extends ref {
+    lazy val bidirectional: ref = ???
+    lazy val subComponent: ref = ???
+  }
+  object one  {
+    def apply[Ns] = new one[Ns] {}
+  }
+
+  private[molecule] trait many[Ns] extends ref {
+    lazy val bidirectional: ref = ???
+    lazy val subComponents: ref = ???
+  }
   object many {
-    def apply[NS] = this
-    def doc(s: String) = this
-    lazy val subComponents = this
+    def apply[Ns] = new many[Ns] {}
   }
 }
 

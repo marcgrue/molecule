@@ -74,7 +74,6 @@ object MBrainzDefinition {
     val script          = one[Script]
     val label           = one[Label]
     val country         = one[Country]
-
   }
 
   trait Script {
