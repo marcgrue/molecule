@@ -136,51 +136,57 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   // Liftables for Model --------------------------------------------------------------
 
   implicit val liftGeneric = Liftable[Generic] {
-    case AttrVar(v)      => q"AttrVar($v)"
-    case TxValue         => q"TxValue"
-    case TxValue_        => q"TxValue_"
-    case TxTValue        => q"TxTValue"
-    case TxInstantValue  => q"TxInstantValue"
-    case OpValue         => q"OpValue"
-    case NsValue(values) => q"NsValue(Seq(..$values))"
-    case NoValue         => q"NoValue"
+    case AttrVar(v)            => q"AttrVar($v)"
+    case TxValue               => q"TxValue"
+    case TxValue_              => q"TxValue_"
+    case TxTValue              => q"TxTValue"
+    case TxInstantValue        => q"TxInstantValue"
+    case OpValue               => q"OpValue"
+    case NsValue(values)       => q"NsValue(Seq(..$values))"
+    case NoValue               => q"NoValue"
+    case BidirectRefAttr(attr) => q"BidirectRefAttr($attr)"
+    case ReverseRef(attr)      => q"ReverseRef($attr)"
+    case ReverseAttr(attr)     => q"ReverseAttr($attr)"
   }
 
   implicit val liftFn    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
   implicit val liftValue = Liftable[Value] {
-    case EntValue         => q"EntValue"
-    case VarValue         => q"VarValue"
-    case NoValue          => q"NoValue"
-    case AttrVar(v)       => q"AttrVar($v)"
-    case TxValue          => q"TxValue"
-    case TxValue_         => q"TxValue_"
-    case TxTValue         => q"TxTValue"
-    case TxInstantValue   => q"TxInstantValue"
-    case NsValue(values)  => q"NsValue(Seq(..$values))"
-    case OpValue          => q"OpValue"
-    case BackValue(value) => q"BackValue($value)"
-    case EnumVal          => q"EnumVal"
-    case IndexVal         => q"IndexVal"
-    case And(values)      => q"And(Seq(..$values))"
-    case Eq(values)       => q"Eq(Seq(..$values))"
-    case Neq(values)      => q"Neq(Seq(..$values))"
-    case Lt(value)        => q"Lt($value)"
-    case Gt(value)        => q"Gt($value)"
-    case Le(value)        => q"Le($value)"
-    case Ge(value)        => q"Ge($value)"
-    case Fn(fn, value)    => q"Fn($fn, $value)"
-    case Length(fn)       => q"Length($fn)"
-    case Qm               => q"Qm"
-    case Distinct         => q"Distinct"
-    case Fulltext(search) => q"Fulltext(Seq(..$search))"
-    case Replace(values)  => q"Replace($values)"
-    case Remove(values)   => q"Remove(Seq(..$values))"
-    case Mapping(pairs)   => q"Mapping(Seq(..$pairs))"
-    case Keys(ks)         => q"Keys(Seq(..$ks))"
+    case EntValue              => q"EntValue"
+    case VarValue              => q"VarValue"
+    case NoValue               => q"NoValue"
+    case AttrVar(v)            => q"AttrVar($v)"
+    case TxValue               => q"TxValue"
+    case TxValue_              => q"TxValue_"
+    case TxTValue              => q"TxTValue"
+    case TxInstantValue        => q"TxInstantValue"
+    case NsValue(values)       => q"NsValue(Seq(..$values))"
+    case OpValue               => q"OpValue"
+    case BidirectRefAttr(attr) => q"BidirectRefAttr($attr)"
+    case ReverseRef(attr)      => q"ReverseRef($attr)"
+    case ReverseAttr(attr)     => q"ReverseAttr($attr)"
+    case BackValue(value)      => q"BackValue($value)"
+    case EnumVal               => q"EnumVal"
+    case IndexVal              => q"IndexVal"
+    case And(values)           => q"And(Seq(..$values))"
+    case Eq(values)            => q"Eq(Seq(..$values))"
+    case Neq(values)           => q"Neq(Seq(..$values))"
+    case Lt(value)             => q"Lt($value)"
+    case Gt(value)             => q"Gt($value)"
+    case Le(value)             => q"Le($value)"
+    case Ge(value)             => q"Ge($value)"
+    case Fn(fn, value)         => q"Fn($fn, $value)"
+    case Length(fn)            => q"Length($fn)"
+    case Qm                    => q"Qm"
+    case Distinct              => q"Distinct"
+    case Fulltext(search)      => q"Fulltext(Seq(..$search))"
+    case Replace(values)       => q"Replace($values)"
+    case Remove(values)        => q"Remove(Seq(..$values))"
+    case Mapping(pairs)        => q"Mapping(Seq(..$pairs))"
+    case Keys(ks)              => q"Keys(Seq(..$ks))"
   }
 
   implicit val liftAtom       = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
-  implicit val liftBond       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card})" }
+  implicit val liftBond       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, ${b.meta})" }
   implicit val liftReBond     = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
   implicit val liftTransitive = Liftable[Transitive] { r => q"Transitive(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.depth}, ${r.prevVar})" }
   implicit val liftMeta       = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
@@ -207,7 +213,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Nested(${g0.bond}, Seq(..$es0))"
   }
 
-  implicit val liftTxMetaData = Liftable[TxMetaData] { tm =>
+  implicit val liftTxMetaData  = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -263,7 +269,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
 
   implicit val liftElement = Liftable[Element] {
     case Atom(ns, name, tpeS, card, value, enumPrefix, gs, keys) => q"Atom($ns, $name, $tpeS, $card, $value, $enumPrefix, Seq(..$gs), Seq(..$keys))"
-    case Bond(ns, refAttr, refNs, card)                          => q"Bond($ns, $refAttr, $refNs, $card)"
+    case Bond(ns, refAttr, refNs, card, biRef)                   => q"Bond($ns, $refAttr, $refNs, $card, $biRef)"
     case ReBond(backRef, refAttr, refNs, distinct, prevVar)      => q"ReBond($backRef, $refAttr, $refNs, $distinct, $prevVar)"
     case Transitive(backRef, refAttr, refNs, level, prevVar)     => q"Transitive($backRef, $refAttr, $refNs, $level, $prevVar)"
     case Self                                                    => q"Self"

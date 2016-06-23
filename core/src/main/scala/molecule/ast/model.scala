@@ -38,19 +38,44 @@ object model {
     value: Value,
     enumPrefix: Option[String] = None,
     gs: Seq[Generic] = Nil,
-    keys: Seq[String] = Nil
-  ) extends Element
-  case class Bond(ns: String, refAttr: String, refNs: String = "", card: Int) extends Element
-  case class ReBond(backRef: String, refAttr: String, refNs: String = "", distinct: Boolean = false, prevVar: String = "") extends Element
-  case class Transitive(backRef: String, refAttr: String, refNs: String, depth: Int = 1, prevVar: String = "") extends Element
-  case class Nested(bond: Bond, elements: Seq[Element]) extends Element
-  case object Self extends Element
+    keys: Seq[String] = Nil) extends Element
 
-  case class Meta(ns: String, attr: String, kind: String, generic: Generic, value: Value) extends Element
+  case class Bond(
+    ns: String,
+    refAttr: String,
+    refNs: String = "",
+    card: Int,
+    meta: String = "") extends Element
+
+  case class ReBond(
+    backRef: String,
+    refAttr: String,
+    refNs: String = "",
+    distinct: Boolean = false,
+    prevVar: String = "") extends Element
+
+  case class Transitive(
+    backRef: String,
+    refAttr: String,
+    refNs: String,
+    depth: Int = 1,
+    prevVar: String = "") extends Element
+
+  case class Nested(
+    bond: Bond,
+    elements: Seq[Element]) extends Element
+
+  case class Meta(
+    ns: String,
+    attr: String,
+    kind: String,
+    generic: Generic,
+    value: Value) extends Element
+
   case class TxMetaData(elements: Seq[Element]) extends Element
   case class TxMetaData_(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
-
+  case object Self extends Element
   case object EmptyElement extends Element
 
 
@@ -88,6 +113,10 @@ object model {
   case object OpValue extends Generic
   case class NsValue(values: Seq[String]) extends Generic
   case object NoValue extends Generic
+
+  case class BidirectRefAttr(attr: String) extends Generic
+  case class ReverseRef(attr: String) extends Generic
+  case class ReverseAttr(attr: String) extends Generic
 
   case object Qm extends Value
   case object Distinct extends Value
@@ -130,8 +159,8 @@ object model {
 
   def curNs(e: Element) = e match {
     case Atom(ns, _, _, _, _, _, _, _) => ns
-    case Bond(ns, _, _, _)             => ns
-    case Nested(Bond(ns, _, _, _), _)  => ns
+    case Bond(ns, _, _, _, _)             => ns
+    case Nested(Bond(ns, _, _, _, _), _)  => ns
     case Meta(ns, _, _, _, _)          => ns
     case unexpected                    => sys.error("[model:curNs] Unexpected element: " + unexpected)
   }

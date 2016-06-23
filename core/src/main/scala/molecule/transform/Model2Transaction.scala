@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
 
 
 case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
-  val x = Debug("Model2Transaction", 52, 51, false, 6)
+  val x = Debug("Model2Transaction", 25, 51, false, 6)
 
   private def tempId(attr: String) = attr match {
     case "tx"                 => Peer.tempid(s":db.part/tx")
@@ -36,13 +36,15 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     }._2
 
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
-      case ('_, Meta(ns, "", "e", _, EntValue))            => ('arg, stmts)
-      case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))   => (Eid(id), stmts)
-      case ('_, Atom(ns, name, _, _, VarValue, _, _, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg))
-      case ('_, Atom(ns, name, _, _, value, prefix, _, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix)))
-      case ('_, Bond(ns, refAttr, refNs, _))               => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs"))
+      case ('_, Meta(ns, "", "e", _, EntValue))                                  => ('arg, stmts)
+      case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))                         => (Eid(id), stmts)
+      case ('_, Atom(ns, name, _, c, VarValue, _, Seq(BidirectRefAttr(_)), _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, "bidirectional" + c))
+      case ('_, Atom(ns, name, _, _, VarValue, _, _, _))                         => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg))
+      case ('_, Atom(ns, name, _, c, value, prefix, Seq(BidirectRefAttr(_)), _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
+      case ('_, Atom(ns, name, _, _, value, prefix, _, _))                       => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix)))
+      case ('_, Bond(ns, refAttr, refNs, _, _))                                  => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs"))
 
-      case (e, Nested(Bond(ns, refAttr, _, _), elements)) =>
+      case (e, Nested(Bond(ns, refAttr, _, _, _), elements)) =>
         val nested = elements.foldLeft('v: Any, Seq[Statement]()) {
           case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
         }._2
@@ -50,15 +52,20 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested))
 
       // First with id
-      case (Eid(id), Atom(ns, name, _, _, value@Remove(_), prefix, _, _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix)))
-      case (Eid(id), Atom(ns, name, _, _, value, prefix, _, _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix)))
-      case (Eid(id), Bond(ns, refAttr, refNs, _))                         => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId))
+      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, Seq(BidirectRefAttr(_)), _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
+      case (Eid(id), Atom(ns, name, _, _, value@Remove(_), prefix, _, _))                       => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix)))
+      case (Eid(id), Atom(ns, name, _, c, value, prefix, Seq(BidirectRefAttr(_)), _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
+      case (Eid(id), Atom(ns, name, _, _, value, prefix, _, _))                                 => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix)))
+      case (Eid(id), Bond(ns, refAttr, refNs, _, _))                                            => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId))
 
       // Same namespace
-      case ('e, Atom(ns, name, _, _, value@Remove(_), prefix, _, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix)))
-      case ('e, Atom(ns, name, _, _, VarValue, _, _, _))             => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
-      case ('e, Atom(ns, name, _, _, value, prefix, _, _))           => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix)))
-      case ('e, Bond(ns, refAttr, refNs, _))                         => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
+      case ('e, Atom(ns, name, _, _, value@Remove(_), prefix, _, _))             => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix)))
+      case ('e, Atom(ns, name, _, c, VarValue, _, Seq(BidirectRefAttr(_)), _))   => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, "bidirectional" + c))
+      case ('e, Atom(ns, name, _, _, VarValue, _, _, _))                         => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
+      case ('e, Atom(ns, name, _, c, value, prefix, Seq(BidirectRefAttr(_)), _)) => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
+      case ('e, Atom(ns, name, _, _, value, prefix, _, _))                       => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix)))
+      case ('e, Bond(ns, refAttr, refNs, c, "bidirectional"))                    => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", "bidirectional" + c))
+      case ('e, Bond(ns, refAttr, refNs, _, _))                                  => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
 
       // Transaction annotations
       case ('_, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
@@ -74,12 +81,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       // Next namespace
       case ('v, Atom(ns, name, _, _, VarValue, _, _, _))   => ('e, stmts :+ Add('v, s":$ns/$name", 'arg))
       case ('v, Atom(ns, name, _, _, value, prefix, _, _)) => ('e, stmts :+ Add('v, s":$ns/$name", Values(value, prefix)))
-      case ('v, Bond(ns, refAttr, _, _))                   => ('v, stmts :+ Add('v, s":$ns/$refAttr", 'tempId))
+      case ('v, Bond(ns, refAttr, _, _, _))                => ('v, stmts :+ Add('v, s":$ns/$refAttr", 'tempId))
 
       // Add one extra generic statement to receive the eid arg for the following statement to use
       // (we then discard that temporary statement from the value statements)
       case ('arg, Atom(ns, name, _, _, VarValue, _, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg) :+ Add('v, s":$ns/$name", 'arg))
-      case ('arg, Bond(ns, refAttr, _, _))                 => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId))
+      case ('arg, Bond(ns, refAttr, _, _, _))              => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId))
 
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
@@ -92,7 +99,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case a@Atom(_, attr, _, _, _, Some(enumPrefix), _, _)
         if attr.last == '$' && enumPrefix.init.last == '$'       => a.copy(name = attr.init, enumPrefix = Some(enumPrefix.init.init + "/"))
       case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '$' => a.copy(name = attr.init)
-      case b@Bond(_, attr, _, _) if attr.last == '$'             => b.copy(refAttr = attr.init)
+      case b@Bond(_, attr, _, _, _) if attr.last == '$'          => b.copy(refAttr = attr.init)
       case t@Transitive(_, attr, _, _, _) if attr.last == '$'    => t.copy(refAttr = attr.init)
       case Nested(ref, es)                                       => Nested(ref, replace$(es))
       case other                                                 => other
@@ -110,8 +117,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).map(_.get(0))
   }
 
-  private def valueStmts(stmts: Seq[Statement], e: Any, a: String, arg: Any, prefix: Option[String] = None): Seq[Statement] = {
+  private def valueStmts(stmts: Seq[Statement], e: Any, a: String, arg: Any, prefix: Option[String] = None, meta: String = ""): Seq[Statement] = {
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
+
     val newStmts = if (prefix.contains("mapping")) arg match {
       case Mapping(pairs)       => pairs.flatMap {
         case (key, value) => {
@@ -132,6 +140,18 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           case _ => sys.error("[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
         }
       }
+
+    } else if (meta.startsWith("bidirectional")) arg match {
+      case Remove(Seq())                  => attrValues(conn.db, e, a).toSeq.flatMap { case ref => Seq(Retract(ref, a, e), Retract(e, a, ref)) }
+      case Remove(removeRefs)             => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref)) }
+      case Eq(refs) if meta.endsWith("1") => refs.flatMap { case ref: Long =>
+        // Retract reverse ref of reverse entity
+        val reverseRetracts = attrValues(conn.db, e, a).toSeq.map(ref => Retract(ref, a, e))
+        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+      }
+      case Eq(refs)                       => refs.flatMap { case ref: Long => Seq(Add(ref, a, e), Add(e, a, ref)) }
+      case ref                            => Seq(Add(ref, a, e), Add(e, a, ref))
+
     } else arg match {
       case Replace(oldNew)      => oldNew.toSeq.flatMap {
         case (oldValue, newValue) => Seq(Retract(e, a, p(oldValue)), Add(e, a, p(newValue)))
@@ -154,8 +174,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = {
     val (dataStmts0, txStmts0) = stmtsModel.map {
-      case tx@Add('tx, _, Values(vs, prefix)) => (None, Some(tx))
-      case other                              => (Some(other), None)
+      case tx@Add('tx, _, Values(vs, prefix), _) => (None, Some(tx))
+      case other                                 => (Some(other), None)
     }.unzip
     (dataStmts0.flatten, txStmts0.flatten)
   }
@@ -182,27 +202,31 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
   def matchDataStmt(stmts: Seq[Statement], dataStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any = 0) = dataStmt match {
     // Keep current cursor (add no new data in this iteration)
-    case Add('tempId, a, refNs: String) => (cur, valueStmts(stmts, tempId(a), a, tempId(refNs)))
-    case Add('e, a, refNs: String)      => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs)))
-    case Add('v, a, 'tempId)            => (cur, valueStmts(stmts, stmts.last.v, a, tempId(a)))
-    case Retract(e, a, v)               => (cur, stmts)
+    case Add('tempId, a, refNs: String, _)           => (cur, valueStmts(stmts, tempId(a), a, tempId(refNs)))
+    case Add('e, a, refNs: String, "bidirectional1") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "bidirectional1"))
+    case Add('e, a, refNs: String, "bidirectional2") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "bidirectional2"))
+    case Add('e, a, refNs: String, _)                => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs)))
+    case Add('v, a, 'tempId, _)                      => (cur, valueStmts(stmts, stmts.last.v, a, tempId(a)))
+    case Retract(e, a, v, _)                         => (cur, stmts)
 
     // Advance cursor for next value in data row
-    case Add('tempId, a, 'arg)                                                    => (next, valueStmts(stmts, tempId(a), a, arg))
-    case Add('tempId, a, Values(EnumVal, prefix))                                 => (next, valueStmts(stmts, tempId(a), a, arg, prefix))
-    case Add('tempId, a, Values(vs, prefix))                                      => (next, valueStmts(stmts, tempId(a), a, vs, prefix))
-    case Add('remove_me, a, 'arg)                                                 => (next, valueStmts(stmts, -1, a, arg))
-    case Add('arg, a, 'tempId)                                                    => (next, valueStmts(stmts, arg, a, tempId(a)))
-    case Add('e, a, 'arg)                                                         => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg))
-    case Add('e, a, Values(EnumVal, prefix))                                      => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, prefix))
-    case Add('e, a, Values(vs, prefix))                                           => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, vs, prefix))
-    case Add('v, a, 'arg) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, valueStmts(stmts, stmts.last.v, a, arg))
-    case Add('v, a, 'arg)                                                         => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg))
-    case Add('v, a, Values(EnumVal, prefix))                                      => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, prefix))
-    case Add('v, a, Values(vs, prefix))                                           => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, vs, prefix))
-    case Add('tx, a, 'arg)                                                        => (next, valueStmts(stmts, tempId("tx"), a, arg))
-    case Add(e0, ref0, nestedStmts0: Seq[_]) if arg == Nil                        => (next, stmts)
-    case Add(e, ref, nestedStmts: Seq[_])                                         => {
+    case Add('tempId, a, 'arg, _)                                                    => (next, valueStmts(stmts, tempId(a), a, arg))
+    case Add('tempId, a, Values(EnumVal, prefix), _)                                 => (next, valueStmts(stmts, tempId(a), a, arg, prefix))
+    case Add('tempId, a, Values(vs, prefix), _)                                      => (next, valueStmts(stmts, tempId(a), a, vs, prefix))
+    case Add('remove_me, a, 'arg, _)                                                 => (next, valueStmts(stmts, -1, a, arg))
+    case Add('arg, a, 'tempId, _)                                                    => (next, valueStmts(stmts, arg, a, tempId(a)))
+    case Add('e, a, 'arg, "bidirectional1")                                          => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "bidirectional1"))
+    case Add('e, a, 'arg, "bidirectional2")                                          => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "bidirectional2"))
+    case Add('e, a, 'arg, _)                                                         => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg))
+    case Add('e, a, Values(EnumVal, prefix), _)                                      => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, prefix))
+    case Add('e, a, Values(vs, prefix), _)                                           => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, vs, prefix))
+    case Add('v, a, 'arg, _) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, valueStmts(stmts, stmts.last.v, a, arg))
+    case Add('v, a, 'arg, _)                                                         => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg))
+    case Add('v, a, Values(EnumVal, prefix), _)                                      => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, prefix))
+    case Add('v, a, Values(vs, prefix), _)                                           => (next, valueStmts(stmts, lastV(stmts, a, nestedE), a, vs, prefix))
+    case Add('tx, a, 'arg, _)                                                        => (next, valueStmts(stmts, tempId("tx"), a, arg))
+    case Add(e0, ref0, nestedStmts0: Seq[_], _) if arg == Nil                        => (next, stmts)
+    case Add(e, ref, nestedStmts: Seq[_], _)                                         => {
       //      x(51, e, ref, nestedStmts, stmts)
       val parentE = if (e == 'parentId)
         tempId(ref)
@@ -211,7 +235,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       else
         stmts.reverse.collectFirst {
           // Find entity value of Add statement with matching namespace
-          case Add(e1, a, _) if a.replaceFirst("/.*", "") == ref.replaceFirst("/.*", "") => e1
+          case Add(e1, a, _, _) if a.replaceFirst("/.*", "") == ref.replaceFirst("/.*", "") => e1
         }.getOrElse(sys.error("[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
       val nestedRows = untupleNestedArgss(nestedStmts, arg)
       val nestedInsertStmts = nestedRows.flatMap { nestedRow =>
@@ -234,23 +258,23 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       val (stmts, nestedE) = if (stmts0.isEmpty)
         (stmts0, nestedE0)
       else stmts0.last match {
-        case Add('ns, ns, backRef) => (stmts0.init, backRef)
-        case _                     => (stmts0, nestedE0)
+        case Add('ns, ns, backRef, _) => (stmts0.init, backRef)
+        case _                        => (stmts0, nestedE0)
       }
       (arg, dataStmt) match {
-        case (null, _)                                                                     => sys.error(
+        case (null, _)                                                                        => sys.error(
           "[Model2Transaction:insertStmts] null values not allowed. Please use `attr$` for Option[tpe] values.")
-        case (_, br@Add('ns, ns, ""))                                                      => {
+        case (_, br@Add('ns, ns, "", _))                                                      => {
           val backRef = stmts.reverse.collectFirst {
-            case Add(e, a, v) if a.startsWith(ns) && e.isInstanceOf[db.DbId] => e
+            case Add(e, a, v, _) if a.startsWith(ns) && e.isInstanceOf[db.DbId] => e
           }.getOrElse(sys.error(s"[Model2Transaction:insertStmts] Couldn't find namespace `$ns` in any previous Add statements.\n" + stmts.mkString("\n")))
           (cur, stmts :+ Add('ns, ns, backRef))
         }
-        case (None, Add('e, a, refNs: String))                                             => (cur, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
-        case (None, _)                                                                     => (next, stmts)
-        case (Some(arg1), _)                                                               => matchDataStmt(stmts, dataStmt, arg1, cur, next, nestedE)
-        case (_, Add('e, a, 'arg)) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, valueStmts(stmts, stmts.last.v, a, arg))
-        case (_, _)                                                                        => matchDataStmt(stmts, dataStmt, arg, cur, next, nestedE)
+        case (None, Add('e, a, refNs: String, _))                                             => (cur, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
+        case (None, _)                                                                        => (next, stmts)
+        case (Some(arg1), _)                                                                  => matchDataStmt(stmts, dataStmt, arg1, cur, next, nestedE)
+        case (_, Add('e, a, 'arg, _)) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, valueStmts(stmts, stmts.last.v, a, arg))
+        case (_, _)                                                                           => matchDataStmt(stmts, dataStmt, arg, cur, next, nestedE)
       }
     }._2.filterNot(_.e == -1)
   }
@@ -260,8 +284,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     val dataStmtss: Seq[Seq[Statement]] = dataRows.map(resolveStmts(dataStmts, _))
     val txId = tempId("tx")
     val txStmtss: Seq[Seq[Statement]] = Seq(txStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add('tx, a, Values(vs, prefix))) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                      => sys.error("[Model2Transaction:insertStmts:txStmts] Unexpected insert statement: " + unexpected)
+      case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
+      case (stmts, unexpected)                         => sys.error("[Model2Transaction:insertStmts:txStmts] Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
@@ -272,16 +296,17 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ((i, stmts), stmt) =>
         val j = i + 1
         stmt match {
-          case Add('tempId, a, Values(vs, prefix)) => (j, valueStmts(stmts, tempId(a), a, vs, prefix))
-          case Add('e, a, Values(vs, prefix))      => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix))
-          case Add('e, a, 'tempId)                 => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a)))
-          case Add(id, a, 'tempId)                 => (i, valueStmts(stmts, id, a, tempId(a)))
-          case Add('e, a, refNs: String)           => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
-          case Add('v, a, Values(vs, prefix))      => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix))
-          case Add('tx, a, Values(vs, prefix))     => (j, valueStmts(stmts, txId, a, vs, prefix))
-          case Retract(e, a, v)                    => (i, stmts)
-          case Add(_, a, 'arg)                     => sys.error(s"[Model2Transaction:saveStmts] Attribute `$a` needs a value applied")
-          case unexpected                          => sys.error("[Model2Transaction:saveStmts] Unexpected save statement: " + unexpected)
+          case Add('tempId, a, Values(vs, prefix), meta) => (j, valueStmts(stmts, tempId(a), a, vs, prefix, meta))
+          case Add('e, a, Values(vs, prefix), meta)      => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix, meta))
+          case Add('e, a, 'tempId, meta)                 => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a), None, meta))
+          case Add(id, a, 'tempId, meta)                 => (i, valueStmts(stmts, id, a, tempId(a), None, meta))
+          case Add('e, a, refNs: String, meta)           => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs), None, meta))
+          case Add('v, a, Values(vs, prefix), meta)      => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, meta))
+          case Add('tx, a, Values(vs, prefix), meta)     => (j, valueStmts(stmts, txId, a, vs, prefix, meta))
+          case Retract(e, a, v, meta)                    => (i, stmts)
+          case Add(id: Long, a, Values(_, _), meta)      => sys.error(s"[Model2Transaction:saveStmts] With a given id `$id` please use `update` instead.")
+          case Add(_, a, 'arg, meta)                     => sys.error(s"[Model2Transaction:saveStmts] Attribute `$a` needs a value applied")
+          case unexpected                                => sys.error("[Model2Transaction:saveStmts] Unexpected save statement: " + unexpected)
         }
     }._2
   }
@@ -293,21 +318,21 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ((i, stmts), stmt) =>
         val j = i + 1
         stmt match {
-          case Add('e, a, Values(vs, prefix))     => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix))
-          case Add('e, a, 'tempId)                => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a)))
-          case Add('v, a, Values(vs, prefix))     => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix))
-          case Add('tx, a, Values(vs, prefix))    => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix))
-          case Add(e, a, Values(vs, prefix))      => (j, valueStmts(stmts, e, a, vs, prefix))
-          case Retract('e, a, Values(vs, prefix)) => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix))
-          case Retract(e, a, Values(vs, prefix))  => (j, valueStmts(stmts, e, a, vs, prefix))
-          case Add(_, a, 'arg)                    => sys.error(s"[Model2Transaction:updateStmts] Attribute `$a` needs a value applied")
-          case unexpected                         => sys.error("[Model2Transaction:updateStmts] Unexpected update statement: " + unexpected)
+          case Add('e, a, Values(vs, prefix), meta)     => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix, meta))
+          case Add('e, a, 'tempId, meta)                => (i, valueStmts(stmts, lastE(stmts, a), a, tempId(a), None, meta))
+          case Add('v, a, Values(vs, prefix), meta)     => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, meta))
+          case Add('tx, a, Values(vs, prefix), meta)    => (j, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, meta))
+          case Add(e, a, Values(vs, prefix), meta)      => (j, valueStmts(stmts, e, a, vs, prefix, meta))
+          case Retract('e, a, Values(vs, prefix), meta) => (j, valueStmts(stmts, lastE(stmts, a), a, vs, prefix, meta))
+          case Retract(e, a, Values(vs, prefix), meta)  => (j, valueStmts(stmts, e, a, vs, prefix, meta))
+          case Add(_, a, 'arg, _)                       => sys.error(s"[Model2Transaction:updateStmts] Attribute `$a` needs a value applied")
+          case unexpected                               => sys.error("[Model2Transaction:updateStmts] Unexpected update statement: " + unexpected)
         }
     }._2
     val txId = tempId("tx")
     val txStmts: Seq[Statement] = txStmts0.foldLeft(Seq[Statement]()) {
-      case (stmts, Add('tx, a, Values(vs, prefix))) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                      => sys.error("[Model2Transaction:updateStmts:txStmts] Unexpected insert statement: " + unexpected)
+      case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
+      case (stmts, unexpected)                         => sys.error("[Model2Transaction:updateStmts:txStmts] Unexpected insert statement: " + unexpected)
     }
     dataStmts ++ txStmts
   }
@@ -324,9 +349,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case unexpected => sys.error("[Model2Transaction:untupleNestedArgss] Unexpected data: " + unexpected)
     }
     val argStmts = stmts.collect {
-      case a@Add(_, _, 'arg)                => a
-      case a@Add(_, _, Values(vs, prefix))  => a
-      case a@Add(_, _, nestedStmts: Seq[_]) => a
+      case a@Add(_, _, 'arg, _)                => a
+      case a@Add(_, _, Values(vs, prefix), _)  => a
+      case a@Add(_, _, nestedStmts: Seq[_], _) => a
     }
     val stmtsSize = argStmts.size
     assert(argArity == stmtsSize, s"[Model2Transaction:untupleNestedArgss] Arity of statements and arguments should match. Found: \n" +

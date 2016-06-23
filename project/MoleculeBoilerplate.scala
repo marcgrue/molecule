@@ -98,21 +98,17 @@ object MoleculeBoilerplate {
     def parseOptions(str0: String, acc: Seq[Optional] = Nil): Seq[Optional] = {
       val indexed = Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed")
       val options = str0 match {
-        case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional( s"""":db/doc"               , $msg""", ""))
-        case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"))
-        case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/value"""", "UniqueValue"))
-        case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"))
-        case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-        case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-        case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional( """":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"))
+        case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional(s"""":db/doc"               , $msg""", ""))
+        case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"))
+        case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/value"""", "UniqueValue"))
+        case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"))
+        case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
+        case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
+        case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional("""":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"))
         case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ indexed)
-        //        case r"\.bidirectional\.(.*)$revRef\.doc\((.*)$msg\)" => parseOptions(s".doc($msg)", acc :+ Optional(revNs, s"Bidirectional[$revRef"))
-        //        case r"\.bidirectional\.doc\((.*)$msg\)"              => parseOptions(s".doc($msg)", acc :+ Optional(revNs, s"Bidirectional[$revRef0"))
-        //        case r"\.bidirectional\.(.*)$revRef"                  => parseOptions("", acc :+ Optional(revNs, s"Bidirectional[$revRef"))
-        //        case r"\.bidirectional"                               => parseOptions("", acc :+ Optional(revNs, s"Bidirectional[$revRef0"))
-        case r"\.bidirectional(.*)$str" => parseOptions(str, acc :+ Optional("", "Bidirectional"))
-        case ""                         => acc
-        case unexpected                 => sys.error(s"Unexpected options code in ${defFile.getName}:\n" + unexpected)
+        case r"\.bidirectional(.*)$str"   => parseOptions(str, acc :+ Optional("", "Bidirectional"))
+        case ""                           => acc
+        case unexpected                   => sys.error(s"Unexpected options code in ${defFile.getName}:\n" + unexpected)
       }
       if (allIndexed) (options :+ indexed).distinct else options
     }
@@ -238,6 +234,8 @@ object MoleculeBoilerplate {
         } get
     }).toMap
 
+    println(revRefMap)
+
     nss.map { ns =>
       val attrs2 = ns.attrs map {
         case oneRef@Ref(revRef, attrClean, _, _, _, "", _, opts) if revRefMap.keys.toList.contains((ns.ns, revRef)) =>
@@ -297,6 +295,11 @@ object MoleculeBoilerplate {
 
         //                println("bidirectRef: " + bidirectRef)
         //        println("revNs: " + revNs)
+        sys.error(
+          s"""$error
+             |For the moment bidirectional references are only allowed to the same
+             |namespace `${curNs.ns}` like:
+             |  val $bidirectAttr = one[${curNs.ns}]""".stripMargin)
 
         val revRef = updatedNss0 collectFirst {
 
@@ -661,13 +664,14 @@ object MoleculeBoilerplate {
           case (0, o)                                    => s"${refNs}_$o$p3[${OutTypes mkString ", "}] with Nested$o[${refNs}_$o$p3, ${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
           case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
         }
+//                val birectional = ""
         val birectional = opts.collectFirst {
           case Optional(_, clazz) if clazz.startsWith("Bidirectional:") =>
             val bidirectRef = clazz.split(':').last
-            s"with Bidirectional[$bidirectRef[NS, NS]] "
+            s"with BiRef[$bidirectRef[NS, NS]] "
           case Optional(_, clazz) if clazz.startsWith("ReverseRef:")    =>
             val reverseRef = clazz.split(':').last
-            s"with ReverseRef[$reverseRef[NS, NS]] "
+            s"with RevRef[$reverseRef[NS, NS]] "
         } getOrElse ""
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref $birectional= ???"
       }
@@ -898,7 +902,12 @@ object MoleculeBoilerplate {
       case other            => other
     }
 
+    //    def addBidirectionals(attrs: Seq[Attr]) = attrs map {
+    //      case Val(_, _, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("ReverseRef"))
+    //    }
+
     val attrClasses = attrs.flatMap {
+
       case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if tpe.take(3) == "Map" =>
         val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
@@ -920,13 +929,13 @@ object MoleculeBoilerplate {
         val bidirectAttr = opts.collectFirst {
           case Optional(bidirectAttr0, refRef) if refRef.startsWith("ReverseRef") => bidirectAttr0
         }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with ReverseRef[$bidirectAttr[NS, NS]]")
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with RevRef[$bidirectAttr[NS, NS]]")
 
       case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
         val revRef = opts.collectFirst {
           case Optional(revRef0, bidirectRef) if bidirectRef.startsWith("Bidirectional") => revRef0
         }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with Bidirectional[$revRef[NS, NS]]")
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiRefAttr[$revRef[NS, NS]]")
 
       case Ref(attr, _, clazz, _, _, _, _, _) =>
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
@@ -951,13 +960,13 @@ object MoleculeBoilerplate {
         val bidirectAttr = opts.collectFirst {
           case Optional(bidirectAttr0, refRef) if refRef.startsWith("ReverseRef") => bidirectAttr0
         }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with ReverseRef[$bidirectAttr[NS, NS]]")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with RevRef[$bidirectAttr[NS, NS]]")
 
       case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
         val revRef = opts.collectFirst {
           case Optional(revRef0, bidirectRef) if bidirectRef.startsWith("Bidirectional") => revRef0
         }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with Bidirectional[$revRef[NS, NS]]")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiRefAttr[$revRef[NS, NS]]")
 
       case Ref(attr, attrClean, clazz, _, _, _, _, _) =>
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}")

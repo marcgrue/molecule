@@ -5,7 +5,7 @@ import java.util.{Date, List => jList, Map => jMap}
 import datomic._
 import datomic.db.Db
 import molecule.api.{Molecule0, MoleculeOut, MoleculeOutBase}
-import molecule.ast.model.{Model, Atom, Bond, TxMetaData}
+import molecule.ast.model.{Atom, Bond, Model, TxMetaData}
 import molecule.ast.query._
 import molecule.ast.transaction.{Statement, _}
 import molecule.dsl.Transaction
@@ -133,7 +133,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
   private[molecule] def insert_(conn: Connection, model: Model, dataRows: Seq[Seq[Any]] = Seq()): Tx = {
     val transformer = Model2Transaction(conn, model)
     val stmtss = transformer.insertStmts(dataRows)
-//        x(2, model, transformer.stmtsModel, dataRows, stmtss)
+    //        x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
     //        x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
@@ -163,10 +163,10 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
     // Prevent reference conflicts
     dataModel.elements.foldLeft(Seq.empty[String]) {
-      case (refs, Bond(ns, refAttr, _, _)) if refs.contains(s"$ns/$refAttr") =>
+      case (refs, Bond(ns, refAttr, _, _, _)) if refs.contains(s"$ns/$refAttr") =>
         throw new RuntimeException(s"[DatomicFacade:insertMerged] Can't insert with same reference :$ns/$refAttr twice")
-      case (refs, Bond(ns, refAttr, _, _))                             => refs :+ s"$ns/$refAttr"
-      case (refs, _)                                                   => refs
+      case (refs, Bond(ns, refAttr, _, _, _))                                   => refs :+ s"$ns/$refAttr"
+      case (refs, _)                                                            => refs
     }
 
     val data = (tupleTuples map tupleToSeq).map(_ flatMap tupleToSeq)
@@ -297,8 +297,8 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
   private val x = Debug("Tx", 1, 99, false, 3)
 
   val flatStmts = stmtss.flatten.map {
-    case Add(e, a, i: Int)   => Add(e, a, i.toLong: java.lang.Long).toJava
-    case Add(e, a, f: Float) => Add(e, a, f.toDouble: java.lang.Double).toJava
+    case Add(e, a, i: Int, meta)   => Add(e, a, i.toLong: java.lang.Long, meta).toJava
+    case Add(e, a, f: Float, meta) => Add(e, a, f.toDouble: java.lang.Double, meta).toJava
     //    case Add(e, a, d: Date)  => Add(e, a, d).toJava
     //    case Add(e, a, v: UUID)  => Add(e, a, v).toJava
     //    case Add(e, a, v: URI)   => Add(e, a, v).toJava
@@ -315,8 +315,8 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     val datoms = txData.asInstanceOf[java.util.Collection[Datom]].toList.tail
 
     val tempIds = stmtss.flatten.collect {
-      case Add(e, _, _) if e.toString.take(6) == "#db/id" => e
-      case Add(_, _, v) if v.toString.take(6) == "#db/id" => v
+      case Add(e, _, _, meta) if e.toString.take(6) == "#db/id" => e
+      case Add(_, _, v, meta) if v.toString.take(6) == "#db/id" => v
     }.distinct
 
     val txTtempIds = txResult.get(Connection.TEMPIDS)

@@ -390,7 +390,7 @@ class SeattleTests extends SeattleSpec {
       .orgtype("personal")
       .category("my", "favorites") // many cardinality allows multiple values
       .Neighborhood.name("myNeighborhood")
-      .District.name("myDistrict").region("nw").add.eids === List(17592186045890L, 17592186045891L, 17592186045892L)
+      .District.name("myDistrict").region("nw").save.eids === List(17592186045890L, 17592186045891L, 17592186045892L)
 
     // Confirm all data is inserted
     Community.name.contains("AAA").url.`type`.orgtype.category.Neighborhood.name.District.name.region.get(1) === List(
@@ -495,7 +495,7 @@ class SeattleTests extends SeattleSpec {
     )
 
     // Applying nothing (empty parenthesises) finds and retract all values of an attribute
-    Community(belltown).name("belltown 3").url().category().update
+    Community(belltown).name("belltown 3").url.apply().category().update
 
     // Belltown has no longer a url or any categories
     Community.name("belltown 3").`type`.url.category.get === List()

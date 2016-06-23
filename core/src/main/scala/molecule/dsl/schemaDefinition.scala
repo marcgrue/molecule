@@ -159,6 +159,7 @@ object schemaDefinition {
   }
 
   private[molecule] trait many[Ns] extends ref {
+//    lazy val propertyEdges: ref = ???
     lazy val bidirectional: ref = ???
     lazy val subComponents: ref = ???
   }

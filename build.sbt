@@ -43,9 +43,9 @@ lazy val moleculeCoretest = project.in(file("coretest"))
 //      "molecule/util"
 //    )
 //  )
-  // Add schema definition directories for boilerplate testing
+  // Add schema definition directories for boilerplate generation testing
   .settings(Seq(definitionDirectories(
-    "molecule/boilerplate"
+    "molecule/bidirectional"
   )))
 
 lazy val moleculeExamples = project.in(file("examples"))

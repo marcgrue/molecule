@@ -12,7 +12,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
   def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
 
   implicit class richTree(t: Tree) {
-    lazy val tpe        = c.typecheck(t).tpe
+    lazy val tpe_       = c.typecheck(t).tpe
     lazy val at         = att(t)
     lazy val ns         = at.ns.toString
     lazy val name       = at.toString
@@ -20,38 +20,45 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     lazy val card       = at.card
     lazy val enumPrefix = at.enumPrefix
 
-    def isFirstNS = tpe <:< typeOf[FirstNS]
+    def isFirstNS = tpe_ <:< typeOf[FirstNS]
     def owner = t.symbol.typeSignature.typeParams.head.name.toString
     def alias = t.symbol.typeSignature.typeParams.head.name.toString
 
-    def refThis = firstLow(tpe.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString)
-    def refNext = firstLow(tpe.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
+    def refThis = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString)
+    def refNext = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
 
-    def isRef = tpe <:< weakTypeOf[Ref[_, _]]
-    def isOneRef = tpe <:< weakTypeOf[OneRef[_, _]]
-    def isManyRef = tpe <:< weakTypeOf[ManyRef[_, _]]
-    def refCard = if(tpe <:< weakTypeOf[ManyRef[_, _]]) 2 else 1
+    def isBidirectRefAttr = tpe_ <:< weakTypeOf[BiRefAttr[_]]
+    def isBiRefAttr = tpe_.baseClasses.contains(weakTypeOf[BiRefAttr[_]].typeSymbol)
+    def isBidirectRef = tpe_ <:< weakTypeOf[BiRef[_]]
+    def isReverseAttr = tpe_ <:< weakTypeOf[RevAttr[_]]
+    def isReverseRef = tpe_ <:< weakTypeOf[RevRef[_]]
 
-    def isAttr = tpe <:< typeOf[Attr]
+    def isRef = tpe_ <:< weakTypeOf[Ref[_, _]]
+    def isOneRef = tpe_ <:< weakTypeOf[OneRef[_, _]]
+    def isManyRef = tpe_ <:< weakTypeOf[ManyRef[_, _]]
+    def refCard = if (tpe_ <:< weakTypeOf[ManyRef[_, _]]) 2 else 1
 
-    def isRefAttr$ = tpe <:< weakTypeOf[RefAttr$]
-    def isRefAttr = tpe <:< weakTypeOf[RefAttr[_, _]]
-    def isOneRefAttr = tpe <:< weakTypeOf[OneRefAttr[_, _]]
-    def isManyRefAttr = tpe <:< weakTypeOf[ManyRefAttr[_, _]]
+    def isAttr = tpe_ <:< typeOf[Attr]
 
-    def isValueAttr = tpe <:< weakTypeOf[ValueAttr[_, _, _, _]]
-    def isValueAttr$ = tpe <:< weakTypeOf[ValueAttr$[_]]
-    def isMapAttrK = tpe <:< typeOf[MapAttrK]
-    def isMapAttr = tpe <:< weakTypeOf[MapAttr[_, _, _, _]]
-    def isMapAttr$ = tpe <:< weakTypeOf[MapAttr$[_]]
-    def isOne = tpe <:< weakTypeOf[One[_, _, _]]
-    def isMany = tpe <:< weakTypeOf[Many[_, _, _, _]]
-    def isEnum = tpe <:< weakTypeOf[Enum]
-    def isEnum$ = tpe <:< weakTypeOf[Enum$]
-    def isOneEnum = tpe <:< weakTypeOf[OneEnum[_, _]]
-    def isManyEnum = tpe <:< weakTypeOf[ManyEnums[_, _]]
-    def isOneURI = tpe <:< weakTypeOf[OneURI[_, _]]
-    def isManyURI = tpe <:< weakTypeOf[ManyURI[_, _]]
+    def isRefAttr$ = tpe_ <:< weakTypeOf[RefAttr$]
+    def isRefAttr = tpe_ <:< weakTypeOf[RefAttr[_, _]]
+    def isOneRefAttr = tpe_ <:< weakTypeOf[OneRefAttr[_, _]]
+    def isManyRefAttr = tpe_ <:< weakTypeOf[ManyRefAttr[_, _]]
+
+
+    def isValueAttr = tpe_ <:< weakTypeOf[ValueAttr[_, _, _, _]]
+    def isValueAttr$ = tpe_ <:< weakTypeOf[ValueAttr$[_]]
+    def isMapAttrK = tpe_ <:< typeOf[MapAttrK]
+    def isMapAttr = tpe_ <:< weakTypeOf[MapAttr[_, _, _, _]]
+    def isMapAttr$ = tpe_ <:< weakTypeOf[MapAttr$[_]]
+    def isOne = tpe_ <:< weakTypeOf[One[_, _, _]]
+    def isMany = tpe_ <:< weakTypeOf[Many[_, _, _, _]]
+    def isEnum = tpe_ <:< weakTypeOf[Enum]
+    def isEnum$ = tpe_ <:< weakTypeOf[Enum$]
+    def isOneEnum = tpe_ <:< weakTypeOf[OneEnum[_, _]]
+    def isManyEnum = tpe_ <:< weakTypeOf[ManyEnums[_, _]]
+    def isOneURI = tpe_ <:< weakTypeOf[OneURI[_, _]]
+    def isManyURI = tpe_ <:< weakTypeOf[ManyURI[_, _]]
     override def toString = t.tpe.typeSymbol.name.toString
   }
   def nsString(ns: String): String = ns

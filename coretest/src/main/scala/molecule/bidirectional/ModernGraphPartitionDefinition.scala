@@ -1,4 +1,4 @@
-package molecule.boilerplate
+package molecule.bidirectional
 
 import molecule.dsl.schemaDefinition._
 

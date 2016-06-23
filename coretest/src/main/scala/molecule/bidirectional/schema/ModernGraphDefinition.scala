@@ -1,4 +1,4 @@
-package molecule.boilerplate.schema
+package molecule.bidirectional.schema
 
 //import molecule.dsl.schemaDefinition._
 import molecule.dsl.schemaDefinition._
@@ -12,22 +12,25 @@ object ModernGraphDefinition {
     val age     = oneInt
     val created = many[Created]
 
-    // Bidirectional card-many ref to property edge namespace
-    val knows = many[Knows].bidirectional
-    // Works also
-    //    val `knows` = many[Knows].bidirectional
-    //    val friends = many[Knows].bidirectional
-    //
-    //    // Bidirectional card-one ref to property edge namespace
-    //    val mentor = one[Knows].bidirectional
+//    // Bidirectional card-many ref to property edge namespace
+//    val knows = many[Knows].bidirectional
+//    // Works also
+//    //    val `knows` = many[Knows].bidirectional
+//    //    val friends = many[Knows].bidirectional
+//
+//    // Bidirectional card-one ref to property edge namespace
+//    val mentor = one[Knows].bidirectional
 
 
     // Bidirectional card-many ref (self-reference)
-    //    val friends = many[Person].bidirectional
+    val friends = many[Person].bidirectional
 
     // Bidirectional card-one ref (self-reference)
-    //    val spouse = one[Person].bidirectional
+    val spouse = one[Person].bidirectional
     //    val `spouse` = one[Person].bidirectional
+
+    // Testing same story with a card-many
+    val spouses = many[Person].bidirectional
   }
 
   trait Software {

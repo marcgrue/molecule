@@ -478,7 +478,7 @@ object Model2Query extends Helpers {
 
         // Bond ===================================================================================
 
-        case Bond(ns, refAttr, refNs, _) => q.ref(e, ns, refAttr, v, refNs)
+        case Bond(ns, refAttr, refNs, _, _) => q.ref(e, ns, refAttr, v, refNs)
 
         case Transitive(backRef, refAttr, refNs, depth, prevVar) => q.transitive(backRef, refAttr, prevVar, v, depth)
 
@@ -544,10 +544,12 @@ object Model2Query extends Helpers {
         case Atom(ns, attr, _, _, _, _, _, _) if ns == prevNs            => (resolve(query, e, w, element), e, w, ns, attr, "")
         case Atom(ns, attr, _, _, _, _, _, _)                            => (resolve(query, e, v, element), e, v, ns, attr, "")
 
-        case Bond(ns, refAttr, refNs, _) if ns == prevNs    => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _) if ns == prevAttr  => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _) if ns == prevRefNs => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _)                    => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
+        case b@Bond(ns, refAttr, refNs, _, meta)
+          if meta.startsWith("bidirectional") && ns == prevNs && refAttr == prevAttr => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, meta) if ns == prevNs                       => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                        => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                       => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _)                                          => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
 
         case transitive@Transitive(backRef, refAttr, refNs, _, _) => {
           val (backRefE, backRefV) = query.wh.clauses.reverse.collectFirst {
@@ -568,7 +570,7 @@ object Model2Query extends Helpers {
 
         case Self => (query, w, y, prevNs, prevAttr, prevRefNs)
 
-        case Nested(b@Bond(ns, refAttr, refNs, _), elements) =>
+        case Nested(b@Bond(ns, refAttr, refNs, _, _), elements) =>
           val (e2, elements2) = if (ns == "") (e, elements) else (w, b +: elements)
           val (q2, _, v2, ns2, attr2, refNs2) = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
             case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
@@ -599,9 +601,10 @@ object Model2Query extends Helpers {
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
         case Composite(elements) =>
-          val eid = if(query.wh.clauses.isEmpty) e else query.wh.clauses.head match {
-            case DataClause(_, Var(firstE),_,_,_,_) => firstE
-            case otherClause => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
+          val eid = if (query.wh.clauses.isEmpty) e
+          else query.wh.clauses.head match {
+            case DataClause(_, Var(firstE), _, _, _, _) => firstE
+            case otherClause                            => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
           }
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
             case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)

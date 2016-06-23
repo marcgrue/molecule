@@ -104,9 +104,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.Self" => traverse(q"$prev", Self)
 
 
-    // Attributes -----------------------------
-
-    case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
+    // Attribute maps -----------------------------------------------------
 
     // Attribute map using k/apply
     case t@q"$prev.$cur.k(..$keys).$op(..$values)" =>
@@ -146,20 +144,53 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       //      x(77, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
+
+    // Attribute operations -----------------------------
+
+    case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
+
+    case t@q"$prev.$biRefAttr.$op(..$values)" if q"$prev.$biRefAttr".isBiRefAttr =>
+      val element = resolveOp(q"$prev", q"$biRefAttr", q"$prev.$biRefAttr", q"$op", q"Seq(..$values)") match {
+        case a: Atom => a.copy(gs = a.gs :+ BidirectRefAttr(biRefAttr.toString))
+      }
+      walk(q"$prev", q"$prev.$biRefAttr".ns, q"$biRefAttr", element)
+
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
-      //      x(78, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+
+
+    // Back reference --------------------------------------
 
     case r@q"$prev.$backRefAttr" if backRefAttr.toString.head == '_' =>
       val backRef = c.typecheck(q"$prev.$backRefAttr").tpe.typeSymbol.name.toString // "partition_Ns_<arity>"
       traverse(q"$prev", ReBond(firstLow(backRef.replaceFirst("_[0-9]+$", "")), "")) // "partition_Ns"
 
-    case a@q"$prev.$refAttr" if a.isRef     => traverse(q"$prev", Bond(a.refThis, firstLow(refAttr.toString), a.refNext, a.refCard))
+
+    // Reference --------------------------------------
+
+    case a@q"$prev.$bidirectRef" if a.isBidirectRef =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiRef[_]].typeSymbol).typeArgs.head.typeSymbol
+      traverse(q"$prev", Bond(a.refThis, firstLow(bidirectRef.toString), a.refNext, a.refCard, "bidirectional"))
+
+    case a@q"$prev.$ref" if a.isRef => traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard))
+
+
+    // Reference attribute --------------------------------------
+
+    case a@q"$prev.$bidirectRefAttr" if a.isBidirectRefAttr =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiRefAttr[_]].typeSymbol).typeArgs.head.typeSymbol
+      val reverseAttr = s":${firstLow(baseType.owner.name)}/${baseType.name}"
+      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(BidirectRefAttr(reverseAttr))))
+
     case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue))
-    case a@q"$prev.$cur" if a.isEnum        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix)))
-    case a@q"$prev.$cur" if a.isMapAttr     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping")))
-    case a@q"$prev.$cur" if a.isValueAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue))
+
+
+    // Standard attributes --------------------------------------
+
+    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix)))
+    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping")))
+    case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue))
 
 
     // Nested ------------------------
@@ -208,7 +239,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
                   case prevAtom@Atom(prevNs, prevAttr, _, _, _, _, _, _) if prevNs == curNs && clean(prevAttr) == clean(attr) =>
                     val t = previous.init.reverse.collectFirst {
                       // Find first previous Bond (relating to this attribute)
-                      case prevBond@Bond(ns2, refAttr, refNs, _) =>
+                      case prevBond@Bond(ns2, refAttr, refNs, _, _) =>
                         //                        x(2, prevAtom, prevBond, ns2, refAttr, refNs)
                         Transitive(ns2, refAttr, refNs, 0)
                     } getOrElse {
@@ -453,7 +484,7 @@ object Dsl2Model {
       case (1, Meta(_, _, "e", _, _))             => txError(s" attribute `e`")
       case (1, Meta(_, _, "v", _, _))             => txError(s" attribute `v`")
       case (1, Atom(_, name, _, _, _, _, _, _))   => txError(s" attribute `$name`")
-      case (1, Bond(_, name, _, _))               => txError(s" reference `${name.capitalize}`")
+      case (1, Bond(_, name, _, _, _))            => txError(s" reference `${name.capitalize}`")
       case (1, e)                                 => txError(s": " + e)
       case _                                      => 0
     }
@@ -504,7 +535,7 @@ object Dsl2Model {
         case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
         case txmd@TxMetaData(txElems)                                                     => (txmd +: es, TxValue +: gs, NoValue)
         case txmd@TxMetaData_(txElems)                                                    => (txmd +: es, TxValue_ +: gs, NoValue)
-        case com@Composite(compositeElems) => compositeElems.last match {
+        case com@Composite(compositeElems)                                                => compositeElems.last match {
           case txmd: TxMetaData  => {
             // Add TxValue internally to previous Atom
             val baseElems = compositeElems.init
@@ -527,7 +558,7 @@ object Dsl2Model {
           }
           case other             => (com +: es, gs, v)
         }
-        case other                         => (other +: es, gs, v)
+        case other                                                                        => (other +: es, gs, v)
       }
     }._1
 

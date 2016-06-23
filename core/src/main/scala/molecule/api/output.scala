@@ -29,18 +29,36 @@ trait Molecule extends DatomicFacade {
   protected def since_  [M <: Molecule](thisMolecule: M, date: Date) = { dbOp = Since(date)    ; thisMolecule }
   protected def imagine_[M <: Molecule](thisMolecule: M, tx: lObj)   = { dbOp = Imagine(tx)    ; thisMolecule }
 
-  def add   (implicit conn: Connection): Tx = save(conn, _model)
+  def save  (implicit conn: Connection): Tx = save(conn, _model)
   def update(implicit conn: Connection): Tx = update(conn, _model)
 
   def debug(implicit conn: Connection): Unit
   def debugE(implicit conn: Connection): Unit
 
-  private val debug = Debug("Molecule insert", 1, 99, false, 3)
+
+
+  // Debug ............................................
+
   protected def _debugInsert(conn: Connection, data: Seq[Seq[Any]]) {
     val transformer = Model2Transaction(conn, _model)
     val stmtss = transformer.insertStmts(data)
-    debug(1, _model, transformer.stmtsModel, data, stmtss)
+    Debug("output.Molecule._debugInsert", 1)(1, _model, transformer.stmtsModel, data, stmtss)
   }
+
+  def debugSave(implicit conn: Connection) {
+    val transformer = Model2Transaction(conn, _model)
+    val stmts = transformer.saveStmts()
+    Debug("output.Molecule.debugSave", 1)(1, _model, transformer.stmtsModel, stmts)
+  }
+
+  def debugUpdate(implicit conn: Connection) {
+    val transformer = Model2Transaction(conn, _model)
+    val stmts = transformer.updateStmts()
+    Debug("output.Molecule.debugUpdate", 1)(1, _model, transformer.stmtsModel, stmts)
+  }
+
+
+  // Pre-insertion checks   ......................................................
 
   protected trait checkInsertModel {
 
@@ -102,11 +120,10 @@ trait Molecule extends DatomicFacade {
           s"""Applying an eid is for updates: `${ns.capitalize}(johnId).likes("pizza").update`""")
       case ok => ok
     }
-
   }
 }
 
-trait MoleculeOutBase{
+trait MoleculeOutBase {
   val _model: Model
   val _query: Query
 }
