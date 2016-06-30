@@ -114,9 +114,10 @@ object model {
   case class NsValue(values: Seq[String]) extends Generic
   case object NoValue extends Generic
 
-  case class BidirectRefAttr(attr: String) extends Generic
-  case class ReverseRef(attr: String) extends Generic
-  case class ReverseAttr(attr: String) extends Generic
+  // Bidirectional markers
+  case object BiAttr extends Generic
+  case class EdgeAttr(attr: String) extends Generic
+  case class RevAttr(attr: String) extends Generic
 
   case object Qm extends Value
   case object Distinct extends Value

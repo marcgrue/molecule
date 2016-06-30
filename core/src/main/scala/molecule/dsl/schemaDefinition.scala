@@ -9,12 +9,12 @@ object schemaDefinition {
 
   trait Bidirectional
 
-  private[molecule] sealed trait scalarAttr[T] {
-    lazy val doc: String => T = (s: String) => ???
-    lazy val indexed       : T         = ???
-    lazy val noHistory     : T         = ???
+  private[molecule] sealed trait scalarAttr[Builder] {
+    lazy val indexed       : Builder         = ???
+    lazy val noHistory     : Builder         = ???
     lazy val uniqueValue   : oneString = ???
     lazy val uniqueIdentity: oneString = ???
+    def doc(s: String) = ??? // can only be last
   }
 
 
@@ -37,16 +37,16 @@ object schemaDefinition {
   trait oneEmail extends oneString
 
   // Number .....................
-  trait number[T] extends scalarAttr[T] {
+  trait number[Builder] extends scalarAttr[Builder] {
     // One by one
-    lazy val count   : T = ???
-    lazy val avg     : T = ???
-    lazy val median  : T = ???
-    lazy val variance: T = ???
-    lazy val stddev  : T = ???
+    lazy val count   : Builder = ???
+    lazy val avg     : Builder = ???
+    lazy val median  : Builder = ???
+    lazy val variance: Builder = ???
+    lazy val stddev  : Builder = ???
 
     // All
-    lazy val aggregates: T = ???
+    lazy val aggregates: Builder = ???
   }
 
   // Int
@@ -144,27 +144,35 @@ object schemaDefinition {
   object manyEnum extends enum
 
 
-  // Ref
+  // References
 
-  private[molecule] trait ref {
-    lazy val doc = (s: String) => this
-  }
-
-  private[molecule] trait one[Ns] extends ref {
-    lazy val bidirectional: ref = ???
-    lazy val subComponent: ref = ???
-  }
-  object one  {
-    def apply[Ns] = new one[Ns] {}
-  }
-
-  private[molecule] trait many[Ns] extends ref {
-//    lazy val propertyEdges: ref = ???
-    lazy val bidirectional: ref = ???
-    lazy val subComponents: ref = ???
+  object one {
+    def apply[Ns] = this
+    lazy val subComponent = this
+    def doc(s: String) = ??? // can only be last
   }
   object many {
-    def apply[Ns] = new many[Ns] {}
+    def apply[Ns] = this
+    lazy val subComponents = this
+    def doc(s: String) = ??? // can only be last
+  }
+
+
+  // Bidirectional self-references
+
+  object oneBi {
+    def apply[ThisNsOrRevRefAttr] = this
+    def doc(s: String) = ??? // can only be last
+  }
+  object manyBi {
+    def apply[ThisNsOrRevRefAttr] = this
+    def doc(s: String) = ??? // can only be last
+  }
+
+  // Reverse ref pointing back to namespace of "outgoing" bidirectional attr
+  object rev {
+    def apply[biRefAttr] = this
+    def doc(s: String) = ??? // can only be last
   }
 }
 

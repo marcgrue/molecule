@@ -135,7 +135,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val stmtss = transformer.insertStmts(dataRows)
     //        x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
-    //        x(2, transformer.stmtsModel, stmtss)
+//            x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
   }
 
@@ -322,7 +322,8 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     val txTtempIds = txResult.get(Connection.TEMPIDS)
     val dbAfter = txResult.get(Connection.DB_AFTER).asInstanceOf[Db]
     val ids: Seq[Long] = tempIds.map(tempId => datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]).distinct
-    //    x(1, transformer.stmtsModel, stmtss, datoms, ids)
+//        x(1, transformer.stmtsModel, stmtss, datoms, ids)
+//        x(1, datoms, tempIds, ids)
     ids.toList
   }
 

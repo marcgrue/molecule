@@ -8,51 +8,58 @@ class Relations extends CoreSpec {
 
   "One-to-One" in new CoreSetup {
 
-    val List(id1, ref1, id2, ref2, id3, ref3) = Ns.str.Ref1.str1 insert List(
+    // Creating 3 entities referencing 3 other entities
+    val List(
+    a0, a1,
+    b0, b1,
+    c0, c1
+    ) = Ns.str.Ref1.str1 insert List(
       ("a0", "a1"),
       ("b0", "b1"),
       ("c0", "c1")) eids
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get === List(
-      ("c0", "c1"),
+    Ns.str.Ref1.str1.get.sorted === List(
       ("a0", "a1"),
-      ("b0", "b1")
+      ("b0", "b1"),
+      ("c0", "c1")
     )
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get === List(
-      ("a0", ref1),
-      ("b0", ref2),
-      ("c0", ref3))
+    Ns.str.ref1.get.sorted === List(
+      ("a0", a1),
+      ("b0", b1),
+      ("c0", c1))
   }
 
 
   "Referenced entity ids" in new CoreSetup {
 
-    val List(orderLine1, orderLine2, orderLine3) = Ref1.str1 insert List("item1", "item2", "item3") eids
+    val List(father1, father2, father3) = Ref1.str1 insert List("father1", "father2", "father3") eids
 
     // We can insert ref entity ids
     Ns.str.ref1 insert List(
-      ("a0", orderLine1),
-      ("b0", orderLine2),
-      ("c0", orderLine3))
+      ("kid1", father1),
+      ("kid2", father2),
+      ("kid3", father3)
+    )
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get === List(
-      ("c0", "item3"),
-      ("b0", "item2"),
-      ("a0", "item1"))
+    Ns.str.Ref1.str1.get.sorted === List(
+      ("kid1", "father1"),
+      ("kid2", "father2"),
+      ("kid3", "father3")
+    )
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get === List(
-      ("a0", orderLine1),
-      ("b0", orderLine2),
-      ("c0", orderLine3))
+    Ns.str.ref1.get.sorted === List(
+      ("kid1", father1),
+      ("kid2", father2),
+      ("kid3", father3))
   }
 
 

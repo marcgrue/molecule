@@ -4,7 +4,7 @@ import java.io.FileReader
 import datomic._
 import molecule._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.schema._
+import molecule.bidirectional._
 
 import scala.language.reflectiveCalls
 
@@ -495,7 +495,7 @@ class SeattleTests extends SeattleSpec {
     )
 
     // Applying nothing (empty parenthesises) finds and retract all values of an attribute
-    Community(belltown).name("belltown 3").url.apply().category().update
+    Community(belltown).name("belltown 3").url().category().update
 
     // Belltown has no longer a url or any categories
     Community.name("belltown 3").`type`.url.category.get === List()

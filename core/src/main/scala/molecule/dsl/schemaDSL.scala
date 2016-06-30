@@ -131,9 +131,6 @@ object schemaDSL {
     // Keyword for entity api
     val _kw: String = ""
 
-    // Empty `apply` in update molecule retracts value(s)!
-    def apply(): Ns with Attr = ???
-
     // Null (datom not asserted)
     def apply(noValue: nil): Ns with Attr = ???
 
@@ -172,8 +169,10 @@ object schemaDSL {
   // Cardinality one attributes
 
   trait One[Ns, In, T] extends ValueAttr[Ns, In, T, T] {
+    // Empty `apply` in update molecule retracts value!
+    def apply()                 : Ns with Attr = ???
     def apply(one: T, more: T*) : Ns with Attr = ???
-    def apply(many: Seq[T])   : Ns with Attr = ???
+    def apply(many: Seq[T])     : Ns with Attr = ???
   }
   trait OneString [Ns, In] extends One[Ns, In, String ]
   trait OneInt    [Ns, In] extends One[Ns, In, Int    ]
@@ -191,7 +190,7 @@ object schemaDSL {
 
   trait Many[Ns, In, S, T] extends ValueAttr[Ns, In, T, S] {
     // Empty `apply` in update molecule retracts all values!
-//    def apply()                                    : Ns with Attr = ???
+    def apply()                                    : Ns with Attr = ???
     def apply(values: T*)                          : Ns with Attr = ???
     def apply(set: S, moreSets: S*)                : Ns with Attr = ???
     def apply(oldNew: (T, T), oldNewMore: (T, T)*) : Ns with Attr = ???
@@ -217,7 +216,7 @@ object schemaDSL {
 
     // Manipulation
     // Empty `apply` in update molecule retracts all key/values!
-//    def apply()                                         : Ns with Attr = ???
+    def apply()                                         : Ns with Attr = ???
     def add(pair: (String, T), morePairs: (String, T)*) : Ns with Attr = ???
     def remove(key: String, moreKeys: String*)          : Ns with Attr = ???
 
@@ -334,13 +333,17 @@ object schemaDSL {
   trait IsComponent
   trait NoHistory
 
-  // Molecule-related options
-  trait BiRefAttr[revAttr]
-  trait BiRef[revAttr]
-//  trait RevRef[revAttr]
-//  trait RevAttr[bidirectRef]
-//  trait OutEdge[revRef]
-//  trait InVertex[bidirectAttr]
-//  trait EdgeProperty[edgeNs]
+
+  // Bidirectional
+
+  // Self-reference
+  trait BiRefAttr
+  trait BiRef
+
+  // Edge-reference (to "property edge/namespace")
+  trait EdgeRefAttr[revRefAttr]
+  trait EdgeRef[revRefAttr]
+  trait RevRefAttr[biRefAttr]
+  trait RevRef[biRefAttr]
 
 }

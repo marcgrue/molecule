@@ -27,11 +27,16 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def refThis = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString)
     def refNext = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
 
-    def isBidirectRefAttr = tpe_ <:< weakTypeOf[BiRefAttr[_]]
-    def isBiRefAttr = tpe_.baseClasses.contains(weakTypeOf[BiRefAttr[_]].typeSymbol)
-    def isBidirectRef = tpe_ <:< weakTypeOf[BiRef[_]]
-    def isReverseAttr = tpe_ <:< weakTypeOf[RevAttr[_]]
-    def isReverseRef = tpe_ <:< weakTypeOf[RevRef[_]]
+    def isBiRefAttr = tpe_ <:< weakTypeOf[BiRefAttr]
+    def isBiRefAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiRefAttr].typeSymbol)
+    def isBiRef = tpe_ <:< weakTypeOf[BiRef]
+
+    def isEdgeRefAttr = tpe_ <:< weakTypeOf[EdgeRefAttr[_]]
+    def isEdgeRefAttr2 = tpe_.baseClasses.contains(weakTypeOf[EdgeRefAttr[_]].typeSymbol)
+    def isEdgeRef = tpe_ <:< weakTypeOf[EdgeRef[_]]
+
+    def isRevRefAttr = tpe_ <:< weakTypeOf[RevRefAttr[_]]
+    def isRevRef = tpe_ <:< weakTypeOf[RevRef[_]]
 
     def isRef = tpe_ <:< weakTypeOf[Ref[_, _]]
     def isOneRef = tpe_ <:< weakTypeOf[OneRef[_, _]]

@@ -80,8 +80,16 @@ object MoleculeBoilerplate {
     }
 
     // Check domain name
-    //    val domain =
-    raw collect {
+    raw.collectFirst {
+      case r"class (.*)${dmn}Definition"        => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"class (.*)${dmn}Definition \{"     => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"class (.*)${dmn}Definition \{ *\}" => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition"        => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition \{"     => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition \{ *\}" => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+    }
+
+    raw.collect {
       case r"object (.*)${name}Definition"      => name
       case r"object (.*)${name}Definition \{"   => name
       case r"object (.*)${name}Definition \{\}" => name
@@ -94,113 +102,315 @@ object MoleculeBoilerplate {
 
     // Parse ..........................................
 
-    //    def parseOptions(str0: String, acc: Seq[Optional] = Nil, revNs: String = "", revRef0: String = ""): Seq[Optional] = {
-    def parseOptions(str0: String, acc: Seq[Optional] = Nil): Seq[Optional] = {
+    def parseOptions(str0: String, acc: Seq[Optional] = Nil, attr: String, curFullNs: String = ""): Seq[Optional] = {
       val indexed = Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed")
       val options = str0 match {
-        case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional(s"""":db/doc"               , $msg""", ""))
-        case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"))
-        case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/value"""", "UniqueValue"))
-        case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"))
-        case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-        case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-        case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional("""":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"))
-        case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ indexed)
-        case r"\.bidirectional(.*)$str"   => parseOptions(str, acc :+ Optional("", "Bidirectional"))
+        case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional(s"""":db/doc"               , $msg""", ""), attr, curFullNs)
+        case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"), attr, curFullNs)
+        case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/value"""", "UniqueValue"), attr, curFullNs)
+        case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional("""":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"), attr, curFullNs)
+        case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"), attr, curFullNs)
+        case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"), attr, curFullNs)
+        case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional("""":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"), attr, curFullNs)
+        case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ indexed, attr, curFullNs)
         case ""                           => acc
-        case unexpected                   => sys.error(s"Unexpected options code in ${defFile.getName}:\n" + unexpected)
+        case unexpected                   => sys.error(s"Unexpected options code for attribute `$attr` in namespace `$curFullNs` in ${defFile.getName}:\n" + unexpected)
       }
       if (allIndexed) (options :+ indexed).distinct else options
     }
 
-    def parseAttr(backTics: Boolean, attrClean: String, str: String, curPart: String): Seq[Attr] = {
+    def parseAttr(backTics: Boolean, attrClean: String, str: String, curPart: String, curFullNs: String): Seq[Attr] = {
       val attr = if (backTics) s"`$attrClean`" else attrClean
       val attrK = attrClean + "K"
-      str match {
-        case r"oneString(.*)$str"  => Seq(Val(attr, attrClean, "OneString", "String", "", "string", parseOptions(str)))
-        case r"oneByte(.*)$str"    => Seq(Val(attr, attrClean, "OneByte", "Byte", "", "byte", parseOptions(str)))
-        case r"oneShort(.*)$str"   => Seq(Val(attr, attrClean, "OneShort", "Short", "", "short", parseOptions(str)))
-        case r"oneInt(.*)$str"     => Seq(Val(attr, attrClean, "OneInt", "Int", "", "long", parseOptions(str)))
-        case r"oneLong(.*)$str"    => Seq(Val(attr, attrClean, "OneLong", "Long", "", "long", parseOptions(str)))
-        case r"oneFloat(.*)$str"   => Seq(Val(attr, attrClean, "OneFloat", "Float", "", "double", parseOptions(str)))
-        case r"oneDouble(.*)$str"  => Seq(Val(attr, attrClean, "OneDouble", "Double", "", "double", parseOptions(str)))
-        case r"oneBoolean(.*)$str" => Seq(Val(attr, attrClean, "OneBoolean", "Boolean", "", "boolean", parseOptions(str)))
-        case r"oneDate(.*)$str"    => Seq(Val(attr, attrClean, "OneDate", "java.util.Date", "", "instant", parseOptions(str)))
-        case r"oneUUID(.*)$str"    => Seq(Val(attr, attrClean, "OneUUID", "java.util.UUID", "", "uuid", parseOptions(str)))
-        case r"oneURI(.*)$str"     => Seq(Val(attr, attrClean, "OneURI", "java.net.URI", "", "uri", parseOptions(str)))
+      val curNs = if (curFullNs.contains('_')) curFullNs.split("_").last else curFullNs
+      val curPartDotNs = if (curFullNs.contains('_')) curFullNs.replace("_", ".") else curFullNs
 
-        case r"manyString(.*)$str"  => Seq(Val(attr, attrClean, "ManyString", "Set[String]", "String", "string", parseOptions(str)))
-        case r"manyInt(.*)$str"     => Seq(Val(attr, attrClean, "ManyInt", "Set[Int]", "Int", "long", parseOptions(str)))
-        case r"manyLong(.*)$str"    => Seq(Val(attr, attrClean, "ManyLong", "Set[Long]", "Long", "long", parseOptions(str)))
-        case r"manyFloat(.*)$str"   => Seq(Val(attr, attrClean, "ManyFloat", "Set[Float]", "Float", "double", parseOptions(str)))
-        case r"manyDouble(.*)$str"  => Seq(Val(attr, attrClean, "ManyDouble", "Set[Double]", "Double", "double", parseOptions(str)))
-        case r"manyBoolean(.*)$str" => Seq(Val(attr, attrClean, "ManyBoolean", "Set[Boolean]", "Boolean", "boolean", parseOptions(str)))
-        case r"manyDate(.*)$str"    => Seq(Val(attr, attrClean, "ManyDate", "Set[java.util.Date]", "java.util.Date", "instant", parseOptions(str)))
-        case r"manyUUID(.*)$str"    => Seq(Val(attr, attrClean, "ManyUUID", "Set[java.util.UUID]", "java.util.UUID", "uuid", parseOptions(str)))
-        case r"manyURI(.*)$str"     => Seq(Val(attr, attrClean, "ManyURI", "Set[java.net.URI]", "java.net.URI", "uri", parseOptions(str)))
+      str match {
+        case r"oneString(.*)$str"  => Seq(Val(attr, attrClean, "OneString", "String", "", "string", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneByte(.*)$str"    => Seq(Val(attr, attrClean, "OneByte", "Byte", "", "byte", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneShort(.*)$str"   => Seq(Val(attr, attrClean, "OneShort", "Short", "", "short", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneInt(.*)$str"     => Seq(Val(attr, attrClean, "OneInt", "Int", "", "long", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneLong(.*)$str"    => Seq(Val(attr, attrClean, "OneLong", "Long", "", "long", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneFloat(.*)$str"   => Seq(Val(attr, attrClean, "OneFloat", "Float", "", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneDouble(.*)$str"  => Seq(Val(attr, attrClean, "OneDouble", "Double", "", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneBoolean(.*)$str" => Seq(Val(attr, attrClean, "OneBoolean", "Boolean", "", "boolean", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneDate(.*)$str"    => Seq(Val(attr, attrClean, "OneDate", "java.util.Date", "", "instant", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneUUID(.*)$str"    => Seq(Val(attr, attrClean, "OneUUID", "java.util.UUID", "", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneURI(.*)$str"     => Seq(Val(attr, attrClean, "OneURI", "java.net.URI", "", "uri", parseOptions(str, Nil, attr, curFullNs)))
+
+        case r"manyString(.*)$str"  => Seq(Val(attr, attrClean, "ManyString", "Set[String]", "String", "string", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyInt(.*)$str"     => Seq(Val(attr, attrClean, "ManyInt", "Set[Int]", "Int", "long", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyLong(.*)$str"    => Seq(Val(attr, attrClean, "ManyLong", "Set[Long]", "Long", "long", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyFloat(.*)$str"   => Seq(Val(attr, attrClean, "ManyFloat", "Set[Float]", "Float", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyDouble(.*)$str"  => Seq(Val(attr, attrClean, "ManyDouble", "Set[Double]", "Double", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyBoolean(.*)$str" => Seq(Val(attr, attrClean, "ManyBoolean", "Set[Boolean]", "Boolean", "boolean", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyDate(.*)$str"    => Seq(Val(attr, attrClean, "ManyDate", "Set[java.util.Date]", "java.util.Date", "instant", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyUUID(.*)$str"    => Seq(Val(attr, attrClean, "ManyUUID", "Set[java.util.UUID]", "java.util.UUID", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyURI(.*)$str"     => Seq(Val(attr, attrClean, "ManyURI", "Set[java.net.URI]", "java.net.URI", "uri", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"mapString(.*)$str"  => Seq(
-          Val(attr, attrClean, "MapString", "Map[String, String]", "String", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneString", "String", "K", "string", parseOptions(str)))
+          Val(attr, attrClean, "MapString", "Map[String, String]", "String", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneString", "String", "K", "string", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapInt(.*)$str"     => Seq(
-          Val(attr, attrClean, "MapInt", "Map[String, Int]", "Int", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneInt", "Int", "K", "long", parseOptions(str)))
+          Val(attr, attrClean, "MapInt", "Map[String, Int]", "Int", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneInt", "Int", "K", "long", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapLong(.*)$str"    => Seq(
-          Val(attr, attrClean, "MapLong", "Map[String, Long]", "Long", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneLong", "Long", "K", "long", parseOptions(str)))
+          Val(attr, attrClean, "MapLong", "Map[String, Long]", "Long", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneLong", "Long", "K", "long", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapFloat(.*)$str"   => Seq(
-          Val(attr, attrClean, "MapFloat", "Map[String, Float]", "Float", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneFloat", "Float", "K", "double", parseOptions(str)))
+          Val(attr, attrClean, "MapFloat", "Map[String, Float]", "Float", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneFloat", "Float", "K", "double", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapDouble(.*)$str"  => Seq(
-          Val(attr, attrClean, "MapDouble", "Map[String, Double]", "Double", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneDouble", "Double", "K", "double", parseOptions(str)))
+          Val(attr, attrClean, "MapDouble", "Map[String, Double]", "Double", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneDouble", "Double", "K", "double", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapBoolean(.*)$str" => Seq(
-          Val(attr, attrClean, "MapBoolean", "Map[String, Boolean]", "Boolean", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneBoolean", "Boolean", "K", "boolean", parseOptions(str)))
+          Val(attr, attrClean, "MapBoolean", "Map[String, Boolean]", "Boolean", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneBoolean", "Boolean", "K", "boolean", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapDate(.*)$str"    => Seq(
-          Val(attr, attrClean, "MapDate", "Map[String, java.util.Date]", "java.util.Date", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneDate", "java.util.Date", "K", "instant", parseOptions(str)))
+          Val(attr, attrClean, "MapDate", "Map[String, java.util.Date]", "java.util.Date", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneDate", "java.util.Date", "K", "instant", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapUUID(.*)$str"    => Seq(
-          Val(attr, attrClean, "MapUUID", "Map[String, java.util.UUID]", "java.util.UUID", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneUUID", "java.util.UUID", "K", "uuid", parseOptions(str)))
+          Val(attr, attrClean, "MapUUID", "Map[String, java.util.UUID]", "java.util.UUID", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneUUID", "java.util.UUID", "K", "uuid", parseOptions(str, Nil, attr, curFullNs)))
         case r"mapURI(.*)$str"     => Seq(
-          Val(attr, attrClean, "MapURI", "Map[String, java.net.URI]", "java.net.URI", "string", parseOptions(str)),
-          Val(attrK, attrK, "OneURI", "java.net.URI", "K", "uri", parseOptions(str)))
+          Val(attr, attrClean, "MapURI", "Map[String, java.net.URI]", "java.net.URI", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneURI", "java.net.URI", "K", "uri", parseOptions(str, Nil, attr, curFullNs)))
 
-        case r"oneEnum\((.*?)$enums\)(.*)$str"  => Seq(Enum(attr, attrClean, "OneEnum", "String", "", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str)))
-        case r"manyEnum\((.*?)$enums\)(.*)$str" => Seq(Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str)))
+        case r"oneEnum\((.*?)$enums\)(.*)$str"  => Seq(Enum(attr, attrClean, "OneEnum", "String", "", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyEnum\((.*?)$enums\)(.*)$str" => Seq(Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
 
-        case r"one\[\w*Definition\.([a-z].*)$partref\](.*)$str"  => Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", partref.replace(".", "_"), parseOptions(str, Nil)))
-        case r"one\[([a-z].*)$partref\](.*)$str"                 => Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", partref.replace(".", "_"), parseOptions(str, Nil)))
-        case r"one\[(.*)$ref\](.*)$str" if curPart.isEmpty       => Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref, parseOptions(str, Nil)))
-        case r"one\[(.*)$ref\](.*)$str"                          => Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", curPart + "_" + ref, parseOptions(str, Nil)))
-        case r"many\[\w*Definition\.([a-z].*)$partref\](.*)$str" => Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", partref.replace(".", "_"), parseOptions(str, Nil)))
-        case r"many\[([a-z].*)$partref\](.*)$str"                => Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", partref.replace(".", "_"), parseOptions(str, Nil)))
-        case r"many\[(.*)$ref\](.*)$str" if curPart.isEmpty      => Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref, parseOptions(str, Nil)))
-        case r"many\[(.*)$ref\](.*)$str"                         => Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", curPart + "_" + ref, parseOptions(str, Nil)))
+        // Bidirectional references
+
+        case r"oneBi\[(.*)$biRef\](.*)$str" =>
+          val (ref, refOptional) = parseBiRefTypeArg("one", biRef, attr, curPart, curFullNs)
+          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref, refOptional +: parseOptions(str, Nil, attr, curFullNs)))
+
+        case r"manyBi\[(.*)$biRef\](.*)$str" =>
+          val (ref, refOptional) = parseBiRefTypeArg("many", biRef, attr, curPart, curFullNs)
+          Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref, refOptional +: parseOptions(str, Nil, attr, curFullNs)))
+
+
+        // Bidirectional reverse reference
+
+        case r"rev\[(.*)$revRef\](.*)$str" =>
+          val ref = parseRefTypeArg(revRef, curPart)
+          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref, Optional(s"$curFullNs.$attr", s"ReverseRef") +: parseOptions(str, Nil, attr, curFullNs)))
+
+
+        // References
+
+        case r"one\[(.*)$ref\](.*)$str"  => Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", parseRefTypeArg(ref, curPart), parseOptions(str, Nil, attr, curFullNs)))
+        case r"many\[(.*)$ref\](.*)$str" => Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", parseRefTypeArg(ref, curPart), parseOptions(str, Nil, attr, curFullNs)))
+
+
+        // Missing ref type args
+
+        case r"oneBi(.*)$str" => sys.error(
+          s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
+              |Please add something like:
+              |  val $attr = oneBi[$curNs] // for bidirectional self-reference, or:
+              |  val $attr = oneBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
+
+        case r"manyBi(.*)$str" => sys.error(
+          s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
+              |Please add something like:
+              |  val $attr = manyBi[$curNs] // for bidirectional self-reference, or:
+              |  val $attr = manyBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
+
+        case r"rev(.*)$str" => sys.error(
+          s"""Type arg missing for bidirectional reverse ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
+              |Please add the namespace where the bidirectional ref pointing to this attribute was defined:
+              |  val $attr = rev[<definingNamespace>]""".stripMargin)
+
+        case r"one(.*)$str" => sys.error(
+          s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
+              |Please add something like:
+              |  val $attr = one[$curNs] // for self-reference, or
+              |  val $attr = one[<otherNamespace>] // for ref towards other namespace""".stripMargin)
+
+        case r"many(.*)$str" => sys.error(
+          s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
+              |Please add something like:
+              |  val $attr = many[$curNs] // for self-reference, or
+              |  val $attr = many[<otherNamespace>] // for ref towards other namespace""".stripMargin)
 
         case unexpected => sys.error(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
       }
     }
 
+    def parseRefTypeArg(refStr: String, curPartition: String = "") = refStr match {
+      case r"\w*Definition\.([a-z].*)$partref"  => partref.replace(".", "_")
+      case r"([a-z]\w*)$part\.(.*)$ref"         => part + "_" + ref
+      case r"(.*)$ref" if curPartition.nonEmpty => curPartition + "_" + ref
+      case r"(.*)$ref"                          => ref
+    }
+
+    def parseRefRefTypeArg(card: String, refStr: String, baseAttr: String, basePart: String = "", baseFullNs: String = "") = {
+
+    }
+
+    def parseBiRefTypeArg(card: String, refStr: String, baseAttr: String, basePart: String = "", baseFullNs: String = "") = {
+      //            println(s"basePart baseFullNs baseAttr: $basePart      $baseFullNs      $baseAttr")
+
+      refStr match {
+
+        // val selfRef = oneBi[MyDomainDefinition.ThisPartition.ThisNamespace.selfRef.type]  // or manyBi
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" if s"${part}_$ref" == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+        // val outRefAttr: AnyRef = oneBi[MyDomainDefinition.ThisPartition.OtherNamespace.revRefAttr.type]  // or manyBi
+        // should be only
+        // val outRefAttr: AnyRef = oneBi[OtherNamespace.revRefAttr.type]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" if part == basePart =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have " +
+            s"only the namespace prefix in the type argument:\n  val $baseAttr: AnyRef = ${card}Bi[$ref.$a.type]")
+
+        // val outRefAttr = oneBi[MyDomainDefinition.SomePartition.OtherNamespace.revRefAttr.type]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" =>
+          println(s"1  $basePart      $baseFullNs      $baseAttr                 ---    $part      $ref      $a")
+          (s"${part}_$ref", Optional(s"${part}_$ref.$a", s"EdgeRef:$baseFullNs.$baseAttr"))
+
+
+        // val selfRef = oneBi[ThisPartition.ThisNamespace.selfRef.type]
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" if s"${part}_$ref" == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+        //      // val outRefAttr: AnyRef = oneBi[ThisPartition.OtherNamespace.revRefAttr.type]
+        //      // should be only
+        //      // val outRefAttr: AnyRef = oneBi[OtherNamespace.revRefAttr.type]
+        //      case r"([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" if part == curPart =>
+        //        sys.error(s"Bidirectional reference `$attr` in `$curFullNs` of ${defFile.getName} should have " +
+        //          s"only the namespace prefix in the type argument:\n  val $attr: AnyRef = ${card}Bi[$ref.$a.type]")
+
+        // val outgoingRef = oneBi[SomePartition.OtherNamespace.revRefAttr.type]
+        case r"([a-z]\w*)$part\.(.*)$ref\.(.*)$a\.type" =>
+          println(s"2  $basePart      $baseFullNs      $baseAttr                 ---    $part      $ref      $a")
+          (s"${part}_$ref", Optional(s"${part}_$ref.$a", s"EdgeRef:$baseFullNs.$baseAttr"))
+
+
+        // val selfRef = oneBi[ThisNamespace.selfRef.type]
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"(.*)$ref\.(.*)$a\.type" if basePart.nonEmpty && s"${basePart}_$ref" == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+
+
+
+        // val outRefAttr: AnyRef = oneBi[OtherNamespace.revRefAttr.type]
+        case r"(.*)$ref\.(.*)$a\.type" if basePart.nonEmpty =>
+          println(s"3  $basePart      $baseFullNs      $baseAttr                 ---    $ref      $a")
+          (s"${basePart}_$ref", Optional(s"${basePart}_$ref.$a", s"EdgeRef:$baseFullNs.$baseAttr"))
+
+
+
+
+        // val selfRef = oneBi[ThisNamespace.selfRef.type]
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"(.*)$ref\.(.*)$a\.type" if ref == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+        // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
+        case r"(.*)$ref\.(.*)$a\.type" =>
+          println(s"4  $basePart      $baseFullNs      $baseAttr                 ---    $ref      $a")
+          (ref, Optional(s"$ref.$a", s"Bidirectional:$baseFullNs.$baseAttr"))
+
+
+        // val selfRef = oneBi[selfRef.type] // presuming it hasn't been imported from another namespace
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"(.*)$a\.type" if a == baseAttr =>
+          val ns = if (basePart.nonEmpty) baseFullNs.split("_").last else baseFullNs
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and only needs the current namespace as type argument:\n  val $baseAttr = ${card}Bi[$ns]")
+
+
+
+        // val selfRef = oneBi[MyDomainDefinition.ThisPartition.ThisNamespace]  // or manyBi
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref" if s"${part}_$ref" == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+        // val outRefAttr = oneBi[MyDomainDefinition.ThisPartition.OtherNamespace]
+        // should be
+        // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref" if part == basePart =>
+          sys.error(s"Missing reverse reference attribute type for bidirectional ref `$baseAttr` in `$baseFullNs` of ${defFile.getName}. " +
+            s"Please append reverse attribute name and type:\n  val $baseAttr: AnyRef = ${card}Bi[$ref.<revRefAttr>.type]")
+
+        // val outRefAttr: AnyRef = oneBi[MyDomainDefinition.SomePartition.OtherNamespace]
+        // should be
+        // val outRefAttr: AnyRef = oneBi[SomePartition.OtherNamespace.revRefAttr.type]
+        case r"\w*Definition\.([a-z]\w*)$part\.(.*)$ref" =>
+          sys.error(s"Missing reverse reference attribute type for bidirectional ref `$baseAttr` in `$baseFullNs` of ${defFile.getName}. " +
+            s"Please append reverse attribute name and type:\n  val $baseAttr: AnyRef = ${card}Bi[$part.$ref.<revRefAttr>.type]")
+
+
+
+        // val selfRef = oneBi[ThisPartition.ThisNamespace.selfRef.type]
+        // should be only
+        // val selfRef = oneBi[ThisNamespace]
+        case r"([a-z]\w*)$part\.(.*)$ref" if s"${part}_$ref" == baseFullNs =>
+          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+            s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$ref]")
+
+        // val outgoingRef: AnyRef = oneBi[ThisPartition.OtherNamespace]
+        // should be
+        // val outgoingRef: AnyRef = oneBi[OtherNamespace.revRefAttr.type]
+        case r"([a-z]\w*)$part\.(.*)$ref" if part == basePart =>
+          sys.error(s"Missing reverse reference attribute type for bidirectional ref `$baseAttr` in `$baseFullNs` of ${defFile.getName}. " +
+            s"Please append reverse attribute name and type:\n  val $baseAttr: AnyRef = ${card}Bi[$ref.<revRefAttr>.type]")
+
+        // val outRefAttr: AnyRef = oneBi[MyDomainDefinition.SomePartition.OtherNamespace]
+        // should be
+        // val outRefAttr: AnyRef = oneBi[SomePartition.OtherNamespace.revRefAttr.type]
+        case r"([a-z]\w*)$part\.(.*)$ref" =>
+          sys.error(s"Missing reverse reference attribute type for bidirectional ref `$baseAttr` in `$baseFullNs` of ${defFile.getName}. " +
+            s"Please append reverse attribute name and type:\n  val $baseAttr: AnyRef = ${card}Bi[$part.$ref.<revRefAttr>.type]")
+
+        // Presuming a self-reference when only a namespace is defined as type arg - to be verified!
+        case ref if basePart.nonEmpty =>
+          println(s"5  $basePart      $baseFullNs      $baseAttr                 ---    $ref")
+          (s"${basePart}_$ref", Optional(s"${basePart}_$ref.$baseAttr", "Bidirectional"))
+
+        case ref if ref != baseFullNs => sys.error(s"Please add reverse attr name and type as type argument to bidirectional " +
+          s"ref `$baseAttr` in `$baseFullNs` of ${defFile.getName}:\n  val $baseAttr = ${card}Bi[$ref.<revRefAttr>.type]")
+
+        case ref =>
+          println(s"6  $basePart      $baseFullNs      $baseAttr                 ---    $ref")
+          //          (ref, Optional(s"$ref.$baseAttr", "Bidirectional"))
+          (ref, Optional("", "Bidirectional"))
+      }
+    }
+
     val definition: Definition = raw.foldLeft(Definition("", Seq(), -1, -1, "", "", Seq())) {
       case (d, line) => line.trim match {
-        case r"\/\/.*" /* comments allowed */                 => d
-        case r"package (.*)$path\.[\w]*"                      => d.copy(pkg = path)
-        case "import molecule.dsl.schemaDefinition._"         => d
-        case r"@InOut\((\d+)$inS, (\d+)$outS\)"               => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
-        case r"object (.*)${dmn}Definition \{"                => d.copy(domain = dmn)
-        case r"object ([a-z]*)$part\s*\{"                     => d.copy(curPart = part)
-        case r"object (\w*)$part\s*\{"                        => sys.error(s"Unexpected partition name '$part' in ${defFile.getName}. Only small letters (a-z) allowed in a partition name.")
-        case r"trait ([A-Z]\w*)$ns\s*\{"                      => {
-          val partns = if (d.curPart.isEmpty) ns else d.curPart + "_" + ns
-          // prepend partition to its namespaces
-          d.copy(nss = d.nss :+ Namespace(d.curPart, partns))
-        }
-        case r"trait (\w*)$ns\s*\{"                           => sys.error(s"Unexpected namespace name '$ns' in ${defFile.getName}. Namespaces have to start with a capital letter [A-Z].")
-        case r"val\s*(\`?)$q1(\w*)$a(\`?)$q2\s*\=\s*(.*)$str" => d.addAttr(parseAttr(q1.nonEmpty, a, str, d.curPart))
+        case r"\/\/.*" /* comments allowed */                  => d
+        case r"package (.*)$path\.[\w]*"                       => d.copy(pkg = path)
+        case "import molecule.dsl.schemaDefinition._"          => d
+        case r"@InOut\((\d+)$inS, (\d+)$outS\)"                => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
+        case r"object (.*)${dmn}Definition \{"                 => d.copy(domain = dmn)
+        case r"object ([a-z]\w*)$part\s*\{"                    => d.copy(curPart = part)
+        case r"object (\w*)$part\s*\{"                         => sys.error(s"Partition name '$part' in ${defFile.getName} should start with a lowercase letter")
+        case r"trait ([A-Z]\w*)$ns\s*\{" if d.curPart.nonEmpty => d.copy(nss = d.nss :+ Namespace(d.curPart, d.curPart + "_" + ns))
+        case r"trait ([A-Z]\w*)$ns\s*\{"                       => d.copy(nss = d.nss :+ Namespace("", ns))
+        case r"trait (\w*)$ns\s*\{"                            => sys.error(s"Unexpected namespace name '$ns' in ${defFile.getName}. Namespaces have to start with a capital letter [A-Z].")
+        //        case r"val\s*(\`?)$q1(\w*)$a(\`?)$q2: AnyRef\s*\=\s*(.*)$str" => d.addAttr(parseAttr(q1.nonEmpty, a, str, d.curPart, d.nss.last.ns))
+        case r"val\s*(\`?)$q1(\w*)$a(\`?)$q2\s*\=\s*(.*)$str" => d.addAttr(parseAttr(q1.nonEmpty, a, str, d.curPart, d.nss.last.ns))
         case "}"                                              => d
         case ""                                               => d
+        case r"object .* extends .*"                          => d
         case unexpected                                       => sys.error(s"Unexpected definition code in ${defFile.getName}:\n" + unexpected)
       }
     }
@@ -225,36 +435,47 @@ object MoleculeBoilerplate {
 
     // Gather OneRefs (ManyRefs are treated as nested data structures)
     val revRefMap = nss.flatMap(_.attrs.collect {
-      case bidirectRef@Ref(attr, _, _, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
+      case bidirectRef@Ref(attr, _, _, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("EdgeRef:")) =>
         opts.collectFirst {
-          case Optional(revRef, clazz) if clazz.startsWith("Bidirectional") =>
-            val bidirectParts = clazz.split(':').toList.tail
-            val revRefParts = revRef.split('.').toList
-            (revRefParts.head -> revRefParts.last) -> s"${bidirectParts.head}.${bidirectParts.last}"
-        } get
+          case Optional(revRef, clazz) if clazz.startsWith("EdgeRef:") =>
+            //            val bidirectParts = clazz.split(':').toList.last
+            //            val revRefParts = revRef.split('.').toList
+            //            (revRefParts.head -> revRefParts.last) -> clazz.split(':').toList.last
+            revRef -> clazz.split(':').toList.last
+        }.get
     }).toMap
 
-    println(revRefMap)
+    //    println(revRefMap)
 
     nss.map { ns =>
       val attrs2 = ns.attrs map {
-        case oneRef@Ref(revRef, attrClean, _, _, _, "", _, opts) if revRefMap.keys.toList.contains((ns.ns, revRef)) =>
-          // Extra check that we are not overwriting a bidirectional definition
-          if (opts.exists(_.clazz.startsWith("Bidirectional")))
-            sys.error(
-              s"""$error
-                 |Unexpected reverse ref in optionals:
-                 |  ${opts.mkString("\n  ")}
-                """.stripMargin)
+        case oneRef@Ref(revRef, attrClean, _, _, _, "", _, opts) if revRefMap.keys.toList.contains(s"${ns.ns}.$revRef") =>
 
-          val bidirectRef = revRefMap((ns.ns, revRef))
-          val reverseRefOptional = Optional(bidirectRef, s"ReverseRef:$revRef")
-          oneRef.copy(options = opts :+ reverseRefOptional)
+          val newOpts = opts.map {
+            case Optional(ns1, "ReverseRef") => Optional(revRefMap(s"${ns.ns}.$revRef"), s"ReverseRef")
+            case other                       => other
+          }
+          //          // Extra check that we are not overwriting a bidirectional definition
+          //          if (opts.exists(_.clazz.startsWith("Bidirectional")))
+          //            sys.error(
+          //              s"""$error
+          //                 |Unexpected reverse ref in optionals:
+          //                 |  ${opts.mkString("\n  ")}
+          //                    """.stripMargin)
+          //
+          //          //          val bidirectRef = revRefMap((ns.ns, revRef))
+          //          val bidirectRef = revRefMap(s"${ns.ns}.$revRef")
+          //          val reverseRefOptional = Optional(bidirectRef, s"ReverseRef:$revRef")
+          //          oneRef.copy(options = opts :+ reverseRefOptional)
+
+          oneRef.copy(options = newOpts)
 
         case otherAttr => otherAttr
       }
       ns.copy(attrs = attrs2)
     }
+
+    //    nss
   }
 
   def resolveBidrectionals(domain: String, updatedNss0: Seq[Namespace], curNs: Namespace): Seq[Namespace] = {
@@ -262,15 +483,20 @@ object MoleculeBoilerplate {
     val nsLower = firstLow(curNs.ns)
     val error = s"Error in ${domain}Definition:"
 
-    //    println(s"--------- $domain ---------")
-    //    println("curNs: " + curNs.ns)
+    //        println(s"--------- $domain ---------")
+    //        println("curNs: " + curNs.ns)
 
     // Resolve bidirectional refs
 
     val attrs1 = curNs.attrs map {
 
       // Bidirectional ref (val knows = one[Person]) pointing to vertex namespace itself
-      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if revNs == curNs.ns && opts.exists(_.clazz == "Bidirectional") => {
+      //      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if revNs == curNs.ns && opts.exists(_.clazz == "Bidirectional") => {
+      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if opts.exists(_.clazz == "Bidirectional") => {
+
+        //        val newOpts = opts.collectFirst {
+        //          case Optional(revRef, "Bidirectinal") =>
+        //        }
 
         val newOpts = opts map {
           case bidirectOps if bidirectOps.clazz == "Bidirectional"          =>
@@ -279,7 +505,7 @@ object MoleculeBoilerplate {
             s"""$error
                |Unexpected bidirectional ref definition:
                |$bidirectOps
-                 """.stripMargin)
+                     """.stripMargin)
           case otherOps                                                     => otherOps
         }
 
@@ -291,116 +517,116 @@ object MoleculeBoilerplate {
       }
 
       // Bidirectional ref (val knows = one[Knows]) pointing to property edge namespace
-      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if opts.exists(_.clazz == "Bidirectional") => {
-
-        //                println("bidirectRef: " + bidirectRef)
-        //        println("revNs: " + revNs)
-        sys.error(
-          s"""$error
-             |For the moment bidirectional references are only allowed to the same
-             |namespace `${curNs.ns}` like:
-             |  val $bidirectAttr = one[${curNs.ns}]""".stripMargin)
-
-        val revRef = updatedNss0 collectFirst {
-
-          case ns_ if revNs == ns_.ns => {
-
-            val reverseRefs = ns_.attrs collect {
-
-              // Reverse ref pointing back to vertex namespace
-              case reverseRef@Ref(attr, _, _, _, _, _, revNs2, opts2) if revNs2 == curNs.ns =>
-                // Only define bidirection in vertex namespace
-                opts2 collectFirst {
-                  case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
-                    s"""$error
-                       |Add the `bidirectional` only to the ref in the "vertex namespace" `${curNs.ns}`
-                       |that points to the edge namespace `$revNs`.
-                       |In the edge namespace `$revNs` simply omit the `bidirectional` option:
-                       |  val $attr = one[${curNs.ns}]
-                         """.stripMargin)
-                }
-                reverseRef
-
-              // Other refs
-              case otherRef@Ref(attr, _, _, _, _, baseTpe, refNs, opts2) => {
-                val card = if (baseTpe.isEmpty) "one" else "many"
-                sys.error(
-                  s"""$error
-                     |"Property edge" namespace `$revNs` is only allowed to have reverse references
-                     |pointing back to namespace `${curNs.ns}` (like `val $nsLower = one[${curNs.ns}]`).
-                     |Found un-allowed reference in property edge namespace `$revNs`:
-                     |  val $attr = $card[$refNs]
-                      """.stripMargin)
-              }
-            }
-
-            // Expect only 1 reverse ref
-            val reverseRef = reverseRefs.length match {
-              case 0          => sys.error(
-                s"""$error
-                   |Can't find  reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
-                   |Expecting something like:
-                   |  val $nsLower = one[${curNs.ns}]
-                     """.stripMargin)
-              case n if n > 1 =>
-                val refs = reverseRefs.map { r =>
-                  val card = if (r.baseTpe.isEmpty) "one" else "many"
-                  s"val ${r.attr} = $card[${curNs.ns}]"
-                }.mkString("\n  ")
-                sys.error(
-                  s"""$error
-                     |Can only have one reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
-                     |Found $n reverse references pointing back to `${curNs.ns}`:
-                     |  $refs
-                     |Expected something like:
-                     |  val $nsLower = one[${curNs.ns}]
-                     """.stripMargin)
-              case 1          => reverseRefs.head
-            }
-
-
-            // No edge namespace without edge properties
-            if (ns_.attrs.collect { case v: Val => v case e: Enum => e }.isEmpty)
-              sys.error(
-                s"""$error
-                   |Edge namespaces like `$revNs` should have at least 1 edge property (attribute/enum) defined.
-                   |If no edge properties are needed, you should skip the separate namespace `$revNs` and simply
-                   |only have a bidirectional self-reference in `${curNs.ns}`, like:
-                   |  val ${firstLow(revNs)} = one[${curNs.ns}]
-                       """.stripMargin)
-
-
-            //            println("reverseRef : " + reverseRef)
-
-            // Expect only card-one reverse ref
-            reverseRef match {
-              case Ref(attr_, _, _, _, _, baseTpe, _, _) if baseTpe.nonEmpty =>
-                sys.error(
-                  s"""$error
-                     |Reverse ref `$attr_` in namespace `$revNs` is expected
-                     |to be a cardinality one ref. Please change to:
-                     |  val $attr_ = one[${curNs.ns}]
-                       """.stripMargin)
-              case revRef                                                    => revRef.attr
-            }
-          }
-        } get
-
-        //        println("reverseRefName: " + revRef)
-
-        val newOpts = opts map {
-          case bidirectOps if bidirectOps.clazz == "Bidirectional"          =>
-            bidirectOps.copy(datomicKeyValue = s"$revNs.$revRef", clazz = s"Bidirectional:${curNs.ns}:$bidirectAttr")
-          case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
-            s"""$error
-               |Unexpected bidirectional ref definition:
-               |$bidirectOps
-                 """.stripMargin)
-          case otherOps                                                     => otherOps
-        }
-
-        bidirectRef.copy(options = newOpts)
-      }
+      //      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if opts.exists(_.clazz == "Bidirectional") => {
+      //
+      //        //                println("bidirectRef: " + bidirectRef)
+      //        //        println("revNs: " + revNs)
+      //        sys.error(
+      //          s"""$error
+      //             |For the moment bidirectional references are only allowed to the same
+      //             |namespace `${curNs.ns}` like:
+      //             |  val $bidirectAttr = one[${curNs.ns}]""".stripMargin)
+      //
+      //        val revRef = updatedNss0.collectFirst {
+      //
+      //          case ns_ if revNs == ns_.ns => {
+      //
+      //            val reverseRefs = ns_.attrs collect {
+      //
+      //              // Reverse ref pointing back to vertex namespace
+      //              case reverseRef@Ref(attr, _, _, _, _, _, revNs2, opts2) if revNs2 == curNs.ns =>
+      //                // Only define bidirection in vertex namespace
+      //                opts2 collectFirst {
+      //                  case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
+      //                    s"""$error
+      //                       |Add the `bidirectional` only to the ref in the "vertex namespace" `${curNs.ns}`
+      //                       |that points to the edge namespace `$revNs`.
+      //                       |In the edge namespace `$revNs` simply omit the `bidirectional` option:
+      //                       |  val $attr = one[${curNs.ns}]
+      //                         """.stripMargin)
+      //                }
+      //                reverseRef
+      //
+      //              // Other refs
+      //              case otherRef@Ref(attr, _, _, _, _, baseTpe, refNs, opts2) => {
+      //                val card = if (baseTpe.isEmpty) "one" else "many"
+      //                sys.error(
+      //                  s"""$error
+      //                     |"Property edge" namespace `$revNs` is only allowed to have reverse references
+      //                     |pointing back to namespace `${curNs.ns}` (like `val $nsLower = one[${curNs.ns}]`).
+      //                     |Found un-allowed reference in property edge namespace `$revNs`:
+      //                     |  val $attr = $card[$refNs]
+      //                      """.stripMargin)
+      //              }
+      //            }
+      //
+      //            // Expect only 1 reverse ref
+      //            val reverseRef = reverseRefs.length match {
+      //              case 0          => sys.error(
+      //                s"""$error
+      //                   |Can't find  reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
+      //                   |Expecting something like:
+      //                   |  val $nsLower = one[${curNs.ns}]
+      //                     """.stripMargin)
+      //              case n if n > 1 =>
+      //                val refs = reverseRefs.map { r =>
+      //                  val card = if (r.baseTpe.isEmpty) "one" else "many"
+      //                  s"val ${r.attr} = $card[${curNs.ns}]"
+      //                }.mkString("\n  ")
+      //                sys.error(
+      //                  s"""$error
+      //                     |Can only have one reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
+      //                     |Found $n reverse references pointing back to `${curNs.ns}`:
+      //                     |  $refs
+      //                     |Expected something like:
+      //                     |  val $nsLower = one[${curNs.ns}]
+      //                     """.stripMargin)
+      //              case 1          => reverseRefs.head
+      //            }
+      //
+      //
+      //            // No edge namespace without edge properties
+      //            if (ns_.attrs.collect { case v: Val => v case e: Enum => e }.isEmpty)
+      //              sys.error(
+      //                s"""$error
+      //                   |Edge namespaces like `$revNs` should have at least 1 edge property (attribute/enum) defined.
+      //                   |If no edge properties are needed, you should skip the separate namespace `$revNs` and simply
+      //                   |only have a bidirectional self-reference in `${curNs.ns}`, like:
+      //                   |  val ${firstLow(revNs)} = one[${curNs.ns}]
+      //                       """.stripMargin)
+      //
+      //
+      //            //            println("reverseRef : " + reverseRef)
+      //
+      //            // Expect only card-one reverse ref
+      //            reverseRef match {
+      //              case Ref(attr_, _, _, _, _, baseTpe, _, _) if baseTpe.nonEmpty =>
+      //                sys.error(
+      //                  s"""$error
+      //                     |Reverse ref `$attr_` in namespace `$revNs` is expected
+      //                     |to be a cardinality one ref. Please change to:
+      //                     |  val $attr_ = one[${curNs.ns}]
+      //                       """.stripMargin)
+      //              case revRef                                                    => revRef.attr
+      //            }
+      //          }
+      //        }.get
+      //
+      //        //        println("reverseRefName: " + revRef)
+      //
+      //        val newOpts = opts map {
+      //          case bidirectOps if bidirectOps.clazz == "Bidirectional"          =>
+      //            bidirectOps.copy(datomicKeyValue = s"$revNs.$revRef", clazz = s"Bidirectional:${curNs.ns}:$bidirectAttr")
+      //          case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
+      //            s"""$error
+      //               |Unexpected bidirectional ref definition:
+      //               |$bidirectOps
+      //                 """.stripMargin)
+      //          case otherOps                                                     => otherOps
+      //        }
+      //
+      //        bidirectRef.copy(options = newOpts)
+      //      }
 
       case otherAttr => otherAttr
     }
@@ -411,7 +637,8 @@ object MoleculeBoilerplate {
       case otherNs                           => otherNs
     }
 
-    nssUpdated1
+    //        nssUpdated1
+    updatedNss0
   }
 
   def addBackRefs(nss: Seq[Namespace], curNs: Namespace): Seq[Namespace] = {
@@ -442,6 +669,7 @@ object MoleculeBoilerplate {
 
     def resolveOptions(options: Seq[Optional]) = options flatMap {
       case Optional(_, clazz) if clazz.startsWith("Bidirectional") => None
+      case Optional(_, clazz) if clazz.startsWith("EdgeRef")       => None
       case Optional(_, clazz) if clazz.startsWith("ReverseRef")    => None
       case optional                                                => Some(optional.datomicKeyValue)
     }
@@ -651,10 +879,12 @@ object MoleculeBoilerplate {
       case other                                      => (0, 0, 0)
     }.unzip3
 
-    val maxAttr0 = attrs.map(_.attr.length).max
+    //    val maxAttr0 = attrs.map(_.attr.length).max
+    val maxAttr0 = attrs.map(_.attrClean.length).max
     val refCode = attrs.foldLeft(Seq("")) {
       case (acc, Ref(attr, attrClean, _, clazz2, _, baseType, refNs, opts)) => {
-        val p1 = padS(maxAttr0, attr)
+        //        val p1 = padS(maxAttr0, attr)
+        val p1 = padS(maxAttr0, attrClean)
         val p2 = padS("ManyRef".length, clazz2)
         val p3 = padS(maxRefNs.max, refNs)
         val ref = (in, out) match {
@@ -664,14 +894,10 @@ object MoleculeBoilerplate {
           case (0, o)                                    => s"${refNs}_$o$p3[${OutTypes mkString ", "}] with Nested$o[${refNs}_$o$p3, ${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
           case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
         }
-//                val birectional = ""
         val birectional = opts.collectFirst {
-          case Optional(_, clazz) if clazz.startsWith("Bidirectional:") =>
-            val bidirectRef = clazz.split(':').last
-            s"with BiRef[$bidirectRef[NS, NS]] "
-          case Optional(_, clazz) if clazz.startsWith("ReverseRef:")    =>
-            val reverseRef = clazz.split(':').last
-            s"with RevRef[$reverseRef[NS, NS]] "
+          case Optional(biRefAttr, clazz) if clazz.startsWith("Bidirectional") => s"with BiRef "
+          case Optional(edgeRefAttr, clazz) if clazz.startsWith("EdgeRef")     => s"with EdgeRef[$edgeRefAttr[NS, NS]] "
+          case Optional(revRefAttr, clazz) if clazz.startsWith("ReverseRef")   => s"with RevRef[$revRefAttr[NS, NS]] "
         } getOrElse ""
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref $birectional= ???"
       }
@@ -902,10 +1128,6 @@ object MoleculeBoilerplate {
       case other            => other
     }
 
-    //    def addBidirectionals(attrs: Seq[Attr]) = attrs map {
-    //      case Val(_, _, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("ReverseRef"))
-    //    }
-
     val attrClasses = attrs.flatMap {
 
       case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if tpe.take(3) == "Map" =>
@@ -925,17 +1147,20 @@ object MoleculeBoilerplate {
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }""")
 
+      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiRefAttr")
+
+      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("EdgeRef")) =>
+        val edgeRef = opts.collectFirst {
+          case Optional(edgeRef0, bidirectRef) if bidirectRef.startsWith("EdgeRef") => edgeRef0
+        }.get
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with EdgeRefAttr[$edgeRef[NS, NS]]")
+
       case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("ReverseRef")) =>
         val bidirectAttr = opts.collectFirst {
           case Optional(bidirectAttr0, refRef) if refRef.startsWith("ReverseRef") => bidirectAttr0
         }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with RevRef[$bidirectAttr[NS, NS]]")
-
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
-        val revRef = opts.collectFirst {
-          case Optional(revRef0, bidirectRef) if bidirectRef.startsWith("Bidirectional") => revRef0
-        }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiRefAttr[$revRef[NS, NS]]")
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with RevRefAttr[$bidirectAttr[NS, NS]]")
 
       case Ref(attr, _, clazz, _, _, _, _, _) =>
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
@@ -956,17 +1181,20 @@ object MoleculeBoilerplate {
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} { $enumValues }""")
 
+      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiRefAttr")
+
+      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("EdgeRef")) =>
+        val edgeRef = opts.collectFirst {
+          case Optional(edgeRef0, bidirectRef) if bidirectRef.startsWith("EdgeRef") => edgeRef0
+        }.get
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with EdgeRefAttr[$edgeRef[NS, NS]]")
+
       case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("ReverseRef")) =>
         val bidirectAttr = opts.collectFirst {
           case Optional(bidirectAttr0, refRef) if refRef.startsWith("ReverseRef") => bidirectAttr0
         }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with RevRef[$bidirectAttr[NS, NS]]")
-
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
-        val revRef = opts.collectFirst {
-          case Optional(revRef0, bidirectRef) if bidirectRef.startsWith("Bidirectional") => revRef0
-        }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiRefAttr[$revRef[NS, NS]]")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with RevRefAttr[$bidirectAttr[NS, NS]]")
 
       case Ref(attr, attrClean, clazz, _, _, _, _, _) =>
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}")
@@ -1017,7 +1245,7 @@ object MoleculeBoilerplate {
     val files = defDirs flatMap { defDir =>
       val definitionFiles = sbt.IO.listFiles(codeDir / defDir / "schema").filter(f => f.isFile && f.getName.endsWith("Definition.scala"))
       assert(definitionFiles.nonEmpty, "\nFound no definition files in path: " + codeDir / defDir +
-        "\nOBS: Remember, schema definition file names should end with `<YourDomain...>Definition.scala`")
+        "\nSchema definition file names should end with `<YourDomain...>Definition.scala`")
 
       // Loop definition files in each domain directory
       definitionFiles flatMap { definitionFile =>

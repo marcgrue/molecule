@@ -19,6 +19,7 @@ object CoreTestDefinition {
     val parent  = one[Ns]
     val ref1    = one[Ref1]
     val refSub1 = one[Ref1].subComponent
+//    val oneNs   = oneBi[Ns]
 
     val strs     = manyString.fullTextSearch
     val ints     = manyInt
@@ -33,6 +34,7 @@ object CoreTestDefinition {
     val parents  = many[Ns]
     val refs1    = many[Ref1]
     val refsSub1 = many[Ref1].subComponents
+//    val manyNs   = manyBi[Ns]
 
     val strMap    = mapString.fullTextSearch
     val intMap    = mapInt
@@ -44,6 +46,7 @@ object CoreTestDefinition {
     val uuidMap   = mapUUID
     val uriMap    = mapURI
   }
+  object Ns extends Ns
 
   trait Ref1 {
     val str1     = oneString
@@ -51,11 +54,13 @@ object CoreTestDefinition {
     val enum1    = oneEnum('enum10, 'enum11, 'enum12)
     val ref2     = one[Ref2]
     val refSub2  = one[Ref2].subComponent
+
     val strs1    = manyString
     val ints1    = manyInt
     val refs2    = many[Ref2]
     val refsSub2 = many[Ref2].subComponents
   }
+  object Ref1 extends Ref1
 
   trait Ref2 {
     val str2  = oneString

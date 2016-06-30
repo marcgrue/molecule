@@ -15,8 +15,7 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
       q"""
       ..${basics(dsl)}
       new Molecule0(model, query) {
-        def debug(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
-        def debugE(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
+        def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
       }
     """)
   }
@@ -29,13 +28,12 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
       ..${basics(dsl)}
       new $MoleculeTpe[..$OutTypes](model, query) {
         def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
-        def debugE(implicit conn: Connection): Unit              = debugMolecule(conn, modelE, queryE)
 
         def get(implicit conn: Connection): Seq[(..$OutTypes)] = model.elements.collectFirst {
           case n: Nested if !n.bond.ns.isEmpty => ${castNestedTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes)}
         } getOrElse results(conn, model, query).map(data => (..${castTpl(q"query", q"data", OutTypes)}))
 
-        def debug(implicit conn: Connection): Unit             = debugMolecule(conn, model, query)
+        def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
       }
     """
     )
@@ -49,12 +47,9 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
       ..${basics(dsl)}
       new $MoleculeTpe[..$OutTypes](model, query) {
         def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
-        def debugE(implicit conn: Connection): Unit              = debugMolecule(conn, modelE, queryE)
 
-        def get(implicit conn: Connection): Seq[(..$OutTypes)] =
-          results(conn, model, query).map(data => (..${castComposite(q"query", q"data", OutTypes)}))
-
-        def debug(implicit conn: Connection): Unit             = debugMolecule(conn, model, query)
+        def get(implicit conn: Connection): Seq[(..$OutTypes)] = results(conn, model, query).map(data => (..${castComposite(q"query", q"data", OutTypes)}))
+        def getD(implicit conn: Connection): Unit              = debugMolecule(conn, model, query)
       }
     """
     )
