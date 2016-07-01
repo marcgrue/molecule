@@ -337,13 +337,16 @@ object schemaDSL {
   // Bidirectional
 
   // Self-reference
-  trait BiRefAttr
-  trait BiRef
+  trait BiSelf
+  trait BiSelfAttr
+  trait BiOther
+  trait BiOtherAttr
 
   // Edge-reference (to "property edge/namespace")
-  trait EdgeRefAttr[revRefAttr]
-  trait EdgeRef[revRefAttr]
-  trait RevRefAttr[biRefAttr]
-  trait RevRef[biRefAttr]
+  trait BiEdge[revRefAttr]
+  trait BiEdgeAttr[revRefAttr]
+
+  trait BiTarget[biRefAttr]
+  trait BiTargetAttr[biRefAttr]
 
 }

@@ -136,17 +136,17 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   // Liftables for Model --------------------------------------------------------------
 
   implicit val liftGeneric = Liftable[Generic] {
-    case AttrVar(v)      => q"AttrVar($v)"
-    case TxValue         => q"TxValue"
-    case TxValue_        => q"TxValue_"
-    case TxTValue        => q"TxTValue"
-    case TxInstantValue  => q"TxInstantValue"
-    case OpValue         => q"OpValue"
-    case NsValue(values) => q"NsValue(Seq(..$values))"
-    case NoValue         => q"NoValue"
-    case BiAttr          => q"BiAttr"
-    case EdgeAttr(attr)  => q"EdgeAttr($attr)"
-    case RevAttr(attr)   => q"RevAttr($attr)"
+    case AttrVar(v)       => q"AttrVar($v)"
+    case TxValue          => q"TxValue"
+    case TxValue_         => q"TxValue_"
+    case TxTValue         => q"TxTValue"
+    case TxInstantValue   => q"TxInstantValue"
+    case OpValue          => q"OpValue"
+    case NsValue(values)  => q"NsValue(Seq(..$values))"
+    case NoValue          => q"NoValue"
+    case BiAttr           => q"BiAttr"
+    case EdgeAttr(attr)   => q"EdgeAttr($attr)"
+    case TargetAttr(attr) => q"TargetAttr($attr)"
   }
 
   implicit val liftFn    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
@@ -163,7 +163,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case OpValue          => q"OpValue"
     case BiAttr           => q"BiAttr"
     case EdgeAttr(attr)   => q"EdgeAttr($attr)"
-    case RevAttr(attr)    => q"RevAttr($attr)"
+    case TargetAttr(attr) => q"TargetAttr($attr)"
     case BackValue(value) => q"BackValue($value)"
     case EnumVal          => q"EnumVal"
     case IndexVal         => q"IndexVal"

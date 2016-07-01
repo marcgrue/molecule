@@ -1,15 +1,8 @@
 package molecule
 package bidirectional
 
-import dsl.bidirectionalPartition._
-import schema.BidirectionalPartitionSchema
+import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
-import org.specs2.specification.Scope
-
-
-class BidirectionalSetup extends Scope with DatomicFacade {
-  implicit val conn = recreateDbFrom(BidirectionalPartitionSchema)
-}
 
 class BidirectionalSelfOne extends MoleculeSpec {
 

@@ -1,7 +1,7 @@
 package molecule
 package bidirectional
 
-import molecule.bidirectional.dsl.bidirectionalPartition._
+import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
 
 
@@ -144,7 +144,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
       val List(ida, tim) = living_Person.name insert List("Ida", "Tim") eids
 
-      // Insert 2 persons and befriend them with existing persons
+      // Insert 2 living_Persons and befriend them with existing living_Persons
       living_Person.name.friends insert List(
         ("Ben", Set(ida, 41L)),
         ("Don", Set(tim))
@@ -164,7 +164,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
       val List(ida, liz, tim) = living_Person.name insert List("Ida", "Liz", "Tim") eids
 
-      // Insert 2 persons and befriend them with existing persons
+      // Insert 2 living_Persons and befriend them with existing living_Persons
       living_Person.name.friends insert List(
         ("Ben", Set(ida, liz)),
         ("Don", Set(ida, tim))

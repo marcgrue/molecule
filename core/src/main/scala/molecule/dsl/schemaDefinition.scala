@@ -10,8 +10,8 @@ object schemaDefinition {
   trait Bidirectional
 
   private[molecule] sealed trait scalarAttr[Builder] {
-    lazy val indexed       : Builder         = ???
-    lazy val noHistory     : Builder         = ???
+    lazy val indexed       : Builder   = ???
+    lazy val noHistory     : Builder   = ???
     lazy val uniqueValue   : oneString = ???
     lazy val uniqueIdentity: oneString = ???
     def doc(s: String) = ??? // can only be last
@@ -159,18 +159,48 @@ object schemaDefinition {
 
 
   // Bidirectional self-references
+//
+////  def oneBiSame[Ns] = OneBiSame[Ns]
+//   object oneBiSame {
+//    def apply[ThisNsOrRevRefAttr] = this
+//    def doc(s: String) = ???
+//  }
+//
+//  object oneBiOther {
+//    def apply[ThisNsOrRevRefAttr] = this
+//    def doc(s: String) = ??? // can only be last
+//  }
 
+//  def oneBi[Ns] = OneBi[Ns]
   object oneBi {
     def apply[ThisNsOrRevRefAttr] = this
     def doc(s: String) = ??? // can only be last
   }
   object manyBi {
+//    def apply[ThisNsOrRevRefAttr]: Int = 7
     def apply[ThisNsOrRevRefAttr] = this
     def doc(s: String) = ??? // can only be last
   }
 
+
+  // Bidirectional self-references
+
+//  object oneBiVia {
+//    def apply[ThisNsOrRevRefAttr] = this
+//    def doc(s: String) = ??? // can only be last
+//  }
+//  object manyBiVia {
+//    def apply[ThisNsOrRevRefAttr] = this
+//    def doc(s: String) = ??? // can only be last
+//  }
+
   // Reverse ref pointing back to namespace of "outgoing" bidirectional attr
-  object rev {
+//  object rev {
+//    def apply[biRefAttr] = this
+//    def doc(s: String) = ??? // can only be last
+//  }
+
+  object target {
     def apply[biRefAttr] = this
     def doc(s: String) = ??? // can only be last
   }

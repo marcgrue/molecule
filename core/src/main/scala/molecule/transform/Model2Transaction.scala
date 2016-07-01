@@ -38,9 +38,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
       case ('_, Meta(ns, "", "e", _, EntValue))                      => ('arg, stmts)
       case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))             => (Eid(id), stmts)
-      case ('_, Atom(ns, name, _, c, VarValue, _, Seq(BiAttr), _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, "bidirectional" + c))
+      case ('_, Atom(ns, name, _, c, VarValue, _, Seq(BiAttr), _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, "biRef" + c))
       case ('_, Atom(ns, name, _, _, VarValue, _, _, _))             => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg))
-      case ('_, Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
+      case ('_, Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), "biRef" + c))
       case ('_, Atom(ns, name, _, _, value, prefix, _, _))           => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix)))
       case ('_, Bond(ns, refAttr, refNs, _, _))                      => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs"))
 
@@ -52,24 +52,25 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, meta + 2))
 
       // First with id
-      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, Seq(BiAttr), _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
-      case (Eid(id), Atom(ns, name, _, _, value@Remove(_), prefix, _, _))           => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix)))
-      case (Eid(id), Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
-      case (Eid(id), Atom(ns, name, _, _, value, prefix, _, _))                     => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix)))
-      case (Eid(id), Bond(ns, refAttr, refNs, c, "biRef"))                          => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, "bidirectional" + c))
-      case (Eid(id), Bond(ns, refAttr, refNs, c, "edgeRef"))                        => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, "bidirectional" + c))
-      case (Eid(id), Bond(ns, refAttr, refNs, _, _))                                => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId))
+      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, Seq(BiAttr), _))                => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), "biRef" + c))
+      case (Eid(id), Atom(ns, name, _, _, value@Remove(_), prefix, _, _))                          => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix)))
+      case (Eid(id), Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _))                          => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), "biRef" + c))
+      case (Eid(id), Atom(ns, name, _, _, value, prefix, _, _))                                    => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix)))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, "biRef"))                                         => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, "biRef" + c))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, edgeRef)) if edgeRef.startsWith("edgeRef@")       => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, edgeRef.replace("@", s"@$c@")))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, targetRef)) if targetRef.startsWith("targetRef@") => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, targetRef.replace("@", s"@$c@")))
+      case (Eid(id), Bond(ns, refAttr, refNs, _, _))                                               => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId))
 
       // Same namespace
-      case ('e, Atom(ns, name, _, _, value@Remove(_), prefix, _, _))                    => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix)))
-      case ('e, Atom(ns, name, _, c, VarValue, _, Seq(BiAttr), _))                      => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, "bidirectional" + c))
-      case ('e, Atom(ns, name, _, _, VarValue, _, _, _))                                => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
-      case ('e, Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _))                    => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), "bidirectional" + c))
-      case ('e, Atom(ns, name, _, _, value, prefix, _, _))                              => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix)))
-      case ('e, Bond(ns, refAttr, refNs, c, "biRef"))                                   => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", "bidirectional" + c))
-      case ('e, Bond(ns, refAttr, refNs, c, edgeRef)) if edgeRef.startsWith("edgeRef@") => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", edgeRef.replace("@", s"@$c@")))
-      //      case ('e, Bond(ns, refAttr, refNs, c, edgeRef)) if edgeRef.startsWith("edgeRef@") => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", "bidirectional" + c + "@" + edgeRef.split("@").last))
-      case ('e, Bond(ns, refAttr, refNs, _, _)) => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
+      case ('e, Atom(ns, name, _, _, value@Remove(_), prefix, _, _))                          => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix)))
+      case ('e, Atom(ns, name, _, c, VarValue, _, Seq(BiAttr), _))                            => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, "biRef" + c))
+      case ('e, Atom(ns, name, _, _, VarValue, _, _, _))                                      => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
+      case ('e, Atom(ns, name, _, c, value, prefix, Seq(BiAttr), _))                          => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), "biRef" + c))
+      case ('e, Atom(ns, name, _, _, value, prefix, _, _))                                    => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix)))
+      case ('e, Bond(ns, refAttr, refNs, c, "biRef"))                                         => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", "biRef" + c))
+      case ('e, Bond(ns, refAttr, refNs, c, edgeRef)) if edgeRef.startsWith("edgeRef@")       => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", edgeRef.replace("@", s"@$c@")))
+      case ('e, Bond(ns, refAttr, refNs, c, targetRef)) if targetRef.startsWith("targetRef@") => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", targetRef.replace("@", s"@$c@")))
+      case ('e, Bond(ns, refAttr, refNs, _, _))                                               => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs"))
 
       // Transaction annotations
       case ('_, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
@@ -124,7 +125,83 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   private def valueStmts(stmts: Seq[Statement], e: Any, a: String, arg: Any, prefix: Option[String] = None, meta: String = ""): Seq[Statement] = {
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
 
-    val newStmts = if (prefix.contains("mapping")) arg match {
+    val newStmts = if (meta.startsWith("biRef")) arg match {
+
+      // Each bidirectional manipulation takes care of the reverse ref
+
+      case Remove(Seq())      => attrValues(conn.db, e, a).toSeq.flatMap {
+        case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
+      }
+      case Remove(removeRefs) => removeRefs.flatMap {
+        case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
+      }
+      case Eq(refs)           => refs.flatMap { case ref: Long =>
+        val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
+        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+      }
+      case refs: Set[_]       => refs.flatMap { case ref: Long =>
+        Seq(Add(ref, a, e), Add(e, a, ref))
+      }
+      case ref                => {
+        val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+      }
+
+    } else if (meta.startsWith("edgeRef")) {
+      val List(card, targetAttr) = meta.split("@").toList.tail
+      arg match {
+
+        // Each bidirectional manipulation takes care of the reverse ref
+
+        case Remove(Seq())      => attrValues(conn.db, e, a).toSeq.flatMap {
+          case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
+        }
+        case Remove(removeRefs) => removeRefs.flatMap {
+          case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
+        }
+        case Eq(refs)           => refs.flatMap { case ref: Long =>
+          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+          if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
+          reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+        }
+        case refs: Set[_]       => refs.flatMap { case ref: Long =>
+          Seq(Add(ref, a, e), Add(e, a, ref))
+        }
+        case ref                => {
+          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+          reverseRetracts ++ Seq(Add(ref, targetAttr, e), Add(e, a, ref))
+        }
+
+      }
+
+    } else if (meta.startsWith("targetRef")) {
+      val List(card, edgeRefAttr) = meta.split("@").toList.tail
+      arg match {
+
+        // Each bidirectional manipulation takes care of the reverse ref
+
+        case Remove(Seq())      => attrValues(conn.db, e, a).toSeq.flatMap {
+          case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
+        }
+        case Remove(removeRefs) => removeRefs.flatMap {
+          case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
+        }
+        case Eq(refs)           => refs.flatMap { case ref: Long =>
+          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+          if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
+          reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+        }
+        case refs: Set[_]       => refs.flatMap { case ref: Long =>
+          Seq(Add(ref, a, e), Add(e, a, ref))
+        }
+        case ref                => {
+          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+          reverseRetracts ++ Seq(Add(ref, edgeRefAttr, e), Add(e, a, ref))
+        }
+      }
+
+    } else if (prefix.contains("mapping")) arg match {
       case Mapping(pairs)       => pairs.flatMap {
         case (key, value) => {
           val existing = pairStr(e, a, key)
@@ -145,53 +222,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }
       }
 
-    } else if (meta.startsWith("bidirectional")) arg match {
-
-      // Each bidirectional manipulation takes care of the reverse ref
-
-      case Remove(Seq())      => attrValues(conn.db, e, a).toSeq.flatMap {
-        case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
-      }
-      case Remove(removeRefs) => removeRefs.flatMap {
-        case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
-      }
-      case Eq(refs)           => refs.flatMap { case ref: Long =>
-        val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-        if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
-        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
-      }
-      case refs: Set[_]       =>
-        refs.flatMap { case ref: Long => Seq(Add(ref, a, e), Add(e, a, ref)) }
-      case ref                => {
-        val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
-      }
-
-    } else if (meta.startsWith("edgeRef")) {
-      val List(card, edgeRefAttr) = meta.split("@").toList.tail
-      arg match {
-
-        // Each bidirectional manipulation takes care of the reverse ref
-
-        case Remove(Seq())      => attrValues(conn.db, e, a).toSeq.flatMap {
-          case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
-        }
-        case Remove(removeRefs) => removeRefs.flatMap {
-          case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
-        }
-        case Eq(refs)           => refs.flatMap { case ref: Long =>
-          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-          if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
-          reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
-        }
-        case refs: Set[_]       =>
-          refs.flatMap { case ref: Long => Seq(Add(ref, a, e), Add(e, a, ref)) }
-        case ref                => {
-          val reverseRetracts = if (meta.endsWith("1")) attrValues(conn.db, e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-          reverseRetracts ++ Seq(Add(ref, edgeRefAttr, e), Add(e, a, ref))
-        }
-
-      }
     } else arg match {
       case Replace(oldNew)      => oldNew.toSeq.flatMap {
         case (oldValue, newValue) => Seq(Retract(e, a, p(oldValue)), Add(e, a, p(newValue)))
@@ -242,12 +272,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
   def matchDataStmt(stmts: Seq[Statement], dataStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any = 0) = dataStmt match {
     // Keep current cursor (add no new data in this iteration)
-    case Add('tempId, a, refNs: String, _)           => (cur, valueStmts(stmts, tempId(a), a, tempId(refNs)))
-    case Add('e, a, refNs: String, "bidirectional1") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "bidirectional1"))
-    case Add('e, a, refNs: String, "bidirectional2") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "bidirectional2"))
-    case Add('e, a, refNs: String, _)                => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs)))
-    case Add('v, a, 'tempId, _)                      => (cur, valueStmts(stmts, stmts.last.v, a, tempId(a)))
-    case Retract(e, a, v, _)                         => (cur, stmts)
+    case Add('tempId, a, refNs: String, _)   => (cur, valueStmts(stmts, tempId(a), a, tempId(refNs)))
+    case Add('e, a, refNs: String, "biRef1") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "biRef1"))
+    case Add('e, a, refNs: String, "biRef2") => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, "biRef2"))
+    case Add('e, a, refNs: String, _)        => (cur, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs)))
+    case Add('v, a, 'tempId, _)              => (cur, valueStmts(stmts, stmts.last.v, a, tempId(a)))
+    case Retract(e, a, v, _)                 => (cur, stmts)
 
     // Advance cursor for next value in data row
     case Add('tempId, a, 'arg, _)                                                    => (next, valueStmts(stmts, tempId(a), a, arg))
@@ -255,8 +285,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     case Add('tempId, a, Values(vs, prefix), _)                                      => (next, valueStmts(stmts, tempId(a), a, vs, prefix))
     case Add('remove_me, a, 'arg, _)                                                 => (next, valueStmts(stmts, -1, a, arg))
     case Add('arg, a, 'tempId, _)                                                    => (next, valueStmts(stmts, arg, a, tempId(a)))
-    case Add('e, a, 'arg, "bidirectional1")                                          => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "bidirectional1"))
-    case Add('e, a, 'arg, "bidirectional2")                                          => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "bidirectional2"))
+    case Add('e, a, 'arg, "biRef1")                                                  => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "biRef1"))
+    case Add('e, a, 'arg, "biRef2")                                                  => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, "biRef2"))
     case Add('e, a, 'arg, _)                                                         => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg))
     case Add('e, a, Values(EnumVal, prefix), _)                                      => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, prefix))
     case Add('e, a, Values(vs, prefix), _)                                           => (next, valueStmts(stmts, lastE(stmts, a, nestedE), a, vs, prefix))
@@ -280,7 +310,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       val nestedRows = untupleNestedArgss(nestedStmts, arg)
       val nestedInsertStmts = nestedRows.flatMap { nestedRow =>
         val nestedE = tempId(ref)
-        val bondStmt = if (meta == "bidirectional2")
+        val bondStmt = if (meta == "biRef2")
           Seq(Add(nestedE, ref, parentE), Add(parentE, ref, nestedE))
         else
           Seq(Add(parentE, ref, nestedE))

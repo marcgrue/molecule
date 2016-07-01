@@ -2,34 +2,56 @@ package molecule.bidirectional.schema
 
 import molecule.dsl.schemaDefinition._
 
-@InOut(2, 4)
-object BidirectionalPartitionDefinition {
+@InOut(0, 4)
+object BidirectionalDefinition {
 
-  // One partition
   object living {
 
+    // Base namespace
     trait Person {
       val name = oneString
 
-      val mother = one[Person]
 
-      // Single bidirectional reference (with no extra properties)
-      val spouse = oneBi[Person]
+      // A ==> a
 
-      // Multiple bidirectional references (with no extra properties)
+      val spouse  = oneBi[Person]
       val friends = manyBi[Person]
-      val friends2 = many[Person]
 
-      // Single bidirectional outgoing reference - adding properties to the relationship
-      val bestFriend = oneBi[Knows.person.type]
 
-      // Multiple bidirectional outgoing references - adding properties to the relationships
-      // (re-using the reverse ref is ok ??)
+      // A ==> b
+
+      val companion  = oneBi[Animal]
+      val companions = manyBi[Animal]
+
+
+      // A ==> x -- a
+
+      //    val bestFriend = oneBi[Knows.person.type]
       val knows = manyBi[Knows.person.type]
-      val knows2 = many[Knows]
 
-      // Multiple bidirectional outgoing references accross partitions
-      val knows3 = manyBi[artificial.InterferesWith.robot.type]
+
+      // A ==> x -- b
+
+      //    val favorite = oneBi[Knows.animal.type]
+      //    val closeTo  = manyBi[Knows.animal.type]
+
+
+      //    // Multiple bidirectional references (with no extra properties)
+      //    val friends2 = many[Person]
+      //
+      //    val spouse2        = oneBiSame
+      //    val spouse3        = oneBiSame[Animal]
+      //    val closestContact = oneBiOther[Animal]
+      //
+      //    // Single bidirectional outgoing reference - adding properties to the relationship
+      //    val bestFriend = oneBiVia[Knows.person.type]
+      //
+      //    // Multiple bidirectional outgoing references - adding properties to the relationships
+      //    // (re-using the reverse ref is ok ??)
+      //    val knows2 = many[Knows]
+      //
+      //    val inContactWith = manyBi[Knows.animal.type]
+
 
       // self-ref ............................................................................
 
@@ -104,42 +126,40 @@ object BidirectionalPartitionDefinition {
     }
 
 
+    // "Property edge"
+
     trait Knows {
-      // Property of this "edge"
       val weight = oneInt
+      //    val friendshipType = one[FriendshipType]
 
-      // Reverse refs pointing back to ns of defining bidirectional attrs
-      val person = rev[Person]
-      val person2 = one[Person]
+      // a -- X ==> a
+      val person = target[Person]
 
-
-      val animal = rev[Animal]
+      // a -- X ==> b
+      //    val animal = target[Animal]
     }
     object Knows extends Knows
 
+    // Other namespace
 
     trait Animal {
       val name = oneString
 
-      val knows = oneBi[Knows.animal.type]
+      // a <== B
+
+      val companion  = oneBi[Person]
+      val companions = manyBi[Person]
+
+
+      // a -- x <== B
+
+      //    val favorite = oneBi[Knows.person.type]
+      //    val closeTo  = manyBi[Knows.person.type]
     }
 
-  }
 
-
-  // Other partition
-  object artificial {
-
-    trait Robot {
+    trait FriendshipType {
       val name = oneString
-      val interferesWith = manyBi[InterferesWith.robot.type]
     }
-    object Robot extends Robot
-
-    trait InterferesWith {
-      val intensity = oneInt
-      val robot = rev[Robot]
-    }
-    object InterferesWith extends InterferesWith
   }
 }

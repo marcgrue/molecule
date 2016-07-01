@@ -117,7 +117,7 @@ object model {
   // Bidirectional markers
   case object BiAttr extends Generic
   case class EdgeAttr(attr: String) extends Generic
-  case class RevAttr(attr: String) extends Generic
+  case class TargetAttr(attr: String) extends Generic
 
   case object Qm extends Value
   case object Distinct extends Value
