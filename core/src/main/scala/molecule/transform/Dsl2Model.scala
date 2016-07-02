@@ -82,6 +82,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
     case q"$prev.txT" if !q"$prev".isAttr       => abort(s"[Dsl2Model:dslStructure] Please add `txT` after an attribute or another transaction value")
+    case q"$prev.txT" if !q"$prev".isAttr       => abort(s"[Dsl2Model:dslStructure] Please add `txT` after an attribute or another transaction value")
     case q"$prev.txInstant" if !q"$prev".isAttr => abort(s"[Dsl2Model:dslStructure] Please add `txInstant` after an attribute or another transaction value")
     case q"$prev.op" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `op` after an attribute or another transaction value")
 
@@ -149,9 +150,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
 
-    case t@q"$prev.$biRefAttr.$op(..$values)" if q"$prev.$biRefAttr".isBiSelfAttr2 =>
+    case t@q"$prev.$biRefAttr.$op(..$values)" if q"$prev.$biRefAttr".isBiSelfRefAttr2 =>
       val element = resolveOp(q"$prev", q"$biRefAttr", q"$prev.$biRefAttr", q"$op", q"Seq(..$values)") match {
-        case a: Atom => a.copy(gs = a.gs :+ BiAttr)
+        case a: Atom => a.copy(gs = a.gs :+ BiRef_)
       }
       walk(q"$prev", q"$prev.$biRefAttr".ns, q"$biRefAttr", element)
 
@@ -169,27 +170,19 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Reference --------------------------------------
 
-    case a@q"$prev.$bidirectRef" if a.isBiSelf =>
+    case a@q"$prev.$bidirectRef" if a.isBiSelfRef =>
       traverse(q"$prev", Bond(a.refThis, firstLow(bidirectRef.toString), a.refNext, a.refCard, "biRef"))
 
     case a@q"$prev.$bidirectRef" if a.isBiEdgePropRef =>
-      //      x(18
-      //        , a
-      //        , a.tpe_
-      //        , a.refThis
-      //        , firstLow(bidirectRef.toString)
-      //        , a.refNext
-      //        , a.refCard
-      //      )
       traverse(q"$prev", Bond(a.refThis, firstLow(bidirectRef.toString), a.refNext, a.refCard, "edgePropRef"))
 
-    case a@q"$prev.$edgeRef" if a.isBiEdge =>
-      val baseType = a.tpe.baseType(weakTypeOf[BiEdge[_]].typeSymbol).typeArgs.head.typeSymbol
+    case a@q"$prev.$edgeRef" if a.isBiEdgeRef =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiEdgeRef[_]].typeSymbol).typeArgs.head.typeSymbol
       val revRefAttr = ":" + baseType.owner.name + "/" + baseType.name
       traverse(q"$prev", Bond(a.refThis, firstLow(edgeRef.toString), a.refNext, a.refCard, "edgeRef@" + revRefAttr))
 
-    case a@q"$prev.$revRef" if a.isBiTarget =>
-      val baseType = a.tpe.baseType(weakTypeOf[BiTarget[_]].typeSymbol).typeArgs.head.typeSymbol
+    case a@q"$prev.$revRef" if a.isBiTargetRef =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiTargetRef[_]].typeSymbol).typeArgs.head.typeSymbol
       val edgeRefAttr = ":" + baseType.owner.name + "/" + baseType.name
       traverse(q"$prev", Bond(a.refThis, firstLow(revRef.toString), a.refNext, a.refCard, "targetRef@" + edgeRefAttr))
 
@@ -200,21 +193,21 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Reference attribute --------------------------------------
 
-    case a@q"$prev.$bidirectRefAttr" if a.isBiSelfAttr =>
-      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(BiAttr)))
+    case a@q"$prev.$bidirectRefAttr" if a.isBiSelfRefAttr =>
+      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(BiRef_)))
 
     case a@q"$prev.$bidirectRefAttr" if a.isBiEdgePropAttr =>
       traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(EdgePropAttr)))
 
-    case a@q"$prev.$revRefAttr" if a.isBiEdgeAttr =>
-      val baseType = a.tpe.baseType(weakTypeOf[BiEdgeAttr[_]].typeSymbol).typeArgs.head.typeSymbol
+    case a@q"$prev.$revRefAttr" if a.isBiEdgeRefAttr =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiEdgeRefAttr[_]].typeSymbol).typeArgs.head.typeSymbol
       val targetAttr = s":${firstLow(baseType.owner.name)}/${baseType.name}"
-      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(EdgeAttr(targetAttr))))
+      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(EdgeRefAttr(targetAttr))))
 
-    case a@q"$prev.$revRefAttr" if a.isBiTargetAttr =>
-      val baseType = a.tpe.baseType(weakTypeOf[BiTargetAttr[_]].typeSymbol).typeArgs.head.typeSymbol
+    case a@q"$prev.$revRefAttr" if a.isBiTargetRefAttr =>
+      val baseType = a.tpe.baseType(weakTypeOf[BiTargetRefAttr[_]].typeSymbol).typeArgs.head.typeSymbol
       val edgeAttr = s":${firstLow(baseType.owner.name)}/${baseType.name}"
-      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(TargetAttr(edgeAttr))))
+      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(TargetRefAttr(edgeAttr))))
 
     case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = opts(a)))
 
@@ -312,7 +305,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-    val meta = if (q"$prev.$manyRef".isBiSelf) "biRef" else ""
+    val meta = if (q"$prev.$manyRef".isBiSelfRef) "biRef" else ""
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, meta), nestedElems)
     //    x(28, prev, parentNs, nestedElems, nested, refNext)
     nested

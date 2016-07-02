@@ -4,10 +4,10 @@ package bidirectional
 import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
 
-class BidirectionalSelfOne extends MoleculeSpec {
+class SelfOne extends MoleculeSpec {
 
 
-  "Save new" in new BidirectionalSetup {
+  "Save new" in new Setup {
 
     // Save Adam, Lisa and bidirectional references between them
     val List(adam, lisa) = living_Person.name("Adam").Spouse.name("Lisa").save.eids
@@ -26,7 +26,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
     living_Person(adam).Spouse.name_.Spouse.name.one === "Adam"
   }
 
-  "Save id" in new BidirectionalSetup {
+  "Save id" in new Setup {
 
     val lisa = living_Person.name.insert("Lisa").eid
 
@@ -46,7 +46,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
   }
 
 
-  "Insert new" in new BidirectionalSetup {
+  "Insert new" in new Setup {
 
     // Insert 2 pairs of bidirectionally referenced entities
     living_Person.name.Spouse.name insert List(
@@ -64,7 +64,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
     )
   }
 
-  "Insert id" in new BidirectionalSetup {
+  "Insert id" in new Setup {
 
     val List(lisa, nina) = living_Person.name insert List("Lisa", "Nina") eids
 
@@ -86,7 +86,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
 
   "Update new" >> {
 
-    "creating ref to new" in new BidirectionalSetup {
+    "creating ref to new" in new Setup {
 
       val adam = living_Person.name.insert("Adam").eid
 
@@ -100,7 +100,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
     }
 
 
-    "replacing ref to new" in new BidirectionalSetup {
+    "replacing ref to new" in new Setup {
 
       val List(adam, lisa) = living_Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -124,7 +124,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
 
   "Update id" >> {
 
-    "creating ref to existing" in new BidirectionalSetup {
+    "creating ref to existing" in new Setup {
 
       // Adam and Lisa not married yet
       val adam = living_Person.name.insert("Adam").eid
@@ -144,7 +144,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
     }
 
 
-    "replacing ref to other existing" in new BidirectionalSetup {
+    "replacing ref to other existing" in new Setup {
 
       val List(adam, lisa) = living_Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -167,7 +167,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
   }
 
 
-  "Update removing reference" in new BidirectionalSetup {
+  "Update removing reference" in new Setup {
 
     val List(adam, lisa) = living_Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -185,7 +185,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
   }
 
 
-  "Retract" in new BidirectionalSetup {
+  "Retract" in new Setup {
 
     val adam = living_Person.name.insert("Adam").eid
 

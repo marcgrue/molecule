@@ -5,12 +5,12 @@ import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
 
 
-class BidirectionalEdgeMany extends MoleculeSpec {
+class EdgeSelfMany extends MoleculeSpec {
 
 
   "Save new" >> {
 
-    "1 new" in new BidirectionalSetup {
+    "1 new" in new Setup {
 
       // Save Ben, Ida and bidirectional references between them
 //      living_Person.name("Ben").Knows2.weight(6).Person2.name("Ida").saveD
@@ -42,63 +42,60 @@ class BidirectionalEdgeMany extends MoleculeSpec {
     }
     /*
 
-
+## 1 ## output.Molecule.saveD
+========================================================================
+1          Model(
+  1          Atom(living_Person,name,String,1,Eq(List(Ben)),None,List(),List())
+  2          Bond(living_Person,knows,living_Knows,2,edgeRef@:living_Knows/person)
+  3          Atom(living_Knows,weight,Long,1,Eq(List(7)),None,List(EdgePropAttr),List())
+  4          Atom(living_Knows,friendshipType,Long,1,Eq(List(42)),None,List(EdgePropRef),List())
+  5          Bond(living_Knows,person,living_Person,1,targetRef@:living_Person/knows)
+  6          Atom(living_Person,name,String,1,Eq(List(Ida)),None,List(),List()))
+------------------------------------------------
 2          List(
-  1          :db/add       'tempId                            :living_Person/name        Values(Eq(List(Ben)),None)
-  2          :db/add       'e                                 :living_Person/knows       :living_Knows                           edgeRef@2@:living_Knows/person
-  3          :db/add       'v                                 :living_Knows/weight       Values(Eq(List(7)),None)
-  4          :db/add       'e                                 :living_Knows/person       :living_Person                          targetRef@1@:living_Person/knows
-  5          :db/add       'v                                 :living_Person/name        Values(Eq(List(Ida)),None)              )
-
+  1          :db/add       'tempId                            :living_Person/name            Values(Eq(List(Ben)),None)
+  2          :db/add       'e                                 :living_Person/knows           :living_Knows                           edgeRef@2@:living_Knows/person
+  3          :db/add       'v                                 :living_Knows/weight           Values(Eq(List(7)),None)
+  4          :db/add       'e                                 :living_Knows/friendshipType   Values(Eq(List(42)),None)
+  5          :db/add       'e                                 :living_Knows/person           :living_Person                          targetRef@1@:living_Person/knows
+  6          :db/add       'v                                 :living_Person/name            Values(Eq(List(Ida)),None)              )
+------------------------------------------------
 3          List(
-  1          :db/add       #db/id[:living -1000014]           :living_Person/name        Ben
-  2          :db/add       #db/id[:living -1000015]           :living_Knows/person       #db/id[:living -1000014]
-  3          :db/add       #db/id[:living -1000014]           :living_Person/knows       #db/id[:living -1000015]
-  4          :db/add       #db/id[:living -1000015]           :living_Knows/weight       7
-  5          :db/add       #db/id[:living -1000016]           :living_Person/knows       #db/id[:living -1000015]
-  6          :db/add       #db/id[:living -1000015]           :living_Knows/person       #db/id[:living -1000016]
-  7          :db/add       #db/id[:living -1000016]           :living_Person/name        Ida                                     )
+  1          :db/add       #db/id[:living -1000015]           :living_Person/name            Ben
 
+  2          :db/add       #db/id[:living -1000016]           :living_Knows/person           #db/id[:living -1000015]
+  3          :db/add       #db/id[:living -1000015]           :living_Person/knows           #db/id[:living -1000016]
 
+  4          :db/add       #db/id[:living -1000016]           :living_Knows/weight           7
 
-3          List(
-  1          :db/add       #db/id[:living -1000014]           :living_Person/name        Ben
-  3          :db/add       #db/id[:living -1000014]           :living_Person/knows       #db/id[:living -1000015]
+  5          :db/add       #db/id[:living -1000016]           :living_Knows/friendshipType   42
 
-  2          :db/add       #db/id[:living -1000015]           :living_Knows/person       #db/id[:living -1000014]
-  4          :db/add       #db/id[:living -1000015]           :living_Knows/weight       7
-  6          :db/add       #db/id[:living -1000015]           :living_Knows/person       #db/id[:living -1000016]
+  6          :db/add       #db/id[:living -1000017]           :living_Person/knows           #db/id[:living -1000016]
+  7          :db/add       #db/id[:living -1000016]           :living_Knows/person           #db/id[:living -1000017]
 
-  5          :db/add       #db/id[:living -1000016]           :living_Person/knows       #db/id[:living -1000015]
-  7          :db/add       #db/id[:living -1000016]           :living_Person/name        Ida                                     )
-
-
-
-2          List(
-  1          :db/add       'tempId                            :living_Person/name        Values(Eq(List(Ben)),None)
-  2          :db/add       'e                                 :living_Person/knows       :living_Knows                           edgeRef@2@:living_Knows/person
-  3          :db/add       'v                                 :living_Knows/weight       Values(Eq(List(7)),None)
-  4          :db/add       'e                                 :living_Knows/person       :living_Person                          targetRef@1@:living_Person/knows
-  5          :db/add       'v                                 :living_Person/name        Values(Eq(List(Ida)),None)              )
+  8          :db/add       #db/id[:living -1000017]           :living_Person/name            Ida                                     )
+========================================================================
 
 
 3          List(
-  1          :db/add       #db/id[:living -1000014]           :living_Person/name        Ben
+  1          :db/add       #db/id[:living -1000015]           :living_Person/name            Ben
 
-  3          :db/add       #db/id[:living -1000014]           :living_Person/knows       #db/id[:living -1000015]
-  3          :db/add       #db/id[:living -1000014]           :living_Person/knows       #db/id[:living -1000016]
+  3          :db/add       #db/id[:living -1000015]           :living_Person/knows           #db/id[:living -1000016]     // A --> X
+  2          :db/add       #db/id[:living -1000017]           :living_Knows/person           #db/id[:living -1000015]     // Y --> A
+  2          :db/add       #db/id[:living -1000016]           :molecule_Edge/otherId         #db/id[:living -1000017]     // X --> Y
+  2          :db/add       #db/id[:living -1000017]           :molecule_Edge/otherId         #db/id[:living -1000016]     // Y --> X
 
-  6          :db/add       #db/id[:living -1000015]           :living_Knows/person       #db/id[:living -1000014]
-  4          :db/add       #db/id[:living -1000015]           :living_Knows/weight       7
-  4          :db/add       #db/id[:living -1000015]           :living_Knows/other        42
+  4          :db/add       #db/id[:living -1000016]           :living_Knows/weight           7                            // edgePropAttr X
+  4          :db/add       #db/id[:living -1000017]           :living_Knows/weight           7                            // edgePropAttr Y
 
-  4          :db/add       #db/id[:living -1000016]           :living_Knows/weight       7
-  4          :db/add       #db/id[:living -1000016]           :living_Knows/other        42
-  6          :db/add       #db/id[:living -1000016]           :living_Knows/person       #db/id[:living -1000017]
+  5          :db/add       #db/id[:living -1000016]           :living_Knows/friendshipType   42                           // edgePropRef X
+  5          :db/add       #db/id[:living -1000017]           :living_Knows/friendshipType   42                           // edgePropRef Y
 
-  5          :db/add       #db/id[:living -1000017]           :living_Person/knows       #db/id[:living -1000015]
-  5          :db/add       #db/id[:living -1000017]           :living_Person/knows       #db/id[:living -1000016]
-  7          :db/add       #db/id[:living -1000017]           :living_Person/name        Ida                                     )
+  7          :db/add       #db/id[:living -1000016]           :living_Knows/person           #db/id[:living -1000018]     // X --> B
+  6          :db/add       #db/id[:living -1000018]           :living_Person/knows           #db/id[:living -1000017]     // B --> Y
+
+  8          :db/add       #db/id[:living -1000018]           :living_Person/name            Ida                                     )
+
 
 
 

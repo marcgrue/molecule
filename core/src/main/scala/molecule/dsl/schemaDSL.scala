@@ -334,22 +334,29 @@ object schemaDSL {
   trait NoHistory
 
 
-  // Bidirectional
+  // Bidirectional ref (with no properties)
 
-  // Self-reference
-  trait BiSelf
-  trait BiSelfAttr
-  trait BiOther
-  trait BiOtherAttr
+  // Bidirectional ref to defining ns (self-reference)
+  trait BiSelfRef
+  trait BiSelfRefAttr
 
-  // Edge-reference (to "property edge/namespace")
-  trait BiEdge[revRefAttr]
-  trait BiEdgeAttr[revRefAttr]
+  // Bidirectional ref to other ns
+  trait BiRef
+  trait BiRefAttr
 
+
+  // Bidirectional property edge
+
+  // Ref from defining ns to edge
+  trait BiEdgeRef[revRefAttr]
+  trait BiEdgeRefAttr[revRefAttr]
+
+  // Edge properties
   trait BiEdgePropAttr
   trait BiEdgePropRef
 
-  trait BiTarget[biRefAttr]
-  trait BiTargetAttr[biRefAttr]
+  // Ref from edge to target ns
+  trait BiTargetRef[biRefAttr]
+  trait BiTargetRefAttr[biRefAttr]
 
 }

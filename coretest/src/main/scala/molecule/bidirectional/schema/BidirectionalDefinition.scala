@@ -24,24 +24,23 @@ object BidirectionalDefinition {
       val companions = manyBi[Animal]
 
 
-      // A ==> x -- a
+      // A ==> edge -- a
 
-      //    val bestFriend = oneBi[Knows.person.type]
-      val knows = manyBi[Knows.person.type]
+      val bestFriend = oneBi[Knows.person.type]
+      val knows      = manyBi[Knows.person.type]
 
 
-      // A ==> x -- b
+      // A ==> edge -- b
 
-      //    val favorite = oneBi[Knows.animal.type]
-      //    val closeTo  = manyBi[Knows.animal.type]
-
+      val favorite = oneBi[Knows.animal.type]
+      val closeTo  = manyBi[Knows.animal.type]
 
       //    // Multiple bidirectional references (with no extra properties)
       //    val friends2 = many[Person]
       //
       //    val spouse2        = oneBiSame
       //    val spouse3        = oneBiSame[Animal]
-      //    val closestContact = oneBiOther[Animal]
+      //    val closestContact = oneBiRef[Animal]
       //
       //    // Single bidirectional outgoing reference - adding properties to the relationship
       //    val bestFriend = oneBiVia[Knows.person.type]
@@ -132,11 +131,11 @@ object BidirectionalDefinition {
       val weight         = oneInt
       val friendshipType = one[FriendshipType]
 
-      // a -- X ==> a
+      // a -- edge ==> a
       val person = target[Person]
 
-      // a -- X ==> b
-      //    val animal = target[Animal]
+      // a -- edge ==> b
+      val animal = target[Animal]
     }
     object Knows extends Knows
 
@@ -151,10 +150,10 @@ object BidirectionalDefinition {
       val companions = manyBi[Person]
 
 
-      // a -- x <== B
+      // a -- edge <== B
 
-      //    val favorite = oneBi[Knows.person.type]
-      //    val closeTo  = manyBi[Knows.person.type]
+      val favorite = oneBi[Knows.person.type]
+      val closeTo  = manyBi[Knows.person.type]
     }
 
 

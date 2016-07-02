@@ -5,12 +5,12 @@ import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
 
 
-class BidirectionalSelfMany extends MoleculeSpec {
+class SelfMany extends MoleculeSpec {
 
 
   "Save new" >> {
 
-    "1 new" in new BidirectionalSetup {
+    "1 new" in new Setup {
 
       // Save Ben, Ida and bidirectional references between them
       living_Person.name("Ben").Friends.name("Ida").save.eids
@@ -24,7 +24,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "n new" in new BidirectionalSetup {
+    "n new" in new Setup {
 
       // Can't save multiple values to cardinality-one attribute
       (living_Person.name("Ben").Friends.name("Ida", "Liz").save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
@@ -43,7 +43,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Save ids" >> {
 
-    "1 id" in new BidirectionalSetup {
+    "1 id" in new Setup {
 
       val ida = living_Person.name.insert("Ida").eid
 
@@ -63,7 +63,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "n ids" in new BidirectionalSetup {
+    "n ids" in new Setup {
 
       val idaLizSet = living_Person.name.insert("Ida", "Liz").eidSet
 
@@ -83,7 +83,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Insert new" >> {
 
-    "1 new" in new BidirectionalSetup {
+    "1 new" in new Setup {
 
       // We can treat card-many attributes as card-one attributes:
 
@@ -103,7 +103,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
       )
     }
 
-    "n new" in new BidirectionalSetup {
+    "n new" in new Setup {
 
       // Create multiple bidirectionally referenced entities with a nested molecule
       living_Person.name.Friends.*(living_Person.name) insert List(
@@ -140,7 +140,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Insert existing" >> {
 
-    "new - ref - 1 existing" in new BidirectionalSetup {
+    "new - ref - 1 existing" in new Setup {
 
       val List(ida, tim) = living_Person.name insert List("Ida", "Tim") eids
 
@@ -160,7 +160,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
       )
     }
 
-    "new - ref - n existing" in new BidirectionalSetup {
+    "new - ref - n existing" in new Setup {
 
       val List(ida, liz, tim) = living_Person.name insert List("Ida", "Liz", "Tim") eids
 
@@ -196,7 +196,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Update new" >> {
 
-    "creating ref to 1 new" in new BidirectionalSetup {
+    "creating ref to 1 new" in new Setup {
 
       val ben = living_Person.name.insert("Ben").eid
 
@@ -210,7 +210,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "creating refs to multiple new" in new BidirectionalSetup {
+    "creating refs to multiple new" in new Setup {
 
       val ben = living_Person.name.insert("Ben").eid
 
@@ -229,7 +229,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "replacing ref to 1 new" in new BidirectionalSetup {
+    "replacing ref to 1 new" in new Setup {
 
       val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
 
@@ -266,7 +266,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
   }
 
 
-  "replacing refs to multiple new" in new BidirectionalSetup {
+  "replacing refs to multiple new" in new Setup {
 
     val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
 
@@ -306,7 +306,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Update existing" >> {
 
-    "creating ref to 1 existing" in new BidirectionalSetup {
+    "creating ref to 1 existing" in new Setup {
 
       val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
 
@@ -319,7 +319,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
       )
     }
 
-    "creating ref to 1 existing with explicit `add`" in new BidirectionalSetup {
+    "creating ref to 1 existing with explicit `add`" in new Setup {
 
       val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
 
@@ -333,7 +333,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "creating refs to multiple existing, vararg" in new BidirectionalSetup {
+    "creating refs to multiple existing, vararg" in new Setup {
 
       val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
 
@@ -349,7 +349,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
     }
 
 
-    "creating refs to multiple existing, Set" in new BidirectionalSetup {
+    "creating refs to multiple existing, Set" in new Setup {
 
       val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
 
@@ -366,7 +366,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
   }
 
 
-  "Update replacing ref to other existing" in new BidirectionalSetup {
+  "Update replacing ref to other existing" in new Setup {
 
     // Save Ben, Ida and bidirectional references between them
     val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
@@ -405,7 +405,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
 
   "Update removing all references" >> {
 
-    "retracting ref" in new BidirectionalSetup {
+    "retracting ref" in new Setup {
 
       // Save Ben, Ida and bidirectional references between them
       val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
@@ -425,7 +425,7 @@ class BidirectionalSelfMany extends MoleculeSpec {
   }
 
 
-  "Retract" in new BidirectionalSetup {
+  "Retract" in new Setup {
 
     // (Same as for cardinality-one)
 

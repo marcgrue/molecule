@@ -115,11 +115,11 @@ object model {
   case object NoValue extends Generic
 
   // Bidirectional markers
-  case object BiAttr extends Generic
+  case object BiRef_ extends Generic
   case object EdgePropAttr extends Generic
   case object EdgePropRef extends Generic
-  case class EdgeAttr(attr: String) extends Generic
-  case class TargetAttr(attr: String) extends Generic
+  case class EdgeRefAttr(attr: String) extends Generic
+  case class TargetRefAttr(attr: String) extends Generic
 
   case object Qm extends Value
   case object Distinct extends Value

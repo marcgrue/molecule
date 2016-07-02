@@ -39,7 +39,7 @@
 //
 //      val spouse2        = oneBiSame
 //      val spouse3        = oneBiSame[Animal]
-//      val closestContact = oneBiOther[Animal]
+//      val closestContact = oneBiRef[Animal]
 //
 //      // Single bidirectional outgoing reference - adding properties to the relationship
 //      val bestFriend = oneBiVia[Knows.person.type]
