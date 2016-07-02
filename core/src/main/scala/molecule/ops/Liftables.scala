@@ -145,6 +145,8 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case NsValue(values)  => q"NsValue(Seq(..$values))"
     case NoValue          => q"NoValue"
     case BiAttr           => q"BiAttr"
+    case EdgePropAttr     => q"EdgePropAttr"
+    case EdgePropRef      => q"EdgePropRef"
     case EdgeAttr(attr)   => q"EdgeAttr($attr)"
     case TargetAttr(attr) => q"TargetAttr($attr)"
   }
@@ -162,6 +164,8 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case NsValue(values)  => q"NsValue(Seq(..$values))"
     case OpValue          => q"OpValue"
     case BiAttr           => q"BiAttr"
+    case EdgePropAttr     => q"EdgePropAttr"
+    case EdgePropRef      => q"EdgePropRef"
     case EdgeAttr(attr)   => q"EdgeAttr($attr)"
     case TargetAttr(attr) => q"TargetAttr($attr)"
     case BackValue(value) => q"BackValue($value)"

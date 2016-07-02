@@ -195,7 +195,7 @@ object MoleculeBoilerplate {
         case r"target\[(.*)$revRef\](.*)$str" =>
           val ref = parseRefTypeArg(revRef, curPart)
           Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref, Optional(s"$curFullNs.$attr", s"BiTarget") +: parseOptions(str, Nil, attr, curFullNs)))
-//                  Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref, Optional(s"$curFullNs.$attr", s"BiTarget") +: parseOptions(str, Nil, attr, curFullNs)))
+        //                  Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref, Optional(s"$curFullNs.$attr", s"BiTarget") +: parseOptions(str, Nil, attr, curFullNs)))
 
 
         // References
@@ -396,12 +396,39 @@ object MoleculeBoilerplate {
   }
 
   def resolve(definition: Definition) = {
-    val updatedNss2 = definition.nss.foldLeft(definition.nss) { case (updatedNss0, curNs) =>
-      val updatedNss1 = resolveBidrectionals(definition.domain, updatedNss0, curNs)
-      addBackRefs(updatedNss1, curNs)
+    val updatedNss1 = markBidrectionalEdgeProperties(definition.nss)
+    val updatedNss3 = definition.nss.foldLeft(updatedNss1) { case (updatedNss2, curNs) =>
+      addBackRefs(updatedNss2, curNs)
     }
-    val updatedNss3 = addReverseRefs(definition.domain, updatedNss2)
-    definition.copy(nss = updatedNss3)
+    val updatedNss4 = addReverseRefs(definition.domain, updatedNss3)
+    definition.copy(nss = updatedNss4)
+  }
+
+  def markBidrectionalEdgeProperties(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
+    val isEdge = ns.attrs.collectFirst {
+      case ref: Ref if ref.options.exists(_.clazz.startsWith("BiTarget")) => true
+    } getOrElse false
+
+    if (isEdge) {
+      val newAttrs: Seq[Attr] = ns.attrs.map {
+        case targetRef: Ref if targetRef.options.exists(_.clazz.startsWith("BiTarget")) => targetRef
+
+        case biRef: Ref if biRef.options.exists(opt => opt.clazz.startsWith("Bi") && opt.clazz.substring(6, 10) != "Prop") => sys.error(
+          s"""Namespace `${ns.ns}` is already defined as a "property edge" and can't also define a bidirectional reference `${biRef.attr}`.""")
+
+        case ref: Ref   => ref.copy(options = ref.options :+ Optional("", "BiEdgePropRef"))
+        case enum: Enum => enum.copy(options = enum.options :+ Optional("", "BiEdgePropAttr"))
+        case value: Val => value.copy(options = value.options :+ Optional("", "BiEdgePropAttr"))
+        case other      => other
+      }
+//      println(s"========== ${ns.ns} ==========")
+//      newAttrs.foreach { a =>
+//        println(s"---------- ${a.attr} ----------")
+//        a.options foreach println
+//      }
+      ns.copy(attrs = newAttrs)
+    } else
+      ns
   }
 
   def addReverseRefs(domain: String, nss: Seq[Namespace]): Seq[Namespace] = {
@@ -422,192 +449,27 @@ object MoleculeBoilerplate {
         }.get
     }).toMap
 
-    println(revRefMap)
+//        println(revRefMap)
 
     nss.map { ns =>
       val attrs2 = ns.attrs map {
         case oneRef@Ref(revRef, attrClean, _, _, _, _, _, opts) if revRefMap.keys.toList.contains(s"${ns.ns}.$revRef") =>
-          //          println("zz: " + revRef)
+//                    println("zz: " + revRef)
           val newOpts = opts.map {
             case Optional(ns1, "BiTarget") =>
               Optional(revRefMap(s"${ns.ns}.$revRef"), s"BiTarget")
-            case other                       => other
+            case other                     => other
           }
           oneRef.copy(options = newOpts)
 
         case oneRef@Ref(revRef, attrClean, _, _, _, _, _, opts) =>
-          //          println("yy: " + revRef)
+//                    println("yy: " + revRef)
           oneRef
 
         case otherAttr => otherAttr
       }
       ns.copy(attrs = attrs2)
     }
-
-    //    nss
-  }
-
-  def resolveBidrectionals(domain: String, updatedNss0: Seq[Namespace], curNs: Namespace): Seq[Namespace] = {
-
-    val nsLower = firstLow(curNs.ns)
-    val error = s"Error in ${domain}Definition:"
-
-    //        println(s"--------- $domain ---------")
-    //        println("curNs: " + curNs.ns)
-
-    // Resolve bidirectional refs
-
-    val attrs1 = curNs.attrs map {
-
-      // Bidirectional ref (val knows = one[Person]) pointing to vertex namespace itself
-      //      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if revNs == curNs.ns && opts.exists(_.clazz == "Bidirectional") => {
-      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if opts.exists(_.clazz == "BiSelf") => {
-
-        //        val newOpts = opts.collectFirst {
-        //          case Optional(revRef, "Bidirectinal") =>
-        //        }
-
-        val newOpts = opts map {
-          case bidirectOps if bidirectOps.clazz == "BiSelf"          =>
-            bidirectOps.copy(datomicKeyValue = s"$bidirectAttr", clazz = s"BiSelf:$bidirectAttr")
-          case bidirectOps if bidirectOps.clazz.startsWith("BiSelf") => sys.error(
-            s"""$error
-               |Unexpected bidirectional ref definition:
-               |$bidirectOps
-                     """.stripMargin)
-          case otherOps                                                     => otherOps
-        }
-
-        //        println("A bidirectRef: " + bidirectRef)
-        //        println("A revNs: " + revNs)
-        //        println("A newOpts: " + newOpts)
-
-        bidirectRef.copy(options = newOpts)
-      }
-
-      // Bidirectional ref (val knows = one[Knows]) pointing to property edge namespace
-      //      case bidirectRef@Ref(bidirectAttr, _, _, _, _, _, revNs, opts) if opts.exists(_.clazz == "Bidirectional") => {
-      //
-      //        //                println("bidirectRef: " + bidirectRef)
-      //        //        println("revNs: " + revNs)
-      //        sys.error(
-      //          s"""$error
-      //             |For the moment bidirectional references are only allowed to the same
-      //             |namespace `${curNs.ns}` like:
-      //             |  val $bidirectAttr = one[${curNs.ns}]""".stripMargin)
-      //
-      //        val revRef = updatedNss0.collectFirst {
-      //
-      //          case ns_ if revNs == ns_.ns => {
-      //
-      //            val reverseRefs = ns_.attrs collect {
-      //
-      //              // Reverse ref pointing back to vertex namespace
-      //              case reverseRef@Ref(attr, _, _, _, _, _, revNs2, opts2) if revNs2 == curNs.ns =>
-      //                // Only define bidirection in vertex namespace
-      //                opts2 collectFirst {
-      //                  case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
-      //                    s"""$error
-      //                       |Add the `bidirectional` only to the ref in the "vertex namespace" `${curNs.ns}`
-      //                       |that points to the edge namespace `$revNs`.
-      //                       |In the edge namespace `$revNs` simply omit the `bidirectional` option:
-      //                       |  val $attr = one[${curNs.ns}]
-      //                         """.stripMargin)
-      //                }
-      //                reverseRef
-      //
-      //              // Other refs
-      //              case otherRef@Ref(attr, _, _, _, _, baseTpe, refNs, opts2) => {
-      //                val card = if (baseTpe.isEmpty) "one" else "many"
-      //                sys.error(
-      //                  s"""$error
-      //                     |"Property edge" namespace `$revNs` is only allowed to have reverse references
-      //                     |pointing back to namespace `${curNs.ns}` (like `val $nsLower = one[${curNs.ns}]`).
-      //                     |Found un-allowed reference in property edge namespace `$revNs`:
-      //                     |  val $attr = $card[$refNs]
-      //                      """.stripMargin)
-      //              }
-      //            }
-      //
-      //            // Expect only 1 reverse ref
-      //            val reverseRef = reverseRefs.length match {
-      //              case 0          => sys.error(
-      //                s"""$error
-      //                   |Can't find  reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
-      //                   |Expecting something like:
-      //                   |  val $nsLower = one[${curNs.ns}]
-      //                     """.stripMargin)
-      //              case n if n > 1 =>
-      //                val refs = reverseRefs.map { r =>
-      //                  val card = if (r.baseTpe.isEmpty) "one" else "many"
-      //                  s"val ${r.attr} = $card[${curNs.ns}]"
-      //                }.mkString("\n  ")
-      //                sys.error(
-      //                  s"""$error
-      //                     |Can only have one reverse ref in namespace `$revNs` pointing back to `${curNs.ns}`.
-      //                     |Found $n reverse references pointing back to `${curNs.ns}`:
-      //                     |  $refs
-      //                     |Expected something like:
-      //                     |  val $nsLower = one[${curNs.ns}]
-      //                     """.stripMargin)
-      //              case 1          => reverseRefs.head
-      //            }
-      //
-      //
-      //            // No edge namespace without edge properties
-      //            if (ns_.attrs.collect { case v: Val => v case e: Enum => e }.isEmpty)
-      //              sys.error(
-      //                s"""$error
-      //                   |Edge namespaces like `$revNs` should have at least 1 edge property (attribute/enum) defined.
-      //                   |If no edge properties are needed, you should skip the separate namespace `$revNs` and simply
-      //                   |only have a bidirectional self-reference in `${curNs.ns}`, like:
-      //                   |  val ${firstLow(revNs)} = one[${curNs.ns}]
-      //                       """.stripMargin)
-      //
-      //
-      //            //            println("reverseRef : " + reverseRef)
-      //
-      //            // Expect only card-one reverse ref
-      //            reverseRef match {
-      //              case Ref(attr_, _, _, _, _, baseTpe, _, _) if baseTpe.nonEmpty =>
-      //                sys.error(
-      //                  s"""$error
-      //                     |Reverse ref `$attr_` in namespace `$revNs` is expected
-      //                     |to be a cardinality one ref. Please change to:
-      //                     |  val $attr_ = one[${curNs.ns}]
-      //                       """.stripMargin)
-      //              case revRef                                                    => revRef.attr
-      //            }
-      //          }
-      //        }.get
-      //
-      //        //        println("reverseRefName: " + revRef)
-      //
-      //        val newOpts = opts map {
-      //          case bidirectOps if bidirectOps.clazz == "Bidirectional"          =>
-      //            bidirectOps.copy(datomicKeyValue = s"$revNs.$revRef", clazz = s"Bidirectional:${curNs.ns}:$bidirectAttr")
-      //          case bidirectOps if bidirectOps.clazz.startsWith("Bidirectional") => sys.error(
-      //            s"""$error
-      //               |Unexpected bidirectional ref definition:
-      //               |$bidirectOps
-      //                 """.stripMargin)
-      //          case otherOps                                                     => otherOps
-      //        }
-      //
-      //        bidirectRef.copy(options = newOpts)
-      //      }
-
-      case otherAttr => otherAttr
-    }
-
-    // Update bidirectional attributes
-    val nssUpdated1 = updatedNss0.map {
-      case definingNs if definingNs == curNs => curNs.copy(attrs = attrs1)
-      case otherNs                           => otherNs
-    }
-
-    //        nssUpdated1
-    updatedNss0
   }
 
   def addBackRefs(nss: Seq[Namespace], curNs: Namespace): Seq[Namespace] = {
@@ -637,11 +499,13 @@ object MoleculeBoilerplate {
   def schemaBody(d: Definition) = {
 
     def resolveOptions(options: Seq[Optional]) = options flatMap {
-      case Optional(_, clazz) if clazz.startsWith("BiSelf")   => None
-      case Optional(_, clazz) if clazz.startsWith("BiOther")  => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdge")   => None
-      case Optional(_, clazz) if clazz.startsWith("BiTarget") => None
-      case optional                                           => Some(optional.datomicKeyValue)
+      case Optional(_, clazz) if clazz.startsWith("BiSelf")         => None
+      case Optional(_, clazz) if clazz.startsWith("BiOther")        => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdge")         => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")  => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr") => None
+      case Optional(_, clazz) if clazz.startsWith("BiTarget")       => None
+      case optional                                                 => Some(optional.datomicKeyValue)
     }
 
 
@@ -865,9 +729,11 @@ object MoleculeBoilerplate {
           case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
         }
         val birectional = opts.collectFirst {
-          case Optional(biRefAttr, clazz) if clazz.startsWith("BiSelf")      => s"with BiSelf "
-          case Optional(biRefAttr, clazz) if clazz.startsWith("BiOther")     => s"with BiOther "
-          case Optional(biEdgeAttr, clazz) if clazz.startsWith("BiEdge")     => s"with BiEdge[$biEdgeAttr[NS, NS]] "
+          case Optional(_, clazz) if clazz.startsWith("BiSelf")              => s"with BiSelf "
+          case Optional(_, clazz) if clazz.startsWith("BiOther")             => s"with BiOther "
+          case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr")      => s"with BiEdgePropAttr "
+          case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")       => s"with BiEdgePropRef "
+          case Optional(biEdgeAttr, clazz) if clazz.startsWith("BiEdge:")    => s"with BiEdge[$biEdgeAttr[NS, NS]] "
           case Optional(biTargetAttr, clazz) if clazz.startsWith("BiTarget") => s"with BiTarget[$biTargetAttr[NS, NS]] "
         } getOrElse ""
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref $birectional= ???"
@@ -1101,22 +967,23 @@ object MoleculeBoilerplate {
 
     val attrClasses = attrs.flatMap {
 
-      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if tpe.take(3) == "Map" =>
-        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, opts) if tpe.take(3) == "Map" =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
-      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if baseTpe == "K" =>
-        val options2 = options :+ Optional("", "MapAttrK")
+      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, opts) if baseTpe == "K" =>
+        val options2 = opts :+ Optional("", "MapAttrK")
         val extensions = " with " + options2.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
-      case Val(attr, _, clazz, _, _, _, options) =>
-        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+      case Val(attr, _, clazz, _, _, _, opts) =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case Enum(attr, _, clazz, _, _, enums, _) =>
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }""")
+
 
       case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiSelf")) =>
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiSelfAttr")
@@ -1124,7 +991,7 @@ object MoleculeBoilerplate {
       case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiOther")) =>
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiOtherAttr")
 
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdge")) =>
+      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdge:")) =>
         val biEdge = opts.collectFirst {
           case Optional(biEdge0, bidirectRef) if bidirectRef.startsWith("BiEdge") => biEdge0
         }.get
@@ -1136,19 +1003,22 @@ object MoleculeBoilerplate {
         }.get
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiTargetAttr[$bidirectAttr[NS, NS]]")
 
-      case Ref(attr, _, clazz, _, _, _, _, _) =>
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
+      case Ref(attr, _, clazz, _, _, _, _, opts) =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
     }.mkString("\n  ").trim
 
+
     val attrClassesOpt = attrs.flatMap {
-      case Val(attr, attrClean, clazz, tpe, baseTpe, _, options) if tpe.take(3) == "Map" =>
-        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+
+      case Val(attr, attrClean, clazz, tpe, baseTpe, _, opts) if tpe.take(3) == "Map" =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
 
-      case Val(attr, attrClean, clazz, _, _, _, options) =>
-        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+      case Val(attr, attrClean, clazz, _, _, _, opts) =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
 
       case Enum(attr, attrClean, clazz, _, _, enums, _) =>
@@ -1161,7 +1031,7 @@ object MoleculeBoilerplate {
       case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiOther")) =>
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiOtherAttr")
 
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdge")) =>
+      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdge:")) =>
         val biEdge = opts.collectFirst {
           case Optional(biEdge0, bidirectRef) if bidirectRef.startsWith("BiEdge") => biEdge0
         }.get
@@ -1173,8 +1043,9 @@ object MoleculeBoilerplate {
         }.get
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiTargetAttr[$bidirectAttr[NS, NS]]")
 
-      case Ref(attr, attrClean, clazz, _, _, _, _, _) =>
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}")
+      case Ref(attr, attrClean, clazz, _, _, _, _, opts) =>
+        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
 
       case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
     }.mkString("\n  ").trim

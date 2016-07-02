@@ -346,6 +346,9 @@ object schemaDSL {
   trait BiEdge[revRefAttr]
   trait BiEdgeAttr[revRefAttr]
 
+  trait BiEdgePropAttr
+  trait BiEdgePropRef
+
   trait BiTarget[biRefAttr]
   trait BiTargetAttr[biRefAttr]
 

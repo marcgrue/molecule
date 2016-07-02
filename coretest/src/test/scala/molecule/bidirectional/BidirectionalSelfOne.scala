@@ -38,7 +38,7 @@ class BidirectionalSelfOne extends MoleculeSpec {
       ("Lisa", "Adam")
     )
 
-    // Saveing reference to generic `e` not allowed.
+    // Saving reference to generic `e` not allowed.
     // (instead apply ref to ref attribute as shown above)
     (living_Person.name("Adam").Spouse.e(lisa).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
       s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +

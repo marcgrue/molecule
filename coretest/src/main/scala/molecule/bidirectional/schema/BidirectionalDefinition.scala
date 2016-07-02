@@ -129,8 +129,8 @@ object BidirectionalDefinition {
     // "Property edge"
 
     trait Knows {
-      val weight = oneInt
-      //    val friendshipType = one[FriendshipType]
+      val weight         = oneInt
+      val friendshipType = one[FriendshipType]
 
       // a -- X ==> a
       val person = target[Person]
@@ -161,5 +161,6 @@ object BidirectionalDefinition {
     trait FriendshipType {
       val name = oneString
     }
+    object FriendshipType extends FriendshipType
   }
 }

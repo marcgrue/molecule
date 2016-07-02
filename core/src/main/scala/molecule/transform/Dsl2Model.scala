@@ -94,10 +94,10 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Optional ----------------------
 
-    case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue))
-    case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix)))
-    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping")))
-    case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue))
+    case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = opts(a)))
+    case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), opts(a)))
+    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), opts(a)))
+    case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = opts(a)))
 
 
     // Self join -----------------------------
@@ -126,7 +126,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
       val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, Some("mappedKey"), Nil, Seq(extract(q"$key").toString))
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, Some("mappedKey"), opts(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(76, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
@@ -140,7 +140,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[One[_, _, _]]     => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, Some("mappedKey"), Nil, Seq(extract(q"$key").toString))
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, Some("mappedKey"), opts(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(77, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
@@ -172,6 +172,17 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case a@q"$prev.$bidirectRef" if a.isBiSelf =>
       traverse(q"$prev", Bond(a.refThis, firstLow(bidirectRef.toString), a.refNext, a.refCard, "biRef"))
 
+    case a@q"$prev.$bidirectRef" if a.isBiEdgePropRef =>
+      //      x(18
+      //        , a
+      //        , a.tpe_
+      //        , a.refThis
+      //        , firstLow(bidirectRef.toString)
+      //        , a.refNext
+      //        , a.refCard
+      //      )
+      traverse(q"$prev", Bond(a.refThis, firstLow(bidirectRef.toString), a.refNext, a.refCard, "edgePropRef"))
+
     case a@q"$prev.$edgeRef" if a.isBiEdge =>
       val baseType = a.tpe.baseType(weakTypeOf[BiEdge[_]].typeSymbol).typeArgs.head.typeSymbol
       val revRefAttr = ":" + baseType.owner.name + "/" + baseType.name
@@ -182,13 +193,18 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       val edgeRefAttr = ":" + baseType.owner.name + "/" + baseType.name
       traverse(q"$prev", Bond(a.refThis, firstLow(revRef.toString), a.refNext, a.refCard, "targetRef@" + edgeRefAttr))
 
-    case a@q"$prev.$ref" if a.isRef => traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard))
+    case a@q"$prev.$ref" if a.isRef =>
+      val meta = if (opts(a).nonEmpty) opts(a).toString else ""
+      traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard, meta))
 
 
     // Reference attribute --------------------------------------
 
     case a@q"$prev.$bidirectRefAttr" if a.isBiSelfAttr =>
       traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(BiAttr)))
+
+    case a@q"$prev.$bidirectRefAttr" if a.isBiEdgePropAttr =>
+      traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(EdgePropAttr)))
 
     case a@q"$prev.$revRefAttr" if a.isBiEdgeAttr =>
       val baseType = a.tpe.baseType(weakTypeOf[BiEdgeAttr[_]].typeSymbol).typeArgs.head.typeSymbol
@@ -200,14 +216,14 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       val edgeAttr = s":${firstLow(baseType.owner.name)}/${baseType.name}"
       traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = Seq(TargetAttr(edgeAttr))))
 
-    case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue))
+    case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = opts(a)))
 
 
     // Standard attributes --------------------------------------
 
-    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix)))
-    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping")))
-    case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue))
+    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), opts(a)))
+    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), opts(a)))
+    case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = opts(a)))
 
 
     // Nested ------------------------
@@ -296,7 +312,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-    val meta = if(q"$prev.$manyRef".isBiSelf) "biRef" else ""
+    val meta = if (q"$prev.$manyRef".isBiSelf) "biRef" else ""
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, meta), nestedElems)
     //    x(28, prev, parentNs, nestedElems, nested, refNext)
     nested
@@ -322,6 +338,11 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     }
   }
 
+  def opts(tree: Tree): Seq[Generic] = tree match {
+    case t if t.isBiEdgePropAttr => Seq(EdgePropAttr)
+    case t if t.isBiEdgePropRef  => Seq(EdgePropRef)
+    case other                   => Nil
+  }
   def cast(tpe: String): String = tpe match {
     case "Int"   => "Long"
     case "Float" => "Double"
@@ -334,19 +355,19 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val enumPrefix = if (attr.isEnum) Some(attr.at.enumPrefix) else None
     val cur = curTree.toString()
     previous match {
-      case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix)
+      case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, opts(attr))
       case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
-      case prev if cur == "e" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix)
+      case prev if cur == "e" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, opts(attr))
       case prev if cur == "e"                => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "a"                => Atom("?", "attr", "a", 1, value)
-      case prev if cur == "a_"               => Atom("?", "attr_", "a", 1, value)
-      case prev if cur == "ns"               => Atom("ns", "?", "ns", 1, value)
-      case prev if cur == "ns_"              => Atom("ns_", "?", "ns", 1, value)
+      case prev if cur == "a"                => Atom("?", "attr", "a", 1, value, gs = opts(attr))
+      case prev if cur == "a_"               => Atom("?", "attr_", "a", 1, value, gs = opts(attr))
+      case prev if cur == "ns"               => Atom("ns", "?", "ns", 1, value, gs = opts(attr))
+      case prev if cur == "ns_"              => Atom("ns_", "?", "ns", 1, value, gs = opts(attr))
       //      case prev if attr.isMapAttrK           => Atom(attr.ns, attr.name, cast(attr), 4, value, Some("mapKey"), keys = Seq("xxx"))
       case prev if attr.isMapAttr => Atom(attr.ns, attr.name, cast(attr), 3, value, Some("mapping"))
-      case prev if attr.isAttr    => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix)
-      case prev if prev.isAttr    => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix)
-      case prev                   => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix)
+      case prev if attr.isAttr    => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, opts(attr))
+      case prev if prev.isAttr    => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, opts(attr))
+      case prev                   => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, opts(attr))
     }
   }
 

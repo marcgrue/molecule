@@ -15,13 +15,13 @@ object model {
           case TxMetaData(nestedElements)   =>
             s"""|TxMetaData(List(
                 |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
-          case TxMetaData_(nestedElements)   =>
+          case TxMetaData_(nestedElements)  =>
             s"""|TxMetaData_(List(
                 |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
           case Composite(elements)          =>
             s"""|Composite(List(
                 |$s  ${draw(elements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
-          case other                       => s"$other"
+          case other                        => s"$other"
         }
       }
       "Model(List(\n  " + draw(elements, 1).mkString(",\n  ") + "))"
@@ -116,6 +116,8 @@ object model {
 
   // Bidirectional markers
   case object BiAttr extends Generic
+  case object EdgePropAttr extends Generic
+  case object EdgePropRef extends Generic
   case class EdgeAttr(attr: String) extends Generic
   case class TargetAttr(attr: String) extends Generic
 
@@ -159,11 +161,11 @@ object model {
   // Convenience methods .........................
 
   def curNs(e: Element) = e match {
-    case Atom(ns, _, _, _, _, _, _, _) => ns
-    case Bond(ns, _, _, _, _)             => ns
-    case Nested(Bond(ns, _, _, _, _), _)  => ns
-    case Meta(ns, _, _, _, _)          => ns
-    case unexpected                    => sys.error("[model:curNs] Unexpected element: " + unexpected)
+    case Atom(ns, _, _, _, _, _, _, _)   => ns
+    case Bond(ns, _, _, _, _)            => ns
+    case Nested(Bond(ns, _, _, _, _), _) => ns
+    case Meta(ns, _, _, _, _)            => ns
+    case unexpected                      => sys.error("[model:curNs] Unexpected element: " + unexpected)
   }
 }
 

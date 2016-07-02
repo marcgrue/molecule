@@ -31,6 +31,9 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def isBiSelfAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiSelfAttr].typeSymbol)
     def isBiSelf = tpe_ <:< weakTypeOf[BiSelf]
 
+    def isBiEdgePropAttr = tpe_ <:< weakTypeOf[BiEdgePropAttr]
+    def isBiEdgePropRef = tpe_ <:< weakTypeOf[BiEdgePropRef]
+
     def isBiEdgeAttr = tpe_ <:< weakTypeOf[BiEdgeAttr[_]]
     def isBiEdgeAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiEdgeAttr[_]].typeSymbol)
     def isBiEdge = tpe_ <:< weakTypeOf[BiEdge[_]]

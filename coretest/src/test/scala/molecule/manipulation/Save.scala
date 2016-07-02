@@ -4,7 +4,7 @@ package manipulation
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}
 
-class Add extends CoreSpec {
+class Save extends CoreSpec {
 
 
   "Data-molecule" >> {
@@ -13,16 +13,16 @@ class Add extends CoreSpec {
 
       // Construct a "Data-Molecule" with an attribute value and add it to the database
 
-      Ns.str("a").add
-      Ns.int(1).add
-      Ns.long(1L).add
-      Ns.float(1.0f).add
-      Ns.double(1.0).add
-      Ns.bool(true).add
-      Ns.date(date1).add
-      Ns.uuid(uuid1).add
-      Ns.uri(uri1).add
-      Ns.enum("enum1").add
+      Ns.str("a").save
+      Ns.int(1).save
+      Ns.long(1L).save
+      Ns.float(1.0f).save
+      Ns.double(1.0).save
+      Ns.bool(true).save
+      Ns.date(date1).save
+      Ns.uuid(uuid1).save
+      Ns.uri(uri1).save
+      Ns.enum("enum1").save
 
       Ns.str.one === "a"
       Ns.int.one === 1
@@ -36,8 +36,8 @@ class Add extends CoreSpec {
       Ns.enum.one === enum1
 
       // Applying multiple values to card-one attr not allowed when adding
-      (Ns.str("a", "b").add must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        s"""[output.Molecule:noConflictingCardOneValues (1)] Can't add multiple values for cardinality-one attribute:
+      (Ns.str("a", "b").save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+        s"""[output.Molecule:noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:
             |  ns ... str(a, b)""".stripMargin
     }
 
@@ -53,7 +53,7 @@ class Add extends CoreSpec {
         .dates(date1, date2)
         .uuids(uuid1, uuid2)
         .uris(uri1, uri2)
-        .enums("enum1", "enum2").add
+        .enums("enum1", "enum2").save
 
       Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.one ===(
         Set("a", "b"),
@@ -72,7 +72,7 @@ class Add extends CoreSpec {
 
       // Construct a "Data-Molecule" with multiple attributes populated with data and add it to the database
 
-      Ns.str("a").int(1).long(1L).float(1.0f).double(1.0).bool(true).date(date1).uuid(uuid1).uri(uri1).enum("enum1").add
+      Ns.str("a").int(1).long(1L).float(1.0f).double(1.0).bool(true).date(date1).uuid(uuid1).uri(uri1).enum("enum1").save
 
       Ns.str.int.long.float.double.bool.date.uuid.uri.enum.one ===(
         "a", 1, 1L, 1.0f, 1.0, true, date1, uuid1, uri1, "enum1")
@@ -83,49 +83,49 @@ class Add extends CoreSpec {
 
       // Construct a "Data-Molecule" with an attribute value and add it to the database
 
-      Ns.strs("a").add
-      Ns.strs("b", "c").add
+      Ns.strs("a").save
+      Ns.strs("b", "c").save
       Ns.strs.one === Set("a", "b", "c")
 
-      Ns.ints(1).add
-      Ns.ints(2, 3).add
+      Ns.ints(1).save
+      Ns.ints(2, 3).save
       Ns.ints.one === Set(1, 2, 3)
 
-      Ns.longs(1L).add
-      Ns.longs(2L, 3L).add
+      Ns.longs(1L).save
+      Ns.longs(2L, 3L).save
       Ns.longs.one === Set(1L, 2L, 3L)
 
-      Ns.floats(1.0f).add
-      Ns.floats(2.0f, 3.0f).add
+      Ns.floats(1.0f).save
+      Ns.floats(2.0f, 3.0f).save
       Ns.floats.one === Set(1.0f, 2.0f, 3.0f)
 
-      Ns.doubles(1.0).add
-      Ns.doubles(2.0, 3.0).add
+      Ns.doubles(1.0).save
+      Ns.doubles(2.0, 3.0).save
       Ns.doubles.one === Set(1.0, 2.0, 3.0)
 
       // Ns.bools not implemented...
 
-      Ns.dates(date1).add
-      Ns.dates(date2, date3).add
+      Ns.dates(date1).save
+      Ns.dates(date2, date3).save
       Ns.dates.one === Set(date1, date2, date3)
 
-      Ns.uuids(uuid1).add
-      Ns.uuids(uuid2, uuid3).add
+      Ns.uuids(uuid1).save
+      Ns.uuids(uuid2, uuid3).save
       Ns.uuids.one === Set(uuid1, uuid2, uuid3)
 
-      Ns.uris(uri1).add
-      Ns.uris(uri2, uri3).add
+      Ns.uris(uri1).save
+      Ns.uris(uri2, uri3).save
       Ns.uris.one === Set(uri1, uri2, uri3)
 
-      Ns.enums("enum1").add
-      Ns.enums("enum2", "enum3").add
+      Ns.enums("enum1").save
+      Ns.enums("enum2", "enum3").save
       Ns.enums.one === Set("enum1", "enum2", "enum3")
     }
 
 
     "Relationships" in new CoreSetup {
 
-      val address = Ns.str("273 Broadway").Ref1.int1(10700).str1("New York").Ref2.str2("USA").add.eid
+      val address = Ns.str("273 Broadway").Ref1.int1(10700).str1("New York").Ref2.str2("USA").save.eid
       address.touch === Map(
         ":db/id" -> 17592186045445L,
         ":ns/ref1" -> Map(

@@ -305,7 +305,7 @@ class OptionalValues extends CoreSpec {
 
     "RuntimeException when inserting" in new CoreSetup {
       (m(Ns.str_.int$).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        "[output.Molecule:modelCheck] Underscore-suffixed attributes like `str_` not allowed in insert molecules."
+        "[output.Molecule.noTacetAttrs] Tacet attributes like `str_` not allowed in insert molecules."
     }
   }
 
@@ -332,7 +332,7 @@ class OptionalValues extends CoreSpec {
 
     // We don't want a Ns entity with no asserted attributes but with a reference to Ref1 (an orphan)
     (m(Ns.Ref1.int1).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (2)] Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (1)] Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
 

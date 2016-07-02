@@ -25,8 +25,8 @@ class BidirectionalEdgeMany extends MoleculeSpec {
 //      living_Knows.weight.Person.name.get === List((7, "Ida"))
 //      living_Person.name.Knows.weight.get === List(("Ida", 7))
 
-      living_Person.name("Ben").Knows.weight(7).Person.name("Ida").saveD
-      living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save
+      living_Person.name("Ben").Knows.weight(7).friendshipType(42L).Person.name("Ida").saveD
+//      living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save
 //
 //      // Reference is bidirectional - both point to each other
 ////      living_Person.name.Knows.weight.get.sorted === List()

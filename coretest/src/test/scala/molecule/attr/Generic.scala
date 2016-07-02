@@ -10,19 +10,18 @@ class Generic extends CoreSpec {
 
     // Todo
 
-    // Add man with ref to existing woman
-    (Ns.str("man").Ref1.e(42L).add must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (Ns.str("man").Ref1.e(42L).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
       s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
-      s"not allowed in add molecules. Found `e`."
+      s"not allowed in save molecules. Found `e(42)`"
 
-    Ns.str("man").Ref1.a("hej").add
-    Ns.str("man").Ref1.v("hej").add
-    Ns.str("man").Ref1.ns("hej").add
-    Ns.str("man").Ref1.tx(42).add
-    Ns.str("man").Ref1.txT(43L).add
-    val now = new java.util.Date()
-    Ns.str("man").Ref1.txInstant(now).add
-    Ns.str("man").Ref1.op(true).add
+//    Ns.str("man").Ref1.a("hej").save
+//    Ns.str("man").Ref1.v("hej").save
+//    Ns.str("man").Ref1.ns("hej").save
+//    Ns.str("man").Ref1.tx(42).save
+//    Ns.str("man").Ref1.txT(43L).save
+//    val now = new java.util.Date()
+//    Ns.str("man").Ref1.txInstant(now).save
+//    Ns.str("man").Ref1.op(true).save
   }
 
 }

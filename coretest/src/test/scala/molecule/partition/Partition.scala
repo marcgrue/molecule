@@ -45,23 +45,23 @@ class Partition extends MoleculeSpec {
 
   "Nested 2 levels missing middle attribute values" in new PartitionSetup {
     (m(lit_Book.title.Reviewers.Professions * gen_Profession.name).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (5)] Namespace `Reviewers` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (2)] Namespace `Reviewers` in insert molecule has no mandatory attributes. Please add at least one."
 
     (m(lit_Book.title.Reviewers * gen_Person.Professions.name).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (2)] Namespace `gen_Person` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (1)] Namespace `gen_Person` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "No transitives in inserts" in new PartitionSetup {
     // Todo: more transitive examples in own file
     (m(lit_Book.title.Author.name.name).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (6)] Can't insert transitive attribute values (repeated attributes)."
+      "[output.Molecule:noTransitiveAttrs] Can't insert transitive attribute values (repeated attributes)."
   }
 
 
   "Back ref" >> {
 
     "Back only" in new PartitionSetup {
-      lit_Book.title("A good book").cat("good").Author.name("Marc").add
+      lit_Book.title("A good book").cat("good").Author.name("Marc").save
       lit_Book.title.Author.name._Book.cat.one ===("A good book", "Marc", "good")
     }
 

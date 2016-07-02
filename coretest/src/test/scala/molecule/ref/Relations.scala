@@ -64,9 +64,12 @@ class Relations extends CoreSpec {
 
 
   "Referenced entity ids" in new CoreSetup {
-    val id     = Ns.str("a").add.eid
-    val refId1 = Ns(id).Refs1.int1(1).add.eid
-    val refId2 = Ref1(refId1).Ref2.int2(2).add.eid
+    val id     = Ns.str("a").save.eid
+    (Ns(id).Refs1.int1(1).save  must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+          """[output.Molecule.noAppliedId] Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates: `Ns(johnId).likes("pizza").update`"""
+
+    val refId1 = Ns(id).Refs1.int1(1).update.eid
+    val refId2 = Ref1(refId1).Ref2.int2(2).update.eid
 
     Ns(id).Refs1.e.Ref2.int2_(2).one === refId1
   }
@@ -122,7 +125,7 @@ class Relations extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Ref1.Ref2.int2).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (2)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (1)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "No mandatory attributes after card-one ref" in new CoreSetup {
@@ -137,7 +140,7 @@ class Relations extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Ref1.int1$).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (4)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (4)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "No mandatory attributes after card-many ref" in new CoreSetup {
@@ -151,7 +154,7 @@ class Relations extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Refs1.int1$).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:modelCheck (4)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[output.Molecule:noOrphanRefs (4)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "Aggregates one" in new CoreSetup {
