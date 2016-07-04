@@ -117,7 +117,7 @@ object model {
   // Bidirectional markers
   case object BiRef_ extends Generic
   case object EdgePropAttr extends Generic
-  case object EdgePropRef extends Generic
+  case object EdgePropRefAttr extends Generic
   case class EdgeRefAttr(attr: String) extends Generic
   case class TargetRefAttr(attr: String) extends Generic
 

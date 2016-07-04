@@ -354,6 +354,7 @@ object schemaDSL {
   // Edge properties
   trait BiEdgePropAttr
   trait BiEdgePropRef
+  trait BiEdgePropRefAttr
 
   // Ref from edge to target ns
   trait BiTargetRef[biRefAttr]

@@ -141,7 +141,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
           case e: Throwable => sys.error(e.toString)
         }
         val ins = inputs(q)
-        sys.error(
+        println(
           "\n--------------------------------------------------------------------------\n" +
           ${show(dsl.tree)} + "\n\n" +
           m + "\n\n" +
@@ -223,6 +223,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def cast(query: Tree, row: Tree, tpe: Type, i: Int): Tree = {
+    val xx = q"println($row);7"
     val value: Tree = q"$row.get($i)"
     tpe match {
       case t if t <:< typeOf[Option[Map[String, _]]] => castOptMap(value, t)
@@ -367,7 +368,9 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
 
             case other => {
 //               sys.error("Default value: " + value.toString)
-//               println("Default value: " + value.toString)
+//               println("Default value type  : " + {t.toString})
+//               println("Default value       : " + value.toString)
+//               println("Default value casted: " + value.asInstanceOf[t].toString)
               $value.asInstanceOf[$t]
             }
           }
@@ -463,135 +466,284 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
   def castTpls(query: Tree, rows: Tree, tpes: Seq[Type]) = q"$rows.map(row => (..${castTpl(query, q"row", tpes)})).toList"
 
 
-  def resolveNested(query: Tree, tpes: Seq[Type], tpl0: Tree, prevRow: Tree, row: Tree, rowNo: Tree, entityIndex: Int, depth: Int, maxDepth: Tree): Tree = {
+  def resolveNested(query: Tree, tpes: Seq[Type], tpl0: Tree, prevRow: Tree, row: Tree, entityIndex: Int, depth: Int, maxDepth: Tree, shift: Int): Tree = {
 
-    val newNested = q"if ($prevRow.head == 0L) true else $prevRow.apply($entityIndex).asInstanceOf[Long] != $row.apply($entityIndex).asInstanceOf[Long]"
+    val prevEnt = q"if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]"
+    val curEnt = q"$row.apply($entityIndex).asInstanceOf[Long]"
+    val isNewNested = q"if ($prevEnt == 0L) true else $prevEnt != $curEnt"
 
-    def resolve(nestedTpes: Seq[Type], i: Int) = {
+    def resolve(nestedTpes: Seq[Type], tupleIndex: Int) = {
+      val rowIndex = entityIndex + shift + tupleIndex
       q"""
-        if ($tpl0.isEmpty || $newNested) {
-          val nestedTpl = ${resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]", prevRow, row, rowNo, entityIndex + 1 + i, depth + 1, maxDepth)}
+        if ($tpl0.isEmpty || $isNewNested) {
+          val nestedTpl = ${resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]", prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
           Seq(nestedTpl)
 
+        // ==========================================================================
         } else if ($tpl0.get.isInstanceOf[Seq[_]]) {
           val nestedTpl = ${
         resolveNested(query, nestedTpes,
           q"Some($tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-          prevRow, row, rowNo, entityIndex + 1 + i, depth + 1, maxDepth)
+          prevRow, row, rowIndex, depth + 1, maxDepth, shift)
       }.asInstanceOf[(..$nestedTpes)]
 
-          if ($prevRow.apply(${entityIndex + 1 + i}).asInstanceOf[Long] != $row.apply(${entityIndex + 1 + i}).asInstanceOf[Long] || $depth == $maxDepth)
+          val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long]
+
+         val nestedAcc = if (newNested)
             $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ nestedTpl
           else
             $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].init :+ nestedTpl
 
+          nestedAcc
+
+        // ==========================================================================
         } else {
+
+         val tpl0_1 = $tpl0.get.asInstanceOf[(..$tpes)]
+         val tpl0_2 = tpl0_1.productElement($tupleIndex)
+         val tpl0_3 = tpl0_2.asInstanceOf[Seq[(..$nestedTpes)]]
+         val tpl0_4 = tpl0_3.last
+         val tpl0_5: (..$nestedTpes) = tpl0_4.asInstanceOf[(..$nestedTpes)]
+
           val nestedTpl = ${
         resolveNested(query, nestedTpes,
-          q"Some($tpl0.get.asInstanceOf[(..$tpes)].productElement($tpl0.get.asInstanceOf[(..$tpes)].productArity - 1).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-          prevRow, row, rowNo, entityIndex + 1 + i, depth + 1, maxDepth)
+          q"Some($tpl0.get.asInstanceOf[(..$tpes)].productElement($tupleIndex).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
+          prevRow, row, rowIndex, depth + 1, maxDepth, shift)
       }.asInstanceOf[(..$nestedTpes)]
 
-          if ($prevRow.apply(${entityIndex + 1 + i}).asInstanceOf[Long] != $row.apply(${entityIndex + 1 + i}).asInstanceOf[Long] || $depth == $maxDepth)
-            $tpl0.get.asInstanceOf[(..$tpes)].productElement($tpl0.get.asInstanceOf[(..$tpes)].productArity - 1).asInstanceOf[Seq[(..$nestedTpes)]] :+ nestedTpl
-          else
-            $tpl0.get.asInstanceOf[(..$tpes)].productElement($tpl0.get.asInstanceOf[(..$tpes)].productArity - 1).asInstanceOf[Seq[(..$nestedTpes)]].init :+ nestedTpl
+           val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long] || $depth == $maxDepth
+
+           val nestedAcc = if (newNested)
+             tpl0_3 :+ nestedTpl
+           else
+             tpl0_3.init :+ nestedTpl
+
+          nestedAcc
         }
       """
+
+      //      q"""
+      //      //      println("  E tpl: " + tpl.isInstanceOf[Product])
+      //      //println(tab + " depth       : " + depth)
+      ////      val ei = "  " * entityIndex
+      //      val tab = "  " * $rowIndex
+      ////      println(tab + "rowIndex : " + rowIndex)
+      //      println(tab + "rowIndex: " + $rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")")
+      //
+      //
+      //        // ==========================================================================
+      //        if ($tpl0.isEmpty || $isNewNested) {
+      //
+      //        println(tab + "a tpl0: " + $tpl0)
+      //          val nestedTpl = ${resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]", prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
+      //        println(tab + "a nestedTpl : Seq(" + nestedTpl + ")")
+      //
+      //          Seq(nestedTpl)
+      //
+      //        // ==========================================================================
+      //        } else if ($tpl0.get.isInstanceOf[Seq[_]]) {
+      //
+      //        println(tab + "b tpl0      : " + $tpl0)
+      //
+      //          val nestedTpl = ${resolveNested(query, nestedTpes,
+      //        q"Some($tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
+      //        prevRow, row, rowIndex, depth + 1, maxDepth, shift)}.asInstanceOf[(..$nestedTpes)]
+      //
+      //          val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long]
+      //
+      //        println(tab + "b nestedTpl : " + nestedTpl)
+      //        println(tab + "b newNested : " + newNested + "  " + $row.apply($rowIndex).asInstanceOf[Long] + " " + $prevRow.apply($rowIndex).asInstanceOf[Long])
+      //
+      //         val nestedAcc = if (newNested)
+      //            $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ nestedTpl
+      //          else
+      //            $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].init :+ nestedTpl
+      //
+      //        println(tab + "b nestedAcc : " + nestedAcc)
+      //          nestedAcc
+      //
+      //        // ==========================================================================
+      //        } else {
+      //
+      //        println(tab + "c tpl0      : " + $tpl0)
+      //
+      //        println(tab + "c tpl0_1 tpe: " + ${tpes.toString})
+      //         val tpl0_1 = $tpl0.get.asInstanceOf[(..$tpes)]
+      //        println(tab + "c tpl0_1    : " + tpl0_1)
+      //
+      //         val tpl0_2 = tpl0_1.productElement($tupleIndex)
+      //        println(tab + "c tpl0_2    : " + tpl0_2)
+      //
+      //        println(tab + "c tpl0_3 tpe: " + ${nestedTpes.toString} + "")
+      //         val tpl0_3 = tpl0_2.asInstanceOf[Seq[(..$nestedTpes)]]
+      //        println(tab + "c tpl0_3    : " + tpl0_3)
+      //
+      //         val tpl0_4 = tpl0_3.last
+      //        println(tab + "c tpl0_4    : " + tpl0_4)
+      //
+      ////        println(tab + "c tpl0_5 tpe: " + {nestedTpes.toString})
+      //         val tpl0_5: (..$nestedTpes) = tpl0_4.asInstanceOf[(..$nestedTpes)]
+      //        println(tab + "c tpl0_5    : " + tpl0_5)
+      //
+      ////          val newTpl0 = Some(tpl0_1.productElement(tpl0_1.productArity - 1).asInstanceOf[Seq[(..nestedTpes)]].last.asInstanceOf[(..nestedTpes)])
+      ////          val newTpl0 = Some(tpl0_5)
+      //
+      ////        println(tab + "c newTpl0   : " + newTpl0)
+      //
+      //          val nestedTpl = ${resolveNested(query, nestedTpes,
+      ////        q"Some(tpl0_5)",
+      //        q"Some($tpl0.get.asInstanceOf[(..$tpes)].productElement($tupleIndex).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
+      //        prevRow, row, rowIndex, depth + 1, maxDepth, shift)}.asInstanceOf[(..$nestedTpes)]
+      //
+      //           val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long] || $depth == $maxDepth
+      //
+      //        println(tab + "c nestedTpl : " + nestedTpl)
+      //        println(tab + "c newNested : " + newNested + "   " + $prevRow.apply($rowIndex).asInstanceOf[Long] + "  " + $row.apply($rowIndex).asInstanceOf[Long] + "    " + $depth + "  " + $maxDepth)
+      //
+      //           val nestedAcc = if (newNested)
+      //             tpl0_3 :+ nestedTpl
+      //           else
+      //             tpl0_3.init :+ nestedTpl
+      //
+      //        println(tab + "c nestedAcc : " + nestedAcc)
+      //          nestedAcc
+      //        }
+      //      """
+
+      //      q"null.asInstanceOf[Seq[(..$nestedTpes)]]"
     }
 
-    lazy val values = tpes.zipWithIndex.map {
+    lazy val values = tpes.zipWithIndex.foldLeft(shift, Seq.empty[Tree]) { case ((shift, vs), (t, tupleIndex)) =>
+      t match {
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 22, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 21, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 20, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 19, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 18, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 17, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 16, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 15, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 14, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 13, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 12, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 11, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 10, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 9, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 8, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 7, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 6, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _, _)].typeSymbol).typeArgs
+          (shift + 5, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _, _)].typeSymbol).typeArgs
+          (shift + 4, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _, _)].typeSymbol).typeArgs
+          (shift + 3, vs :+ resolve(nestedTpes, tupleIndex))
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[(_, _)]] =>
-        val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _)].typeSymbol).typeArgs
-        resolve(nestedTpes, i)
+        case tpe if tpe <:< weakTypeOf[Seq[(_, _)]] =>
+          val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _)].typeSymbol).typeArgs
+          (shift + 2, vs :+ resolve(nestedTpes, tupleIndex))
+        //          val resultTree =
+        //            q"""
+        //            val rowIndex = $entityIndex + $shift + $tupleIndex
+        //            val ei = "  " * rowIndex
+        //            println(ei + "T2 " + rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")   " + ${tpe.toString})
+        //
+        //            val result = ${resolve(nestedTpes, tupleIndex)}
+        //
+        //            println(ei + "T2 " + result)
+        //            result
+        //          """
+        //          (shift + 2, vs :+ resultTree)
 
-      case (tpe, i) if tpe <:< weakTypeOf[Seq[_]] =>
-        val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
-        resolve(Seq(nestedTpe), i)
+        case tpe if tpe <:< weakTypeOf[Seq[_]] =>
+          val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
+          (shift + 1, vs :+ resolve(Seq(nestedTpe), tupleIndex))
 
-      case (tpe, i) => q"${cast(query, row, tpe, entityIndex + 1 + i)}"
-    }
+        case tpe =>
+          (shift, vs :+ cast(query, row, tpe, entityIndex + shift + tupleIndex))
+        //          val resultTree =
+        //            q"""
+        //              val rowIndex = $entityIndex + $shift + $tupleIndex
+        //              val ei = "  " * rowIndex
+        //              println(ei + "B " + rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")   " + ${tpe.toString})
+        //
+        //              val result = ${cast(query, row, tpe, entityIndex + shift + tupleIndex)}
+        //
+        //              println(ei + "B " + result)
+        //              result
+        //            """
+        //          (shift, vs :+ resultTree)
+      }
+    }._2
+
+    //    q"""
+    //      val ei = "  " * $entityIndex
+    //
+    ////      println(ei + "-------------------------------")
+    //      println(ei + "A " + $entityIndex + "-" + $shift + "   " + ${tpes.toString})
+    //
+    //      val result = (..$values).asInstanceOf[(..$tpes)]
+    //
+    //      println(ei + "A " + result)
+    //      result
+    //    """
     q"(..$values).asInstanceOf[(..$tpes)]"
   }
 
@@ -618,7 +770,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
           val entityIndexes = flatModel.zipWithIndex.collect {
             case  (Meta(_, _, _, _, IndexVal), i) => i
           }
-
+//println("===============================================")
 //flatModel foreach println
 //println("---- " + entityIndexes)
 
@@ -641,15 +793,17 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
           val rowCount = sortedRows.length
 
           val casted = sortedRows.foldLeft((Seq[(..$tpes)](), None: Option[(..$tpes)], Seq(0L), Seq[Any](0L), 1)) { case ((accTpls0, tpl0, prevEntities, prevRow, r), row) =>
-//println("--- " + r + " ---")
+//println("--- " + r + " ---------------------------------------------------")
             val entities = entityIndexes.map(i => row(i).asInstanceOf[Long])
 
             val isLastRow = rowCount == r
             val newTpl = prevEntities.head != 0 && entities.head != prevEntities.head
 
-//println("TPL0         : " + tpl0)
+//println("TPL0 " + tpl0)
 
-            val tpl = ${resolveNested(query, tpes, q"tpl0", q"prevRow", q"row", q"r", 0, 1, q"entityIndexes.size - 1")}
+            val tpl = ${resolveNested(query, tpes, q"tpl0", q"prevRow", q"row", 0, 1, q"entityIndexes.size - 1", 1)}
+
+//println("TPL1 " + tpl)
 
             val accTpls = if (isLastRow && newTpl) {
               // Add current tuple

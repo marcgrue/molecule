@@ -146,7 +146,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case NoValue             => q"NoValue"
     case BiRef_              => q"BiRef_"
     case EdgePropAttr        => q"EdgePropAttr"
-    case EdgePropRef         => q"EdgePropRef"
+    case EdgePropRefAttr     => q"EdgePropRefAttr"
     case EdgeRefAttr(attr)   => q"EdgeRefAttr($attr)"
     case TargetRefAttr(attr) => q"TargetRefAttr($attr)"
   }
@@ -165,7 +165,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case OpValue             => q"OpValue"
     case BiRef_              => q"BiRef_"
     case EdgePropAttr        => q"EdgePropAttr"
-    case EdgePropRef         => q"EdgePropRef"
+    case EdgePropRefAttr     => q"EdgePropRefAttr"
     case EdgeRefAttr(attr)   => q"EdgeRefAttr($attr)"
     case TargetRefAttr(attr) => q"TargetRefAttr($attr)"
     case BackValue(value)    => q"BackValue($value)"

@@ -27,12 +27,23 @@ class SelfMany extends MoleculeSpec {
     "n new" in new Setup {
 
       // Can't save multiple values to cardinality-one attribute
-      (living_Person.name("Ben").Friends.name("Ida", "Liz").save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+      // It could become unwieldy if different referenced attributes had different number of
+      // values (arities) - how many related entities should be created then?
+      (living_Person.name("Ben").Friends.name("Ida", "Liz").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule:noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:\n" +
         "  living_Person ... name(Ida, Liz)"
 
+      // We can save a single value though...
+      living_Person.name("Ben").Friends.name("Ida", "Liz").save
+
+      living_Person.name.Friends.name.get === List(
+        ("Ben", "Liz"),
+        ("Liz", "Ben")
+      )
+
+
       // Can't save nested data structures
-      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule.noNested] Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities with the `save` command.
@@ -57,7 +68,7 @@ class SelfMany extends MoleculeSpec {
 
       // Saveing reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
-      (living_Person.name("Ben").Friends.e(ida).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+      (living_Person.name("Ben").Friends.e(ida).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($ida)`"
     }
@@ -216,12 +227,12 @@ class SelfMany extends MoleculeSpec {
 
 
       // Can't update multiple values of cardinality-one attribute `name`
-      (living_Person.name("Ben").Friends.name("Ida", "Liz").update must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+      (living_Person.name("Ben").Friends.name("Ida", "Liz").update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule:noConflictingCardOneValues (1)] Can't update multiple values for cardinality-one attribute:\n" +
         "  living_Person ... name(Ida, Liz)"
 
       // Can't update nested data structures
-      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).update must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule.noNested] Nested data structures not allowed in update molecules"
 
       // So, we can't create multiple referenced entities with the `update` command.
@@ -291,12 +302,12 @@ class SelfMany extends MoleculeSpec {
     )
 
     // Can't update multiple values of cardinality-one attribute `name`
-    (living_Person(ben).Friends.name("Ida", "Liz").update must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (living_Person(ben).Friends.name("Ida", "Liz").update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[output.Molecule:noConflictingCardOneValues (1)] Can't update multiple values for cardinality-one attribute:\n" +
       "  living_Person ... name(Ida, Liz)"
 
     // Can't update nested data structures
-    (living_Person(ben).Friends.*(living_Person.name("Ida")).update must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (living_Person(ben).Friends.*(living_Person.name("Ida")).update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[output.Molecule.noNested] Nested data structures not allowed in update molecules"
 
     // So, we can't create multiple referenced entities with the `update` command.

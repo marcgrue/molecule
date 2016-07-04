@@ -4,7 +4,7 @@ package ref
 import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}
 
-
+// (`Nested` is a model class..)
 class NestedTests extends CoreSpec {
 
   "Nested enum after ref" in new CoreSetup {
@@ -33,7 +33,7 @@ class NestedTests extends CoreSpec {
       ("b", List(22)))
 
     // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Refs1 * Ref1.Ref2.int2).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (m(Ns.str.Refs1 * Ref1.Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       "[output.Molecule:noOrphanRefs (1)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
@@ -47,7 +47,7 @@ class NestedTests extends CoreSpec {
       ("b", List(Some(21))))
 
     // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Refs1 * Ref1.int1$).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (m(Ns.str.Refs1 * Ref1.int1$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       "[output.Molecule:noOrphanRefs (3)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
@@ -79,7 +79,7 @@ class NestedTests extends CoreSpec {
   }
 
   "Missing many attribute" in new CoreSetup {
-    (m(Ns.str.Refs1.Refs2 * Ref2.int2).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (m(Ns.str.Refs1.Refs2 * Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       "[output.Molecule:noOrphanRefs (2)] Namespace `Refs1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
@@ -144,5 +144,17 @@ class NestedTests extends CoreSpec {
       m(Ns.str.Ref1.str1._Ns.Refs1 * (Ref1.str1.Refs2 * Ref2.str2)).get === List(("book", "John", List(("Marc", List("Musician")))))
       m(Ns.str.Ref1.str1._Ns.Refs1.str1.Refs2.str2).get === List(("book", "John", "Marc", "Musician"))
     }
+  }
+
+
+  "Attributes after nested group" in new CoreSetup {
+    m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool) insert List(
+      (100L, 200.0, List(("aaa", 300), ("bbb", 400)), true),
+      (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
+    )
+    m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool).get === List(
+      (100L, 200.0, List(("aaa", 300), ("bbb", 400)), true),
+      (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
+    )
   }
 }

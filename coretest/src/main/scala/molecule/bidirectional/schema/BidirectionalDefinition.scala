@@ -2,14 +2,13 @@ package molecule.bidirectional.schema
 
 import molecule.dsl.schemaDefinition._
 
-@InOut(0, 4)
+@InOut(0, 9)
 object BidirectionalDefinition {
 
   object living {
 
     // Base namespace
     trait Person {
-      val name = oneString
 
 
       // A ==> a
@@ -35,6 +34,9 @@ object BidirectionalDefinition {
       val favorite = oneBi[Knows.animal.type]
       val closeTo  = manyBi[Knows.animal.type]
 
+
+      // Base property
+      val name = oneString
       //    // Multiple bidirectional references (with no extra properties)
       //    val friends2 = many[Person]
       //
@@ -123,43 +125,65 @@ object BidirectionalDefinition {
 
       //      val noGood = oneBi[String]
     }
+    object Person extends Person
 
 
     // "Property edge"
-
     trait Knows {
-      val weight         = oneInt
-      val friendshipType = one[FriendshipType]
 
+      // Edge connecting to same namespace
       // a -- edge ==> a
-      val person = target[Person]
+      val person: AnyRef = target[Person.knows.type]
 
+      // Edge connecting to other namespace
       // a -- edge ==> b
-      val animal = target[Animal]
+      val animal: AnyRef = target[Animal.favorite.type]
+
+
+      // Selection of edge property types ......................
+
+      // Card one attributes
+      val weight   = oneInt
+      val howWeMet = oneEnum('inSchool, 'atWork, 'throughFriend)
+
+      // Card many attributes
+      val commonInterests = manyString
+      val commonLicences   = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+
+      // Map attribute
+      val commonScores = mapInt
+
+      // References
+      val coreQuality = one[Quality]
+      val inCommon            = many[Quality]
     }
     object Knows extends Knows
 
-    // Other namespace
-
-    trait Animal {
+    // Sample ns to demonstrate edge ref property
+    trait Quality {
       val name = oneString
+    }
 
+
+    // Other namespace
+    trait Animal {
+
+      // Other end/start point of bidirectional relationship
       // a <== B
-
       val companion  = oneBi[Person]
       val companions = manyBi[Person]
 
 
+      // Other end/start point of bidirectional edge relationship
       // a -- edge <== B
-
       val favorite = oneBi[Knows.person.type]
       val closeTo  = manyBi[Knows.person.type]
-    }
 
-
-    trait FriendshipType {
+      // base property
       val name = oneString
     }
-    object FriendshipType extends FriendshipType
+    object Animal extends Animal
+
+
   }
 }

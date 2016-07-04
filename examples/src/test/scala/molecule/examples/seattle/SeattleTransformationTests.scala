@@ -978,7 +978,7 @@ class SeattleTransformationTests extends SeattleSpec {
   "Working with time" >> {
 
 //    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
-    import molecule.bidirectional._
+    import molecule.schema._
 
     m(Db.txInstant) -->
       Model(List(

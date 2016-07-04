@@ -45,6 +45,7 @@ trait Molecule extends DatomicFacade {
 
   def update(implicit conn: Connection): Tx = {
     noConflictingCardOneValues("update")
+    noEdgePropRefs("update") // ??
     noNested("update")
     update(conn, _model)
   }
@@ -60,6 +61,7 @@ trait Molecule extends DatomicFacade {
     noOrphanRefs("save")
     noConflictingCardOneValues("save")
     noNested("save")
+    noEdgePropRefs("save")
   }
 
   private def insertChecks {
@@ -72,21 +74,21 @@ trait Molecule extends DatomicFacade {
 
   // Avoid mixing insert/update style
   private def noAppliedId(action: String) = _model.elements.head match {
-    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => throw new RuntimeException(
+    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => throw new IllegalArgumentException(
       s"[output.Molecule.noAppliedId] Can't $action molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
         s"""Applying an eid is for updates: `${ns.capitalize}(johnId).likes("pizza").update`""")
     case ok                                       => _model
   }
 
   private def noGenericsInTail(action: String) = _model.elements.tail.collectFirst {
-    case Meta(_, _, "e", _, Eq(List(eid))) => throw new RuntimeException(
+    case Meta(_, _, "e", _, Eq(List(eid))) => throw new IllegalArgumentException(
       s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
         s"not allowed in $action molecules. Found `e($eid)`")
   }
 
   private def noTacetAttrs(action: String) {
     def detectTacetAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
-      case a: Atom if a.name.last == '_' => throw new RuntimeException(
+      case a: Atom if a.name.last == '_' => throw new IllegalArgumentException(
         s"[output.Molecule.noTacetAttrs] Tacet attributes like `${a.name}` not allowed in $action molecules.")
       case Nested(ref, es)               => detectTacetAttrs(es)
       case Composite(es)                 => detectTacetAttrs(es)
@@ -96,13 +98,13 @@ trait Molecule extends DatomicFacade {
   }
 
   private def noTransitiveAttrs(action: String) = _model.elements collectFirst {
-    case t: Transitive => throw new RuntimeException(
+    case t: Transitive => throw new IllegalArgumentException(
       s"[output.Molecule:noTransitiveAttrs] Can't $action transitive attribute values (repeated attributes).")
   }
 
   private def noOrphanRefs(action: String) {
     // An insert molecule can only build on with a ref if it has already at least one mandatory attribute
-    def abortNs(i: Int, ns: String) = throw new RuntimeException(
+    def abortNs(i: Int, ns: String) = throw new IllegalArgumentException(
       s"[output.Molecule:noOrphanRefs ($i)] Namespace `$ns` in $action molecule has no mandatory attributes. Please add at least one.")
 
     def getNs(ns: String) = if (ns.contains("_")) ns else ns.capitalize
@@ -130,7 +132,7 @@ trait Molecule extends DatomicFacade {
   }
 
   private def noConflictingCardOneValues(action: String) {
-    def abort(i: Int, ns: String, attr: String, values: Seq[Any]) = throw new RuntimeException(
+    def abort(i: Int, ns: String, attr: String, values: Seq[Any]) = throw new IllegalArgumentException(
       s"""[output.Molecule:noConflictingCardOneValues ($i)] Can't $action multiple values for cardinality-one attribute:
           |  $ns ... $attr(${values.mkString(", ")})""".stripMargin)
 
@@ -144,13 +146,19 @@ trait Molecule extends DatomicFacade {
 
   private def noNested(action: String) {
     def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
-      case n: Nested => throw new RuntimeException(
+      case n: Nested => throw new IllegalArgumentException(
         s"[output.Molecule.noNested] Nested data structures not allowed in $action molecules")
       case Composite(es) => checkNested(es)
     }
     checkNested(_model.elements)
   }
 
+  // Todo: Might be possible to implement if we control that the molecule doesn't build further out
+  private def noEdgePropRefs(action: String) = _model.elements.collectFirst {
+    case Bond(ns, refAttr, _, _, "edgePropRef") => throw new IllegalArgumentException(
+      s"[output.Molecule.noEdgePropRefs] Building on to another namespace from a property edge of a $action molecule not allowed. " +
+        s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
+  }
 
   // Debug ....................................................................
 

@@ -3,7 +3,7 @@ package examples.seattle
 import java.io.FileReader
 
 import molecule.examples.seattle.dsl.seattle._
-import molecule.bidirectional._
+import molecule.schema._
 
 import scala.language.reflectiveCalls
 
