@@ -34,7 +34,7 @@ class SelfMany extends MoleculeSpec {
         "  living_Person ... name(Ida, Liz)"
 
       // We can save a single value though...
-      living_Person.name("Ben").Friends.name("Ida", "Liz").save
+      living_Person.name("Ben").Friends.name("Liz").save
 
       living_Person.name.Friends.name.get === List(
         ("Ben", "Liz"),

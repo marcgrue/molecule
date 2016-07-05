@@ -148,16 +148,17 @@ object BidirectionalDefinition {
 
       // Card many attributes
       val commonInterests = manyString
-      val commonLicences   = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+      val commonLicences  = manyEnum('climbing, 'diving, 'parachuting, 'flying)
 
       // Map attribute
       val commonScores = mapInt
 
       // References
       val coreQuality = one[Quality]
-      val inCommon            = many[Quality]
+      val inCommon    = many[Quality]
     }
     object Knows extends Knows
+
 
     // Sample ns to demonstrate edge ref property
     trait Quality {

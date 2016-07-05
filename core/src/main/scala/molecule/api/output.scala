@@ -160,6 +160,17 @@ trait Molecule extends DatomicFacade {
         s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
   }
 
+//  private def noNestedEdgesWithoutTarget(action: String) {
+//    def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
+//      case Nested(Bond(_,_,_,_,meta), es) if meta.startsWith("") =>
+//      case n: Nested => throw new IllegalArgumentException(
+//        s"[output.Molecule.noNested] Nested data structures not allowed in $action molecules")
+//      case Composite(es) => checkNested(es)
+//    }
+//    checkNested(_model.elements)
+//  }
+
+
   // Debug ....................................................................
 
   // Append "D" to basic commands `get`, `save`, `insert` and `update` to debug (prints to console)

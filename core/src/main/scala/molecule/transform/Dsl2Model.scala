@@ -158,7 +158,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
-      //      x(78, element)
+      //            x(78, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
 
@@ -174,19 +174,6 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case a@q"$prev.$biRef" if a.isBiSelfRef =>
       traverse(q"$prev", Bond(a.refThis, firstLow(biRef.toString), a.refNext, a.refCard, "biRef"))
 
-    //    case a@q"$prev.$biRef" if a.isBiEdgePropRef =>
-    //      x(19
-    //        , a
-    //        , a.tpe_
-    //        , a.tpe
-    //        , a.tpe.baseClasses
-    //      , a.tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol)
-    //      , a.tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs
-    ////      , a.tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString
-    ////      , firstLow(a.tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
-    //      )
-    //      traverse(q"$prev", Bond(a.refThis, firstLow(biRef.toString), a.refNext, a.refCard, "edgePropRef"))
-
     case a@q"$prev.$edgeRef" if a.isBiEdgeRef =>
       val baseType = a.tpe.baseType(weakTypeOf[BiEdgeRef[_]].typeSymbol).typeArgs.head.typeSymbol
       val revRefAttr = ":" + baseType.owner.name + "/" + baseType.name
@@ -198,13 +185,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       traverse(q"$prev", Bond(a.refThis, firstLow(revRef.toString), a.refNext, a.refCard, "targetRef@" + edgeRefAttr))
 
     case a@q"$prev.$ref" if a.isRef =>
-      //      val meta = if (opts(a).nonEmpty) opts(a).toString else ""
-//      x(20
-//        , a
-//        , optsRef(a)
-//      )
       traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard, optsRef(a)))
-    //      traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard))
 
 
     // Reference attribute --------------------------------------
@@ -237,12 +218,12 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Nested ------------------------
 
-    case t@q"$prev.e.apply[..$types]($nested)" if !q"$prev".isRef  => Seq(Nested(Bond("", "", "", 2), Meta("", "", "e", NoValue, EntValue) +: resolve(nested)))
-    case t@q"$prev.e_.apply[..$types]($nested)" if !q"$prev".isRef => Seq(Nested(Bond("", "", "", 2), resolve(nested)))
-    case t@q"$prev.e.$manyRef.*[..$types]($nested)"                => traverse(q"$prev.e", nested1(q"$prev", manyRef, nested))
+    case t@q"$prev.e.apply[..$types]($nested)" if !q"$prev".isRef  => Seq(Nested(Bond("", "", "", 2), Meta("", "", "e", NoValue, EntValue) +: resolve(q"$nested")))
+    case t@q"$prev.e_.apply[..$types]($nested)" if !q"$prev".isRef => Seq(Nested(Bond("", "", "", 2), resolve(q"$nested")))
+    case t@q"$prev.e.$manyRef.*[..$types]($nested)"                => traverse(q"$prev.e", nested1(prev, manyRef, nested))
 
-    case t@q"$prev.$manyRef.*[..$types]($nested)"                                 => traverse(q"$prev", nested1(q"$prev", manyRef, nested))
-    case t@q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef => Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), nested)))
+    case t@q"$prev.$manyRef.*[..$types]($nested)"                                 => traverse(q"$prev", nested1(prev, manyRef, nested))
+    case t@q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef => Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), q"$nested")))
     case t@q"$prev.$manyRef.apply[..$types]($nested)"                             => traverse(q"$prev", nested1(prev, manyRef, nested))
 
 
@@ -313,15 +294,20 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val refNext = q"$prev.$manyRef".refNext
     val parentNs = prev match {
       case k@q"$p.apply($value)" if k.isMapAttrK   => new nsp(c.typecheck(k).tpe.typeSymbol.owner)
-      case q"$p.apply($value)" if p.isAttr         => p.ns
-      case q"$p.apply($value)"                     => p.name
+      case q"$p.apply($value)" if q"$p".isAttr     => q"$p".ns
+      case q"$p.apply($value)"                     => q"$p".name
       case p if p.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""))
       case p if p.isAttr                           => p.ns
       case p if p.isRef                            => p.refNext
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-    val meta = if (q"$prev.$manyRef".isBiSelfRef) "biRef" else ""
+    val meta = q"$prev.$manyRef" match {
+      case ref if ref.isBiSelfRef     => "biRef"
+//      case ref if ref.isBiEdgeRef     => "edgeRef"
+      case ref if ref.isBiEdgePropRef => "edgePropRef"
+      case _                          => ""
+    }
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, meta), nestedElems)
     //    x(28, prev, parentNs, nestedElems, nested, refNext)
     nested
@@ -350,6 +336,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def opts(tree: Tree): Seq[Generic] = tree match {
     case t if t.isBiEdgePropAttr    => Seq(EdgePropAttr)
     case t if t.isBiEdgePropRefAttr => Seq(EdgePropRefAttr)
+    case t if t.isBiTargetRefAttr   =>
+      val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiTargetRefAttr[_]].typeSymbol).typeArgs.head.typeSymbol
+      Seq(TargetRefAttr(":" + baseType.owner.name + "/" + baseType.name))
     case other                      => Nil
   }
   def optsRef(tree: Tree): String = tree match {
@@ -452,8 +441,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       }
       case q"Seq(..$vs)"
         if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]       => mapPairs(vs, attr)
-      case q"Seq(..$vs)" if attr == null                           => vs.flatMap(v => resolveValues(v))
-      case q"Seq(..$vs)"                                           => vs.flatMap(v => resolveValues(v, att(q"$attr")))
+      case q"Seq(..$vs)" if attr == null                           => vs.flatMap(v => resolveValues(q"$v"))
+      case q"Seq(..$vs)"                                           => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
       case other if attr == null                                   => resolveValues(other)
       case other                                                   => resolveValues(other, att(q"$attr"))
       //      case other if attr.isOneURI || attr.isManyURI                => Fn("URI", resolveValues(other))
@@ -462,8 +451,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
     val keyValues = vs.map {
-      case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(k), extract(v))
-      case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(k), extract(v))
+      case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
+      case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(q"$k"), extract(q"$v"))
       case ident                                                => (extract(ident), "__pair__")
     }
     if (attr.isMapAttr)

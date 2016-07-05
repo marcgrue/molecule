@@ -45,8 +45,8 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   //  )
   // Add schema definition directories for boilerplate generation testing
   .settings(Seq(definitionDirectories(
-  "molecule/partition",
-  "molecule/util",
+//  "molecule/partition",
+//  "molecule/util",
   "molecule/bidirectional"
 )))
 
@@ -63,13 +63,13 @@ lazy val moleculeExamples = project.in(file("examples"))
   //      "molecule/examples/seattle"
   //    )
   //  )
-  .settings(Seq(definitionDirectories(
-  "molecule/examples/dayOfDatomic",
-  "molecule/examples/gremlin",
-  "molecule/examples/mbrainz",
-  "molecule/examples/seattle",
-  "molecule/examples/gremlin"
-)))
+//  .settings(Seq(definitionDirectories(
+//  "molecule/examples/dayOfDatomic",
+//  "molecule/examples/gremlin",
+//  "molecule/examples/mbrainz",
+//  "molecule/examples/seattle",
+//  "molecule/examples/gremlin"
+//)))
 
 
 def definitionDirectories(domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {

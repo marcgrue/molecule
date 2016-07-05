@@ -8,16 +8,17 @@ import molecule.util.MoleculeSpec
 class EdgeSelfMany extends MoleculeSpec {
 
 
-  "Save new" >> {
+  "Save" >> {
 
-    "1 new with " in new Setup {
+    "2 new entities with edge properties" in new Setup {
 
       // We save some qualitites separately first
       val loves     = living_Quality.name("Love").save.eid
       val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
 
-      // Save Ben, Ida and bidirectional edge properties
-      living_Person.name("Ben").Knows
+      // Save Ben, Ida and bidirectional edge properties describing their relationship
+      living_Person.name("Ben") // New entity
+        .Knows
         .weight(7)
         .howWeMet("inSchool")
         .commonInterests("Food", "Walking", "Travelling")
@@ -25,7 +26,8 @@ class EdgeSelfMany extends MoleculeSpec {
         .commonScores(Seq("golf" -> 7, "baseball" -> 9))
         .coreQuality(loves)
         .inCommon(inCommons)
-        .Person.name("Ida").save
+        .Person.name("Ida") // Creating new person
+        .save
 
       // Reference is bidirectional - both edges point to each other and have all properties
       living_Person.name.Knows
@@ -71,123 +73,242 @@ class EdgeSelfMany extends MoleculeSpec {
     }
 
 
-    //    "n new" in new Setup {
+    "1 new entity with property edge to exisiting entity" in new Setup {
+
+      // We save some qualitites separately first
+      val loves     = living_Quality.name("Love").save.eid
+      val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
+      val ida       = living_Person.name.insert("Ida").eid
+
+
+      // Save Ben, Ida and bidirectional edge properties describing their relationship
+      living_Person.name("Ben") // New entity
+        .Knows
+        .weight(7)
+        .howWeMet("inSchool")
+        .commonInterests("Food", "Walking", "Travelling")
+        .commonLicences("climbing", "flying")
+        .commonScores(Seq("golf" -> 7, "baseball" -> 9))
+        .coreQuality(loves)
+        .inCommon(inCommons)
+        .person(ida) // Saving reference to existing Person entity
+        .save
+
+      // Reference is bidirectional - both edges point to each other and have all properties
+      living_Person.name
+        .Knows
+        .weight
+        .howWeMet
+        .commonInterests
+        .commonLicences
+        .commonScores
+        .CoreQuality.name._Knows
+        .InCommon.*(living_Quality.name)._Knows
+        .Person.name
+        .get === List(
+        ("Ida"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ben"),
+        ("Ben"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ida")
+      )
+    }
+  }
+
+  "Insert new" >> {
+
+    "new edge new" in new Setup {
+
+      living_Person.name
+        .Knows
+        .weight
+        .howWeMet
+        .commonInterests
+        .commonLicences
+        .commonScores
+        .CoreQuality.name._Knows
+        .InCommon.*(living_Quality.name)._Knows
+        .Person.name insertD List(
+        ("Ben"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ida")
+      )
+
+      living_Person.name
+        .Knows
+        .weight
+        .howWeMet
+        .commonInterests
+        .commonLicences
+        .commonScores
+        .CoreQuality.name._Knows
+        .InCommon.*(living_Quality.name)._Knows
+        .Person.name insert List(
+        ("Ben"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ida")
+      )
+
+      living_Person.name
+        .Knows
+        .weight
+        .howWeMet
+        .commonInterests
+        .commonLicences
+        .commonScores
+        .CoreQuality.name._Knows
+        .InCommon.*(living_Quality.name)._Knows
+        .Person.name
+        .get === List(
+        ("Ben"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ida"),
+        ("Ida"
+          , 7
+          , "inSchool"
+          , Set("Food", "Walking", "Travelling")
+          , Set("climbing", "flying")
+          , Map("baseball" -> 9, "golf" -> 7)
+          , "Love"
+          , List("Patience", "Humor")
+          , "Ben")
+      )
+    }
+
+    //    "new *(edge) new" in new Setup {
+    //      // Can't make multiple edges to the same target entity
+    ////      !ok
     //
-    //      // Can't save multiple values to cardinality-one attribute
-    ////      (Person.name("Ben").Knows.weight(7).Person.name("Ida", "Liz").save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-    ////        s"[output.Molecule:noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:\n" +
-    ////        "  living_Person ... name(Ida, Liz)"
-    //ok
-    //      // Can't save nested data structures
-    //      //      (Person.name("Ben").Knows.weight(7).Person.*(Person.name("Ida")).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-    //      //        s"[output.Molecule.noNested] Nested data structures not allowed in save molecules"
+    //      living_Person.name.Knows.*(living_Knows.weight).Person.name insertD List(
+    //        ("Ben", List(7, 8), "Ida")
+    //      )
+    //    }
+
+
+    //    "new *(edge new)" in new Setup {
     //
-    //      // So, we can't create multiple referenced entities with the `save` command.
-    //      // Use `insert` for this or save existing entity ids (see below).
+    //      living_Person.name.Knows.*(living_Knows.weight.Person.name) insert List(
+    //        ("Ben", List((7, "Ida")))
+    //      )
+    //    }
+
+
+    //        "new *(edge new)" in new Setup {
+    ////      living_Person.name
+    ////        .Knows
+    ////        .*(living_Knows
+    ////          .weight
+    ////          .howWeMet
+    ////          .commonInterests
+    ////          .commonLicences
+    ////          .commonScores
+    ////          .CoreQuality.name._Knows
+    ////          .InCommon.*(living_Quality.name)
+    ////        )
+    ////        .Person.name insert List(
+    ////        ("Ben"
+    ////          , 7
+    ////          , "inSchool"
+    ////          , Set("Food", "Walking", "Travelling")
+    ////          , Set("climbing", "flying")
+    ////          , Map("baseball" -> 9, "golf" -> 7)
+    ////          , "Love"
+    ////          , List("Patience", "Humor")
+    ////          , "Ida")
+    ////      )
+    ////
+    ////
+    ////      living_Person.name
+    ////        .Knows
+    ////        .*(living_Knows
+    ////          .weight
+    ////          .howWeMet
+    ////          .commonInterests
+    ////          .commonLicences
+    ////          .commonScores
+    ////          .CoreQuality.name._Knows
+    ////          .InCommon.*(living_Quality.name)._Knows
+    ////          .Person.name
+    ////        ) insert List(
+    ////        ("Ben"
+    ////          , 7
+    ////          , "inSchool"
+    ////          , Set("Food", "Walking", "Travelling")
+    ////          , Set("climbing", "flying")
+    ////          , Map("baseball" -> 9, "golf" -> 7)
+    ////          , "Love"
+    ////          , List("Patience", "Humor")
+    ////          , "Ida")
+    ////      )
+    ////
+    ////      living_Person.name
+    ////        .Knows
+    ////        .weight
+    ////        .howWeMet
+    ////        .commonInterests
+    ////        .commonLicences
+    ////        .commonScores
+    ////        .CoreQuality.name._Knows
+    ////        .InCommon.*(living_Quality.name)._Knows
+    ////        .Person.name
+    ////        .get === List(
+    ////        ("Ben"
+    ////          , 7
+    ////          , "inSchool"
+    ////          , Set("Food", "Walking", "Travelling")
+    ////          , Set("climbing", "flying")
+    ////          , Map("baseball" -> 9, "golf" -> 7)
+    ////          , "Love"
+    ////          , List("Patience", "Humor")
+    ////          , "Ida"),
+    ////        ("Ida"
+    ////          , 7
+    ////          , "inSchool"
+    ////          , Set("Food", "Walking", "Travelling")
+    ////          , Set("climbing", "flying")
+    ////          , Map("baseball" -> 9, "golf" -> 7)
+    ////          , "Love"
+    ////          , List("Patience", "Humor")
+    ////          , "Ben")
+    ////      )
     //    }
   }
 
 
-  //  "Save ids" >> {
-  //
-  //    "1 id" in new BidirectionalSetup {
-  //
-  //      val ida = living_Person.name.insert("Ida").eid
-  //
-  //      // Save Ben with bidirectional ref to existing Ida
-  //      living_Person.name("Ben").Knows.weight(7).person(ida).save.eid
-  //
-  //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
-  //        ("Ben", "Ida"),
-  //        ("Ida", "Ben")
-  //      )
-  //
-  //      // Saveing reference to generic `e` not allowed.
-  //      // (instead apply ref to ref attribute as shown above)
-  //      (Person.name("Ben").Knows.weight(7).Person.e(ida).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-  //        s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
-  //        s"not allowed in save molecules. Found `e($ida)`"
-  //    }
-  //
-  //
-  //    "n ids" in new BidirectionalSetup {
-  //
-  //      val idaLizSet = living_Person.name.insert("Ida", "Liz").eidSet
-  //
-  //      // Save Ben with bidirectional ref to existing Ida and Liz
-  //      living_Person.name("Ben").Knows.weight(7).person(idaLizSet).save.eid
-  //
-  //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
-  //        ("Ben", "Ida"),
-  //        ("Ben", "Liz"),
-  //        // Reverse references:
-  //        ("Ida", "Ben"),
-  //        ("Liz", "Ben")
-  //      )
-  //    }
-  //  }
-
-
-  //  "Insert new" >> {
-  //
-  //    "1 new" in new BidirectionalSetup {
-  //
-  //      // We can treat card-many attributes as card-one attributes:
-  //
-  //      // Insert 2 pairs of bidirectionally referenced entities (as with card-one insert)
-  //      living_Person.name.Knows.weight.Person.name insert List(
-  //        ("Ben", "Ida"),
-  //        ("Don", "Tim")
-  //      ) eids
-  //
-  //      // Bidirectional references have been inserted
-  //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
-  //        ("Ben", "Ida"),
-  //        ("Don", "Tim"),
-  //        // Reverse references:
-  //        ("Ida", "Ben"),
-  //        ("Tim", "Don")
-  //      )
-  //    }
-  //
-  //    "n new" in new BidirectionalSetup {
-  //
-  //      // Create multiple bidirectionally referenced entities with a nested molecule
-  //      living_Person.name.Knows.weight.Person.*(Person.name) insert List(
-  //        ("Ben", List("Ida", "Liz")),
-  //        ("Don", List("Tim", "Tom"))
-  //      )
-  //
-  //      // Bidirectional references have been inserted
-  //      living_Person.name.Knows.weight.Person.*(Person.name).get.sortBy(_._1) === List(
-  //        ("Ben", List("Ida", "Liz")),
-  //        ("Don", List("Tim", "Tom")),
-  //        // Reverse refs:
-  //        ("Ida", List("Ben")),
-  //        ("Liz", List("Ben")),
-  //        ("Tim", List("Don")),
-  //        ("Tom", List("Don"))
-  //      )
-  //
-  //      // Flat list
-  //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
-  //        ("Ben", "Ida"),
-  //        ("Ben", "Liz"),
-  //        ("Don", "Tim"),
-  //        ("Don", "Tom"),
-  //        // Reverse refs:
-  //        ("Ida", "Ben"),
-  //        ("Liz", "Ben"),
-  //        ("Tim", "Don"),
-  //        ("Tom", "Don")
-  //      )
-  //    }
-  //  }
-  //
-  //
   //  "Insert existing" >> {
   //
-  //    "new - ref - 1 existing" in new BidirectionalSetup {
+  //    "new - ref - 1 existing" in new Setup {
   //
   //      val List(ida, tim) = living_Person.name insert List("Ida", "Tim") eids
   //
@@ -207,7 +328,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //      )
   //    }
   //
-  //    "new - ref - n existing" in new BidirectionalSetup {
+  //    "new - ref - n existing" in new Setup {
   //
   //      val List(ida, liz, tim) = living_Person.name insert List("Ida", "Liz", "Tim") eids
   //
@@ -243,7 +364,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //
   //  "Update new" >> {
   //
-  //    "creating ref to 1 new" in new BidirectionalSetup {
+  //    "creating ref to 1 new" in new Setup {
   //
   //      val ben = living_Person.name.insert("Ben").eid
   //
@@ -251,13 +372,13 @@ class EdgeSelfMany extends MoleculeSpec {
   //      living_Person(ben).Knows.weight(7).Person.name("Ida").update
   //
   //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
-  //        ("Ben", "Ida"),
-  //        ("Ida", "Ben")
+  //        ("Ben", 7, "Ida"),
+  //        ("Ida", 7, "Ben")
   //      )
   //    }
   //
   //
-  //    "creating refs to multiple new" in new BidirectionalSetup {
+  //    "creating refs to multiple new" in new Setup {
   //
   //      val ben = living_Person.name.insert("Ben").eid
   //
@@ -276,7 +397,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //    }
   //
   //
-  //    "replacing ref to 1 new" in new BidirectionalSetup {
+  //    "replacing ref to 1 new" in new Setup {
   //
   //      val List(ben, ida) = living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save.eids
   //
@@ -313,7 +434,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //  }
   //
   //
-  //  "replacing refs to multiple new" in new BidirectionalSetup {
+  //  "replacing refs to multiple new" in new Setup {
   //
   //    val List(ben, ida) = living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save.eids
   //
@@ -353,12 +474,12 @@ class EdgeSelfMany extends MoleculeSpec {
   //
   //  "Update existing" >> {
   //
-  //    "creating ref to 1 existing" in new BidirectionalSetup {
+  //    "creating ref to 1 existing" in new Setup {
   //
   //      val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
   //
   //      // Update a with creation of bidirectional reference to existing b
-  //      living_Person(ben).Knows.weight(7).Person(ida).update
+  //      living_Person(ben).Knows.weight(7).person(ida).update
   //
   //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
   //        ("Ben", "Ida"),
@@ -366,7 +487,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //      )
   //    }
   //
-  //    "creating ref to 1 existing with explicit `add`" in new BidirectionalSetup {
+  //    "creating ref to 1 existing with explicit `add`" in new Setup {
   //
   //      val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
   //
@@ -380,12 +501,12 @@ class EdgeSelfMany extends MoleculeSpec {
   //    }
   //
   //
-  //    "creating refs to multiple existing, vararg" in new BidirectionalSetup {
+  //    "creating refs to multiple existing, vararg" in new Setup {
   //
   //      val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
   //
   //      // Update Ben with two new friendships
-  //      living_Person(ben).Knows.weight(7).Person(ida, liz).update
+  //      living_Person(ben).Knows.weight(7).person(ida, liz).update
   //
   //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
   //        ("Ben", "Ida"),
@@ -396,12 +517,12 @@ class EdgeSelfMany extends MoleculeSpec {
   //    }
   //
   //
-  //    "creating refs to multiple existing, Set" in new BidirectionalSetup {
+  //    "creating refs to multiple existing, Set" in new Setup {
   //
   //      val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
   //
   //      // Update Ben with two new friendships supplied as a Set
-  //      living_Person(ben).Knows.weight(7).Person(Set(ida, liz)).update
+  //      living_Person(ben).Knows.weight(7).person(Set(ida, liz)).update
   //
   //      living_Person.name.Knows.weight.Person.name.get.sorted === List(
   //        ("Ben", "Ida"),
@@ -413,7 +534,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //  }
   //
   //
-  //  "Update replacing ref to other existing" in new BidirectionalSetup {
+  //  "Update replacing ref to other existing" in new Setup {
   //
   //    // Save Ben, Ida and bidirectional references between them
   //    val List(ben, ida) = living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save.eids
@@ -428,7 +549,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //    // Note that since `Friends` is a cardinality many, Liz is _added_ as a friend to Ben
   //    // and will not cause his friendship to Ida to be retracted!
   //    val liz = living_Person.name.insert("Liz").eid
-  //    living_Person(ben).Knows.weight(7).Person(liz).update
+  //    living_Person(ben).Knows.weight(7).person(liz).update
   //
   //    // Bidirectional references to/from Liz has been added.
   //    // OBS: see note above and difference to cardinality-one updates!
@@ -440,7 +561,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //    )
   //
   //    // To remove the friendship to Ida we need to remove it manually as we did above
-  //    living_Person(ben).Knows.weight(7).Person.remove(ida).update
+  //    living_Person(ben).Knows.weight(7).person.remove(ida).update
   //
   //    // Now the friendship with Ida has been replaced with the friendship with Liz
   //    living_Person.name.Knows.weight.Person.name.get.sorted === List(
@@ -452,7 +573,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //
   //  "Update removing all references" >> {
   //
-  //    "retracting ref" in new BidirectionalSetup {
+  //    "retracting ref" in new Setup {
   //
   //      // Save Ben, Ida and bidirectional references between them
   //      val List(ben, ida) = living_Person.name("Ben").Knows.weight(7).Person.name("Ida").save.eids
@@ -472,7 +593,7 @@ class EdgeSelfMany extends MoleculeSpec {
   //  }
   //
   //
-  //  "Retract" in new BidirectionalSetup {
+  //  "Retract" in new Setup {
   //
   //    // (Same as for cardinality-one)
   //

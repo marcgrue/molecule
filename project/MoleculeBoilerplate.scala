@@ -248,12 +248,12 @@ object MoleculeBoilerplate {
 
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"(.*)$targetNs\.(.*)$targetAttr\.type" if basePart.nonEmpty =>
-          println(s"Target 1:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
+          //          println(s"Target 1:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
           (s"${basePart}_$targetNs", Optional(s"${basePart}_$targetNs.$targetAttr", "BiTargetRef"))
 
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"(.*)$targetNs\.(.*)$targetAttr\.type" =>
-          println(s"Target 2:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
+          //          println(s"Target 2:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
           (targetNs, Optional(s"$targetNs.$targetAttr", "BiTargetRef"))
 
         case other =>
@@ -447,22 +447,33 @@ object MoleculeBoilerplate {
 
   def addBackRefs(nss: Seq[Namespace], curNs: Namespace): Seq[Namespace] = {
     // Gather OneRefs (ManyRefs are treated as nested data structures)
-    val refs1 = curNs.attrs.collect {
-      case ref@Ref(_, refAttr, clazz, _, _, _, refNs, _) => refNs -> ref
+    val refMap = curNs.attrs.collect {
+      case outRef@Ref(_, _, _, _, _, _, refNs, _) => refNs -> outRef
     }.toMap
 
     nss.map {
-      case ns2 if refs1.nonEmpty && refs1.keys.toList.contains(ns2.ns) => {
-        val attrs2 = refs1.foldLeft(ns2.attrs) { case (attrs, ref) =>
-          val Ref(_, refAttr, clazz, _, tpe, _, _, _) = ref._2
+      case ns2 if refMap.nonEmpty && refMap.keys.toList.contains(ns2.ns) => {
+        val attrs2 = refMap.foldLeft(ns2.attrs) { case (attrs, (refNs, outRef@Ref(_, _, _, _, tpe, _, _, opts))) =>
+          //          val Ref(_, _, _, _, tpe, _, _, opts) = ref._2
           val cleanNs = if (curNs.ns.contains('_')) curNs.ns.split("_").tail.head else curNs.ns
-          val backRef = BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "") // todo: check not to backreference same-named namespaces in different partitions
-          // Exclude self-references (?)
-          if (curNs.ns == ns2.ns) attrs else attrs :+ backRef
+          //          val backRef = BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "") // todo: check not to backreference same-named namespaces in different partitions
+          // todo: check not to backreference same-named namespaces in different partitions
+
+          if(cleanNs == "Knows") {
+            println(s"----- ${ns2.ns}  --  ${curNs.ns} ---------------")
+            //          println("curNs: " + curNs.ns)
+            println("outRef: " + outRef)
+          }
+          curNs.ns match {
+            case ns1 if ns1 == ns2.ns                                             => attrs
+//            case edgePropBackRef if opts.exists(_.clazz.startsWith("BiEdgeRef:")) => attrs :+ BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "", Seq(Optional("", "BiEdgePropBackRef")))
+            case other                                                            => attrs :+ BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "")
+          }
+          //          if (curNs.ns == ns2.ns) attrs else attrs :+ backRef
         }.distinct
         ns2.copy(attrs = attrs2)
       }
-      case ns2                                                         => ns2
+      case ns2                                                           => ns2
     }
   }
 
@@ -472,13 +483,14 @@ object MoleculeBoilerplate {
   def schemaBody(d: Definition) = {
 
     def resolveOptions(options: Seq[Optional]) = options flatMap {
-      case Optional(_, clazz) if clazz.startsWith("BiSelfRef")      => None
-      case Optional(_, clazz) if clazz.startsWith("BiRef")          => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgeRef")      => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")  => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr") => None
-      case Optional(_, clazz) if clazz.startsWith("BiTargetRef")    => None
-      case optional                                                 => Some(optional.datomicKeyValue)
+      case Optional(_, clazz) if clazz.startsWith("BiSelfRef")         => None
+      case Optional(_, clazz) if clazz.startsWith("BiRef")             => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgeRef")         => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")     => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr")    => None
+      case Optional(_, clazz) if clazz.startsWith("BiEdgePropBackRef") => None
+      case Optional(_, clazz) if clazz.startsWith("BiTargetRef")       => None
+      case optional                                                    => Some(optional.datomicKeyValue)
     }
 
 
@@ -730,7 +742,7 @@ object MoleculeBoilerplate {
         } getOrElse ""
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref $birectional= ???"
       }
-      case (acc, BackRef(backAttr, backRef, _, _, _, _, _, _))              =>
+      case (acc, BackRef(backAttr, backRef, _, _, _, _, _, opts))              =>
         val p1 = padS(maxAttr0, backAttr)
         val p2 = padS(maxClazz2.max, backRef)
         val ref = (in, out) match {
@@ -738,7 +750,10 @@ object MoleculeBoilerplate {
           case (0, o) => s"${backRef}_$o$p2[${OutTypes mkString ", "}]"
           case (i, o) => s"${backRef}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        acc :+ s"def $backAttr $p1: $ref = ???"
+        val birectional = opts.collectFirst {
+          case Optional(_, "BiEdgePropBackRef")           => s"with BiEdgePropBackRef "
+        } getOrElse ""
+        acc :+ s"def $backAttr $p1: $ref $birectional= ???"
       case (acc, _)                                                         => acc
     }.distinct
 

@@ -31,8 +31,8 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
             val metaStr = if(meta.nonEmpty) s"<$meta>" else ""
             indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + s"List(      $metaStr\n" +
             stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Add(e, a, v, meta)             => indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(36, v.toString) + "   " + meta
-          case Retract(e, a, v, meta)         => indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(36, v.toString) + "   " + meta
+          case Add(e, a, v, meta)             => indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + meta
+          case Retract(e, a, v, meta)         => indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + meta
 
           case l: java.util.List[_] if l.size() == 4 && l.head.toString.take(4) == ":db/" => {
             val List(action, e, a, v) = l.toList
