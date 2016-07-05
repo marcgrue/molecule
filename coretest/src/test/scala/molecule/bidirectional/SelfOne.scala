@@ -40,7 +40,7 @@ class SelfOne extends MoleculeSpec {
 
     // Saving reference to generic `e` not allowed.
     // (instead apply ref to ref attribute as shown above)
-    (living_Person.name("Adam").Spouse.e(lisa).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
+    (living_Person.name("Adam").Spouse.e(lisa).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
       s"not allowed in save molecules. Found `e($lisa)`"
   }

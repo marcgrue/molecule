@@ -70,6 +70,7 @@ trait Molecule extends DatomicFacade {
     noTacetAttrs("insert")
     noTransitiveAttrs("insert")
     noOrphanRefs("insert")
+    noNestedEdgesWithoutTarget("insert")
   }
 
   // Avoid mixing insert/update style
@@ -160,15 +161,16 @@ trait Molecule extends DatomicFacade {
         s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
   }
 
-//  private def noNestedEdgesWithoutTarget(action: String) {
-//    def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
-//      case Nested(Bond(_,_,_,_,meta), es) if meta.startsWith("") =>
-//      case n: Nested => throw new IllegalArgumentException(
-//        s"[output.Molecule.noNested] Nested data structures not allowed in $action molecules")
-//      case Composite(es) => checkNested(es)
-//    }
-//    checkNested(_model.elements)
-//  }
+  private def noNestedEdgesWithoutTarget(action: String) {
+    def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
+      case Nested(Bond(baseNs, _, refNs, _, "edgeRef"), es)
+        if !es.collectFirst {
+          case Bond(edgeNs, _, _, _, meta) if meta.contains(':') && meta.split(":").last.split("/").head == baseNs => true
+        }.getOrElse(false) => throw new IllegalArgumentException(
+          s"[output.Molecule.noNestedEdgesWithoutTarget] Nested edge ns `$refNs` should link to target ns within the nested group of attributes.")
+    }
+    checkNested(_model.elements)
+  }
 
 
   // Debug ....................................................................

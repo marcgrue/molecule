@@ -38,7 +38,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     // Bidirectional meta processors
     def aRef(gs: Seq[Generic], card: Int = 0) = gs.collectFirst {
       case TargetRefAttr(attr) => "targetRef@" + attr
-      //      case EdgeRefAttr(attr) => "edgeRef@" + attr
+//            case EdgeRefAttr(attr) => "edgeRef@" + attr
       case EdgePropAttr       => "edgeProp"
       case EdgePropRefAttr    => "edgeProp"
       case BiRef_ if card > 0 => "biRef" + card
@@ -448,19 +448,30 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           }.getOrElse(sys.error("[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
 
         val nestedRows = untupleNestedArgss(nestedStmts, arg)
+        val edgeB1 = meta match {
+          case "edgeRef2" => Some(tempId(ref))
+          case _          => edgeB
+        }
         val nestedInsertStmts = nestedRows.flatMap { nestedRow =>
           val nestedE = tempId(ref)
           val bondStmt = meta match {
             case "biRef2"       => Seq(Add(nestedE, ref, parentE), Add(parentE, ref, nestedE))
-            case "edgePropRef2" => Seq(Add(edgeB.get, ref, nestedE), Add(parentE, ref, nestedE))
-            //          case "edgePropRef2" =>
-            //            val edgeB1 = edgeB getOrElse sys.error("[Model2Transaction:matchDataStmt]  Missing id of other edge.")
-            //
-            //            Seq(Add(edgeB.get, ref, nestedE), Add(parentE, ref, nestedE))
-            case other => Seq(Add(parentE, ref, nestedE))
+            case "edgePropRef2" => Seq(Add(edgeB1.get, ref, nestedE), Add(parentE, ref, nestedE))
+            case "edgeRef2"     =>
+
+              Seq(
+              Add(edgeB1.get, ":molecule_Meta/otherEdge", nestedE),
+              Add(nestedE, ":molecule_Meta/otherEdge", edgeB1.get),
+//              Add(edgeB, targetAttr, e),
+//              Add(e, a, edgeA)
+
+              Add(nestedE, ref, parentE),
+              Add(parentE, ref, edgeB1.get)
+            )
+            case other          => Seq(Add(parentE, ref, nestedE))
           }
           val nestedStmtsCasted = nestedStmts.map { case s: Statement => s }
-          val nestedStmts1 = resolveStmts(nestedStmtsCasted, nestedRow, nestedE)
+          val nestedStmts1 = resolveStmts(nestedStmtsCasted, nestedRow, nestedE, edgeB1)
           bondStmt ++ nestedStmts1
         }
         (next, edgeB, stmts ++ nestedInsertStmts)
@@ -497,8 +508,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   //    }._2.filterNot(_.e == -1)
   //  }
 
-  def resolveStmts(genericStmts: Seq[Statement], row: Seq[Any], nestedE0: Any = 0): Seq[Statement] = {
-    genericStmts.foldLeft(0, None: Option[AnyRef], Seq[Statement]()) { case ((cur, edgeB, stmts0), genericStmt0) =>
+  def resolveStmts(genericStmts: Seq[Statement], row: Seq[Any], nestedE0: Any = 0, edgeB0: Option[AnyRef] = None): Seq[Statement] = {
+    genericStmts.foldLeft(0, edgeB0, Seq[Statement]()) { case ((cur, edgeB, stmts0), genericStmt0) =>
       val arg0 = row.get(cur)
       val next = if ((cur + 1) < row.size) cur + 1 else cur
       val (stmts, nestedE) = if (stmts0.isEmpty)

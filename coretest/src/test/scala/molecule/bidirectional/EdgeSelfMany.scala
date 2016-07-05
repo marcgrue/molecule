@@ -8,220 +8,237 @@ import molecule.util.MoleculeSpec
 class EdgeSelfMany extends MoleculeSpec {
 
 
-  "Save" >> {
+    "Save" >> {
 
-    "2 new entities with edge properties" in new Setup {
+      "2 new entities with edge properties" in new Setup {
 
-      // We save some qualitites separately first
-      val loves     = living_Quality.name("Love").save.eid
-      val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
+        // We save some qualitites separately first
+        val loves     = living_Quality.name("Love").save.eid
+        val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
 
-      // Save Ben, Ida and bidirectional edge properties describing their relationship
-      living_Person.name("Ben") // New entity
-        .Knows
-        .weight(7)
-        .howWeMet("inSchool")
-        .commonInterests("Food", "Walking", "Travelling")
-        .commonLicences("climbing", "flying")
-        .commonScores(Seq("golf" -> 7, "baseball" -> 9))
-        .coreQuality(loves)
-        .inCommon(inCommons)
-        .Person.name("Ida") // Creating new person
-        .save
+        // Save Ben, Ida and bidirectional edge properties describing their relationship
+        living_Person.name("Ben") // New entity
+          .Knows
+          .weight(7)
+          .howWeMet("inSchool")
+          .commonInterests("Food", "Walking", "Travelling")
+          .commonLicences("climbing", "flying")
+          .commonScores(Seq("golf" -> 7, "baseball" -> 9))
+          .coreQuality(loves)
+          .inCommon(inCommons)
+          .Person.name("Ida") // Creating new person
+          .save
 
-      // Reference is bidirectional - both edges point to each other and have all properties
-      living_Person.name.Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(living_Quality.name)._Knows
-        .Person.name
-        .get === List(
-        // "Original" edge
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ida"),
+        // Reference is bidirectional - both edges point to each other and have all properties
+        living_Person.name.Knows
+          .weight
+          .howWeMet
+          .commonInterests
+          .commonLicences
+          .commonScores
+          .CoreQuality.name._Knows
+          .InCommon.*(living_Quality.name)._Knows
+          .Person.name
+          .get === List(
+          // "Original" edge
+          ("Ben"
+            , 7
+            , "inSchool"
+            , Set("Food", "Walking", "Travelling")
+            , Set("climbing", "flying")
+            , Map("baseball" -> 9, "golf" -> 7)
+            , "Love"
+            , List("Patience", "Humor")
+            , "Ida"),
 
-        // Managed reverse edge
-        ("Ida"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ben")
-      )
+          // Managed reverse edge
+          ("Ida"
+            , 7
+            , "inSchool"
+            , Set("Food", "Walking", "Travelling")
+            , Set("climbing", "flying")
+            , Map("baseball" -> 9, "golf" -> 7)
+            , "Love"
+            , List("Patience", "Humor")
+            , "Ben")
+        )
 
 
-      // We can't build into related namespaces from a property edge since it would become unwieldy to keep track of.
-      // Instead we save the related entity and apply the ids in an edge property as we did above with `coreQuality(love)`.
-      (living_Person.name("Ben").Knows.weight(7).CoreQuality.name("Love")._Knows.Person.name("Ida").save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: [output.Molecule.noEdgePropRefs] Building on to another namespace " +
-        "from a property edge of a save molecule not allowed. " +
-        "Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.coreQuality(<refIds>)`"
+        // We can't build into related namespaces from a property edge since it would become unwieldy to keep track of.
+        // Instead we save the related entity and apply the ids in an edge property as we did above with `coreQuality(love)`.
+        (living_Person.name("Ben").Knows.weight(7).CoreQuality.name("Love")._Knows.Person.name("Ida").save must throwA[IllegalArgumentException])
+          .message === "Got the exception java.lang.IllegalArgumentException: [output.Molecule.noEdgePropRefs] Building on to another namespace " +
+          "from a property edge of a save molecule not allowed. " +
+          "Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.coreQuality(<refIds>)`"
+      }
+
+
+      "1 new entity with property edge to exisiting entity" in new Setup {
+
+        // We save some qualitites separately first
+        val loves     = living_Quality.name("Love").save.eid
+        val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
+        val ida       = living_Person.name.insert("Ida").eid
+
+
+        // Save Ben, Ida and bidirectional edge properties describing their relationship
+        living_Person.name("Ben") // New entity
+          .Knows
+          .weight(7)
+          .howWeMet("inSchool")
+          .commonInterests("Food", "Walking", "Travelling")
+          .commonLicences("climbing", "flying")
+          .commonScores(Seq("golf" -> 7, "baseball" -> 9))
+          .coreQuality(loves)
+          .inCommon(inCommons)
+          .person(ida) // Saving reference to existing Person entity
+          .save
+
+        // Reference is bidirectional - both edges point to each other and have all properties
+        living_Person.name
+          .Knows
+          .weight
+          .howWeMet
+          .commonInterests
+          .commonLicences
+          .commonScores
+          .CoreQuality.name._Knows
+          .InCommon.*(living_Quality.name)._Knows
+          .Person.name
+          .get === List(
+          ("Ida"
+            , 7
+            , "inSchool"
+            , Set("Food", "Walking", "Travelling")
+            , Set("climbing", "flying")
+            , Map("baseball" -> 9, "golf" -> 7)
+            , "Love"
+            , List("Patience", "Humor")
+            , "Ben"),
+          ("Ben"
+            , 7
+            , "inSchool"
+            , Set("Food", "Walking", "Travelling")
+            , Set("climbing", "flying")
+            , Map("baseball" -> 9, "golf" -> 7)
+            , "Love"
+            , List("Patience", "Humor")
+            , "Ida")
+        )
+      }
     }
-
-
-    "1 new entity with property edge to exisiting entity" in new Setup {
-
-      // We save some qualitites separately first
-      val loves     = living_Quality.name("Love").save.eid
-      val inCommons = living_Quality.name.insert("Patience", "Humor").eidSet
-      val ida       = living_Person.name.insert("Ida").eid
-
-
-      // Save Ben, Ida and bidirectional edge properties describing their relationship
-      living_Person.name("Ben") // New entity
-        .Knows
-        .weight(7)
-        .howWeMet("inSchool")
-        .commonInterests("Food", "Walking", "Travelling")
-        .commonLicences("climbing", "flying")
-        .commonScores(Seq("golf" -> 7, "baseball" -> 9))
-        .coreQuality(loves)
-        .inCommon(inCommons)
-        .person(ida) // Saving reference to existing Person entity
-        .save
-
-      // Reference is bidirectional - both edges point to each other and have all properties
-      living_Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(living_Quality.name)._Knows
-        .Person.name
-        .get === List(
-        ("Ida"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ben"),
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ida")
-      )
-    }
-  }
 
   "Insert new" >> {
 
-    "new edge new" in new Setup {
+        "new edge new" in new Setup {
 
-      living_Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(living_Quality.name)._Knows
-        .Person.name insertD List(
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ida")
-      )
+    //      living_Person.name
+    //        .Knows
+    //        .weight
+    //        .howWeMet
+    //        .commonInterests
+    //        .commonLicences
+    //        .commonScores
+    //        .CoreQuality.name._Knows
+    //        .InCommon.*(living_Quality.name)._Knows
+    //        .Person.name insertD List(
+    //        ("Ben"
+    //          , 7
+    //          , "inSchool"
+    //          , Set("Food", "Walking", "Travelling")
+    //          , Set("climbing", "flying")
+    //          , Map("baseball" -> 9, "golf" -> 7)
+    //          , "Love"
+    //          , List("Patience", "Humor")
+    //          , "Ida")
+    //      )
 
-      living_Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(living_Quality.name)._Knows
-        .Person.name insert List(
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ida")
-      )
+          living_Person.name
+            .Knows
+            .weight
+            .howWeMet
+            .commonInterests
+            .commonLicences
+            .commonScores
+            .CoreQuality.name._Knows
+            .InCommon.*(living_Quality.name)._Knows
+            .Person.name insert List(
+            ("Ben"
+              , 7
+              , "inSchool"
+              , Set("Food", "Walking", "Travelling")
+              , Set("climbing", "flying")
+              , Map("baseball" -> 9, "golf" -> 7)
+              , "Love"
+              , List("Patience", "Humor")
+              , "Ida")
+          )
 
-      living_Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(living_Quality.name)._Knows
-        .Person.name
-        .get === List(
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ida"),
-        ("Ida"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ben")
-      )
+          living_Person.name
+            .Knows
+            .weight
+            .howWeMet
+            .commonInterests
+            .commonLicences
+            .commonScores
+            .CoreQuality.name._Knows
+            .InCommon.*(living_Quality.name)._Knows
+            .Person.name
+            .get === List(
+            ("Ben"
+              , 7
+              , "inSchool"
+              , Set("Food", "Walking", "Travelling")
+              , Set("climbing", "flying")
+              , Map("baseball" -> 9, "golf" -> 7)
+              , "Love"
+              , List("Patience", "Humor")
+              , "Ida"),
+            ("Ida"
+              , 7
+              , "inSchool"
+              , Set("Food", "Walking", "Travelling")
+              , Set("climbing", "flying")
+              , Map("baseball" -> 9, "golf" -> 7)
+              , "Love"
+              , List("Patience", "Humor")
+              , "Ben")
+          )
+        }
+
+    "new *(edge) new" in new Setup {
+
+      // Can't make multiple edges to the same target entity
+      (living_Person.name.Knows.*(living_Knows.weight).Person.name insert List(
+        ("Ben", List(7, 8), "Ida")
+      ) must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+        s"[output.Molecule.noNestedEdgesWithoutTarget] Nested edge ns `living_Knows` should link " +
+        s"to target ns within the nested group of attributes."
     }
 
-    //    "new *(edge) new" in new Setup {
-    //      // Can't make multiple edges to the same target entity
-    ////      !ok
-    //
-    //      living_Person.name.Knows.*(living_Knows.weight).Person.name insertD List(
-    //        ("Ben", List(7, 8), "Ida")
-    //      )
-    //    }
 
+    "new *(edge new)" in new Setup {
+      println(living_Person.name.Knows.*(living_Knows.weight.Person.name)._model)
 
-    //    "new *(edge new)" in new Setup {
-    //
-    //      living_Person.name.Knows.*(living_Knows.weight.Person.name) insert List(
-    //        ("Ben", List((7, "Ida")))
-    //      )
-    //    }
+      living_Person.name.Knows.weight.Person.name insertD List(
+        ("Ben", 7, "Liz")
+      )
+
+      // Insert entity having multiple connected entities
+      living_Person.name.Knows.*(living_Knows.weight.Person.name) insertD List(
+        ("Ben", List(
+          (7, "Ida")
+//          , (6, "Liz")
+        ))
+      )
+
+      // Ben are connect to Ida and Liz and they are in turn connected to Ben
+      living_Person.name.Knows.*(living_Knows.weight.Person.name).get === List(
+        ("Ben", List((7, "Ida"), (6, "Liz"))),
+        ("Ida", List((7, "Ben"))),
+        ("Liz", List((6, "Ben")))
+      )
+    }
 
 
     //        "new *(edge new)" in new Setup {
