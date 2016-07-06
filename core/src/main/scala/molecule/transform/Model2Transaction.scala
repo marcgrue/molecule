@@ -639,145 +639,119 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       stmts.last.v
   }
 
-  def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any, edgeB: Option[AnyRef]) =
-    genericStmt match {
-      // Keep current cursor (add no new data in this iteration)
-      case Add('tempId, a, refNs: String, bi)              => (cur, edgeB, valueStmts(stmts, tempId(a), a, tempId(refNs), None, bi, edgeB))
-      case Add('e, a, refNs: String, bi@BiSelfRef(1))      => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
-      case Add('e, a, refNs: String, bi@BiSelfRef(2))      => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
-      case Add('e, a, refNs: String, bi@BiEdgeRef(_, _))   =>
-        val (edgeA, edgeB) = (tempId(refNs), Some(tempId(a)))
-        (cur, edgeB, valueStmts(stmts, lastE(stmts, a), a, edgeA, None, bi, edgeB))
-      case Add('e, a, refNs: String, bi@BiTargetRef(_, _)) => (cur, None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-      case Add('e, a, refNs: String, bi)                   => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
-      case Add('v, a, 'tempId, bi)                         => (cur, edgeB, valueStmts(stmts, stmts.last.v, a, tempId(a), None, bi, edgeB))
-      case Retract(e, a, v, bi)                            => (cur, edgeB, stmts)
+  def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any, edgeB: Option[AnyRef]) = genericStmt match {
 
-      // Advance cursor for next value in data row
-      case Add('tempId, a, 'arg, bi)                                                    => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB))
-      case Add('tempId, a, Values(EnumVal, prefix), bi)                                 => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, prefix, bi, edgeB))
-      case Add('tempId, a, Values(vs, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, tempId(a), a, vs, prefix, bi, edgeB))
-      case Add('remove_me, a, 'arg, bi)                                                 => (next, edgeB, valueStmts(stmts, -1, a, arg, None, bi, edgeB))
-      case Add('arg, a, 'tempId, bi)                                                    => (next, edgeB, valueStmts(stmts, arg, a, tempId(a), None, bi, edgeB))
-      case Add('e, a, 'arg, bi@BiSelfRef(1))                                            => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
-      case Add('e, a, 'arg, bi@BiSelfRef(2))                                            => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
-      case Add('e, a, 'arg, bi)                                                         => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
-      case Add('e, a, Values(EnumVal, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, prefix, bi, edgeB))
-      case Add('e, a, Values(vs, prefix), bi)                                           => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, vs, prefix, bi, edgeB))
-      case Add('v, a, 'arg, bi) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, edgeB, valueStmts(stmts, stmts.last.v, a, arg, None, bi, edgeB))
-      case Add('v, a, 'arg, bi)                                                         => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, None, bi, edgeB))
-      case Add('v, a, Values(EnumVal, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, prefix, bi, edgeB))
-      case Add('v, a, Values(vs, prefix), bi)                                           => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, vs, prefix, bi, edgeB))
-      case Add('tx, a, 'arg, bi)                                                        => (next, edgeB, valueStmts(stmts, tempId("tx"), a, arg, None, bi, edgeB))
-      case Add(_, _, nestedGenStmts0: Seq[_], _) if arg == Nil                          => (next, edgeB, stmts)
-      case Add(e, ref, nestedGenStmts0: Seq[_], bi)                                     => {
-        //      x(51, e, ref, nestedStmts, stmts)
-        val parentE = if (e == 'parentId)
-          tempId(ref)
-        else if (stmts.isEmpty)
-          e
-        else
-          stmts.reverse.collectFirst {
-            // Find entity value of Add statement with matching namespace
-            case Add(e1, a, _, _) if a.replaceFirst("/.*", "") == ref.replaceFirst("/.*", "") => e1
-          }.getOrElse(sys.error("[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
+    // Keep current cursor (add no new data in this iteration)
+    case Add('tempId, a, refNs: String, bi)              => (cur, edgeB, valueStmts(stmts, tempId(a), a, tempId(refNs), None, bi, edgeB))
+    case Add('e, a, refNs: String, bi@BiSelfRef(1))      => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
+    case Add('e, a, refNs: String, bi@BiSelfRef(2))      => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
+    case Add('e, a, refNs: String, bi@BiEdgeRef(_, _))   =>
+      val (edgeA, edgeB) = (tempId(refNs), Some(tempId(a)))
+      (cur, edgeB, valueStmts(stmts, lastE(stmts, a), a, edgeA, None, bi, edgeB))
+    case Add('e, a, refNs: String, bi@BiTargetRef(_, _)) => (cur, None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+    case Add('e, a, refNs: String, bi)                   => (cur, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, tempId(refNs), None, bi, edgeB))
+    case Add('v, a, 'tempId, bi)                         => (cur, edgeB, valueStmts(stmts, stmts.last.v, a, tempId(a), None, bi, edgeB))
+    case Retract(e, a, v, bi)                            => (cur, edgeB, stmts)
 
-        val nestedGenStmts = nestedGenStmts0.map { case s: Statement => s }
-        val nestedRows = untupleNestedArgss(nestedGenStmts0, arg)
+    // Advance cursor for next value in data row
+    case Add('tempId, a, 'arg, bi)                                                    => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB))
+    case Add('tempId, a, Values(EnumVal, prefix), bi)                                 => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, prefix, bi, edgeB))
+    case Add('tempId, a, Values(vs, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, tempId(a), a, vs, prefix, bi, edgeB))
+    case Add('remove_me, a, 'arg, bi)                                                 => (next, edgeB, valueStmts(stmts, -1, a, arg, None, bi, edgeB))
+    case Add('arg, a, 'tempId, bi)                                                    => (next, edgeB, valueStmts(stmts, arg, a, tempId(a), None, bi, edgeB))
+    case Add('e, a, 'arg, bi@BiSelfRef(1))                                            => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
+    case Add('e, a, 'arg, bi@BiSelfRef(2))                                            => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
+    case Add('e, a, 'arg, bi)                                                         => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, None, bi, edgeB))
+    case Add('e, a, Values(EnumVal, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, arg, prefix, bi, edgeB))
+    case Add('e, a, Values(vs, prefix), bi)                                           => (next, edgeB, valueStmts(stmts, lastE(stmts, a, nestedE), a, vs, prefix, bi, edgeB))
+    case Add('v, a, 'arg, bi) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, edgeB, valueStmts(stmts, stmts.last.v, a, arg, None, bi, edgeB))
+    case Add('v, a, 'arg, bi)                                                         => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, None, bi, edgeB))
+    case Add('v, a, Values(EnumVal, prefix), bi)                                      => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, arg, prefix, bi, edgeB))
+    case Add('v, a, Values(vs, prefix), bi)                                           => (next, edgeB, valueStmts(stmts, lastV(stmts, a, nestedE), a, vs, prefix, bi, edgeB))
+    case Add('tx, a, 'arg, bi)                                                        => (next, edgeB, valueStmts(stmts, tempId("tx"), a, arg, None, bi, edgeB))
+    case Add(_, _, nestedGenStmts0: Seq[_], _) if arg == Nil                          => (next, edgeB, stmts)
 
-        val nestedInsertStmts: Seq[Statement] = bi match {
+    // Nested data structures
+    case Add(e, ref, nestedGenStmts0: Seq[_], bi) => {
+      //      x(51, e, ref, nestedStmts, stmts)
+      val parentE = if (e == 'parentId)
+        tempId(ref)
+      else if (stmts.isEmpty)
+        e
+      else
+        stmts.reverse.collectFirst {
+          // Find entity value of Add statement with matching namespace
+          case Add(e1, a, _, _) if a.replaceFirst("/.*", "") == ref.replaceFirst("/.*", "") => e1
+        }.getOrElse(sys.error("[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
 
-          // Bidirectional self references ...........................................................
+      val nestedGenStmts = nestedGenStmts0.map { case s: Statement => s }
+      val nestedRows = untupleNestedArgss(nestedGenStmts0, arg)
 
-          // Nested self references
-          // living_Person.name.Friends.*(living_Person.name) insert List(...
-          case BiSelfRef(2) => nestedRows.flatMap { nestedRow =>
-            val nestedE = tempId(ref)
-            val bondStmts = Seq(
-              Add(nestedE, ref, parentE),
-              Add(parentE, ref, nestedE)
-            )
-            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
-//            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE, edgeB) // todo edgeB necessary?
-            bondStmts ++ nestedStmts
-          }
+      val nestedInsertStmts: Seq[Statement] = bi match {
 
+        // Bidirectional self references ...........................................................
 
-          // Bidirectional propert edges ...........................................................
-
-          // Nested property edges
-          // living_Person.name.Knows.*(living_Knows.weight.Person.name) insert List(...
-          case BiEdgeRef(2, revAttr) => nestedRows.flatMap { nestedRow =>
-            val edgeA = tempId(revAttr)
-            val edgeB1 = tempId(ref)
-            val bondStmts = Seq(
-              Add(edgeA, ":molecule_Meta/otherEdge", edgeB1),
-              Add(edgeB1, ":molecule_Meta/otherEdge", edgeA),
-              Add(edgeB1, revAttr, parentE),
-              Add(parentE, ref, edgeA)
-            )
-            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA, Some(edgeB1))
-            bondStmts ++ nestedStmts
-          }
-
-          // Nested edge property values
-          // living_Person.name.Knows.weight.InCommon.*(living_Quality.name)._Knows.Person.name insert List(...
-          case BiEdgePropRef(2) => nestedRows.flatMap { nestedRow =>
-            val edgeA = tempId(ref)
-            val bondStmts = Seq(
-              Add(edgeB.get, ref, edgeA),
-              Add(parentE, ref, edgeA)
-            )
-            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA)
-//            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA, edgeB) // todo edgeB necessary?
-            bondStmts ++ nestedStmts
-          }
-
-
-          // Uni-directional (normal) nested rows ...............................................
-
-          // Invoice.id.InvoiceLines * InvoiceLine.no.item.price
-          case _ => nestedRows.flatMap { nestedRow =>
-            val nestedE = tempId(ref)
-            val bondStmt = Add(parentE, ref, nestedE)
-            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
-            bondStmt +: nestedStmts
-          }
+        // Nested self references
+        // living_Person.name.Friends.*(living_Person.name) insert List(...
+        case BiSelfRef(2) => nestedRows.flatMap { nestedRow =>
+          val nestedE = tempId(ref)
+          val bondStmts = Seq(
+            Add(nestedE, ref, parentE),
+            Add(parentE, ref, nestedE)
+          )
+          val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
+          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE, edgeB) // todo edgeB necessary?
+          bondStmts ++ nestedStmts
         }
 
-        (next, edgeB, stmts ++ nestedInsertStmts)
+
+        // Bidirectional propert edges ...........................................................
+
+        // Nested property edges
+        // living_Person.name.Knows.*(living_Knows.weight.Person.name) insert List(...
+        case BiEdgeRef(2, revAttr) => nestedRows.flatMap { nestedRow =>
+          val edgeA = tempId(revAttr)
+          val edgeB1 = tempId(ref)
+          val bondStmts = Seq(
+            Add(edgeA, ":molecule_Meta/otherEdge", edgeB1),
+            Add(edgeB1, ":molecule_Meta/otherEdge", edgeA),
+            Add(edgeB1, revAttr, parentE),
+            Add(parentE, ref, edgeA)
+          )
+          val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA, Some(edgeB1))
+          bondStmts ++ nestedStmts
+        }
+
+        // Nested edge property values
+        // living_Person.name.Knows.weight.InCommon.*(living_Quality.name)._Knows.Person.name insert List(...
+        case BiEdgePropRef(2) => nestedRows.flatMap { nestedRow =>
+          val edgeA = tempId(ref)
+          val bondStmts = Seq(
+            Add(edgeB.get, ref, edgeA),
+            Add(parentE, ref, edgeA)
+          )
+          val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA)
+          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA, edgeB) // todo edgeB necessary?
+          bondStmts ++ nestedStmts
+        }
+
+
+        // Uni-directional (normal) nested rows ...............................................
+
+        // Invoice.id.InvoiceLines * InvoiceLine.no.item.price
+        case _ => nestedRows.flatMap { nestedRow =>
+          val nestedE = tempId(ref)
+          val bondStmt = Add(parentE, ref, nestedE)
+          val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
+          bondStmt +: nestedStmts
+        }
       }
 
-      case unexpected => sys.error("[Model2Transaction:matchDataStmt] Unexpected insert statement: " + unexpected)
+      (next, edgeB, stmts ++ nestedInsertStmts)
     }
 
-  //  def resolveStmtsOLD(genericStmts: Seq[Statement], row: Seq[Any], nestedE0: Any = 0): Seq[Statement] = {
-  //    genericStmts.foldLeft(0, Seq[Statement]()) { case ((cur, stmts0), genericStmt0) =>
-  //      val arg0 = row.get(cur)
-  //      val next = if ((cur + 1) < row.size) cur + 1 else cur
-  //      val (stmts, nestedE) = if (stmts0.isEmpty)
-  //        (stmts0, nestedE0)
-  //      else stmts0.last match {
-  //        case Add('ns, ns, backRef, _) => (stmts0.init, backRef)
-  //        case _                        => (stmts0, nestedE0)
-  //      }
-  //      (arg0, genericStmt0) match {
-  //        case (null, _)                                                                          => sys.error(
-  //          "[Model2Transaction:insertStmts] null values not allowed. Please use `attr$` for Option[tpe] values.")
-  //        case (_, br@Add('ns, ns, "", _))                                                        => {
-  //          val backRef = stmts.reverse.collectFirst {
-  //            case Add(e, a, v, _) if a.startsWith(ns) && e.isInstanceOf[db.DbId] => e
-  //          }.getOrElse(sys.error(s"[Model2Transaction:insertStmts] Couldn't find namespace `$ns` in any previous Add statements.\n" + stmts.mkString("\n")))
-  //          (cur, stmts :+ Add('ns, ns, backRef))
-  //        }
-  //        case (None, Add('e, a, refNs: String, _))                                               => (cur, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
-  //        case (None, _)                                                                          => (next, stmts)
-  //        case (Some(arg), genericStmt)                                                           => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE)
-  //        case (arg, Add('e, a, 'arg, _)) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, valueStmts(stmts, stmts.last.v, a, arg))
-  //        case (arg, genericStmt)                                                                 => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE)
-  //      }
-  //    }._2.filterNot(_.e == -1)
-  //  }
+    case unexpected => sys.error("[Model2Transaction:matchDataStmt] Unexpected insert statement: " + unexpected)
+  }
 
   def resolveStmts(genericStmts: Seq[Statement], row: Seq[Any], nestedE0: Any = 0, edgeB0: Option[AnyRef] = None): Seq[Statement] = {
     genericStmts.foldLeft(0, edgeB0, Seq[Statement]()) { case ((cur, edgeB, stmts0), genericStmt0) =>

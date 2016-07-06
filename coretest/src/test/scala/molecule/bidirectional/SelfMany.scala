@@ -21,6 +21,11 @@ class SelfMany extends MoleculeSpec {
         // Reverse reference:
         ("Ida", "Ben")
       )
+
+      // We can now use a uniform query from both ends:
+      // Ben and Ida are friends with each other
+      living_Person.name_("Ben").Friends.name.get === List("Ida")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
     }
 
 
@@ -41,8 +46,11 @@ class SelfMany extends MoleculeSpec {
         ("Liz", "Ben")
       )
 
+      // Ben and Ida are friends with each other
+      living_Person.name_("Ben").Friends.name.get === List("Liz")
+      living_Person.name_("Liz").Friends.name.get === List("Ben")
 
-      // Can't save nested data structures
+      // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[output.Molecule.noNested] Nested data structures not allowed in save molecules"
 
@@ -66,6 +74,10 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben")
       )
 
+      // Ben and Ida are friends with each other
+      living_Person.name_("Ben").Friends.name.get === List("Ida")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
+
       // Saveing reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
       (living_Person.name("Ben").Friends.e(ida).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
@@ -88,6 +100,10 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben"),
         ("Liz", "Ben")
       )
+
+      // Ben and Ida's friends
+      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
     }
   }
 
@@ -112,6 +128,10 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben"),
         ("Tim", "Don")
       )
+
+      // Don and Tim are friends with each other
+      living_Person.name_("Don").Friends.name.get === List("Tim")
+      living_Person.name_("Tim").Friends.name.get === List("Don")
     }
 
     "n new" in new Setup {
@@ -145,6 +165,10 @@ class SelfMany extends MoleculeSpec {
         ("Tim", "Don"),
         ("Tom", "Don")
       )
+
+      // Don and Tim's friends
+      living_Person.name_("Don").Friends.name.get === List("Tom", "Tim")
+      living_Person.name_("Tim").Friends.name.get === List("Don")
     }
   }
 
@@ -218,6 +242,10 @@ class SelfMany extends MoleculeSpec {
         ("Ben", "Ida"),
         ("Ida", "Ben")
       )
+
+      // Ben and Ida are friends with each other
+      living_Person.name_("Ben").Friends.name.get === List("Ida")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
     }
 
 
@@ -265,7 +293,11 @@ class SelfMany extends MoleculeSpec {
         ("Liz", "Ben")
       )
 
-      // To remove the friendship to Ida we need to remove it manually
+      // Ben and Ida's friends
+      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
+
+      // To remove Ben's friendship with Ida we need to remove it manually
       living_Person(ben).friends.remove(ida).update
 
       // Now the friendship with Ida has been replaced with the friendship with Liz
@@ -273,6 +305,10 @@ class SelfMany extends MoleculeSpec {
         ("Ben", "Liz"),
         ("Liz", "Ben")
       )
+
+      // Now only Ben and Liz are friends
+      living_Person.name_("Ben").Friends.name.get === List("Liz")
+      living_Person.name_("Liz").Friends.name.get === List("Ben")
     }
   }
 
@@ -357,6 +393,10 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben"),
         ("Liz", "Ben")
       )
+
+      // Ben and Ida's friends
+      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
     }
 
 
@@ -373,6 +413,10 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben"),
         ("Liz", "Ben")
       )
+
+      // Ben and Ida's friends
+      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
     }
   }
 
@@ -403,6 +447,10 @@ class SelfMany extends MoleculeSpec {
       ("Liz", "Ben")
     )
 
+    // Ben and Ida's friends
+    living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
+    living_Person.name_("Ida").Friends.name.get === List("Ben")
+
     // To remove the friendship to Ida we need to remove it manually as we did above
     living_Person(ben).friends.remove(ida).update
 
@@ -411,6 +459,10 @@ class SelfMany extends MoleculeSpec {
       ("Ben", "Liz"),
       ("Liz", "Ben")
     )
+
+    // Now only Ben and Liz are friends
+    living_Person.name_("Ben").Friends.name.get === List("Liz")
+    living_Person.name_("Liz").Friends.name.get === List("Ben")
   }
 
 
@@ -427,11 +479,19 @@ class SelfMany extends MoleculeSpec {
         ("Ida", "Ben")
       )
 
-      // Retract ref between them by applying no value
-      living_Person(ben).friends().update
+      // Ben and Ida are friends with each other
+      living_Person.name_("Ben").Friends.name.get === List("Ida")
+      living_Person.name_("Ida").Friends.name.get === List("Ben")
 
-      // Bidirectional references retracted - Ben has no friends anymore
-      living_Person.name.Friends.name.get.sorted === List()
+      // Retract ref between them by applying no value
+      // (we can retract the relationship from both Ben and Ida)
+      living_Person(ida).friends().update
+
+      // Bidirectional references retracted -
+      // Both Ben and Ida still exists but have no friends anymore
+      living_Person.name.get.sorted === List("Ben", "Ida")
+      living_Person.name_("Ben").Friends.name.get === List()
+      living_Person.name_("Ida").Friends.name.get === List()
     }
   }
 
@@ -456,7 +516,7 @@ class SelfMany extends MoleculeSpec {
     // Retract a and all references from/to a
     ben.retract
 
-    // Woa remains and both references retracted
+    // Ida still exists. Ben is gone and so is their friendship in both directions
     living_Person.name.get === List("Ida")
     living_Person(ben).Friends.name.get === List()
     living_Person(ida).Friends.name.get === List()
