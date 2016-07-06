@@ -27,24 +27,21 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def refThis = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString)
     def refNext = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
 
-    def isBiSelfRef = tpe_ <:< weakTypeOf[BiSelfRef]
-    def isBiSelfRefAttr = tpe_ <:< weakTypeOf[BiSelfRefAttr]
-    def isBiSelfRefAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiSelfRefAttr].typeSymbol)
+    def isBiSelfRef = tpe_ <:< weakTypeOf[BiSelfRef_]
+    def isBiSelfRefAttr = tpe_ <:< weakTypeOf[BiSelfRefAttr_]
 
-    def isBiRef = tpe_ <:< weakTypeOf[BiRef]
-    def isBiRefAttr = tpe_ <:< weakTypeOf[BiRefAttr]
-    def isBiRefAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiRefAttr].typeSymbol)
+    def isBiOtherRef = tpe_ <:< weakTypeOf[BiOtherRef_]
+    def isBiOtherRefAttr = tpe_ <:< weakTypeOf[BiOtherRefAttr_]
 
-    def isBiEdgePropAttr = tpe_ <:< weakTypeOf[BiEdgePropAttr]
-    def isBiEdgePropRefAttr = tpe_ <:< weakTypeOf[BiEdgePropRefAttr]
-    def isBiEdgePropRef = tpe_ <:< weakTypeOf[BiEdgePropRef]
+    def isBiEdgeRef = tpe_ <:< weakTypeOf[BiEdgeRef_[_]]
+    def isBiEdgeRefAttr = tpe_ <:< weakTypeOf[BiEdgeRefAttr_[_]]
 
-    def isBiEdgeRefAttr = tpe_ <:< weakTypeOf[BiEdgeRefAttr[_]]
-    def isBiEdgeRefAttr2 = tpe_.baseClasses.contains(weakTypeOf[BiEdgeRefAttr[_]].typeSymbol)
-    def isBiEdgeRef = tpe_ <:< weakTypeOf[BiEdgeRef[_]]
+    def isBiEdgePropRef = tpe_ <:< weakTypeOf[BiEdgePropRef_]
+    def isBiEdgePropAttr = tpe_ <:< weakTypeOf[BiEdgePropAttr_]
+    def isBiEdgePropRefAttr = tpe_ <:< weakTypeOf[BiEdgePropRefAttr_]
 
-    def isBiTargetRefAttr = tpe_ <:< weakTypeOf[BiTargetRefAttr[_]]
-    def isBiTargetRef = tpe_ <:< weakTypeOf[BiTargetRef[_]]
+    def isBiTargetRefAttr = tpe_ <:< weakTypeOf[BiTargetRefAttr_[_]]
+    def isBiTargetRef = tpe_ <:< weakTypeOf[BiTargetRef_[_]]
 
     def isRef = tpe_ <:< weakTypeOf[Ref[_, _]]
     def isOneRef = tpe_ <:< weakTypeOf[OneRef[_, _]]

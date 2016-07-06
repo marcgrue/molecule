@@ -156,16 +156,16 @@ trait Molecule extends DatomicFacade {
 
   // Todo: Might be possible to implement if we control that the molecule doesn't build further out
   private def noEdgePropRefs(action: String) = _model.elements.collectFirst {
-    case Bond(ns, refAttr, _, _, "edgePropRef") => throw new IllegalArgumentException(
+    case Bond(ns, refAttr, _, _, Seq(BiEdgePropRef(_))) => throw new IllegalArgumentException(
       s"[output.Molecule.noEdgePropRefs] Building on to another namespace from a property edge of a $action molecule not allowed. " +
         s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
   }
 
   private def noNestedEdgesWithoutTarget(action: String) {
     def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
-      case Nested(Bond(baseNs, _, refNs, _, "edgeRef"), es)
+      case Nested(Bond(baseNs, _, refNs, _, Seq(BiEdgeRef(_,_))), es)
         if !es.collectFirst {
-          case Bond(edgeNs, _, _, _, meta) if meta.contains(':') && meta.split(":").last.split("/").head == baseNs => true
+          case Bond(edgeNs, _, _, _, Seq(BiTargetRef(_,attr))) if attr.nonEmpty && attr.split(":").last.split("/").head == baseNs => true
         }.getOrElse(false) => throw new IllegalArgumentException(
           s"[output.Molecule.noNestedEdgesWithoutTarget] Nested edge ns `$refNs` should link to target ns within the nested group of attributes.")
     }

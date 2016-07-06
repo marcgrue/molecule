@@ -157,7 +157,7 @@ class SelfMany extends MoleculeSpec {
 
       // Insert 2 living_Persons and befriend them with existing living_Persons
       living_Person.name.friends insert List(
-        ("Ben", Set(ida, 41L)),
+        ("Ben", Set(ida)),
         ("Don", Set(tim))
       )
 
@@ -175,7 +175,7 @@ class SelfMany extends MoleculeSpec {
 
       val List(ida, liz, tim) = living_Person.name insert List("Ida", "Liz", "Tim") eids
 
-      // Insert 2 living_Persons and befriend them with existing living_Persons
+      // Insert 2 living_Persons and connect them with existing living_Persons
       living_Person.name.friends insert List(
         ("Ben", Set(ida, liz)),
         ("Don", Set(ida, tim))

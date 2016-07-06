@@ -1,5 +1,6 @@
 package molecule.ast
 import datomic.Util
+import molecule.ast.model._
 
 object transaction {
 
@@ -8,15 +9,15 @@ object transaction {
     val e     : Any
     val a     : String
     val v     : Any
-    val meta  : String
+    val bi    : Generic
     def toJava = Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
   }
 
-  case class Add(e: Any, a: String, v: Any, meta: String = "") extends Statement {
+  case class Add(e: Any, a: String, v: Any, bi: Generic = NoValue) extends Statement {
     val action = ":db/add"
   }
 
-  case class Retract(e: Any, a: String, v: Any, meta: String = "") extends Statement {
+  case class Retract(e: Any, a: String, v: Any, bi: Generic = NoValue) extends Statement {
     val action = ":db/retract"
   }
 

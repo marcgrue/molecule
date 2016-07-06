@@ -27,12 +27,16 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
         val indent = if (i == 0) "" else pad1 + i + pad2
         val max = level >= maxLevel
         x match {
-          case Add(e, a, stmts: Seq[_], meta) =>
-            val metaStr = if(meta.nonEmpty) s"<$meta>" else ""
-            indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + s"List(      $metaStr\n" +
+          case Add(e, a, stmts: Seq[_], bi) =>
+            val biStr = if(bi != NoValue) s"      <$bi>" else ""
+            indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + s"List($biStr\n" +
             stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Add(e, a, v, meta)             => indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + meta
-          case Retract(e, a, v, meta)         => indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + meta
+          case Add(e, a, v, bi)             =>
+            val biStr = if(bi != NoValue) bi else ""
+            indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
+          case Retract(e, a, v, bi)         =>
+            val biStr = if(bi != NoValue) bi else ""
+            indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
 
           case l: java.util.List[_] if l.size() == 4 && l.head.toString.take(4) == ":db/" => {
             val List(action, e, a, v) = l.toList

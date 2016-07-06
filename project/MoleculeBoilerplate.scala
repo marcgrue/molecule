@@ -177,22 +177,22 @@ object MoleculeBoilerplate {
         case r"oneEnum\((.*?)$enums\)(.*)$str"  => Seq(Enum(attr, attrClean, "OneEnum", "String", "", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
         case r"manyEnum\((.*?)$enums\)(.*)$str" => Seq(Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
 
-        // Bidirectional start
+        // Bidirectional_ start
 
         case r"oneBi\[(.*)$biRef\](.*)$str" =>
-          val (refNs, refOptional) = parseBiRefTypeArg("one", biRef, attr, curPart, curFullNs)
-          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", refNs, refOptional +: parseOptions(str, Nil, attr, curFullNs)))
+          val (refNs, refOptional) = parseBiRefTypeArg_("one", biRef, attr, curPart, curFullNs)
+          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", refNs, parseOptions(str, Nil, attr, curFullNs) :+ refOptional))
 
         case r"manyBi\[(.*)$biRef\](.*)$str" =>
-          val (refNs, refOptional) = parseBiRefTypeArg("many", biRef, attr, curPart, curFullNs)
-          Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", refNs, refOptional +: parseOptions(str, Nil, attr, curFullNs)))
+          val (refNs, refOptional) = parseBiRefTypeArg_("many", biRef, attr, curPart, curFullNs)
+          Seq(Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", refNs, parseOptions(str, Nil, attr, curFullNs) :+ refOptional))
 
 
-        // Bidirectional end
+        // Bidirectional_ end
 
-        case r"target\[(.*)$targetRef\](.*)$str" =>
-          val (targetNs, targetOptional) = parseTargetRefTypeArg(targetRef, attr, curPart, curFullNs)
-          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", targetNs, targetOptional +: parseOptions(str, Nil, attr, curFullNs)))
+        case r"target\[(.*)$biTargetRef\](.*)$str" =>
+          val (targetNs, targetOptional) = parseTargetRefTypeArg(biTargetRef, attr, curPart, curFullNs)
+          Seq(Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", targetNs, parseOptions(str, Nil, attr, curFullNs) :+ targetOptional))
 
 
         // References
@@ -249,12 +249,12 @@ object MoleculeBoilerplate {
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"(.*)$targetNs\.(.*)$targetAttr\.type" if basePart.nonEmpty =>
           //          println(s"Target 1:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
-          (s"${basePart}_$targetNs", Optional(s"${basePart}_$targetNs.$targetAttr", "BiTargetRef"))
+          (s"${basePart}_$targetNs", Optional(s"${basePart}_$targetNs.$targetAttr", "BiTargetRef_"))
 
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"(.*)$targetNs\.(.*)$targetAttr\.type" =>
           //          println(s"Target 2:  $basePart      $baseFullNs      $baseAttr                 ---    $targetNs      $targetAttr")
-          (targetNs, Optional(s"$targetNs.$targetAttr", "BiTargetRef"))
+          (targetNs, Optional(s"$targetNs.$targetAttr", "BiTargetRef_"))
 
         case other =>
           sys.error(
@@ -265,7 +265,7 @@ object MoleculeBoilerplate {
       }
     }
 
-    def parseBiRefTypeArg(card: String, refStr: String, baseAttr: String, basePart: String = "", baseFullNs: String = "") = {
+    def parseBiRefTypeArg_(card: String, refStr: String, baseAttr: String, basePart: String = "", baseFullNs: String = "") = {
       //            println(s"basePart baseFullNs baseAttr: $basePart      $baseFullNs      $baseAttr")
 
       refStr match {
@@ -278,20 +278,20 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttra\.type" if s"${part}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outRefAttr = oneBi[MyDomainDefinition.ThisPartition.OtherNamespace.revRefAttr.type]  // or manyBi
         // should be only
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" if part == basePart =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have " +
             s"only the namespace prefix in the type argument:\n  val $baseAttr = ${card}Bi[$edgeNs.$targetAttr.type]")
 
         // val outRefAttr = oneBi[MyDomainDefinition.SomePartition.OtherNamespace.toRefAttr.type]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" =>
           //          println(s"1  $basePart      $baseFullNs      $baseAttr                 ---    $part      $edgeNs      $targetAttr")
-          (s"${part}_$edgeNs", Optional(s"${part}_$edgeNs.$targetAttr", s"BiEdgeRef:$baseFullNs.$baseAttr"))
+          (s"${part}_$edgeNs", Optional(s"${part}_$edgeNs.$targetAttr", s"BiEdgeRef_:$baseFullNs.$baseAttr"))
 
 
         // With partition .......................................
@@ -300,20 +300,20 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" if s"${part}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and can't have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val selfRef = oneBi[ThisNamespace.selfRef.type]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" if basePart.nonEmpty && s"${basePart}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outgoingRef = oneBi[SomePartition.OtherNamespace.toRefAttr.type]
         case r"([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" =>
           //          println(s"2  $basePart      $baseFullNs      $baseAttr                 ---    $part      $edgeNs      $targetAttr")
-          (s"${part}_$edgeNs", Optional(s"${part}_$edgeNs.$targetAttr", s"BiEdgeRef:$baseFullNs.$baseAttr"))
+          (s"${part}_$edgeNs", Optional(s"${part}_$edgeNs.$targetAttr", s"BiEdgeRef_:$baseFullNs.$baseAttr"))
 
 
         // With edge ns .......................................
@@ -322,18 +322,18 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" if edgeNs == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outRefAttr = oneBi[OtherNamespace.toRefAttr.type]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" if basePart.nonEmpty =>
           //          println(s"3  $basePart      $baseFullNs      $baseAttr                 ---    $edgeNs      $targetAttr")
-          (s"${basePart}_$edgeNs", Optional(s"${basePart}_$edgeNs.$targetAttr", s"BiEdgeRef:$baseFullNs.$baseAttr"))
+          (s"${basePart}_$edgeNs", Optional(s"${basePart}_$edgeNs.$targetAttr", s"BiEdgeRef_:$baseFullNs.$baseAttr"))
 
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" =>
           //          println(s"4  $basePart      $baseFullNs      $baseAttr                 ---    $edgeNs      $targetAttr")
-          (edgeNs, Optional(s"$edgeNs.$targetAttr", s"BiEdgeRef:$baseFullNs.$baseAttr"))
+          (edgeNs, Optional(s"$edgeNs.$targetAttr", s"BiEdgeRef_:$baseFullNs.$baseAttr"))
 
         // Incorrect edge definition
         // val selfRef = oneBi[selfRef.type] // presuming it hasn't been imported from another namespace
@@ -341,48 +341,48 @@ object MoleculeBoilerplate {
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$a\.type" if a == baseAttr =>
           val ns = if (basePart.nonEmpty) baseFullNs.split("_").last else baseFullNs
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and only needs the current namespace as type argument:\n  val $baseAttr = ${card}Bi[$ns]")
 
 
 
-        // Bidirectional self-reference -------------------------------------------------------------------
+        // Bidirectional_ self-reference -------------------------------------------------------------------
 
         // val selfRef = oneBi[MyDomainDefinition.ThisPartition.ThisNamespace] // or manyBi
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$selfRef" if s"${part}_$selfRef" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$selfRef]")
 
         // val selfRef = oneBi[ThisPartition.ThisNamespace]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"([a-z]\w*)$part\.(.*)$selfRef" if s"${part}_$selfRef" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          sys.error(s"Bidirectional_ reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$selfRef]")
 
         // val spouse = oneBi[Person]
         case selfRef if basePart.nonEmpty && s"${basePart}_$selfRef" == baseFullNs =>
           //          println(s"5  $basePart      $baseFullNs      $baseAttr                 ---    $selfRef")
-          (s"${basePart}_$selfRef", Optional("", "BiSelfRef"))
+          (s"${basePart}_$selfRef", Optional("", "BiSelfRef_"))
 
         // val spouse = oneBi[Person]
         case selfRef if selfRef == baseFullNs =>
           //          println(s"6  $basePart      $baseFullNs      $baseAttr                 ---    $selfRef")
-          (selfRef, Optional("", "BiSelfRef"))
+          (selfRef, Optional("", "BiSelfRef_"))
 
 
 
-        // Bidirectional to other namespace -------------------------------------------------------------------
+        // Bidirectional_ to other namespace -------------------------------------------------------------------
 
         case otherRef if basePart.nonEmpty =>
           //          println(s"7  $basePart      $baseFullNs      $baseAttr                 ---    $otherRef")
-          (s"${basePart}_$otherRef", Optional(s"${basePart}_$otherRef.$baseAttr", "BiRef"))
+          (s"${basePart}_$otherRef", Optional(s"${basePart}_$otherRef.$baseAttr", "BiOtherRef_"))
 
         case otherRef =>
           //          println(s"8  $basePart      $baseFullNs      $baseAttr                 ---    $otherRef")
-          (otherRef, Optional(s"$otherRef.$baseAttr", "BiRef"))
+          (otherRef, Optional(s"$otherRef.$baseAttr", "BiOtherRef_"))
       }
     }
 
@@ -411,35 +411,30 @@ object MoleculeBoilerplate {
   }
 
   def resolve(definition: Definition) = {
-    val updatedNss1 = markBidrectionalEdgeProperties(definition.nss)
+    val updatedNss1 = markBidrectionalEdgeProperties_(definition.nss)
     val updatedNss3 = definition.nss.foldLeft(updatedNss1) { case (updatedNss2, curNs) =>
       addBackRefs(updatedNss2, curNs)
     }
     definition.copy(nss = updatedNss3)
   }
 
-  def markBidrectionalEdgeProperties(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
+  def markBidrectionalEdgeProperties_(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
     val isEdge = ns.attrs.collectFirst {
-      case ref: Ref if ref.options.exists(_.clazz.startsWith("BiTargetRef")) => true
+      case ref: Ref if ref.options.exists(_.clazz.startsWith("BiTargetRef_")) => true
     } getOrElse false
 
     if (isEdge) {
       val newAttrs: Seq[Attr] = ns.attrs.map {
-        case targetRef: Ref if targetRef.options.exists(_.clazz.startsWith("BiTargetRef")) => targetRef
+        case biTargetRef: Ref if biTargetRef.options.exists(_.clazz.startsWith("BiTargetRef_")) => biTargetRef
 
         case biRef: Ref if biRef.options.exists(opt => opt.clazz.startsWith("Bi") && opt.clazz.substring(6, 10) != "Prop") => sys.error(
           s"""Namespace `${ns.ns}` is already defined as a "property edge" and can't also define a bidirectional reference `${biRef.attr}`.""")
 
-        case ref: Ref   => ref.copy(options = ref.options :+ Optional("", "BiEdgePropRefAttr"))
-        case enum: Enum => enum.copy(options = enum.options :+ Optional("", "BiEdgePropAttr"))
-        case value: Val => value.copy(options = value.options :+ Optional("", "BiEdgePropAttr"))
+        case ref: Ref   => ref.copy(options = ref.options :+ Optional("", "BiEdgePropRef"))
+        case enum: Enum => enum.copy(options = enum.options :+ Optional("", "BiEdgePropAttr_"))
+        case value: Val => value.copy(options = value.options :+ Optional("", "BiEdgePropAttr_"))
         case other      => other
       }
-      //      println(s"========== ${ns.ns} ==========")
-      //      newAttrs.foreach { a =>
-      //        println(s"---------- ${a.attr} ----------")
-      //        a.options foreach println
-      //      }
       ns.copy(attrs = newAttrs)
     } else
       ns
@@ -454,22 +449,12 @@ object MoleculeBoilerplate {
     nss.map {
       case ns2 if refMap.nonEmpty && refMap.keys.toList.contains(ns2.ns) => {
         val attrs2 = refMap.foldLeft(ns2.attrs) { case (attrs, (refNs, outRef@Ref(_, _, _, _, tpe, _, _, opts))) =>
-          //          val Ref(_, _, _, _, tpe, _, _, opts) = ref._2
           val cleanNs = if (curNs.ns.contains('_')) curNs.ns.split("_").tail.head else curNs.ns
-          //          val backRef = BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "") // todo: check not to backreference same-named namespaces in different partitions
           // todo: check not to backreference same-named namespaces in different partitions
-
-          if(cleanNs == "Knows") {
-            println(s"----- ${ns2.ns}  --  ${curNs.ns} ---------------")
-            //          println("curNs: " + curNs.ns)
-            println("outRef: " + outRef)
-          }
           curNs.ns match {
-            case ns1 if ns1 == ns2.ns                                             => attrs
-//            case edgePropBackRef if opts.exists(_.clazz.startsWith("BiEdgeRef:")) => attrs :+ BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "", Seq(Optional("", "BiEdgePropBackRef")))
-            case other                                                            => attrs :+ BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "")
+            case ns1 if ns1 == ns2.ns => attrs
+            case other                => attrs :+ BackRef(s"_$cleanNs", curNs.ns, "BackRefAttr", "BackRef", tpe, "", "")
           }
-          //          if (curNs.ns == ns2.ns) attrs else attrs :+ backRef
         }.distinct
         ns2.copy(attrs = attrs2)
       }
@@ -483,16 +468,9 @@ object MoleculeBoilerplate {
   def schemaBody(d: Definition) = {
 
     def resolveOptions(options: Seq[Optional]) = options flatMap {
-      case Optional(_, clazz) if clazz.startsWith("BiSelfRef")         => None
-      case Optional(_, clazz) if clazz.startsWith("BiRef")             => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgeRef")         => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")     => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr")    => None
-      case Optional(_, clazz) if clazz.startsWith("BiEdgePropBackRef") => None
-      case Optional(_, clazz) if clazz.startsWith("BiTargetRef")       => None
-      case optional                                                    => Some(optional.datomicKeyValue)
+      case Optional(_, clazz) if clazz.startsWith("Bi") => None
+      case optional                                     => Some(optional.datomicKeyValue)
     }
-
 
     def attrStmts(ns: String, a: Attr) = {
       val ident = s"""":db/ident"             , ":${firstLow(ns)}/${a.attrClean}""""
@@ -525,7 +503,7 @@ object MoleculeBoilerplate {
         throw new IllegalArgumentException("Partition name `molecule` is reserved by Molecule. Please choose another partition name.")
       d.nss.collectFirst {
         case ns if ns.attrs.collectFirst {
-          case targetRef: Ref if targetRef.options.exists(_.clazz.startsWith("BiTargetRef")) => true
+          case biTargetRef: Ref if biTargetRef.options.exists(_.clazz.startsWith("BiTargetRef_")) => true
         }.getOrElse(false) => {
           val moleculeMetaNs = Namespace("molecule", "molecule_Meta", None, Seq(
             Ref("otherEdge", "otherEdge", "OneRefAttr", "OneRef", "Long", "", "molecule_Meta",
@@ -733,16 +711,17 @@ object MoleculeBoilerplate {
           case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
         }
         val birectional = opts.collectFirst {
-          case Optional(_, clazz) if clazz.startsWith("BiSelfRef")              => s"with BiSelfRef "
-          case Optional(_, clazz) if clazz.startsWith("BiRef")                  => s"with BiRef "
-          case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr")         => s"with BiEdgePropAttr "
-          case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef")          => s"with BiEdgePropRef "
-          case Optional(biEdgeAttr, clazz) if clazz.startsWith("BiEdgeRef:")    => s"with BiEdgeRef[$biEdgeAttr[NS, NS]] "
-          case Optional(biTargetAttr, clazz) if clazz.startsWith("BiTargetRef") => s"with BiTargetRef[$biTargetAttr[NS, NS]] "
+          case Optional(_, clazz) if clazz.startsWith("BiSelfRef_")    => s"with BiSelfRef_ "
+          case Optional(_, clazz) if clazz.startsWith("BiOtherRef_")   => s"with BiOtherRef_ "
+          case Optional(_, clazz) if clazz.startsWith("BiEdgePropRef") => s"with BiEdgePropRef_ "
+          //          case Optional(_, clazz) if clazz.startsWith("BiEdgePropAttr_")         => s"with BiEdgePropAttr_ "
+          //          case Optional(_, clazz) if clazz.startsWith("BiEdgePropRefAttr_")      => s"with BiEdgePropRefAttr_ "
+          case Optional(biEdgeAttr, clazz) if clazz.startsWith("BiEdgeRef_:")    => s"with BiEdgeRef_[$biEdgeAttr[NS, NS]] "
+          case Optional(biTargetAttr, clazz) if clazz.startsWith("BiTargetRef_") => s"with BiTargetRef_[$biTargetAttr[NS, NS]] "
         } getOrElse ""
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref $birectional= ???"
       }
-      case (acc, BackRef(backAttr, backRef, _, _, _, _, _, opts))              =>
+      case (acc, BackRef(backAttr, backRef, _, _, _, _, _, opts))           =>
         val p1 = padS(maxAttr0, backAttr)
         val p2 = padS(maxClazz2.max, backRef)
         val ref = (in, out) match {
@@ -750,10 +729,7 @@ object MoleculeBoilerplate {
           case (0, o) => s"${backRef}_$o$p2[${OutTypes mkString ", "}]"
           case (i, o) => s"${backRef}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        val birectional = opts.collectFirst {
-          case Optional(_, "BiEdgePropBackRef")           => s"with BiEdgePropBackRef "
-        } getOrElse ""
-        acc :+ s"def $backAttr $p1: $ref $birectional= ???"
+        acc :+ s"def $backAttr $p1: $ref = ???"
       case (acc, _)                                                         => acc
     }.distinct
 
@@ -861,12 +837,12 @@ object MoleculeBoilerplate {
   //        val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
   //        Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }""")
   //
-  //      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
+  //      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional_")) =>
   //        val (revNs, revRef) = opts.collectFirst {
-  //          case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional") => (revNs0, revRef0.split(':').last)
+  //          case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional_") => (revNs0, revRef0.split(':').last)
   //        }.get
   //        val bidirectAttr = if (revNs == Ns) revRef else s"$revNs.$revRef"
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with Bidirectional[$bidirectAttr[Ns, In]]")
+  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with Bidirectional_[$bidirectAttr[Ns, In]]")
   //
   //      case Ref(attr, _, clazz, _, _, _, _, _) =>
   //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
@@ -887,10 +863,10 @@ object MoleculeBoilerplate {
   //        val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
   //        Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} { $enumValues }""")
   //
-  //      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional")) =>
-  //        val (revNs, revRef) = opts.collectFirst { case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional") => (revNs0, revRef0.split(':').last) }.get
+  //      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional_")) =>
+  //        val (revNs, revRef) = opts.collectFirst { case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional_") => (revNs0, revRef0.split(':').last) }.get
   //        val bidirectAttr = if (revNs == Ns) revRef else s"$revNs.$revRef"
-  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with Bidirectional[$bidirectAttr[Ns, In]]")
+  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with Bidirectional_[$bidirectAttr[Ns, In]]")
   //
   //      case Ref(attr, attrClean, clazz, _, _, _, _, _) =>
   //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}")
@@ -992,27 +968,16 @@ object MoleculeBoilerplate {
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions { $enumValues }""")
 
-
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiSelfRef")) =>
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiSelfRefAttr")
-
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiRef")) =>
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiRefAttr")
-
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdgeRef:")) =>
-        val biEdge = opts.collectFirst {
-          case Optional(biEdge0, bidirectRef) if bidirectRef.startsWith("BiEdgeRef") => biEdge0
-        }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiEdgeRefAttr[$biEdge[NS, NS]]")
-
-      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiTargetRef")) =>
-        val targetAttr = opts.collectFirst {
-          case Optional(targetAttr0, targetRef) if targetRef == "BiTargetRef" => targetAttr0
-        }.get
-        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with BiTargetRefAttr[$targetAttr[NS, NS]]")
-
       case Ref(attr, _, clazz, _, _, _, _, opts) =>
-        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+        val extensions = opts.map {
+          case Optional(_, bi) if bi.startsWith("BiSelfRef_")     => "BiSelfRefAttr_"
+          case Optional(_, bi) if bi.startsWith("BiOtherRef_")    => "BiOtherRefAttr_"
+          case Optional(a, bi) if bi.startsWith("BiEdgeRef_")     => "BiEdgeRefAttr_[" + a + "[NS, NS]]"
+          case Optional(_, bi) if bi.startsWith("BiEdgePropAttr") => "BiEdgePropAttr_"
+          case Optional(_, bi) if bi.startsWith("BiEdgePropRef")  => "BiEdgePropRefAttr_"
+          case Optional(a, bi) if bi.startsWith("BiTargetRef_")   => "BiTargetRefAttr_[" + a + "[NS, NS]]"
+          case Optional(_, other)                                 => other
+        }.mkString(" with ", " with ", "")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
@@ -1034,26 +999,16 @@ object MoleculeBoilerplate {
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions { $enumValues }""")
 
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiSelfRef")) =>
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiSelfRefAttr")
-
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiRef")) =>
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiRefAttr")
-
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiEdgeRef:")) =>
-        val biEdge = opts.collectFirst {
-          case Optional(biEdge0, bidirectRef) if bidirectRef.startsWith("BiEdgeRef") => biEdge0
-        }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiEdgeRefAttr[$biEdge[NS, NS]]")
-
-      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("BiTargetRef")) =>
-        val targetAttr = opts.collectFirst {
-          case Optional(targetAttr0, targetRef) if targetRef == "BiTargetRef" => targetAttr0
-        }.get
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with BiTargetRefAttr[$targetAttr[NS, NS]]")
-
       case Ref(attr, attrClean, clazz, _, _, _, _, opts) =>
-        val extensions = if (opts.isEmpty) "" else " with " + opts.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
+        val extensions = opts.map {
+          case Optional(_, bi) if bi.startsWith("BiSelfRef_")     => "BiSelfRefAttr_"
+          case Optional(_, bi) if bi.startsWith("BiOtherRef_")    => "BiOtherRefAttr_"
+          case Optional(a, bi) if bi.startsWith("BiEdgeRef_")     => "BiEdgeRefAttr_[" + a + "[NS, NS]]"
+          case Optional(_, bi) if bi.startsWith("BiEdgePropAttr") => "BiEdgePropAttr_"
+          case Optional(_, bi) if bi.startsWith("BiEdgePropRef")  => "BiEdgePropRefAttr_"
+          case Optional(a, bi) if bi.startsWith("BiTargetRef_")   => "BiTargetRefAttr_[" + a + "[NS, NS]]"
+          case Optional(_, other)                                 => other
+        }.mkString(" with ", " with ", "")
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
 
       case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil

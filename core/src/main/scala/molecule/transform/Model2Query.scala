@@ -544,12 +544,11 @@ object Model2Query extends Helpers {
         case Atom(ns, attr, _, _, _, _, _, _) if ns == prevNs            => (resolve(query, e, w, element), e, w, ns, attr, "")
         case Atom(ns, attr, _, _, _, _, _, _)                            => (resolve(query, e, v, element), e, v, ns, attr, "")
 
-        case b@Bond(ns, refAttr, refNs, _, meta)
-          if meta.startsWith("bidirectional") && ns == prevNs && refAttr == prevAttr => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, meta) if ns == prevNs                       => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                        => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                       => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, _)                                          => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, bi: Bidirectional) if ns == prevNs && refAttr == prevAttr => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, meta) if ns == prevNs                                     => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                                      => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                                     => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _)                                                         => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
 
         case transitive@Transitive(backRef, refAttr, refNs, _, _) => {
           val (backRefE, backRefV) = query.wh.clauses.reverse.collectFirst {

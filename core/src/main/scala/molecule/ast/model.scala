@@ -45,7 +45,7 @@ object model {
     refAttr: String,
     refNs: String = "",
     card: Int,
-    meta: String = "") extends Element
+    gs: Seq[Generic] = Nil) extends Element
 
   case class ReBond(
     backRef: String,
@@ -104,23 +104,6 @@ object model {
   case class Le(value: Any) extends Value
   case class Ge(value: Any) extends Value
 
-  sealed trait Generic extends Value
-  case class AttrVar(v: String) extends Generic
-  case object TxValue extends Generic
-  case object TxValue_ extends Generic
-  case object TxTValue extends Generic
-  case object TxInstantValue extends Generic
-  case object OpValue extends Generic
-  case class NsValue(values: Seq[String]) extends Generic
-  case object NoValue extends Generic
-
-  // Bidirectional markers
-  case object BiRef_ extends Generic
-  case object EdgePropAttr extends Generic
-  case object EdgePropRefAttr extends Generic
-  case class EdgeRefAttr(attr: String) extends Generic
-  case class TargetRefAttr(attr: String) extends Generic
-
   case object Qm extends Value
   case object Distinct extends Value
 
@@ -132,6 +115,36 @@ object model {
   case class Mapping(pairs: Seq[(String, Any)]) extends Value
   case class Keys(ks: Seq[String]) extends Value
 
+
+  sealed trait Generic extends Value
+
+  case class AttrVar(v: String) extends Generic
+  case object TxValue extends Generic
+  case object TxValue_ extends Generic
+  case object TxTValue extends Generic
+  case object TxInstantValue extends Generic
+  case object OpValue extends Generic
+  case class NsValue(values: Seq[String]) extends Generic
+  case object NoValue extends Generic
+
+
+  sealed trait Bidirectional  extends Generic
+
+  case class BiSelfRef(card: Int) extends Bidirectional
+  case class BiSelfRefAttr(card: Int) extends Bidirectional
+
+  case class BiOtherRef(card: Int) extends Bidirectional
+  case class BiOtherRefAttr(card: Int) extends Bidirectional
+
+  case class BiEdgeRef(card: Int, attr: String) extends Bidirectional
+  case class BiEdgeRefAttr(card: Int, attr: String) extends Bidirectional
+
+  case class BiEdgePropAttr(card: Int) extends Bidirectional
+  case class BiEdgePropRefAttr(card: Int) extends Bidirectional
+  case class BiEdgePropRef(card: Int) extends Bidirectional
+
+  case class BiTargetRef(card: Int, attr: String) extends Bidirectional
+  case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional
 
   trait Expression
 
