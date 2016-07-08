@@ -8,7 +8,7 @@ import molecule.util.MoleculeSpec
 class SelfMany extends MoleculeSpec {
 
 
-  "Save new" >> {
+  "Save" >> {
 
     "1 new" in new Setup {
 
@@ -59,12 +59,9 @@ class SelfMany extends MoleculeSpec {
       // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
     }
-  }
 
 
-  "Save ids" >> {
-
-    "1 id" in new Setup {
+    "1 existing" in new Setup {
 
       val ben = living_Person.name.insert("Ben").eid
 
@@ -89,7 +86,7 @@ class SelfMany extends MoleculeSpec {
     }
 
 
-    "n ids" in new Setup {
+    "n existing" in new Setup {
 
       val benJoeSet = living_Person.name.insert("Ben", "Joe").eidSet
 
@@ -103,7 +100,7 @@ class SelfMany extends MoleculeSpec {
   }
 
 
-  "Insert new" >> {
+  "Insert" >> {
 
     "1 new" in new Setup {
 
@@ -121,6 +118,7 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Joe").Friends.name.get === List("Ann")
       living_Person.name_("Tim").Friends.name.get === List("Ben")
     }
+
 
     "n new" in new Setup {
 
@@ -140,12 +138,9 @@ class SelfMany extends MoleculeSpec {
         ("Tom", List("Don"))
       )
     }
-  }
 
 
-  "Insert existing" >> {
-
-    "new - ref - 1 existing" in new Setup {
+    "1 existing" in new Setup {
 
       val List(joe, tim) = living_Person.name insert List("Joe", "Tim") eids
 
@@ -165,7 +160,8 @@ class SelfMany extends MoleculeSpec {
       )
     }
 
-    "new - ref - n existing" in new Setup {
+
+    "n existing" in new Setup {
 
       val List(ben, joe, tim) = living_Person.name insert List("Ben", "Joe", "Tim") eids
 

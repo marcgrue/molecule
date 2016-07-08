@@ -15,11 +15,15 @@ import scala.collection.JavaConverters._
 case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 25, 51, false, 6)
 
+  private def iae(method: String, msg: String) = {
+    throw new IllegalArgumentException(s"[molecule.transform.Model2Transaction.$method]  $msg")
+  }
+
   val stmtsModel: Seq[Statement] = {
 
     def resolveTx(elements: Seq[Element]) = elements.foldLeft('tx: Any, Seq[Statement]()) {
-      case ((eSlot1, stmts1), a@Atom(ns, name, _, _, VarValue, _, _, _)) => throw new RuntimeException(
-        s"[Model2Transaction:stmtsModel] Please apply transaction meta data directly to transaction attribute: `${ns.capitalize}.$name(<metadata>)`")
+      case ((eSlot1, stmts1), a@Atom(ns, name, _, _, VarValue, _, _, _)) => iae("stmtsModel",
+        s"Please apply transaction meta data directly to transaction attribute: `${ns.capitalize}.$name(<metadata>)`")
       case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
     }._2
 
@@ -74,8 +78,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
 
-      case (e, c: Composite) => sys.error(s"[Model2Transaction:stmtsModel] Composites are only for getting data:\nMODEL: $model \nPAIR: ($e, $c)\nSTMTS: $stmts")
-      case (e, elem)         => sys.error(s"[Model2Transaction:stmtsModel] Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
+      case (e, c: Composite) => iae("stmtsModel", s"Composites are only for getting data:\nMODEL: $model \nPAIR: ($e, $c)\nSTMTS: $stmts")
+      case (e, elem)         => iae("stmtsModel", s"Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
     }
 
     def replace$(elements: Seq[Element]): Seq[Element] = elements map {
@@ -131,7 +135,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
       }
 
-      case Adding(refs)           => refs.flatMap { case ref: Long =>
+      case Adding(refs) => refs.flatMap { case ref: Long =>
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
         if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
         reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
@@ -182,8 +186,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           case edgeA: Long => getOtherEdgeId(edgeA) match {
             // Retract both edge entities
             case Seq(edgeB) => retract(edgeA.asInstanceOf[AnyRef], edgeB)
-            case Nil        => sys.error("[Model2Transaction:valueStmts (biEdgeRef)] Couldn't find id of reverse edge.")
-            case ids        => sys.error("[Model2Transaction:valueStmts (biEdgeRef)] Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
+            case Nil        => iae("valueStmts:biEdgeRef", "Couldn't find id of reverse edge.")
+            case ids        => iae("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
           }
         }
         // No statements collected since we retracted the whole edge entities
@@ -192,7 +196,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
       case Eq(edges) => edges.flatMap { case edgeA: Long =>
         val retracts = attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e))
-        if (edgeA == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
+        if (edgeA == e) iae("valueStmts:biEdgeRef", "Current entity and referenced entity ids can't be the same")
         retracts ++ Seq(Add(edgeA, a, e), Add(e, a, edgeA))
 
         Seq(Add(otherEdgeId, a, e), Add(e, a, edgeA))
@@ -201,8 +205,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       //        case refs: Set[_]       => refs.flatMap { case ref: Long =>
       //          Seq(Add(ref, a, e), Add(e, a, ref))
       //        }
-      case edgeA: Long => {
-        val edgeB = otherEdgeId getOrElse sys.error("[Model2Transaction:valueStmts (biEdgeRef)] Missing id of other edge.")
+      case edgeA => {
+        val edgeB = otherEdgeId getOrElse iae("valueStmts:biEdgeRef", "Missing id of other edge.")
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
         reverseRetracts ++ Seq(
           // Interlink edge entities so that we later know which other one to update
@@ -218,8 +222,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     def biEdgeProp(card: Int) = {
       val edgeA = e
       val edgeB = otherEdgeId match {
-        case Some(eid) if eid == edgeA => sys.error("[Model2Transaction:valueStmts (biEdgeProp)]  Other edge id is unexpectedly the same as this edge id.")
-        case None                      => sys.error("[Model2Transaction:valueStmts (biEdgeProp)]  Missing id of other edge.")
+        case Some(eid) if eid == edgeA => iae("valueStmts:biEdgeProp", "Other edge id is unexpectedly the same as this edge id.")
+        case None                      => iae("valueStmts:biEdgeProp", "Missing id of other edge.")
         case Some(eid)                 => eid
       }
 
@@ -236,7 +240,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
                 Retract(edgeB, a, existing.head), Add(edgeB, a, key + "@" + value),
                 Retract(edgeA, a, existing.head), Add(edgeA, a, key + "@" + value)
               )
-              case _ => sys.error("[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+              case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
             }
           }
         }
@@ -246,7 +250,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         //              existing.size match {
         //                case 0 => None
         //                case 1 => Some(Retract(e, a, existing.head))
-        //                case _ => sys.error("[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+        //                case _ => abort("", "[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
         //              }
         //            }
 
@@ -299,7 +303,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
     def biTargetRef(card: Int, biEdgeRefAttr: String) = {
       val edgeA = e
-      val edgeB = otherEdgeId getOrElse sys.error("[Model2Transaction:valueStmts (biTargetRef)]  Missing id of other edge.")
+      val edgeB = otherEdgeId getOrElse iae("valueStmts:biTargetRef", "Missing id of other edge.")
       //      val List(card, "biEdgeRefAttr) = meta.split("@").toList.tail
       //      val biEdgeRefAttr = bi.split("@").toList.last
       arg match {
@@ -351,7 +355,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           existing.size match {
             case 0 => Seq(Add(e, a, key + "@" + value))
             case 1 => Seq(Retract(e, a, existing.head), Add(e, a, key + "@" + value))
-            case _ => sys.error("[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+            case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
           }
         }
       }
@@ -361,7 +365,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         existing.size match {
           case 0 => None
           case 1 => Some(Retract(e, a, existing.head))
-          case _ => sys.error("[Model2Transaction:valueStmts] Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+          case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
         }
       }
 
@@ -417,7 +421,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         val lastEdgeNs = attr.split("/").head
         stmts.reverse.collectFirst {
           case Add(e, a, v, _) if a.startsWith(lastEdgeNs) && e.isInstanceOf[db.DbId] => e
-        }.getOrElse(sys.error(s"[Model2Transaction:lastE] Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n")))
+        } getOrElse iae("lastE", s"Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n"))
       }
       case _                 => {
         if (nestedE != 0)
@@ -434,7 +438,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     //      val lastEdgeNs = attr.split("/").head
     //      stmts.reverse.collectFirst {
     //        case Add(e, a, v, _) if a.startsWith(lastEdgeNs) && e.isInstanceOf[db.DbId] => e
-    //      }.getOrElse(sys.error(s"[Model2Transaction:lastE] Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n")))
+    //      }.getOrElse(abort("", s"[Model2Transaction:lastE] Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n")))
     //    } else if (nestedE != 0)
     //      nestedE
     //    else if (stmts.isEmpty)
@@ -497,7 +501,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         stmts.reverse.collectFirst {
           // Find entity value of Add statement with matching namespace
           case Add(e1, a, _, _) if a.replaceFirst("/.*", "") == ref.replaceFirst("/.*", "") => e1
-        }.getOrElse(sys.error("[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
+        }.getOrElse(iae("", "[Model2Transaction:matchDataStmt] Couldn't find previous statement with matching namespace. e: " + e + "  -- ref: " + ref.replaceFirst("/.*", "")))
 
       val nestedGenStmts = nestedGenStmts0.map { case s: Statement => s }
       val nestedRows = untupleNestedArgss(nestedGenStmts0, arg)
@@ -565,7 +569,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       (next, edgeB, stmts ++ nestedInsertStmts)
     }
 
-    case unexpected => sys.error("[Model2Transaction:matchDataStmt] Unexpected insert statement: " + unexpected)
+    case unexpected => iae("matchDataStmt", "Unexpected insert statement: " + unexpected)
   }
 
 
@@ -584,13 +588,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       (arg0, genericStmt0) match {
 
         // null values not allowed
-        case (null, _) => sys.error("[Model2Transaction:insertStmts] null values not allowed. Please use `attr$` for Option[tpe] values.")
+        case (null, _) => iae("resolveStmts", "null values not allowed. Please use `attr$` for Option[tpe] values.")
 
         // Backreference - with mandatory previous ref
         case (_, br@Add('ns, ns, "", _)) =>
           val backRef = stmts.reverse.collectFirst {
             case Add(e, a, v, _) if a.startsWith(ns) && e.isInstanceOf[db.DbId] => e
-          }.getOrElse(sys.error(s"[Model2Transaction:insertStmts] Couldn't find namespace `$ns` in any previous Add statements.\n" + stmts.mkString("\n")))
+          } getOrElse iae("resolveStmts", s"Couldn't find namespace `$ns` in any previous Add statements.\n" + stmts.mkString("\n"))
           (cur, edgeB, stmts :+ Add('ns, ns, backRef))
 
         case (None, Add('e, a, refNs: String, _))                                               => (cur, edgeB, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
@@ -609,7 +613,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     val txId = tempId("tx")
     val txStmtss: Seq[Seq[Statement]] = Seq(genericTxStmts.foldLeft(Seq[Statement]()) {
       case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                         => sys.error("[Model2Transaction:insertStmts:txStmts] Unexpected insert statement: " + unexpected)
+      case (stmts, unexpected)                         => iae("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
@@ -638,9 +642,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         case Add('tx, a, Values(vs, prefix), bi)     => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
         case Add('ns, a, _, _)                       => (edgeB, stmts)
         case Retract(_, _, _, _)                     => (edgeB, stmts)
-        case Add(id: Long, a, Values(_, _), _)       => sys.error(s"[Model2Transaction:saveStmts] With a given id `$id` please use `update` instead.")
-        case Add(_, a, 'arg, _)                      => sys.error(s"[Model2Transaction:saveStmts] Attribute `$a` needs a value applied")
-        case unexpected                              => sys.error("[Model2Transaction:saveStmts] Unexpected save statement: " + unexpected)
+        case Add(id: Long, a, Values(_, _), _)       => iae("saveStmts", s"With a given id `$id` please use `update` instead.")
+        case Add(_, a, 'arg, _)                      => iae("saveStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                              => iae("saveStmts", "Unexpected save statement: " + unexpected)
       }
     }._2
   }
@@ -668,14 +672,14 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         case Add(e, a, Values(vs, prefix), bi)      => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB))
         case Retract('e, a, Values(vs, prefix), bi) => (edgeB, valueStmts(stmts, lastE(stmts, a), a, vs, prefix, bi, edgeB))
         case Retract(e, a, Values(vs, prefix), bi)  => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB))
-        case Add(_, a, 'arg, _)                     => sys.error(s"[Model2Transaction:updateStmts] Attribute `$a` needs a value applied")
-        case unexpected                             => sys.error("[Model2Transaction:updateStmts] Unexpected update statement: " + unexpected)
+        case Add(_, a, 'arg, _)                     => iae("updateStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                             => iae("updateStmts", "Unexpected update statement: " + unexpected)
       }
     }._2
     val txId = tempId("tx")
     val txStmts: Seq[Statement] = genericTxStmts.foldLeft(Seq[Statement]()) {
       case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                         => sys.error("[Model2Transaction:updateStmts:txStmts] Unexpected insert statement: " + unexpected)
+      case (stmts, unexpected)                         => iae("updateStmts", "Unexpected insert statement: " + unexpected)
     }
     dataStmts ++ txStmts
   }
@@ -684,13 +688,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   private def untupleNestedArgss(stmts: Seq[Any], arg0: Any): Seq[Seq[Any]] = {
     val (argArity, arg) = arg0 match {
       case a: Seq[_]  => a.head match {
-        case None       => sys.error("[Model2Transaction:untupleNestedArgss] Please use `List()` instead of `List(None)` for nested null values.")
-        case null       => sys.error("[Model2Transaction:untupleNestedArgss] Please use `List()` instead of `List(null)` for nested null values.")
+        case None       => iae("untupleNestedArgss", "Please use `List()` instead of `List(None)` for nested null values.")
+        case null       => iae("untupleNestedArgss", "Please use `List()` instead of `List(null)` for nested null values.")
         case p: Product => (p.productArity, a)
         case l: Seq[_]  => (l.size, a)
         case _          => (1, a)
       }
-      case unexpected => sys.error("[Model2Transaction:untupleNestedArgss] Unexpected data: " + unexpected)
+      case unexpected => iae("untupleNestedArgss", "Unexpected data: " + unexpected)
     }
     val argStmts = stmts.collect {
       case a@Add(_, _, 'arg, _)                => a
@@ -698,7 +702,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case a@Add(_, _, nestedStmts: Seq[_], _) => a
     }
     val stmtsSize = argStmts.size
-    assert(argArity == stmtsSize, s"[Model2Transaction:untupleNestedArgss] Arity of statements and arguments should match. Found: \n" +
+    if (argArity == stmtsSize) iae("untupleNestedArgss", "Arity of statements and arguments should match. Found: \n" +
       s"Statements (arity $stmtsSize): " + stmts.mkString("\n  ", "\n  ", "\n") +
       s"Arguments0                  : " + arg0 +
       s"Arguments  (arity $argArity): " + arg.mkString("\n  ", "\n  ", "\n"))
