@@ -37,7 +37,7 @@ class Save extends CoreSpec {
 
       // Applying multiple values to card-one attr not allowed when adding
       (Ns.str("a", "b").save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        s"""[output.Molecule:noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:
+        s"""[api.CheckModel.noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:
             |  ns ... str(a, b)""".stripMargin
     }
 

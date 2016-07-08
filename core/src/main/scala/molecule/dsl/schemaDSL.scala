@@ -109,20 +109,23 @@ object schemaDSL {
   }
 
   trait OneRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
-    def apply(ref: Long)      : Ns with Attr = ???
+    def apply(ref: Long, moreRefs: Long*)      : Ns with Attr = ???
     def apply(refs: Seq[Long]): Ns with Attr = ???
   }
 
   trait ManyRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
-    def apply(value: Long, values: Long*)             : Ns with Attr = ???
-    def apply(oneSet: Set[Long], moreSets: Set[Long]*): Ns with Attr = ??? // Todo: not implemented yet
+    def apply(ref: Long, moreRefs: Long*)  : Ns with Attr = ???
+    def apply(refs: Set[Long])             : Ns with Attr = ??? // Todo: not implemented yet
 
-    def add(value: Long)                              : Ns with Attr = ???
-    def remove(values: Long*)                         : Ns with Attr = ???
+    def add(ref: Long, moreRefs: Long*)    : Ns with Attr = ???
+    def add(refs: Set[Long])               : Ns with Attr = ???
+
+    def remove(ref: Long, moreRefs: Long*) : Ns with Attr = ???
+    def remove(refs : Set[Long])           : Ns with Attr = ???
   }
 
   trait BackRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
-    def apply(value: Long): Ns with Attr = ???
+    def apply(ref: Long): Ns with Attr = ???
   }
 
 

@@ -23,9 +23,9 @@ trait Aggregate1[Ns1[_], A] {
 
   def apply(v: count)        : Ns1[Int   ] = ???
   def apply(v: countDistinct): Ns1[Int   ] = ???
-  def apply(v: sum)          : Ns1[A] = ???
+  def apply(v: sum)          : Ns1[A     ] = ???
   def apply(v: avg)          : Ns1[Double] = ???
-  def apply(v: median)       : Ns1[A] = ???
+  def apply(v: median)       : Ns1[A     ] = ???
   def apply(v: variance)     : Ns1[Double] = ???
   def apply(v: stddev)       : Ns1[Double] = ???
 

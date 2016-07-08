@@ -273,11 +273,11 @@ class Insert extends CoreSpec {
       // We don't want orphan entities (with no attributes asserted) having references to other entities
       "RuntimeException when inserting" in new CoreSetup {
         (Ns.Ref1.str1.insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-          "[output.Molecule:modelCheck (2)] Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
+          "[api.CheckModel.modelCheck (2)] Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
       }
       "RuntimeException when inserting" in new CoreSetup {
         (Ns.str.Ref1.Ref2.str2.insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-          "[output.Molecule:modelCheck (2)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+          "[api.CheckModel.modelCheck (2)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
       }
 
 

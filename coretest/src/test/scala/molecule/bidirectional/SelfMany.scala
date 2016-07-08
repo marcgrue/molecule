@@ -12,20 +12,20 @@ class SelfMany extends MoleculeSpec {
 
     "1 new" in new Setup {
 
-      // Save Ben, Ida and bidirectional references between them
-      living_Person.name("Ben").Friends.name("Ida").save.eids
+      // Save Ann, Ben and bidirectional references between them
+      living_Person.name("Ann").Friends.name("Ben").save.eids
 
       // Reference is bidirectional - both point to each other
       living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
+        ("Ann", "Ben"),
         // Reverse reference:
-        ("Ida", "Ben")
+        ("Ben", "Ann")
       )
 
       // We can now use a uniform query from both ends:
-      // Ben and Ida are friends with each other
-      living_Person.name_("Ben").Friends.name.get === List("Ida")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
+      // Ann and Ben are friends with each other
+      living_Person.name_("Ann").Friends.name.get === List("Ben")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
     }
 
 
@@ -34,27 +34,29 @@ class SelfMany extends MoleculeSpec {
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
       // values (arities) - how many related entities should be created then?
-      (living_Person.name("Ben").Friends.name("Ida", "Liz").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[output.Molecule:noConflictingCardOneValues (1)] Can't save multiple values for cardinality-one attribute:\n" +
-        "  living_Person ... name(Ida, Liz)"
+      (living_Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        s"[api.CheckModel.noConflictingCardOneValues] Can't save multiple values for cardinality-one attribute:\n" +
+        "  living_Person ... name(Ben, Joe)"
 
       // We can save a single value though...
-      living_Person.name("Ben").Friends.name("Liz").save
+      living_Person.name("Ann").Friends.name("Joe").save
 
       living_Person.name.Friends.name.get === List(
-        ("Ben", "Liz"),
-        ("Liz", "Ben")
+        ("Ann", "Joe"),
+        ("Joe", "Ann")
       )
 
-      // Ben and Ida are friends with each other
-      living_Person.name_("Ben").Friends.name.get === List("Liz")
-      living_Person.name_("Liz").Friends.name.get === List("Ben")
+      // Ann and Ben are friends with each other
+      living_Person.name_("Ann").Friends.name.get === List("Joe")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
-      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[output.Molecule.noNested] Nested data structures not allowed in save molecules"
+      (living_Person.name("Ann").Friends.*(living_Person.name("Ben")).save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        s"[api.CheckModel.noNested] Nested data structures not allowed in save molecules"
 
-      // So, we can't create multiple referenced entities with the `save` command.
+      // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
     }
   }
@@ -64,46 +66,39 @@ class SelfMany extends MoleculeSpec {
 
     "1 id" in new Setup {
 
-      val ida = living_Person.name.insert("Ida").eid
+      val ben = living_Person.name.insert("Ben").eid
 
-      // Save Ben with bidirectional ref to existing Ida
-      living_Person.name("Ben").friends(ida).save.eid
+      // Save Ann with bidirectional ref to existing Ben
+      living_Person.name("Ann").friends(ben).save.eid
 
       living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
+        ("Ann", "Ben"),
+        ("Ben", "Ann")
       )
 
-      // Ben and Ida are friends with each other
-      living_Person.name_("Ben").Friends.name.get === List("Ida")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
+      // Ann and Ben are friends with each other
+      living_Person.name_("Ann").Friends.name.get === List("Ben")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
 
       // Saveing reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
-      (living_Person.name("Ben").Friends.e(ida).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
-        s"not allowed in save molecules. Found `e($ida)`"
+      (living_Person.name("Ann").Friends.e(ben).save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        s"[api.CheckModel.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
+        s"not allowed in save molecules. Found `e($ben)`"
     }
 
 
     "n ids" in new Setup {
 
-      val idaLizSet = living_Person.name.insert("Ida", "Liz").eidSet
+      val benJoeSet = living_Person.name.insert("Ben", "Joe").eidSet
 
-      // Save Ben with bidirectional ref to existing Ida and Liz
-      living_Person.name("Ben").friends(idaLizSet).save.eid
+      // Save Ann with bidirectional ref to existing Ben and Joe
+      living_Person.name("Ann").friends(benJoeSet).save.eid
 
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        // Reverse references:
-        ("Ida", "Ben"),
-        ("Liz", "Ben")
-      )
-
-      // Ben and Ida's friends
-      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
     }
   }
 
@@ -116,59 +111,34 @@ class SelfMany extends MoleculeSpec {
 
       // Insert 2 pairs of bidirectionally referenced entities (as with card-one insert)
       living_Person.name.Friends.name insert List(
-        ("Ben", "Ida"),
-        ("Don", "Tim")
+        ("Ann", "Joe"),
+        ("Ben", "Tim")
       ) eids
 
       // Bidirectional references have been inserted
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Don", "Tim"),
-        // Reverse references:
-        ("Ida", "Ben"),
-        ("Tim", "Don")
-      )
-
-      // Don and Tim are friends with each other
-      living_Person.name_("Don").Friends.name.get === List("Tim")
-      living_Person.name_("Tim").Friends.name.get === List("Don")
+      living_Person.name_("Ann").Friends.name.get === List("Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Tim")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Tim").Friends.name.get === List("Ben")
     }
 
     "n new" in new Setup {
 
       // Create multiple bidirectionally referenced entities with a nested molecule
       living_Person.name.Friends.*(living_Person.name) insert List(
-        ("Ben", List("Ida", "Liz")),
+        ("Ann", List("Ben", "Joe")),
         ("Don", List("Tim", "Tom"))
       )
 
       // Bidirectional references have been inserted
       living_Person.name.Friends.*(living_Person.name).get.sortBy(_._1) === List(
-        ("Ben", List("Ida", "Liz")),
+        ("Ann", List("Ben", "Joe")),
+        ("Ben", List("Ann")),
         ("Don", List("Tim", "Tom")),
-        // Reverse refs:
-        ("Ida", List("Ben")),
-        ("Liz", List("Ben")),
+        ("Joe", List("Ann")),
         ("Tim", List("Don")),
         ("Tom", List("Don"))
       )
-
-      // Flat list
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        ("Don", "Tim"),
-        ("Don", "Tom"),
-        // Reverse refs:
-        ("Ida", "Ben"),
-        ("Liz", "Ben"),
-        ("Tim", "Don"),
-        ("Tom", "Don")
-      )
-
-      // Don and Tim's friends
-      living_Person.name_("Don").Friends.name.get === List("Tom", "Tim")
-      living_Person.name_("Tim").Friends.name.get === List("Don")
     }
   }
 
@@ -177,349 +147,239 @@ class SelfMany extends MoleculeSpec {
 
     "new - ref - 1 existing" in new Setup {
 
-      val List(ida, tim) = living_Person.name insert List("Ida", "Tim") eids
+      val List(joe, tim) = living_Person.name insert List("Joe", "Tim") eids
 
       // Insert 2 living_Persons and befriend them with existing living_Persons
       living_Person.name.friends insert List(
-        ("Ben", Set(ida)),
-        ("Don", Set(tim))
+        ("Ann", Set(joe)),
+        ("Ben", Set(tim))
       )
 
       // Bidirectional references have been inserted
       living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Don", "Tim"),
+        ("Ann", "Joe"),
+        ("Ben", "Tim"),
         // Reverse refs:
-        ("Ida", "Ben"),
-        ("Tim", "Don")
+        ("Joe", "Ann"),
+        ("Tim", "Ben")
       )
     }
 
     "new - ref - n existing" in new Setup {
 
-      val List(ida, liz, tim) = living_Person.name insert List("Ida", "Liz", "Tim") eids
+      val List(ben, joe, tim) = living_Person.name insert List("Ben", "Joe", "Tim") eids
 
       // Insert 2 living_Persons and connect them with existing living_Persons
       living_Person.name.friends insert List(
-        ("Ben", Set(ida, liz)),
-        ("Don", Set(ida, tim))
+        ("Ann", Set(ben, joe)),
+        ("Don", Set(ben, tim))
       )
 
-      // Bidirectional references have been inserted - not how Ida got 2 (reverse) friendships
+      // Bidirectional references have been inserted - not how Ben got 2 (reverse) friendships
       living_Person.name.Friends.*(living_Person.name).get.sortBy(_._1) === List(
-        ("Ben", List("Ida", "Liz")),
-        ("Don", List("Ida", "Tim")),
-        ("Ida", List("Ben", "Don")),
-        ("Liz", List("Ben")),
+        ("Ann", List("Ben", "Joe")),
+        ("Ben", List("Ann", "Don")),
+        ("Don", List("Ben", "Tim")),
+        ("Joe", List("Ann")),
         ("Tim", List("Don"))
       )
-
-      // Bidirectional references have been inserted
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        ("Don", "Ida"),
-        ("Don", "Tim"),
-        ("Ida", "Ben"),
-        ("Ida", "Don"),
-        ("Liz", "Ben"),
-        ("Tim", "Don")
-      )
     }
   }
 
 
-  "Update new" >> {
+  "Update" >> {
 
-    "creating ref to 1 new" in new Setup {
+    "add" in new Setup {
 
-      val ben = living_Person.name.insert("Ben").eid
+      val List(ann, ben, joe, liz, tom) = living_Person.name.insert("Ann", "Ben", "Joe", "Liz", "Tom").eids
 
-      // Update a with creation of b and bidirectional reference between a and b
-      living_Person(ben).Friends.name("Ida").update
+      // Add friendships in various ways
 
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
-      )
+      // Single reference
+      living_Person(ann).friends.add(ben).update
 
-      // Ben and Ida are friends with each other
-      living_Person.name_("Ben").Friends.name.get === List("Ida")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
+      // Multiple references (vararg)
+      living_Person(ann).friends.add(joe, liz).update
+
+      // Set of references
+      living_Person(ann).friends.add(Set(tom)).update
+
+      // Friendships have been added in both directions
+      living_Person.name_("Ann").Friends.name.get.sorted === List("Ben", "Joe", "Liz", "Tom")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Liz").Friends.name.get === List("Ann")
+      living_Person.name_("Tom").Friends.name.get === List("Ann")
     }
 
 
-    "creating refs to multiple new" in new Setup {
+    "remove" in new Setup {
 
-      val ben = living_Person.name.insert("Ben").eid
+      // Insert Ann and friends
+      val List(ann, ben, joe, liz, tom, ulf) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe", "Liz", "Tom", "Ulf"))
+      ) eids
 
+      // Friendships have been inserted in both directions
+      living_Person.name_("Ann").Friends.name.get.sorted === List("Ben", "Joe", "Liz", "Tom", "Ulf")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Liz").Friends.name.get === List("Ann")
+      living_Person.name_("Tom").Friends.name.get === List("Ann")
+      living_Person.name_("Ulf").Friends.name.get === List("Ann")
 
-      // Can't update multiple values of cardinality-one attribute `name`
-      (living_Person.name("Ben").Friends.name("Ida", "Liz").update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[output.Molecule:noConflictingCardOneValues (1)] Can't update multiple values for cardinality-one attribute:\n" +
-        "  living_Person ... name(Ida, Liz)"
+      // Remove some friendships in various ways
 
-      // Can't update nested data structures
-      (living_Person.name("Ben").Friends.*(living_Person.name("Ida")).update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[output.Molecule.noNested] Nested data structures not allowed in update molecules"
+      // Single reference
+      living_Person(ann).friends.remove(ben).update
 
-      // So, we can't create multiple referenced entities with the `update` command.
-      // Update ref attribute with already created entity ids instead (see below).
-    }
+      // Multiple references (vararg)
+      living_Person(ann).friends.remove(joe, liz).update
 
+      // Set of references
+      living_Person(ann).friends.remove(Set(tom)).update
 
-    "replacing ref to 1 new" in new Setup {
-
-      val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
-
-      // Bidirectional references created
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
-      )
-
-      // Update Ben with creation of Liz and bidirectional references to/from her.
-      // Note that since `Friends` is a cardinality many, Liz is _added_ as a friend to Ben
-      // and will not cause his friendship to Ida to be retracted as it would be with a
-      // cardinality one reference!
-      living_Person(ben).Friends.name("Liz").update
-
-      // Bidirectional references to/from Liz has been added.
-      // OBS: see note above and difference to cardinality-one updates!
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        ("Ida", "Ben"),
-        ("Liz", "Ben")
-      )
-
-      // Ben and Ida's friends
-      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
-
-      // To remove Ben's friendship with Ida we need to remove it manually
-      living_Person(ben).friends.remove(ida).update
-
-      // Now the friendship with Ida has been replaced with the friendship with Liz
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Liz"),
-        ("Liz", "Ben")
-      )
-
-      // Now only Ben and Liz are friends
-      living_Person.name_("Ben").Friends.name.get === List("Liz")
-      living_Person.name_("Liz").Friends.name.get === List("Ben")
-    }
-  }
-
-
-  "replacing refs to multiple new" in new Setup {
-
-    val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
-
-    // Bidirectional references created
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Ida"),
-      ("Ida", "Ben")
-    )
-
-    // Update Ben with creation of Liz and bidirectional references to/from her
-    // Note that since `Friends` is a cardinality many, Liz is _added_ as a friend to Ben
-    // and will not cause his friendship to Ida to be retracted!
-    living_Person(ben).Friends.name("Liz").update
-
-    // Bidirectional references to/from Liz has been added.
-    // OBS: see note above and difference to cardinality-one updates!
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Ida"),
-      ("Ben", "Liz"),
-      ("Ida", "Ben"),
-      ("Liz", "Ben")
-    )
-
-    // Can't update multiple values of cardinality-one attribute `name`
-    (living_Person(ben).Friends.name("Ida", "Liz").update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[output.Molecule:noConflictingCardOneValues (1)] Can't update multiple values for cardinality-one attribute:\n" +
-      "  living_Person ... name(Ida, Liz)"
-
-    // Can't update nested data structures
-    (living_Person(ben).Friends.*(living_Person.name("Ida")).update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[output.Molecule.noNested] Nested data structures not allowed in update molecules"
-
-    // So, we can't create multiple referenced entities with the `update` command.
-    // Update ref attribute with existing created entity ids instead (see below).
-  }
-
-
-  "Update existing" >> {
-
-    "creating ref to 1 existing" in new Setup {
-
-      val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
-
-      // Update a with creation of bidirectional reference to existing b
-      living_Person(ben).friends(ida).update
-
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
-      )
-    }
-
-    "creating ref to 1 existing with explicit `add`" in new Setup {
-
-      val List(ben, ida) = living_Person.name.insert("Ben", "Ida").eids
-
-      // Update a with creation of bidirectional reference to existing b
-      living_Person(ben).friends.add(ida).update
-
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
-      )
-    }
-
-
-    "creating refs to multiple existing, vararg" in new Setup {
-
-      val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
-
-      // Update Ben with two new friendships
-      living_Person(ben).friends(ida, liz).update
-
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        ("Ida", "Ben"),
-        ("Liz", "Ben")
-      )
-
-      // Ben and Ida's friends
-      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
-    }
-
-
-    "creating refs to multiple existing, Set" in new Setup {
-
-      val List(ben, ida, liz) = living_Person.name.insert("Ben", "Ida", "Liz").eids
-
-      // Update Ben with two new friendships supplied as a Set
-      living_Person(ben).friends(Set(ida, liz)).update
-
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ben", "Liz"),
-        ("Ida", "Ben"),
-        ("Liz", "Ben")
-      )
-
-      // Ben and Ida's friends
-      living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
-    }
-  }
-
-
-  "Update replacing ref to other existing" in new Setup {
-
-    // Save Ben, Ida and bidirectional references between them
-    val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
-
-    // Bidirectional references created
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Ida"),
-      ("Ida", "Ben")
-    )
-
-    // Update Ben by adding Liz and bidirectional references to/from her
-    // Note that since `Friends` is a cardinality many, Liz is _added_ as a friend to Ben
-    // and will not cause his friendship to Ida to be retracted!
-    val liz = living_Person.name.insert("Liz").eid
-    living_Person(ben).friends(liz).update
-
-    // Bidirectional references to/from Liz has been added.
-    // OBS: see note above and difference to cardinality-one updates!
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Ida"),
-      ("Ben", "Liz"),
-      ("Ida", "Ben"),
-      ("Liz", "Ben")
-    )
-
-    // Ben and Ida's friends
-    living_Person.name_("Ben").Friends.name.get === List("Ida", "Liz")
-    living_Person.name_("Ida").Friends.name.get === List("Ben")
-
-    // To remove the friendship to Ida we need to remove it manually as we did above
-    living_Person(ben).friends.remove(ida).update
-
-    // Now the friendship with Ida has been replaced with the friendship with Liz
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Liz"),
-      ("Liz", "Ben")
-    )
-
-    // Now only Ben and Liz are friends
-    living_Person.name_("Ben").Friends.name.get === List("Liz")
-    living_Person.name_("Liz").Friends.name.get === List("Ben")
-  }
-
-
-  "Update removing all references" >> {
-
-    "retracting ref" in new Setup {
-
-      // Save Ben, Ida and bidirectional references between them
-      val List(ben, ida) = living_Person.name("Ben").Friends.name("Ida").save.eids
-
-      // Bidirectional references created
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ben", "Ida"),
-        ("Ida", "Ben")
-      )
-
-      // Ben and Ida are friends with each other
-      living_Person.name_("Ben").Friends.name.get === List("Ida")
-      living_Person.name_("Ida").Friends.name.get === List("Ben")
-
-      // Retract ref between them by applying no value
-      // (we can retract the relationship from both Ben and Ida)
-      living_Person(ida).friends().update
-
-      // Bidirectional references retracted -
-      // Both Ben and Ida still exists but have no friends anymore
-      living_Person.name.get.sorted === List("Ben", "Ida")
+      // Correct friendships have been removed in both directions
+      living_Person.name_("Ann").Friends.name.get === List("Ulf")
       living_Person.name_("Ben").Friends.name.get === List()
-      living_Person.name_("Ida").Friends.name.get === List()
+      living_Person.name_("Joe").Friends.name.get === List()
+      living_Person.name_("Liz").Friends.name.get === List()
+      living_Person.name_("Tom").Friends.name.get === List()
+      living_Person.name_("Ulf").Friends.name.get === List("Ann")
+    }
+
+
+    "replace all with 1" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe"))
+      ) eids
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+
+      // Ann now only has Ben as friend
+      living_Person(ann).friends(ben).update
+
+      // Joe and Ann no longer friends
+      living_Person.name_("Ann").Friends.name.get === List("Ben")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List()
+    }
+
+
+    "replace all with multiple (apply varargs)" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe"))
+      ) eids
+
+      val liz = living_Person.name.insert("Liz").eid
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Liz").Friends.name.get === List()
+
+      // Ann now has Ben and Liz as friends
+      living_Person(ann).friends(ben, liz).update
+
+      // Ann and Liz new friends
+      // Ann and Joe no longer friends
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Liz")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List()
+      living_Person.name_("Liz").Friends.name.get === List("Ann")
+    }
+
+
+    "replace all with multiple (apply Set)" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe"))
+      ) eids
+
+      val liz = living_Person.name.insert("Liz").eid
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Liz").Friends.name.get === List()
+
+      // Ann now has Ben and Liz as friends
+      living_Person(ann).friends(Set(ben, liz)).update
+
+      // Ann and Liz new friends
+      // Ann and Joe no longer friends
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Liz")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List()
+      living_Person.name_("Liz").Friends.name.get === List("Ann")
+    }
+
+
+    "remove all (apply no values)" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe"))
+      ) eids
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+
+      // Ann has no friends any longer
+      living_Person(ann).friends().update
+
+      // Ann's friendships replaced with no friendships (in both directions)
+      living_Person.name_("Ann").Friends.name.get === List()
+      living_Person.name_("Ben").Friends.name.get === List()
+      living_Person.name_("Joe").Friends.name.get === List()
+    }
+
+
+    "remove all (apply empty Set)" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+        ("Ann", List("Ben", "Joe"))
+      ) eids
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+
+      // Ann has no friends any longer
+      val noFriends = Set.empty[Long]
+      living_Person(ann).friends(noFriends).update
+
+      // Ann's friendships replaced with no friendships (in both directions)
+      living_Person.name_("Ann").Friends.name.get === List()
+      living_Person.name_("Ben").Friends.name.get === List()
+      living_Person.name_("Joe").Friends.name.get === List()
     }
   }
 
 
   "Retract" in new Setup {
 
-    // (Same as for cardinality-one)
+    val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
+      ("Ann", List("Ben", "Joe"))
+    ) eids
 
-    val ben = living_Person.name.insert("Ben").eid
+    living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+    living_Person.name_("Ben").Friends.name.get === List("Ann")
+    living_Person.name_("Joe").Friends.name.get === List("Ann")
 
-    // Create and reference b to a
-    val ida = living_Person(ben).Friends.name("Ida").update.eid
+    // Retract Ann and all her friendships
+    ann.retract
 
-    living_Person(ben).Friends.name.get === List("Ida")
-    living_Person(ida).Friends.name.get === List("Ben")
+    // Ann doesn't exist anymore
+    living_Person.name("Ann").get === List()
+    living_Person.name_("Ann").Friends.name.get === List()
 
-    living_Person.name.Friends.name.get.sorted === List(
-      ("Ben", "Ida"),
-      ("Ida", "Ben")
-    )
-
-    // Retract a and all references from/to a
-    ben.retract
-
-    // Ida still exists. Ben is gone and so is their friendship in both directions
-    living_Person.name.get === List("Ida")
-    living_Person(ben).Friends.name.get === List()
-    living_Person(ida).Friends.name.get === List()
-    living_Person.name.Friends.name.get.sorted === List()
+    // Ben and Joe are no longer friends with Ann
+    living_Person.name_("Ben").Friends.name.get === List()
+    living_Person.name_("Joe").Friends.name.get === List()
   }
 }

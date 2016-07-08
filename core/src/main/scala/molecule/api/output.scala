@@ -33,143 +33,18 @@ trait Molecule extends DatomicFacade {
   // Manipulation .............................................................
 
   def save(implicit conn: Connection): Tx = {
-    saveChecks
-    // Add applied data of molecule
+    CheckModel(_model, "save")
     save(conn, _model)
   }
 
-  protected trait checkInsertModel {
-    insertChecks
-    // Insert data is applied in sub-molecules
-  }
-
   def update(implicit conn: Connection): Tx = {
-    noConflictingCardOneValues("update")
-    noEdgePropRefs("update") // ??
-    noNested("update")
+    CheckModel(_model, "update")
     update(conn, _model)
   }
 
-
-  // Model checks .............................................................
-
-  private def saveChecks {
-    noAppliedId("save")
-    noGenericsInTail("save")
-    noTacetAttrs("save")
-    noTransitiveAttrs("save")
-    noOrphanRefs("save")
-    noConflictingCardOneValues("save")
-    noNested("save")
-    noEdgePropRefs("save")
-  }
-
-  private def insertChecks {
-    noAppliedId("insert")
-    noGenericsInTail("insert")
-    noTacetAttrs("insert")
-    noTransitiveAttrs("insert")
-    noOrphanRefs("insert")
-    noNestedEdgesWithoutTarget("insert")
-  }
-
-  // Avoid mixing insert/update style
-  private def noAppliedId(action: String) = _model.elements.head match {
-    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => throw new IllegalArgumentException(
-      s"[output.Molecule.noAppliedId] Can't $action molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
-        s"""Applying an eid is for updates: `${ns.capitalize}(johnId).likes("pizza").update`""")
-    case ok                                       => _model
-  }
-
-  private def noGenericsInTail(action: String) = _model.elements.tail.collectFirst {
-    case Meta(_, _, "e", _, Eq(List(eid))) => throw new IllegalArgumentException(
-      s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
-        s"not allowed in $action molecules. Found `e($eid)`")
-  }
-
-  private def noTacetAttrs(action: String) {
-    def detectTacetAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
-      case a: Atom if a.name.last == '_' => throw new IllegalArgumentException(
-        s"[output.Molecule.noTacetAttrs] Tacet attributes like `${a.name}` not allowed in $action molecules.")
-      case Nested(ref, es)               => detectTacetAttrs(es)
-      case Composite(es)                 => detectTacetAttrs(es)
-      case e: Element                    => Seq(e)
-    }
-    detectTacetAttrs(_model.elements)
-  }
-
-  private def noTransitiveAttrs(action: String) = _model.elements collectFirst {
-    case t: Transitive => throw new IllegalArgumentException(
-      s"[output.Molecule:noTransitiveAttrs] Can't $action transitive attribute values (repeated attributes).")
-  }
-
-  private def noOrphanRefs(action: String) {
-    // An insert molecule can only build on with a ref if it has already at least one mandatory attribute
-    def abortNs(i: Int, ns: String) = throw new IllegalArgumentException(
-      s"[output.Molecule:noOrphanRefs ($i)] Namespace `$ns` in $action molecule has no mandatory attributes. Please add at least one.")
-
-    def getNs(ns: String) = if (ns.contains("_")) ns else ns.capitalize
-
-    def avoidMissingAttrs(elements: Seq[Element]): (Element, Seq[Element], String) = elements.foldLeft((null: Element, Seq[Element](), "")) {
-      case ((prevElem, attrs, ns0), e) =>
-        e match {
-          case a: Atom if a.name.last != '$'                    => (a, attrs :+ a, getNs(a.ns))
-          case a: Atom                                          => (a, attrs, getNs(a.ns))
-          case b: Bond if attrs.isEmpty                         => abortNs(1, getNs(b.ns))
-          case b: Bond                                          => (b, Nil, getNs(b.ns))
-          case r@ReBond(ns1, _, _, _, _)                        => (r, attrs :+ r, getNs(ns1))
-          case g@Nested(ref, es) if prevElem.isInstanceOf[Bond] => abortNs(2, prevElem.asInstanceOf[Bond].refAttr.capitalize)
-          case g@Nested(ref, es)                                => {
-            val (_, nested, ns1) = avoidMissingAttrs(es)
-            if (nested.isEmpty) abortNs(3, ns1) else (g, nested, ns1)
-          }
-          case m@Meta(ns1, _, "e", NoValue, _)                  => (m, attrs :+ m, getNs(ns1))
-          case Composite(es)                                    => avoidMissingAttrs(es)
-          case _                                                => (e, attrs, ns0)
-        }
-    }
-    val (_, elements, ns) = avoidMissingAttrs(_model.elements)
-    if (elements.isEmpty) abortNs(4, ns)
-  }
-
-  private def noConflictingCardOneValues(action: String) {
-    def abort(i: Int, ns: String, attr: String, values: Seq[Any]) = throw new IllegalArgumentException(
-      s"""[output.Molecule:noConflictingCardOneValues ($i)] Can't $action multiple values for cardinality-one attribute:
-          |  $ns ... $attr(${values.mkString(", ")})""".stripMargin)
-
-    def catchConflictingCardOneValues(elements: Seq[Element]): Unit = elements.collectFirst {
-      case Atom(ns, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => abort(1, ns, attr, vs)
-      case Nested(ref, es)                                        => catchConflictingCardOneValues(es)
-      case Composite(es)                                          => catchConflictingCardOneValues(es)
-    }
-    catchConflictingCardOneValues(_model.elements)
-  }
-
-  private def noNested(action: String) {
-    def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
-      case n: Nested => throw new IllegalArgumentException(
-        s"[output.Molecule.noNested] Nested data structures not allowed in $action molecules")
-      case Composite(es) => checkNested(es)
-    }
-    checkNested(_model.elements)
-  }
-
-  // Todo: Might be possible to implement if we control that the molecule doesn't build further out
-  private def noEdgePropRefs(action: String) = _model.elements.collectFirst {
-    case Bond(ns, refAttr, _, _, Seq(BiEdgePropRef(_))) => throw new IllegalArgumentException(
-      s"[output.Molecule.noEdgePropRefs] Building on to another namespace from a property edge of a $action molecule not allowed. " +
-        s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
-  }
-
-  private def noNestedEdgesWithoutTarget(action: String) {
-    def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
-      case Nested(Bond(baseNs, _, refNs, _, Seq(BiEdgeRef(_,_))), es)
-        if !es.collectFirst {
-          case Bond(edgeNs, _, _, _, Seq(BiTargetRef(_,attr))) if attr.nonEmpty && attr.split(":").last.split("/").head == baseNs => true
-        }.getOrElse(false) => throw new IllegalArgumentException(
-          s"[output.Molecule.noNestedEdgesWithoutTarget] Nested edge ns `$refNs` should link to target ns within the nested group of attributes.")
-    }
-    checkNested(_model.elements)
+  // Insert data is applied in each arity molecule (see below)
+  protected trait checkInsertModel {
+    CheckModel(_model, "insert")
   }
 
 
@@ -180,20 +55,21 @@ trait Molecule extends DatomicFacade {
   def getD(implicit conn: Connection): Unit
 
   def saveD(implicit conn: Connection) {
-    saveChecks
+    CheckModel(_model, "save")
     val transformer = Model2Transaction(conn, _model)
     val stmts = transformer.saveStmts()
     Debug("output.Molecule.saveD", 1)(1, _model, transformer.stmtsModel, stmts)
   }
 
   protected def _insertD(conn: Connection, data: Seq[Seq[Any]]) {
-    insertChecks
+    CheckModel(_model, "insert")
     val transformer = Model2Transaction(conn, _model)
     val stmtss = transformer.insertStmts(data)
     Debug("output.Molecule._insertD", 1)(1, _model, transformer.stmtsModel, data, stmtss)
   }
 
   def updateD(implicit conn: Connection) {
+    CheckModel(_model, "update")
     val transformer = Model2Transaction(conn, _model)
     val stmts = transformer.updateStmts()
     Debug("output.Molecule.updateD", 1)(1, _model, transformer.stmtsModel, stmts)

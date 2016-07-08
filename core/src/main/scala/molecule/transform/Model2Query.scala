@@ -19,6 +19,7 @@ object Model2Query extends Helpers {
         // Manipulation (not relevant to queries) ----------------------------
 
         case Atom(_, _, _, card, Replace(_), _, _, _) => q
+        case Atom(_, _, _, card, Adding(_), _, _, _)  => q
         case Atom(_, _, _, card, Remove(_), _, _, _)  => q
 
 

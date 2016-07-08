@@ -108,6 +108,7 @@ object model {
   case object Distinct extends Value
 
   // Action
+  case class Adding(values: Seq[Any]) extends Value
   case class Remove(values: Seq[Any]) extends Value
   case class Replace(oldNew: Map[Any, Any]) extends Value
 

@@ -360,7 +360,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case "$less$eq"    => values match {case qm: Qm.type => Le(Qm); case vs: Seq[_] => Le(vs.head)}
       case "$greater$eq" => values match {case qm: Qm.type => Ge(Qm); case vs: Seq[_] => Ge(vs.head)}
       case "contains"    => values match {case qm: Qm.type => Fulltext(Seq(Qm)); case vs: Seq[_] => Fulltext(vs)}
-      case "add"         => values match {case vs: Seq[_] => Eq(vs); case mapped: Value => mapped}
+      case "add"         => values match {case vs: Seq[_] => Adding(vs); case mapped: Value => mapped}
       case "remove"      => values match {case vs: Seq[_] => Remove(vs)}
       case unexpected    => abort(s"[Dsl2Model:modelValue] Unknown operator '$unexpected'\nattr: $attr \nvalue: $values0")
     }
