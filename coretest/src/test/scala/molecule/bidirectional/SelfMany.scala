@@ -36,7 +36,7 @@ class SelfMany extends MoleculeSpec {
       // values (arities) - how many related entities should be created then?
       (living_Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[api.CheckModel.noConflictingCardOneValues] Can't save multiple values for cardinality-one attribute:\n" +
+        s"[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:\n" +
         "  living_Person ... name(Ben, Joe)"
 
       // We can save a single value though...
@@ -54,7 +54,7 @@ class SelfMany extends MoleculeSpec {
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (living_Person.name("Ann").Friends.*(living_Person.name("Ben")).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[api.CheckModel.noNested] Nested data structures not allowed in save molecules"
+        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
@@ -81,7 +81,7 @@ class SelfMany extends MoleculeSpec {
       // (instead apply ref to ref attribute as shown above)
       (living_Person.name("Ann").Friends.e(ben).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[api.CheckModel.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
+        s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($ben)`"
     }
 
@@ -104,13 +104,51 @@ class SelfMany extends MoleculeSpec {
 
     "1 new" in new Setup {
 
-      // We can treat card-many attributes as card-one attributes:
+      // Insert two bidirectionally connected entities
+      living_Person.name.Friends.name.insert("Ann", "Ben")
 
-      // Insert 2 pairs of bidirectionally referenced entities (as with card-one insert)
+      // Bidirectional references have been inserted
+      living_Person.name_("Ann").Friends.name.get === List("Ben")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+    }
+
+    "1 existing" in new Setup {
+
+      val ben = living_Person.name("Ben").save.eid
+
+      // Insert Ann with bidirectional ref to existing Ben
+      living_Person.name.friends.insert("Ann", Set(ben))
+
+      // Bidirectional references have been inserted
+      living_Person.name_("Ann").Friends.name.get === List("Ben")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+    }
+
+
+    "multiple new" in new Setup {
+
+      // Insert 2 pairs of entities with bidirectional references between them
       living_Person.name.Friends.name insert List(
         ("Ann", "Joe"),
         ("Ben", "Tim")
-      ) eids
+      )
+
+      // Bidirectional references have been inserted
+      living_Person.name_("Ann").Friends.name.get === List("Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Tim")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Tim").Friends.name.get === List("Ben")
+    }
+
+    "multiple existing" in new Setup {
+
+      val List(joe, tim) = living_Person.name.insert("Joe", "Tim").eids
+
+      // Insert 2 entities with bidirectional refs to existing entities
+      living_Person.name.friends insert List(
+        ("Ann", Set(joe)),
+        ("Ben", Set(tim))
+      )
 
       // Bidirectional references have been inserted
       living_Person.name_("Ann").Friends.name.get === List("Joe")
@@ -120,9 +158,10 @@ class SelfMany extends MoleculeSpec {
     }
 
 
-    "n new" in new Setup {
+    "nested new" in new Setup {
 
-      // Create multiple bidirectionally referenced entities with a nested molecule
+      // Insert molecules allow nested data structures. So we can conveniently
+      // insert 2 entities each connected to 2 target entites
       living_Person.name.Friends.*(living_Person.name) insert List(
         ("Ann", List("Ben", "Joe")),
         ("Don", List("Tim", "Tom"))
@@ -139,29 +178,7 @@ class SelfMany extends MoleculeSpec {
       )
     }
 
-
-    "1 existing" in new Setup {
-
-      val List(joe, tim) = living_Person.name insert List("Joe", "Tim") eids
-
-      // Insert 2 living_Persons and befriend them with existing living_Persons
-      living_Person.name.friends insert List(
-        ("Ann", Set(joe)),
-        ("Ben", Set(tim))
-      )
-
-      // Bidirectional references have been inserted
-      living_Person.name.Friends.name.get.sorted === List(
-        ("Ann", "Joe"),
-        ("Ben", "Tim"),
-        // Reverse refs:
-        ("Joe", "Ann"),
-        ("Tim", "Ben")
-      )
-    }
-
-
-    "n existing" in new Setup {
+    "nested existing" in new Setup {
 
       val List(ben, joe, tim) = living_Person.name insert List("Ben", "Joe", "Tim") eids
 
@@ -245,6 +262,54 @@ class SelfMany extends MoleculeSpec {
     }
 
 
+    "replace 1" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name)
+        .insert("Ann", List("Ben", "Joe")).eids
+
+      val tim = living_Person.name("Tim").save.eid
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Tim").Friends.name.get === List()
+
+      // Ann replaces Ben with Tim
+      living_Person(ann).friends(ben -> tim).update
+
+      // Ann now friends with Tim instead of Ben
+      living_Person.name_("Ann").Friends.name.get === List("Tim", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List()
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Tim").Friends.name.get === List("Ann")
+    }
+
+    "replace multiple" in new Setup {
+
+      val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name)
+        .insert("Ann", List("Ben", "Joe")).eids
+
+      val List(tim, tom) = living_Person.name.insert("Tim", "Tom").eids
+
+      living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
+      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Tim").Friends.name.get === List()
+      living_Person.name_("Tom").Friends.name.get === List()
+
+      // Ann replaces Ben and Joe with Tim and Tom
+      living_Person(ann).friends(ben -> tim, joe -> tom).update
+
+      // Ann is now friends with Tim and Tom instead of Ben and Joe
+      // Ben and Joe are no longer friends with Ann either
+      living_Person.name_("Ann").Friends.name.get === List("Tom", "Tim")
+      living_Person.name_("Ben").Friends.name.get === List()
+      living_Person.name_("Joe").Friends.name.get === List()
+      living_Person.name_("Tim").Friends.name.get === List("Ann")
+      living_Person.name_("Tom").Friends.name.get === List("Ann")
+    }
+
+
     "replace all with 1" in new Setup {
 
       val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
@@ -254,6 +319,8 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
       living_Person.name_("Ben").Friends.name.get === List("Ann")
       living_Person.name_("Joe").Friends.name.get === List("Ann")
+
+      // Applying value(s) replaces all existing values!
 
       // Ann now only has Ben as friend
       living_Person(ann).friends(ben).update

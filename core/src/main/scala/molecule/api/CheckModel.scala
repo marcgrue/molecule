@@ -166,19 +166,17 @@ case class CheckModel(model: Model, op: String) {
 
       def hasBase(es: Seq[Element], edgeNs: String) = elements.collectFirst {
         // Base.attr.Edge ...
-        case Bond(_, _, edgeNs1, _, Seq(BiEdgeRef(_, _))) if edgeNs1 == edgeNs              => true
+        case Bond(_, _, edgeNs1, _, Seq(BiEdgeRef(_, _))) if edgeNs1 == edgeNs => true
         // Base.attr.edge ...
         case Atom(_, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) if ns(edgeRefAttr) == edgeNs => true
       }
 
       elements.collectFirst {
-
         // ?.. Target
         case Bond(edgeNs, _, refNs, _, Seq(BiTargetRef(_, x))) => hasBase(elements, edgeNs) getOrElse
           iae("edgeConsistency", s"Missing base namespace before edge namespace `$refNs`.")
-
         // ?.. target
-        case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => hasBase(elements, edgeNs)
+        case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => hasBase(elements, edgeNs) getOrElse
           iae("edgeConsistency", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
       }
     }
@@ -190,20 +188,20 @@ case class CheckModel(model: Model, op: String) {
         case Bond(edgeNs1, _, _, _, Seq(BiTargetRef(_, _))) if edgeNs1 == edgeNs => true
         // ... target
         case Atom(edgeNs1, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if edgeNs1 == edgeNs => true
+        // ... <nested>
+        case Nested(Bond(edgeNs1, _, _, _, _), _) if edgeNs1 == edgeNs => iae("edgeConsistency",
+          s"Missing target namespace after edge namespace `$edgeNs`.")
       }
 
       elements.collectFirst {
-
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
           iae("edgeConsistency", s"Missing target namespace after edge namespace `$edgeNs`.")
-
         // Base.attr.edge ..?
-        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, ns(edgeRefAttr))
+        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, ns(edgeRefAttr)) getOrElse
           iae("edgeConsistency", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
-
         // Base.attr.Edge.prop ..?
-        case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, ns(prop))
+        case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, ns(prop)) getOrElse
           iae("edgeConsistency", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
       }
     }

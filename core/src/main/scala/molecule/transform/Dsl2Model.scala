@@ -412,6 +412,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
+//    x(23, vs, attr)
     val keyValues = vs.map {
       case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
       case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(q"$k"), extract(q"$v"))
@@ -424,7 +425,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def extract(t: Tree) = {
-    //    x(31, t.raw)
+//        x(31, t.raw)
     t match {
       case Constant(v: String)                            => v
       case Literal(Constant(v: String))                   => v

@@ -114,6 +114,7 @@ object schemaDSL {
   }
 
   trait ManyRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
+    // Replaces all existing values with the applied new value(s)
     def apply(ref: Long, moreRefs: Long*)  : Ns with Attr = ???
     def apply(refs: Set[Long])             : Ns with Attr = ??? // Todo: not implemented yet
 
@@ -122,6 +123,8 @@ object schemaDSL {
 
     def remove(ref: Long, moreRefs: Long*) : Ns with Attr = ???
     def remove(refs : Set[Long])           : Ns with Attr = ???
+
+    def apply(oldNew: (Long, Long), oldNewMore: (Long, Long)*) : Ns with Attr = ???
   }
 
   trait BackRefAttr[Ns, In] extends RefAttr[Ns,  Long] {

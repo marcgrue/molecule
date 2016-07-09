@@ -44,32 +44,34 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
       case (key: String, value: Any) if key.startsWith("__ident__")                                     => Seq(key -> q"${TermName(key.substring(9))}")
       case (key: String, value: String) if value.startsWith("__ident__")                                => Seq(value -> q"${TermName(value.substring(9))}")
       case ident: String if ident.startsWith("__ident__")                                               => Seq(ident -> q"${TermName(ident.substring(9))}")
-      case _                                                                                            => Nil
+      case other                                                                                        => Nil
     }
 
     def mapIdentifiers(elements: Seq[Element], identifiers0: Seq[(String, Tree)] = Seq()): Seq[(String, Tree)] = {
       val newIdentifiers = (elements collect {
-        case atom@Atom(_, _, _, _, Eq(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, Neq(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, And(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, Lt(ident), _, _, keyIdents)      => mapIdents(ident +: keyIdents)
-        case atom@Atom(_, _, _, _, Gt(ident), _, _, keyIdents)      => mapIdents(ident +: keyIdents)
-        case atom@Atom(_, _, _, _, Le(ident), _, _, keyIdents)      => mapIdents(ident +: keyIdents)
-        case atom@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)      => mapIdents(ident +: keyIdents)
-        case atom@Atom(_, _, _, _, Adding(idents), _, _, keyIdents) => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, Remove(idents), _, _, keyIdents) => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, Mapping(pairs), _, _, keyIdents) => mapIdents(pairs ++ keyIdents)
-        case atom@Atom(_, _, _, _, Keys(idents), _, _, keyIdents)   => mapIdents(idents ++ keyIdents)
-        case meta@Meta(_, _, _, _, Eq(idents))                      => mapIdents(idents)
-        case Nested(_, nestedElements)                              => mapIdentifiers(nestedElements, identifiers0)
-        case TxMetaData(txElements)                                 => mapIdentifiers(txElements, identifiers0)
-        case TxMetaData_(txElements)                                => mapIdentifiers(txElements, identifiers0)
+        case atom@Atom(_, _, _, _, Eq(idents), _, _, keyIdents)         => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, Neq(idents), _, _, keyIdents)        => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, And(idents), _, _, keyIdents)        => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, Lt(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
+        case atom@Atom(_, _, _, _, Gt(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
+        case atom@Atom(_, _, _, _, Le(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
+        case atom@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
+        case atom@Atom(_, _, _, _, Adding(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, Remove(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, keyIdents) => mapIdents(oldNewMap.toSeq.map(p => (p._1.toString, p._2)) ++ keyIdents)
+        case atom@Atom(_, _, _, _, Mapping(pairs), _, _, keyIdents)     => mapIdents(pairs ++ keyIdents)
+        case atom@Atom(_, _, _, _, Keys(idents), _, _, keyIdents)       => mapIdents(idents ++ keyIdents)
+        case meta@Meta(_, _, _, _, Eq(idents))                          => mapIdents(idents)
+        case Nested(_, nestedElements)                                  => mapIdentifiers(nestedElements, identifiers0)
+        case Composite(compositeElements)                               => mapIdentifiers(compositeElements, identifiers0)
+        case TxMetaData(txElements)                                     => mapIdentifiers(txElements, identifiers0)
+        case TxMetaData_(txElements)                                    => mapIdentifiers(txElements, identifiers0)
       }).flatten
       (identifiers0 ++ newIdentifiers).distinct
     }
 
     val identMap = mapIdentifiers(model.elements).toMap
-    //        x(2, identMap)
+    //    x(2, model, identMap)
 
     q"""
       import molecule._
@@ -119,10 +121,12 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)       => atom.copy(value = Ge(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Adding(idents), _, _, _)          => atom.copy(value = Adding(getValues(idents)))
         case atom@Atom(_, _, _, _, Remove(idents), _, _, _)          => atom.copy(value = Remove(getValues(idents)))
+        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, _)      => atom.copy(value = Replace( getValues(oldNewMap.toSeq).map{ case (k, v) => (k, v) }.toMap.asInstanceOf[Map[Any, Any]]))
         case atom@Atom(_, _, _, _, Mapping(idents), _, _, keyIdents) => atom.copy(value = Mapping(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Keys(idents), _, _, _)            => atom.copy(value = Keys(getValues(idents).asInstanceOf[Seq[String]]))
         case meta@Meta(_, _, _, _, Eq(idents))                       => meta.copy(value = Eq(getValues(idents)))
         case Nested(ns, nestedElements)                              => Nested(ns, resolveIdentifiers(nestedElements))
+        case Composite(compositeElements)                            => Composite(resolveIdentifiers(compositeElements))
         case TxMetaData(txElements)                                  => TxMetaData(resolveIdentifiers(txElements))
         case TxMetaData_(txElements)                                 => TxMetaData_(resolveIdentifiers(txElements))
         case other                                                   => other

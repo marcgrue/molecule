@@ -32,6 +32,11 @@ trait Molecule extends DatomicFacade {
 
   // Manipulation .............................................................
 
+  // Insert data is applied in each arity molecule (see below)
+  protected trait checkInsertModel {
+    CheckModel(_model, "insert")
+  }
+
   def save(implicit conn: Connection): Tx = {
     CheckModel(_model, "save")
     save(conn, _model)
@@ -42,11 +47,6 @@ trait Molecule extends DatomicFacade {
     update(conn, _model)
   }
 
-  // Insert data is applied in each arity molecule (see below)
-  protected trait checkInsertModel {
-    CheckModel(_model, "insert")
-  }
-
 
   // Debug ....................................................................
 
@@ -54,18 +54,18 @@ trait Molecule extends DatomicFacade {
 
   def getD(implicit conn: Connection): Unit
 
-  def saveD(implicit conn: Connection) {
-    CheckModel(_model, "save")
-    val transformer = Model2Transaction(conn, _model)
-    val stmts = transformer.saveStmts()
-    Debug("output.Molecule.saveD", 1)(1, _model, transformer.stmtsModel, stmts)
-  }
-
   protected def _insertD(conn: Connection, data: Seq[Seq[Any]]) {
     CheckModel(_model, "insert")
     val transformer = Model2Transaction(conn, _model)
     val stmtss = transformer.insertStmts(data)
     Debug("output.Molecule._insertD", 1)(1, _model, transformer.stmtsModel, data, stmtss)
+  }
+
+  def saveD(implicit conn: Connection) {
+    CheckModel(_model, "save")
+    val transformer = Model2Transaction(conn, _model)
+    val stmts = transformer.saveStmts()
+    Debug("output.Molecule.saveD", 1)(1, _model, transformer.stmtsModel, stmts)
   }
 
   def updateD(implicit conn: Connection) {

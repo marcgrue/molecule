@@ -211,7 +211,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Distinct                    => q"Distinct"
     case Fulltext(search)            => q"Fulltext(Seq(..$search))"
     case Adding(values)              => q"Adding(Seq(..$values))"
-    case Replace(values)             => q"Replace(Seq(..$values))"
+    case Replace(map)                => q"Replace($map)"
     case Remove(values)              => q"Remove(Seq(..$values))"
     case Mapping(pairs)              => q"Mapping(Seq(..$pairs))"
     case Keys(ks)                    => q"Keys(Seq(..$ks))"

@@ -128,8 +128,22 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
 
     def biSelfRef(card: Int) = arg match {
+
+      case Replace(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+        oldNew.toSeq.flatMap {
+          case (oldRef, newRef) if oldRef == revRef => Seq(
+            // This entity e now has ref to newRef instead of oldRef
+            Retract(e, a, oldRef), Add(e, a, newRef),
+            // RevRef no longer has a ref to this entity e
+            // Instead newRef has a ref to this entity e
+            Retract(revRef, a, e), Add(newRef, a, e)
+          )
+          case _                                 => Nil
+        }
+      }
+
       case Remove(Seq())      => attrValues(e, a).toSeq.flatMap {
-        case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
+        case revRef => Seq(Retract(revRef, a, e), Retract(e, a, revRef))
       }
       case Remove(removeRefs) => removeRefs.flatMap {
         case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
@@ -256,9 +270,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
       } else arg match {
 
-        //        case Replace(oldNew)      => oldNew.toSeq.flatMap {
-        //          case (oldValue, newValue) => Seq(Retract(e, a, p(oldValue)), Add(e, a, p(newValue)))
-        //        }
+        case Replace(oldNew) => oldNew.toSeq.flatMap {
+          case (oldValue, newValue) => Seq(
+            Retract(edgeB, a, p(oldValue)), Add(edgeB, a, p(newValue)),
+            Retract(edgeA, a, p(oldValue)), Add(edgeA, a, p(newValue))
+          )
+        }
         //        case Remove(Seq())      => attrValues(e, a).toSeq.flatMap {
         //          case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
         //        }
@@ -377,7 +394,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       }
       case Remove(Seq())        => attrValues(e, a).toSeq.map(v => Retract(e, a, p(v)))
       case Remove(removeValues) => removeValues.map(v => Retract(e, a, p(v)))
-      case Eq(vs)               => vs.map(v => Add(e, a, p(v)))
+      case Eq(vs)               =>
+        // Todo: if card-many, remove existing values (?)
+        vs.map(v => Add(e, a, p(v)))
       case vs: Set[_]           => vs.map(v => Add(e, a, p(v)))
       case m: Map[_, _]         => m map {
         case (k, d: Date) => Add(e, a, k + "@" + format2(d)) // Need uniform Date format
@@ -702,7 +721,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case a@Add(_, _, nestedStmts: Seq[_], _) => a
     }
     val stmtsSize = argStmts.size
-    if (argArity == stmtsSize) iae("untupleNestedArgss", "Arity of statements and arguments should match. Found: \n" +
+    if (argArity != stmtsSize) iae("untupleNestedArgss", "Arity of statements and arguments should match. Found: \n" +
       s"Statements (arity $stmtsSize): " + stmts.mkString("\n  ", "\n  ", "\n") +
       s"Arguments0                  : " + arg0 +
       s"Arguments  (arity $argArity): " + arg.mkString("\n  ", "\n  ", "\n"))
