@@ -1,7 +1,7 @@
 package molecule.dsl
 
 import java.util.Date
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import scala.language.higherKinds
 
 

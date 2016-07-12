@@ -1,8 +1,9 @@
-package molecule.dsl
+package molecule.schema
+
 import scala.annotation.StaticAnnotation
 
 
-object schemaDefinition {
+object definition {
 
   // Annotation for arities of molecule inputs and outputs
   class InOut(inputArity: Int = 3, outputArity: Int = 8) extends StaticAnnotation

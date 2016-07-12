@@ -108,13 +108,16 @@ object model {
   case object Distinct extends Value
 
   // Action
-  case class Adding(values: Seq[Any]) extends Value
+  case class Add_(values: Seq[Any]) extends Value
+  case class Replace(oldNew: Seq[(Any, Any)]) extends Value
   case class Remove(values: Seq[Any]) extends Value
-  case class Replace(oldNew: Map[Any, Any]) extends Value
 
   // Attribute Maps
-  case class Mapping(pairs: Seq[(String, Any)]) extends Value
-  case class Keys(ks: Seq[String]) extends Value
+  case class MapAdd(pairs: Seq[(String, Any)]) extends Value
+  case class MapReplace(pairs: Seq[(String, Any)]) extends Value
+  case class MapRemove(keys: Seq[String]) extends Value
+  case class MapEq(pairs: Seq[(String, Any)]) extends Value
+  case class MapKeys(ks: Seq[String]) extends Value
 
 
   sealed trait Generic extends Value
@@ -137,6 +140,7 @@ object model {
   case class BiOtherRef(card: Int) extends Bidirectional
   case class BiOtherRefAttr(card: Int) extends Bidirectional
 
+  case object BiEdge extends Bidirectional
   case class BiEdgeRef(card: Int, attr: String) extends Bidirectional
   case class BiEdgeRefAttr(card: Int, attr: String) extends Bidirectional
 

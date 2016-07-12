@@ -1,7 +1,7 @@
 package molecule.factory
 import molecule.api._
 import molecule.dsl._
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context

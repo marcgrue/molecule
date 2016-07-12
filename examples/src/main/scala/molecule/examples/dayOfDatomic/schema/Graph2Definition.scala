@@ -1,6 +1,5 @@
 package molecule.examples.dayOfDatomic.schema
-
-import molecule.dsl.schemaDefinition._
+import molecule.schema.definition._
 
 @InOut(2, 4)
 object Graph2Definition {

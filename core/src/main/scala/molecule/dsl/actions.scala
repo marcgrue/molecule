@@ -5,7 +5,7 @@ import molecule._
 import molecule.ast.model._
 
 
-object schemaDSL {
+object actions {
 
   trait NS
 
@@ -124,6 +124,7 @@ object schemaDSL {
     def remove(ref: Long, moreRefs: Long*) : Ns with Attr = ???
     def remove(refs : Set[Long])           : Ns with Attr = ???
 
+    // Replace
     def apply(oldNew: (Long, Long), oldNewMore: (Long, Long)*) : Ns with Attr = ???
   }
 
@@ -138,19 +139,19 @@ object schemaDSL {
     val _kw: String = ""
 
     // Null (datom not asserted)
-    def apply(noValue: nil): Ns with Attr = ???
+    def apply(noValue: nil)    : Ns with Attr = ???
 
     // Unifying marker for attributes to be unified in self-joins
     def apply(unifyThis: unify): Ns with Attr = ???
 
     // Negation
-    def not(one: T, more: T*) : Ns with Attr = ???
-    def not(many: Seq[T])     : Ns with Attr = ???
+    def not(one: T, more: T*)  : Ns with Attr = ???
+    def not(many: Seq[T])      : Ns with Attr = ???
     // Same as
-    def != (one: T, more: T*) : Ns with Attr = ???
+    def != (one: T, more: T*)  : Ns with Attr = ???
     // Todo: remove this method when Intellij can infer from the above method alone...
-    def != (one: T)           : Ns with Attr = ???
-    def != (many: Seq[T])     : Ns with Attr = ???
+    def != (one: T)            : Ns with Attr = ???
+    def != (many: Seq[T])      : Ns with Attr = ???
 
     // Comparison
     def <  (value: T) : Ns with Attr = ???
@@ -196,12 +197,18 @@ object schemaDSL {
 
   trait Many[Ns, In, S, T] extends ValueAttr[Ns, In, T, S] {
     // Empty `apply` in update molecule retracts all values!
-    def apply()                                    : Ns with Attr = ???
-    def apply(values: T*)                          : Ns with Attr = ???
-    def apply(set: S, moreSets: S*)                : Ns with Attr = ???
-    def apply(oldNew: (T, T), oldNewMore: (T, T)*) : Ns with Attr = ???
-    def add(value: T)                              : Ns with Attr = ???
-    def remove(values: T*)                         : Ns with Attr = ???
+    def apply()                                      : Ns with Attr = ???
+    def apply(values: T*)                            : Ns with Attr = ???
+    def apply(set: S, moreSets: S*)                  : Ns with Attr = ???
+
+    def add(value: T, more: T*)                      : Ns with Attr = ???
+    def add(values: Seq[T])                          : Ns with Attr = ???
+
+    def replace(oldNew: (T, T), oldNewMore: (T, T)*) : Ns with Attr = ???
+    def replace(oldNew: Seq[(T, T)])                   : Ns with Attr = ???
+
+    def remove(value: T, more: T*)                   : Ns with Attr = ???
+    def remove(values: Seq[T])                       : Ns with Attr = ???
   }
   trait ManyString [Ns, In] extends Many[Ns, In, Set[String ], String ]
   trait ManyInt    [Ns, In] extends Many[Ns, In, Set[Int    ], Int    ]
@@ -219,19 +226,26 @@ object schemaDSL {
   trait MapAttrK
 
   trait MapAttr[Ns, In, M, T] extends ValueAttr[Ns, In, T, M]  {
-
-    // Manipulation
     // Empty `apply` in update molecule retracts all key/values!
-    def apply()                                         : Ns with Attr = ???
-    def add(pair: (String, T), morePairs: (String, T)*) : Ns with Attr = ???
-    def remove(key: String, moreKeys: String*)          : Ns with Attr = ???
+    def apply()                                                 : Ns with Attr = ???
+    def apply(pair: (String, T), morePairs: (String, T)*)       : Ns with Attr = ???
+    def apply(pairs: Seq[(String, T)])                            : Ns with Attr = ???
+    def apply(pairs: Or[(String, T)])                           : Ns with Attr = ???
 
-    // Values
-    def apply(value: T, more: T*)                        : Ns with Attr = ???
-    def apply(set: Set[T], moreSets: Set[T]*)            : Ns with Attr = ???
-    def apply(pair: (String, T), morePairs: (String, T)*): Ns with Attr = ???
-    def apply(pairs: Seq[(String, T)])                   : Ns with Attr = ???
-    def apply(pairs: Or[(String, T)])                    : Ns with Attr = ???
+    def add(pair: (String, T), morePairs: (String, T)*)         : Ns with Attr = ???
+    def add(pairs: Seq[(String, T)])                              : Ns with Attr = ???
+
+    def replace(newValue: (String, T), newValues: (String, T)*) : Ns with Attr = ???
+    def replace(newValues: Seq[(String, T)])                      : Ns with Attr = ???
+
+    def remove(key: String, moreKeys: String*)                  : Ns with Attr = ???
+    def remove(keys: Seq[String])                               : Ns with Attr = ???
+
+    // todo: exclude all methods below from manipulation...
+
+    // Value filters
+    def apply(value: T, more: T*)                         : Ns with Attr = ???
+    def apply(set: Set[T], moreSets: Set[T]*)             : Ns with Attr = ???
 
     // Keys
     def k(value: String)                : Values with Ns with Attr = ???
@@ -246,7 +260,7 @@ object schemaDSL {
       def apply(or: Or[T])         : Ns with Attr = ???
 
       // Negation
-      def not(one: T, more: T*)         : Ns with Attr = ???
+      def not(one: T, more: T*) : Ns with Attr = ???
       def != (one: T, more: T*) : Ns with Attr = ???
 
       // Comparison
@@ -349,6 +363,9 @@ object schemaDSL {
   // Bidirectional ref to other ns
   trait BiOtherRef_
   trait BiOtherRefAttr_
+
+  // Property edge namespace
+  trait BiEdge_
 
   // Ref from defining ns to edge
   trait BiEdgeRef_[revRefAttr]

@@ -1,5 +1,5 @@
 package molecule.dsl
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 
 import scala.language.higherKinds
 

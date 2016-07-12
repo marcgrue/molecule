@@ -10,7 +10,10 @@ object transaction {
     val a     : String
     val v     : Any
     val bi    : Generic
-    def toJava = Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
+    def toJava = if (action == ":db.fn/retractEntity")
+      Util.list(action, e.asInstanceOf[Object])
+    else
+      Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
   }
 
   case class Add(e: Any, a: String, v: Any, bi: Generic = NoValue) extends Statement {
@@ -19,6 +22,13 @@ object transaction {
 
   case class Retract(e: Any, a: String, v: Any, bi: Generic = NoValue) extends Statement {
     val action = ":db/retract"
+  }
+
+  case class RetractEntity(e: Any) extends Statement {
+    val a      = ""
+    val v      = ""
+    val bi     = NoValue
+    val action = ":db.fn/retractEntity"
   }
 
   case class Eid(id: Long)

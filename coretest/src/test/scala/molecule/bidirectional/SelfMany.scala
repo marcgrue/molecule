@@ -315,20 +315,23 @@ class SelfMany extends MoleculeSpec {
       val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
       ) eids
+      val liz = living_Person.name.insert("Liz").eid
 
       living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
       living_Person.name_("Ben").Friends.name.get === List("Ann")
       living_Person.name_("Joe").Friends.name.get === List("Ann")
+      living_Person.name_("Liz").Friends.name.get === List()
 
       // Applying value(s) replaces all existing values!
 
-      // Ann now only has Ben as friend
-      living_Person(ann).friends(ben).update
+      // Liz is the new friend
+      living_Person(ann).friends(liz).update
 
       // Joe and Ann no longer friends
-      living_Person.name_("Ann").Friends.name.get === List("Ben")
-      living_Person.name_("Ben").Friends.name.get === List("Ann")
+      living_Person.name_("Ann").Friends.name.get === List("Liz")
+      living_Person.name_("Ben").Friends.name.get === List()
       living_Person.name_("Joe").Friends.name.get === List()
+      living_Person.name_("Liz").Friends.name.get === List("Ann")
     }
 
 

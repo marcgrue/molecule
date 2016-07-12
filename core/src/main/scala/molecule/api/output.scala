@@ -6,7 +6,7 @@ import java.util.Date
 import datomic.Connection
 import molecule.ast.model._
 import molecule.ast.query.Query
-import molecule.dsl.schemaDSL.ValueAttr
+import molecule.dsl.actions.ValueAttr
 import molecule.transform.Model2Transaction
 import molecule.util.Debug
 

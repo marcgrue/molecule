@@ -1,6 +1,6 @@
 package molecule.bidirectional.schema
 
-import molecule.dsl.schemaDefinition._
+import molecule.schema.definition._
 
 @InOut(0, 9)
 object BidirectionalDefinition {

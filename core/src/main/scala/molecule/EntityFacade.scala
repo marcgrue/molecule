@@ -112,7 +112,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   // Entity api from ValueAttribute (typed) .................................................................
 
-  import dsl.schemaDSL._
+  import dsl.actions._
   type VA[Out] = ValueAttr[_, _, _, Out]
   type Op[T] = Option[T]
 

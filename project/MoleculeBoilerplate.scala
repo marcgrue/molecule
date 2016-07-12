@@ -17,6 +17,7 @@ object MoleculeBoilerplate {
   case class Namespace(part: String, ns: String, opt: Option[Extension] = None, attrs: Seq[Attr] = Seq())
 
   sealed trait Extension
+  case object Edge extends Extension
 
   sealed trait Attr {
     val attr     : String
@@ -390,7 +391,7 @@ object MoleculeBoilerplate {
       case (d, line) => line.trim match {
         case r"\/\/.*" /* comments allowed */                         => d
         case r"package (.*)$path\.[\w]*"                              => d.copy(pkg = path)
-        case "import molecule.dsl.schemaDefinition._"                 => d
+        case "import molecule.schema.definition._"                 => d
         case r"@InOut\((\d+)$inS, (\d+)$outS\)"                       => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
         case r"object (.*)${dmn}Definition \{"                        => d.copy(domain = dmn)
         case r"object ([a-z]\w*)$part\s*\{"                           => d.copy(curPart = part)
@@ -435,7 +436,7 @@ object MoleculeBoilerplate {
         case value: Val => value.copy(options = value.options :+ Optional("", "BiEdgePropAttr_"))
         case other      => other
       }
-      ns.copy(attrs = newAttrs)
+      ns.copy(opt = Some(Edge), attrs = newAttrs)
     } else
       ns
   }
@@ -506,8 +507,11 @@ object MoleculeBoilerplate {
           case biTargetRef: Ref if biTargetRef.options.exists(_.clazz.startsWith("BiTargetRef_")) => true
         }.getOrElse(false) => {
           val moleculeMetaNs = Namespace("molecule", "molecule_Meta", None, Seq(
-            Ref("otherEdge", "otherEdge", "OneRefAttr", "OneRef", "Long", "", "molecule_Meta",
-              Seq(Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed")))))
+            Ref("otherEdge", "otherEdge", "OneRefAttr", "OneRef", "Long", "", "molecule_Meta", Seq(
+              Optional("""":db/index"             , true.asInstanceOf[Object]""", "Indexed"),
+              // Is component so that retracts automatically retracts the other edge
+              Optional("""":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent")
+            ))))
           (parts :+ "molecule", d.nss :+ moleculeMetaNs)
         }
       } getOrElse(parts, d.nss)
@@ -892,7 +896,7 @@ object MoleculeBoilerplate {
   //          |* 3. Refresh and re-compile project in IDE
   //          |*/
   //          |package ${d.pkg}.dsl.${firstLow(d.domain)}
-  //          |import molecule.dsl.schemaDSL._
+  //          |import molecule.dsl.actions._
   //          |import molecule.dsl._$extraImports
   //          |
   //          |
@@ -923,7 +927,7 @@ object MoleculeBoilerplate {
   //            |* 3. Refresh and re-compile project in IDE
   //            |*/
   //            |package ${d.pkg}.dsl.${firstLow(d.domain)}
-  //            |import molecule.dsl.schemaDSL._
+  //            |import molecule.dsl.actions._
   //            |import molecule.dsl._$extraImports
   //            |
   //            |$inTraits""".stripMargin
@@ -939,6 +943,10 @@ object MoleculeBoilerplate {
     val outArity = d.out
     val Ns = namespace.ns
     val attrs = namespace.attrs
+    val ext = namespace.opt match {
+      case Some(Edge) => "extends BiEdge_ "
+      case _          => ""
+    }
     val p1 = (s: String) => padS(attrs.map(_.attr).filter(!_.startsWith("_")).map(_.length).max, s)
     val p2 = (s: String) => padS(attrs.map(_.clazz).filter(!_.startsWith("Back")).map(_.length).max, s)
     def mapType(s: String) = s match {
@@ -1035,7 +1043,7 @@ object MoleculeBoilerplate {
         |* 3. Refresh and re-compile project in IDE
         |*/
         |package ${d.pkg}.dsl.${firstLow(d.domain)}
-        |import molecule.dsl.schemaDSL._
+        |import molecule.dsl.actions._
         |import molecule.dsl._$extraImports
         |
         |
@@ -1043,7 +1051,7 @@ object MoleculeBoilerplate {
         |  def apply(e: Long): ${Ns}_0 = ???
         |}
         |
-        |trait $Ns {
+        |trait $Ns $ext{
         |  $attrClasses
         |
         |  $attrClassesOpt

@@ -18,9 +18,12 @@ object Model2Query extends Helpers {
 
         // Manipulation (not relevant to queries) ----------------------------
 
-        case Atom(_, _, _, card, Replace(_), _, _, _) => q
-        case Atom(_, _, _, card, Adding(_), _, _, _)  => q
-        case Atom(_, _, _, card, Remove(_), _, _, _)  => q
+        case Atom(_, _, _, _, Add_(_), _, _, _)       => q
+        case Atom(_, _, _, _, Replace(_), _, _, _)    => q
+        case Atom(_, _, _, _, Remove(_), _, _, _)     => q
+        case Atom(_, _, _, _, MapAdd(_), _, _, _)     => q
+        case Atom(_, _, _, _, MapReplace(_), _, _, _) => q
+        case Atom(_, _, _, _, MapRemove(_), _, _, _)  => q
 
 
         // Schema =================================================================================
@@ -232,61 +235,64 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 3, value, _, gs, keys) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case Qm                            => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-            case Fulltext(Seq(Qm))             => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-            case Neq(Seq(Qm))                  => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
-            case Gt(Qm)                        => q.mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
-            case Ge(Qm)                        => q.mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
-            case Lt(Qm)                        => q.mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
-            case Le(Qm)                        => q.mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
-            case Gt(arg)                       => q.mapCompareTo(">", e, a, v, keys, arg, gs)
-            case Ge(arg)                       => q.mapCompareTo(">=", e, a, v, keys, arg, gs)
-            case Lt(arg)                       => q.mapCompareTo("<", e, a, v, keys, arg, gs)
-            case Le(arg)                       => q.mapCompareTo("<=", e, a, v, keys, arg, gs)
-            case VarValue                      => q.where(e, a, v, gs)
-            case Fulltext(arg :: Nil)          => q.where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
-            case Fulltext(args)                => q.where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
-            case Eq((set: Set[_]) :: Nil)      => q.where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
-            case Eq(arg :: Nil)                => q.where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
-            case Eq(args)                      => q.where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
-            case Neq(args)                     => q.where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
-            case Keys(arg :: Nil)              => q.where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
-            case Keys(args)                    => q.where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-            case Mapping((key, value1) :: Nil) => q.where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")")
-            case Mapping(pairs)                => q.where(e, a, v, gs).mappings(v, a, pairs)
-            case And(args)                     => q.where(e, a, v, gs).matches(v, keys, "(" + args.head + ")$") // (post-processed)
-            case Fn("not", _)                  => q.not(e, a, v, gs)
-            case other                         => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacet mapped Atom_:\nAtom_   : $a\nElement: $other")
+            case Qm                              => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+            case Fulltext(Seq(Qm))               => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+            case Neq(Seq(Qm))                    => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
+            case Gt(Qm)                          => q.mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
+            case Ge(Qm)                          => q.mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
+            case Lt(Qm)                          => q.mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
+            case Le(Qm)                          => q.mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
+            case Gt(arg)                         => q.mapCompareTo(">", e, a, v, keys, arg, gs)
+            case Ge(arg)                         => q.mapCompareTo(">=", e, a, v, keys, arg, gs)
+            case Lt(arg)                         => q.mapCompareTo("<", e, a, v, keys, arg, gs)
+            case Le(arg)                         => q.mapCompareTo("<=", e, a, v, keys, arg, gs)
+            case VarValue                        => q.where(e, a, v, gs)
+            case Fulltext(arg :: Nil)            => q.where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
+            case Fulltext(args)                  => q.where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
+            case Eq((set: Set[_]) :: Nil)        => q.where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
+            case Eq(arg :: Nil)                  => q.where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
+            case Eq(args)                        => q.where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
+            case Neq(args)                       => q.where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
+            case MapKeys(arg :: Nil)             => q.where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
+            case MapKeys(args)                   => q.where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
+//            case MapEq((key, value1) :: Nil)     => q.where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")")
+//            case MapEq(pairs)                    => q.where(e, a, v, gs).mappings(v, a, pairs)
+            case MapEq(pairs) if pairs.size == 1 => q.where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")")
+            case MapEq(pairs)                    => q.where(e, a, v, gs).mappings(v, a, pairs.toSeq)
+            case And(args)                       => q.where(e, a, v, gs).matches(v, keys, "(" + args.head + ")$") // (post-processed)
+            case Fn("not", _)                    => q.not(e, a, v, gs)
+            case other                           => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacet mapped Atom_:\nAtom_   : $a\nElement: $other")
           }
         }
 
         // Map Atom (mandatory)
 
         case a@Atom(_, _, t, 3, value, _, gs, keys) => value match {
-          case Qm                            => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-          case Fulltext(Seq(Qm))             => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
-          case Neq(Seq(Qm))                  => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
-          case Gt(Qm)                        => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
-          case Ge(Qm)                        => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
-          case Lt(Qm)                        => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
-          case Le(Qm)                        => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
-          case Gt(arg)                       => q.findD(v, gs).mapCompareTo(">", e, a, v, keys, arg, gs)
-          case Ge(arg)                       => q.findD(v, gs).mapCompareTo(">=", e, a, v, keys, arg, gs)
-          case Lt(arg)                       => q.findD(v, gs).mapCompareTo("<", e, a, v, keys, arg, gs)
-          case Le(arg)                       => q.findD(v, gs).mapCompareTo("<=", e, a, v, keys, arg, gs)
-          case VarValue                      => q.findD(v, gs).where(e, a, v, gs)
-          case Fulltext(arg :: Nil)          => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
-          case Fulltext(args)                => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
-          case Eq((set: Set[_]) :: Nil)      => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
-          case Eq(arg :: Nil)                => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
-          case Eq(args)                      => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
-          case Neq(args)                     => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
-          case Keys(arg :: Nil)              => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
-          case Keys(args)                    => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-          case Mapping((key, value1) :: Nil) => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")$")
-          case Mapping(pairs)                => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs)
-          case And(args)                     => q.findD(v, gs).whereAnd(e, a, v, args)
-          case other                         => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
+          case Qm                          => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+          case Fulltext(Seq(Qm))           => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
+          case Neq(Seq(Qm))                => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
+          case Gt(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
+          case Ge(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
+          case Lt(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
+          case Le(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
+          case Gt(arg)                     => q.findD(v, gs).mapCompareTo(">", e, a, v, keys, arg, gs)
+          case Ge(arg)                     => q.findD(v, gs).mapCompareTo(">=", e, a, v, keys, arg, gs)
+          case Lt(arg)                     => q.findD(v, gs).mapCompareTo("<", e, a, v, keys, arg, gs)
+          case Le(arg)                     => q.findD(v, gs).mapCompareTo("<=", e, a, v, keys, arg, gs)
+          case VarValue                    => q.findD(v, gs).where(e, a, v, gs)
+          case Fulltext(arg :: Nil)        => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
+          case Fulltext(args)              => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
+          case Eq((set: Set[_]) :: Nil)    => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
+          case Eq(arg :: Nil)              => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
+          case Eq(args)                    => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
+          case Neq(args)                   => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
+          case MapKeys(arg :: Nil)         => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
+          case MapKeys(args)               => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
+//          case MapEq((key, value1) :: Nil) => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")$")
+          case MapEq(pairs) if pairs.size == 1 => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")$")
+          case MapEq(pairs)                => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs.toSeq)
+          case And(args)                   => q.findD(v, gs).whereAnd(e, a, v, args)
+          case other                       => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
         }
 
 
@@ -549,7 +555,7 @@ object Model2Query extends Helpers {
         case Bond(ns, refAttr, refNs, _, meta) if ns == prevNs                                     => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                                      => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                                     => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, _)                                                         => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _)                                                        => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)
 
         case transitive@Transitive(backRef, refAttr, refNs, _, _) => {
           val (backRefE, backRefV) = query.wh.clauses.reverse.collectFirst {

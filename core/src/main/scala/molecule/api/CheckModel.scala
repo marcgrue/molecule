@@ -10,7 +10,7 @@ case class CheckModel(model: Model, op: String) {
   }
 
   private def checkSave() {
-    noAppliedId
+    unexpectedAppliedId
     noGenericsInTail
     noTacetAttrs
     noTransitiveAttrs
@@ -18,11 +18,11 @@ case class CheckModel(model: Model, op: String) {
     noConflictingCardOneValues
     noNested
     noEdgePropRefs
-    edgeConsistency
+    save_edgeComplete
   }
 
   private def checkInsert() {
-    noAppliedId
+    unexpectedAppliedId
     noGenericsInTail
     noTacetAttrs
     noTransitiveAttrs
@@ -31,9 +31,12 @@ case class CheckModel(model: Model, op: String) {
   }
 
   private def checkUpdate() {
-    noRefs
+    //    update_onlyOneNs
+    missingAppliedId
     noConflictingCardOneValues
     noEdgePropRefs // ??
+    noNested
+    update_edgeComplete
   }
 
 
@@ -46,11 +49,16 @@ case class CheckModel(model: Model, op: String) {
   }
 
   // Avoid mixing insert/update style
-  private def noAppliedId = model.elements.head match {
-    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => iae("noAppliedId",
+  private def unexpectedAppliedId = model.elements.head match {
+    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
       s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
         s"""Applying an eid is for updates, like `${ns.capitalize}(johnId).likes("pizza").update`""")
     case ok                                       => ok
+  }
+  private def missingAppliedId = model.elements.head match {
+    case Meta(_, _, "e", BiEdge, Eq(List(eid)))  => true
+    case Meta(_, _, "e", NoValue, Eq(List(eid))) => true
+    case Atom(ns, _, _, _, _, _, _, _)           => iae("missingAppliedId", s"Update molecule should start with an applied id: `$ns(<eid>)...`")
   }
 
   private def noGenericsInTail = model.elements.tail.collectFirst {
@@ -116,10 +124,12 @@ case class CheckModel(model: Model, op: String) {
     catchConflictingCardOneValues(model.elements)
   }
 
-  private def noRefs = model.elements.collectFirst {
-    case b: Bond      => iae("noRefs", op.capitalize + " molecules can't have references to other namespaces.")
-    case n: Nested    => iae("noRefs", op.capitalize + " molecules can't have nested data structures.")
-    case c: Composite => iae("noRefs", op.capitalize + " molecules can't be composites.")
+  private def update_onlyOneNs = model.elements.collect {
+    //    case Bond(_, _, _, _, Seq(BiEdgeRef(_, _)))   => true
+    //    case Bond(_, _, _, _, Seq(BiTargetRef(_, _))) => true
+    case Bond(_, _, ref, _, _)            => iae("update_onlyOneNs", op.capitalize + s" molecules can't span multiple namespaces like `$ref`.")
+    case Nested(Bond(_, _, ref, _, _), _) => iae("update_onlyOneNs", op.capitalize + s" molecules can't have nested data structures like `$ref`.")
+    case c: Composite                     => iae("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
   }
 
   private def noNested {
@@ -154,7 +164,7 @@ case class CheckModel(model: Model, op: String) {
   }
 
 
-  private def edgeConsistency {
+  private def save_edgeComplete {
     /*
       In order to maintain data consistency for bidirectional edges we need to ensure
       that no edge is connected to only the base or target entity.
@@ -172,42 +182,66 @@ case class CheckModel(model: Model, op: String) {
       }
 
       elements.collectFirst {
-        // ?.. Target
+        // ?.. TargetNs
         case Bond(edgeNs, _, refNs, _, Seq(BiTargetRef(_, x))) => hasBase(elements, edgeNs) getOrElse
-          iae("edgeConsistency", s"Missing base namespace before edge namespace `$refNs`.")
-        // ?.. target
+          iae("save_edgeCompleteª", s"Missing base namespace before edge namespace `$refNs`.")
+        // ?.. targetAttr
         case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => hasBase(elements, edgeNs) getOrElse
-          iae("edgeConsistency", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
+          iae("save_edgeCompleteª", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
       }
     }
 
     def missingTarget(elements: Seq[Element]): Unit = {
 
       def hasTarget(es: Seq[Element], edgeNs: String) = elements.collectFirst {
-        // ... Target
+        // ... TargetNs
         case Bond(edgeNs1, _, _, _, Seq(BiTargetRef(_, _))) if edgeNs1 == edgeNs => true
-        // ... target
+        // ... targetAttr
         case Atom(edgeNs1, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if edgeNs1 == edgeNs => true
-        // ... <nested>
-        case Nested(Bond(edgeNs1, _, _, _, _), _) if edgeNs1 == edgeNs => iae("edgeConsistency",
-          s"Missing target namespace after edge namespace `$edgeNs`.")
       }
 
       elements.collectFirst {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
-          iae("edgeConsistency", s"Missing target namespace after edge namespace `$edgeNs`.")
+          iae("save_edgeCompleteª", s"Missing target namespace after edge namespace `$edgeNs`.")
         // Base.attr.edge ..?
         case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, ns(edgeRefAttr)) getOrElse
-          iae("edgeConsistency", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
+          iae("save_edgeCompleteª", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
         // Base.attr.Edge.prop ..?
         case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, ns(prop)) getOrElse
-          iae("edgeConsistency", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
+          iae("save_edgeCompleteª", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
       }
     }
 
-    missingBase(model.elements)
-    missingTarget(model.elements)
+    model.elements.head match {
+      case Meta(ns, _, "e", BiEdge, Eq(List(eid))) =>
+      case checkNext                               =>
+        missingBase(model.elements)
+        missingTarget(model.elements)
+    }
   }
 
+
+  private def update_edgeComplete {
+
+    def missingTarget(elements: Seq[Element]): Unit = {
+
+      // Ok if target Ns is present - then we are updating with a new edge to a new/existing target entity.
+      def hasTarget(es: Seq[Element], edgeNs: String) = elements.collectFirst {
+        // ... TargetNs
+        case Bond(edgeNs1, _, _, _, Seq(BiTargetRef(_, _))) if edgeNs1 == edgeNs => true
+        // ... targetAttr
+        case Atom(edgeNs1, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if edgeNs1 == edgeNs => true
+      }
+
+      elements.collectFirst {
+        // Base.attr.Edge ..?
+        case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
+          iae("save_edgeCompleteª", s"Can't update edge `$edgeNs` of base entity `$baseNs` without knowing which target entity the edge is pointing too. " +
+            s"Please update the edge itself, like `$edgeNs(<edgeId>).edgeProperty(<new value>).update`.")
+      }
+    }
+
+    missingTarget(model.elements)
+  }
 }

@@ -1,6 +1,5 @@
 package molecule.examples.dayOfDatomic.schema
-
-import molecule.dsl.schemaDefinition._
+import molecule.schema.definition._
 
 // See: http://blog.datomic.com/2013/06/component-entities.html
 

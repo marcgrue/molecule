@@ -1,5 +1,5 @@
 package molecule.dsl
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import scala.language.higherKinds
 
 trait In_3_0[In3_0[_,_,_], In3_1[_,_,_,_], In4_0[_,_,_,_], In4_1[_, _,_,_,_], I1, I2, I3]

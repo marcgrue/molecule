@@ -1,7 +1,7 @@
 package molecule
 package transform
 import molecule.ast.model._
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import molecule.ops.TreeOps
 
 import scala.language.experimental.macros
@@ -9,7 +9,7 @@ import scala.reflect.macros.whitebox.Context
 
 trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 18, 78)
+  val x = DebugMacro("Dsl2Model", 1, 78)
   //  val x = Debug("Dsl2Model", 30, 32, true)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
@@ -34,7 +34,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"TermValue.apply($ns)" => resolve(ns)
 
     // Namespace(eid).attr1...
-    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(extract(eid)))))
+    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS && q"$prev.$ns".isBiEdge => traverse(q"$prev", Meta(firstLow(ns), "", "e", BiEdge, Eq(Seq(extract(eid)))))
+    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS                          => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(extract(eid)))))
 
 
     // Functions ---------------------------
@@ -152,6 +153,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
+      //      x(1, t, prev, cur, op, values, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
 
@@ -205,7 +207,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
     val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
-    x(2, prevElements, curNs, attr, thisElement)
+    //    x(2, prevElements, curNs, attr, thisElement)
     if (prevElements.isEmpty) {
       traverse(q"$prev", thisElement)
     } else {
@@ -260,7 +262,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, bi(q"$prev.$manyRef")), nestedElems)
-//        x(28, prev, parentNs, nestedElems, nested, refNext, q"$prev.$manyRef", q"$prev.$manyRef".card)
+    //        x(28, prev, parentNs, nestedElems, nested, refNext, q"$prev.$manyRef", q"$prev.$manyRef".card)
     nested
   }
 
@@ -301,7 +303,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case t if t.isBiTargetRef       =>
       val baseType = c.typecheck(t).tpe.baseType(weakTypeOf[BiTargetRef_[_]].typeSymbol).typeArgs.head.typeSymbol
       Seq(BiTargetRef(t.refCard, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
-    case t if t.isBiTargetRefAttr       =>
+    case t if t.isBiTargetRefAttr   =>
       val baseType = c.typecheck(t).tpe.baseType(weakTypeOf[BiTargetRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
       Seq(BiTargetRefAttr(t.card, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
     case other                      => Nil
@@ -318,6 +320,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val value: Value = modelValue(op.toString(), attr, values0)
     val enumPrefix = if (attr.isEnum) Some(attr.at.enumPrefix) else None
     val cur = curTree.toString()
+    //    x(35, previous, previous.isRef, previous.isAttr, previous.isBiEdge)
     previous match {
       case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
       case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
@@ -340,16 +343,22 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-    //    x(9, values)
+    //    x(10
+    //      , values0
+    //      , values
+    //      , attr
+    //      , attr.isMapAttr
+    //    )
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
         case resolved: Value => resolved
-        case vs: Seq[_]      => if (vs.isEmpty) Remove(Seq()) else Eq(vs)
-        case other           => errValue(1, other)
+        //        case vs: Seq[_]      => if (vs.isEmpty) Remove(Seq()) else Eq(vs)
+        case vs: Seq[_] => Eq(vs)
+        case other      => errValue(1, other)
       }
       case "k"           => values match {
-        case vs: Seq[_] => Keys(vs.map(_.asInstanceOf[String]))
+        case vs: Seq[_] => MapKeys(vs.map(_.asInstanceOf[String]))
         case other      => errValue(2, other)
       }
       case "count"       => values match {case Fn("avg", i) => Length(Some(Fn("avg", i))); case other => errValue(3, other)}
@@ -360,8 +369,25 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case "$less$eq"    => values match {case qm: Qm.type => Le(Qm); case vs: Seq[_] => Le(vs.head)}
       case "$greater$eq" => values match {case qm: Qm.type => Ge(Qm); case vs: Seq[_] => Ge(vs.head)}
       case "contains"    => values match {case qm: Qm.type => Fulltext(Seq(Qm)); case vs: Seq[_] => Fulltext(vs)}
-      case "add"         => values match {case vs: Seq[_] => Adding(vs); case mapped: Value => mapped}
-      case "remove"      => values match {case vs: Seq[_] => Remove(vs)}
+      case "add"         => values match {
+        case MapEq(pairs)  =>
+          //          x(1, pairs)
+          MapAdd(pairs)
+        case mapped: Value =>
+          //          x(2, mapped)
+          mapped
+        case vs: Seq[_]    =>
+          //          x(3, vs)
+          Add_(vs)
+      }
+      case "remove"      => values match {
+        case vs: Seq[_] if attr.isMapAttr => MapRemove(vs.map(_.toString))
+        case vs: Seq[_]                   => Remove(vs)
+      }
+      case "replace"     => values match {
+        case MapEq(keyValues) => MapReplace(keyValues)
+        case resolved: Value  => resolved
+      }
       case unexpected    => abort(s"[Dsl2Model:modelValue] Unknown operator '$unexpected'\nattr: $attr \nvalue: $values0")
     }
   }
@@ -398,11 +424,22 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq($a.and[$t]($b))"                                  => And(resolveValues(q"Seq($a, $b)"))
       case q"Seq(..$vs)"
         if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]] => vs.head match {
-        case Apply(_, pairs) => mapPairs(pairs, attr)
+        case Apply(_, pairs) =>
+          //          x(3, "seq")
+          mapPairs(pairs, attr)
         case ident           => mapPairs(Seq(ident), attr)
       }
       case q"Seq(..$vs)"
-        if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]       => mapPairs(vs, attr)
+        if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Map[_, _]]   => vs.head match {
+        case Apply(_, pairs) =>
+          //          x(4, "map")
+          mapPairs(pairs, attr)
+        case ident           => mapPairs(Seq(ident), attr)
+      }
+      case q"Seq(..$vs)"
+        if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]       =>
+        //          x(5, "pair")
+        mapPairs(vs, attr)
       case q"Seq(..$vs)" if attr == null                           => vs.flatMap(v => resolveValues(q"$v"))
       case q"Seq(..$vs)"                                           => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
       case other if attr == null                                   => resolveValues(other)
@@ -412,20 +449,20 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
-//    x(23, vs, attr)
+    //    x(23, vs, attr)
     val keyValues = vs.map {
       case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
       case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(q"$k"), extract(q"$v"))
       case ident                                                => (extract(ident), "__pair__")
     }
     if (attr.isMapAttr)
-      Mapping(keyValues.map(kv => (kv._1.asInstanceOf[String], kv._2)))
+      MapEq(keyValues.map(kv => (kv._1.asInstanceOf[String], kv._2)))
     else
-      Replace(keyValues.toMap)
+      Replace(keyValues)
   }
 
   def extract(t: Tree) = {
-//        x(31, t.raw)
+    //        x(31, t.raw)
     t match {
       case Constant(v: String)                            => v
       case Literal(Constant(v: String))                   => v
@@ -436,6 +473,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def resolveValues(tree: Tree, at: att = null) = {
+    //    x(1,tree)
     def resolve(tree0: Tree, values: Seq[Tree] = Seq()): Seq[Tree] = tree0 match {
       case q"$a.or($b)"             => resolve(b, resolve(a, values))
       case q"${_}.string2Model($v)" => values :+ v
@@ -455,7 +493,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       resolve(tree) map extract
     else
       resolve(tree) map extract map validateStaticEnums
-    if (values.isEmpty) abort(s"[Dsl2Model:resolveValues] Unexpected empty values for attribute `$at`")
+    //    if (values.isEmpty) abort(s"[Dsl2Model:resolveValues] Unexpected empty values for attribute `$at`")
     values
   }
 }
@@ -525,6 +563,50 @@ object Dsl2Model {
       }
     }
 
+    // Don't know why we need to extract values at this point?!
+    import c.universe._
+    def extract(raw: Any) = raw match {
+      case Literal(Constant(s: String))  => s
+      case Literal(Constant(i: Int))     => i
+      case Literal(Constant(l: Long))    => l
+      case Literal(Constant(f: Float))   => f
+      case Literal(Constant(d: Double))  => d
+      case Literal(Constant(b: Boolean)) => b
+      case other                         => other
+    }
+    def vs1(values: Seq[Any]) = values.map(extract(_))
+    def vs2(pairs: Map[Any, Any]) = pairs.map { case (k, v) => extract(v) }
+    def dupS(values: Seq[Any]) = vs1(values).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+//    def dupM(pairs: Map[Any, Any]) = vs2(pairs).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupValues(pairs: Seq[(Any, Any)]) = vs1(pairs.map(_._2)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupKeys(pairs: Seq[(Any, Any)]) = vs1(pairs.map(_._1)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+
+    // Catch duplicate update values
+    elements0.collectFirst {
+      case a@Atom(ns, name, _, 1, Eq(vs), _, _, _) if vs.size > 1 =>
+        abort(10, s"Can't apply multiple values to card-one attribute `:$ns/$name`:\n" + vs.mkString("\n"))
+
+      case a@Atom(ns, name, _, _, Add_(vs), _, _, _) if dupS(vs).nonEmpty =>
+        abort(11, s"Can't add duplicate values to attribute `:$ns/$name`:\n" + dupS(vs).mkString("\n"))
+
+      case a@Atom(ns, name, _, _, Replace(pairs), _, _, _) if dupValues(pairs).nonEmpty =>
+        abort(12, s"Can't replace with duplicate values of attribute `:$ns/$name`:\n" + dupValues(pairs).mkString("\n"))
+
+      case a@Atom(ns, name, _, _, Eq(vs), _, _, _) if dupS(vs).nonEmpty =>
+        abort(13, s"Can't apply duplicate values to attribute `:$ns/$name`:\n" + dupS(vs).mkString("\n"))
+
+      case a@Atom(ns, name, _, _, MapAdd(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
+        val dups = dupKeys(pairs)
+        val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
+        abort(14, s"Can't add multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
+
+//      case a@Atom(_, name, _, _, MapReplace(pairs), _, _, _) if dupM(pairs).nonEmpty =>
+//        abort(15, s"Can't replace with duplicate values of attribute `$name`:\n" + dupM(pairs).mkString("\n"))
+//
+//      case a@Atom(_, name, _, _, MapEq(vs), _, _, _) if dupS(vs).nonEmpty =>
+//        abort(16, s"Can't apply duplicate values to attribute `$name`:\n" + dupS(vs).mkString("\n"))
+    }
+
     // Resolve generic elements ............................................................
 
     // Transfer generic values from Meta elements to Atoms and skip Meta elements
@@ -567,7 +649,7 @@ object Dsl2Model {
 
     val model = Model(elements1)
     //            inst(c).x(30, dsl, elements0, elements1, model)
-//                inst(c).x(30, elements0, elements1)
+    //                inst(c).x(30, elements0, elements1)
     //            inst(c).x(30, model)
 
     model

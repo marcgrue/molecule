@@ -3,7 +3,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 
 import molecule.ast.model._
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import molecule.ops.TreeOps
 import molecule.transform._
 
@@ -56,11 +56,13 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Gt(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
         case atom@Atom(_, _, _, _, Le(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
         case atom@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)          => mapIdents(ident +: keyIdents)
-        case atom@Atom(_, _, _, _, Adding(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
+        case atom@Atom(_, _, _, _, Add_(idents), _, _, keyIdents)       => mapIdents(idents ++ keyIdents)
         case atom@Atom(_, _, _, _, Remove(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
-        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, keyIdents) => mapIdents(oldNewMap.toSeq.map(p => (p._1.toString, p._2)) ++ keyIdents)
-        case atom@Atom(_, _, _, _, Mapping(pairs), _, _, keyIdents)     => mapIdents(pairs ++ keyIdents)
-        case atom@Atom(_, _, _, _, Keys(idents), _, _, keyIdents)       => mapIdents(idents ++ keyIdents)
+//        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, keyIdents) => mapIdents(oldNewMap.toSeq.map(p => (p._1.toString, p._2)) ++ keyIdents)
+        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, keyIdents) => mapIdents(oldNewMap ++ keyIdents)
+//        case atom@Atom(_, _, _, _, MapEq(pairs), _, _, keyIdents)       => mapIdents(pairs.toSeq.map(p => (p._1.toString, p._2)) ++ keyIdents)
+        case atom@Atom(_, _, _, _, MapEq(pairs), _, _, keyIdents)       => mapIdents(pairs ++ keyIdents)
+        case atom@Atom(_, _, _, _, MapKeys(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
         case meta@Meta(_, _, _, _, Eq(idents))                          => mapIdents(idents)
         case Nested(_, nestedElements)                                  => mapIdentifiers(nestedElements, identifiers0)
         case Composite(compositeElements)                               => mapIdentifiers(compositeElements, identifiers0)
@@ -119,11 +121,17 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, Gt(ident), _, _, keyIdents)       => atom.copy(value = Gt(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Le(ident), _, _, keyIdents)       => atom.copy(value = Le(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)       => atom.copy(value = Ge(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
-        case atom@Atom(_, _, _, _, Adding(idents), _, _, _)          => atom.copy(value = Adding(getValues(idents)))
+        case atom@Atom(_, _, _, _, Add_(idents), _, _, _)            => atom.copy(value = Add_(getValues(idents)))
         case atom@Atom(_, _, _, _, Remove(idents), _, _, _)          => atom.copy(value = Remove(getValues(idents)))
-        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, _)      => atom.copy(value = Replace( getValues(oldNewMap.toSeq).map{ case (k, v) => (k, v) }.toMap.asInstanceOf[Map[Any, Any]]))
-        case atom@Atom(_, _, _, _, Mapping(idents), _, _, keyIdents) => atom.copy(value = Mapping(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
-        case atom@Atom(_, _, _, _, Keys(idents), _, _, _)            => atom.copy(value = Keys(getValues(idents).asInstanceOf[Seq[String]]))
+
+//        case atom@Atom(_, _, _, _, Replace(oldNewMap), _, _, _)      => atom.copy(value = Replace(getValues(oldNewMap.toSeq).map{ case (k, v) => (k, v) }.toMap.asInstanceOf[Map[Any, Any]]))
+        case atom@Atom(_, _, _, _, Replace(oldNew), _, _, _)      => atom.copy(value = Replace(getValues(oldNew).asInstanceOf[Seq[(String, Any)]]))
+
+//        case atom@Atom(_, _, _, _, MapEq(idents), _, _, keyIdents)   => atom.copy(value = MapEq(getValues(idents.toSeq).map{ case (k, v) => (k, v) }.toMap.asInstanceOf[Map[String, Any]]), keys = getKeys(keyIdents))
+        case atom@Atom(_, _, _, _, MapEq(idents), _, _, keyIdents)   => atom.copy(value = MapEq(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
+
+
+        case atom@Atom(_, _, _, _, MapKeys(idents), _, _, _)         => atom.copy(value = MapKeys(getValues(idents).asInstanceOf[Seq[String]]))
         case meta@Meta(_, _, _, _, Eq(idents))                       => meta.copy(value = Eq(getValues(idents)))
         case Nested(ns, nestedElements)                              => Nested(ns, resolveIdentifiers(nestedElements))
         case Composite(compositeElements)                            => Composite(resolveIdentifiers(compositeElements))

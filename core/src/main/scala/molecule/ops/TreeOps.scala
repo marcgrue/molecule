@@ -1,6 +1,6 @@
 package molecule.ops
 import molecule.ast.query._
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 
 import scala.language.existentials
 //import scala.language.higherKinds
@@ -33,6 +33,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def isBiOtherRef = tpe_ <:< weakTypeOf[BiOtherRef_]
     def isBiOtherRefAttr = tpe_ <:< weakTypeOf[BiOtherRefAttr_]
 
+    def isBiEdge = tpe_ <:< weakTypeOf[BiEdge_]
     def isBiEdgeRef = tpe_ <:< weakTypeOf[BiEdgeRef_[_]]
     def isBiEdgeRefAttr = tpe_ <:< weakTypeOf[BiEdgeRefAttr_[_]]
 

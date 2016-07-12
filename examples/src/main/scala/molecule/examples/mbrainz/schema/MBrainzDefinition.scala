@@ -1,6 +1,5 @@
 package molecule.examples.mbrainz.schema
-
-import molecule.dsl.schemaDefinition._
+import molecule.schema.definition._
 
 @InOut(3, 8)
 object MBrainzDefinition {

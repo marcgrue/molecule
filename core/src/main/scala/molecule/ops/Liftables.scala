@@ -44,6 +44,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   }
 
   implicit val liftTuple2 = Liftable[Product] {
+    //    case (pair1@(k1: String, v1: Any), pair2@(k2: String, v2: Any)) => q"($pair1, $pair2)"
     case (k: String, v: String) => q"($k, $v)"
     case (k: Int, v: Int)       => q"($k, $v)"
     case (k: Long, v: Long)     => q"($k, $v)"
@@ -141,6 +142,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case BiSelfRefAttr(card)         => q"BiSelfRefAttr($card)"
     case BiOtherRef(card)            => q"BiOtherRef($card)"
     case BiOtherRefAttr(card)        => q"BiOtherRefAttr($card)"
+    case BiEdge                      => q"BiEdge"
     case BiEdgeRef(card, attr)       => q"BiEdgeRef($card, $attr)"
     case BiEdgeRefAttr(card, attr)   => q"BiEdgeRefAttr($card, $attr)"
     case BiEdgePropRef(card)         => q"BiEdgePropRef($card)"
@@ -163,6 +165,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case BiSelfRefAttr(card)         => q"BiSelfRefAttr($card)"
     case BiOtherRef(card)            => q"BiOtherRef($card)"
     case BiOtherRefAttr(card)        => q"BiOtherRefAttr($card)"
+    case BiEdge                      => q"BiEdge"
     case BiEdgeRef(card, attr)       => q"BiEdgeRef($card, $attr)"
     case BiEdgeRefAttr(card, attr)   => q"BiEdgeRefAttr($card, $attr)"
     case BiEdgePropRef(card)         => q"BiEdgePropRef($card)"
@@ -188,6 +191,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case BiSelfRefAttr(card)         => q"BiSelfRefAttr($card)"
     case BiOtherRef(card)            => q"BiOtherRef($card)"
     case BiOtherRefAttr(card)        => q"BiOtherRefAttr($card)"
+    case BiEdge                      => q"BiEdge"
     case BiEdgeRef(card, attr)       => q"BiEdgeRef($card, $attr)"
     case BiEdgeRefAttr(card, attr)   => q"BiEdgeRefAttr($card, $attr)"
     case BiEdgePropRef(card)         => q"BiEdgePropRef($card)"
@@ -210,11 +214,14 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Qm                          => q"Qm"
     case Distinct                    => q"Distinct"
     case Fulltext(search)            => q"Fulltext(Seq(..$search))"
-    case Adding(values)              => q"Adding(Seq(..$values))"
-    case Replace(map)                => q"Replace($map)"
+    case Add_(values)                => q"Add_(Seq(..$values))"
+    case Replace(oldNew)             => q"Replace(Seq(..$oldNew))"
     case Remove(values)              => q"Remove(Seq(..$values))"
-    case Mapping(pairs)              => q"Mapping(Seq(..$pairs))"
-    case Keys(ks)                    => q"Keys(Seq(..$ks))"
+    case MapEq(pairs)                => q"MapEq(Seq(..$pairs))"
+    case MapAdd(pairs)               => q"MapAdd(Seq(..$pairs))"
+    case MapReplace(pairs)           => q"MapReplace(Seq(..$pairs))"
+    case MapRemove(keys)             => q"MapRemove(Seq(..$keys))"
+    case MapKeys(keys)               => q"MapKeys(Seq(..$keys))"
   }
 
 

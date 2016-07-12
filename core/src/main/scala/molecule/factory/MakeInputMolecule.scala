@@ -1,7 +1,7 @@
 package molecule.factory
 import molecule._
 import molecule.api._
-import molecule.dsl.schemaDSL._
+import molecule.dsl.actions._
 import molecule.ops.QueryOps._
 import molecule.ops.TreeOps
 import molecule.dsl._
