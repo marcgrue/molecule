@@ -37,58 +37,51 @@ object definition {
   object oneEmail extends oneEmail
   trait oneEmail extends oneString
 
-  // Number .....................
-  trait number[Builder] extends scalarAttr[Builder] {
-    // One by one
-    lazy val count   : Builder = ???
-    lazy val avg     : Builder = ???
-    lazy val median  : Builder = ???
-    lazy val variance: Builder = ???
-    lazy val stddev  : Builder = ???
-
-    // All
-    lazy val aggregates: Builder = ???
+  trait number[Builder, T] extends scalarAttr[Builder] {
+    // Todo: schema level constraints
+    def min(n: T) : this.type = ???
+    def max(n: T) : this.type = ???
   }
 
   // Int
   object oneInt extends oneInt
-  trait oneInt extends number[oneInt] with scalarAttr[oneInt]
+  trait oneInt extends number[oneInt, Int]
 
   object manyInt extends manyInt
-  trait manyInt extends number[manyInt] with scalarAttr[manyInt]
+  trait manyInt extends number[manyInt, Int]
 
   object mapInt extends mapInt
-  trait mapInt extends number[mapInt] with scalarAttr[mapInt]
+  trait mapInt extends number[mapInt, Int]
 
   // Long
   object oneLong extends oneLong
-  trait oneLong extends number[oneLong] with scalarAttr[oneLong]
+  trait oneLong extends number[oneLong, Long]
 
   object manyLong extends manyLong
-  trait manyLong extends number[manyLong] with scalarAttr[manyLong]
+  trait manyLong extends number[manyLong, Long]
 
   object mapLong extends mapLong
-  trait mapLong extends number[mapLong] with scalarAttr[mapLong]
+  trait mapLong extends number[mapLong, Long]
 
   // Float
   object oneFloat extends oneFloat
-  trait oneFloat extends number[oneFloat] with scalarAttr[oneFloat]
+  trait oneFloat extends number[oneFloat, Float]
 
   object manyFloat extends manyFloat
-  trait manyFloat extends number[manyFloat] with scalarAttr[manyFloat]
+  trait manyFloat extends number[manyFloat, Float]
 
   object mapFloat extends mapFloat
-  trait mapFloat extends number[mapFloat] with scalarAttr[mapFloat]
+  trait mapFloat extends number[mapFloat, Float]
 
   // Double
   object oneDouble extends oneDouble
-  trait oneDouble extends number[oneDouble] with scalarAttr[oneDouble]
+  trait oneDouble extends number[oneDouble, Double]
 
   object manyDouble extends manyDouble
-  trait manyDouble extends number[manyDouble] with scalarAttr[manyDouble]
+  trait manyDouble extends number[manyDouble, Double]
 
   object mapDouble extends mapDouble
-  trait mapDouble extends number[mapDouble] with scalarAttr[mapDouble]
+  trait mapDouble extends number[mapDouble, Double]
 
   // Boolean
   object oneBoolean extends oneBoolean
@@ -99,6 +92,27 @@ object definition {
 
   object mapBoolean extends mapBoolean
   trait mapBoolean extends scalarAttr[mapBoolean]
+
+
+  // BigInt
+  object oneBigInt extends oneBigInt
+  trait oneBigInt extends number[oneBigInt, BigInt]
+
+  object manyBigInt extends manyBigInt
+  trait manyBigInt extends number[manyBigInt, BigInt]
+
+  object mapBigInt extends mapBigInt
+  trait mapBigInt extends number[mapBigInt, BigInt]
+
+  // BigDecimal
+  object oneBigDec extends oneBigDec
+  trait oneBigDec extends number[oneBigDec, BigDecimal]
+
+  object manyBigDec extends manyBigDec
+  trait manyBigDec extends number[manyBigDec, BigDecimal]
+
+  object mapBigDec extends mapBigDec
+  trait mapBigDec extends number[mapBigDec, BigDecimal]
 
   // Date
   object oneDate extends oneDate
@@ -130,11 +144,15 @@ object definition {
   object mapURI extends mapURI
   trait mapURI extends scalarAttr[mapURI]
 
-  // todo?
-  // BigInt
-  // BigDec
   // Bytes
+  object oneByte extends oneByte
+  trait oneByte extends scalarAttr[oneByte]
 
+  object manyByte extends manyByte
+  trait manyByte extends scalarAttr[manyByte]
+
+  object mapByte extends mapByte
+  trait mapByte extends scalarAttr[mapByte]
 
   // Enum
   private[molecule] trait enum extends scalarAttr[enum] {

@@ -40,7 +40,14 @@ object expectCompileError {
           |AST:
           |${showRaw(c.typecheck(c.parse("{ " + codeStr + " }")))}
           |--------------------
-         """.stripMargin)
+         """.stripMargin
+//        s"""Type-checking succeeded unexpectedly!!!
+//          |CODE:
+//          |$codeStr
+//          |$expMsg
+//          |--------------------
+//         """.stripMargin
+      )
     } catch {
       case e: TypecheckException =>
         val msg = e.getMessage.trim

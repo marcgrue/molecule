@@ -98,7 +98,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
     case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
-    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
+    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
+//    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
     case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
 
@@ -128,7 +129,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
       val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+//      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(76, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
@@ -142,7 +144,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[One[_, _, _]]     => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+//      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(77, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
@@ -170,7 +173,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     // Attributes --------------------------------------
 
     case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
-    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
+//    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
+    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
     case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
 
@@ -330,7 +334,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case prev if cur == "a_"               => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
       case prev if cur == "ns"               => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
       case prev if cur == "ns_"              => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
-      case prev if attr.isMapAttr            => Atom(attr.ns, attr.name, cast(attr), 3, value, Some("mapping"), bi(attr))
+      case prev if attr.isMapAttr            => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
+//      case prev if attr.isMapAttr            => Atom(attr.ns, attr.name, cast(attr), 3, value, Some("mapping"), bi(attr))
       case prev if attr.isAttr               => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
       case prev if prev.isAttr               => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
       case prev                              => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
@@ -343,19 +348,21 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-    //    x(10
-    //      , values0
-    //      , values
-    //      , attr
-    //      , attr.isMapAttr
-    //    )
+//    x(10
+//      , values0
+//      , values
+//      , op
+//      , attr
+//      , attr.isMapAttr
+//    )
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
-        case resolved: Value => resolved
         //        case vs: Seq[_]      => if (vs.isEmpty) Remove(Seq()) else Eq(vs)
-        case vs: Seq[_] => Eq(vs)
-        case other      => errValue(1, other)
+        case resolved: Value                            => resolved
+        case vs: Seq[_] if attr.isMapAttr && vs.isEmpty => MapEq(Seq())
+        case vs: Seq[_]                                 => Eq(vs)
+        case other                                      => errValue(1, other)
       }
       case "k"           => values match {
         case vs: Seq[_] => MapKeys(vs.map(_.asInstanceOf[String]))
@@ -370,15 +377,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case "$greater$eq" => values match {case qm: Qm.type => Ge(Qm); case vs: Seq[_] => Ge(vs.head)}
       case "contains"    => values match {case qm: Qm.type => Fulltext(Seq(Qm)); case vs: Seq[_] => Fulltext(vs)}
       case "add"         => values match {
-        case MapEq(pairs)  =>
-          //          x(1, pairs)
-          MapAdd(pairs)
-        case mapped: Value =>
-          //          x(2, mapped)
-          mapped
-        case vs: Seq[_]    =>
-          //          x(3, vs)
-          Add_(vs)
+        case MapEq(pairs)  => MapAdd(pairs)
+        case mapped: Value => mapped
+        case vs: Seq[_]    => Add_(vs)
       }
       case "remove"      => values match {
         case vs: Seq[_] if attr.isMapAttr => MapRemove(vs.map(_.toString))
@@ -429,21 +430,21 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
           mapPairs(pairs, attr)
         case ident           => mapPairs(Seq(ident), attr)
       }
+      //      case q"Seq(..$vs)"
+      //        if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Map[_, _]]   => vs.head match {
+      //        case Apply(_, pairs) =>
+      //          //          x(4, "map")
+      //          mapPairs(pairs, attr)
+      //        case ident           => mapPairs(Seq(ident), attr)
+      //      }
       case q"Seq(..$vs)"
-        if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Map[_, _]]   => vs.head match {
-        case Apply(_, pairs) =>
-          //          x(4, "map")
-          mapPairs(pairs, attr)
-        case ident           => mapPairs(Seq(ident), attr)
-      }
-      case q"Seq(..$vs)"
-        if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]       =>
+        if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] =>
         //          x(5, "pair")
         mapPairs(vs, attr)
-      case q"Seq(..$vs)" if attr == null                           => vs.flatMap(v => resolveValues(q"$v"))
-      case q"Seq(..$vs)"                                           => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
-      case other if attr == null                                   => resolveValues(other)
-      case other                                                   => resolveValues(other, att(q"$attr"))
+      case q"Seq(..$vs)" if attr == null                     => vs.flatMap(v => resolveValues(q"$v"))
+      case q"Seq(..$vs)"                                     => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
+      case other if attr == null                             => resolveValues(other)
+      case other                                             => resolveValues(other, att(q"$attr"))
       //      case other if attr.isOneURI || attr.isManyURI                => Fn("URI", resolveValues(other))
     }
   }
@@ -563,7 +564,7 @@ object Dsl2Model {
       }
     }
 
-    // Don't know why we need to extract values at this point?!
+    // Why do we need to extract values at this point?!
     import c.universe._
     def extract(raw: Any) = raw match {
       case Literal(Constant(s: String))  => s
@@ -574,12 +575,10 @@ object Dsl2Model {
       case Literal(Constant(b: Boolean)) => b
       case other                         => other
     }
-    def vs1(values: Seq[Any]) = values.map(extract(_))
-    def vs2(pairs: Map[Any, Any]) = pairs.map { case (k, v) => extract(v) }
-    def dupS(values: Seq[Any]) = vs1(values).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
-//    def dupM(pairs: Map[Any, Any]) = vs2(pairs).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
-    def dupValues(pairs: Seq[(Any, Any)]) = vs1(pairs.map(_._2)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
-    def dupKeys(pairs: Seq[(Any, Any)]) = vs1(pairs.map(_._1)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def vs(values: Seq[Any]) = values map extract
+    def dupS(values: Seq[Any]) = vs(values).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupValues(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._2)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupKeys(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._1)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
 
     // Catch duplicate update values
     elements0.collectFirst {
@@ -600,11 +599,15 @@ object Dsl2Model {
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         abort(14, s"Can't add multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
 
-//      case a@Atom(_, name, _, _, MapReplace(pairs), _, _, _) if dupM(pairs).nonEmpty =>
-//        abort(15, s"Can't replace with duplicate values of attribute `$name`:\n" + dupM(pairs).mkString("\n"))
-//
-//      case a@Atom(_, name, _, _, MapEq(vs), _, _, _) if dupS(vs).nonEmpty =>
-//        abort(16, s"Can't apply duplicate values to attribute `$name`:\n" + dupS(vs).mkString("\n"))
+      case a@Atom(ns, name, _, _, MapReplace(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
+        val dups = dupKeys(pairs)
+        val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
+        abort(15, s"Can't replace multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
+
+      case a@Atom(ns, name, _, _, MapEq(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
+        val dups = dupKeys(pairs)
+        val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
+        abort(16, s"Can't apply multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
     }
 
     // Resolve generic elements ............................................................

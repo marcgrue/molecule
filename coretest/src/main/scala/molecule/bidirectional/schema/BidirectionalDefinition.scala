@@ -2,7 +2,7 @@ package molecule.bidirectional.schema
 
 import molecule.schema.definition._
 
-@InOut(0, 9)
+@InOut(1, 9)
 object BidirectionalDefinition {
 
   object living {

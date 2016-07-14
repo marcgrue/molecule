@@ -44,9 +44,11 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   //    )
   //  )
   // Add schema definition directories for boilerplate generation testing
-  .settings(Seq(definitionDirectories(
-//  "molecule/partition",
-//  "molecule/util",
+  .settings(Seq(definitionDirsSeparate(
+  "molecule/util"
+)))
+  .settings(Seq(definitionDirs(
+  "molecule/partition",
   "molecule/bidirectional"
 )))
 
@@ -63,21 +65,23 @@ lazy val moleculeExamples = project.in(file("examples"))
   //      "molecule/examples/seattle"
   //    )
   //  )
-//  .settings(Seq(definitionDirectories(
-//  "molecule/examples/dayOfDatomic",
-//  "molecule/examples/gremlin",
-//  "molecule/examples/mbrainz",
-//  "molecule/examples/seattle",
-//  "molecule/examples/gremlin"
-//)))
+  .settings(Seq(definitionDirs(
+  "molecule/examples/dayOfDatomic",
+  "molecule/examples/gremlin",
+  "molecule/examples/mbrainz",
+  "molecule/examples/seattle",
+  "molecule/examples/gremlin"
+)))
 
 
-def definitionDirectories(domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
+def definitionDirsSeparate(domainDirs: String*) = definitionDirs0(true, domainDirs: _*)
+def definitionDirs(domainDirs: String*) = definitionDirs0(false, domainDirs: _*)
+def definitionDirs0(separateInFiles: Boolean, domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
   val codeDir = (scalaSource in Compile).value
   val sourceDir = (sourceManaged in Compile).value
 
   // generate source files
-  val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq)
+  val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq, separateInFiles)
 
   // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
   val cache = FileFunction.cached(
@@ -102,7 +106,7 @@ lazy val publishSettings = Seq(
   homepage := Some(url("http://scalamolecule.org")),
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
-  pomExtra := (
+  pomExtra :=
     <developers>
       <developer>
         <id>marcgrue</id>
@@ -110,7 +114,6 @@ lazy val publishSettings = Seq(
         <url>http://marcgrue.com</url>
       </developer>
     </developers>
-    )
 )
 
 lazy val noPublishSettings = Seq(

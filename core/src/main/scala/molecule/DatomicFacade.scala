@@ -135,7 +135,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val stmtss = transformer.insertStmts(dataRows)
     //        x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
-//            x(2, transformer.stmtsModel, stmtss)
+    //            x(2, transformer.stmtsModel, stmtss)
     Tx(conn, stmtss)
   }
 
@@ -297,8 +297,10 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
   private val x = Debug("Tx", 1, 99, false, 3)
 
   val flatStmts = stmtss.flatten.map {
-    case Add(e, a, i: Int, meta)   => Add(e, a, i.toLong: java.lang.Long, meta).toJava
-    case Add(e, a, f: Float, meta) => Add(e, a, f.toDouble: java.lang.Double, meta).toJava
+    case Add(e, a, i: Int, meta)             => Add(e, a, i.toLong: java.lang.Long, meta).toJava
+    case Add(e, a, f: Float, meta)           => Add(e, a, f.toDouble: java.lang.Double, meta).toJava
+    case Add(e, a, bigInt: BigInt, meta)     => Add(e, a, bigInt.bigInteger, meta).toJava
+    case Add(e, a, bigDec: BigDecimal, meta) => Add(e, a, bigDec.bigDecimal, meta).toJava
     //    case Add(e, a, d: Date)  => Add(e, a, d).toJava
     //    case Add(e, a, v: UUID)  => Add(e, a, v).toJava
     //    case Add(e, a, v: URI)   => Add(e, a, v).toJava
@@ -322,8 +324,8 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     val txTtempIds = txResult.get(Connection.TEMPIDS)
     val dbAfter = txResult.get(Connection.DB_AFTER).asInstanceOf[Db]
     val ids: Seq[Long] = tempIds.map(tempId => datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]).distinct
-//        x(1, transformer.stmtsModel, stmtss, datoms, ids)
-//        x(1, datoms, tempIds, ids)
+    //        x(1, transformer.stmtsModel, stmtss, datoms, ids)
+    //        x(1, datoms, tempIds, ids)
     ids.toList
   }
 
@@ -365,3 +367,13 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
 //      |        [(.compareTo ^String ?c3 ?cValue) ?c3_1]
 //      |        [(> ?c3_1 0)]]
 //    """.stripMargin, argss1: _*) === 77
+
+
+//      import datomic.Util.list
+//      conn.transact( //"[[:db/add #db/id[:db.part/user -1000097] :ns/bigInt 123]]"
+//        list(
+//          list(":db/add", Peer.tempid(s":db.part/user"), ":ns/int", 123.asInstanceOf[Object]),
+////          list(":db/add", Peer.tempid(s":db.part/user"), ":ns/int", "(int 123)".asInstanceOf[Object]),
+//          list(":db/add", Peer.tempid(s":db.part/user"), ":ns/bigInt", bigInt1.bigInteger.asInstanceOf[Object])
+//        )
+//      ).get

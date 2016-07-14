@@ -126,12 +126,13 @@ object MoleculeBoilerplate {
 
       str match {
         case r"oneString(.*)$str"  => Seq(Val(attr, attrClean, "OneString", "String", "", "string", parseOptions(str, Nil, attr, curFullNs)))
-        case r"oneByte(.*)$str"    => Seq(Val(attr, attrClean, "OneByte", "Byte", "", "byte", parseOptions(str, Nil, attr, curFullNs)))
-        case r"oneShort(.*)$str"   => Seq(Val(attr, attrClean, "OneShort", "Short", "", "short", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneInt(.*)$str"     => Seq(Val(attr, attrClean, "OneInt", "Int", "", "long", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneLong(.*)$str"    => Seq(Val(attr, attrClean, "OneLong", "Long", "", "long", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneFloat(.*)$str"   => Seq(Val(attr, attrClean, "OneFloat", "Float", "", "double", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneDouble(.*)$str"  => Seq(Val(attr, attrClean, "OneDouble", "Double", "", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneBigInt(.*)$str"  => Seq(Val(attr, attrClean, "OneBigInt", "BigInt", "", "bigint", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneBigDec(.*)$str"  => Seq(Val(attr, attrClean, "OneBigDec", "BigDecimal", "", "bigdec", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneByte(.*)$str"    => Seq(Val(attr, attrClean, "OneByte", "Byte", "", "bytes", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneBoolean(.*)$str" => Seq(Val(attr, attrClean, "OneBoolean", "Boolean", "", "boolean", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneDate(.*)$str"    => Seq(Val(attr, attrClean, "OneDate", "java.util.Date", "", "instant", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneUUID(.*)$str"    => Seq(Val(attr, attrClean, "OneUUID", "java.util.UUID", "", "uuid", parseOptions(str, Nil, attr, curFullNs)))
@@ -142,6 +143,9 @@ object MoleculeBoilerplate {
         case r"manyLong(.*)$str"    => Seq(Val(attr, attrClean, "ManyLong", "Set[Long]", "Long", "long", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyFloat(.*)$str"   => Seq(Val(attr, attrClean, "ManyFloat", "Set[Float]", "Float", "double", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyDouble(.*)$str"  => Seq(Val(attr, attrClean, "ManyDouble", "Set[Double]", "Double", "double", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyBigInt(.*)$str"  => Seq(Val(attr, attrClean, "ManyBigInt", "Set[BigInt]", "BigInt", "bigint", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyBigDec(.*)$str"  => Seq(Val(attr, attrClean, "ManyBigDec", "Set[BigDecimal]", "BigDecimal", "bigdec", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyByte(.*)$str"    => Seq(Val(attr, attrClean, "ManyByte", "Set[Byte]", "Byte", "bytes", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyBoolean(.*)$str" => Seq(Val(attr, attrClean, "ManyBoolean", "Set[Boolean]", "Boolean", "boolean", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyDate(.*)$str"    => Seq(Val(attr, attrClean, "ManyDate", "Set[java.util.Date]", "java.util.Date", "instant", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyUUID(.*)$str"    => Seq(Val(attr, attrClean, "ManyUUID", "Set[java.util.UUID]", "java.util.UUID", "uuid", parseOptions(str, Nil, attr, curFullNs)))
@@ -150,27 +154,47 @@ object MoleculeBoilerplate {
         case r"mapString(.*)$str"  => Seq(
           Val(attr, attrClean, "MapString", "Map[String, String]", "String", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneString", "String", "K", "string", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapInt(.*)$str"     => Seq(
           Val(attr, attrClean, "MapInt", "Map[String, Int]", "Int", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneInt", "Int", "K", "long", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapLong(.*)$str"    => Seq(
           Val(attr, attrClean, "MapLong", "Map[String, Long]", "Long", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneLong", "Long", "K", "long", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapFloat(.*)$str"   => Seq(
           Val(attr, attrClean, "MapFloat", "Map[String, Float]", "Float", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneFloat", "Float", "K", "double", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapDouble(.*)$str"  => Seq(
           Val(attr, attrClean, "MapDouble", "Map[String, Double]", "Double", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneDouble", "Double", "K", "double", parseOptions(str, Nil, attr, curFullNs)))
+
+        case r"mapBigInt(.*)$str"  => Seq(
+          Val(attr, attrClean, "MapBigInt", "Map[String, BigInt]", "BigInt", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneBigInt", "BigInt", "K", "bigint", parseOptions(str, Nil, attr, curFullNs)))
+
+        case r"mapBigDec(.*)$str"  => Seq(
+          Val(attr, attrClean, "MapBigDec", "Map[String, BigDecimal]", "BigDecimal", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneBigDec", "BigDecimal", "K", "bigdec", parseOptions(str, Nil, attr, curFullNs)))
+
+        case r"mapByte(.*)$str"   => Seq(
+          Val(attr, attrClean, "MapByte", "Map[String, Byte]", "Byte", "bytes", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneByte", "Byte", "K", "bytes", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapBoolean(.*)$str" => Seq(
           Val(attr, attrClean, "MapBoolean", "Map[String, Boolean]", "Boolean", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneBoolean", "Boolean", "K", "boolean", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapDate(.*)$str"    => Seq(
           Val(attr, attrClean, "MapDate", "Map[String, java.util.Date]", "java.util.Date", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneDate", "java.util.Date", "K", "instant", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapUUID(.*)$str"    => Seq(
           Val(attr, attrClean, "MapUUID", "Map[String, java.util.UUID]", "java.util.UUID", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneUUID", "java.util.UUID", "K", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+
         case r"mapURI(.*)$str"     => Seq(
           Val(attr, attrClean, "MapURI", "Map[String, java.net.URI]", "java.net.URI", "string", parseOptions(str, Nil, attr, curFullNs)),
           Val(attrK, attrK, "OneURI", "java.net.URI", "K", "uri", parseOptions(str, Nil, attr, curFullNs)))
@@ -391,7 +415,7 @@ object MoleculeBoilerplate {
       case (d, line) => line.trim match {
         case r"\/\/.*" /* comments allowed */                         => d
         case r"package (.*)$path\.[\w]*"                              => d.copy(pkg = path)
-        case "import molecule.schema.definition._"                 => d
+        case "import molecule.schema.definition._"                    => d
         case r"@InOut\((\d+)$inS, (\d+)$outS\)"                       => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
         case r"object (.*)${dmn}Definition \{"                        => d.copy(domain = dmn)
         case r"object ([a-z]\w*)$part\s*\{"                           => d.copy(curPart = part)
@@ -809,136 +833,8 @@ object MoleculeBoilerplate {
     }
   }
 
-  //  def namespaceBodies(d: Definition, namespace: Namespace): (String, Seq[(Int, String)]) = {
-  //    val inArity = d.in
-  //    val outArity = d.out
-  //    val Ns = namespace.ns
-  //    val attrs = namespace.attrs
-  //    val p1 = (s: String) => padS(attrs.map(_.attr).filter(!_.startsWith("_")).map(_.length).max, s)
-  //    val p2 = (s: String) => padS(attrs.map(_.clazz).filter(!_.startsWith("Back")).map(_.length).max, s)
-  //    def mapType(s: String) = s match {
-  //      case "java.util.Date" => "Date"
-  //      case "java.util.UUID" => "UUID"
-  //      case "java.net.URI"   => "URI"
-  //      case other            => other
-  //    }
-  //
-  //    val attrClasses = attrs.flatMap {
-  //      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if tpe.take(3) == "Map" =>
-  //        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
-  //
-  //      case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, options) if baseTpe == "K" =>
-  //        val options2 = options :+ Optional("", "MapAttrK")
-  //        val extensions = " with " + options2.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
-  //
-  //      case Val(attr, _, clazz, _, _, _, options) =>
-  //        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
-  //
-  //      case Enum(attr, _, clazz, _, _, enums, _) =>
-  //        val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
-  //        Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }""")
-  //
-  //      case Ref(attr, _, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional_")) =>
-  //        val (revNs, revRef) = opts.collectFirst {
-  //          case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional_") => (revNs0, revRef0.split(':').last)
-  //        }.get
-  //        val bidirectAttr = if (revNs == Ns) revRef else s"$revNs.$revRef"
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] with Bidirectional_[$bidirectAttr[Ns, In]]")
-  //
-  //      case Ref(attr, _, clazz, _, _, _, _, _) =>
-  //        Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
-  //
-  //      case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
-  //    }.mkString("\n  ").trim
-  //
-  //    val attrClassesOpt = attrs.flatMap {
-  //      case Val(attr, attrClean, clazz, tpe, baseTpe, _, options) if tpe.take(3) == "Map" =>
-  //        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
-  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
-  //
-  //      case Val(attr, attrClean, clazz, _, _, _, options) =>
-  //        val extensions = if (options.isEmpty) "" else " with " + options.filter(_.clazz.nonEmpty).map(_.clazz).mkString(" with ")
-  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
-  //
-  //      case Enum(attr, attrClean, clazz, _, _, enums, _) =>
-  //        val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
-  //        Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} { $enumValues }""")
-  //
-  //      case Ref(attr, attrClean, clazz, _, _, _, _, opts) if opts.exists(_.clazz.startsWith("Bidirectional_")) =>
-  //        val (revNs, revRef) = opts.collectFirst { case Optional(revNs0, revRef0) if revRef0.startsWith("Bidirectional_") => (revNs0, revRef0.split(':').last) }.get
-  //        val bidirectAttr = if (revNs == Ns) revRef else s"$revNs.$revRef"
-  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)} with Bidirectional_[$bidirectAttr[Ns, In]]")
-  //
-  //      case Ref(attr, attrClean, clazz, _, _, _, _, _) =>
-  //        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}")
-  //
-  //      case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
-  //    }.mkString("\n  ").trim
-  //
-  //    val nsArities = d.nss.map(ns => ns.ns -> ns.attrs.size).toMap
-  //
-  //    val extraImports0 = attrs.collect {
-  //      case Val(_, _, _, tpe, _, _, _) if tpe.take(4) == "java" => tpe
-  //    }.distinct
-  //    val extraImports = if (extraImports0.isEmpty) "" else extraImports0.mkString(s"\nimport ", "\nimport ", "")
-  //
-  //    val nsTraitsOut = (0 to outArity).map(nsTrait(namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
-  //    val outFile: String =
-  //      s"""/*
-  //          |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$Ns`
-  //          |*
-  //          |* To change:
-  //          |* 1. edit schema definition file in `${d.pkg}.schema/`
-  //          |* 2. `sbt compile` in terminal
-  //          |* 3. Refresh and re-compile project in IDE
-  //          |*/
-  //          |package ${d.pkg}.dsl.${firstLow(d.domain)}
-  //          |import molecule.dsl.actions._
-  //          |import molecule.dsl._$extraImports
-  //          |
-  //          |
-  //          |object $Ns extends ${Ns}_0 with FirstNS {
-  //          |  def apply(e: Long): ${Ns}_0 = ???
-  //          |}
-  //          |
-  //          |trait $Ns {
-  //          |  $attrClasses
-  //          |
-  //          |  $attrClassesOpt
-  //          |}
-  //          |
-  //          |$nsTraitsOut""".stripMargin
-  //
-  //    val nsTraitsIn: Seq[(Int, String)] = if (inArity == 0) Nil
-  //    else (1 to inArity).map(in =>
-  //      (in, (0 to outArity).map(nsTrait(namespace, in, _, inArity, outArity, nsArities)).mkString("\n"))
-  //    )
-  //    val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
-  //      val inFile: String =
-  //        s"""/*
-  //            |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$Ns`
-  //            |*
-  //            |* To change:
-  //            |* 1. edit schema definition file in `${d.pkg}.schema/`
-  //            |* 2. `sbt compile` in terminal
-  //            |* 3. Refresh and re-compile project in IDE
-  //            |*/
-  //            |package ${d.pkg}.dsl.${firstLow(d.domain)}
-  //            |import molecule.dsl.actions._
-  //            |import molecule.dsl._$extraImports
-  //            |
-  //            |$inTraits""".stripMargin
-  //
-  //      (in, inFile)
-  //    }
-  //
-  //    (outFile, inFiles)
-  //  }
 
-  def namespaceBody(d: Definition, namespace: Namespace): String = {
+  def resolveNs(d: Definition, namespace: Namespace) = {
     val inArity = d.in
     val outArity = d.out
     val Ns = namespace.ns
@@ -1024,18 +920,84 @@ object MoleculeBoilerplate {
 
     val nsArities = d.nss.map(ns => ns.ns -> ns.attrs.size).toMap
 
-    val nsTraits = (for {
-      in <- 0 to inArity
-      out <- 0 to outArity
-    } yield nsTrait(namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
-
     val extraImports0 = attrs.collect {
       case Val(_, _, _, tpe, _, _, _) if tpe.take(4) == "java" => tpe
     }.distinct
     val extraImports = if (extraImports0.isEmpty) "" else extraImports0.mkString(s"\nimport ", "\nimport ", "")
 
+    (inArity, outArity, Ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports)
+  }
+
+
+  def namespaceBodies(d: Definition, namespace: Namespace): (String, Seq[(Int, String)]) = {
+
+    val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
+
+    val nsTraitsOut = (0 to outArity).map(nsTrait(namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
+    val outFile: String =
+      s"""/*
+          |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
+          |*
+          |* To change:
+          |* 1. edit schema definition file in `${d.pkg}.schema/`
+          |* 2. `sbt compile` in terminal
+          |* 3. Refresh and re-compile project in IDE
+          |*/
+          |package ${d.pkg}.dsl.${firstLow(d.domain)}
+          |import molecule.dsl.actions._
+          |import molecule.dsl._$extraImports
+          |
+          |
+          |object $ns extends ${ns}_0 with FirstNS {
+          |  def apply(e: Long): ${ns}_0 = ???
+          |}
+          |
+          |trait $ns {
+          |  $attrClasses
+          |
+          |  $attrClassesOpt
+          |}
+          |
+          |$nsTraitsOut""".stripMargin
+
+    val nsTraitsIn: Seq[(Int, String)] = if (inArity == 0) Nil
+    else (1 to inArity).map(in =>
+      (in, (0 to outArity).map(nsTrait(namespace, in, _, inArity, outArity, nsArities)).mkString("\n"))
+    )
+    val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
+      val inFile: String =
+        s"""/*
+            |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
+            |*
+            |* To change:
+            |* 1. edit schema definition file in `${d.pkg}.schema/`
+            |* 2. `sbt compile` in terminal
+            |* 3. Refresh and re-compile project in IDE
+            |*/
+            |package ${d.pkg}.dsl.${firstLow(d.domain)}
+            |import molecule.dsl.actions._
+            |import molecule.dsl._$extraImports
+            |
+            |$inTraits""".stripMargin
+
+      (in, inFile)
+    }
+
+    (outFile, inFiles)
+  }
+
+
+  def namespaceBody(d: Definition, namespace: Namespace): String = {
+
+    val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
+
+    val nsTraits = (for {
+      in <- 0 to inArity
+      out <- 0 to outArity
+    } yield nsTrait(namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
+
     s"""/*
-        |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$Ns`
+        |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
         |*
         |* To change:
         |* 1. edit schema definition file in `${d.pkg}.schema/`
@@ -1047,11 +1009,11 @@ object MoleculeBoilerplate {
         |import molecule.dsl._$extraImports
         |
         |
-        |object $Ns extends ${Ns}_0 with FirstNS {
-        |  def apply(e: Long): ${Ns}_0 = ???
+        |object $ns extends ${ns}_0 with FirstNS {
+        |  def apply(e: Long): ${ns}_0 = ???
         |}
         |
-        |trait $Ns $ext{
+        |trait $ns $ext{
         |  $attrClasses
         |
         |  $attrClassesOpt
@@ -1060,7 +1022,8 @@ object MoleculeBoilerplate {
         |$nsTraits""".stripMargin
   }
 
-  def apply(codeDir: File, managedDir: File, defDirs: Seq[String], allIndexed: Boolean = true): Seq[File] = {
+
+  def apply(codeDir: File, managedDir: File, defDirs: Seq[String], separateInFiles: Boolean = false, allIndexed: Boolean = true): Seq[File] = {
     // Loop domain directories
     val files = defDirs flatMap { defDir =>
       val definitionFiles = sbt.IO.listFiles(codeDir / defDir / "schema").filter(f => f.isFile && f.getName.endsWith("Definition.scala"))
@@ -1076,26 +1039,34 @@ object MoleculeBoilerplate {
         val schemaFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "schema" / s"${d.domain}Schema.scala"
         IO.write(schemaFile, schemaBody(d))
 
-        //        // Write namespace files
-        //        val namespaceFiles = d.nss.flatMap { ns =>
-        //          val (outBody, inBodies) = namespaceBodies(d, ns)
-        //          val outFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
-        //          IO.write(outFile, outBody)
-        //
-        //          val inFiles = inBodies.map { case (i, inBody) =>
-        //            val inFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}_in$i.scala"
-        //            IO.write(inFile, inBody)
-        //            inFile
-        //          }
-        //          outFile +: inFiles
-        //        }
+        val namespaceFiles = if (separateInFiles) {
 
-        // Write namespace files
-        val namespaceFiles = d.nss.map { ns =>
-          val nsFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
-          val nsBody = namespaceBody(d, ns)
-          IO.write(nsFile, nsBody)
-          nsFile
+          d.nss.flatMap { ns =>
+            val (outBody, inBodies) = namespaceBodies(d, ns)
+
+            // Output namespace files
+            val nsOutFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
+            IO.write(nsOutFile, outBody)
+
+            // Input namespace files
+            val nsInFiles = inBodies.map { case (i, inBody) =>
+              val inFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}_in$i.scala"
+              IO.write(inFile, inBody)
+              inFile
+            }
+            nsOutFile +: nsInFiles
+          }
+
+        } else {
+
+          // Namespace files (including output and input)
+          // Those could become too big so that you want to separate them
+          d.nss.map { ns =>
+            val nsFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
+            val nsBody = namespaceBody(d, ns)
+            IO.write(nsFile, nsBody)
+            nsFile
+          }
         }
 
         schemaFile +: namespaceFiles
