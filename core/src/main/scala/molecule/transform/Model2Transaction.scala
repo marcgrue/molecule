@@ -131,8 +131,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   private def valueStmts(stmts: Seq[Statement], e: Any, a: String, arg: Any, prefix: Option[String] = None, bi: Generic = NoValue, otherEdgeId: Option[AnyRef] = None): Seq[Statement] = {
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
 
+    def d(v: Any) = v match {
+      case d: Date => format2(d)
+      case other   => other
+    }
+
     def attrValues(id: Any, attr: String) = {
-//      val query = if (prefix.isDefined && prefix.get != "mapping")
+      //      val query = if (prefix.isDefined && prefix.get != "mapping")
       val query = if (prefix.isDefined)
         s"""[:find ?enums
             | :in $$ ?id
@@ -289,40 +294,40 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }
       }
 
-//      if (prefix.contains("mapping")) arg match {
-//
-//        // Maps ......................................
-//
-//        case MapEq(pairs) => pairs.flatMap {
-//          case (key, value) => {
-//            val existing = pairStrs(edgeA, a, key)
-//            existing.size match {
-//              case 0 => Seq(
-//                Add(edgeB, a, key + "@" + value),
-//                Add(edgeA, a, key + "@" + value)
-//              )
-//              case 1 => Seq(
-//                Retract(edgeB, a, existing.head), Add(edgeB, a, key + "@" + value),
-//                Retract(edgeA, a, existing.head), Add(edgeA, a, key + "@" + value)
-//              )
-//              case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-//            }
-//          }
-//        }
-//        //        case Remove(Seq())        => attrValues(e, a).toSeq.flatMap(v => Seq(Retract(edgeB, a, v), Retract(edgeA, a, v)))
-//        //        case Remove(removeValues) => removeValues.flatMap { case key: String =>
-//        //          val existing = pairStrs(e, a, key)
-//        //          existing.size match {
-//        //            case 0 => Nil
-//        //            case 1 => Seq(Retract(edgeB, a, existing.head), Retract(edgeA, a, existing.head))
-//        //            case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-//        //          }
-//        //        }
-//        case other => iae("valueStmts:biEdgeProp", "Unexpected arg for mapped edge property: " + other)
-//
-//      } else
+      //      if (prefix.contains("mapping")) arg match {
+      //
+      //        // Maps ......................................
+      //
+      //        case MapEq(pairs) => pairs.flatMap {
+      //          case (key, value) => {
+      //            val existing = pairStrs(edgeA, a, key)
+      //            existing.size match {
+      //              case 0 => Seq(
+      //                Add(edgeB, a, key + "@" + value),
+      //                Add(edgeA, a, key + "@" + value)
+      //              )
+      //              case 1 => Seq(
+      //                Retract(edgeB, a, existing.head), Add(edgeB, a, key + "@" + value),
+      //                Retract(edgeA, a, existing.head), Add(edgeA, a, key + "@" + value)
+      //              )
+      //              case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+      //            }
+      //          }
+      //        }
+      //        //        case Remove(Seq())        => attrValues(e, a).toSeq.flatMap(v => Seq(Retract(edgeB, a, v), Retract(edgeA, a, v)))
+      //        //        case Remove(removeValues) => removeValues.flatMap { case key: String =>
+      //        //          val existing = pairStrs(e, a, key)
+      //        //          existing.size match {
+      //        //            case 0 => Nil
+      //        //            case 1 => Seq(Retract(edgeB, a, existing.head), Retract(edgeA, a, existing.head))
+      //        //            case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
+      //        //          }
+      //        //        }
+      //        case other => iae("valueStmts:biEdgeProp", "Unexpected arg for mapped edge property: " + other)
+      //
+      //      } else
 
-        arg match {
+      arg match {
 
         // Non-Maps ..................................
 
@@ -367,13 +372,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
         case vs: Set[_]   => vs.toSeq.flatMap(v => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v))))
         case m: Map[_, _] => m.flatMap {
-          case (k, d: Date) => Seq(
-            Add(edgeB, a, k + "@" + format2(d)),
-            Add(edgeA, a, k + "@" + format2(d))
-          )
-          case (k, v)       => Seq(
-            Add(edgeB, a, k + "@" + v),
-            Add(edgeA, a, k + "@" + v)
+          //          case (k, d: Date) => Seq(
+          //            Add(edgeB, a, k + "@" + format2(d)),
+          //            Add(edgeA, a, k + "@" + format2(d))
+          //          )
+          case (k, v) => Seq(
+            Add(edgeB, a, k + "@" + d(v)),
+            Add(edgeA, a, k + "@" + d(v))
           )
         }
         case v :: Nil     => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v)))
@@ -471,12 +476,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       val curPairs = getPairs(e, a)
       val curKeys = curPairs.keys
       newPairs.flatMap {
-        case (k, v) if curPairs.contains((k, v.toString)) =>
-          Nil
-        case (k, v) if curKeys.contains(k)                =>
-          Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + v))
-        case (k, v)                                       =>
-          Seq(Add(e, a, k + "@" + v))
+        case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
+        case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v)))
+        case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v)))
       }
     }
 
@@ -497,18 +499,16 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         e match {
           case updateE: Long => {
             val oldPairs = getPairs(e, a)
-            val newPairs1 = newPairs.map{case (k, v) => (k, v.toString)}
+            val newPairs1 = newPairs.map { case (k, v) => (k, d(v).toString) }
             val obsoleteRetracts = oldPairs.flatMap {
-              case (oldK, oldV) if newPairs1.contains((oldK, oldV)) =>
-                Nil
-              case (oldK, oldV)                                             =>
-                Seq(Retract(e, a, oldK + "@" + oldV))
+              case (oldK, oldV) if newPairs1.contains((oldK, oldV)) => Nil
+              case (oldK, oldV)                                     => Seq(Retract(e, a, oldK + "@" + oldV))
             }
-            val newAdds = newPairs.map { case (k, v) => Add(e, a, k + "@" + v) }
+            val newAdds = newPairs.map { case (k, v) => Add(e, a, k + "@" + d(v)) }
             obsoleteRetracts ++ newAdds
           }
           case newE          =>
-            newPairs.map { case (k, v) => Add(e, a, k + "@" + v) }
+            newPairs.map { case (k, v) => Add(e, a, k + "@" + d(v)) }
         }
 
       case Add_(values) =>
@@ -538,10 +538,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }
         obsoleteRetracts ++ newAdds
 
-      case m: Map[_, _] => m map {
-        case (k, d: Date) => Add(e, a, k + "@" + format2(d)) // Need uniform Date format
-        case (k, v)       => Add(e, a, k + "@" + v)
-      }
+      case m: Map[_, _] => m.map { case (k, v) => Add(e, a, k + "@" + d(v)) }
       case vs: Set[_]   => vs.map(v => Add(e, a, p(v)))
       case v :: Nil     => Seq(Add(e, a, p(v)))
       case vs: List[_]  => vs.map(v => Add(e, a, p(v)))

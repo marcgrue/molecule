@@ -1,34 +1,33 @@
-//package molecule
-//package manipulation
-//
-//import molecule.util.dsl.coreTest._
-//import molecule.util.{CoreSetup, CoreSpec}
-//
-//class Insert extends CoreSpec {
-//
-//
-//  "Single attribute" >> {
-//
-//    "Card one" in new CoreSetup {
-//
-//      // The `insert` method performs the compile time analysis of the molecule
-//      // The `apply` method inserts the type-inferred data at runtime
-//      Ns.str.insert.apply("a")
-//
-//      // We can enter data for one attribute in 4 different ways:
-//
-//      // 1. Comma-separated list
-//      Ns.str insert "b"
-//      Ns.str.insert("c", "d")
-//
-//      // 2. List of values
-//      Ns.str insert List("e")
-//      Ns.str insert List("f", "g")
-//
-//      // All values inserted
-//      Ns.str.get.sorted === List("a", "b", "c", "d", "e", "f", "g")
-//
-//
+package molecule.manipulation
+
+import molecule.util.dsl.coreTest._
+import molecule.util.{CoreSetup, CoreSpec}
+
+class Insert extends CoreSpec {
+
+
+  "Single attribute" >> {
+
+    "Card one" in new CoreSetup {
+
+      // The `insert` method performs the compile time analysis of the molecule
+      // The `apply` method inserts the type-inferred data at runtime
+      Ns.str.insert.apply("a")
+
+      // We can enter data for one attribute in 4 different ways:
+
+      // 1. Comma-separated list
+      Ns.str insert "b"
+      Ns.str.insert("c", "d")
+
+      // 2. List of values
+      Ns.str insert List("e")
+      Ns.str insert List("f", "g")
+
+      // All values inserted
+      Ns.str.get.sorted === List("a", "b", "c", "d", "e", "f", "g")
+
+
 //      Ns.int.insert(1)
 //      Ns.int.insert(2, 3)
 //      Ns.int.insert(List(4))
@@ -99,9 +98,9 @@
 //      Ns.enum.insert(List("enum5", "enum1"))
 //      // Unique values coalesced
 //      Ns.enum.get.sorted === List(enum1, enum2, enum3, enum4, enum5)
-//    }
-//
-//
+    }
+
+
 //    "Card many" in new CoreSetup {
 //
 //      // The `insert` method performs the compile time analysis of the molecule
@@ -190,9 +189,9 @@
 //      Ns.enums.insert(List(Set(enum9), Set(enum0)))
 //      Ns.enums.one.toSeq.sorted === List(enum0, enum1, enum2, enum3, enum4, enum5, enum6, enum7, enum8, enum9)
 //    }
-//  }
-//
-//
+  }
+
+
 //  "Multiple attributes" >> {
 //
 //    "Card one" in new CoreSetup {
@@ -589,4 +588,4 @@
 //      (eid, "a", 42, None, true)
 //    )
 //  }
-//}
+}

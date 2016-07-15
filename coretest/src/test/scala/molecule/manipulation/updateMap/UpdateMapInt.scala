@@ -216,7 +216,7 @@ class UpdateMapInt extends CoreSpec {
           "\n__ident__str1 -> __ident__int2")
 
       // If duplicate values are added with non-equally-named variables we can still catch them at runtime
-      val str1x = "a"
+      val str1x = str1
 
       // vararg
       (Ns(eid).intMap.add(str1 -> int1, str1x -> int2).update must throwA[IllegalArgumentException])

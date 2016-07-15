@@ -31,7 +31,7 @@ case class CheckModel(model: Model, op: String) {
   }
 
   private def checkUpdate() {
-    //    update_onlyOneNs
+    update_onlyOneNs
     missingAppliedId
     noConflictingCardOneValues
     noEdgePropRefs // ??
