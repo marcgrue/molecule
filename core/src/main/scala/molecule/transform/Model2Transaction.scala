@@ -2,6 +2,7 @@ package molecule.transform
 import java.util.{Date, List => jList}
 
 import molecule._
+import molecule.ast.transaction.RetractEntity
 //import datomic.{Connection, Database, Peer}
 import datomic._
 //import molecule.DatomicFacade
@@ -128,7 +129,16 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   }
 
 
-  private def valueStmts(stmts: Seq[Statement], e: Any, a: String, arg: Any, prefix: Option[String] = None, bi: Generic = NoValue, otherEdgeId: Option[AnyRef] = None): Seq[Statement] = {
+  private def valueStmts(
+    stmts: Seq[Statement],
+    e: Any,
+    a: String,
+    arg: Any,
+    prefix: Option[String] = None,
+    bi: Generic = NoValue,
+    otherEdgeId: Option[AnyRef] = None)
+  : Seq[Statement] = {
+
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
 
     def d(v: Any) = v match {
@@ -137,7 +147,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     }
 
     def attrValues(id: Any, attr: String) = {
-      //      val query = if (prefix.isDefined && prefix.get != "mapping")
       val query = if (prefix.isDefined)
         s"""[:find ?enums
             | :in $$ ?id
@@ -151,15 +160,59 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       Peer.q(query, conn.db, id.asInstanceOf[Object]).map(_.get(0))
     }
 
-    def getOtherEdgeId(edgeA: Any) = {
+    def otherEdge(edgeA: Any) = {
       val query = s"[:find ?edgeB :in $$ ?edgeA :where [?edgeA :molecule_Meta/otherEdge ?edgeB]]"
-      Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).map(_.get(0))
+      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).map(_.get(0))
+      result match {
+        case Seq(edgeB) => edgeB
+        case Nil        =>
+          val otherId = EntityFacade(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
+          iae("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
+            s"Could it be another entity?:\n" + otherId.touchQ(2) + s"\nSpooky id: $otherId")
+        case ids        =>
+          iae("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
+      }
     }
+
+
+    def checkDupKeys(pairs: Seq[(String, Any)], host: String, op: String) {
+      val dupKeys = pairs.map(_._1).groupBy(identity).collect { case (key, keys) if keys.size > 1 => key }
+      if (dupKeys.nonEmpty) {
+        val dupPairs = pairs.filter(p => dupKeys.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
+        iae(s"valueStmts:$host", s"Can't $op multiple key/value pairs with the same key for attribute `$a`:\n" + dupPairs.mkString("\n"))
+      }
+    }
+    def checkDupValuesOfPairs(pairs: Seq[(Any, Any)], host: String, op: String) {
+      val dups = pairs.map(_._2).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
+      if (dups.nonEmpty)
+        iae(s"valueStmts:$host", s"Can't replace with duplicate new values of attribute `$a`:\n" + dups.mkString("\n"))
+    }
+    def checkDupValues(values: Seq[Any], host: String, op: String) {
+      val dups = values.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
+      if (dups.nonEmpty)
+        iae(s"valueStmts:$host", s"Can't $op duplicate new values to attribute `$a`:\n" + dups.mkString("\n"))
+    }
+
+    def checkUnknownKeys(newPairs: Seq[(String, Any)], curKeys: Seq[String], host: String) {
+      val unknownKeys = newPairs.map(_._1).diff(curKeys)
+      if (unknownKeys.nonEmpty)
+        iae(s"valueStmts:$host", s"Can't replace non-existing keys of map attribute `$a`:\n" + unknownKeys.mkString("\n") +
+          "\nYou might want to apply the values instead to replace all current values?")
+    }
+
+
+    // Bidirectional self-ref operations ------------------------------------------------------------------
 
     def biSelfRef(card: Int) = arg match {
 
+      case Add_(refs) => refs.flatMap { case ref: Long =>
+        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        if (ref == e) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
+        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
+      }
+
       case Replace(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
-        oldNew.toSeq.flatMap {
+        oldNew.flatMap {
           case (oldRef, newRef) if oldRef == revRef => Seq(
             // This entity e now has ref to newRef instead of oldRef
             Retract(e, a, oldRef), Add(e, a, newRef),
@@ -171,46 +224,23 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }
       }
 
-      case Remove(Seq())      => attrValues(e, a).toSeq.flatMap {
-        case revRef => Seq(Retract(revRef, a, e), Retract(e, a, revRef))
-      }
-      case Remove(removeRefs) => removeRefs.flatMap {
-        case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
-      }
-
-      case Add_(refs) => refs.flatMap { case ref: Long =>
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-        if (ref == e) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
-        reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
-      }
+      case Remove(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref)) }
 
       case Eq(newRefs) => {
         if (newRefs.contains(e)) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
         val oldRefs = attrValues(e, a).toSeq
         val obsoleteRetracts = oldRefs.flatMap {
-          // Remaining ref
           case oldRef if newRefs.contains(oldRef) => Nil
-          // Obsolete ref
-          case obsoleteRef => Seq(
-            Retract(obsoleteRef, a, e),
-            Retract(e, a, obsoleteRef)
-          )
+          case obsoleteRef                        => Seq(Retract(obsoleteRef, a, e), Retract(e, a, obsoleteRef))
         }
         val newAdds = newRefs.flatMap {
-          // Existing ref
           case newRef if oldRefs.contains(newRef) => Nil
-          // New ref
-          case newRef => Seq(
-            Add(newRef, a, e),
-            Add(e, a, newRef)
-          )
+          case newRef                             => Seq(Add(newRef, a, e), Add(e, a, newRef))
         }
         obsoleteRetracts ++ newAdds
       }
 
-      case refs: Set[_] => refs.flatMap { case ref: Long =>
-        Seq(Add(ref, a, e), Add(e, a, ref))
-      }
+      case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, a, e), Add(e, a, ref)) }
       case ref          => {
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, a, e), Add(e, a, ref))
@@ -218,12 +248,58 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     }
 
 
-    def biOtherRef(card: Int) = biSelfRef(card) // Todo
+    // Bidirectional other-ref operations ------------------------------------------------------------------
 
+    def biOtherRef(card: Int, revRefAttr: String) = arg match {
+
+      case Add_(refs) => refs.flatMap { case ref: Long =>
+        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        if (ref == e) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
+        reverseRetracts ++ Seq(Add(ref, revRefAttr, e), Add(e, a, ref))
+      }
+
+      case Replace(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+        oldNew.flatMap {
+          case (oldRef, newRef) if oldRef == revRef => Seq(
+            // This entity e now has ref to newRef instead of oldRef
+            Retract(e, a, oldRef), Add(e, a, newRef),
+            // RevRef no longer has a ref to this entity e
+            // Instead newRef has a ref to this entity e
+            Retract(revRef, revRefAttr, e), Add(newRef, revRefAttr, e)
+          )
+          case _                                    => Nil
+        }
+      }
+
+      case Remove(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, revRefAttr, e), Retract(e, a, ref)) }
+
+      case Eq(newRefs) => {
+        if (newRefs.contains(e)) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
+        val oldRefs = attrValues(e, a).toSeq
+        val obsoleteRetracts = oldRefs.flatMap {
+          case oldRef if newRefs.contains(oldRef) => Nil
+          case obsoleteRef                        => Seq(Retract(obsoleteRef, revRefAttr, e), Retract(e, a, obsoleteRef))
+        }
+        val newAdds = newRefs.flatMap {
+          case newRef if oldRefs.contains(newRef) => Nil
+          case newRef                             => Seq(Add(newRef, revRefAttr, e), Add(e, a, newRef))
+        }
+        obsoleteRetracts ++ newAdds
+      }
+
+      case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, revRefAttr, e), Add(e, a, ref)) }
+      case ref          => {
+        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, revRefAttr, e)) else Nil
+        reverseRetracts ++ Seq(Add(ref, revRefAttr, e), Add(e, a, ref))
+      }
+    }
+
+
+    // Bidirectional edge operations -------------------------------------------------------------------
 
     def biEdgeRefAttr(card: Int, targetAttr: String) = arg match {
       case Replace(oldNew) => iae("valueStmts:biEdgeRefAttr",
-        s"Replacing edge ids with `edgeAttr.apply(old -> new)` is not allowed. It could be an indication that you are " +
+        s"Replacing edge ids with `edgeAttr.replace(old -> new)` is not allowed. It could be an indication that you are " +
           s"trying to replace the old edge with an existing edge which is not allowed.")
       case Add_(_)         => iae("valueStmts:biEdgeRefAttr",
         s"Adding edge ids with `edgeAttr.add(someEdgeId)` is not allowed. It could be an indication that you are " +
@@ -231,43 +307,38 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case other           => biEdgeRef(card, targetAttr)
     }
 
+
     def biEdgeRef(card: Int, targetAttr: String) = arg match {
 
-      // BaseEntity.edge()
-      case Remove(Seq()) =>
-        // Retracting each edge will retract the reverse too since it is defined with `isComponent`
-        attrValues(e, a).map(RetractEntity(_))
-
       // BaseEntity.edge.remove(edge1, edgeN)
-      case Remove(edges) =>
-        edges.flatMap { edgeA =>
-          getOtherEdgeId(edgeA) match {
-            case Seq(edgeB) =>
-              // Retract both edge entities
-              Seq(RetractEntity(edgeA), RetractEntity(edgeB))
-            case Nil        =>
-              val otherId = EntityFacade(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
-              iae("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
-                s"Could it be another entity?:\n" + otherId.touchQ(2) + s"\nSpooky id: $otherId")
-            case ids        =>
-              iae("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
-          }
+      // Retracting each edge will retract the reverse edge too since they are
+      // mutually referenced through :molecule_Meta/otherEdge each having the `isComponent` option
+      case Remove(edges) => edges map RetractEntity
+
+      case Eq(newEdges) =>
+        if (newEdges.contains(e))
+          iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
+        val oldEdges = attrValues(e, a).toSeq
+        val retracts = oldEdges.flatMap {
+          case oldEdgeA if newEdges.contains(oldEdgeA) => Nil
+          case oldEdgeA                                => Seq(RetractEntity(oldEdgeA))
         }
+        val adds = newEdges.flatMap {
+          case edgeA if oldEdges.contains(edgeA) => Nil
+          case edgeA                             =>
+            val edgeB = otherEdge(edgeA)
+            Seq(
+              Add(edgeA, ":molecule_Meta/otherEdge", edgeB),
+              Add(edgeB, ":molecule_Meta/otherEdge", edgeA),
+              Add(edgeB, targetAttr, e),
+              Add(e, a, edgeA)
+            )
+        }
+        retracts ++ adds
 
-      case Eq(edges) => edges.flatMap { case edgeA: Long =>
-        val retracts = attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e))
-        if (edgeA == e) iae("valueStmts:biEdgeRef", "Current entity and referenced entity ids can't be the same")
-        retracts ++ Seq(Add(edgeA, a, e), Add(e, a, edgeA))
-
-        Seq(Add(otherEdgeId, a, e), Add(e, a, edgeA))
-      }
-
-      //        case refs: Set[_]       => refs.flatMap { case ref: Long =>
-      //          Seq(Add(ref, a, e), Add(e, a, ref))
-      //        }
       case edgeA => {
         val edgeB = otherEdgeId getOrElse iae("valueStmts:biEdgeRef", "Missing id of other edge.")
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(oldEdgeA => RetractEntity(oldEdgeA)) else Nil
         reverseRetracts ++ Seq(
           // Interlink edge entities so that we later know which other one to update
           Add(edgeA, ":molecule_Meta/otherEdge", edgeB),
@@ -280,77 +351,87 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
 
     def biEdgeProp(card: Int) = {
+
       val edgeA = e
       val edgeB = otherEdgeId match {
         case Some(eid) if eid == edgeA => iae("valueStmts:biEdgeProp", "Other edge id is unexpectedly the same as this edge id.")
         case Some(eid)                 => eid
-        case None                      => getOtherEdgeId(edgeA) match {
-          case Seq(edgeB1) => edgeB1
-          case Nil         =>
-            val otherId = EntityFacade(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
-            iae("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
-              s"Could it be another entity?:\n" + otherId.touchQ(1))
-          case ids         => iae("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
-        }
+        case None                      => otherEdge(edgeA)
       }
-
-      //      if (prefix.contains("mapping")) arg match {
-      //
-      //        // Maps ......................................
-      //
-      //        case MapEq(pairs) => pairs.flatMap {
-      //          case (key, value) => {
-      //            val existing = pairStrs(edgeA, a, key)
-      //            existing.size match {
-      //              case 0 => Seq(
-      //                Add(edgeB, a, key + "@" + value),
-      //                Add(edgeA, a, key + "@" + value)
-      //              )
-      //              case 1 => Seq(
-      //                Retract(edgeB, a, existing.head), Add(edgeB, a, key + "@" + value),
-      //                Retract(edgeA, a, existing.head), Add(edgeA, a, key + "@" + value)
-      //              )
-      //              case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-      //            }
-      //          }
-      //        }
-      //        //        case Remove(Seq())        => attrValues(e, a).toSeq.flatMap(v => Seq(Retract(edgeB, a, v), Retract(edgeA, a, v)))
-      //        //        case Remove(removeValues) => removeValues.flatMap { case key: String =>
-      //        //          val existing = pairStrs(e, a, key)
-      //        //          existing.size match {
-      //        //            case 0 => Nil
-      //        //            case 1 => Seq(Retract(edgeB, a, existing.head), Retract(edgeA, a, existing.head))
-      //        //            case _ => iae("valueStmts:biEdgeProp", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-      //        //          }
-      //        //        }
-      //        case other => iae("valueStmts:biEdgeProp", "Unexpected arg for mapped edge property: " + other)
-      //
-      //      } else
 
       arg match {
 
-        // Non-Maps ..................................
+        case MapAdd(newPairs) =>
+          checkDupKeys(newPairs, "biEdgeProp", "add")
+          val curPairs = getPairs(edgeA, a)
+          val curKeys = curPairs.keys
+          newPairs.flatMap {
+            case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
+            case (k, v) if curKeys.contains(k)                   => Seq(
+              Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v)),
+              Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v))
+            )
+            case (k, v)                                          => Seq(Add(edgeB, a, k + "@" + d(v)), Add(edgeA, a, k + "@" + d(v)))
+          }
 
-        case Replace(oldNew)      => oldNew.toSeq.flatMap {
-          case (oldValue, newValue) => Seq(
+        case MapReplace(newPairs) =>
+          checkDupKeys(newPairs, "biEdgeProp", "replace")
+          val curPairs = getPairs(edgeA, a)
+          val curKeys = curPairs.keys.toSeq
+          checkUnknownKeys(newPairs, curKeys, "biEdgeProp")
+          newPairs.flatMap {
+            case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
+            case (k, v) if curKeys.contains(k)                   => Seq(
+              Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v)),
+              Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v))
+            )
+            case (k, v)                                          => Seq(Add(edgeB, a, k + "@" + d(v)), Add(edgeA, a, k + "@" + d(v)))
+          }
+
+        case MapRemove(removeKeys0) =>
+          val removeKeys = removeKeys0.distinct
+          val oldPairs = getPairs(edgeA, a)
+          oldPairs.flatMap {
+            case (oldK, oldV) if removeKeys.contains(oldK) => Seq(Retract(edgeB, a, oldK + "@" + oldV), Retract(edgeA, a, oldK + "@" + oldV))
+            case (oldK, oldV)                              => Nil
+          }
+
+        case MapEq(newPairs) =>
+          checkDupKeys(newPairs, "biEdgeProp", "apply")
+          edgeA match {
+            case updateE: Long => {
+              val oldPairs = getPairs(edgeA, a)
+              val newPairs1 = newPairs.map { case (k, v) => (k, d(v).toString) }
+              val obsoleteRetracts = oldPairs.flatMap {
+                case (oldK, oldV) if newPairs1.contains((oldK, oldV)) => Nil
+                case (oldK, oldV)                                     => Seq(Retract(edgeB, a, oldK + "@" + oldV), Retract(edgeA, a, oldK + "@" + oldV))
+              }
+              val newAdds = newPairs.flatMap { case (k, v) => Seq(Add(edgeB, a, k + "@" + d(v)), Add(edgeA, a, k + "@" + d(v))) }
+              obsoleteRetracts ++ newAdds
+            }
+            case newE          =>
+              newPairs.flatMap { case (k, v) => Seq(Add(edgeB, a, k + "@" + d(v)), Add(edgeA, a, k + "@" + d(v))) }
+          }
+
+        case Add_(values) =>
+          checkDupValues(values, "biEdgeProp", "add")
+          values.flatMap(v => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v))))
+
+        case Replace(oldNew) =>
+          checkDupValuesOfPairs(oldNew, "biEdgeProp", "replace")
+          oldNew.flatMap { case (oldValue, newValue) => Seq(
             Retract(edgeB, a, p(oldValue)), Add(edgeB, a, p(newValue)),
-            Retract(edgeA, a, p(oldValue)), Add(edgeA, a, p(newValue))
-          )
-        }
-        case Remove(Seq())        => attrValues(edgeA, a).toSeq.flatMap {
-          case v => Seq(Retract(edgeB, a, p(v)), Retract(edgeA, a, p(v)))
-        }
-        case Remove(removeValues) => removeValues.flatMap {
-          case v =>
-            Seq(Retract(edgeB, a, p(v)), Retract(edgeA, a, p(v)))
-        }
-        case Add_(vs)             => vs.flatMap { case v =>
-          Seq(Add(edgeA, a, p(v)), Add(edgeB, a, p(v)))
-        }
+            Retract(edgeA, a, p(oldValue)), Add(edgeA, a, p(newValue)))
+          }
 
-        case Eq(newValues) => {
-          if (newValues.contains(e)) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-          val curValues = attrValues(e, a).toSeq
+        case Remove(removeValues) =>
+          removeValues.distinct.flatMap(v => Seq(Retract(edgeB, a, p(v)), Retract(edgeA, a, p(v))))
+
+        case Eq(newValues) =>
+          if (newValues.contains(e))
+            iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
+          checkDupValues(newValues, "biEdgeProp", "apply")
+          val curValues = attrValues(edgeA, a).toSeq
           val obsoleteRetracts = curValues.flatMap {
             case curValue if newValues.contains(curValue) => Nil
             case obsoleteValue                            => Seq(Retract(edgeB, a, p(obsoleteValue)), Retract(edgeA, a, p(obsoleteValue)))
@@ -360,57 +441,20 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
             case newValue                                 => Seq(Add(edgeB, a, p(newValue)), Add(edgeA, a, p(newValue)))
           }
           obsoleteRetracts ++ newAdds
-        }
 
-        //                case ref                => {
-        //                  val reverseRetracts = if (meta.endsWith("1")) attrValues(edgeA, a).toSeq.map(revRef => Retract(revRef, a, edgeA)) else Nil
-        //                  reverseRetracts ++ Seq(
-        //                    Add(edgeB, a, ref),
-        //                    Add(edgeA, a, ref)
-        //                  )
-        //                }
-
+        case m: Map[_, _] => m.flatMap { case (k, v) => Seq(Add(edgeB, a, k + "@" + d(v)), Add(edgeA, a, k + "@" + d(v))) }
         case vs: Set[_]   => vs.toSeq.flatMap(v => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v))))
-        case m: Map[_, _] => m.flatMap {
-          //          case (k, d: Date) => Seq(
-          //            Add(edgeB, a, k + "@" + format2(d)),
-          //            Add(edgeA, a, k + "@" + format2(d))
-          //          )
-          case (k, v) => Seq(
-            Add(edgeB, a, k + "@" + d(v)),
-            Add(edgeA, a, k + "@" + d(v))
-          )
-        }
         case v :: Nil     => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v)))
         case vs: List[_]  => vs.flatMap(v => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v))))
         case v            => Seq(Add(edgeB, a, p(v)), Add(edgeA, a, p(v)))
-
       }
     }
 
     def biTargetRef(card: Int, biEdgeRefAttr: String) = {
       val edgeA = e
       val edgeB = otherEdgeId getOrElse iae("valueStmts:biTargetRef", "Missing id of other edge.")
-      //      val List(card, "biEdgeRefAttr) = meta.split("@").toList.tail
-      //      val biEdgeRefAttr = bi.split("@").toList.last
+
       arg match {
-
-        // Each bidirectional manipulation takes care of the reverse ref
-
-        //        case Remove(Seq())      => attrValues(e, a).toSeq.flatMap {
-        //          case ref => Seq(Retract(ref, a, e), Retract(e, a, ref))
-        //        }
-        //        case Remove(removeRefs) => removeRefs.flatMap {
-        //          case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref))
-        //        }
-        //        case Eq(refs) => refs.flatMap { case ref: Long =>
-        //          val reverseRetracts = if (meta.endsWith("1")) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-        //          if (ref == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
-        //          reverseRetracts ++ Seq(
-        //            Add(ref, a, e),
-        //            Add(e, a, ref)
-        //          )
-        //        }
         case Eq(biTargetRef :: Nil) =>
           //          val reverseRetracts = if (meta.endsWith("1")) attrValues(edgeA, a).toSeq.map(revRef => Retract(revRef, a, edgeA)) else Nil
           //          if (biTargetRef == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
@@ -432,70 +476,43 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           )
         }
       }
-
     }
 
-    def mapping = arg match {
-      case MapEq(newPairs) => {
-        val retractCurrents = attrValues(e, a).toSeq.map(v => Retract(e, a, p(v)))
-        val addNew = newPairs.map { case (newKey, newValue) => Add(e, a, newKey + "@" + newValue) }
-        retractCurrents ++ addNew
-      }
-      //      case MapEq(pairs)    => pairs.flatMap {
-      //        case (key, value) => {
-      //          val existing = pairStrs(e, a, key)
-      //          existing.size match {
-      //            case 0 => Seq(Add(e, a, key + "@" + value))
-      //            case 1 => Seq(Retract(e, a, existing.head), Add(e, a, key + "@" + value))
-      //            case _ => iae("valueStmts:mapping", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-      //          }
-      //        }
-      //      }
-      //      case Remove(Seq())        => attrValues(e, a).toSeq.map(v => Retract(e, a, p(v)))
-      case Remove(removeValues) => removeValues.flatMap { case removeKey: String =>
-        val existing = pairStrs(e, a, removeKey)
-        existing.size match {
-          case 0 => Nil
-          case 1 => Seq(Retract(e, a, existing.head))
-          case _ => iae("valueStmts:mapping", "Unexpected number of mapped values with the same key:\n" + existing.mkString("\n"))
-        }
-      }
-    }
-
-    def checkDupKeys(pairs: Seq[(String, Any)], op: String) {
-      val dupKeys = pairs.map(_._1).groupBy(identity).collect { case (key, keys) if keys.size > 1 => key }
-      if (dupKeys.nonEmpty) {
-        val dupPairs = pairs.filter(p => dupKeys.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
-        iae("valueStmts:default", s"Can't $op multiple key/value pairs with the same key for attribute `$a`:\n" + dupPairs.mkString("\n"))
-      }
-    }
-
-    // `add` and `replace` of map attributes share semantics
-    def upsertPairs(newPairs: Seq[(String, Any)], op: String) = {
-      checkDupKeys(newPairs, op)
-      val curPairs = getPairs(e, a)
-      val curKeys = curPairs.keys
-      newPairs.flatMap {
-        case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
-        case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v)))
-        case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v)))
-      }
-    }
+    // Default operations -------------------------------------------------------------------
 
     def default = arg match {
 
-      case MapAdd(newPairs)       => upsertPairs(newPairs, "add")
-      case MapReplace(newPairs)   => upsertPairs(newPairs, "replace")
-      case MapRemove(removeKeys0) => {
+      case MapAdd(newPairs) =>
+        checkDupKeys(newPairs, "default", "add")
+        val curPairs = getPairs(e, a)
+        val curKeys = curPairs.keys
+        newPairs.flatMap {
+          case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
+          case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v)))
+          case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v)))
+        }
+
+      case MapReplace(newPairs) =>
+        checkDupKeys(newPairs, "default", "replace")
+        val curPairs = getPairs(e, a)
+        val curKeys = curPairs.keys.toSeq
+        checkUnknownKeys(newPairs, curKeys, "default")
+        newPairs.flatMap {
+          case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
+          case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v)))
+          case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v)))
+        }
+
+      case MapRemove(removeKeys0) =>
         val removeKeys = removeKeys0.distinct
         val oldPairs = getPairs(e, a)
         oldPairs.flatMap {
           case (oldK, oldV) if removeKeys.contains(oldK) => Seq(Retract(e, a, oldK + "@" + oldV))
           case (oldK, oldV)                              => Nil
         }
-      }
-      case MapEq(newPairs)        =>
-        checkDupKeys(newPairs, "apply")
+
+      case MapEq(newPairs) =>
+        checkDupKeys(newPairs, "default", "apply")
         e match {
           case updateE: Long => {
             val oldPairs = getPairs(e, a)
@@ -512,21 +529,18 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }
 
       case Add_(values) =>
-        val dups = values.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
-        if (dups.nonEmpty) iae("valueStmts:default", s"Can't add duplicate new values to attribute `$a`:\n" + dups.mkString("\n"))
+        checkDupValues(values, "default", "add")
         values.map(v => Add(e, a, p(v)))
 
       case Replace(oldNew) =>
-        val dups = oldNew.map(_._2).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
-        if (dups.nonEmpty) iae("valueStmts:default", s"Can't replace with duplicate new values of attribute `$a`:\n" + dups.mkString("\n"))
+        checkDupValuesOfPairs(oldNew, "default", "replace")
         oldNew.flatMap { case (oldValue, newValue) => Seq(Retract(e, a, p(oldValue)), Add(e, a, p(newValue))) }
 
       case Remove(removeValues) =>
         removeValues.distinct.map(v => Retract(e, a, p(v)))
 
       case Eq(newValues) =>
-        val dups = newValues.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
-        if (dups.nonEmpty) iae("valueStmts:default", s"Can't apply duplicate new values to attribute `$a`:\n" + dups.mkString("\n"))
+        checkDupValues(newValues, "default", "apply")
         val curValues = attrValues(e, a).toSeq
         val obsoleteRetracts = curValues.flatMap {
           case curValue if newValues.contains(curValue) => Nil
@@ -548,8 +562,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     val newStmts = bi match {
       case BiSelfRef(card)             => biSelfRef(card)
       case BiSelfRefAttr(card)         => biSelfRef(card)
-      case BiOtherRef(card)            => biOtherRef(card)
-      case BiOtherRefAttr(card)        => biOtherRef(card)
+      case BiOtherRef(card, attr)      => biOtherRef(card, attr)
+      case BiOtherRefAttr(card, attr)  => biOtherRef(card, attr)
       case BiEdgeRef(card, attr)       => biEdgeRef(card, attr)
       case BiEdgeRefAttr(card, attr)   => biEdgeRefAttr(card, attr)
       case BiEdgePropAttr(card)        => biEdgeProp(card)
@@ -557,8 +571,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case BiEdgePropRef(card)         => biEdgeProp(card)
       case BiTargetRef(card, attr)     => biTargetRef(card, attr)
       case BiTargetRefAttr(card, attr) => biTargetRef(card, attr)
-      //      case _ if prefix.contains("mapping") => mapping
-      case _ => default
+      case _                           => default
     }
 
     stmts ++ newStmts
@@ -591,19 +604,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           stmts.last.e
       }
     }
-    //    if (bi.startsWith("biTargetRef")) {
-    //      val lastEdgeNs = attr.split("/").head
-    //      stmts.reverse.collectFirst {
-    //        case Add(e, a, v, _) if a.startsWith(lastEdgeNs) && e.isInstanceOf[db.DbId] => e
-    //      }.getOrElse(abort("", s"[Model2Transaction:lastE] Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n")))
-    //    } else if (nestedE != 0)
-    //      nestedE
-    //    else if (stmts.isEmpty)
-    //      tempId(attr)
-    //    else if (stmts.last.e == -1)
-    //      stmts.last.v
-    //    else
-    //      stmts.last.e
   }
 
   def lastV(stmts: Seq[Statement], attr: String, nestedE: Any = 0) = {
@@ -680,8 +680,23 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           bondStmts ++ nestedStmts
         }
 
+        // Bidirectional other references ...........................................................
 
-        // Bidirectional propert edges ...........................................................
+        // Nested other references
+        // living_Person.name.Buddies.*(living_Animal.name) insert List(...
+        case BiOtherRef(2, revRefAttr) => nestedRows.flatMap { nestedRow =>
+          val nestedE = tempId(ref)
+          val bondStmts = Seq(
+            Add(nestedE, revRefAttr, parentE),
+            Add(parentE, ref, nestedE)
+          )
+          val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
+          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE, edgeB) // todo edgeB necessary?
+          bondStmts ++ nestedStmts
+        }
+
+
+        // Bidirectional property edges ...........................................................
 
         // Nested property edges
         // living_Person.name.Knows.*(living_Knows.weight.Person.name) insert List(...

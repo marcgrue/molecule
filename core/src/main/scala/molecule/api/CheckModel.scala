@@ -125,11 +125,16 @@ case class CheckModel(model: Model, op: String) {
   }
 
   private def update_onlyOneNs = model.elements.collect {
-    //    case Bond(_, _, _, _, Seq(BiEdgeRef(_, _)))   => true
-    //    case Bond(_, _, _, _, Seq(BiTargetRef(_, _))) => true
-    case Bond(_, _, ref, _, _)            => iae("update_onlyOneNs", op.capitalize + s" molecules can't span multiple namespaces like `$ref`.")
-    case Nested(Bond(_, _, ref, _, _), _) => iae("update_onlyOneNs", op.capitalize + s" molecules can't have nested data structures like `$ref`.")
-    case c: Composite                     => iae("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
+    // Allow bidirectional references
+    case Bond(_, _, _, _, Seq(BiSelfRef(_)))   => true
+    case Bond(_, _, _, _, Seq(BiOtherRef(_, _)))   => true
+    case Bond(_, _, _, _, Seq(BiEdgeRef(_, _)))   => true
+    case Bond(_, _, _, _, Seq(BiTargetRef(_, _))) => true
+
+      // Otherwise disallow refs in updates
+    case Bond(_, _, ref, _, _)                    => iae("update_onlyOneNs", op.capitalize + s" molecules can't span multiple namespaces like `$ref`.")
+    case Nested(Bond(_, _, ref, _, _), _)         => iae("update_onlyOneNs", op.capitalize + s" molecules can't have nested data structures like `$ref`.")
+    case c: Composite                             => iae("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
   }
 
   private def noNested {

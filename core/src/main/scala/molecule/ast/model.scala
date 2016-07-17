@@ -137,8 +137,8 @@ object model {
   case class BiSelfRef(card: Int) extends Bidirectional
   case class BiSelfRefAttr(card: Int) extends Bidirectional
 
-  case class BiOtherRef(card: Int) extends Bidirectional
-  case class BiOtherRefAttr(card: Int) extends Bidirectional
+  case class BiOtherRef(card: Int, attr: String) extends Bidirectional
+  case class BiOtherRefAttr(card: Int, attr: String) extends Bidirectional
 
   case object BiEdge extends Bidirectional
   case class BiEdgeRef(card: Int, attr: String) extends Bidirectional
@@ -147,6 +147,10 @@ object model {
   case class BiEdgePropAttr(card: Int) extends Bidirectional
   case class BiEdgePropRefAttr(card: Int) extends Bidirectional
   case class BiEdgePropRef(card: Int) extends Bidirectional
+
+//  case class BiEdgePropAttr(card: Int, attr: String) extends Bidirectional
+//  case class BiEdgePropRefAttr(card: Int, attr: String) extends Bidirectional
+//  case class BiEdgePropRef(card: Int, attr: String) extends Bidirectional
 
   case class BiTargetRef(card: Int, attr: String) extends Bidirectional
   case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional

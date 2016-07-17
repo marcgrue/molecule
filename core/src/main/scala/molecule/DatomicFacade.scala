@@ -306,7 +306,7 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     //    case Add(e, a, v: URI)   => Add(e, a, v).toJava
     case other => other.toJava
   }.asJava
-  //      x(7, stmtss, flatStmts)
+//        x(7, stmtss, flatStmts)
 
   val txResult: jMap[_, _] = conn.transact(flatStmts).get
 

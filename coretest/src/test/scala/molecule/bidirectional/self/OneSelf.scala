@@ -1,10 +1,12 @@
-package molecule
-package bidirectional
+package molecule.bidirectional.self
 
+import molecule._
 import molecule.bidirectional.dsl.bidirectional._
 import molecule.util.MoleculeSpec
+import molecule.bidirectional.Setup
 
-class SelfOne extends MoleculeSpec {
+
+class OneSelf extends MoleculeSpec {
 
 
   "Save new" in new Setup {
@@ -24,6 +26,7 @@ class SelfOne extends MoleculeSpec {
 
     // Forth and back should bring us to the initial value (given Adam cardinality one ref)
     living_Person(adam).Spouse.name_.Spouse.name.one === "Adam"
+    living_Person(lisa).Spouse.name_.Spouse.name.one === "Lisa"
   }
 
   "Save id" in new Setup {
@@ -41,7 +44,7 @@ class SelfOne extends MoleculeSpec {
     // Saving reference to generic `e` not allowed.
     // (instead apply ref to ref attribute as shown above)
     (living_Person.name("Adam").Spouse.e(lisa).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[api.CheckModel.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
+      s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
       s"not allowed in save molecules. Found `e($lisa)`"
   }
 
@@ -68,7 +71,7 @@ class SelfOne extends MoleculeSpec {
 
     val List(lisa, nina) = living_Person.name insert List("Lisa", "Nina") eids
 
-    // Insert 2 men and pair them with existing women
+    // Insert 2 new entities and pair them with existing entities
     living_Person.name.spouse insert List(
       ("Adam", lisa),
       ("John", nina)
@@ -139,8 +142,9 @@ class SelfOne extends MoleculeSpec {
       )
 
       // Referencing the same id is not allowed
-      (living_Person(adam).spouse(adam).update must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        "Current entity and referenced entity ids can't be the same"
+      (living_Person(adam).spouse(adam).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:biSelfRef]  Current entity and referenced entity ids can't be the same."
     }
 
 
@@ -154,7 +158,7 @@ class SelfOne extends MoleculeSpec {
         ("Lisa", "Adam")
       )
 
-      // Update a, replacing bidirectional reference with Lisa to existing Nina
+      // Update Adam, replacing bidirectional reference with Lisa to existing Nina
       val nina = living_Person.name.insert("Nina").eid
       living_Person(adam).spouse(nina).update
 
@@ -189,7 +193,7 @@ class SelfOne extends MoleculeSpec {
 
     val adam = living_Person.name.insert("Adam").eid
 
-    // Create and reference Lisa to a
+    // Create and reference Lisa to Adam
     val lisa = living_Person(adam).Spouse.name("Lisa").update.eid
 
     living_Person(adam).Spouse.name.get === List("Lisa")

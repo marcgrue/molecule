@@ -94,6 +94,13 @@ class UpdateMapInt extends CoreSpec {
         "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
+
+      (Ns(eid).intMap.replace("unknownKey" -> 42).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  " +
+        "Can't replace non-existing keys of map attribute `:ns/intMap`:" +
+        "\nunknownKey" +
+        "\nYou might want to apply the values instead to replace all current values?"
     }
 
 

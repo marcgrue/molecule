@@ -30,8 +30,8 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def isBiSelfRef = tpe_ <:< weakTypeOf[BiSelfRef_]
     def isBiSelfRefAttr = tpe_ <:< weakTypeOf[BiSelfRefAttr_]
 
-    def isBiOtherRef = tpe_ <:< weakTypeOf[BiOtherRef_]
-    def isBiOtherRefAttr = tpe_ <:< weakTypeOf[BiOtherRefAttr_]
+    def isBiOtherRef = tpe_ <:< weakTypeOf[BiOtherRef_[_]]
+    def isBiOtherRefAttr = tpe_ <:< weakTypeOf[BiOtherRefAttr_[_]]
 
     def isBiEdge = tpe_ <:< weakTypeOf[BiEdge_]
     def isBiEdgeRef = tpe_ <:< weakTypeOf[BiEdgeRef_[_]]

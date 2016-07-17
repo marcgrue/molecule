@@ -100,12 +100,12 @@ object actions {
 
     // Negation
     def not(one: T, more: T*) : Ns with Attr = ???
-    def not(many: Set[T])     : Ns with Attr = ???
+    def not(many: Seq[T])     : Ns with Attr = ???
     // Same as
     def != (one: T, more: T*) : Ns with Attr = ???
     // Todo: remove this method when Intellij can infer from the above method alone...
     def != (one: T)           : Ns with Attr = ???
-    def != (many: Set[T])     : Ns with Attr = ???
+    def != (many: Seq[T])     : Ns with Attr = ???
   }
 
   trait OneRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
@@ -116,16 +116,18 @@ object actions {
   trait ManyRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
     // Replaces all existing values with the applied new value(s)
     def apply(ref: Long, moreRefs: Long*)  : Ns with Attr = ???
-    def apply(refs: Set[Long])             : Ns with Attr = ??? // Todo: not implemented yet
+    def apply(refs: Seq[Long])             : Ns with Attr = ??? // Todo: not implemented yet
 
     def add(ref: Long, moreRefs: Long*)    : Ns with Attr = ???
-    def add(refs: Set[Long])               : Ns with Attr = ???
-
-    def remove(ref: Long, moreRefs: Long*) : Ns with Attr = ???
-    def remove(refs : Set[Long])           : Ns with Attr = ???
+    def add(refs: Seq[Long])               : Ns with Attr = ???
 
     // Replace
-    def apply(oldNew: (Long, Long), oldNewMore: (Long, Long)*) : Ns with Attr = ???
+//    def apply(oldNew: (Long, Long), oldNewMore: (Long, Long)*) : Ns with Attr = ???
+    def replace(oldNew: (Long, Long), oldNewMore: (Long, Long)*) : Ns with Attr = ???
+    def replace(oldNew: Seq[(Long, Long)])                       : Ns with Attr = ???
+
+    def remove(ref: Long, moreRefs: Long*) : Ns with Attr = ???
+    def remove(refs : Seq[Long])           : Ns with Attr = ???
   }
 
   trait BackRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
@@ -251,7 +253,7 @@ object actions {
 
     // Value filters
     def apply(value: T, more: T*)             : Ns with Attr = ???
-    def apply(set: Set[T], moreSets: Set[T]*) : Ns with Attr = ???
+    def apply(set: Seq[T], moreSets: Seq[T]*) : Ns with Attr = ???
 
     // Keys
     def k(value: String)                : Values with Ns with Attr = ???
@@ -379,8 +381,8 @@ object actions {
   trait BiSelfRefAttr_
 
   // Bidirectional ref to other ns
-  trait BiOtherRef_
-  trait BiOtherRefAttr_
+  trait BiOtherRef_[revRefAttr]
+  trait BiOtherRefAttr_[revRefAttr]
 
   // Property edge namespace
   trait BiEdge_

@@ -1,11 +1,12 @@
-package molecule
-package bidirectional
+package molecule.bidirectional.self
 
+import molecule._
+import molecule.bidirectional.Setup
 import molecule.bidirectional.dsl.bidirectional._
-import molecule.util.MoleculeSpec
+import molecule.util._
 
 
-class SelfMany extends MoleculeSpec {
+class ManySelf extends MoleculeSpec {
 
 
   "Save" >> {
@@ -36,8 +37,8 @@ class SelfMany extends MoleculeSpec {
       // values (arities) - how many related entities should be created then?
       (living_Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:\n" +
-        "  living_Person ... name(Ben, Joe)"
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+        "\n  living_Person ... name(Ben, Joe)"
 
       // We can save a single value though...
       living_Person.name("Ann").Friends.name("Joe").save
@@ -88,10 +89,10 @@ class SelfMany extends MoleculeSpec {
 
     "n existing" in new Setup {
 
-      val benJoeSet = living_Person.name.insert("Ben", "Joe").eidSet
+      val benJoe = living_Person.name.insert("Ben", "Joe").eids
 
       // Save Ann with bidirectional ref to existing Ben and Joe
-      living_Person.name("Ann").friends(benJoeSet).save.eid
+      living_Person.name("Ann").friends(benJoe).save.eid
 
       living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
       living_Person.name_("Ben").Friends.name.get === List("Ann")
@@ -215,7 +216,7 @@ class SelfMany extends MoleculeSpec {
       living_Person(ann).friends.add(joe, liz).update
 
       // Set of references
-      living_Person(ann).friends.add(Set(tom)).update
+      living_Person(ann).friends.add(Seq(tom)).update
 
       // Friendships have been added in both directions
       living_Person.name_("Ann").Friends.name.get.sorted === List("Ben", "Joe", "Liz", "Tom")
@@ -250,7 +251,7 @@ class SelfMany extends MoleculeSpec {
       living_Person(ann).friends.remove(joe, liz).update
 
       // Set of references
-      living_Person(ann).friends.remove(Set(tom)).update
+      living_Person(ann).friends.remove(Seq(tom)).update
 
       // Correct friendships have been removed in both directions
       living_Person.name_("Ann").Friends.name.get === List("Ulf")
@@ -275,7 +276,7 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Tim").Friends.name.get === List()
 
       // Ann replaces Ben with Tim
-      living_Person(ann).friends(ben -> tim).update
+      living_Person(ann).friends.replace(ben -> tim).update
 
       // Ann now friends with Tim instead of Ben
       living_Person.name_("Ann").Friends.name.get === List("Tim", "Joe")
@@ -298,7 +299,7 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Tom").Friends.name.get === List()
 
       // Ann replaces Ben and Joe with Tim and Tom
-      living_Person(ann).friends(ben -> tim, joe -> tom).update
+      living_Person(ann).friends.replace(ben -> tim, joe -> tom).update
 
       // Ann is now friends with Tim and Tom instead of Ben and Joe
       // Ben and Joe are no longer friends with Ann either
@@ -315,7 +316,7 @@ class SelfMany extends MoleculeSpec {
       val List(ann, ben, joe) = living_Person.name.Friends.*(living_Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
       ) eids
-      val liz = living_Person.name.insert("Liz").eid
+      val liz                 = living_Person.name.insert("Liz").eid
 
       living_Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
       living_Person.name_("Ben").Friends.name.get === List("Ann")
@@ -374,7 +375,7 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Liz").Friends.name.get === List()
 
       // Ann now has Ben and Liz as friends
-      living_Person(ann).friends(Set(ben, liz)).update
+      living_Person(ann).friends(Seq(ben, liz)).update
 
       // Ann and Liz new friends
       // Ann and Joe no longer friends
@@ -416,7 +417,7 @@ class SelfMany extends MoleculeSpec {
       living_Person.name_("Joe").Friends.name.get === List("Ann")
 
       // Ann has no friends any longer
-      val noFriends = Set.empty[Long]
+      val noFriends = Seq.empty[Long]
       living_Person(ann).friends(noFriends).update
 
       // Ann's friendships replaced with no friendships (in both directions)

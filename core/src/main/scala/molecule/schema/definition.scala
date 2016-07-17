@@ -177,13 +177,24 @@ object definition {
   }
 
 
-  // Bidirectional references
+  // Bidirectional ref
 
   object oneBi {
     def apply[ThisNsOrRevRefAttr] = this
     def doc(s: String) = ???
   }
   object manyBi {
+    def apply[ThisNsOrRevRefAttr] = this
+    def doc(s: String) = ???
+  }
+
+  // Bidirectional edge
+
+  object oneBiEdge {
+    def apply[ThisNsOrRevRefAttr] = this
+    def doc(s: String) = ???
+  }
+  object manyBiEdge {
     def apply[ThisNsOrRevRefAttr] = this
     def doc(s: String) = ???
   }
