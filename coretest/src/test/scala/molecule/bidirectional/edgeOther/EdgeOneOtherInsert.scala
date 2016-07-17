@@ -11,23 +11,24 @@ class EdgeOneOtherInsert extends MoleculeSpec {
   "1 new" in new Setup {
 
     // Insert 1 pair of entities with bidirectional property edge between them
-    living_Person.name.Favorite.weight.Animal.name.insert("Ann", 7, "Ben")
+    living_Person.name.Favorite.weight.Animal.name.insert("Ben", 7, "Rex")
 
     // Bidirectional property edge has been inserted
-    living_Person.name_("Ann").Favorite.weight.Animal.name.get === List((7, "Ben"))
-    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Ann"))
+    // Note how we query differently from each end
+    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+    living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
   }
 
   "1 existing" in new Setup {
 
     val ben = living_Person.name.insert("Ben").eid
 
-    // Insert Ann with bidirectional property edge to existing Ben
-    living_Person.name.Favorite.weight.animal.insert("Ann", 7, ben)
+    // We can insert from the other end as well
+    living_Animal.name.Favorite.weight.person.insert("Rex", 7, ben)
 
     // Bidirectional property edge has been inserted
-    living_Person.name_("Ann").Favorite.weight.Animal.name.get === List((7, "Ben"))
-    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Ann"))
+    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+    living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
   }
 
 
@@ -35,32 +36,34 @@ class EdgeOneOtherInsert extends MoleculeSpec {
 
     // Insert 2 pair of entities with bidirectional property edge between them
     living_Person.name.Favorite.weight.Animal.name insert List(
-      ("Ann", 7, "Joe"),
-      ("Ben", 6, "Tim")
+      ("Ben", 7, "Rex"),
+      ("Kim", 6, "Zip")
     )
 
     // Bidirectional property edges have been inserted
-    living_Person.name_("Ann").Favorite.weight.Animal.name.get === List((7, "Joe"))
-    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((6, "Tim"))
-    living_Person.name_("Joe").Favorite.weight.Animal.name.get === List((7, "Ann"))
-    living_Person.name_("Tim").Favorite.weight.Animal.name.get === List((6, "Ben"))
+    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+    living_Person.name_("Kim").Favorite.weight.Animal.name.get === List((6, "Zip"))
+
+    living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+    living_Animal.name_("Zip").Favorite.weight.Person.name.get === List((6, "Kim"))
   }
 
   "multiple existing" in new Setup {
 
-    val List(joe, tim) = living_Person.name.insert("Joe", "Tim").eids
+    val List(rex, zip) = living_Animal.name.insert("Rex", "Zip").eids
 
     // Insert 2 entities with bidirectional property edges to existing entities
     living_Person.name.Favorite.weight.animal insert List(
-      ("Ann", 7, joe),
-      ("Ben", 6, tim)
+      ("Ben", 7, rex),
+      ("Kim", 6, zip)
     )
 
     // Bidirectional property edges have been inserted
-    living_Person.name_("Ann").Favorite.weight.Animal.name.get === List((7, "Joe"))
-    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((6, "Tim"))
-    living_Person.name_("Joe").Favorite.weight.Animal.name.get === List((7, "Ann"))
-    living_Person.name_("Tim").Favorite.weight.Animal.name.get === List((6, "Ben"))
+    living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+    living_Person.name_("Kim").Favorite.weight.Animal.name.get === List((6, "Zip"))
+
+    living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+    living_Animal.name_("Zip").Favorite.weight.Person.name.get === List((6, "Kim"))
   }
 
 
@@ -84,9 +87,12 @@ class EdgeOneOtherInsert extends MoleculeSpec {
         , Map("baseball" -> 9, "golf" -> 7)
         , "Love"
         , List("Patience", "Humor")
-        , "Joe")
+        , "Rex")
     )
 
+    // All edge properties have been inserted in both directions:
+
+    // Person -> Animal
     living_Person.name
       .Favorite
       .weight
@@ -106,8 +112,22 @@ class EdgeOneOtherInsert extends MoleculeSpec {
         , Map("baseball" -> 9, "golf" -> 7)
         , "Love"
         , List("Patience", "Humor")
-        , "Joe"),
-      ("Joe"
+        , "Rex")
+    )
+
+    // Animal -> Person
+    living_Animal.name
+      .Favorite
+      .weight
+      .howWeMet
+      .commonInterests
+      .commonLicences
+      .commonScores
+      .CoreQuality.name._Favorite
+      .InCommon.*(living_Quality.name)._Favorite
+      .Person.name
+      .get === List(
+      ("Rex"
         , 7
         , "inSchool"
         , Set("Food", "Walking", "Travelling")

@@ -28,21 +28,6 @@ object BidirectionalDefinition {
       val name = oneString
     }
 
-    object Animal extends Animal
-    trait Animal {
-      // Other end/start point of other ref
-      // a <== B
-      val master : AnyRef = oneBi[Person.pet.type]
-      val buddies: AnyRef = manyBi[Person.buddies.type]
-
-      // Other end/start point of edges between different namespaces
-      // a -- edge <== B
-      val favorite = oneBiEdge[Favorite.person.type]
-      val closeTo  = manyBiEdge[CloseTo.person.type]
-
-      val name = oneString
-    }
-
     // Property edges to same namespace ..........................
 
     object Loves extends Loves
@@ -83,6 +68,7 @@ object BidirectionalDefinition {
       // a --- edge ==> b
       val animal: AnyRef = target[Animal.favorite.type]
       // a <== edge --- b
+//      val person: AnyRef = target[Animal.favorite.type]
       val person: AnyRef = target[Person.favorite.type]
 
       // Edge properties
@@ -112,8 +98,26 @@ object BidirectionalDefinition {
       val inCommon        = many[Quality]
     }
 
+
     // Sample ns to demonstrate edge ref property
     trait Quality {
+      val name = oneString
+    }
+
+
+
+    object Animal extends Animal
+    trait Animal {
+      // Other end/start point of other ref
+      // a <== B
+      val master : AnyRef = oneBi[Person.pet.type]
+      val buddies: AnyRef = manyBi[Person.buddies.type]
+
+      // Other end/start point of edges between different namespaces
+      // a -- edge <== B
+      val favorite = oneBiEdge[Favorite.person.type]
+      val closeTo  = manyBiEdge[CloseTo.person.type]
+
       val name = oneString
     }
   }

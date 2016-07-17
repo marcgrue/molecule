@@ -189,10 +189,10 @@ case class CheckModel(model: Model, op: String) {
       elements.collectFirst {
         // ?.. TargetNs
         case Bond(edgeNs, _, refNs, _, Seq(BiTargetRef(_, x))) => hasBase(elements, edgeNs) getOrElse
-          iae("save_edgeCompleteª", s"Missing base namespace before edge namespace `$refNs`.")
+          iae("save_edgeComplete", s"Missing base namespace before edge namespace `$refNs`.")
         // ?.. targetAttr
         case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => hasBase(elements, edgeNs) getOrElse
-          iae("save_edgeCompleteª", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
+          iae("save_edgeComplete", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
       }
     }
 
@@ -208,13 +208,13 @@ case class CheckModel(model: Model, op: String) {
       elements.collectFirst {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
-          iae("save_edgeCompleteª", s"Missing target namespace after edge namespace `$edgeNs`.")
+          iae("save_edgeComplete", s"Missing target namespace after edge namespace `$edgeNs`.")
         // Base.attr.edge ..?
         case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, ns(edgeRefAttr)) getOrElse
-          iae("save_edgeCompleteª", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
+          iae("save_edgeComplete", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
         // Base.attr.Edge.prop ..?
         case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, ns(prop)) getOrElse
-          iae("save_edgeCompleteª", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
+          iae("save_edgeComplete", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
       }
     }
 
@@ -242,7 +242,7 @@ case class CheckModel(model: Model, op: String) {
       elements.collectFirst {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
-          iae("save_edgeCompleteª", s"Can't update edge `$edgeNs` of base entity `$baseNs` without knowing which target entity the edge is pointing too. " +
+          iae("save_edgeComplete", s"Can't update edge `$edgeNs` of base entity `$baseNs` without knowing which target entity the edge is pointing too. " +
             s"Please update the edge itself, like `$edgeNs(<edgeId>).edgeProperty(<new value>).update`.")
       }
     }

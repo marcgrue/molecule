@@ -65,7 +65,7 @@
 //      // Updating edge properties from the base entity is not allowed
 //      (living_Person(ann).Knows.howWeMet("inSchool").update must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Can't update edge `living_Knows` " +
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Can't update edge `living_Knows` " +
 //        s"of base entity `living_Person` without knowing which target entity the edge is pointing too. " +
 //        s"Please update the edge itself, like `living_Knows(<edgeId>).edgeProperty(<new value>).update`."
 //

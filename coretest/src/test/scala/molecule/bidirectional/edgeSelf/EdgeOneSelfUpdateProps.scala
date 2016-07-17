@@ -66,7 +66,7 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       // Updating edge properties from the base entity is not allowed
       (living_Person(ann).Loves.howWeMet("inSchool").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeCompleteª]  Can't update edge `living_Loves` " +
+        s"[molecule.api.CheckModel.save_edgeComplete]  Can't update edge `living_Loves` " +
         s"of base entity `living_Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `living_Loves(<edgeId>).edgeProperty(<new value>).update`."
 

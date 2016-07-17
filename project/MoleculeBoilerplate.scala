@@ -472,60 +472,98 @@ object MoleculeBoilerplate {
   }
 
   def resolve(definition: Definition) = {
-    val updatedNss1 = markBidrectionalEdgeProperties_(definition.nss)
+    val updatedNss1 = markBidrectionalEdgeProperties(definition.nss)
     val updatedNss3 = definition.nss.foldLeft(updatedNss1) { case (updatedNss2, curNs) =>
       addBackRefs(updatedNss2, curNs)
     }
-    definition.copy(nss = updatedNss3)
+    val updatedNss4 = resolveEdgeToOther(updatedNss3)
+    definition.copy(nss = updatedNss4)
   }
 
-  def markBidrectionalEdgeProperties_(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
+  def resolveEdgeToOther(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
+    val isBaseEntity = ns.attrs.collectFirst {
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef) => true
+    } getOrElse false
+
+    if (isBaseEntity) {
+      //      println("")
+      //      println(s"=============== ${ns.ns} =================")
+      val newAttrs: Seq[Attr] = ns.attrs.map {
+        case biEdgeRefAttr@Ref(attr1, _, _, _, _, _, edgeNs1, _, Some("BiEdgeRef_"), revRef1) =>
+          //          println("")
+          //          println(attr1 + "     -----     " + edgeNs1 + "     -----     " + revRef1)
+          nss.collectFirst {
+            case Namespace(part2, ns2, _, attrs2) if part2 == ns.part && ns2 == edgeNs1 =>
+              //              println(s"   $ns2 --------------------------------------------------------------------")
+              attrs2.collectFirst {
+                case ref4@Ref(attr3, _, _, _, _, _, refNs3, _, Some("BiTargetRef_"), revRef3) if refNs3 == ns.ns =>
+                  //                  println("      " + attr3 + "     -----     " + refNs3 + "     -----     " + revRef3)
+                  biEdgeRefAttr.copy(revRef = attr3)
+              } getOrElse {
+                val baseNs = ns.ns.replace("_", ".")
+                sys.error(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
+                  s"Expecting something like:\nval ${firstLow(baseNs.split('.').last)} = target[${baseNs.split('.').last}.$attr1.type]")
+              }
+          } getOrElse {
+            val baseNs = ns.ns.replace("_", ".")
+            sys.error(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
+              s"Expecting something like:\nval ${firstLow(baseNs.split('.').last)} = target[${baseNs.split('.').last}.$attr1.type]")
+          }
+        case other                                                                            => other
+      }
+      ns.copy(attrs = newAttrs)
+    } else {
+      ns
+    }
+  }
+
+  def markBidrectionalEdgeProperties(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
 
     // Todo: check correct bidirectional definitions
-//    ns.attrs.collect {
-//      //      case ref@Ref(attr, _, _, _, _, _, refNs, opts) => opts.collect {
-//      case ref@Ref(attr, _, _, _, _, _, refNs, opts, Some("BiEdgeRef_"), revRef) =>
-//        println("")
-//        println("A " + ns.ns + "     -----     " + attr + "     -----     " + refNs + "     -----     " + revRef)
-//
-//        refNs.replace("_", ".").split('.').toList match {
-//
-//          case part2 :: ns2 :: Nil => nss.collect {
-//
-//            case Namespace(part3, ns3, _, attrs3) if part3 == part2 && ns3 == refNs =>
-//              val otherNs = ns3.replace("_", ".").split('.').last
-//              println("B    " + ns3 + "     -----     " + otherNs + "     -----     " + revRef)
-//
-//              attrs3.collect {
-//
-//                case ref4@Ref(attr4, _, _, _, _, _, refNs4, opts4, bi, revRef4) if attr4 == revRef && revRef4 != attr =>
-//                  val baseNs = refNs4.replace("_", ".").split('.').last
-//                  println("C       " + attr4 + "     -----     " + refNs4 + "     -----     " + revRef4+ "     -----     " + bi)
-//
-////                  bi match {
-////                    case "BiTargetRef_" if =>
-////                  }
-//
-//
-//                  opts4.collectFirst {
-//
-//                    case Optional(a5, "BiTargetRef_", xx) if a5.replace("_", ".").split('.').last != attr =>
-//                      println("D          " + a5 + "     -----     " + a5.replace("_", ".").split('.').last + "     -----     " + xx)
-//                      sys.error(s"Target ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
-//                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
-//
-//                    case Optional(a5, "BiEdgeRef_", _) if a5.replace("_", ".").split('.').last != attr    =>
-//                      sys.error(s"Other ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
-//                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
-//                    //                        sys.error("got you!")
-//                  }
-//                //                      println("      " + attr4 + "     -----     " + part2)
-//              }
-//          }
-//          case ns2 :: Nil =>
-//          case other =>
-//        }
-//    }
+    //    ns.attrs.collect {
+    //      //      case ref@Ref(attr, _, _, _, _, _, refNs, opts) => opts.collect {
+    //      case ref@Ref(attr, _, _, _, _, _, refNs, opts, Some("BiEdgeRef_"), revRef) =>
+    //        println("")
+    //        println("A " + ns.ns + "     -----     " + attr + "     -----     " + refNs + "     -----     " + revRef)
+    //
+    //        refNs.replace("_", ".").split('.').toList match {
+    //
+    //          case part2 :: ns2 :: Nil => nss.collect {
+    //
+    //            case Namespace(part3, ns3, _, attrs3) if part3 == part2 && ns3 == refNs =>
+    //              val otherNs = ns3.replace("_", ".").split('.').last
+    //              println("B    " + ns3 + "     -----     " + otherNs + "     -----     " + revRef)
+    //
+    //              attrs3.collect {
+    //
+    //                case ref4@Ref(attr4, _, _, _, _, _, refNs4, opts4, bi, revRef4) if attr4 == revRef && revRef4 != attr =>
+    //                  val baseNs = refNs4.replace("_", ".").split('.').last
+    //                  println("C       " + attr4 + "     -----     " + refNs4 + "     -----     " + revRef4+ "     -----     " + bi)
+    //
+    ////                  bi match {
+    ////                    case "BiTargetRef_" if =>
+    ////                  }
+    //
+    //
+    //                  opts4.collectFirst {
+    //
+    //                    case Optional(a5, "BiTargetRef_", xx) if a5.replace("_", ".").split('.').last != attr =>
+    //                      println("D          " + a5 + "     -----     " + a5.replace("_", ".").split('.').last + "     -----     " + xx)
+    //                      sys.error(s"Target ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
+    //                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
+    //
+    //                    case Optional(a5, "BiEdgeRef_", _) if a5.replace("_", ".").split('.').last != attr    =>
+    //                      sys.error(s"Other ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
+    //                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
+    //                    //                        sys.error("got you!")
+    //                  }
+    //                //                      println("      " + attr4 + "     -----     " + part2)
+    //              }
+    //          }
+    //          case ns2 :: Nil =>
+    //          case other =>
+    //        }
+    //    }
 
 
     val isEdge = ns.attrs.collectFirst {
@@ -534,6 +572,8 @@ object MoleculeBoilerplate {
 
     if (isEdge) {
       val newAttrs: Seq[Attr] = ns.attrs.map {
+        case biEdgeRefAttr@Ref(_, _, _, _, _, _, _, _, Some("BiEdgeRefAttr_"), refRef) => biEdgeRefAttr
+
         case biTargetRef@Ref(_, _, _, _, _, _, _, _, Some("BiTargetRef_"), _) => biTargetRef
 
         case Ref(attr, _, _, _, _, _, _, _, Some(bi), _) if bi.substring(6, 10) != "Prop" => sys.error(
@@ -811,7 +851,7 @@ object MoleculeBoilerplate {
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgePropRef_"), revRef) => Some(attr -> s" with BiEdgePropRef_")
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef)     => Some(attr -> s" with BiEdgeRef_[$refNs.$revRef[NS, NS]]")
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef)   => Some(attr -> s" with BiTargetRef_[$refNs.$revRef[NS, NS]]")
-      case other => None
+      case other                                                              => None
     }.toMap
     val maxBidirectionals = bidirectionals.values.map(_.length)
 

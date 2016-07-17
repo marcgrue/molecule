@@ -21,13 +21,13 @@
 //
 //      (living_Person.name("Ann").Knows.weight(5).save must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Missing target namespace after edge namespace `living_Knows`."
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Knows`."
 //
 //      // Same applies when using a reference attribute (`knows`)
 //      val edgeId = 42L
 //      (living_Person.name("Ann").knows(edgeId).save must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Missing target namespace after edge namespace `living_Knows`."
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Knows`."
 //    }
 //
 //
@@ -35,12 +35,12 @@
 //
 //      (living_Knows.weight(7).Person.name("Ben").save must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Missing base namespace before edge namespace `living_Person`."
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Person`."
 //
 //      val targetId = 42L
 //      (living_Knows.weight(7).person(targetId).save must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Missing base namespace before edge namespace `living_Knows`."
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Knows`."
 //    }
 //
 //
@@ -48,7 +48,7 @@
 //
 //      (living_Knows.weight(7).save must throwA[IllegalArgumentException])
 //        .message === "Got the exception java.lang.IllegalArgumentException: " +
-//        s"[molecule.api.CheckModel.save_edgeCompleteª]  Missing target namespace somewhere after edge property `living_Knows/weight`."
+//        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `living_Knows/weight`."
 //    }
 //
 //

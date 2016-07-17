@@ -16,7 +16,7 @@ class OneOther extends MoleculeSpec {
 
     // Reference in both directions saved
     // Since we use different names for the ref attributes on each end,
-    // we query from each end. We could as well have had the zipe attr name.
+    // we query from each end. We could as well have had the same attr name.
     living_Person(ben).Pet.name.one === "Rex"
     living_Animal(rex).Master.name.one === "Ben"
 
@@ -28,14 +28,14 @@ class OneOther extends MoleculeSpec {
 
   "Save new in reverse" in new Setup {
 
-    // Building from the other end gives the zipe result
+    // Building from the other end gives the same result
 
     // Save Ben, Rex and bidirectional references between them
     val List(rex, ben) = living_Animal.name("Rex").Master.name("Ben").save.eids
 
     // Reference in both directions saved
     // Since we use different names for the ref attributes on each end,
-    // we query from each end. We could as well have had the zipe attr name.
+    // we query from each end. We could as well have had the same attr name.
     living_Animal(rex).Master.name.one === "Ben"
     living_Person(ben).Pet.name.one === "Rex"
 
