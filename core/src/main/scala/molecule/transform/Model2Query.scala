@@ -255,8 +255,6 @@ object Model2Query extends Helpers {
             case Neq(args)                       => q.where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
             case MapKeys(arg :: Nil)             => q.where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
             case MapKeys(args)                   => q.where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-//            case MapEq((key, value1) :: Nil)     => q.where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")")
-//            case MapEq(pairs)                    => q.where(e, a, v, gs).mappings(v, a, pairs)
             case MapEq(pairs) if pairs.size == 1 => q.where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")")
             case MapEq(pairs)                    => q.where(e, a, v, gs).mappings(v, a, pairs.toSeq)
             case And(args)                       => q.where(e, a, v, gs).matches(v, keys, "(" + args.head + ")$") // (post-processed)
@@ -288,7 +286,6 @@ object Model2Query extends Helpers {
           case Neq(args)                   => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
           case MapKeys(arg :: Nil)         => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
           case MapKeys(args)               => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-//          case MapEq((key, value1) :: Nil) => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + key + ")@(" + value1 + ")$")
           case MapEq(pairs) if pairs.size == 1 => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")$")
           case MapEq(pairs)                => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs.toSeq)
           case And(args)                   => q.findD(v, gs).whereAnd(e, a, v, args)
@@ -552,7 +549,9 @@ object Model2Query extends Helpers {
         case Atom(ns, attr, _, _, _, _, _, _)                            => (resolve(query, e, v, element), e, v, ns, attr, "")
 
         case Bond(ns, refAttr, refNs, _, bi: Bidirectional) if ns == prevNs && refAttr == prevAttr => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, meta) if ns == prevNs                                     => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevNs && refAttr == prevAttr                 =>
+          (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevNs                                        => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                                      => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                                     => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _)                                                        => (resolve(query, e, v, element), e, v, ns, refAttr, refNs)

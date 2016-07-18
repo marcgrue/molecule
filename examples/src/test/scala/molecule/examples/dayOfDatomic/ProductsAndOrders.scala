@@ -158,7 +158,7 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get ................................
 
     // Get adjacent facts
-    m(Order.orderid.LineItems.quantity.price.product.Product.description).get.sortBy(_._1) === List(
+    m(Order.orderid.LineItems.quantity.price.Product.e.description).get.sortBy(_._1) === List(
       (23, 2, 77.0, licoriceId, "Licorice"),
       // whisky for order 23 is _not_ fetched since it has no quantity asserted!
       (23, 1, 48.0, chocolateId, "Expensive Chocolate"),
@@ -168,7 +168,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
     // Make `quantity` optional (by appending `$`) and get all facts wether quantity is asserted or not.
     // Quantities are then returned as Option[Int]
-    m(Order.orderid.LineItems.quantity$.price.product.Product.description).get.sortBy(_._1) === List(
+    m(Order.orderid.LineItems.quantity$.price.Product.e.description).get.sortBy(_._1) === List(
       (23, Some(2), 77.0, licoriceId, "Licorice"),
       (23, Some(1), 48.0, chocolateId, "Expensive Chocolate"),
       (23, None, 38.0, whiskyId, "Cheap Whisky"),

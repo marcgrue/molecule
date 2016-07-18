@@ -614,6 +614,10 @@ object Dsl2Model {
     // Transfer generic values from Meta elements to Atoms and skip Meta elements
     val elements1 = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
       element match {
+        case a@Atom(ns1, attr, _, _, _, _, _, _) if es.collectFirst {
+          case Bond(ns, refAttr, refNs, _, _) if ns1 == ns && attr == refAttr => abort(10,
+            s"Instead of getting the ref id with `$attr` please get it via the referenced namespace: `${refNs.capitalize}.e ...`")
+        }.getOrElse(false)                                                                => abort(42, "we won't get here")
         case a: Atom if a.name != "attr" && gs.contains(NsValue) && !gs.contains(AttrVar) => abort(7, s"`ns` needs to have a generic `a` before")
         case a: Atom if gs.isEmpty                                                        => (a +: es, Nil, NoValue)
         case a: Atom if a.name == "attr"                                                  => (a.copy(gs = a.gs ++ gs, value = v) +: es, Nil, NoValue)

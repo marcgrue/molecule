@@ -10,6 +10,10 @@ object ModernGraphDefinition {
     val age     = oneInt
     val created = many[Created]
 
+    // Bidirectional card-one ref (self-reference)
+    val spouse  = oneBi[Person]
+    val spouses = manyBi[Person]
+
     val knows0   = many[Person]
     val knows   = manyBi[Person]
 
@@ -17,9 +21,6 @@ object ModernGraphDefinition {
     // Bidirectional card-many ref (self-reference)
     val friends = manyBi[Person]
 
-    // Bidirectional card-one ref (self-reference)
-    val spouse  = oneBi[Person]
-    val spouses = manyBi[Person]
   }
 //  object Person extends Person
 

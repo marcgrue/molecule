@@ -9,7 +9,7 @@ import molecule.util.MoleculeSpec
 class GettingStarted extends MoleculeSpec with DatomicFacade {
 
 
-  "Bidirectional card-one" >> {
+  "Bidirectional self, card-one" >> {
 
     implicit val conn = recreateDbFrom(ModernGraphSchema)
 
@@ -79,7 +79,7 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
   }
 
 
-  "Bidirectional card-many" >> {
+  "Bidirectional self, card-many" >> {
 
     implicit val conn = recreateDbFrom(ModernGraphSchema)
 
@@ -150,7 +150,6 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
   "Bidirectional card-many queries" >> {
 
     implicit val conn = recreateDbFrom(ModernGraphSchema)
-
 
     // Person
     val List(marko, vadas, josh, peter) = Person.name.age insert Seq(
@@ -331,14 +330,13 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
 
     // My friends' friends
     Person.name_("marko").Friends.Friends.name.not("marko").get === List(
-      "vadas", "josh"
-//      "peter"
+      "peter"
     )
 
     // My friends' friends that are not already my friends (or myself)
     val markoFriends = Person(marko).Friends.name.get :+ "marko"
     Person(marko).Friends.Friends.name.not(markoFriends).get === List(
-//      "peter"
+      "peter"
     )
 
     // etc...
