@@ -360,13 +360,13 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     //      , values
     //      , op
     //      , attr
-    //      , attr.isMapAttr
+    //      //          , attr.isMapAttr
     //    )
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
-        //        case vs: Seq[_]      => if (vs.isEmpty) Remove(Seq()) else Eq(vs)
         case resolved: Value                            => resolved
+        case vs: Seq[_] if attr == null                 => Eq(vs)
         case vs: Seq[_] if attr.isMapAttr && vs.isEmpty => MapEq(Seq())
         case vs: Seq[_]                                 => Eq(vs)
         case other                                      => errValue(1, other)

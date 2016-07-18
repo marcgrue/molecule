@@ -12,7 +12,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
   def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
 
   implicit class richTree(t: Tree) {
-    lazy val tpe_       = c.typecheck(t).tpe
+    lazy val tpe_       = if(t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
     lazy val at         = att(t)
     lazy val ns         = at.ns.toString
     lazy val name       = at.toString

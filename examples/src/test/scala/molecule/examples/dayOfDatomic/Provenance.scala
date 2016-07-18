@@ -150,26 +150,6 @@ class Provenance extends MoleculeSpec {
     val edTx   = Story(elasticacheStory).title("ElastiCache in 5 minutes").tx_(MetaData.user(ed).usecase_("UpdateStory")).update
     val edTxId = edTx.eids.last
 
-    // This is what happens in the background:
-    // Since we are "updating" a cardinality-one attribute (title) we only need to _add_ the new value.
-    // Datomic automatically retracts the old value first (see further below).
-    testUpdateMolecule(
-      m(Story(elasticacheStory).title("ElastiCache in 5 minutes").tx_(MetaData.user(ed).usecase_("UpdateStory")))
-    ) -->
-      Model(List(
-        Meta("story", "", "e", NoValue, Eq(List(17592186045450L))),
-        Atom("story", "title", "String", 1, Eq(List("ElastiCache in 5 minutes")), None, List(TxValue_), List()),
-        TxMetaData_(List(
-          Atom("metaData", "user", "Long", 1, Eq(List(17592186045424L)), None, List(), List()),
-          Atom("metaData", "usecase_", "String", 1, Eq(List("UpdateStory")), None, List(), List())))
-      )) -->
-      """List(
-        |  List(:db/add,  17592186045450                ,  :story/title     ,  ElastiCache in 5 minutes),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000002],  :metaData/user   ,  17592186045424          ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000002],  :metaData/usecase,  UpdateStory             )
-        |)""".stripMargin
-
-
     // Title now
     Story.url_(ecURL).title.get.head === "ElastiCache in 5 minutes"
 
@@ -183,7 +163,6 @@ class Provenance extends MoleculeSpec {
       ("ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")   // Ed's update of the title
     )
 
-
     // Entire attributes history of ElastiCache story _entity_
     Story(elasticacheStory).a.v.op.tx(MetaData.usecase.User.firstName).history.get === List(
       (":story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
@@ -191,7 +170,6 @@ class Provenance extends MoleculeSpec {
       (":story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
       (":story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")
     )
-
 
     // Stories with latest use case meta date
     Story.title.tx_(MetaData.usecase).get === List(

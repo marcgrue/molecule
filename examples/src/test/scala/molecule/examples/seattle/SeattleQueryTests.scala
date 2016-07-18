@@ -519,9 +519,10 @@ class SeattleQueryTests extends SeattleSpec {
 
     // Many-cardinality attributes ............................
 
-    // Retract current value + assert new value
+    // Replace category
+    // Retracts current value an asserts new value
     testUpdateMolecule(
-      Community(belltownId).category("news" -> "Cool news")
+      Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       """List(
         |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
@@ -529,9 +530,9 @@ class SeattleQueryTests extends SeattleSpec {
         |)""".stripMargin
 
 
-    // Update multiple categories
+    // Replace multiple categories
     testUpdateMolecule(
-      Community(belltownId).category(
+      Community(belltownId).category.replace(
         "Cool news" -> "Super cool news",
         "events" -> "Super cool events"
       )

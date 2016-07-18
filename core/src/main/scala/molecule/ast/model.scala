@@ -130,6 +130,7 @@ object model {
   case object OpValue extends Generic
   case class NsValue(values: Seq[String]) extends Generic
   case object NoValue extends Generic
+  case class Cardinality(card: Int) extends Generic
 
 
   sealed trait Bidirectional  extends Generic

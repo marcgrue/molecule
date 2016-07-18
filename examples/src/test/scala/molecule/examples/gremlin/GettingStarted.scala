@@ -126,36 +126,16 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
     // Rebecca is flirting
     val rebecca = Person.name.insert("rebecca").eid
 
-    //    println("rebecca: " + rebecca)
-
-    // Directly to third marriage...
+    // Directly to third marriage. Applying new spouse
     Person(marko).spouses(rebecca).update
-
-    // Surprise! Marko now has two wives!
-    Person(marko).spouses.get === List(Set(rebecca, anna))
-    // .. and anna hasn't divorced marko yet
-    Person(anna).spouses.get === List(Set(marko))
-
-    // Since the spouses ref is now of cardinality many, Datomic doesn't automatically
-    // retract any old refs when adding new ones since it can't know which to retract.
-    // So the old ref from marko to anna still remains after adding the new ref to rebecca!
-
-    // Molecule only performs two operations for card-many refs
-    // 1. Add new ref from marko to rebecca
-    // 2. Add reverse ref from rebecca to marko
-
-    // As with any non-bidirectional cardinality-many ref we need to remove unwanted
-    // reference values manually
-    Person(marko).spouses.remove(anna).update
-
-    // Now marko has the expected number of wives and anna is divorced
     Person(marko).spouses.get === List(Set(rebecca))
-    Person(anna).spouses.get === List()
-
-    // .. and rebecca is married to marko
     Person(rebecca).spouses.get === List(Set(marko))
 
-    // Rebecca dies. Datomic takes care of retracting any ref pointing to
+    // .. and anna hasn't divorced marko yet
+    Person(anna).spouses.get === List()
+
+    // Rebecca goes away.
+    // Datomic takes care of retracting any ref pointing to
     // an entity being retracted. All refs from Marko to Rebecca (1 in this case)
     // is therefore automatically retracted when the Rebecca entity is retracted.
     rebecca.retract
@@ -199,13 +179,13 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
     Person(peter).friends(vadas).update
 
     // Created
-    val markoCreations = Created.software.weight.insert(lop, 0.4).eidSet
+    val markoCreations = Created.software.weight.insert(lop, 0.4).eids
     Person(marko).created(markoCreations).update
 
-    val joshCreations = Created.software.weight.insert(Seq((lop, 0.4), (ripple, 1.0))).eidSet
+    val joshCreations = Created.software.weight.insert(Seq((lop, 0.4), (ripple, 1.0))).eids
     Person(josh).created(joshCreations).update
 
-    val peterCreations = Created.software.weight.insert(lop, 0.2).eidSet
+    val peterCreations = Created.software.weight.insert(lop, 0.2).eids
     Person(peter).created(peterCreations).update
 
 
@@ -242,7 +222,7 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
 
     // Marko created (refs to Created)
     // g.V().has('name','marko').out('created')
-    Person.name_("marko").created.get === Seq(markoCreations)
+    Person.name_("marko").created.one.toSeq === markoCreations
 
     // Marko created software named...
     // g.V().has('name','marko').out('created').values('name')
@@ -351,13 +331,14 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
 
     // My friends' friends
     Person.name_("marko").Friends.Friends.name.not("marko").get === List(
-      "peter"
+      "vadas", "josh"
+//      "peter"
     )
 
     // My friends' friends that are not already my friends (or myself)
     val markoFriends = Person(marko).Friends.name.get :+ "marko"
     Person(marko).Friends.Friends.name.not(markoFriends).get === List(
-      "peter"
+//      "peter"
     )
 
     // etc...

@@ -1111,13 +1111,14 @@ class SeattleTransformationTests extends SeattleSpec {
 
     // Many-cardinality attributes ............................
 
-    // Retract current value + assert new value
+    // Replace category
+    // Retracts current value an asserts new value
     testUpdateMolecule(
-      Community(belltownId).category("news" -> "Cool news")
+      Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       Model(List(
         Meta("community", "", "e", NoValue, Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, Replace(Map("news" -> "Cool news")), None))
+        Atom("community", "category", "String", 2, Replace(Seq("news" -> "Cool news")), None))
       ) -->
       """List(
         |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
@@ -1125,16 +1126,16 @@ class SeattleTransformationTests extends SeattleSpec {
         |)""".stripMargin
 
 
-    // Update multiple categories
+    // Replace multiple categories
     testUpdateMolecule(
-      Community(belltownId).category(
+      Community(belltownId).category.replace(
         "Cool news" -> "Super cool news",
         "events" -> "Super cool events"
       )
     ) -->
       Model(List(
         Meta("community", "", "e", NoValue, Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, Replace(Map(
+        Atom("community", "category", "String", 2, Replace(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
       ) -->
@@ -1152,7 +1153,7 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("community", "", "e", NoValue, Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, Eq(List("extra category")), None))
+        Atom("community", "category", "String", 2, Add_(List("extra category")), None))
       ) -->
       """List(
         |  List(:db/add,  17592186045886                ,  :community/category,  extra category)
@@ -1182,8 +1183,8 @@ class SeattleTransformationTests extends SeattleSpec {
       Model(List(
         Meta("community", "", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "name", "String", 1, Eq(List("belltown 3")), None),
-        Atom("community", "url", "String", 1, Remove(List()), None),
-        Atom("community", "category", "String", 2, Remove(List()), None))
+        Atom("community", "url", "String", 1, Eq(List()), None),
+        Atom("community", "category", "String", 2, Eq(List()), None))
       ) -->
       """List(
         |  List(:db/add    ,  17592186045886                ,  :community/name    ,  belltown 3                    ),

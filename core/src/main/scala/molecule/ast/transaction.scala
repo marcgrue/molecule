@@ -10,6 +10,7 @@ object transaction {
     val a     : String
     val v     : Any
     val bi    : Generic
+
     def toJava = if (action == ":db.fn/retractEntity")
       Util.list(action, e.asInstanceOf[Object])
     else

@@ -28,32 +28,34 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
     }._2
 
-    def bi(gs: Seq[Generic]) = gs.collectFirst { case bi: Bidirectional => bi } getOrElse NoValue
+    def bi(gs: Seq[Generic], card: Int) = gs.collectFirst {
+      case bi: Bidirectional => bi
+    } getOrElse Cardinality(card)
 
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
       case ('_, Meta(ns, "", "e", _, EntValue))             => ('arg, stmts)
       case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))    => (Eid(id), stmts)
-      case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs)))
-      case ('_, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case ('_, Bond(ns, refAttr, refNs, c, gs))            => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs)))
+      case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs, c)))
+      case ('_, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('_, Bond(ns, refAttr, refNs, c, gs))            => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
 
-      case (e, Nested(Bond(ns, refAttr, _, _, gs), elements)) =>
+      case (e, Nested(Bond(ns, refAttr, _, c, gs), elements)) =>
         val nested = elements.foldLeft('v: Any, Seq[Statement]()) {
           case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
         }._2
         val parentId = if (e == '_) 'parentId else 'e
-        ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, bi(gs)))
+        ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, bi(gs, c)))
 
       // First with id
-      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case (Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs)))
+      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case (Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // Same namespace
-      case ('e, Atom(ns, name, _, _, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case ('e, Atom(ns, name, _, c, VarValue, _, gs, _))             => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, bi(gs)))
-      case ('e, Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case ('e, Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", bi(gs)))
+      case ('e, Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('e, Atom(ns, name, _, c, VarValue, _, gs, _))             => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, bi(gs, c)))
+      case ('e, Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('e, Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
 
       // Transaction annotations
       case ('_, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
@@ -62,19 +64,19 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case ('e, TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
-      case ('tx, Atom(ns, name, _, _, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg))
-      case ('tx, Atom(ns, name, _, _, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ('tx, stmts :+ Add('tx, s":$ns/${name.init}", Values(value, prefix)))
-      case ('tx, Atom(ns, name, _, _, value, prefix, _, _))                                         => ('tx, stmts :+ Add('tx, s":$ns/$name", Values(value, prefix)))
+      case ('tx, Atom(ns, name, _, c, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, Cardinality(c)))
+      case ('tx, Atom(ns, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ('tx, stmts :+ Add('tx, s":$ns/${name.init}", Values(value, prefix), Cardinality(c)))
+      case ('tx, Atom(ns, name, _, c, value, prefix, _, _))                                         => ('tx, stmts :+ Add('tx, s":$ns/$name", Values(value, prefix), Cardinality(c)))
 
       // Next namespace
-      case ('v, Atom(ns, name, _, _, VarValue, _, gs, _))   => ('e, stmts :+ Add('v, s":$ns/$name", 'arg, bi(gs)))
-      case ('v, Atom(ns, name, _, _, value, prefix, gs, _)) => ('e, stmts :+ Add('v, s":$ns/$name", Values(value, prefix), bi(gs)))
-      case ('v, Bond(ns, refAttr, _, c, gs))                => ('v, stmts :+ Add('v, s":$ns/$refAttr", 'tempId, bi(gs)))
+      case ('v, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('v, s":$ns/$name", 'arg, bi(gs, c)))
+      case ('v, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('v, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('v, Bond(ns, refAttr, _, c, gs))                => ('v, stmts :+ Add('v, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // Add one extra generic statement to receive the eid arg for the following statement to use
       // (we then discard that temporary statement from the value statements)
-      case ('arg, Atom(ns, name, _, _, VarValue, _, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg) :+ Add('v, s":$ns/$name", 'arg))
-      case ('arg, Bond(ns, refAttr, _, c, gs))             => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs)))
+      case ('arg, Atom(ns, name, _, c, VarValue, _, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg) :+ Add('v, s":$ns/$name", 'arg, Cardinality(c)))
+      case ('arg, Bond(ns, refAttr, _, c, gs))             => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", ""))
@@ -134,8 +136,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     e: Any,
     a: String,
     arg: Any,
-    prefix: Option[String] = None,
-    bi: Generic = NoValue,
+    prefix: Option[String],
+    bi: Generic,
     otherEdgeId: Option[AnyRef] = None)
   : Seq[Statement] = {
 
@@ -453,17 +455,15 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     def biTargetRef(card: Int, biEdgeRefAttr: String) = {
       val edgeA = e
       val edgeB = otherEdgeId getOrElse iae("valueStmts:biTargetRef", "Missing id of other edge.")
-
       arg match {
         case Eq(biTargetRef :: Nil) => Seq(Add(biTargetRef, biEdgeRefAttr, edgeB), Add(edgeA, a, biTargetRef))
         case biTargetRef            => Seq(Add(biTargetRef, biEdgeRefAttr, edgeB), Add(edgeA, a, biTargetRef))
-
       }
     }
 
     // Default operations -------------------------------------------------------------------
 
-    def default = arg match {
+    def default(card: Int) = arg match {
 
       case MapAdd(newPairs) =>
         checkDupKeys(newPairs, "default", "add")
@@ -525,10 +525,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case Eq(newValues) =>
         checkDupValues(newValues, "default", "apply")
         val curValues = attrValues(e, a).toSeq
-        val obsoleteRetracts = curValues.flatMap {
-          case curValue if newValues.contains(curValue) => Nil
-          case obsoleteValue                            => Seq(Retract(e, a, p(obsoleteValue)))
-        }
+        val obsoleteRetracts = if (card == 2 ||
+          // Retract obsolete card-1 value
+          (newValues.isEmpty && curValues.nonEmpty)
+        ) curValues.flatMap {
+            case curValue if newValues.contains(curValue) => Nil
+            case obsoleteValue                            => Seq(Retract(e, a, p(obsoleteValue)))
+          } else Nil
         val newAdds = newValues.flatMap {
           case newValue if curValues.contains(newValue) => Nil
           case newValue                                 => Seq(Add(e, a, p(newValue)))
@@ -554,7 +557,13 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case BiEdgePropRef(card)         => biEdgeProp(card)
       case BiTargetRef(card, attr)     => biTargetRef(card, attr)
       case BiTargetRefAttr(card, attr) => biTargetRef(card, attr)
-      case _                           => default
+      case Cardinality(card)           => default(card)
+      case other                       => sys.error(
+        s"""Unexpected or missing Generic `$other`:
+            |e  : $e
+            |a  : $a
+            |arg: $arg
+         """.stripMargin)
     }
 
     stmts ++ newStmts
@@ -752,11 +761,11 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           } getOrElse iae("resolveStmts", s"Couldn't find namespace `$ns` in any previous Add statements.\n" + stmts.mkString("\n"))
           (cur, edgeB, stmts :+ Add('ns, ns, backRef))
 
-        case (None, Add('e, a, refNs: String, _))                                               => (cur, edgeB, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs)))
-        case (None, _)                                                                          => (next, edgeB, stmts)
-        case (Some(arg), genericStmt)                                                           => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE, edgeB)
-        case (arg, Add('e, a, 'arg, _)) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, edgeB, valueStmts(stmts, stmts.last.v, a, arg))
-        case (arg, genericStmt)                                                                 => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE, edgeB)
+        case (None, Add('e, a, refNs: String, bi))                                               => (cur, edgeB, valueStmts(stmts, lastE(stmts, a), a, tempId(refNs), None, bi))
+        case (None, _)                                                                           => (next, edgeB, stmts)
+        case (Some(arg), genericStmt)                                                            => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE, edgeB)
+        case (arg, Add('e, a, 'arg, bi)) if stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId] => (next, edgeB, valueStmts(stmts, stmts.last.v, a, arg, None, bi))
+        case (arg, genericStmt)                                                                  => matchDataStmt(stmts, genericStmt, arg, cur, next, nestedE, edgeB)
       }
     }._3.filterNot(_.e == -1)
   }
@@ -767,8 +776,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     val dataStmtss: Seq[Seq[Statement]] = dataRows.map(resolveStmts(genericStmts, _))
     val txId = tempId("tx")
     val txStmtss: Seq[Seq[Statement]] = Seq(genericTxStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                         => iae("insertStmts", "Unexpected insert statement: " + unexpected)
+      case (stmts, Add('tx, a, Values(vs, prefix), bi)) => valueStmts(stmts, txId, a, vs, prefix, bi)
+      case (stmts, unexpected)                          => iae("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
@@ -833,8 +842,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     }._2
     val txId = tempId("tx")
     val txStmts: Seq[Statement] = genericTxStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add('tx, a, Values(vs, prefix), _)) => valueStmts(stmts, txId, a, vs, prefix)
-      case (stmts, unexpected)                         => iae("updateStmts", "Unexpected insert statement: " + unexpected)
+      case (stmts, Add('tx, a, Values(vs, prefix), bi)) => valueStmts(stmts, txId, a, vs, prefix, bi)
+      case (stmts, unexpected)                          => iae("updateStmts", "Unexpected insert statement: " + unexpected)
     }
     dataStmts ++ txStmts
   }

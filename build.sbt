@@ -44,11 +44,11 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   //    )
   //  )
   // Add schema definition directories for boilerplate generation testing
-//  .settings(Seq(definitionDirsSeparate(
-//  "molecule/util"
-//)))
+  .settings(Seq(definitionDirsSeparate(
+  "molecule/util"
+)))
   .settings(Seq(definitionDirs(
-//  "molecule/partition",
+  "molecule/partition",
   "molecule/bidirectional"
 )))
 
@@ -65,13 +65,13 @@ lazy val moleculeExamples = project.in(file("examples"))
   //      "molecule/examples/seattle"
   //    )
   //  )
-//  .settings(Seq(definitionDirs(
-//  "molecule/examples/dayOfDatomic",
-//  "molecule/examples/gremlin",
-//  "molecule/examples/mbrainz",
-//  "molecule/examples/seattle",
-//  "molecule/examples/gremlin"
-//)))
+  .settings(Seq(definitionDirs(
+  "molecule/examples/dayOfDatomic",
+  "molecule/examples/gremlin",
+  "molecule/examples/mbrainz",
+  "molecule/examples/seattle",
+  "molecule/examples/gremlin"
+)))
 
 
 def definitionDirsSeparate(domainDirs: String*) = definitionDirs0(true, domainDirs: _*)

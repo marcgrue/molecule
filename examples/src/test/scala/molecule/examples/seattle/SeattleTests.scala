@@ -469,15 +469,11 @@ class SeattleTests extends SeattleSpec {
     Community.name_("belltown 2").category.get.head === Set("news", "events")
 
     // Replace value
-    // Todo: use replace
-//    Community(belltown).category.replace("news" -> "Cool news").update
-    Community(belltown).category("news" -> "Cool news").update
+    Community(belltown).category.replace("news" -> "Cool news").update
     Community.name_("belltown 2").category.get.head === Set("Cool news", "events")
 
     // Replace multiple values
-    // Todo: use replace
-//    Community(belltown).category.replace(
-    Community(belltown).category(
+    Community(belltown).category.replace(
       "Cool news" -> "Super cool news",
       "events" -> "Super cool events").update
     Community.name_("belltown 2").category.get.head === Set("Super cool news", "Super cool events")
