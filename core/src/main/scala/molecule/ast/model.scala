@@ -148,10 +148,6 @@ object model {
   case class BiEdgePropRefAttr(card: Int) extends Bidirectional
   case class BiEdgePropRef(card: Int) extends Bidirectional
 
-//  case class BiEdgePropAttr(card: Int, attr: String) extends Bidirectional
-//  case class BiEdgePropRefAttr(card: Int, attr: String) extends Bidirectional
-//  case class BiEdgePropRef(card: Int, attr: String) extends Bidirectional
-
   case class BiTargetRef(card: Int, attr: String) extends Bidirectional
   case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional
 

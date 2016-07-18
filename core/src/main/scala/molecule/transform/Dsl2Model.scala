@@ -99,8 +99,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
     case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
     case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
-    //    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
-    case a@q"$prev.$cur" if a.isValueAttr$ => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
+    case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
 
     // Self join -----------------------------
@@ -129,7 +128,6 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
       val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
-      //      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(76, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
@@ -144,7 +142,6 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case t1 if t1 <:< weakTypeOf[One[_, _, _]]     => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
         case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
       }
-      //      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, Some("mappedKey"), bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
       //      x(77, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
@@ -172,8 +169,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Attributes --------------------------------------
 
-    case a@q"$prev.$cur" if a.isEnum => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
-    //    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, Some("mapping"), bi(a)))
+    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
     case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
     case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
@@ -593,9 +589,6 @@ object Dsl2Model {
 
     // Catch duplicate update values
     elements0.collectFirst {
-      //      case a@Atom(ns, name, _, 1, Eq(vs), _, _, _) if vs.size > 1 =>
-      //        abort(10, s"Can't apply multiple values to card-one attribute `:$ns/$name`:\n" + vs.mkString("\n"))
-
       case a@Atom(ns, name, _, _, Add_(vs), _, _, _) if dupS(vs).nonEmpty =>
         abort(11, s"Can't add duplicate values to attribute `:$ns/$name`:\n" + dupS(vs).mkString("\n"))
 
@@ -614,14 +607,6 @@ object Dsl2Model {
         val dups = dupKeys(pairs)
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         abort(15, s"Can't replace multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
-
-      case a@Atom(ns, name, _, _, MapEq(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
-        val dups = dupKeys(pairs)
-        val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
-        abort(16, s"Can't apply multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
-
-      //      case a@Atom(ns, name, _, _, Replace(pairs), _, _, _) if dupValues(pairs).nonEmpty =>
-
     }
 
     // Resolve generic elements ............................................................

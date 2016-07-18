@@ -527,14 +527,14 @@ class Values extends Base {
     // 'or'-separated list not allowed (reserved for key/value pairs)
     // Ns.int.strMap("Hello" or "Hej")
 
-    // 2. Set
-    Ns.int.strMap(Set("Hello", "Hej")).get === List(
+    // 2. Seq
+    Ns.int.strMap.apply(Seq("Hello", "Hej")).get === List(
       (3, Map("en" -> "Hello", "da" -> "Hej")),
       (4, Map("da" -> "Hej"))
     )
     // Supplied as variable
-    val set = Set("Hello", "Hej")
-    Ns.int.strMap(set).get === List(
+    val seq = Seq("Hello", "Hej")
+    Ns.int.strMap(seq).get === List(
       (3, Map("en" -> "Hello", "da" -> "Hej")),
       (4, Map("da" -> "Hej"))
     )
@@ -546,8 +546,8 @@ class Values extends Base {
     )
 
     Ns.int.strMap_("Hello", "Hej").get === List(3, 4)
-    Ns.int.strMap_(Set("Hello", "Hej")).get === List(3, 4)
-    Ns.int.strMap_(set).get === List(3, 4)
+    Ns.int.strMap_(Seq("Hello", "Hej")).get === List(3, 4)
+    Ns.int.strMap_(seq).get === List(3, 4)
     Ns.int.strMap_("Hello|Hej").get === List(3, 4)
 
 
@@ -557,25 +557,25 @@ class Values extends Base {
       (1, Map("en" -> 10)),
       (2, Map("en" -> 10, "da" -> 10, "fr" -> 20))
     )
-    Ns.int.intMap(Set(10, 20)).get === List(
+    Ns.int.intMap(Seq(10, 20)).get === List(
       (1, Map("en" -> 10)),
       (2, Map("en" -> 10, "da" -> 10, "fr" -> 20))
     )
-    // We can even apply multiple sets
-    Ns.int.intMap(Set(10), Set(20)).get === List(
+    // We can even apply multiple seqs
+    Ns.int.intMap(Seq(10), Seq(20)).get === List(
       (1, Map("en" -> 10)),
       (2, Map("en" -> 10, "da" -> 10, "fr" -> 20))
     )
-    val intSet = Set(10, 20)
-    Ns.int.intMap(intSet).get === List(
+    val intSeq = Seq(10, 20)
+    Ns.int.intMap(intSeq).get === List(
       (1, Map("en" -> 10)),
       (2, Map("en" -> 10, "da" -> 10, "fr" -> 20))
     )
 
     Ns.int.intMap_(10, 20).get === List(1, 2)
-    Ns.int.intMap_(Set(10, 20)).get === List(1, 2)
-    Ns.int.intMap_(Set(10), Set(20)).get === List(1, 2)
-    Ns.int.intMap_(intSet).get === List(1, 2)
+    Ns.int.intMap_(Seq(10, 20)).get === List(1, 2)
+    Ns.int.intMap_(Seq(10), Seq(20)).get === List(1, 2)
+    Ns.int.intMap_(intSeq).get === List(1, 2)
 
 
     // Long
@@ -584,13 +584,13 @@ class Values extends Base {
       (1, Map("en" -> 10L)),
       (2, Map("en" -> 10L, "da" -> 10L, "fr" -> 20L))
     )
-    Ns.int.longMap(Set(10L, 20L)).get === List(
+    Ns.int.longMap(Seq(10L, 20L)).get === List(
       (1, Map("en" -> 10L)),
       (2, Map("en" -> 10L, "da" -> 10L, "fr" -> 20L))
     )
 
     Ns.int.longMap_(10L, 20L).get === List(1, 2)
-    Ns.int.longMap_(Set(10L, 20L)).get === List(1, 2)
+    Ns.int.longMap_(Seq(10L, 20L)).get === List(1, 2)
 
 
     // Float
@@ -599,13 +599,13 @@ class Values extends Base {
       (1, Map("en" -> 10f)),
       (2, Map("en" -> 10f, "da" -> 10f, "fr" -> 20f))
     )
-    Ns.int.floatMap(Set(10f, 20f)).get === List(
+    Ns.int.floatMap(Seq(10f, 20f)).get === List(
       (1, Map("en" -> 10f)),
       (2, Map("en" -> 10f, "da" -> 10f, "fr" -> 20f))
     )
 
     Ns.int.floatMap_(10f, 20f).get === List(1, 2)
-    Ns.int.floatMap_(Set(10f, 20f)).get === List(1, 2)
+    Ns.int.floatMap_(Seq(10f, 20f)).get === List(1, 2)
 
 
     // Double
@@ -614,13 +614,13 @@ class Values extends Base {
       (1, Map("en" -> 10.0)),
       (2, Map("en" -> 10.0, "da" -> 10.0, "fr" -> 20.0))
     )
-    Ns.int.doubleMap(Set(10.0, 20.0)).get === List(
+    Ns.int.doubleMap(Seq(10.0, 20.0)).get === List(
       (1, Map("en" -> 10.0)),
       (2, Map("en" -> 10.0, "da" -> 10.0, "fr" -> 20.0))
     )
 
     Ns.int.doubleMap_(10.0, 20.0).get === List(1, 2)
-    Ns.int.doubleMap_(Set(10.0, 20.0)).get === List(1, 2)
+    Ns.int.doubleMap_(Seq(10.0, 20.0)).get === List(1, 2)
 
 
     // Date
@@ -629,13 +629,13 @@ class Values extends Base {
       (1, Map("en" -> date1)),
       (2, Map("en" -> date1, "da" -> date1, "fr" -> date2))
     )
-    Ns.int.dateMap(Set(date1, date2)).get === List(
+    Ns.int.dateMap(Seq(date1, date2)).get === List(
       (1, Map("en" -> date1)),
       (2, Map("en" -> date1, "da" -> date1, "fr" -> date2))
     )
 
     Ns.int.dateMap_(date1, date2).get === List(1, 2)
-    Ns.int.dateMap_(Set(date1, date2)).get === List(1, 2)
+    Ns.int.dateMap_(Seq(date1, date2)).get === List(1, 2)
 
 
     // UUID
@@ -644,13 +644,13 @@ class Values extends Base {
       (1, Map("en" -> uuid1)),
       (2, Map("en" -> uuid1, "da" -> uuid1, "fr" -> uuid2))
     )
-    Ns.int.uuidMap(Set(uuid1, uuid2)).get === List(
+    Ns.int.uuidMap(Seq(uuid1, uuid2)).get === List(
       (1, Map("en" -> uuid1)),
       (2, Map("en" -> uuid1, "da" -> uuid1, "fr" -> uuid2))
     )
 
     Ns.int.uuidMap_(uuid1, uuid2).get === List(1, 2)
-    Ns.int.uuidMap_(Set(uuid1, uuid2)).get === List(1, 2)
+    Ns.int.uuidMap_(Seq(uuid1, uuid2)).get === List(1, 2)
 
 
     // URI
@@ -659,13 +659,13 @@ class Values extends Base {
       (1, Map("en" -> uri1)),
       (2, Map("en" -> uri1, "da" -> uri1, "fr" -> uri2))
     )
-    Ns.int.uriMap(Set(uri1, uri2)).get === List(
+    Ns.int.uriMap(Seq(uri1, uri2)).get === List(
       (1, Map("en" -> uri1)),
       (2, Map("en" -> uri1, "da" -> uri1, "fr" -> uri2))
     )
 
     Ns.int.uriMap_(uri1, uri2).get === List(1, 2)
-    Ns.int.uriMap_(Set(uri1, uri2)).get === List(1, 2)
+    Ns.int.uriMap_(Seq(uri1, uri2)).get === List(1, 2)
 
     // Searching for multiple Boolean values doesn't make sense...
   }

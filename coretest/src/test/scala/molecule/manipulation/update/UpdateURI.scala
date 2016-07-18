@@ -30,11 +30,10 @@ class UpdateURI extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).uri(uri2, uri3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/uri`:" +
-          "\n__ident__uri2" +
-          "\n__ident__uri3")
+      (Ns(eid).uri(uri2, uri3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... uri($uri2, $uri3)"
     }
   }
 

@@ -157,17 +157,19 @@ class UpdateMapFloat extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).floatMap("str1" -> 1f, "str1" -> 2f).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
-          "\nstr1 -> 1.0" +
-          "\nstr1 -> 2.0")
+      // vararg
+      (Ns(eid).floatMap("str1" -> 1f, "str1" -> 2f).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "\nstr1 -> 1.0" +
+        "\nstr1 -> 2.0"
 
-      expectCompileError(
-        """Ns(eid).floatMap(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
-          "\nstr1 -> 1.0" +
-          "\nstr1 -> 2.0")
+      // Seq
+      (Ns(eid).floatMap(Seq("str1" -> 1f, "str1" -> 2f)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "\nstr1 -> 1.0" +
+        "\nstr1 -> 2.0"
     }
   }
 
@@ -340,17 +342,19 @@ class UpdateMapFloat extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).floatMap(str1 -> float1, str1 -> float2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
-          "\n__ident__str1 -> __ident__float1" +
-          "\n__ident__str1 -> __ident__float2")
+      // vararg
+      (Ns(eid).floatMap(str1 -> float1, str1 -> float2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "\na -> 1.0" +
+        "\na -> 2.0"
 
-      expectCompileError(
-        """Ns(eid).floatMap(Seq(str1 -> float1, str1 -> float2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
-          "\n__ident__str1 -> __ident__float1" +
-          "\n__ident__str1 -> __ident__float2")
+      // Seq
+      (Ns(eid).floatMap(Seq(str1 -> float1, str1 -> float2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "\na -> 1.0" +
+        "\na -> 2.0"
     }
   }
 }

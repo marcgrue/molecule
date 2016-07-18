@@ -455,26 +455,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       val edgeB = otherEdgeId getOrElse iae("valueStmts:biTargetRef", "Missing id of other edge.")
 
       arg match {
-        case Eq(biTargetRef :: Nil) =>
-          //          val reverseRetracts = if (meta.endsWith("1")) attrValues(edgeA, a).toSeq.map(revRef => Retract(revRef, a, edgeA)) else Nil
-          //          if (biTargetRef == e) throw new IllegalArgumentException("Current entity and referenced entity ids can't be the same")
-          //          reverseRetracts ++
-          Seq(
-            Add(biTargetRef, biEdgeRefAttr, edgeB),
-            Add(edgeA, a, biTargetRef)
-          )
-        //        case refs: Set[_]       => refs.flatMap { case ref: Long =>
-        //          Seq(Add(ref, a, e), Add(e, a, ref))
-        //        }
+        case Eq(biTargetRef :: Nil) => Seq(Add(biTargetRef, biEdgeRefAttr, edgeB), Add(edgeA, a, biTargetRef))
+        case biTargetRef            => Seq(Add(biTargetRef, biEdgeRefAttr, edgeB), Add(edgeA, a, biTargetRef))
 
-        case biTargetRef => {
-          //          val reverseRetracts = if (meta.endsWith("1")) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
-          //          reverseRetracts ++
-          Seq(
-            Add(biTargetRef, biEdgeRefAttr, edgeB),
-            Add(edgeA, a, biTargetRef)
-          )
-        }
       }
     }
 

@@ -28,11 +28,10 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).bigDec(bigDec2, bigDec3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/bigDec`:" +
-          "\n__ident__bigDec2" +
-          "\n__ident__bigDec3")
+      (Ns(eid).bigDec(bigDec2, bigDec3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... bigDec($bigDec2, $bigDec3)"
     }
   }
 

@@ -30,11 +30,10 @@ class UpdateEnum extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).enum("enum2", "enum3").update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/enum`:" +
-          "\nenum2" +
-          "\nenum3")
+      (Ns(eid).enum("enum2", "enum3").update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... enum(enum2, enum3)"
     }
   }
 
@@ -60,11 +59,10 @@ class UpdateEnum extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).enum(enum2, enum3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/enum`:" +
-          "\n__ident__enum2" +
-          "\n__ident__enum3")
+      (Ns(eid).enum(enum2, enum3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... enum($enum2, $enum3)"
     }
   }
 

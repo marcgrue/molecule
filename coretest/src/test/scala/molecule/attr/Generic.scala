@@ -10,9 +10,8 @@ class Generic extends CoreSpec {
 
     // Todo
 
-    (Ns.str("man").Ref1.e(42L).save must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      s"[output.Molecule.noGenerics] Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
-      s"not allowed in save molecules. Found `e(42)`"
+    (Ns.str("man").Ref1.e(42L).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` not allowed in save molecules. Found `e(42)`"
 
 //    Ns.str("man").Ref1.a("hej").save
 //    Ns.str("man").Ref1.v("hej").save

@@ -174,18 +174,17 @@ class UpdateMapBoolean extends CoreSpec {
 
 
       // Can't apply pairs with duplicate keys
+      (Ns(eid).longMap(str1 -> long1, str1 -> long2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\na -> 1" +
+        "\na -> 2"
 
-      expectCompileError(
-        """Ns(eid).boolMap(str1 -> bool1, str1 -> bool2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
-          "\n__ident__str1 -> __ident__bool1" +
-          "\n__ident__str1 -> __ident__bool2")
-
-      expectCompileError(
-        """Ns(eid).boolMap(Seq(str1 -> bool1, str1 -> bool2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
-          "\n__ident__str1 -> __ident__bool1" +
-          "\n__ident__str1 -> __ident__bool2")
+      (Ns(eid).longMap(Seq(str1 -> long1, str1 -> long2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\na -> 1" +
+        "\na -> 2"
     }
   }
 }

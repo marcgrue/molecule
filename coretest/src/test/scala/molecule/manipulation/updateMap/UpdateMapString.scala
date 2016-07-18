@@ -157,17 +157,19 @@ class UpdateMapString extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).strMap("str1" -> "a", "str1" -> "b").update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
-          "\nstr1 -> a" +
-          "\nstr1 -> b")
+      // vararg
+      (Ns(eid).strMap("str1" -> "a", "str1" -> "b").update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
+        "\nstr1 -> a" +
+        "\nstr1 -> b"
 
-      expectCompileError(
-        """Ns(eid).strMap(Seq("str1" -> "a", "str1" -> "b")).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
-          "\nstr1 -> a" +
-          "\nstr1 -> b")
+      // Seq
+      (Ns(eid).strMap(Seq("str1" -> "a", "str1" -> "b")).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
+        "\nstr1 -> a" +
+        "\nstr1 -> b"
     }
   }
 
@@ -339,17 +341,19 @@ class UpdateMapString extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).strMap(str1 -> str1, str1 -> str2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
-          "\n__ident__str1 -> __ident__str1" +
-          "\n__ident__str1 -> __ident__str2")
+      // vararg
+      (Ns(eid).strMap(str1 -> str1, str1 -> str2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
+        "\na -> a" +
+        "\na -> b"
 
-      expectCompileError(
-        """Ns(eid).strMap(Seq(str1 -> str1, str1 -> str2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
-          "\n__ident__str1 -> __ident__str1" +
-          "\n__ident__str1 -> __ident__str2")
+      // Seq
+      (Ns(eid).strMap(Seq(str1 -> str1, str1 -> str2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/strMap`:" +
+        "\na -> a" +
+        "\na -> b"
     }
   }
 }

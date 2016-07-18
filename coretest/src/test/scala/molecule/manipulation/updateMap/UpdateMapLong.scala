@@ -157,17 +157,17 @@ class UpdateMapLong extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).longMap("str1" -> 1L, "str1" -> 2L).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+      (Ns(eid).longMap("str1" -> 1L, "str1" -> 2L).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\nstr1 -> 1" +
+        "\nstr1 -> 2"
 
-      expectCompileError(
-        """Ns(eid).longMap(Seq("str1" -> 1L, "str1" -> 2L)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+      (Ns(eid).longMap(Seq("str1" -> 1L, "str1" -> 2L)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\nstr1 -> 1" +
+        "\nstr1 -> 2"
     }
   }
 
@@ -224,7 +224,6 @@ class UpdateMapLong extends CoreSpec {
         "[molecule.transform.Model2Transaction.valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
-
 
       // Seq
       (Ns(eid).longMap.add(Seq(str1 -> long1, str1x -> long2)).update must throwA[IllegalArgumentException])
@@ -340,17 +339,17 @@ class UpdateMapLong extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).longMap(str1 -> long1, str1 -> long2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\n__ident__str1 -> __ident__long1" +
-          "\n__ident__str1 -> __ident__long2")
+      (Ns(eid).longMap(str1 -> long1, str1 -> long2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\na -> 1" +
+        "\na -> 2"
 
-      expectCompileError(
-        """Ns(eid).longMap(Seq(str1 -> long1, str1 -> long2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\n__ident__str1 -> __ident__long1" +
-          "\n__ident__str1 -> __ident__long2")
+      (Ns(eid).longMap(Seq(str1 -> long1, str1 -> long2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "\na -> 1" +
+        "\na -> 2"
     }
   }
 }

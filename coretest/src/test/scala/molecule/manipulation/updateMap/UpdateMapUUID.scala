@@ -177,17 +177,32 @@ class UpdateMapUUID extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
-          "\n__ident__str1 -> __ident__uuid1" +
-          "\n__ident__str1 -> __ident__uuid2")
+      // vararg
+      (Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "\na -> " + uuid1 +
+        "\na -> " + uuid2
 
-      expectCompileError(
-        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
-          "\n__ident__str1 -> __ident__uuid1" +
-          "\n__ident__str1 -> __ident__uuid2")
+
+      // Seq
+      (Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "\na -> " + uuid1 +
+        "\na -> " + uuid2
+
+//      expectCompileError(
+//        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
+//        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//          "\n__ident__str1 -> __ident__uuid1" +
+//          "\n__ident__str1 -> __ident__uuid2")
+//
+//      expectCompileError(
+//        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
+//        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//          "\n__ident__str1 -> __ident__uuid1" +
+//          "\n__ident__str1 -> __ident__uuid2")
     }
   }
 }

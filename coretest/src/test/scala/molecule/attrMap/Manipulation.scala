@@ -32,7 +32,7 @@ class Manipulation extends Base {
     // finds and retract all values of an attribute
 
     Ns(eid).strMap().update
-    Ns.strMap.one === Map()
+    Ns.strMap.get === List()
   }
 
 }

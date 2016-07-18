@@ -28,11 +28,10 @@ class UpdateInt extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).int(2, 3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/int`:" +
-          "\n2" +
-          "\n3")
+      (Ns(eid).int(2, 3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... int(2, 3)"
     }
   }
 
@@ -58,11 +57,10 @@ class UpdateInt extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).int(int2, int3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/int`:" +
-          "\n__ident__int2" +
-          "\n__ident__int3")
+      (Ns(eid).int(int2, int3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... int($int2, $int3)"
     }
   }
 

@@ -177,17 +177,17 @@ class UpdateMapURI extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).uriMap(str1 -> uri1, str1 -> uri2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
-          "\n__ident__str1 -> __ident__uri1" +
-          "\n__ident__str1 -> __ident__uri2")
+      (Ns(eid).uriMap(str1 -> uri1, str1 -> uri2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "\na -> " + uri1 +
+        "\na -> " + uri2
 
-      expectCompileError(
-        """Ns(eid).uriMap(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
-          "\n__ident__str1 -> __ident__uri1" +
-          "\n__ident__str1 -> __ident__uri2")
+      (Ns(eid).uriMap(Seq(str1 -> uri1, str1 -> uri2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "\na -> " + uri1 +
+        "\na -> " + uri2
     }
   }
 }

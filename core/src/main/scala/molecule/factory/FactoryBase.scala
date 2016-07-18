@@ -318,6 +318,10 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
       q"""if ($value == null) None else
             Some($value.asInstanceOf[jMap[String, PersistentVector]].toMap.values.head.asInstanceOf[PersistentVector].toSet.asInstanceOf[Set[Double]])"""
 
+    case t if t <:< typeOf[Option[Set[Boolean]]] =>
+      q"""if ($value == null) None else
+            Some($value.asInstanceOf[jMap[String, PersistentVector]].toMap.values.head.asInstanceOf[PersistentVector].toSet.asInstanceOf[Set[Boolean]])"""
+
     case t if t <:< typeOf[Option[Set[BigInt]]] =>
       q"""if ($value == null) None else {
             val javaSet = $value.asInstanceOf[jMap[String, PersistentVector]].toMap.values.head.asInstanceOf[PersistentVector]
@@ -626,96 +630,6 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
           nestedAcc
         }
       """
-
-      //      q"""
-      //      //      println("  E tpl: " + tpl.isInstanceOf[Product])
-      //      //println(tab + " depth       : " + depth)
-      ////      val ei = "  " * entityIndex
-      //      val tab = "  " * $rowIndex
-      ////      println(tab + "rowIndex : " + rowIndex)
-      //      println(tab + "rowIndex: " + $rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")")
-      //
-      //
-      //        // ==========================================================================
-      //        if ($tpl0.isEmpty || $isNewNested) {
-      //
-      //        println(tab + "a tpl0: " + $tpl0)
-      //          val nestedTpl = ${resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]", prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
-      //        println(tab + "a nestedTpl : Seq(" + nestedTpl + ")")
-      //
-      //          Seq(nestedTpl)
-      //
-      //        // ==========================================================================
-      //        } else if ($tpl0.get.isInstanceOf[Seq[_]]) {
-      //
-      //        println(tab + "b tpl0      : " + $tpl0)
-      //
-      //          val nestedTpl = ${resolveNested(query, nestedTpes,
-      //        q"Some($tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-      //        prevRow, row, rowIndex, depth + 1, maxDepth, shift)}.asInstanceOf[(..$nestedTpes)]
-      //
-      //          val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long]
-      //
-      //        println(tab + "b nestedTpl : " + nestedTpl)
-      //        println(tab + "b newNested : " + newNested + "  " + $row.apply($rowIndex).asInstanceOf[Long] + " " + $prevRow.apply($rowIndex).asInstanceOf[Long])
-      //
-      //         val nestedAcc = if (newNested)
-      //            $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ nestedTpl
-      //          else
-      //            $tpl0.get.asInstanceOf[Seq[(..$nestedTpes)]].init :+ nestedTpl
-      //
-      //        println(tab + "b nestedAcc : " + nestedAcc)
-      //          nestedAcc
-      //
-      //        // ==========================================================================
-      //        } else {
-      //
-      //        println(tab + "c tpl0      : " + $tpl0)
-      //
-      //        println(tab + "c tpl0_1 tpe: " + ${tpes.toString})
-      //         val tpl0_1 = $tpl0.get.asInstanceOf[(..$tpes)]
-      //        println(tab + "c tpl0_1    : " + tpl0_1)
-      //
-      //         val tpl0_2 = tpl0_1.productElement($tupleIndex)
-      //        println(tab + "c tpl0_2    : " + tpl0_2)
-      //
-      //        println(tab + "c tpl0_3 tpe: " + ${nestedTpes.toString} + "")
-      //         val tpl0_3 = tpl0_2.asInstanceOf[Seq[(..$nestedTpes)]]
-      //        println(tab + "c tpl0_3    : " + tpl0_3)
-      //
-      //         val tpl0_4 = tpl0_3.last
-      //        println(tab + "c tpl0_4    : " + tpl0_4)
-      //
-      ////        println(tab + "c tpl0_5 tpe: " + {nestedTpes.toString})
-      //         val tpl0_5: (..$nestedTpes) = tpl0_4.asInstanceOf[(..$nestedTpes)]
-      //        println(tab + "c tpl0_5    : " + tpl0_5)
-      //
-      ////          val newTpl0 = Some(tpl0_1.productElement(tpl0_1.productArity - 1).asInstanceOf[Seq[(..nestedTpes)]].last.asInstanceOf[(..nestedTpes)])
-      ////          val newTpl0 = Some(tpl0_5)
-      //
-      ////        println(tab + "c newTpl0   : " + newTpl0)
-      //
-      //          val nestedTpl = ${resolveNested(query, nestedTpes,
-      ////        q"Some(tpl0_5)",
-      //        q"Some($tpl0.get.asInstanceOf[(..$tpes)].productElement($tupleIndex).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-      //        prevRow, row, rowIndex, depth + 1, maxDepth, shift)}.asInstanceOf[(..$nestedTpes)]
-      //
-      //           val newNested = $prevRow.apply($rowIndex).asInstanceOf[Long] != $row.apply($rowIndex).asInstanceOf[Long] || $depth == $maxDepth
-      //
-      //        println(tab + "c nestedTpl : " + nestedTpl)
-      //        println(tab + "c newNested : " + newNested + "   " + $prevRow.apply($rowIndex).asInstanceOf[Long] + "  " + $row.apply($rowIndex).asInstanceOf[Long] + "    " + $depth + "  " + $maxDepth)
-      //
-      //           val nestedAcc = if (newNested)
-      //             tpl0_3 :+ nestedTpl
-      //           else
-      //             tpl0_3.init :+ nestedTpl
-      //
-      //        println(tab + "c nestedAcc : " + nestedAcc)
-      //          nestedAcc
-      //        }
-      //      """
-
-      //      q"null.asInstanceOf[Seq[(..$nestedTpes)]]"
     }
 
     lazy val values = tpes.zipWithIndex.foldLeft(shift, Seq.empty[Tree]) { case ((shift, vs), (t, tupleIndex)) =>
@@ -804,18 +718,6 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case tpe if tpe <:< weakTypeOf[Seq[(_, _)]] =>
           val nestedTpes = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head.baseType(weakTypeOf[(_, _)].typeSymbol).typeArgs
           (shift + 2, vs :+ resolve(nestedTpes, tupleIndex))
-        //          val resultTree =
-        //            q"""
-        //            val rowIndex = $entityIndex + $shift + $tupleIndex
-        //            val ei = "  " * rowIndex
-        //            println(ei + "T2 " + rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")   " + ${tpe.toString})
-        //
-        //            val result = ${resolve(nestedTpes, tupleIndex)}
-        //
-        //            println(ei + "T2 " + result)
-        //            result
-        //          """
-        //          (shift + 2, vs :+ resultTree)
 
         case tpe if tpe <:< weakTypeOf[Seq[_]] =>
           val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
@@ -823,32 +725,9 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
 
         case tpe =>
           (shift, vs :+ cast(query, row, tpe, entityIndex + shift + tupleIndex))
-        //          val resultTree =
-        //            q"""
-        //              val rowIndex = $entityIndex + $shift + $tupleIndex
-        //              val ei = "  " * rowIndex
-        //              println(ei + "B " + rowIndex + " (" + $entityIndex + "-" + $shift + "-" + $tupleIndex + ")   " + ${tpe.toString})
-        //
-        //              val result = ${cast(query, row, tpe, entityIndex + shift + tupleIndex)}
-        //
-        //              println(ei + "B " + result)
-        //              result
-        //            """
-        //          (shift, vs :+ resultTree)
       }
     }._2
 
-    //    q"""
-    //      val ei = "  " * $entityIndex
-    //
-    ////      println(ei + "-------------------------------")
-    //      println(ei + "A " + $entityIndex + "-" + $shift + "   " + ${tpes.toString})
-    //
-    //      val result = (..$values).asInstanceOf[(..$tpes)]
-    //
-    //      println(ei + "A " + result)
-    //      result
-    //    """
     q"(..$values).asInstanceOf[(..$tpes)]"
   }
 

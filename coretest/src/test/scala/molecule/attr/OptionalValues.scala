@@ -303,9 +303,9 @@ class OptionalValues extends CoreSpec {
         None)
     }
 
-    "RuntimeException when inserting" in new CoreSetup {
-      (m(Ns.str_.int$).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        "[output.Molecule.noTacetAttrs] Tacet attributes like `str_` not allowed in insert molecules."
+    "IllegalArgumentException when inserting" in new CoreSetup {
+      (m(Ns.str_.int$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noTacetAttrs]  Tacet attributes like `str_` not allowed in insert molecules."
     }
   }
 
@@ -331,8 +331,8 @@ class OptionalValues extends CoreSpec {
     Ns.Ref1.int1.get === List(1, 2)
 
     // We don't want a Ns entity with no asserted attributes but with a reference to Ref1 (an orphan)
-    (m(Ns.Ref1.int1).insert must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      "[output.Molecule:noOrphanRefs (1)] Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
+    (m(Ns.Ref1.int1).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
 

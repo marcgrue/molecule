@@ -69,8 +69,7 @@ case class CheckModel(model: Model, op: String) {
 
   private def noTacetAttrs {
     def detectTacetAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
-      case a: Atom if a.name.last == '_' => iae("noTacetAttrs",
-        s"[api.CheckModel.noTacetAttrs] Tacet attributes like `${a.name}` not allowed in $op molecules.")
+      case a: Atom if a.name.last == '_' => iae("noTacetAttrs", s"Tacet attributes like `${a.name}` not allowed in $op molecules.")
       case Nested(ref, es)               => detectTacetAttrs(es)
       case Composite(es)                 => detectTacetAttrs(es)
       case e: Element                    => Seq(e)
@@ -160,8 +159,10 @@ case class CheckModel(model: Model, op: String) {
       case Nested(Bond(baseNs, _, refNs, _, Seq(BiEdgeRef(_, _))), es)
         if !es.collectFirst {
           // One of those is expected
-          case Bond(_, _, _, _, Seq(BiTargetRef(_, attr))) if ns(attr) == baseNs              => true
-          case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if ns(attr) == baseNs => true
+          case Bond(_, _, _, _, Seq(BiTargetRef(_, attr)))              => true
+          case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => true
+//          case Bond(_, _, _, _, Seq(BiTargetRef(_, attr))) if ns(attr) == baseNs              => true
+//          case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if ns(attr) == baseNs => true
         }.getOrElse(false) => iae("noNestedEdgesWithoutTarget",
         s"Nested edge ns `$refNs` should link to target ns within the nested group of attributes.")
     }

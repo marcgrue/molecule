@@ -34,7 +34,7 @@ class NestedTests extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Refs1 * Ref1.Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[api.CheckModel.noOrphanRefs (1)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "No mandatory attributes after nested" in new CoreSetup {
@@ -48,7 +48,7 @@ class NestedTests extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Refs1 * Ref1.int1$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[api.CheckModel.noOrphanRefs (3)] Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
 
@@ -80,7 +80,7 @@ class NestedTests extends CoreSpec {
 
   "Missing many attribute" in new CoreSetup {
     (m(Ns.str.Refs1.Refs2 * Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[api.CheckModel.noOrphanRefs (2)] Namespace `Refs1` in insert molecule has no mandatory attributes. Please add at least one."
+      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Refs1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
   "Refs after nested" in new CoreSetup {

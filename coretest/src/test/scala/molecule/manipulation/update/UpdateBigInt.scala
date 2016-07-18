@@ -28,11 +28,10 @@ class UpdateBigInt extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).bigInt(bigInt2, bigInt3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/bigInt`:" +
-          "\n__ident__bigInt2" +
-          "\n__ident__bigInt3")
+      (Ns(eid).bigInt(bigInt2, bigInt3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... bigInt($bigInt2, $bigInt3)"
     }
   }
 

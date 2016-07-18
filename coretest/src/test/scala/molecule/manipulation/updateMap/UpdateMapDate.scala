@@ -176,17 +176,20 @@ class UpdateMapDate extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).dateMap(str1 -> date1, str1 -> date2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
-          "\n__ident__str1 -> __ident__date1" +
-          "\n__ident__str1 -> __ident__date2")
+      // vararg
+      (Ns(eid).dateMap(str1 -> date1, str1 -> date2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "\na -> Thu Jan 01 01:00:01 CET 1970" +
+        "\na -> Thu Jan 01 01:00:02 CET 1970"
 
-      expectCompileError(
-        """Ns(eid).dateMap(Seq(str1 -> date1, str1 -> date2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
-          "\n__ident__str1 -> __ident__date1" +
-          "\n__ident__str1 -> __ident__date2")
+
+      // Seq
+      (Ns(eid).dateMap(Seq(str1 -> date1, str1 -> date2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "\na -> Thu Jan 01 01:00:01 CET 1970" +
+        "\na -> Thu Jan 01 01:00:02 CET 1970"
     }
   }
 }

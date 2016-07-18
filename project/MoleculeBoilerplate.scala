@@ -38,7 +38,7 @@ object MoleculeBoilerplate {
 
   case class BackRef(attr: String, attrClean: String, clazz: String, clazz2: String, tpe: String, baseTpe: String, backRef: String, options: Seq[Optional] = Seq()) extends Attr
 
-  case class Optional(datomicKeyValue: String, clazz: String, baseRef: String = "")
+  case class Optional(datomicKeyValue: String, clazz: String)
 
 
   // Helpers ..........................................

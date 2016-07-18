@@ -36,11 +36,11 @@ class Save extends CoreSpec {
       Ns.enum.one === enum1
 
       // Applying multiple values to card-one attr not allowed when saving
-      expectCompileError(
-        """Ns.str("a", "b").save""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/str`:" +
-          "\na" +
-          "\nb")
+
+      (Ns.str("a", "b").save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+        s"\n  ns ... str(a, b)"
     }
 
     "Card many attr" in new CoreSetup {

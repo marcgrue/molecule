@@ -7,6 +7,7 @@ object BidirectionalDefinition {
 
   object living {
 
+    // Base namespace
     object Person extends Person
     trait Person {
       // A ==> a
@@ -34,7 +35,6 @@ object BidirectionalDefinition {
     trait Loves {
       // a --- edge ==> a
       val person: AnyRef = target[Person.loves.type]
-//      val person: AnyRef = target[Person.knows.type]
 
       // Edge properties
       val weight          = oneInt
@@ -68,7 +68,6 @@ object BidirectionalDefinition {
       // a --- edge ==> b
       val animal: AnyRef = target[Animal.favorite.type]
       // a <== edge --- b
-//      val person: AnyRef = target[Animal.favorite.type]
       val person: AnyRef = target[Person.favorite.type]
 
       // Edge properties
@@ -105,7 +104,7 @@ object BidirectionalDefinition {
     }
 
 
-
+    // Other namespace
     object Animal extends Animal
     trait Animal {
       // Other end/start point of other ref

@@ -175,17 +175,17 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).bigIntMap(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
-          "\n__ident__str1 -> __ident__bigInt1" +
-          "\n__ident__str1 -> __ident__bigInt2")
+      (Ns(eid).bigIntMap(str1 -> bigInt1, str1 -> bigInt2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "\na -> " + bigInt1 +
+        "\na -> " + bigInt2
 
-      expectCompileError(
-        """Ns(eid).bigIntMap(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
-          "\n__ident__str1 -> __ident__bigInt1" +
-          "\n__ident__str1 -> __ident__bigInt2")
+      (Ns(eid).bigIntMap(Seq(str1 -> bigInt1, str1 -> bigInt2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "\na -> " + bigInt1 +
+        "\na -> " + bigInt2
     }
   }
 }

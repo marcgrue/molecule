@@ -26,11 +26,10 @@ class UpdateBoolean extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).bool(true, false).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/bool`:" +
-          "\ntrue" +
-          "\nfalse")
+      (Ns(eid).bool(true, false).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... bool(true, false)"
     }
   }
 
@@ -52,11 +51,10 @@ class UpdateBoolean extends CoreSpec {
 
       // Applying multiple values to card-one attribute not allowed
 
-      expectCompileError(
-        """Ns(eid).bool(bool2, bool3).update""",
-        "[Dsl2Model:apply (10)] Can't apply multiple values to card-one attribute `:ns/bool`:" +
-          "\n__ident__bool2" +
-          "\n__ident__bool3")
+      (Ns(eid).bool(bool2, bool3).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        s"\n  ns ... bool($bool2, $bool3)"
     }
   }
 

@@ -285,8 +285,8 @@ class Composite extends CoreSpec {
       ":ns/ints" -> List(3, 2),
       ":ns/long" -> 1,
       ":ns/longs" -> List(3, 2),
-      ":ns/ref1" -> ":ns/dateMap",
-      ":ns/refSub1" -> ":ns/dateMapK",
+      ":ns/ref1" -> ":db.install/partition",
+      ":ns/refSub1" -> ":db.install/valueType",
       ":ns/str" -> "a",
       ":ns/strs" -> List("b", "c"),
       ":ns/uri" -> uri1,
@@ -307,11 +307,11 @@ class Composite extends CoreSpec {
         Seq(
           (
             (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
-            (1, Set(2, 3), 1L, Set(2L, 3L), 101L, 102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+            (1, Set(2, 3), 1L, Set(2L, 3L), 11L, 12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
             ),
           (
             (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f)),
-            (4, Set(5, 6), 4L, Set(5L, 6L), 201L, 202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+            (4, Set(5, 6), 4L, Set(5L, 6L), 21L, 22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
             )
         )
       )().eids
@@ -333,13 +333,13 @@ class Composite extends CoreSpec {
         Seq(
           (
             (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-            (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 101L),
-            (102L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+            (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
+            (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
             ),
           (
             (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
-            (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 201L),
-            (202L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+            (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
+            (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
             )
         )
       )().eids

@@ -1,6 +1,7 @@
 package molecule
 package expression
 import molecule.util.dsl.coreTest._
+import molecule.util.expectCompileError
 
 class Logic extends Base {
 
@@ -28,12 +29,30 @@ class Logic extends Base {
     Ns.str("a" or "b" or "c" or "d").get.sorted === List("a", "b")
     Ns.str(List("a", "b", "c", "d")).get.sorted === List("a", "b")
 
-    // Applying same value returns single value
-    Ns.str("a", "a").get === List("a")
-    Ns.str("a" or "a").get === List("a")
 
-    // Multiple search strings in a list are treated with OR-semantics
-    Ns.str(List("a", "a")).get === List("a")
+    // Can't apply same value
+
+    expectCompileError(
+      """Ns.str("a", "a").get""",
+      "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/str`:" +
+        "\na")
+
+    expectCompileError(
+      """Ns.str("a" or "a").get""",
+      "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/str`:" +
+        "\na")
+
+    expectCompileError(
+      """Ns.str(List("a", "a")).get""",
+      "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/str`:" +
+        "\na")
+
+
+//    Ns.str("a", "a").get === List("a")
+//    Ns.str("a" or "a").get === List("a")
+//
+//    // Multiple search strings in a list are treated with OR-semantics
+//    Ns.str(List("a", "a")).get === List("a")
 
     // Applying non-matching values returns empty result
     Ns.str("c", "d").get === List()

@@ -58,7 +58,7 @@ class UpdateMapBigDecimal extends CoreSpec {
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.transform.Model2Transaction.valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
-      "\na -> " + bigDec2
+        "\na -> " + bigDec2
 
 
       // Seq
@@ -66,7 +66,7 @@ class UpdateMapBigDecimal extends CoreSpec {
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.transform.Model2Transaction.valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
-      "\na -> " + bigDec2
+        "\na -> " + bigDec2
     }
 
 
@@ -175,17 +175,17 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
 
-      expectCompileError(
-        """Ns(eid).bigDecMap(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
-          "\n__ident__str1 -> __ident__bigDec1" +
-          "\n__ident__str1 -> __ident__bigDec2")
+      (Ns(eid).bigDecMap(str1 -> bigDec1, str1 -> bigDec2).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "\na -> " + bigDec1 +
+        "\na -> " + bigDec2
 
-      expectCompileError(
-        """Ns(eid).bigDecMap(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
-          "\n__ident__str1 -> __ident__bigDec1" +
-          "\n__ident__str1 -> __ident__bigDec2")
+      (Ns(eid).bigDecMap(Seq(str1 -> bigDec1, str1 -> bigDec2)).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "\na -> " + bigDec1 +
+        "\na -> " + bigDec2
     }
   }
 }

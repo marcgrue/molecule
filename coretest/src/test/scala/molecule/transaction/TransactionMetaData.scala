@@ -12,8 +12,8 @@ class TransactionMetaData extends CoreSpec {
   "Basic insert/retrieval" in new CoreSetup {
 
     // Can't add transaction meta data along other data of molecule
-    (m(Ns.int.tx_(Ns.str)).insert(0, "a") must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-      s"[Model2Transaction:stmtsModel] Please apply transaction meta data directly to transaction attribute: `Ns.str(<metadata>)`"
+    (m(Ns.int.tx_(Ns.str)).insert(0, "a") must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.transform.Model2Transaction.stmtsModel]  Please apply transaction meta data directly to transaction attribute: `Ns.str(<metadata>)`"
 
     // Can't apply transaction meta data to mandatory transaction attributes
     // Ns.int.tx_(Ns.str("use case 42")).insert(0)
