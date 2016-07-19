@@ -31,7 +31,7 @@ class UpdateLong extends CoreSpec {
       (Ns(eid).long(2L, 3L).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-        s"\n  ns ... long(2, 3)"
+        s"\n  Ns ... long(2, 3)"
     }
   }
 
@@ -60,7 +60,7 @@ class UpdateLong extends CoreSpec {
       (Ns(eid).long(long2, long3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-        s"\n  ns ... long($long2, $long3)"
+        s"\n  Ns ... long($long2, $long3)"
     }
   }
 

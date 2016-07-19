@@ -44,16 +44,24 @@ class Partition extends MoleculeSpec {
   }
 
   "Nested 2 levels missing middle attribute values" in new PartitionSetup {
-    (m(lit_Book.title.Reviewers.Professions * gen_Profession.name).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Reviewers` in insert molecule has no mandatory attributes. Please add at least one."
+    m(lit_Book.title.Reviewers.Professions * gen_Profession.name) insert List(("book", List("Hacker", "Magician")))
 
-    (m(lit_Book.title.Reviewers * gen_Person.Professions.name).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `gen_Person` in insert molecule has no mandatory attributes. Please add at least one."
+    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Magician", "Hacker")))
+  }
+
+
+  "Nested 2 levels missing middle attribute values" in new PartitionSetup {
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name) insert List(("book", List("Hacker", "Magician")))
+
+    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
   }
 
   "No transitives in inserts" in new PartitionSetup {
     // Todo: more transitive examples in own file
-    (m(lit_Book.title.Author.name.name).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+    (m(lit_Book.title.Author.name.name).insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
       "[molecule.api.CheckModel.noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
   }
 

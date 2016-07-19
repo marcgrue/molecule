@@ -12,10 +12,12 @@ class NestedTests extends CoreSpec {
     m(Ns.str.Refs1 * Ref1.enum1).get === List(("d", List("enum11")))
   }
 
+
   "Nested enum after attr" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.int1.enum1) insert List(("e", List((12, "enum12"))))
     m(Ns.str.Refs1 * Ref1.int1.enum1).get === List(("e", List((12, "enum12"))))
   }
+
 
   "Nested ref without attribute" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.int1.Ref2.int2) insert List(
@@ -27,61 +29,79 @@ class NestedTests extends CoreSpec {
       ("a", List(12)),
       ("b", List(22)))
 
-    // We can omit non-fetching attribute between Ref1 and Ref2
+    // We can omit tacet attribute between Ref1 and Ref2
     m(Ns.str.Refs1 * Ref1.Ref2.int2).get === List(
       ("a", List(12)),
       ("b", List(22)))
-
-    // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Refs1 * Ref1.Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
-  "No mandatory attributes after nested" in new CoreSetup {
-    m(Ns.str.Refs1 * Ref1.int1) insert List(
-      ("a", List(11)),
-      ("b", List(21)))
 
-    m(Ns.str.Refs1 * Ref1.int1$).get === List(
-      ("a", List(Some(11))),
-      ("b", List(Some(21))))
+  "Intermediate references without attributes" in new CoreSetup {
 
-    // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Refs1 * Ref1.int1$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+    m(Ns.str.Refs1 * Ref1.Ref2.int2) insert List(
+      ("a", List(10, 20)),
+      ("b", List(30))
+    )
+    m(Ns.str.Refs1 * Ref1.Ref2.int2).get === List(
+      ("a", List(10, 20)),
+      ("b", List(30))
+    )
+  }
+
+
+  "Intermediate references with optional attributes" in new CoreSetup {
+
+    m(Ns.str.Refs1 * Ref1.int1$.Ref2.int2) insert List(
+      ("a", List((Some(1), 10), (None, 20))),
+      ("b", List((Some(3), 30)))
+    )
+
+    m(Ns.str.Refs1 * Ref1.int1$.Ref2.int2).get === List(
+      ("a", List((Some(1), 10), (None, 20))),
+      ("b", List((Some(3), 30)))
+    )
   }
 
 
   "Optional attribute" in new CoreSetup {
-    // Todo
-    //      m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2) insert List(("a", None, List(2)))
-    //      m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2).get === List(("a", None, List(2)))
-    //      m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(("a", List(2)))
-    ok
+
+    m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2) insert List(("a", None, List(2)))
+
+    m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2).get === List(("a", None, List(2)))
+    m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(("a", List(2)))
   }
+
 
   "One - one" in new CoreSetup {
     m(Ns.str.Ref1.int1.Refs2 * Ref2.int2) insert List(("a", 1, List(2)))
+
     m(Ns.str.Ref1.int1.Refs2 * Ref2.int2).get === List(("a", 1, List(2)))
     m(Ns.str.Ref1.Refs2 * Ref2.int2).get === List(("a", List(2)))
   }
 
+
   "One - one - many" in new CoreSetup {
     m(Ns.str.Ref1.int1.Refs2 * Ref2.ints2) insert List(("a", 1, List(Set(2))))
+
     m(Ns.str.Ref1.int1.Refs2 * Ref2.ints2).get === List(("a", 1, List(Set(2))))
     m(Ns.str.Ref1.Refs2 * Ref2.ints2).get === List(("a", List(Set(2))))
   }
 
+
   "Many - one" in new CoreSetup {
     m(Ns.str.Refs1.int1.Refs2 * Ref2.int2) insert List(("a", 1, List(2)))
+
     m(Ns.str.Refs1.int1.Refs2 * Ref2.int2).get === List(("a", 1, List(2)))
     m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(("a", List(2)))
   }
 
-  "Missing many attribute" in new CoreSetup {
-    (m(Ns.str.Refs1.Refs2 * Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Refs1` in insert molecule has no mandatory attributes. Please add at least one."
+
+  "None - one" in new CoreSetup {
+    m(Ns.str.Refs1.Refs2 * Ref2.int2) insert List(("a", List(2)))
+
+    m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(("a", List(2)))
   }
+
 
   "Refs after nested" in new CoreSetup {
     m(Ns.str.Refs1 * (Ref1.int1.Refs2 * Ref2.int2)) insert List(

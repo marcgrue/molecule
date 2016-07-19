@@ -18,36 +18,36 @@ class EdgeOneSelfSave extends MoleculeSpec {
       // Can't save edge missing the target namespace (`Person`)
       // The edge needs to be complete at all times to preserve consistency.
 
-      (living_Person.name("Ann").Loves.weight(5).save must throwA[IllegalArgumentException])
+      (Person.name("Ann").Loves.weight(5).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Loves`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Loves`."
 
-      // Same applies when using a reference attribute (`loves`)
+      // Same applies when using a reference attribute (`Loves`)
       val edgeId = 42L
-      (living_Person.name("Ann").loves(edgeId).save must throwA[IllegalArgumentException])
+      (Person.name("Ann").loves(edgeId).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Loves`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Loves`."
     }
 
 
     "<missing base> - edge - target" in new Setup {
 
-      (living_Loves.weight(7).Person.name("Ben").save must throwA[IllegalArgumentException])
+      (Loves.weight(7).Person.name("Ben").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Person`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Person`."
 
       val targetId = 42L
-      (living_Loves.weight(7).person(targetId).save must throwA[IllegalArgumentException])
+      (Loves.weight(7).person(targetId).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Loves`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Loves`."
     }
 
 
     "<missing base> - edge - <missing target>" in new Setup {
 
-      (living_Loves.weight(7).save must throwA[IllegalArgumentException])
+      (Loves.weight(7).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `living_Loves/weight`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
     }
 
 
@@ -64,43 +64,43 @@ class EdgeOneSelfSave extends MoleculeSpec {
 
           So we get 4 entities:
       */
-      val List(ann, annLovesBen, benLovesAnn, ben) = living_Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
+      val List(ann, annLovesBen, benLovesAnn, ben) = Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
 
       // Bidirectional property edges have been saved
-      living_Person.name.Loves.weight.Person.name.get.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         // Reverse edge:
         ("Ben", 7, "Ann")
       )
 
       // Ann and Ben know each other with a weight of 7
-      living_Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
-      living_Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
+      Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
+      Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
     }
 
 
     "new base -- new edge -- existing target" in new Setup {
 
-      val ben = living_Person.name.insert("Ben").eid
+      val ben = Person.name.insert("Ben").eid
 
       // Save Ann with weighed relationship to existing Ben
-      living_Person.name("Ann").Loves.weight(7).person(ben).save.eids
+      Person.name("Ann").Loves.weight(7).person(ben).save.eids
 
       // Ann and Ben know each other with a weight of 7
-      living_Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
-      living_Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
+      Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
+      Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
     }
 
 
     "edge with multiple properties" in new Setup {
 
       // We save some qualitites separately first
-      val loves     = living_Quality.name("Love").save.eid
-      val inCommons = living_Quality.name.insert("Patience", "Humor").eids
-      val ann       = living_Person.name.insert("Ann").eid
+      val loves     = Quality.name("Love").save.eid
+      val inCommons = Quality.name.insert("Patience", "Humor").eids
+      val ann       = Person.name.insert("Ann").eid
 
       // Save Ben, Ann and bidirectional edge properties describing their relationship
-      living_Person.name("Ben") // New entity
+      Person.name("Ben") // New entity
         .Loves
         .weight(7)
         .howWeMet("inSchool")
@@ -113,7 +113,7 @@ class EdgeOneSelfSave extends MoleculeSpec {
         .save
 
       // Reference is bidirectional - both edges point to each other and have all properties
-      living_Person.name
+      Person.name
         .Loves
         .weight
         .howWeMet
@@ -121,7 +121,7 @@ class EdgeOneSelfSave extends MoleculeSpec {
         .commonLicences
         .commonScores
         .CoreQuality.name._Loves
-        .InCommon.*(living_Quality.name)._Loves
+        .InCommon.*(Quality.name)._Loves
         .Person.name
         .get === List(
         ("Ann"

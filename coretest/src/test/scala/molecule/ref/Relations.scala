@@ -64,16 +64,19 @@ class Relations extends CoreSpec {
 
 
   "Referenced entity ids" in new CoreSetup {
-    val id     = Ns.str("a").save.eid
+    val id = Ns.str("a").save.eid
 
     // Avoid mixing update/save semantics
-    (Ns(id).Refs1.int1(1).save  must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-          """[molecule.api.CheckModel.unexpectedAppliedId]  Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
+    (Ns(id).Refs1.int1(1).save must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.unexpectedAppliedId]  Can't save molecule with an applied eid as in `Ns(eid)`. " +
+      """Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
 
-    // Updating accross namespaces not allowed
+    // Updating across namespaces not allowed
 
-    (Ns(id).Refs1.int1(1).update  must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-          "[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `ref1`."
+    (Ns(id).Refs1.int1(1).update must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
   }
 
 
@@ -124,13 +127,9 @@ class Relations extends CoreSpec {
     Ns.str.Ref1.Ref2.int2.get === List(
       ("b", 22),
       ("a", 12))
-
-    // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Ref1.Ref2.int2).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
   }
 
-  "No mandatory attributes after card-one ref" in new CoreSetup {
+  "Expecting mandatory attributes after card-one ref" in new CoreSetup {
     m(Ns.str.Ref1.int1) insert List(
       ("a", 1),
       ("b", 2))
@@ -141,22 +140,9 @@ class Relations extends CoreSpec {
       ("b", Some(2)))
 
     // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Ref1.int1$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
-  }
-
-  "No mandatory attributes after card-many ref" in new CoreSetup {
-    m(Ns.str.Refs1.int1) insert List(
-      ("a", 1),
-      ("b", 2))
-
-    m(Ns.str.Refs1.int1$).get === List(
-      ("a", Some(1)),
-      ("b", Some(2)))
-
-    // But in insert molecules we don't want to create referenced orphan entities
-    (m(Ns.str.Refs1.int1$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ref1` in insert molecule has no mandatory attributes. Please add at least one."
+    (m(Ns.str.Ref1.int1$).insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
   "Aggregates one" in new CoreSetup {

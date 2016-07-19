@@ -31,7 +31,7 @@ class UpdateString extends CoreSpec {
       (Ns(eid).str("b", "c").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-        s"\n  ns ... str(b, c)"
+        s"\n  Ns ... str(b, c)"
     }
   }
 
@@ -60,7 +60,7 @@ class UpdateString extends CoreSpec {
       (Ns(eid).str(str2, str3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-        s"\n  ns ... str($str2, $str3)"
+        s"\n  Ns ... str($str2, $str3)"
     }
   }
 

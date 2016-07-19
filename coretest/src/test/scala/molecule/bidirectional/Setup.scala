@@ -2,7 +2,7 @@ package molecule.bidirectional
 
 import molecule._
 import molecule.DatomicFacade
-import molecule.bidirectional.dsl.bidirectional.{living_Knows, living_Person, living_Quality}
+import molecule.bidirectional.dsl.bidirectional.{Knows, Person, Quality}
 import molecule.bidirectional.schema.BidirectionalSchema
 import org.specs2.specification.Scope
 

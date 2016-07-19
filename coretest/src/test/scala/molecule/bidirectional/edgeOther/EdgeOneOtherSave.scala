@@ -18,36 +18,36 @@ class EdgeOneOtherSave extends MoleculeSpec {
       // Can't save edge missing the target namespace (`Person`)
       // The edge needs to be complete at all times to preserve consistency.
 
-      (living_Person.name("Ben").Favorite.weight(5).save must throwA[IllegalArgumentException])
+      (Person.name("Ben").Favorite.weight(5).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Favorite`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Favorite`."
 
-      // Same applies when using a reference attribute (`loves`)
+      // Same applies when using a reference attribute (`Loves`)
       val edgeId = 42L
-      (living_Person.name("Ben").favorite(edgeId).save must throwA[IllegalArgumentException])
+      (Person.name("Ben").favorite(edgeId).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `living_Favorite`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Favorite`."
     }
 
 
     "<missing base> - edge - target" in new Setup {
 
-      (living_Favorite.weight(7).Animal.name("Rex").save must throwA[IllegalArgumentException])
+      (Favorite.weight(7).Animal.name("Rex").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Animal`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Animal`."
 
       val targetId = 42L
-      (living_Favorite.weight(7).animal(targetId).save must throwA[IllegalArgumentException])
+      (Favorite.weight(7).animal(targetId).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `living_Favorite`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Favorite`."
     }
 
 
     "<missing base> - edge - <missing target>" in new Setup {
 
-      (living_Favorite.weight(7).save must throwA[IllegalArgumentException])
+      (Favorite.weight(7).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `living_Favorite/weight`."
+        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
     }
 
 
@@ -64,36 +64,36 @@ class EdgeOneOtherSave extends MoleculeSpec {
 
           So we get 4 entities:
       */
-      val List(ben, benFavoriteRex, rexFavoriteBen, rex) = living_Person.name("Ben").Favorite.weight(7).Animal.name("Rex").save.eids
+      val List(ben, benFavoriteRex, rexFavoriteBen, rex) = Person.name("Ben").Favorite.weight(7).Animal.name("Rex").save.eids
 
       // Bidirectional property edges have been saved
-      living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-      living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+      Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+      Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
     }
 
 
     "new base -- new edge -- existing target" in new Setup {
 
-      val rex = living_Animal.name.insert("Rex").eid
+      val rex = Animal.name.insert("Rex").eid
 
       // Save Ben with weighed relationship to existing Rex
-      living_Person.name("Ben").Favorite.weight(7).animal(rex).save.eids
+      Person.name("Ben").Favorite.weight(7).animal(rex).save.eids
 
       // Ben and Rex know each other with a weight of 7
-      living_Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-      living_Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+      Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
+      Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
     }
 
 
     "edge with multiple properties" in new Setup {
 
       // We save some qualitites separately first
-      val loves     = living_Quality.name("Love").save.eid
-      val inCommons = living_Quality.name.insert("Patience", "Humor").eids
-      val rex       = living_Animal.name.insert("Rex").eid
+      val loves     = Quality.name("Love").save.eid
+      val inCommons = Quality.name.insert("Patience", "Humor").eids
+      val rex       = Animal.name.insert("Rex").eid
 
       // Save Rex, Ben and bidirectional edge properties describing their relationship
-      living_Person.name("Ben") // New entity
+      Person.name("Ben") // New entity
         .Favorite
         .weight(7)
         .howWeMet("inSchool")
@@ -108,7 +108,7 @@ class EdgeOneOtherSave extends MoleculeSpec {
       // All edge properties have been saved in both directions:
 
       // Person -> Animal
-      living_Person.name
+      Person.name
         .Favorite
         .weight
         .howWeMet
@@ -116,7 +116,7 @@ class EdgeOneOtherSave extends MoleculeSpec {
         .commonLicences
         .commonScores
         .CoreQuality.name._Favorite
-        .InCommon.*(living_Quality.name)._Favorite
+        .InCommon.*(Quality.name)._Favorite
         .Animal.name
         .get === List(
         ("Ben"
@@ -131,7 +131,7 @@ class EdgeOneOtherSave extends MoleculeSpec {
       )
 
       // Animal -> Person
-      living_Animal.name
+      Animal.name
         .Favorite
         .weight
         .howWeMet
@@ -139,7 +139,7 @@ class EdgeOneOtherSave extends MoleculeSpec {
         .commonLicences
         .commonScores
         .CoreQuality.name._Favorite
-        .InCommon.*(living_Quality.name)._Favorite
+        .InCommon.*(Quality.name)._Favorite
         .Person.name
         .get === List(
         ("Rex"

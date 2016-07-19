@@ -5,24 +5,21 @@ import molecule.schema.definition._
 object ModernGraphDefinition {
 
   // Vertex namespace
+  object Person extends Person
   trait Person {
     val name    = oneString
     val age     = oneInt
+
+    // Normal reference to a namespace
     val created = many[Created]
 
-    // Bidirectional card-one ref (self-reference)
-    val spouse  = oneBi[Person]
-    val spouses = manyBi[Person]
-
-    val knows0   = many[Person]
-    val knows   = manyBi[Person]
+    // Reference to property edge
+    val knows: AnyRef   = manyBiEdge[Knows.person.type]
 
 
     // Bidirectional card-many ref (self-reference)
     val friends = manyBi[Person]
-
   }
-//  object Person extends Person
 
   trait Software {
     val name = oneString
@@ -30,11 +27,14 @@ object ModernGraphDefinition {
   }
 
   // Property edge namespace
+  object Knows extends Knows
   trait Knows {
-    val person = one[Person]
+
+    val person: AnyRef = target[Person.friends.type]
+
+
     val weight = oneDouble
   }
-  object Knows extends Knows
 
   trait Created {
     val software = one[Software]

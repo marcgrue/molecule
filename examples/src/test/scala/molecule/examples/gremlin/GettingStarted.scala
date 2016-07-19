@@ -4,160 +4,24 @@ package examples.gremlin
 import molecule.examples.gremlin.dsl.modernGraph._
 import molecule.examples.gremlin.schema.ModernGraphSchema
 import molecule.util.MoleculeSpec
+import org.specs2.specification.Scope
 
 
 class GettingStarted extends MoleculeSpec with DatomicFacade {
 
-
-  "Bidirectional self, card-one" >> {
-
+  class Setup extends Scope with DatomicFacade {
     implicit val conn = recreateDbFrom(ModernGraphSchema)
 
+    /*
+      Sample bidirectional friendships graph (with vadas--peter friendship added)
+      http://tinkerpop.apache.org/docs/current/tutorials/getting-started/
 
-    // Marriage - create ref via ref namespace
-    val List(marko, lisa) = Person.name.Spouse.name insert Seq(
-      ("marko", "lisa")
-    ) eids
+        marko (29) ---- josh (32)
+          |
+          |
+        vadas (27) ---- peter (35)
 
-    // Marko and Lisa are married
-    Person.name_("marko").Spouse.name.get === List("lisa")
-    Person.name_("lisa").Spouse.name.get === List("marko")
-
-    // When we traverse forth and back we end at the starting point (marko) as expected
-    Person.name_("marko").Spouse.name.Spouse.name.get === List(("lisa", "marko"))
-    Person.name_("lisa").Spouse.name.Spouse.name.get === List(("marko", "lisa"))
-
-    // Divorce (retract both spouse refs)
-    Person(marko).spouse().update
-
-    // Both Marko and Lisa are now singles
-    Person(marko).spouse.get === List()
-    Person(lisa).spouse.get === List()
-
-    // Anna comes into the picture
-    val anna = Person.name.insert("anna").eid
-
-    // Marko marries again, now with Anna
-    // Add ref as value to ref attr
-    // This automatically retracts ref from lisa to marko!
-    Person(marko).spouse(anna).update
-
-    // Marko and Anna are married
-    Person(marko).spouse.get === List(anna)
-    Person(anna).spouse.get === List(marko)
-
-    // Lisa is single
-    Person(lisa).spouse.get === List()
-
-    // Rebecca pops up
-    val rebecca = Person.name.insert("rebecca").eid
-
-    // Directly to third marriage...
-    // Molecule performs three operations:
-    // 1. Retract reverse ref from anna to marko
-    // 2. Add new ref from marko to rebecca
-    // 3. Add reverse ref from rebecca to marko
-    // Since the spouse ref is of cardinality one, Datomic automatically retracts
-    // the old ref from marko to anna before adding the new ref to rebecca (2).
-    Person(marko).spouse(rebecca).update
-
-    // Both Marko and Rebecca are married to each other
-    Person(marko).spouse.get === List(rebecca)
-    Person(rebecca).spouse.get === List(marko)
-
-    // Anna has been made single too as part of the last update
-    Person(anna).spouse.get === List()
-
-    // Rebecca dies - Datomic takes care of retracting any ref pointing to
-    // an entity being retracted. Ref from Marko to Rebecca is therefore
-    // automatically retracted when Rebecca entity is retracted.
-    rebecca.retract
-
-    // Marko is single again
-    Person(marko).spouse.get === List()
-    Person(rebecca).spouse.get === List() // Rebecca doesn't even exist anymore
-  }
-
-
-  "Bidirectional self, card-many" >> {
-
-    implicit val conn = recreateDbFrom(ModernGraphSchema)
-
-    // Marriage - create ref via ref namespace
-    val List(marko, lisa) = Person.name.Spouses.name insert Seq(
-      ("marko", "lisa")
-    ) eids
-
-    // Marko and Lisa are married
-    Person(marko).spouses.get === List(Set(lisa))
-    Person(lisa).spouses.get === List(Set(marko))
-
-    Person.name_("marko").Spouses.name.get === List("lisa")
-    Person.name_("lisa").Spouses.name.get === List("marko")
-
-    // When we traverse forth and back we end at the starting point (marko) as expected
-    Person.name_("marko").Spouses.name.Spouses.name.get === List(("lisa", "marko"))
-    Person.name_("lisa").Spouses.name.Spouses.name.get === List(("marko", "lisa"))
-
-    // Divorce (retract both spouses refs)
-    Person(marko).spouses().update
-
-    // Both Marko and Lisa are now singles
-    Person(marko).spouses.get === List()
-    Person(lisa).spouses.get === List()
-
-    // Anna comes into the picture
-    val anna = Person.name.insert("anna").eid
-
-    //    println("anna   : " + anna)
-
-    // Marko marries again, now with Anna
-    // Add ref as value to ref attr
-    // Molecule automatically retracts ref from lisa to marko!
-    Person(marko).spouses(anna).update
-
-    // Marko and Anna are married
-    Person(marko).spouses.get === List(Set(anna))
-    Person(anna).spouses.get === List(Set(marko))
-
-    // Lisa is single
-    Person.name_("lisa").spouses.get === List()
-
-    // Rebecca is flirting
-    val rebecca = Person.name.insert("rebecca").eid
-
-    // Directly to third marriage. Applying new spouse
-    Person(marko).spouses(rebecca).update
-    Person(marko).spouses.get === List(Set(rebecca))
-    Person(rebecca).spouses.get === List(Set(marko))
-
-    // .. and anna hasn't divorced marko yet
-    Person(anna).spouses.get === List()
-
-    // Rebecca goes away.
-    // Datomic takes care of retracting any ref pointing to
-    // an entity being retracted. All refs from Marko to Rebecca (1 in this case)
-    // is therefore automatically retracted when the Rebecca entity is retracted.
-    rebecca.retract
-
-    // Marko is single again
-    Person(marko).spouses.get === List()
-    // and rebecca doesn't exist anymore
-    Person(rebecca).name.spouses.get === List()
-  }
-
-
-  "Bidirectional card-many queries" >> {
-
-    implicit val conn = recreateDbFrom(ModernGraphSchema)
-
-    // Person
-    val List(marko, vadas, josh, peter) = Person.name.age insert Seq(
-      ("marko", 29),
-      ("vadas", 27),
-      ("josh", 32),
-      ("peter", 35)
-    ) eids
+    */
 
     // Software
     val List(lop, ripple) = Software.name.lang insert Seq(
@@ -165,30 +29,43 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
       ("riple", "java")
     ) eids
 
-    /* Sample bidirectional friendships graph (
-    (from http://tinkerpop.apache.org/docs/current/tutorials/getting-started/)
+    val List(
+    marko, markoLop,
+    vadas,
+    josh, joshLop, joshRipple,
+    peter, peterLop
+    ) = m(Person.name.age.Created * Created.software.weight) insert Seq(
+      ("marko", 29, Seq((lop, 0.4))),
+      ("vadas", 27, Seq()),
+      ("josh", 32, Seq((lop, 0.4), (ripple, 1.0))),
+      ("peter", 35, Seq((lop, 0.2)))
+    ) eids
 
-      marko (29) ---- josh (32)
-        |
-        |
-      vadas (27) ---- peter (35)
+    //    // Persons
+    //    val List(marko, vadas, josh, peter) = Person.name.age insert Seq(
+    //      ("marko", 29),
+    //      ("vadas", 27),
+    //      ("josh", 32),
+    //      ("peter", 35)
+    //    ) eids
 
-    */
+
+    // Friendships
     Person(marko).friends(vadas, josh).update
     Person(peter).friends(vadas).update
 
-    // Created
-    val markoCreations = Created.software.weight.insert(lop, 0.4).eids
-    Person(marko).created(markoCreations).update
+//    // Creations
+//    val markoCreations = Created.software.weight.insert(lop, 0.4).eids
+//    val joshCreations  = Created.software.weight.insert(Seq((lop, 0.4), (ripple, 1.0))).eids
+//    val peterCreations = Created.software.weight.insert(lop, 0.2).eids
+//
+//    Person(marko).created(markoCreations).update
+//    Person(josh).created(joshCreations).update
+//    Person(peter).created(peterCreations).update
+  }
 
-    val joshCreations = Created.software.weight.insert(Seq((lop, 0.4), (ripple, 1.0))).eids
-    Person(josh).created(joshCreations).update
 
-    val peterCreations = Created.software.weight.insert(lop, 0.2).eids
-    Person(peter).created(peterCreations).update
-
-
-    // "Getting started" .........................................
+  "The first 5 minutes" in new Setup {
 
     // Marko's name
     // gremlin> g.V(1).values('name')
@@ -211,9 +88,10 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
     // "Markos friends older than 30"
     // g.V(1).out('knows').has('age', gt(30)).values('name')
     Person(marko).Friends.name.age_.>(30).one === "josh"
+  }
 
 
-    // "Next 15 minutes" ......................................
+  "Next 15 minutes" in new Setup {
 
     // Find Marko id
     // g.V().has('name','marko')
@@ -221,7 +99,7 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
 
     // Marko created (refs to Created)
     // g.V().has('name','marko').out('created')
-    Person.name_("marko").created.one.toSeq === markoCreations
+    Person.name_("marko").created.one === Set(markoLop)
 
     // Marko created software named...
     // g.V().has('name','marko').out('created').values('name')
@@ -253,12 +131,15 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
     // g.V().has('name','marko').as('exclude').out('created').in('created').where(neq('exclude')).values('name')
     Person.name.not("marko").Created.software_(markoSoftware).get === List("peter", "josh")
 
-    // Generic queries as
+    // Untyped generic queries are not directly handled by Molecule but with a
+    // namespace prefixed we can get similar but safe type results
     // g.V().group().by(label).by('name')
-    // are not so interesting in Molecule since we deal with namespaced/typed attributes only
+    Person.name.get === List("peter", "vadas", "josh", "marko")
+    Software.name.get === List("riple", "lop")
+  }
 
 
-    // What else could we ask? ........................................................
+  "What else could we ask?" in new Setup {
 
     // What friends does each person have (nested list)
     m(Person.name.Friends * Person.name).get === List(
@@ -367,153 +248,153 @@ class GettingStarted extends MoleculeSpec with DatomicFacade {
 //  }
 
 
-//  "Next 15 minutes" in new ModernGraphSetup(ModernGraphSchema) {
-//
-//    // (For the creation part - se GettingStartedSetup above...)
-//
-//    // Find Marko id
-//    // g.V().has('name','marko')
-//    Person.e.name_("marko").get === Seq(marko)
-//
-//    // Marko created (refs to Created)
-//    // g.V().has('name','marko').out('created')
-//    Person.name_("marko").created.get === Seq(markoCreations)
-//
-//    // Marko created software named...
-//    // g.V().has('name','marko').out('created').values('name')
-//    Person.name_("marko").Created.Software.name.get === Seq("lop")
-//
-//
-//    // Ages of marko and vadas
-//    // g.V().has('name',within('vadas','marko')).values('age')
-//    Person.name_("marko", "vadas").age.get === Seq(27, 29)
-//
-//    // Mean/average age of marko and vadas
-//    // g.V().has('name',within('vadas','marko')).values('age').mean()
-//    Person.name_("marko", "vadas").age(avg).one === 28.0
-//
-//
-//    // Who are the people that marko develops software with?
-//
-//    // It's ideomatic for Datomic to split such query and use the output of
-//    // one query as input for the next one.
-//
-//    // g.V().has('name','marko').out('created').in('created').values('name')
-//
-//    // First find ids of software projects that marko has participated in
-//    val markoSoftware = Person.name_("marko").Created.software.get
-//
-//    // Then find names of persons that have participated in those projects
-//    Person.name.Created.software_(markoSoftware).get === List("peter", "josh", "marko")
-//
-//    // Excluding marko from the result (re-using the first sub-query)
-//    // g.V().has('name','marko').as('exclude').out('created').in('created').where(neq('exclude')).values('name')
-//    Person.name.not("marko").Created.software_(markoSoftware).get === List("peter", "josh")
-//
-//    // Generic queries as
-//    // g.V().group().by(label).by('name')
-//    // are not so interesting in Molecule since we deal with namespaced/typed attributes only
-//  }
-//
-//
-//  "What else could we ask?" in new ModernGraphSetup(ModernGraphSchema) {
-//
-//    // Markos friends older than 30
-//    Person(marko).Knows.Person.name.age.>(30).get === List(("josh", 32))
-//
-//    // Who knows young people?
-//    // Since Datomic references are directed from one entity
-//    // to the referenced entity, we only get the "knows" in one direction:
-//    Person.name.Knows.Person.name.age.<(30).get === List(
-//      ("marko", "vadas", 27) // marko knows vadas who is 27
-//    )
-//    // We can though go backwards also:
-//    Person.name.age.<(30).Knows.Person.name.get === List(
-//      ("marko", 29, "josh"), // marko who is 29 is known by josh
-//      ("marko", 29, "vadas") // marko who is 29 is known by vadas
-//    )
-//
-//    // Language-wise we don't care about database directions and would have
-//    // intuitively expected this result below. To get this we could merge the two
-//    // results sets after re-arranging the order of attribute values of the second result:
-//    Person.name.Knows.Person.name.age.<(30).get ++
-//      Person.name.age.<(30).Knows.Person.name.get.map(t => (t._3, t._1, t._2)) === List(
-//      ("marko", "vadas", 27), // marko knows vadas who is 27
-//      ("josh", "marko", 29),  // josh knows marko who is 29
-//      ("vadas", "marko", 29)  // vadas knows marko who is 29
-//    )
-//
-//  }
+  //  "Next 15 minutes" in new ModernGraphSetup(ModernGraphSchema) {
+  //
+  //    // (For the creation part - se GettingStartedSetup above...)
+  //
+  //    // Find Marko id
+  //    // g.V().has('name','marko')
+  //    Person.e.name_("marko").get === Seq(marko)
+  //
+  //    // Marko created (refs to Created)
+  //    // g.V().has('name','marko').out('created')
+  //    Person.name_("marko").created.get === Seq(markoCreations)
+  //
+  //    // Marko created software named...
+  //    // g.V().has('name','marko').out('created').values('name')
+  //    Person.name_("marko").Created.Software.name.get === Seq("lop")
+  //
+  //
+  //    // Ages of marko and vadas
+  //    // g.V().has('name',within('vadas','marko')).values('age')
+  //    Person.name_("marko", "vadas").age.get === Seq(27, 29)
+  //
+  //    // Mean/average age of marko and vadas
+  //    // g.V().has('name',within('vadas','marko')).values('age').mean()
+  //    Person.name_("marko", "vadas").age(avg).one === 28.0
+  //
+  //
+  //    // Who are the people that marko develops software with?
+  //
+  //    // It's ideomatic for Datomic to split such query and use the output of
+  //    // one query as input for the next one.
+  //
+  //    // g.V().has('name','marko').out('created').in('created').values('name')
+  //
+  //    // First find ids of software projects that marko has participated in
+  //    val markoSoftware = Person.name_("marko").Created.software.get
+  //
+  //    // Then find names of persons that have participated in those projects
+  //    Person.name.Created.software_(markoSoftware).get === List("peter", "josh", "marko")
+  //
+  //    // Excluding marko from the result (re-using the first sub-query)
+  //    // g.V().has('name','marko').as('exclude').out('created').in('created').where(neq('exclude')).values('name')
+  //    Person.name.not("marko").Created.software_(markoSoftware).get === List("peter", "josh")
+  //
+  //    // Generic queries as
+  //    // g.V().group().by(label).by('name')
+  //    // are not so interesting in Molecule since we deal with namespaced/typed attributes only
+  //  }
+  //
+  //
+  //  "What else could we ask?" in new ModernGraphSetup(ModernGraphSchema) {
+  //
+  //    // Markos friends older than 30
+  //    Person(marko).Knows.Person.name.age.>(30).get === List(("josh", 32))
+  //
+  //    // Who knows young people?
+  //    // Since Datomic references are directed from one entity
+  //    // to the referenced entity, we only get the "knows" in one direction:
+  //    Person.name.Knows.Person.name.age.<(30).get === List(
+  //      ("marko", "vadas", 27) // marko knows vadas who is 27
+  //    )
+  //    // We can though go backwards also:
+  //    Person.name.age.<(30).Knows.Person.name.get === List(
+  //      ("marko", 29, "josh"), // marko who is 29 is known by josh
+  //      ("marko", 29, "vadas") // marko who is 29 is known by vadas
+  //    )
+  //
+  //    // Language-wise we don't care about database directions and would have
+  //    // intuitively expected this result below. To get this we could merge the two
+  //    // results sets after re-arranging the order of attribute values of the second result:
+  //    Person.name.Knows.Person.name.age.<(30).get ++
+  //      Person.name.age.<(30).Knows.Person.name.get.map(t => (t._3, t._1, t._2)) === List(
+  //      ("marko", "vadas", 27), // marko knows vadas who is 27
+  //      ("josh", "marko", 29),  // josh knows marko who is 29
+  //      ("vadas", "marko", 29)  // vadas knows marko who is 29
+  //    )
+  //
+  //  }
 
-//
-//  "Bidirectional" in new ModernGraphSetup(ModernGraphSchema) {
-//
-//    // Markos friends older than 30
-//    Person(marko).Knows.Person.name.age.>(30).get === List(("josh", 32))
-//
-//    // Who knows young people?
-//    // Since Datomic references are directed from one entity
-//    // to the referenced entity, we only get the "knows" in one direction:
-//    Person.name.Knows.Person.name.age.<(30).get === List(
-//      ("marko", "vadas", 27) // marko knows vadas who is 27
-//    )
-//    // We can though go backwards also:
-//    Person.name.age.<(30).Knows.Person.name.get === List(
-//      ("marko", 29, "josh"), // marko who is 29 is known by josh
-//      ("marko", 29, "vadas") // marko who is 29 is known by vadas
-//    )
-//
-//    // Language-wise we don't care about database directions and would have
-//    // intuitively expected this result below. To get this we could merge the two
-//    // results sets after re-arranging the order of attribute values of the second result:
-//    Person.name.Knows.Person.name.age.<(30).get ++
-//      Person.name.age.<(30).Knows.Person.name.get.map(t => (t._3, t._1, t._2)) === List(
-//      ("marko", "vadas", 27), // marko knows vadas who is 27
-//      ("josh", "marko", 29), // josh knows marko who is 29
-//      ("vadas", "marko", 29) // vadas knows marko who is 29
-//    )
-//  }
+  //
+  //  "Bidirectional" in new ModernGraphSetup(ModernGraphSchema) {
+  //
+  //    // Markos friends older than 30
+  //    Person(marko).Knows.Person.name.age.>(30).get === List(("josh", 32))
+  //
+  //    // Who knows young people?
+  //    // Since Datomic references are directed from one entity
+  //    // to the referenced entity, we only get the "knows" in one direction:
+  //    Person.name.Knows.Person.name.age.<(30).get === List(
+  //      ("marko", "vadas", 27) // marko knows vadas who is 27
+  //    )
+  //    // We can though go backwards also:
+  //    Person.name.age.<(30).Knows.Person.name.get === List(
+  //      ("marko", 29, "josh"), // marko who is 29 is known by josh
+  //      ("marko", 29, "vadas") // marko who is 29 is known by vadas
+  //    )
+  //
+  //    // Language-wise we don't care about database directions and would have
+  //    // intuitively expected this result below. To get this we could merge the two
+  //    // results sets after re-arranging the order of attribute values of the second result:
+  //    Person.name.Knows.Person.name.age.<(30).get ++
+  //      Person.name.age.<(30).Knows.Person.name.get.map(t => (t._3, t._1, t._2)) === List(
+  //      ("marko", "vadas", 27), // marko knows vadas who is 27
+  //      ("josh", "marko", 29), // josh knows marko who is 29
+  //      ("vadas", "marko", 29) // vadas knows marko who is 29
+  //    )
+  //  }
 
 
-//  "more..." in new ModernGraphSetup(ModernGraphSchema) {
-    //    // https://github.com/tinkerpop/gremlin/wiki/Backtrack-Pattern
-    //    // "get the names of those songs that follow Dark Star and are sung by Jerry Garcia"
-    //    Song.id(89).FollowedBy.name.Singer.name("Jerry Garcia").get(3) === List("Eyes of the World", "Sing me back home", "Morning Dew")
-    //
-    //    // https://github.com/tinkerpop/gremlin/wiki/Except-Retain-Pattern
-    //    // “Who are my friends friends that are not already my friends?”
-    //    Person(marko).Knows.Person('friend).Knows.Person.!=('friend).getFirst === 5
-    //
-    //    // https://github.com/tinkerpop/gremlin/wiki/Flow-Rank-Pattern
-    //    // "Who created projects"
-    //    Person.e.Created.Project.e === List(
-    //      (marko, lop),
-    //      (josh, lop),
-    //      (peter, lop),
-    //      (josh, riple)
-    //    )
-    //    // "Who created most projects"
-    //    Person.e(count).Created.Project === List(
-    //      marko -> 1,
-    //      josh -> 2,
-    //      peter -> 1
-    //    )
-    //
-    //    // https://github.com/thinkaurelius/titan/wiki/Gremlin-Query-Language
-    //
-    //    Being.name("hercules").Father.Father.name.getFirst === "saturn"
-    //
-    //    Being.name("hercules").e === 123
-    //
-    //    Being.name("hercules").Father.`type`.Mother.`type` === List("god", "human")
-    //
-    //    // "Who did hercules battle?"
-    //    Being.name("hercules").Battled.Being.name.`type` === List(
-    //      ("nemean", "monster"),
-    //      ("hydra", "monster"),
-    //      ("cererus", "monster")
-    //    )
-//    ok
-//  }
+  //  "more..." in new ModernGraphSetup(ModernGraphSchema) {
+  //    // https://github.com/tinkerpop/gremlin/wiki/Backtrack-Pattern
+  //    // "get the names of those songs that follow Dark Star and are sung by Jerry Garcia"
+  //    Song.id(89).FollowedBy.name.Singer.name("Jerry Garcia").get(3) === List("Eyes of the World", "Sing me back home", "Morning Dew")
+  //
+  //    // https://github.com/tinkerpop/gremlin/wiki/Except-Retain-Pattern
+  //    // “Who are my friends friends that are not already my friends?”
+  //    Person(marko).Knows.Person('friend).Knows.Person.!=('friend).getFirst === 5
+  //
+  //    // https://github.com/tinkerpop/gremlin/wiki/Flow-Rank-Pattern
+  //    // "Who created projects"
+  //    Person.e.Created.Project.e === List(
+  //      (marko, lop),
+  //      (josh, lop),
+  //      (peter, lop),
+  //      (josh, riple)
+  //    )
+  //    // "Who created most projects"
+  //    Person.e(count).Created.Project === List(
+  //      marko -> 1,
+  //      josh -> 2,
+  //      peter -> 1
+  //    )
+  //
+  //    // https://github.com/thinkaurelius/titan/wiki/Gremlin-Query-Language
+  //
+  //    Being.name("hercules").Father.Father.name.getFirst === "saturn"
+  //
+  //    Being.name("hercules").e === 123
+  //
+  //    Being.name("hercules").Father.`type`.Mother.`type` === List("god", "human")
+  //
+  //    // "Who did hercules battle?"
+  //    Being.name("hercules").Battled.Being.name.`type` === List(
+  //      ("nemean", "monster"),
+  //      ("hydra", "monster"),
+  //      ("cererus", "monster")
+  //    )
+  //    ok
+  //  }
 
 }

@@ -17,7 +17,7 @@ object transaction {
       Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
   }
 
-  case class Add(e: Any, a: String, v: Any, bi: Generic = NoValue) extends Statement {
+  case class Add(e: Any, a: String, v: Any, bi: Generic) extends Statement {
     val action = ":db/add"
   }
 

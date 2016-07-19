@@ -20,15 +20,15 @@ class UpdateRef extends CoreSpec {
 
       (Ns(42L).str("b").Ref1.int1(2).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `ref1`."
+        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
 
       (Ns(42L).str("b").Refs1.int1(2).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `ref1`."
+        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
 
       (Ns(42L).str("b").Refs1.*(Ref1.int1(2)).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `ref1`."
+        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Ref1`."
 
       (m(Ns(42L).str("b") ~ Ref2.int2(2)).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +

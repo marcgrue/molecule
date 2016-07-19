@@ -46,13 +46,13 @@ class SocialNews extends MoleculeSpec {
     User(stu).upVotes(paulGrahamStory).update
 
     // Current Users and upvotes
-    User.email.upVotes.get.head ===("stuarthalloway@datomic.com", Set(paulGrahamStory))
+    User.email.upVotes.get.head === ("stuarthalloway@datomic.com", Set(paulGrahamStory))
 
-    // Todo: Optional attributes (Pull API)
-    //    User.email.upVotes(o).get === List(
-    //      ("stuarthalloway@datomic.com", Some(Set(s1))),
-    //      ("editor@example.com", None),
-    //      ("john@example.com", None)
-    //    )
+    // Current upVotes
+    User.email.upVotes$.get === List(
+      ("stuarthalloway@datomic.com", Some(Set(paulGrahamStory))),
+      ("editor@example.com", None),
+      ("john@example.com", None)
+    )
   }
 }

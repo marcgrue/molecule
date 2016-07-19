@@ -48,12 +48,6 @@ class Logic extends Base {
         "\na")
 
 
-//    Ns.str("a", "a").get === List("a")
-//    Ns.str("a" or "a").get === List("a")
-//
-//    // Multiple search strings in a list are treated with OR-semantics
-//    Ns.str(List("a", "a")).get === List("a")
-
     // Applying non-matching values returns empty result
     Ns.str("c", "d").get === List()
     Ns.str("c" or "d").get === List()

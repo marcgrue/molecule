@@ -711,8 +711,8 @@ object MoleculeBoilerplate {
         |}""".stripMargin
   }
 
-  def nsTrait(namesp: Namespace, in: Int, out: Int, maxIn: Int, maxOut: Int, nsArities: Map[String, Int]) = {
-    val (ns, option, attrs) = (namesp.ns, namesp.opt, namesp.attrs)
+  def nsTrait(domain0: String, namesp: Namespace, in: Int, out: Int, maxIn: Int, maxOut: Int, nsArities: Map[String, Int]) = {
+    val (domain, ns, option, attrs) = (firstLow(domain0), namesp.ns, namesp.opt, namesp.attrs)
 
     val InTypes = (0 until in) map (n => "I" + (n + 1))
     val OutTypes = (0 until out) map (n => (n + 'A').toChar.toString)
@@ -847,10 +847,10 @@ object MoleculeBoilerplate {
 
     val bidirectionals: Map[String, String] = attrs.flatMap {
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiSelfRef_"), revRef)     => Some(attr -> s" with BiSelfRef_")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiOtherRef_"), revRef)    => Some(attr -> s" with BiOtherRef_[$refNs.$revRef[NS, NS]]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiOtherRef_"), revRef)    => Some(attr -> s" with BiOtherRef_[$domain.$refNs.$revRef[NS, NS]]")
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgePropRef_"), revRef) => Some(attr -> s" with BiEdgePropRef_")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef)     => Some(attr -> s" with BiEdgeRef_[$refNs.$revRef[NS, NS]]")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef)   => Some(attr -> s" with BiTargetRef_[$refNs.$revRef[NS, NS]]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef)     => Some(attr -> s" with BiEdgeRef_[$domain.$refNs.$revRef[NS, NS]]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef)   => Some(attr -> s" with BiTargetRef_[$domain.$refNs.$revRef[NS, NS]]")
       case other                                                              => None
     }.toMap
     val maxBidirectionals = bidirectionals.values.map(_.length)
@@ -1068,7 +1068,7 @@ object MoleculeBoilerplate {
 
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
-    val nsTraitsOut = (0 to outArity).map(nsTrait(namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
+    val nsTraitsOut = (0 to outArity).map(nsTrait(d.domain, namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
     val outFile: String =
       s"""/*
           |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
@@ -1078,7 +1078,8 @@ object MoleculeBoilerplate {
           |* 2. `sbt compile` in terminal
           |* 3. Refresh and re-compile project in IDE
           |*/
-          |package ${d.pkg}.dsl.${firstLow(d.domain)}
+          |package ${d.pkg}.dsl
+          |package ${firstLow(d.domain)}
           |import molecule.dsl.actions._
           |import molecule.dsl._$extraImports
           |
@@ -1097,7 +1098,7 @@ object MoleculeBoilerplate {
 
     val nsTraitsIn: Seq[(Int, String)] = if (inArity == 0) Nil
     else (1 to inArity).map(in =>
-      (in, (0 to outArity).map(nsTrait(namespace, in, _, inArity, outArity, nsArities)).mkString("\n"))
+      (in, (0 to outArity).map(nsTrait(d.domain, namespace, in, _, inArity, outArity, nsArities)).mkString("\n"))
     )
     val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
       val inFile: String =
@@ -1109,7 +1110,8 @@ object MoleculeBoilerplate {
             |* 2. `sbt compile` in terminal
             |* 3. Refresh and re-compile project in IDE
             |*/
-            |package ${d.pkg}.dsl.${firstLow(d.domain)}
+            |package ${d.pkg}.dsl
+            |package ${firstLow(d.domain)}
             |import molecule.dsl.actions._
             |import molecule.dsl._$extraImports
             |
@@ -1129,7 +1131,7 @@ object MoleculeBoilerplate {
     val nsTraits = (for {
       in <- 0 to inArity
       out <- 0 to outArity
-    } yield nsTrait(namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
+    } yield nsTrait(d.domain, namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
 
     s"""/*
         |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
@@ -1139,7 +1141,8 @@ object MoleculeBoilerplate {
         |* 2. `sbt compile` in terminal
         |* 3. Refresh and re-compile project in IDE
         |*/
-        |package ${d.pkg}.dsl.${firstLow(d.domain)}
+        |package ${d.pkg}.dsl
+        |package ${firstLow(d.domain)}
         |import molecule.dsl.actions._
         |import molecule.dsl._$extraImports
         |

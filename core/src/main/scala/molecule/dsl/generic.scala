@@ -7,7 +7,7 @@ import scala.language.higherKinds
 
 trait Generic0[Ns0, Ns1[_], In0[_], In1[_, _]] {
   lazy val e          : Ns1[Long   ] with OneLong   [Ns1[Long   ], In1[Long   , Long   ]] = ???
-  lazy val a          : Ns1[String ] with OneString [Ns1[String ], In1[String , String ]] = ???
+  lazy val a          : Ns1[String ] with OneString [Ns1[String ], In1[String , String ]] with FulltextSearch[Ns1[String ], In1[String , String ]]= ???
   lazy val v          : Ns1[Any    ] with OneAny    [Ns1[Any    ], In1[Any    , Any    ]] = ???
   lazy val ns         : Ns1[String ] with OneString [Ns1[String ], In1[String , String ]] = ???
   lazy val tx         : Ns1[Long   ] with OneLong   [Ns1[Long   ], In1[Long   , Long   ]] = ???

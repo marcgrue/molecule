@@ -291,7 +291,7 @@ class OptionalValues extends CoreSpec {
   }
 
 
-  "Mixing optional and non-fetching attributes" >> {
+  "Mixing optional and tacet attributes" >> {
 
     "Ok in query" in new CoreSetup {
       Ns.str.int$ insert List(
@@ -330,13 +330,33 @@ class OptionalValues extends CoreSpec {
     // Adding unnecessary Ns gives same result
     Ns.Ref1.int1.get === List(1, 2)
 
-    // We don't want a Ns entity with no asserted attributes but with a reference to Ref1 (an orphan)
+    // First namespace without any attributes not allowed
     (m(Ns.Ref1.int1).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noOrphanRefs]  Namespace `Ns` in insert molecule has no mandatory attributes. Please add at least one."
+      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
+
+    // First namespace without any mandatory attributes not allowed
+    (Ns.str$.Ref1.int1.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
+
+    // If at least 1 mandatory attribute is present we can have optional attributes too
+    Ns.str$.int.insert(Some("a"), 1)
+    Ns.str$.int.get === List((Some("a"), 1))
+
+    Ns.int.str$.insert(2, None)
+    Ns.int.str$.get === List((1, Some("a")), (2, None))
+
+    // First namespace without any mandatory attributes not allowed
+    (Ns.str_.Ref1.int1.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.noTacetAttrs]  Tacet attributes like `str_` not allowed in insert molecules."
+
+    // Last namespace without any mandatory attributes not allowed
+    (Ns.str.Ref1.int1$.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
 
-  "No optional values" in new CoreSetup {
+  "Only optional attributes" in new CoreSetup {
+
     expectCompileError(
       "m(Ns.str$)",
       "[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
@@ -347,9 +367,9 @@ class OptionalValues extends CoreSpec {
   }
 
 
-  "Only un-fetched attributes" in new CoreSetup {
+  "Only tacet attributes" in new CoreSetup {
 
-    // Un-fetched mandatory attributes only don't make it for querable molecules
+    // Queries with only tacet attributes not allowed
     expectCompileError(
       "m(Ns.str_).get",
       "value get is not a member of molecule.api.Molecule0")

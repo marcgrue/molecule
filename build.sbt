@@ -47,10 +47,10 @@ lazy val moleculeCoretest = project.in(file("coretest"))
 //  .settings(Seq(definitionDirsSeparate(
 //  "molecule/util"
 //)))
-//  .settings(Seq(definitionDirs(
-//  "molecule/partition",
-//  "molecule/bidirectional"
-//)))
+  .settings(Seq(definitionDirs(
+  "molecule/partition",
+  "molecule/bidirectional"
+)))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
@@ -66,11 +66,10 @@ lazy val moleculeExamples = project.in(file("examples"))
   //    )
   //  )
   .settings(Seq(definitionDirs(
-  "molecule/examples/dayOfDatomic",
-  "molecule/examples/gremlin",
-  "molecule/examples/mbrainz",
-  "molecule/examples/seattle",
+//  "molecule/examples/dayOfDatomic",
   "molecule/examples/gremlin"
+//  "molecule/examples/mbrainz",
+//  "molecule/examples/seattle",
 )))
 
 

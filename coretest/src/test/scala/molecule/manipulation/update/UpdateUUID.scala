@@ -33,7 +33,7 @@ class UpdateUUID extends CoreSpec {
       (Ns(eid).uuid(uuid2, uuid3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-        s"\n  ns ... uuid($uuid2, $uuid3)"
+        s"\n  Ns ... uuid($uuid2, $uuid3)"
     }
   }
 

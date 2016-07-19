@@ -14,7 +14,8 @@ case class CheckModel(model: Model, op: String) {
     noGenericsInTail
     noTacetAttrs
     noTransitiveAttrs
-    noOrphanRefs
+    //    noOrphanRefs
+    missingAttrInStartEnd
     noConflictingCardOneValues
     noNested
     noEdgePropRefs
@@ -26,7 +27,8 @@ case class CheckModel(model: Model, op: String) {
     noGenericsInTail
     noTacetAttrs
     noTransitiveAttrs
-    noOrphanRefs
+    //    noOrphanRefs
+    missingAttrInStartEnd
     noNestedEdgesWithoutTarget
   }
 
@@ -48,17 +50,24 @@ case class CheckModel(model: Model, op: String) {
     throw new IllegalArgumentException(s"[molecule.api.CheckModel.$method]  $msg")
   }
 
+  private def extractNs(fullAttr: String) = {
+    val ns = fullAttr.split(":").last.split("/").head
+    if (ns.contains('_')) ns else ns.capitalize
+  }
+
+  private def Ns(ns: String) = if (ns.contains('_')) ns else ns.capitalize
+
   // Avoid mixing insert/update style
   private def unexpectedAppliedId = model.elements.head match {
     case Meta(ns, _, "e", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
       s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
-        s"""Applying an eid is for updates, like `${ns.capitalize}(johnId).likes("pizza").update`""")
+        s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
     case ok                                       => ok
   }
   private def missingAppliedId = model.elements.head match {
     case Meta(_, _, "e", BiEdge, Eq(List(eid)))  => true
     case Meta(_, _, "e", NoValue, Eq(List(eid))) => true
-    case Atom(ns, _, _, _, _, _, _, _)           => iae("missingAppliedId", s"Update molecule should start with an applied id: `$ns(<eid>)...`")
+    case Atom(ns, _, _, _, _, _, _, _)           => iae("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
   }
 
   private def noGenericsInTail = model.elements.tail.collectFirst {
@@ -81,33 +90,53 @@ case class CheckModel(model: Model, op: String) {
     case t: Transitive => iae("noTransitiveAttrs", s"Can't $op transitive attribute values (repeated attributes).")
   }
 
-  private def noOrphanRefs {
-    // An insert molecule can only build on with a ref if it has already at least one mandatory attribute
-    def abortNs(i: Int, ns: String) = iae("noOrphanRefs",
-      s"Namespace `$ns` in $op molecule has no mandatory attributes. Please add at least one.")
+  //  private def noOrphanRefs {
+  //    // An insert molecule can only build on with a ref if it has already at least one mandatory attribute
+  //    def abortNs(i: Int, ns: String) = iae("noOrphanRefs",
+  //      s"Namespace `${Ns(ns)}` in $op molecule has no mandatory attributes. Please add at least one.")
+  //
+  //    def getNs(ns: String) = if (ns.contains("_")) ns else ns.capitalize
+  //
+  //    def avoidMissingAttrs(elements: Seq[Element]): (Element, Seq[Element], String) = elements.foldLeft((null: Element, Seq[Element](), "")) {
+  //      case ((prevElem, attrs, ns0), e) =>
+  //        e match {
+  //          case a: Atom if a.name.last != '$'                    => (a, attrs :+ a, getNs(a.ns))
+  //          case a: Atom                                          => (a, attrs, getNs(a.ns))
+  //          case b: Bond if attrs.isEmpty                         => abortNs(1, getNs(b.ns))
+  //          case b: Bond                                          => (b, Nil, getNs(b.ns))
+  //          case r@ReBond(ns1, _, _, _, _)                        => (r, attrs :+ r, getNs(ns1))
+  //          case g@Nested(ref, es) if prevElem.isInstanceOf[Bond] => abortNs(2, prevElem.asInstanceOf[Bond].refAttr.capitalize)
+  //          case g@Nested(ref, es)                                => {
+  //            val (_, nested, ns1) = avoidMissingAttrs(es)
+  //            if (nested.isEmpty) abortNs(3, ns1) else (g, nested, ns1)
+  //          }
+  //          case m@Meta(ns1, _, "e", NoValue, _)                  => (m, attrs :+ m, getNs(ns1))
+  //          case Composite(es)                                    => avoidMissingAttrs(es)
+  //          case _                                                => (e, attrs, ns0)
+  //        }
+  //    }
+  //    val (_, elements, ns) = avoidMissingAttrs(model.elements)
+  //    if (elements.isEmpty) abortNs(4, ns)
+  //  }
 
-    def getNs(ns: String) = if (ns.contains("_")) ns else ns.capitalize
-
-    def avoidMissingAttrs(elements: Seq[Element]): (Element, Seq[Element], String) = elements.foldLeft((null: Element, Seq[Element](), "")) {
-      case ((prevElem, attrs, ns0), e) =>
-        e match {
-          case a: Atom if a.name.last != '$'                    => (a, attrs :+ a, getNs(a.ns))
-          case a: Atom                                          => (a, attrs, getNs(a.ns))
-          case b: Bond if attrs.isEmpty                         => abortNs(1, getNs(b.ns))
-          case b: Bond                                          => (b, Nil, getNs(b.ns))
-          case r@ReBond(ns1, _, _, _, _)                        => (r, attrs :+ r, getNs(ns1))
-          case g@Nested(ref, es) if prevElem.isInstanceOf[Bond] => abortNs(2, prevElem.asInstanceOf[Bond].refAttr.capitalize)
-          case g@Nested(ref, es)                                => {
-            val (_, nested, ns1) = avoidMissingAttrs(es)
-            if (nested.isEmpty) abortNs(3, ns1) else (g, nested, ns1)
-          }
-          case m@Meta(ns1, _, "e", NoValue, _)                  => (m, attrs :+ m, getNs(ns1))
-          case Composite(es)                                    => avoidMissingAttrs(es)
-          case _                                                => (e, attrs, ns0)
-        }
+  private def missingAttrInStartEnd {
+    model.elements.foldLeft(Seq[Element]()) {
+      case (attrs, e) => e match {
+        case a: Atom if a.name.last != '$'        => attrs :+ a
+        case m@Meta(_, _, "e", NoValue, EntValue) => attrs :+ m
+        case b: Bond if attrs.isEmpty             => iae("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
+        case _                                    => attrs
+      }
     }
-    val (_, elements, ns) = avoidMissingAttrs(model.elements)
-    if (elements.isEmpty) abortNs(4, ns)
+    def missingAttrInEnd(elements: Seq[Element]): Seq[Element] = elements.foldRight(Seq[Element]()) {
+      case (e, attrs) => e match {
+        case a: Atom if a.name.last != '$' => attrs :+ a
+        case Nested(ref, es)               => missingAttrInEnd(es)
+        case b: Bond if attrs.isEmpty      => iae("missingAttrInStartEnd", "Missing mandatory attributes of last namespace.")
+        case _                             => attrs
+      }
+    }
+    missingAttrInEnd(model.elements)
   }
 
   private def noConflictingCardOneValues {
@@ -116,7 +145,7 @@ case class CheckModel(model: Model, op: String) {
     def catchConflictingCardOneValues(elements: Seq[Element]): Unit = elements.collectFirst {
       case Atom(ns, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => iae("noConflictingCardOneValues",
         s"""Can't $op multiple values for cardinality-one attribute:
-            |  $ns ... $attr(${vs.mkString(", ")})""".stripMargin)
+            |  ${Ns(ns)} ... $attr(${vs.mkString(", ")})""".stripMargin)
       case Nested(ref, es)                                        => catchConflictingCardOneValues(es)
       case Composite(es)                                          => catchConflictingCardOneValues(es)
     }
@@ -125,15 +154,15 @@ case class CheckModel(model: Model, op: String) {
 
   private def update_onlyOneNs = model.elements.collect {
     // Allow bidirectional references
-    case Bond(_, _, _, _, Seq(BiSelfRef(_)))   => true
-    case Bond(_, _, _, _, Seq(BiOtherRef(_, _)))   => true
+    case Bond(_, _, _, _, Seq(BiSelfRef(_)))      => true
+    case Bond(_, _, _, _, Seq(BiOtherRef(_, _)))  => true
     case Bond(_, _, _, _, Seq(BiEdgeRef(_, _)))   => true
     case Bond(_, _, _, _, Seq(BiTargetRef(_, _))) => true
 
-      // Otherwise disallow refs in updates
-    case Bond(_, _, ref, _, _)                    => iae("update_onlyOneNs", op.capitalize + s" molecules can't span multiple namespaces like `$ref`.")
-    case Nested(Bond(_, _, ref, _, _), _)         => iae("update_onlyOneNs", op.capitalize + s" molecules can't have nested data structures like `$ref`.")
-    case c: Composite                             => iae("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
+    // Otherwise disallow refs in updates
+    case Bond(_, _, refNs, _, _)            => iae("update_onlyOneNs", op.capitalize + s" molecules can't span multiple namespaces like `${Ns(refNs)}`.")
+    case Nested(Bond(_, _, refNs, _, _), _) => iae("update_onlyOneNs", op.capitalize + s" molecules can't have nested data structures like `${Ns(refNs)}`.")
+    case c: Composite                       => iae("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
   }
 
   private def noNested {
@@ -151,7 +180,6 @@ case class CheckModel(model: Model, op: String) {
         s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
   }
 
-  private def ns(fullAttr: String) = fullAttr.split(":").last.split("/").head
 
   private def noNestedEdgesWithoutTarget {
     def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
@@ -161,10 +189,10 @@ case class CheckModel(model: Model, op: String) {
           // One of those is expected
           case Bond(_, _, _, _, Seq(BiTargetRef(_, attr)))              => true
           case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => true
-//          case Bond(_, _, _, _, Seq(BiTargetRef(_, attr))) if ns(attr) == baseNs              => true
-//          case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if ns(attr) == baseNs => true
+          //          case Bond(_, _, _, _, Seq(BiTargetRef(_, attr))) if ns(attr) == baseNs              => true
+          //          case Atom(_, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if ns(attr) == baseNs => true
         }.getOrElse(false) => iae("noNestedEdgesWithoutTarget",
-        s"Nested edge ns `$refNs` should link to target ns within the nested group of attributes.")
+        s"Nested edge ns `${Ns(refNs)}` should link to target ns within the nested group of attributes.")
     }
     checkNested(model.elements)
   }
@@ -184,16 +212,16 @@ case class CheckModel(model: Model, op: String) {
         // Base.attr.Edge ...
         case Bond(_, _, edgeNs1, _, Seq(BiEdgeRef(_, _))) if edgeNs1 == edgeNs => true
         // Base.attr.edge ...
-        case Atom(_, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) if ns(edgeRefAttr) == edgeNs => true
+        case Atom(_, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) if extractNs(edgeRefAttr) == edgeNs => true
       }
 
       elements.collectFirst {
         // ?.. TargetNs
         case Bond(edgeNs, _, refNs, _, Seq(BiTargetRef(_, x))) => hasBase(elements, edgeNs) getOrElse
-          iae("save_edgeComplete", s"Missing base namespace before edge namespace `$refNs`.")
+          iae("save_edgeComplete", s"Missing base namespace before edge namespace `${Ns(refNs)}`.")
         // ?.. targetAttr
         case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) => hasBase(elements, edgeNs) getOrElse
-          iae("save_edgeComplete", s"Missing base namespace before edge namespace `${ns(edgeNs)}`.")
+          iae("save_edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
       }
     }
 
@@ -209,13 +237,13 @@ case class CheckModel(model: Model, op: String) {
       elements.collectFirst {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
-          iae("save_edgeComplete", s"Missing target namespace after edge namespace `$edgeNs`.")
+          iae("save_edgeComplete", s"Missing target namespace after edge namespace `${Ns(edgeNs)}`.")
         // Base.attr.edge ..?
-        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, ns(edgeRefAttr)) getOrElse
-          iae("save_edgeComplete", s"Missing target namespace after edge namespace `${ns(edgeRefAttr)}`.")
+        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, extractNs(edgeRefAttr)) getOrElse
+          iae("save_edgeComplete", s"Missing target namespace after edge namespace `${extractNs(edgeRefAttr)}`.")
         // Base.attr.Edge.prop ..?
-        case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, ns(prop)) getOrElse
-          iae("save_edgeComplete", s"Missing target namespace somewhere after edge property `$edgeNs/${ns(prop)}`.")
+        case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) => hasTarget(elements, prop) getOrElse
+          iae("save_edgeComplete", s"Missing target namespace somewhere after edge property `${Ns(edgeNs)}/$prop`.")
       }
     }
 
@@ -243,8 +271,8 @@ case class CheckModel(model: Model, op: String) {
       elements.collectFirst {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
-          iae("save_edgeComplete", s"Can't update edge `$edgeNs` of base entity `$baseNs` without knowing which target entity the edge is pointing too. " +
-            s"Please update the edge itself, like `$edgeNs(<edgeId>).edgeProperty(<new value>).update`.")
+          iae("save_edgeComplete", s"Can't update edge `${Ns(edgeNs)}` of base entity `${Ns(baseNs)}` without knowing which target entity the edge is pointing too. " +
+            s"Please update the edge itself, like `${Ns(edgeNs)}(<edgeId>).edgeProperty(<new value>).update`.")
       }
     }
 
