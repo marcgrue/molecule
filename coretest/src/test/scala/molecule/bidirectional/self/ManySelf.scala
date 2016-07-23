@@ -8,10 +8,13 @@ import molecule.util._
 
 class ManySelf extends MoleculeSpec {
 
+  class setup extends Setup {
+    val friendsOf = m(Person.name_(?).Friends.name)
+  }
 
   "Save" >> {
 
-    "1 new" in new Setup {
+    "1 new" in new setup {
 
       // Save Ann, Ben and bidirectional references between them
       Person.name("Ann").Friends.name("Ben").save.eids
@@ -25,12 +28,12 @@ class ManySelf extends MoleculeSpec {
 
       // We can now use a uniform query from both ends:
       // Ann and Ben are friends with each other
-      Person.name_("Ann").Friends.name.get === List("Ben")
-      Person.name_("Ben").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben")
+      friendsOf("Ben").get === List("Ann")
     }
 
 
-    "n new" in new Setup {
+    "n new" in new setup {
 
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
@@ -49,8 +52,8 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Ann and Ben are friends with each other
-      Person.name_("Ann").Friends.name.get === List("Joe")
-      Person.name_("Joe").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Joe")
+      friendsOf("Joe").get === List("Ann")
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (Person.name("Ann").Friends.*(Person.name("Ben")).save must throwA[IllegalArgumentException])
@@ -62,7 +65,7 @@ class ManySelf extends MoleculeSpec {
     }
 
 
-    "1 existing" in new Setup {
+    "1 existing" in new setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -75,8 +78,8 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Ann and Ben are friends with each other
-      Person.name_("Ann").Friends.name.get === List("Ben")
-      Person.name_("Ben").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben")
+      friendsOf("Ben").get === List("Ann")
 
       // Saveing reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
@@ -87,33 +90,33 @@ class ManySelf extends MoleculeSpec {
     }
 
 
-    "n existing" in new Setup {
+    "n existing" in new setup {
 
       val benJoe = Person.name.insert("Ben", "Joe").eids
 
       // Save Ann with bidirectional ref to existing Ben and Joe
       Person.name("Ann").friends(benJoe).save.eid
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
     }
   }
 
 
   "Insert" >> {
 
-    "1 new" in new Setup {
+    "1 new" in new setup {
 
       // Insert two bidirectionally connected entities
       Person.name.Friends.name.insert("Ann", "Ben")
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Friends.name.get === List("Ben")
-      Person.name_("Ben").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben")
+      friendsOf("Ben").get === List("Ann")
     }
 
-    "1 existing" in new Setup {
+    "1 existing" in new setup {
 
       val ben = Person.name("Ben").save.eid
 
@@ -121,12 +124,12 @@ class ManySelf extends MoleculeSpec {
       Person.name.friends.insert("Ann", Set(ben))
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Friends.name.get === List("Ben")
-      Person.name_("Ben").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben")
+      friendsOf("Ben").get === List("Ann")
     }
 
 
-    "multiple new" in new Setup {
+    "multiple new" in new setup {
 
       // Insert 2 pairs of entities with bidirectional references between them
       Person.name.Friends.name insert List(
@@ -135,13 +138,13 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Friends.name.get === List("Joe")
-      Person.name_("Ben").Friends.name.get === List("Tim")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Tim").Friends.name.get === List("Ben")
+      friendsOf("Ann").get === List("Joe")
+      friendsOf("Ben").get === List("Tim")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Tim").get === List("Ben")
     }
 
-    "multiple existing" in new Setup {
+    "multiple existing" in new setup {
 
       val List(joe, tim) = Person.name.insert("Joe", "Tim").eids
 
@@ -152,10 +155,10 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Friends.name.get === List("Joe")
-      Person.name_("Ben").Friends.name.get === List("Tim")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Tim").Friends.name.get === List("Ben")
+      friendsOf("Ann").get === List("Joe")
+      friendsOf("Ben").get === List("Tim")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Tim").get === List("Ben")
     }
 
 
@@ -203,7 +206,7 @@ class ManySelf extends MoleculeSpec {
 
   "Update" >> {
 
-    "add" in new Setup {
+    "add" in new setup {
 
       val List(ann, ben, joe, liz, tom) = Person.name.insert("Ann", "Ben", "Joe", "Liz", "Tom").eids
 
@@ -219,15 +222,15 @@ class ManySelf extends MoleculeSpec {
       Person(ann).friends.add(Seq(tom)).update
 
       // Friendships have been added in both directions
-      Person.name_("Ann").Friends.name.get.sorted === List("Ben", "Joe", "Liz", "Tom")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Liz").Friends.name.get === List("Ann")
-      Person.name_("Tom").Friends.name.get === List("Ann")
+      friendsOf("Ann").get.sorted === List("Ben", "Joe", "Liz", "Tom")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Liz").get === List("Ann")
+      friendsOf("Tom").get === List("Ann")
     }
 
 
-    "remove" in new Setup {
+    "remove" in new setup {
 
       // Insert Ann and friends
       val List(ann, ben, joe, liz, tom, ulf) = Person.name.Friends.*(Person.name) insert List(
@@ -235,12 +238,12 @@ class ManySelf extends MoleculeSpec {
       ) eids
 
       // Friendships have been inserted in both directions
-      Person.name_("Ann").Friends.name.get.sorted === List("Ben", "Joe", "Liz", "Tom", "Ulf")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Liz").Friends.name.get === List("Ann")
-      Person.name_("Tom").Friends.name.get === List("Ann")
-      Person.name_("Ulf").Friends.name.get === List("Ann")
+      friendsOf("Ann").get.sorted === List("Ben", "Joe", "Liz", "Tom", "Ulf")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Liz").get === List("Ann")
+      friendsOf("Tom").get === List("Ann")
+      friendsOf("Ulf").get === List("Ann")
 
       // Remove some friendships in various ways
 
@@ -254,74 +257,74 @@ class ManySelf extends MoleculeSpec {
       Person(ann).friends.remove(Seq(tom)).update
 
       // Correct friendships have been removed in both directions
-      Person.name_("Ann").Friends.name.get === List("Ulf")
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List()
-      Person.name_("Liz").Friends.name.get === List()
-      Person.name_("Tom").Friends.name.get === List()
-      Person.name_("Ulf").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ulf")
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List()
+      friendsOf("Liz").get === List()
+      friendsOf("Tom").get === List()
+      friendsOf("Ulf").get === List("Ann")
     }
 
 
-    "replace 1" in new Setup {
+    "replace 1" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name)
         .insert("Ann", List("Ben", "Joe")).eids
 
       val tim = Person.name("Tim").save.eid
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Tim").Friends.name.get === List()
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Tim").get === List()
 
       // Ann replaces Ben with Tim
       Person(ann).friends.replace(ben -> tim).update
 
       // Ann now friends with Tim instead of Ben
-      Person.name_("Ann").Friends.name.get === List("Tim", "Joe")
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Tim").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Tim", "Joe")
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Tim").get === List("Ann")
     }
 
-    "replace multiple" in new Setup {
+    "replace multiple" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name)
         .insert("Ann", List("Ben", "Joe")).eids
 
       val List(tim, tom) = Person.name.insert("Tim", "Tom").eids
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Tim").Friends.name.get === List()
-      Person.name_("Tom").Friends.name.get === List()
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Tim").get === List()
+      friendsOf("Tom").get === List()
 
       // Ann replaces Ben and Joe with Tim and Tom
       Person(ann).friends.replace(ben -> tim, joe -> tom).update
 
       // Ann is now friends with Tim and Tom instead of Ben and Joe
       // Ben and Joe are no longer friends with Ann either
-      Person.name_("Ann").Friends.name.get === List("Tom", "Tim")
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List()
-      Person.name_("Tim").Friends.name.get === List("Ann")
-      Person.name_("Tom").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Tom", "Tim")
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List()
+      friendsOf("Tim").get === List("Ann")
+      friendsOf("Tom").get === List("Ann")
     }
 
 
-    "replace all with 1" in new Setup {
+    "replace all with 1" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
       ) eids
       val liz                 = Person.name.insert("Liz").eid
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Liz").Friends.name.get === List()
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Liz").get === List()
 
       // Applying value(s) replaces all existing values!
 
@@ -329,14 +332,14 @@ class ManySelf extends MoleculeSpec {
       Person(ann).friends(liz).update
 
       // Joe and Ann no longer friends
-      Person.name_("Ann").Friends.name.get === List("Liz")
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List()
-      Person.name_("Liz").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Liz")
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List()
+      friendsOf("Liz").get === List("Ann")
     }
 
 
-    "replace all with multiple (apply varargs)" in new Setup {
+    "replace all with multiple (apply varargs)" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -344,24 +347,24 @@ class ManySelf extends MoleculeSpec {
 
       val liz = Person.name.insert("Liz").eid
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Liz").Friends.name.get === List()
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Liz").get === List()
 
       // Ann now has Ben and Liz as friends
       Person(ann).friends(ben, liz).update
 
       // Ann and Liz new friends
       // Ann and Joe no longer friends
-      Person.name_("Ann").Friends.name.get === List("Ben", "Liz")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List()
-      Person.name_("Liz").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben", "Liz")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List()
+      friendsOf("Liz").get === List("Ann")
     }
 
 
-    "replace all with multiple (apply Set)" in new Setup {
+    "replace all with multiple (apply Set)" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -369,84 +372,84 @@ class ManySelf extends MoleculeSpec {
 
       val liz = Person.name.insert("Liz").eid
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
-      Person.name_("Liz").Friends.name.get === List()
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
+      friendsOf("Liz").get === List()
 
       // Ann now has Ben and Liz as friends
       Person(ann).friends(Seq(ben, liz)).update
 
       // Ann and Liz new friends
       // Ann and Joe no longer friends
-      Person.name_("Ann").Friends.name.get === List("Ben", "Liz")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List()
-      Person.name_("Liz").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben", "Liz")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List()
+      friendsOf("Liz").get === List("Ann")
     }
 
 
-    "remove all (apply no values)" in new Setup {
+    "remove all (apply no values)" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
       ) eids
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
 
       // Ann has no friends any longer
       Person(ann).friends().update
 
       // Ann's friendships replaced with no friendships (in both directions)
-      Person.name_("Ann").Friends.name.get === List()
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List()
+      friendsOf("Ann").get === List()
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List()
     }
 
 
-    "remove all (apply empty Set)" in new Setup {
+    "remove all (apply empty Set)" in new setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
       ) eids
 
-      Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-      Person.name_("Ben").Friends.name.get === List("Ann")
-      Person.name_("Joe").Friends.name.get === List("Ann")
+      friendsOf("Ann").get === List("Ben", "Joe")
+      friendsOf("Ben").get === List("Ann")
+      friendsOf("Joe").get === List("Ann")
 
       // Ann has no friends any longer
       val noFriends = Seq.empty[Long]
       Person(ann).friends(noFriends).update
 
       // Ann's friendships replaced with no friendships (in both directions)
-      Person.name_("Ann").Friends.name.get === List()
-      Person.name_("Ben").Friends.name.get === List()
-      Person.name_("Joe").Friends.name.get === List()
+      friendsOf("Ann").get === List()
+      friendsOf("Ben").get === List()
+      friendsOf("Joe").get === List()
     }
   }
 
 
-  "Retract" in new Setup {
+  "Retract" in new setup {
 
     val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
       ("Ann", List("Ben", "Joe"))
     ) eids
 
-    Person.name_("Ann").Friends.name.get === List("Ben", "Joe")
-    Person.name_("Ben").Friends.name.get === List("Ann")
-    Person.name_("Joe").Friends.name.get === List("Ann")
+    friendsOf("Ann").get === List("Ben", "Joe")
+    friendsOf("Ben").get === List("Ann")
+    friendsOf("Joe").get === List("Ann")
 
     // Retract Ann and all her friendships
     ann.retract
 
     // Ann doesn't exist anymore
     Person.name("Ann").get === List()
-    Person.name_("Ann").Friends.name.get === List()
+    friendsOf("Ann").get === List()
 
     // Ben and Joe are no longer friends with Ann
-    Person.name_("Ben").Friends.name.get === List()
-    Person.name_("Joe").Friends.name.get === List()
+    friendsOf("Ben").get === List()
+    friendsOf("Joe").get === List()
   }
 }

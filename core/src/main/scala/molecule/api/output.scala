@@ -57,21 +57,42 @@ trait Molecule extends DatomicFacade {
   protected def _insertD(conn: Connection, data: Seq[Seq[Any]]) {
     CheckModel(_model, "insert")
     val transformer = Model2Transaction(conn, _model)
-    val stmtss = transformer.insertStmts(data)
+    val stmtss = try {
+      transformer.insertStmts(data)
+    } catch {
+      case e: Throwable =>
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+        Debug("output.Molecule._insertD", 1)(1, _model, transformer.stmtsModel, data)
+        throw e
+    }
     Debug("output.Molecule._insertD", 1)(1, _model, transformer.stmtsModel, data, stmtss)
   }
 
   def saveD(implicit conn: Connection) {
     CheckModel(_model, "save")
     val transformer = Model2Transaction(conn, _model)
-    val stmts = transformer.saveStmts()
+    val stmts = try {
+      transformer.saveStmts()
+    } catch {
+      case e: Throwable =>
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+        Debug("output.Molecule.saveD", 1)(1, _model, transformer.stmtsModel)
+        throw e
+    }
     Debug("output.Molecule.saveD", 1)(1, _model, transformer.stmtsModel, stmts)
   }
 
   def updateD(implicit conn: Connection) {
     CheckModel(_model, "update")
     val transformer = Model2Transaction(conn, _model)
-    val stmts = transformer.updateStmts()
+    val stmts = try {
+      transformer.updateStmts()
+    } catch {
+      case e: Throwable =>
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+        Debug("output.Molecule.updateD", 1)(1, _model, transformer.stmtsModel)
+        throw e
+    }
     Debug("output.Molecule.updateD", 1)(1, _model, transformer.stmtsModel, stmts)
   }
 

@@ -3,55 +3,14 @@ package molecule.bidirectional.edgeSelf
 import molecule._
 import molecule.bidirectional.Setup
 import molecule.bidirectional.dsl.bidirectional._
-import molecule.bidirectional.schema.BidirectionalSchema
 import molecule.util._
-import org.specs2.specification.Scope
 
 class EdgeOneSelfSave extends MoleculeSpec {
 
 
-    // Edge consistency checks.
-    // Any edge should always be connected to both a base and a target entity.
+  "base/edge/target" >> {
 
-    "base - edge - <missing target>" in new Setup {
-
-      // Can't save edge missing the target namespace (`Person`)
-      // The edge needs to be complete at all times to preserve consistency.
-
-      (Person.name("Ann").Loves.weight(5).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Loves`."
-
-      // Same applies when using a reference attribute (`Loves`)
-      val edgeId = 42L
-      (Person.name("Ann").loves(edgeId).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace after edge namespace `Loves`."
-    }
-
-
-    "<missing base> - edge - target" in new Setup {
-
-      (Loves.weight(7).Person.name("Ben").save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Person`."
-
-      val targetId = 42L
-      (Loves.weight(7).person(targetId).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing base namespace before edge namespace `Loves`."
-    }
-
-
-    "<missing base> - edge - <missing target>" in new Setup {
-
-      (Loves.weight(7).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
-    }
-
-
-    "new base -- new edge -- new target" in new Setup {
+    "new target" in new Setup {
 
       /*
           When a "property edge" is created, Molecule automatically creates a reverse reference in the opposite direction:
@@ -64,7 +23,8 @@ class EdgeOneSelfSave extends MoleculeSpec {
 
           So we get 4 entities:
       */
-      val List(ann, annLovesBen, benLovesAnn, ben) = Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
+      val List(ann, annLovesBen, benLovesAnn, ben) =
+        Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
 
       // Bidirectional property edges have been saved
       Person.name.Loves.weight.Person.name.get.sorted === List(
@@ -72,14 +32,10 @@ class EdgeOneSelfSave extends MoleculeSpec {
         // Reverse edge:
         ("Ben", 7, "Ann")
       )
-
-      // Ann and Ben know each other with a weight of 7
-      Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
-      Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
     }
 
 
-    "new base -- new edge -- existing target" in new Setup {
+    "existing target" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -87,62 +43,86 @@ class EdgeOneSelfSave extends MoleculeSpec {
       Person.name("Ann").Loves.weight(7).person(ben).save.eids
 
       // Ann and Ben know each other with a weight of 7
-      Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
-      Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
+      Person.name.Loves.weight.Person.name.get.sorted === List(
+        ("Ann", 7, "Ben"),
+        ("Ben", 7, "Ann")
+      )
     }
+  }
 
 
-    "edge with multiple properties" in new Setup {
+  "base + edge/target" >> {
 
-      // We save some qualitites separately first
-      val loves     = Quality.name("Love").save.eid
-      val inCommons = Quality.name.insert("Patience", "Humor").eids
-      val ann       = Person.name.insert("Ann").eid
+    "new target" in new Setup {
 
-      // Save Ben, Ann and bidirectional edge properties describing their relationship
-      Person.name("Ben") // New entity
-        .Loves
-        .weight(7)
-        .howWeMet("inSchool")
-        .commonInterests("Food", "Walking", "Travelling")
-        .commonLicences("climbing", "flying")
-        .commonScores(Seq("golf" -> 7, "baseball" -> 9))
-        .coreQuality(loves)
-        .inCommon(inCommons)
-        .person(ann) // Saving reference to existing Person entity
-        .save
+      // Create love edges to/from Ben
+      val List(lovesBen, benLoves, ben) = Loves.weight(7).Person.name("Ben").save.eids
 
-      // Reference is bidirectional - both edges point to each other and have all properties
-      Person.name
-        .Loves
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Loves
-        .InCommon.*(Quality.name)._Loves
-        .Person.name
-        .get === List(
-        ("Ann"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ben"),
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ann")
+      /*
+          Ben and bidirectional edges created
+
+                (-->)  lovesBen  -->
+          (Ann)                       Ben
+                (<--)  benLoves  <--
+
+      */
+
+      // lovesBen edge points to Ben
+      lovesBen.touch(1) === Map(
+        ":db/id" -> lovesBen,
+        ":loves/person" -> ben,
+        ":loves/weight" -> 7,
+        ":molecule_Meta/otherEdge" -> benLoves // To be able to find the other edge later
+      )
+
+      // Ben points to edge benLoves
+      ben.touch(1) === Map(
+        ":db/id" -> ben,
+        ":person/loves" -> benLoves,
+        ":person/name" -> "Ben"
+      )
+
+      // benLoves edge is ready to point back to a base entity (Ann)
+      benLoves.touch(1) === Map(
+        ":db/id" -> benLoves,
+        ":loves/weight" -> 7,
+        ":molecule_Meta/otherEdge" -> lovesBen // To be able to find the other edge later
+      )
+
+      // Two edges pointing to and from Ben
+      Loves.e.weight_(7).Person.name_("Ben").get === Seq(lovesBen)
+      Person.name_("Ben").Loves.weight_(7).e.get === Seq(benLoves)
+
+      // Base entity Ann points to one of the edges (doesn't matter which of them)
+      val ann = Person.name("Ann").loves(lovesBen).save.eid
+
+      // Narcissistic tendencies not allowed
+      (Person(ann).loves(ann).update must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        s"[molecule.transform.Model2Transaction.valueStmts:biEdgeRefAttr]  Current entity and referenced entity ids can't be the same."
+
+      // Ann and Ben know each other with a weight of 7
+      Person.name.Loves.weight.Person.name.get.sorted === List(
+        ("Ann", 7, "Ben"),
+        ("Ben", 7, "Ann")
       )
     }
 
+    "existing target" in new Setup {
+
+      val ben = Person.name.insert("Ben").eid
+
+      // Create edges to existing Ben
+      val List(annLovesBen, benLovesAnn) = Loves.weight.person.insert(7, ben).eids
+
+      // Base entity Ann points to one of the edges (doesn't matter which of them - Molecule connects Ann to both)
+      Person.name("Ann").loves(benLovesAnn).save
+
+      // Ann loves Ben and Ben loves Ann - that is 70% love
+      Person.name.Loves.weight.Person.name.get.sorted === List(
+        ("Ann", 7, "Ben"),
+        ("Ben", 7, "Ann")
+      )
+    }
+  }
 }

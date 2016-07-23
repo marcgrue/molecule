@@ -31,10 +31,10 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
   //  }
 
 
-  def bindValues1(inputTuples: Seq[(I1, I2, I3)]) = {
-    val (vars, Seq(p1 ,p2,p3)) = varsAndPrefixes.unzip
+  def bindValues1(query: Query, inputTuples: Seq[(I1, I2, I3)]) = {
+    val (vars, Seq(p1 ,p2,p3)) = varsAndPrefixes(query).unzip
     val values = inputTuples.map(tpl => Seq(p1 + tpl._1, p2 + tpl._2, p3 + tpl._3))
-    _query.copy(i = In(Seq(InVar(RelationBinding(vars), values)), _query.i.rules, _query.i.ds))
+    query.copy(i = In(Seq(InVar(RelationBinding(vars), values)), query.i.rules, query.i.ds))
   }
 }
 

@@ -26,33 +26,35 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     traverse(or)
   }
 
-  def bindValues1(inputTuples: Seq[(I1, I2)]) = {
-    val (vars, Seq(p1, p2)) = varsAndPrefixes.unzip
+  def bindValues1(query: Query, inputTuples: Seq[(I1, I2)]) = {
+    val (vars, Seq(p1, p2)) = varsAndPrefixes(query).unzip
     val values = inputTuples.map(tpl => Seq(p1 + tpl._1, p2 + tpl._2))
-    _query.copy(i = In(Seq(InVar(RelationBinding(vars), values)), _query.i.rules, _query.i.ds))
+    query.copy(i = In(Seq(InVar(RelationBinding(vars), values)), query.i.rules, query.i.ds))
   }
 
-  def inputValues1(inputTuples: Seq[(I1, I2)]) = {
-    val (vars, Seq(p1, p2)) = varsAndPrefixes.unzip
+  def inputValues1(query: Query, inputTuples: Seq[(I1, I2)]) = {
+    val (vars, Seq(p1, p2)) = varsAndPrefixes(query).unzip
     inputTuples.map(tpl => Seq(p1 + tpl._1, p2 + tpl._2))
 //    val values = inputTuples.map(tpl => Seq(p1 + tpl._1, p2 + tpl._2))
 //    values.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1).mkString("\n")
   }
 
 
-  def bindValues2(inputLists: (Seq[I1], Seq[I2])) = {
+//  def bindValues2(query: Query, inputLists: (Seq[I1], Seq[I2])) = {
+  def bindValues2(query: Query, input1: Seq[I1], input2: Seq[I2]) = {
 
     // Extract placeholder info and discard placeholders
-    val varsAndPrefixes = _query.i.inputs.collect {
+    val varsAndPrefixes = query.i.inputs.collect {
       case Placeholder(_, kw, enumPrefix, e) => (kw, enumPrefix, e)
     }
-    val query1 = _query.copy(i = In(Seq(), _query.i.rules, _query.i.ds))
+    val query1 = query.copy(i = In(Seq(), query.i.rules, query.i.ds))
 
     if (varsAndPrefixes.size != 2)
-      sys.error(s"[InputMolecule_2] Query should expect exactly 2 inputs:\nQuery: ${_query.datalog}")
+      sys.error(s"[InputMolecule_2] Query should expect exactly 2 inputs:\nQuery: ${query.datalog}")
 
     // Add rules for each list of inputs
-    val query2 = inputLists.productIterator.toList.zip(varsAndPrefixes).foldLeft(query1) {
+//    val query2 = inputLists.productIterator.toList.zip(varsAndPrefixes).foldLeft(query1) {
+    val query2 = Seq(input1, input2).zip(varsAndPrefixes).foldLeft(query1) {
       case (q, (inputList: Seq[_], (kw, enumPrefix, e))) => {
         // Add rule for each input value
         val ruleName = "rule" + (q.i.rules.map(_.name).distinct.size + 1)

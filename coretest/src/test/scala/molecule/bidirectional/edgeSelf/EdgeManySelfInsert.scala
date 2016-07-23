@@ -3,87 +3,41 @@ package molecule.bidirectional.edgeSelf
 import molecule._
 import molecule.bidirectional.Setup
 import molecule.bidirectional.dsl.bidirectional._
-import molecule.bidirectional.schema.BidirectionalSchema
 import molecule.util._
-import org.specs2.specification.Scope
 
 class EdgeManySelfInsert extends MoleculeSpec {
 
+  class setup extends Setup {
+    val knownBy  = m(Person.name_(?).Knows.*(Knows.weight.Person.name))
+  }
 
+  "base/edge/target" >> {
 
-    "1 new" in new Setup {
+    "new targets" in new setup {
 
-      // Insert 1 pair of entities with bidirectional property edge between them
-      Person.name.Knows.weight.Person.name.insert("Ann", 7, "Ben")
-
-      // Bidirectional property edge has been inserted
-      Person.name_("Ann").Knows.weight.Person.name.get === List((7, "Ben"))
-      Person.name_("Ben").Knows.weight.Person.name.get === List((7, "Ann"))
-    }
-
-    "1 existing" in new Setup {
-
-      val ben = Person.name.insert("Ben").eid
-
-      // Insert Ann with bidirectional property edge to existing Ben
-      Person.name.Knows.weight.person.insert("Ann", 7, ben)
-
-      // Bidirectional property edge has been inserted
-      Person.name_("Ann").Knows.weight.Person.name.get === List((7, "Ben"))
-      Person.name_("Ben").Knows.weight.Person.name.get === List((7, "Ann"))
-    }
-
-
-    "multiple new" in new Setup {
-
-      // Insert 2 pair of entities with bidirectional property edge between them
-      Person.name.Knows.weight.Person.name insert List(
-        ("Ann", 7, "Joe"),
-        ("Ben", 6, "Tim")
-      )
+      // Create Ann with multiple edges to new target entities Ben and Joe
+      Person.name.Knows.*(Knows.weight.Person.name).insert("Ann", List((7, "Ben"), (8, "Joe")))
 
       // Bidirectional property edges have been inserted
-      Person.name_("Ann").Knows.weight.Person.name.get === List((7, "Joe"))
-      Person.name_("Ben").Knows.weight.Person.name.get === List((6, "Tim"))
-      Person.name_("Joe").Knows.weight.Person.name.get === List((7, "Ann"))
-      Person.name_("Tim").Knows.weight.Person.name.get === List((6, "Ben"))
+      knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
+      knownBy("Ben").one === List((7, "Ann"))
+      knownBy("Joe").one === List((8, "Ann"))
     }
 
-    "multiple existing" in new Setup {
+    "existing targets" in new setup {
 
-      val List(joe, tim) = Person.name.insert("Joe", "Tim").eids
+      val Seq(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
-      // Insert 2 entities with bidirectional property edges to existing entities
-      Person.name.Knows.weight.person insert List(
-        ("Ann", 7, joe),
-        ("Ben", 6, tim)
-      )
+      // Create Ann with multiple edges to existing target entities Ben and Joe
+      Person.name.Knows.*(Knows.weight.person).insert("Ann", List((7, ben), (8, joe))).eids
 
       // Bidirectional property edges have been inserted
-      Person.name_("Ann").Knows.weight.Person.name.get === List((7, "Joe"))
-      Person.name_("Ben").Knows.weight.Person.name.get === List((6, "Tim"))
-      Person.name_("Joe").Knows.weight.Person.name.get === List((7, "Ann"))
-      Person.name_("Tim").Knows.weight.Person.name.get === List((6, "Ben"))
+      knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
+      knownBy("Ben").one === List((7, "Ann"))
+      knownBy("Joe").one === List((8, "Ann"))
     }
 
-
-    "nested new" in new Setup {
-
-      // Insert molecules allow nested data structures. So we can conveniently
-      // insert 2 entities each connected to 2 target entites via property edges
-      Person.name.Knows.*(Knows.weight.Person.name) insert List(
-        ("Ann", List((7, "Ben"), (6, "Joe"))),
-        ("Don", List((8, "Tim"), (9, "Tom")))
-      )
-
-      Person.name.Knows.*(Knows.weight.Person.name).get.sortBy(_._1) === List(
-        ("Ann", List((7, "Ben"), (6, "Joe"))),
-        ("Ben", List((7, "Ann"))),
-        ("Don", List((8, "Tim"), (9, "Tom"))),
-        ("Joe", List((6, "Ann"))),
-        ("Tim", List((8, "Don"))),
-        ("Tom", List((9, "Don")))
-      )
+    "nested edge only not allowed" in new Setup {
 
       // Can't save nested edges without including target entity
       (Person.name.Knows.*(Knows.weight).Person.name insert List(
@@ -92,138 +46,58 @@ class EdgeManySelfInsert extends MoleculeSpec {
         s"[molecule.api.CheckModel.noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
         s"target ns within the nested group of attributes."
     }
+  }
 
-    "nested existing" in new Setup {
 
-      val List(ben, joe, tim, tom) = Person.name.insert("Ben", "Joe", "Tim", "Tom").eids
+  "base + edge/target" >> {
 
-      // Insert 2 Persons and connect them with existing Persons
-      Person.name.Knows.*(Knows.weight.person) insert List(
-        ("Ann", List((7, ben), (6, joe))),
-        ("Don", List((8, tim), (9, tom)))
-      )
+    "new targets" in new setup {
 
-      // Bidirectional references have been inserted - not how Ben got 2 (reverse) friendships
-      Person.name.Knows.*(Knows.weight.Person.name).get.sortBy(_._1) === List(
-        ("Ann", List((7, "Ben"), (6, "Joe"))),
-        ("Ben", List((7, "Ann"))),
-        ("Don", List((8, "Tim"), (9, "Tom"))),
-        ("Joe", List((6, "Ann"))),
-        ("Tim", List((8, "Don"))),
-        ("Tom", List((9, "Don")))
-      )
+      // Create edges to new target entities
+      val Seq(knowsBen, knowsJoe): Seq[Long] = Knows.weight.Person.name.insert(List((7, "Ben"), (8, "Joe"))).eids.grouped(3).map(_.head).toSeq
+
+      // Connect base entity to edges
+      Person.name.knows.insert("Ann", Set(knowsBen, knowsJoe))
+
+      // Bidirectional property edges have been inserted
+      knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
+      knownBy("Ben").one === List((7, "Ann"))
+      knownBy("Joe").one === List((8, "Ann"))
     }
 
+    "existing targets" in new setup {
 
-    "1 large edge to new entity" in new Setup {
+      val Seq(ben , joe) = Person.name.insert("Ben", "Joe").eids
 
-      Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(Quality.name)._Knows
-        .Person.name insert List(
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Joe")
-      )
+      // Create edges to existing target entities
+      val Seq(knowsBen, knowsJoe): Seq[Long] = Knows.weight.person.insert(List((7, ben), (8, joe))).eids.grouped(3).map(_.head).toSeq
 
-      Person.name
-        .Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(Quality.name)._Knows
-        .Person.name
-        .get === List(
-        ("Ben"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Joe"),
-        ("Joe"
-          , 7
-          , "inSchool"
-          , Set("Food", "Walking", "Travelling")
-          , Set("climbing", "flying")
-          , Map("baseball" -> 9, "golf" -> 7)
-          , "Love"
-          , List("Patience", "Humor")
-          , "Ben")
-      )
+      // Connect base entity to edges
+      Person.name.knows.insert("Ann", Set(knowsBen, knowsJoe))
+
+      // Bidirectional property edges have been inserted
+      knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
+      knownBy("Ben").one === List((7, "Ann"))
+      knownBy("Joe").one === List((8, "Ann"))
     }
+  }
 
 
-    "multiple large edges to existing entities" in new Setup {
+  // Edge consistency checks
 
-      val List(joe, liz) = Person.name.insert("Joe", "Liz").eids
+  "base/edge - <missing target>" in new Setup {
 
-      // Insert new entity with property edges to multiple existing entities
-      Person.name.Knows.*(Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(Quality.name)._Knows
-        .person) insert List(
-        (
-          "Ben",
-          List(
-            (7
-              , "inSchool"
-              , Set("Food", "Walking", "Travelling")
-              , Set("climbing", "flying")
-              , Map("baseball" -> 9, "golf" -> 7)
-              , "Love"
-              , List("Patience", "Humor")
-              , joe),
-            (6
-              , "atWork"
-              , Set("Programming", "Molecule")
-              , Set("diving")
-              , Map("dart" -> 4, "running" -> 2)
-              , "Respect"
-              , List("Focus", "Wit")
-              , liz)
-          ))
-      )
+    // Can't allow edge without ref to target entity
+    (Person.name.Knows.weight.insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `Knows`."
+  }
 
-      // Ben is connect to Joe and Liz and they are in turn connected to Ben with the same edge properties
-      Person.name.Knows.*(Knows
-        .weight
-        .howWeMet
-        .commonInterests
-        .commonLicences
-        .commonScores
-        .CoreQuality.name._Knows
-        .InCommon.*(Quality.name)._Knows
-        .Person.name).get.sortBy(_._1) === List(
-        ("Ben", List(
-          (7, "inSchool", Set("Food", "Walking", "Travelling"), Set("climbing", "flying"), Map("baseball" -> 9, "golf" -> 7), "Love", List("Patience", "Humor"), "Joe"),
-          (6, "atWork", Set("Programming", "Molecule"), Set("diving"), Map("dart" -> 4, "running" -> 2), "Respect", List("Focus", "Wit"), "Liz"))),
-        ("Joe", List(
-          (7, "inSchool", Set("Food", "Walking", "Travelling"), Set("climbing", "flying"), Map("baseball" -> 9, "golf" -> 7), "Love", List("Patience", "Humor"), "Ben"))),
-        ("Liz", List(
-          (6, "atWork", Set("Programming", "Molecule"), Set("diving"), Map("dart" -> 4, "running" -> 2), "Respect", List("Focus", "Wit"), "Ben")))
-      )
-    }
+  "<missing base> - edge - <missing target>" in new Setup {
+
+    // Edge always have to have a ref to a target entity
+    (Knows.weight.insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
+  }
 }

@@ -8,10 +8,14 @@ import molecule.util._
 
 class ManyOther extends MoleculeSpec {
 
+  class setup extends Setup {
+    val animalBuddiesOf = m(Person.name_(?).Buddies.name)
+    val personBuddiesOf = m(Animal.name_(?).Buddies.name)
+  }
 
   "Save" >> {
 
-    "1 new" in new Setup {
+    "1 new" in new setup {
 
       // Save Ann, Gus and bidirectional references between them
       Person.name("Ann").Buddies.name("Gus").save.eids
@@ -26,8 +30,8 @@ class ManyOther extends MoleculeSpec {
 
       // We can now use a uniform query from both ends:
       // Ann and Gus are buddies with each other
-      Person.name_("Ann").Buddies.name.get === List("Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Gus")
+      personBuddiesOf("Gus").get === List("Ann")
 
       // Forth and back should bring os to the starting point
       Person.name_("Ann").Buddies.Buddies.name.get === List("Ann")
@@ -35,7 +39,7 @@ class ManyOther extends MoleculeSpec {
     }
 
 
-    "n new" in new Setup {
+    "n new" in new setup {
 
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
@@ -56,8 +60,8 @@ class ManyOther extends MoleculeSpec {
       )
 
       // Ann and Gus are buddies with each other
-      Person.name_("Ann").Buddies.name.get === List("Leo")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Leo")
+      personBuddiesOf("Leo").get === List("Ann")
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (Person.name("Ann").Buddies.*(Animal.name("Gus")).save must throwA[IllegalArgumentException])
@@ -93,33 +97,33 @@ class ManyOther extends MoleculeSpec {
     }
 
 
-    "n existing" in new Setup {
+    "n existing" in new setup {
 
       val gusLeo = Animal.name.insert("Gus", "Leo").eids
 
       // Save Ann with bidirectional ref to existing Gus and Leo
       Person.name("Ann").buddies(gusLeo).save.eid
 
-      Person.name_("Ann").Buddies.name.get.sorted === List("Gus", "Leo")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
     }
   }
 
 
   "Insert" >> {
 
-    "1 new" in new Setup {
+    "1 new" in new setup {
 
       // Insert two bidirectionally connected entities
       Person.name.Buddies.name.insert("Ann", "Gus")
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Buddies.name.get === List("Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Gus")
+      personBuddiesOf("Gus").get === List("Ann")
     }
 
-    "1 existing" in new Setup {
+    "1 existing" in new setup {
 
       val gus = Animal.name("Gus").save.eid
 
@@ -127,12 +131,12 @@ class ManyOther extends MoleculeSpec {
       Person.name.buddies.insert("Ann", Set(gus))
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Buddies.name.get === List("Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Gus")
+      personBuddiesOf("Gus").get === List("Ann")
     }
 
 
-    "multiple new" in new Setup {
+    "multiple new" in new setup {
 
       // Insert 2 pairs of entities with bidirectional references between them
       Person.name.Buddies.name insert List(
@@ -141,13 +145,13 @@ class ManyOther extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Buddies.name.get === List("Gus")
-      Person.name_("Bob").Buddies.name.get === List("Leo")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Bob")
+      animalBuddiesOf("Ann").get === List("Gus")
+      animalBuddiesOf("Bob").get === List("Leo")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Bob")
     }
 
-    "multiple existing" in new Setup {
+    "multiple existing" in new setup {
 
       val List(gus, leo) = Animal.name.insert("Gus", "Leo").eids
 
@@ -158,10 +162,10 @@ class ManyOther extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name_("Ann").Buddies.name.get === List("Gus")
-      Person.name_("Bob").Buddies.name.get === List("Leo")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Bob")
+      animalBuddiesOf("Ann").get === List("Gus")
+      animalBuddiesOf("Bob").get === List("Leo")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Bob")
     }
 
 
@@ -213,7 +217,7 @@ class ManyOther extends MoleculeSpec {
 
   "Update" >> {
 
-    "add" in new Setup {
+    "add" in new setup {
 
       val ann                      = Person.name("Ann").save.eid
       val List(gus, leo, rex, zip) = Animal.name.insert("Gus", "Leo", "Rex", "Zip").eids
@@ -230,15 +234,15 @@ class ManyOther extends MoleculeSpec {
       Person(ann).buddies.add(Seq(zip)).update
 
       // Buddieships have been added in both directions
-      Person.name_("Ann").Buddies.name.get.sorted === List("Gus", "Leo", "Rex", "Zip")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
-      Animal.name_("Zip").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo", "Rex", "Zip")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List("Ann")
+      personBuddiesOf("Zip").get === List("Ann")
     }
 
 
-    "remove" in new Setup {
+    "remove" in new setup {
 
       // Insert Ann and buddies
       val List(ann, gus, leo, rex, zip, zup) = Person.name.Buddies.*(Animal.name) insert List(
@@ -246,12 +250,12 @@ class ManyOther extends MoleculeSpec {
       ) eids
 
       // Buddieships have been inserted in both directions
-      Person.name_("Ann").Buddies.name.get.sorted === List("Gus", "Leo", "Rex", "Zip", "Zup")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
-      Animal.name_("Zip").Buddies.name.get === List("Ann")
-      Animal.name_("Zup").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo", "Rex", "Zip", "Zup")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List("Ann")
+      personBuddiesOf("Zip").get === List("Ann")
+      personBuddiesOf("Zup").get === List("Ann")
 
       // Remove some buddieships in various ways
 
@@ -265,74 +269,74 @@ class ManyOther extends MoleculeSpec {
       Person(ann).buddies.remove(Seq(zip)).update
 
       // Correct buddieships have been removed in both directions
-      Person.name_("Ann").Buddies.name.get === List("Zup")
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List()
-      Animal.name_("Rex").Buddies.name.get === List()
-      Animal.name_("Zip").Buddies.name.get === List()
-      Animal.name_("Zup").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Zup")
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List()
+      personBuddiesOf("Rex").get === List()
+      personBuddiesOf("Zip").get === List()
+      personBuddiesOf("Zup").get === List("Ann")
     }
 
 
-    "replace 1" in new Setup {
+    "replace 1" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name)
         .insert("Ann", List("Gus", "Leo")).eids
 
       val rex = Animal.name("Rex").save.eid
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List()
 
       // Ann replaces Gus with Rex
       Person(ann).buddies.replace(gus -> rex).update
 
       // Ann now buddies with Rex instead of Gus
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Rex")
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Leo", "Rex")
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List("Ann")
     }
 
-    "replace multiple" in new Setup {
+    "replace multiple" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name)
         .insert("Ann", List("Gus", "Leo")).eids
 
       val List(rex, zip) = Animal.name.insert("Rex", "Zip").eids
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List()
-      Animal.name_("Zip").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List()
+      personBuddiesOf("Zip").get === List()
 
       // Ann replaces Gus and Leo with Rex and Zip
       Person(ann).buddies.replace(gus -> rex, leo -> zip).update
 
       // Ann is now buddies with Rex and Zip instead of Gus and Leo
       // Gus and Leo are no longer buddies with Ann either
-      Person.name_("Ann").Buddies.name.get === List("Zip", "Rex")
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List()
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
-      Animal.name_("Zip").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Zip", "Rex")
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List()
+      personBuddiesOf("Rex").get === List("Ann")
+      personBuddiesOf("Zip").get === List("Ann")
     }
 
 
-    "replace all with 1" in new Setup {
+    "replace all with 1" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
       ) eids
       val rex                 = Animal.name.insert("Rex").eid
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Rex").get === List()
 
       // Applying value(s) replaces all existing values!
 
@@ -340,14 +344,14 @@ class ManyOther extends MoleculeSpec {
       Person(ann).buddies(rex).update
 
       // Leo and Ann no longer buddies
-      Person.name_("Ann").Buddies.name.get === List("Rex")
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List()
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Rex")
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List()
+      personBuddiesOf("Rex").get === List("Ann")
     }
 
 
-    "replace all with multiple (apply varargs)" in new Setup {
+    "replace all with multiple (apply varargs)" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -355,24 +359,24 @@ class ManyOther extends MoleculeSpec {
 
       val rex = Animal.name.insert("Rex").eid
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List()
 
       // Ann now has Gus and Rex as buddies
       Person(ann).buddies(gus, rex).update
 
       // Ann and Rex new buddies
       // Ann and Leo no longer buddies
-      Person.name_("Ann").Buddies.name.get === List("Rex", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List()
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Rex", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List()
+      personBuddiesOf("Rex").get === List("Ann")
     }
 
 
-    "replace all with multiple (apply Set)" in new Setup {
+    "replace all with multiple (apply Set)" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -380,74 +384,74 @@ class ManyOther extends MoleculeSpec {
 
       val rex = Animal.name.insert("Rex").eid
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
-      Animal.name_("Rex").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
+      personBuddiesOf("Rex").get === List()
 
       // Ann now has Gus and Rex as buddies
       Person(ann).buddies(Seq(gus, rex)).update
 
       // Ann and Rex new buddies
       // Ann and Leo no longer buddies
-      Person.name_("Ann").Buddies.name.get === List("Rex", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List()
-      Animal.name_("Rex").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Rex", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List()
+      personBuddiesOf("Rex").get === List("Ann")
     }
 
 
-    "remove all (apply no values)" in new Setup {
+    "remove all (apply no values)" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
       ) eids
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
 
       // Ann has no buddies any longer
       Person(ann).buddies().update
 
       // Ann's buddieships replaced with no buddieships (in both directions)
-      Person.name_("Ann").Buddies.name.get === List()
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List()
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List()
     }
 
 
-    "remove all (apply empty Set)" in new Setup {
+    "remove all (apply empty Set)" in new setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
       ) eids
 
-      Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-      Animal.name_("Gus").Buddies.name.get === List("Ann")
-      Animal.name_("Leo").Buddies.name.get === List("Ann")
+      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      personBuddiesOf("Gus").get === List("Ann")
+      personBuddiesOf("Leo").get === List("Ann")
 
       // Ann has no buddies any longer
       val noBuddies = Seq.empty[Long]
       Person(ann).buddies(noBuddies).update
 
       // Ann's buddieships replaced with no buddieships (in both directions)
-      Person.name_("Ann").Buddies.name.get === List()
-      Animal.name_("Gus").Buddies.name.get === List()
-      Animal.name_("Leo").Buddies.name.get === List()
+      animalBuddiesOf("Ann").get === List()
+      personBuddiesOf("Gus").get === List()
+      personBuddiesOf("Leo").get === List()
     }
   }
 
 
-  "Retract" in new Setup {
+  "Retract" in new setup {
 
     val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
       ("Ann", List("Gus", "Leo"))
     ) eids
 
-    Person.name_("Ann").Buddies.name.get === List("Leo", "Gus")
-    Animal.name_("Gus").Buddies.name.get === List("Ann")
-    Animal.name_("Leo").Buddies.name.get === List("Ann")
+    animalBuddiesOf("Ann").get === List("Leo", "Gus")
+    personBuddiesOf("Gus").get === List("Ann")
+    personBuddiesOf("Leo").get === List("Ann")
 
     // Retract Leo and his relationship to Ann
     leo.retract

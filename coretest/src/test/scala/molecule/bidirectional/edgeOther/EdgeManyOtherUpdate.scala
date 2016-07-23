@@ -7,291 +7,236 @@ import molecule.util._
 
 class EdgeManyOtherUpdate extends MoleculeSpec {
 
+  class setup extends Setup {
+    val ann     = Person.name("Ann").save.eid
+    
+    val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
+    val personsCloseTo = m(Animal.name_(?).CloseTo.*(CloseTo.weight.Person.name))
 
-  "add" in new Setup {
+    // Separate edges
+    val Seq(
+    closeToBob,
+    closeToDot,
+    closeToGus,
+    closeToHip,
+    closeZoeax,
+    closeToPix,
+    closeToZoe
+    ): Seq[Long] = CloseTo.weight.Animal.name.insert(List(
+      (2, "Bob"),
+      (3, "Dot"),
+      (4, "Gus"),
+      (5, "Hip"),
+      (6, "Max"),
+      (7, "Pix"),
+      (8, "Zoe")
+    )).eids.grouped(3).map(_.head).toSeq
+  }
 
-    // In order to maintain data consistency we can't create property edges in isolation.
-    // We can therefore not "add" them to existing entities as we could with simple
-    // reference values as we saw in the update:replace1/multiple tests in `SelfMany`.
-    (Person(ben).closeTo.add(42L).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.transform.Model2Transaction.valueStmts:biEdgeRefAttr]  Adding edge ids with " +
-      s"`edgeAttr.add(someEdgeId)` is not allowed. It could be an indication that you are trying to " +
-      s"use an existing edge twice which is not allowed."
 
-    // Adding an edge from an existing entity to another entity therefore involves
-    // creating the edge entity itself having a reference to either an existing target
-    // entity or a newly created one.
+  "add edges" in new setup {
 
-    val ben = Person.name("Ben").save.eid
+    // vararg
+    Person(ann).closeTo.add(closeToBob, closeToDot).update
 
-    // New edge and new target entity
-    // Update Ben with new friendship to new Rex
-    Person(ben).CloseTo.weight(7).Animal.name("Rex").update
+    // Seq
+    Person(ann).closeTo.add(Seq(closeToGus)).update
 
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List((7, "Rex"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((7, "Ben"))
+    // Empty list of edges has no effect
+    Person(ann).closeTo.add(Seq()).update
 
-    // New edge with reference to existing target entity
-    val zip = Animal.name("Zip").save.eid
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+    personsCloseTo("Gus").get === List(List((4, "Ann")))
+  }
 
-    // Update Ben with new friendship to existing Zip
-    Person(ben).CloseTo.weight(6).animal(zip).update
 
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List((6, "Zip"), (7, "Rex"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((7, "Ben"))
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((6, "Ben"))
+  "replace edges" in new setup {
 
+    // current friends
+    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus, closeToZoe).update
+
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus"), (8, "Zoe")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+    personsCloseTo("Gus").get === List(List((4, "Ann")))
+    personsCloseTo("Zoe").get === List(List((8, "Ann")))
+
+    // Replace who Ann closeTo
+    Person(ann).closeTo.replace(closeToBob -> closeToHip, closeToDot -> closeZoeax).update
+    Person(ann).closeTo.replace(Seq(closeToGus -> closeToPix)).update
+
+    // All friends have been replaced
+    animalsCloseTo("Ann").get === List(List((5, "Hip"), (6, "Max"), (7, "Pix"), (8, "Zoe")))
+    personsCloseTo("Hip").get === List(List((5, "Ann")))
+    personsCloseTo("Max").get === List(List((6, "Ann")))
+    personsCloseTo("Pix").get === List(List((7, "Ann")))
+    personsCloseTo("Zoe").get === List(List((8, "Ann"))) // Hasn't been replace by empty Seq
+
+    // Replace with empty Seq has no effect
+    Person(ann).closeTo.replace(Seq()).update
+    animalsCloseTo("Ann").get === List(List((5, "Hip"), (6, "Max"), (7, "Pix"), (8, "Zoe")))
+  }
+
+
+  "remove edges" in new setup {
+
+    // current friends
+    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus, closeToZoe).update
+
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus"), (8, "Zoe")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+    personsCloseTo("Gus").get === List(List((4, "Ann")))
+    personsCloseTo("Zoe").get === List(List((8, "Ann")))
+
+
+    // Remove who Ann closeTo
+    Person(ann).closeTo.remove(closeToBob, closeToDot).update
+
+    // All friends have been replaced
+    animalsCloseTo("Ann").get === List(List((4, "Gus"), (8, "Zoe")))
+    personsCloseTo("Bob").get === List()
+    personsCloseTo("Dot").get === List()
+    personsCloseTo("Gus").get === List(List((4, "Ann")))
+    personsCloseTo("Zoe").get === List(List((8, "Ann")))
+
+    // Remove Seq of edges
+    Person(ann).closeTo.remove(Seq(closeToGus)).update
+
+    // All friends have been replaced
+    animalsCloseTo("Ann").get === List(List((8, "Zoe")))
+    personsCloseTo("Bob").get === List()
+    personsCloseTo("Dot").get === List()
+    personsCloseTo("Gus").get === List()
+    personsCloseTo("Zoe").get === List(List((8, "Ann")))
+
+    // Remove empty Seq of edges has no effect
+    Person(ann).closeTo.remove(Seq()).update
+
+    // All friends have been replaced
+    animalsCloseTo("Ann").get === List(List((8, "Zoe")))
+  }
+
+
+  "apply edges" in new setup {
+
+    // current friends
+    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus).update
+
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+    personsCloseTo("Gus").get === List(List((4, "Ann")))
+    personsCloseTo("Zoe").get === List()
+
+
+    // State who Ann closeTo now
+    Person(ann).closeTo(closeToBob, closeToZoe).update
+
+    // Bob remains, Zoe added
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (8, "Zoe")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List()
+    personsCloseTo("Gus").get === List()
+    personsCloseTo("Zoe").get === List(List((8, "Ann")))
+
+    // Apply Seq of edges
+    Person(ann).closeTo(Seq(closeToHip)).update
+
+    animalsCloseTo("Ann").get === List(List((5, "Hip")))
+    personsCloseTo("Bob").get === List()
+    personsCloseTo("Dot").get === List()
+    personsCloseTo("Gus").get === List()
+    personsCloseTo("Hip").get === List(List((5, "Ann")))
+    personsCloseTo("Zoe").get === List()
+
+    // Applying empty Seq retracts all edges from Ann!
+    Person(ann).closeTo(Seq()).update
+
+    animalsCloseTo("Ann").get === List()
+    personsCloseTo("Hip").get === List()
+
+
+    // Applying no values removes all!
+
+    Person(ann).CloseTo.weight(7).Animal.name("Bob").update
+    animalsCloseTo("Ann").get === List(List((7, "Bob")))
+
+    Person(ann).closeTo().update
+    animalsCloseTo("Ann").get === List()
+  }
+
+
+  "retract edge" in new setup {
+
+    // current friends
+    Person(ann).closeTo.add(closeToBob, closeToDot).update
+
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+
+    // Retract single edge
+    closeToBob.retract
+
+    animalsCloseTo("Ann").get === List(List((3, "Dot")))
+    personsCloseTo("Bob").get === List()
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+  }
+
+
+  "retract base/target entity" in new setup {
+
+    // current friends
+    Person(ann).closeTo.add(closeToBob, closeToDot).update
+
+    animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot")))
+    personsCloseTo("Bob").get === List(List((2, "Ann")))
+    personsCloseTo("Dot").get === List(List((3, "Ann")))
+
+    // Retract base entity
+    ann.retract
+
+    // All knowing to/from Ann retracted
+    animalsCloseTo("Ann").get === List()
+    personsCloseTo("Bob").get === List()
+    personsCloseTo("Dot").get === List()
+  }
+
+
+  "no nested in update molecules" in new setup {
 
     // Can't update multiple values of cardinality-one attribute `name`
-    (Person(ben).CloseTo.weight(7).Animal.name("Zip", "Zup").update must throwA[IllegalArgumentException])
+    (Person(ann).CloseTo.weight(7).Animal.name("Max", "Liz").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
-      "\n  Animal ... name(Zip, Zup)"
+      "\n  Animal ... name(Max, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
-    (Person(ben).CloseTo.*(CloseTo.weight(4)).Animal.name("Zip").update must throwA[IllegalArgumentException])
+    (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ben).CloseTo.*(CloseTo.weight(4)).animal(zip).update must throwA[IllegalArgumentException])
+    (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ben).CloseTo.*(CloseTo.weight(4).Animal.name("Zip")).update must throwA[IllegalArgumentException])
+    (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ben).CloseTo.*(CloseTo.weight(4).animal(zip)).update must throwA[IllegalArgumentException])
+    (Person(ann).CloseTo.*(CloseTo.weight(4).animal(42L)).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
       s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
-
 
     // Note that an edge always have only one target entity.
     // So we can't add multiple (won't compile)
-    // Person(ben).CloseTo.weight(6).animal(42L, 43L).update
+    // Person(ann).CloseTo.weight(6).animal(42L, 43L).update
 
     // Each edge has only 1 target entity so we can't use nested structures on the target namespace
-    // (Person.name("Rex").CloseTo.weight(7).Animal.*(Animal.name("Zip")).update
-    //                                                   ^ nesting of edge target namespace not available
-  }
-
-
-  "replace" in new Setup {
-
-    Person.name.CloseTo.*(CloseTo.weight.Animal.name) insert List(
-      ("Ben", List((6, "Gus"), (7, "Leo"))),
-      ("Don", List((9, "Rex")))
-    )
-
-    // Entities
-    val List(ben, don)      = Person.e.name.get.sortBy(_._2).map(_._1)
-    val List(gus, leo, rex) = Animal.e.name.get.sortBy(_._2).map(_._1)
-
-    // Edges
-    val List(benGus, _, benLeo, _, donRex, _) = CloseTo.e.weight_.get
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List((6, "Gus"), (7, "Leo"))
-    Person.name_("Don").CloseTo.weight.Animal.name.get === List((9, "Rex"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((6, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((7, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((9, "Don"))
-
-    // edgeAttr.replace(old -> new) not available for edges
-    // To enforce consistency, edges are not allowed to be replaced with each other
-    (Person(ben).closeTo.replace(benGus -> donRex).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.transform.Model2Transaction.valueStmts:biEdgeRefAttr]  Replacing edge ids " +
-      s"with `edgeAttr.replace(old -> new)` is not allowed. It could be an indication that you are " +
-      s"trying to replace the old edge with an existing edge which is not allowed."
-
-    // Replace edge in 2 steps instead:
-
-    // 1. Remove friendship with Gus
-    Person(ben).closeTo.remove(benGus).update
-
-    // 2. Update Ben with new friendship to existing Rex
-    Person(ben).CloseTo.weight(8).animal(rex).update
-
-    // Now both Ben and Don are close to Rex
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List((7, "Leo"), (8, "Rex"))
-    Person.name_("Don").CloseTo.weight.Animal.name.get === List((9, "Rex"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((7, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((8, "Ben"), (9, "Don"))
-  }
-
-
-  "remove" in new Setup {
-
-    val ids = Person.name.CloseTo.*(CloseTo.weight.Animal.name) insert List(
-      ("Ben", List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup")))
-    ) eids
-
-    // Entities
-    val ben                = ids.head
-    val List(gus, leo, rex, zip, zup) = Animal.e.name.get.sortBy(_._2).map(_._1)
-
-    // Edges
-    val List(benGus, benLeo, benRex, benZip, benZap) = Person(ben).CloseTo.e.Animal.name.get.sortBy(_._2).map(_._1)
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((1, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((2, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((4, "Ben"))
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((8, "Ben"))
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-
-    // Remove single edge
-    Person(ben).closeTo.remove(benGus).update
-
-    // Remove multiple edges
-    Person(ben).closeTo.remove(benLeo, benRex).update
-
-    // Remove Seq of edges
-    Person(ben).closeTo.remove(Seq(benZip)).update
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List((9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-  }
-
-
-
-  "remove all / apply" in new Setup {
-
-    val ids = Person.name.CloseTo.*(CloseTo.weight.Animal.name) insert List(
-      ("Ben", List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup")))
-    ) eids
-
-    val ben                           = ids.head
-    val List(gus, leo, rex, zip, zup) = Animal.e.name.get.sortBy(_._2).map(_._1)
-
-
-    // Applyin no values from other end
-    Animal(rex).closeTo().update
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((1, "Gus"), (2, "Leo"), (8, "Zip"), (9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((1, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((2, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((8, "Ben"))
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-
-
-    // Remove all edges (apply no values)
-    Person(ben).closeTo().update
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List()
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List()
-  }
-
-
-  "retract edge" in new Setup {
-
-    val ids = Person.name.CloseTo.*(CloseTo.weight.Animal.name) insert List(
-      ("Ben", List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup")))
-    ) eids
-
-    val ben                           = ids.head
-    val List(gus, leo, rex, zip, zup) = Animal.e.name.get.sortBy(_._2).map(_._1)
-
-    // Edges
-    val List(benGus, benLeo, benRex, benZip, benZap) = Person(ben).CloseTo.e.Animal.name.get.sortBy(_._2).map(_._1)
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((1, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((2, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((4, "Ben"))
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((8, "Ben"))
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-
-    // Retract single edge
-    benGus.retract
-
-    // Retract multiple edges
-    Seq(benLeo, benRex, benZip).map(_.retract)
-
-    // Edges in both directions have been retracted
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-
-    // Retract all edges
-    CloseTo.person_.e.get.map(_.retract)
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List()
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List()
-  }
-
-
-  "retract base/target entity" in new Setup {
-
-    val ids = Person.name.CloseTo.*(CloseTo.weight.Animal.name) insert List(
-      ("Ben", List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup")))
-    ) eids
-
-    val ben                           = ids.head
-    val List(gus, leo, rex, zip, zup) = Animal.e.name.get.sortBy(_._2).map(_._1)
-
-    // Edges
-    val List(benGus, benLeo, benRex, benZip, benZap) = Person(ben).CloseTo.e.Animal.name.get.sortBy(_._2).map(_._1)
-
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"), (9, "Zup"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((1, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((2, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((4, "Ben"))
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((8, "Ben"))
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List((9, "Ben"))
-
-    // Retract target entity
-    zup.retract
-
-    // Edges are components of the retracted entity, so they also are retracted when the entity is
-    Person.name_("Ben").CloseTo.weight.Animal.name.get.sorted === List((1, "Gus"), (2, "Leo"), (4, "Rex"), (8, "Zip"))
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List((1, "Ben"))
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List((2, "Ben"))
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List((4, "Ben"))
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List((8, "Ben"))
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List()
-
-    // Retract base entity with multiple edges
-    ben.retract
-
-    // All edges from/to Ben have been retracted too
-    Person.name_("Ben").CloseTo.weight.Animal.name.get === List()
-
-    Animal.name_("Gus").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Leo").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Rex").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zip").CloseTo.weight.Person.name.get === List()
-    Animal.name_("Zup").CloseTo.weight.Person.name.get === List()
-
-    // Animals not retracted are still there
-    Animal.name.get.sorted === List("Gus", "Leo", "Rex", "Zip")
+    // (Person.name("Bob").CloseTo.weight(7).Animal.*(Animal.name("Max")).update
+    //                                                ^ nesting of edge target namespace not available
   }
 }

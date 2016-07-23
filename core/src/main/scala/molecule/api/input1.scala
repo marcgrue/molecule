@@ -9,8 +9,8 @@ import molecule.ast.query._
 
 trait InputMolecule_1[I1] extends InputMolecule {
 
-  def bindValues1(in1: Seq[I1]) = {
-    val (inVars, prefixes) = varsAndPrefixes.unzip
+  def bindValues1(query: Query, in1: Seq[I1]) = {
+    val (inVars, prefixes) = varsAndPrefixes(query).unzip
     val prefix = prefixes.head
     val values = if (prefix != "")
       in1.flatMap {
@@ -25,11 +25,11 @@ trait InputMolecule_1[I1] extends InputMolecule {
       }
 
     if (inVars.size > 1)
-      _query.copy(i = In(Seq(InVar(RelationBinding(inVars), values)), _query.i.rules, _query.i.ds))
+      query.copy(i = In(Seq(InVar(RelationBinding(inVars), values)), query.i.rules, query.i.ds))
     else if (values.size > 1)
-      _query.copy(i = In(Seq(InVar(CollectionBinding(inVars.head), Seq(values.flatten))), _query.i.rules, _query.i.ds))
+      query.copy(i = In(Seq(InVar(CollectionBinding(inVars.head), Seq(values.flatten))), query.i.rules, query.i.ds))
     else
-      _query.copy(i = In(Seq(InVar(ScalarBinding(inVars.head), values)), _query.i.rules, _query.i.ds))
+      query.copy(i = In(Seq(InVar(ScalarBinding(inVars.head), values)), query.i.rules, query.i.ds))
   }
 }
 

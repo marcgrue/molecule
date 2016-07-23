@@ -8,6 +8,10 @@ import molecule.util.MoleculeSpec
 
 class OneOther extends MoleculeSpec {
 
+  class setup extends Setup {
+    val personPet = m(Person.name.Pet.name)
+    val animalMaster = m(Animal.name.Master.name)
+  }
 
   "Save new" in new Setup {
 
@@ -45,17 +49,17 @@ class OneOther extends MoleculeSpec {
   }
 
 
-  "Save id" in new Setup {
+  "Save id" in new setup {
 
     val rex = Animal.name.insert("Rex").eid
 
     // Save Ben with bidirectional ref to existing Rex
     val ben = Person.name("Ben").pet(rex).save.eid
 
-    Animal.name.Master.name.get === List(
+    animalMaster.get === List(
       ("Rex", "Ben")
     )
-    Person.name.Pet.name.get === List(
+    personPet.get === List(
       ("Ben", "Rex")
     )
 
@@ -68,7 +72,7 @@ class OneOther extends MoleculeSpec {
   }
 
 
-  "Insert new" in new Setup {
+  "Insert new" in new setup {
 
     // Insert 2 pairs of bidirectionally referenced entities
     Person.name.Pet.name insert List(
@@ -77,17 +81,17 @@ class OneOther extends MoleculeSpec {
     ) eids
 
     // Bidirectional references have been inserted
-    Person.name.Pet.name.get.sorted === List(
+    personPet.get.sorted === List(
       ("Ben", "Rex"),
       ("Kim", "Zip")
     )
-    Animal.name.Master.name.get.sorted === List(
+    animalMaster.get.sorted === List(
       ("Rex", "Ben"),
       ("Zip", "Kim")
     )
   }
 
-  "Insert id" in new Setup {
+  "Insert id" in new setup {
 
     val List(rex, zip) = Animal.name insert List("Rex", "Zip") eids
 
@@ -98,11 +102,11 @@ class OneOther extends MoleculeSpec {
     )
 
     // Bidirectional references have been inserted
-    Person.name.Pet.name.get.sorted === List(
+    personPet.get.sorted === List(
       ("Ben", "Rex"),
       ("Kim", "Zip")
     )
-    Animal.name.Master.name.get.sorted === List(
+    animalMaster.get.sorted === List(
       ("Rex", "Ben"),
       ("Zip", "Kim")
     )
@@ -111,15 +115,15 @@ class OneOther extends MoleculeSpec {
 
   "Update new" >> {
 
-    "creating ref to new" in new Setup {
+    "creating ref to new" in new setup {
 
       val ben = Person.name.insert("Ben").eid
       Person(ben).Pet.name("Rex").update
 
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Rex")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Rex", "Ben")
       )
 
@@ -128,26 +132,26 @@ class OneOther extends MoleculeSpec {
       val zip = Animal.name.insert("Zip").eid
       Animal(zip).Master.name("Kim").update
 
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Rex"),
         ("Kim", "Zip")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Rex", "Ben"),
         ("Zip", "Kim")
       )
     }
 
 
-    "replacing ref to new" in new Setup {
+    "replacing ref to new" in new setup {
 
       val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
       // Bidirectional references created
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Rex")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Rex", "Ben")
       )
 
@@ -155,10 +159,10 @@ class OneOther extends MoleculeSpec {
       Person(ben).Pet.name("Guz").update
 
       // Bidirectional references to Rex have been replaced with refs to/from Zip
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Guz")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Guz", "Ben")
       )
     }
@@ -167,7 +171,7 @@ class OneOther extends MoleculeSpec {
 
   "Update id" >> {
 
-    "creating ref to existing" in new Setup {
+    "creating ref to existing" in new setup {
 
       // Ben haven't got Rex yet
       val ben = Person.name.insert("Ben").eid
@@ -176,10 +180,10 @@ class OneOther extends MoleculeSpec {
       // Update Ben with creation of bidirectional reference to existing Rex
       Person(ben).pet(rex).update
 
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Rex")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Rex", "Ben")
       )
 
@@ -190,15 +194,15 @@ class OneOther extends MoleculeSpec {
     }
 
 
-    "replacing ref to other existing" in new Setup {
+    "replacing ref to other existing" in new setup {
 
       val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
       // Bidirectional references created
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Rex")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Rex", "Ben")
       )
 
@@ -207,25 +211,25 @@ class OneOther extends MoleculeSpec {
       Person(ben).pet(zip).update
 
       // Bidirectional references to Rex have been replaced with refs to/from Zip
-      Person.name.Pet.name.get.sorted === List(
+      personPet.get.sorted === List(
         ("Ben", "Zip")
       )
-      Animal.name.Master.name.get.sorted === List(
+      animalMaster.get.sorted === List(
         ("Zip", "Ben")
       )
     }
   }
 
 
-  "Update removing reference" in new Setup {
+  "Update removing reference" in new setup {
 
     val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
     // Bidirectional references created
-    Person.name.Pet.name.get.sorted === List(
+    personPet.get.sorted === List(
       ("Ben", "Rex")
     )
-    Animal.name.Master.name.get.sorted === List(
+    animalMaster.get.sorted === List(
       ("Rex", "Ben")
     )
 
@@ -233,21 +237,21 @@ class OneOther extends MoleculeSpec {
     Person(ben).pet().update
 
     // Bidirectional references retracted
-    Person.name.Pet.name.get.sorted === List()
+    personPet.get.sorted === List()
   }
 
 
-  "Retract" in new Setup {
+  "Retract" in new setup {
 
     val ben = Person.name.insert("Ben").eid
 
     // Create and reference Rex to Ben
     val rex = Person(ben).Pet.name("Rex").update.eid
 
-    Person.name.Pet.name.get.sorted === List(
+    personPet.get.sorted === List(
       ("Ben", "Rex")
     )
-    Animal.name.Master.name.get.sorted === List(
+    animalMaster.get.sorted === List(
       ("Rex", "Ben")
     )
 
@@ -261,7 +265,7 @@ class OneOther extends MoleculeSpec {
     Person(ben).Pet.name.get === List()
     Animal(rex).Master.name.get === List()
 
-    Person.name.Pet.name.get.sorted === List()
-    Animal.name.Master.name.get.sorted === List()
+    personPet.get.sorted === List()
+    animalMaster.get.sorted === List()
   }
 }

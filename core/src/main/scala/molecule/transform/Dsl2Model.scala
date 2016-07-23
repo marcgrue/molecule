@@ -355,13 +355,13 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-    //    x(10
-    //      , values0
-    //      , values
-    //      , op
-    //      , attr
-    //      //          , attr.isMapAttr
-    //    )
+//    x(10
+//      , values0
+//      , values
+//      , op
+//      , attr
+//      //          , attr.isMapAttr
+//    )
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
@@ -395,6 +395,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case "replace"     => values match {
         case MapEq(keyValues) => MapReplace(keyValues)
         case resolved: Value  => resolved
+        case Nil              => Replace(Nil)
       }
       case unexpected    => abort(s"[Dsl2Model:modelValue] Unknown operator '$unexpected'\nattr: $attr \nvalue: $values0")
     }
@@ -430,10 +431,11 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq($pkg.stddev)"                                     => aggr("stddev")
       case q"Seq($a.and[$t]($b).and[$u]($c))"                      => And(resolveValues(q"Seq($a, $b, $c)"))
       case q"Seq($a.and[$t]($b))"                                  => And(resolveValues(q"Seq($a, $b)"))
-      case q"Seq(..$vs)"
-        if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]] => vs.head match {
+      case q"Seq(..$vs)" if vs.size == 1
+        && !(vs.head.tpe <:< weakTypeOf[Seq[Nothing]])
+        && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => vs.head match {
         case Apply(_, pairs) =>
-          //          x(3, "seq")
+//          x(3, vs)
           mapPairs(pairs, attr)
         case ident           => mapPairs(Seq(ident), attr)
       }
@@ -446,7 +448,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       //      }
       case q"Seq(..$vs)"
         if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] =>
-        //          x(5, "pair")
+//        x(5, vs)
         mapPairs(vs, attr)
       case q"Seq(..$vs)" if attr == null                     => vs.flatMap(v => resolveValues(q"$v"))
       case q"Seq(..$vs)"                                     => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
@@ -457,7 +459,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
-    //    x(23, vs, attr)
+//    x(23, vs, attr)
     val keyValues = vs.map {
       case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
       case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(q"$k"), extract(q"$v"))

@@ -152,8 +152,8 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
       val model: Model = Model(resolveIdentifiers($model.elements))
       val query: Query = Model2Query(model)
 
-      lazy val modelE: Model = Model(resolveIdentifiers($modelE.elements))
-      lazy val queryE: Query = Model2Query(modelE)
+      def modelE: Model = Model(resolveIdentifiers($modelE.elements))
+      def queryE: Query = Model2Query(modelE)
 
       def date(s: String): Date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s)
 

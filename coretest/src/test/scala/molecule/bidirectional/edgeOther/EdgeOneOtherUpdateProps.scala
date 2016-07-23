@@ -1,6 +1,7 @@
 package molecule.bidirectional.edgeOther
 
 import molecule._
+import molecule.bidirectional.Setup
 import molecule.bidirectional.dsl.bidirectional._
 import molecule.bidirectional.schema.BidirectionalSchema
 import molecule.util._
@@ -8,12 +9,13 @@ import org.specs2.specification.Scope
 
 class EdgeOneOtherUpdateProps extends MoleculeSpec {
 
-  class Setup extends Scope with DatomicFacade {
-    implicit val conn = recreateDbFrom(BidirectionalSchema)
 
+  class setup extends Setup {
+    
     val love                    = Quality.name("Love").save.eid
     val List(patience, humor)   = Quality.name.insert("Patience", "Humor").eids
-    val List(ben, benRex, _, _) = Person.name("Ben")
+
+    val List(ann, annRex, _, _) = Person.name("Ann")
       .Favorite
       .weight(7)
       .howWeMet("atWork")
@@ -24,6 +26,9 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       .inCommon(Seq(patience, humor))
       .Animal.name("Rex")
       .save.eids
+  }
+
+  "base data" in new setup {
 
     // All edge properties have been inserted in both directions:
 
@@ -39,7 +44,7 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       .InCommon.*(Quality.name)._Favorite
       .Animal.name
       .get === List(
-      ("Ben"
+      ("Ann"
         , 7
         , "atWork"
         , Set("Food", "Travelling", "Walking")
@@ -70,66 +75,66 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
         , Map("baseball" -> 9, "golf" -> 7)
         , "Love"
         , List("Patience", "Humor")
-        , "Ben")
+        , "Ann")
     )
   }
 
 
   "Card-one" >> {
 
-    "value" in new Setup {
+    "value" in new setup {
 
       // Updating edge properties from the base entity is not allowed
-      (Person(ben).Favorite.howWeMet("inSchool").update must throwA[IllegalArgumentException])
+      (Person(ann).Favorite.howWeMet("inSchool").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Can't update edge `Favorite` " +
+        s"[molecule.api.CheckModel.update_edgeComplete]  Can't update edge `Favorite` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Favorite(<edgeId>).edgeProperty(<new value>).update`."
 
       // Instead update the edge entity itself:
 
       // Current weight value
-      Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-      Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+      Person.name_("Ann").Favorite.weight.Animal.name.get === List((7, "Rex"))
+      Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ann"))
 
       // Apply new value
-      Favorite(benRex).weight(2).update
-      Person.name_("Ben").Favorite.weight.Animal.name.get === List((2, "Rex"))
-      Animal.name_("Rex").Favorite.weight.Person.name.get === List((2, "Ben"))
+      Favorite(annRex).weight(2).update
+      Person.name_("Ann").Favorite.weight.Animal.name.get === List((2, "Rex"))
+      Animal.name_("Rex").Favorite.weight.Person.name.get === List((2, "Ann"))
 
       // Retract value
-      Favorite(benRex).weight().update
-      Person.name("Ben").Favorite.weight.get === List()
+      Favorite(annRex).weight().update
+      Person.name("Ann").Favorite.weight.get === List()
       Animal.name("Rex").Favorite.weight.get === List()
     }
 
 
-    "enum" in new Setup {
+    "enum" in new setup {
 
       // Current howWeMet enum value
-      Person.name_("Ben").Favorite.howWeMet.Animal.name.get === List(("atWork", "Rex"))
-      Animal.name_("Rex").Favorite.howWeMet.Person.name.get === List(("atWork", "Ben"))
+      Person.name_("Ann").Favorite.howWeMet.Animal.name.get === List(("atWork", "Rex"))
+      Animal.name_("Rex").Favorite.howWeMet.Person.name.get === List(("atWork", "Ann"))
 
       // Apply new enum value
-      Favorite(benRex).howWeMet("throughFriend").update
-      Person.name_("Ben").Favorite.howWeMet.Animal.name.get === List(("throughFriend", "Rex"))
-      Animal.name_("Rex").Favorite.howWeMet.Person.name.get === List(("throughFriend", "Ben"))
+      Favorite(annRex).howWeMet("throughFriend").update
+      Person.name_("Ann").Favorite.howWeMet.Animal.name.get === List(("throughFriend", "Rex"))
+      Animal.name_("Rex").Favorite.howWeMet.Person.name.get === List(("throughFriend", "Ann"))
 
       // Retract enum value
-      Favorite(benRex).howWeMet().update
-      Person.name("Ben").Favorite.howWeMet.get === List()
+      Favorite(annRex).howWeMet().update
+      Person.name("Ann").Favorite.howWeMet.get === List()
       Animal.name("Rex").Favorite.howWeMet.get === List()
     }
 
 
-    "ref" in new Setup {
+    "ref" in new setup {
 
       // Current value
-      Person.name_("Ben").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Love", "Rex"))
-      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Love", "Ben"))
+      Person.name_("Ann").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Love", "Rex"))
+      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Love", "Ann"))
 
       // We can't update across namespaces
-      (Favorite(benRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
+      (Favorite(annRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
         s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
@@ -140,101 +145,101 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Quality(love).name("Compassion").update
 
       // Same reference, new value
-      Person.name_("Ben").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Compassion", "Rex"))
-      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Compassion", "Ben"))
+      Person.name_("Ann").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Compassion", "Rex"))
+      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Compassion", "Ann"))
 
 
       // 2. Update reference
 
       val trust = Quality.name("Trust").save.eid
-      Favorite(benRex).coreQuality(trust).update
+      Favorite(annRex).coreQuality(trust).update
 
       // New reference/value
-      Person.name_("Ben").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Trust", "Rex"))
-      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Trust", "Ben"))
+      Person.name_("Ann").Favorite.CoreQuality.name._Favorite.Animal.name.get === List(("Trust", "Rex"))
+      Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Trust", "Ann"))
 
 
       // Retract reference
-      Favorite(benRex).coreQuality().update
-      Favorite(benRex).CoreQuality.name.get === List()
+      Favorite(annRex).coreQuality().update
+      Favorite(annRex).CoreQuality.name.get === List()
     }
   }
 
 
   "Card-many" >> {
 
-    "values" in new Setup {
+    "values" in new setup {
 
       // Current values
-      Person.name_("Ben").Favorite.commonInterests.Animal.name.get === List((Set("Food", "Travelling", "Walking"), "Rex"))
-      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Food", "Travelling", "Walking"), "Ben"))
+      Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Food", "Travelling", "Walking"), "Rex"))
+      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Food", "Travelling", "Walking"), "Ann"))
 
       // Replace
-      Favorite(benRex).commonInterests.replace("Food" -> "Cuisine").update
-      Person.name_("Ben").Favorite.commonInterests.Animal.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Rex"))
-      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Ben"))
+      Favorite(annRex).commonInterests.replace("Food" -> "Cuisine").update
+      Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Rex"))
+      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Ann"))
 
       // Remove
-      Favorite(benRex).commonInterests.remove("Travelling").update
-      Person.name_("Ben").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine"), "Rex"))
-      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine"), "Ben"))
+      Favorite(annRex).commonInterests.remove("Travelling").update
+      Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine"), "Rex"))
+      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine"), "Ann"))
 
       // Add
-      Favorite(benRex).commonInterests.add("Meditating").update
-      Person.name_("Ben").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Rex"))
-      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Ben"))
+      Favorite(annRex).commonInterests.add("Meditating").update
+      Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Rex"))
+      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Ann"))
 
       // Apply new values
-      Favorite(benRex).commonInterests("Running", "Cycling").update
-      Person.name_("Ben").Favorite.commonInterests.Animal.name.get === List((Set("Running", "Cycling"), "Rex"))
-      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Running", "Cycling"), "Ben"))
+      Favorite(annRex).commonInterests("Running", "Cycling").update
+      Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Running", "Cycling"), "Rex"))
+      Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Running", "Cycling"), "Ann"))
 
       // Retract all
-      Favorite(benRex).commonInterests().update
-      Person.name_("Ben").Favorite.commonInterests.get === List()
+      Favorite(annRex).commonInterests().update
+      Person.name_("Ann").Favorite.commonInterests.get === List()
       Animal.name_("Rex").Favorite.commonInterests.get === List()
     }
 
 
-    "enums" in new Setup {
+    "enums" in new setup {
 
       // Current enum values
-      Person.name_("Ben").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "flying"), "Rex"))
-      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "flying"), "Ben"))
+      Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "flying"), "Rex"))
+      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "flying"), "Ann"))
 
       // Replace
-      Favorite(benRex).commonLicences.replace("flying" -> "diving").update
-      Person.name_("Ben").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "diving"), "Rex"))
-      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "diving"), "Ben"))
+      Favorite(annRex).commonLicences.replace("flying" -> "diving").update
+      Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "diving"), "Rex"))
+      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "diving"), "Ann"))
 
       // Remove
-      Favorite(benRex).commonLicences.remove("climbing").update
-      Person.name_("Ben").Favorite.commonLicences.Animal.name.get === List((Set("diving"), "Rex"))
-      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving"), "Ben"))
+      Favorite(annRex).commonLicences.remove("climbing").update
+      Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("diving"), "Rex"))
+      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving"), "Ann"))
 
       // Add
-      Favorite(benRex).commonLicences.add("parachuting").update
-      Person.name_("Ben").Favorite.commonLicences.Animal.name.get === List((Set("diving", "parachuting"), "Rex"))
-      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving", "parachuting"), "Ben"))
+      Favorite(annRex).commonLicences.add("parachuting").update
+      Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("diving", "parachuting"), "Rex"))
+      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving", "parachuting"), "Ann"))
 
       // Apply new values
-      Favorite(benRex).commonLicences("climbing", "flying").update
-      Person.name_("Ben").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "flying"), "Rex"))
-      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "flying"), "Ben"))
+      Favorite(annRex).commonLicences("climbing", "flying").update
+      Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("climbing", "flying"), "Rex"))
+      Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "flying"), "Ann"))
 
       // Retract all
-      Favorite(benRex).commonLicences().update
-      Person.name_("Ben").Favorite.commonLicences.get === List()
+      Favorite(annRex).commonLicences().update
+      Person.name_("Ann").Favorite.commonLicences.get === List()
       Animal.name_("Rex").Favorite.commonLicences.get === List()
-      Person.name("Ben" or "Rex").Favorite.commonLicences.get === List()
+      Person.name("Ann" or "Rex").Favorite.commonLicences.get === List()
     }
 
 
-    "refs" in new Setup {
+    "refs" in new setup {
 
       // Current value
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Patience", "Humor"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Patience", "Humor"), "Ben"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Patience", "Humor"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Patience", "Humor"), "Ann"))
 
       // As with card-one references we have two choices to change referenced value(s)
 
@@ -244,8 +249,8 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Quality(humor).name("Funny").update
 
       // Same references, new value(s)
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Funny"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Funny"), "Ben"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Funny"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Funny"), "Ann"))
 
 
       // 2. Update reference(s)
@@ -253,62 +258,62 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       val sporty = Quality.name("Sporty").save.eid
 
       // replace
-      Favorite(benRex).inCommon.replace(humor -> sporty).update
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ben"))
+      Favorite(annRex).inCommon.replace(humor -> sporty).update
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
       // remove
-      Favorite(benRex).inCommon.remove(patience).update
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Sporty"), "Ben"))
+      Favorite(annRex).inCommon.remove(patience).update
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Sporty"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Sporty"), "Ann"))
 
       // add
-      Favorite(benRex).inCommon.add(patience).update
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ben"))
+      Favorite(annRex).inCommon.add(patience).update
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
       // Apply new values
-      Favorite(benRex).inCommon(sporty, humor).update
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Funny", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Funny", "Sporty"), "Ben"))
+      Favorite(annRex).inCommon(sporty, humor).update
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Funny", "Sporty"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Funny", "Sporty"), "Ann"))
 
       // Retract all references
-      Favorite(benRex).inCommon().update
-      Person.name_("Ben").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List()
+      Favorite(annRex).inCommon().update
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List()
       Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List()
     }
   }
 
 
-  "Map" in new Setup {
+  "Map" in new setup {
 
     // Current values
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 9, "golf" -> 7), "Rex"))
-    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 9, "golf" -> 7), "Ben"))
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 9, "golf" -> 7), "Rex"))
+    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 9, "golf" -> 7), "Ann"))
 
     // Replace values by key
-    Favorite(benRex).commonScores.replace("baseball" -> 8, "golf" -> 6).update
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Rex"))
-    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Ben"))
+    Favorite(annRex).commonScores.replace("baseball" -> 8, "golf" -> 6).update
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Rex"))
+    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Ann"))
 
     // Remove by key
-    Favorite(benRex).commonScores.remove("golf").update
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8), "Rex"))
-    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8), "Ben"))
+    Favorite(annRex).commonScores.remove("golf").update
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8), "Rex"))
+    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8), "Ann"))
 
     // Add
-    Favorite(benRex).commonScores.add("parachuting" -> 4).update
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Rex"))
-    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Ben"))
+    Favorite(annRex).commonScores.add("parachuting" -> 4).update
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Rex"))
+    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Ann"))
 
     // Apply new values (replacing all current values!)
-    Favorite(benRex).commonScores("volleball" -> 4, "handball" -> 5).update
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List((Map("volleball" -> 4, "handball" -> 5), "Rex"))
-    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("volleball" -> 4, "handball" -> 5), "Ben"))
+    Favorite(annRex).commonScores("volleball" -> 4, "handball" -> 5).update
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("volleball" -> 4, "handball" -> 5), "Rex"))
+    Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("volleball" -> 4, "handball" -> 5), "Ann"))
 
     // Delete all
-    Favorite(benRex).commonScores().update
-    Person.name_("Ben").Favorite.commonScores.Animal.name.get === List()
+    Favorite(annRex).commonScores().update
+    Person.name_("Ann").Favorite.commonScores.Animal.name.get === List()
     Animal.name_("Rex").Favorite.commonScores.Person.name.get === List()
   }
 }

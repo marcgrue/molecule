@@ -116,7 +116,7 @@ object actions {
   trait ManyRefAttr[Ns, In] extends RefAttr[Ns,  Long] {
     // Replaces all existing values with the applied new value(s)
     def apply(ref: Long, moreRefs: Long*)  : Ns with Attr = ???
-    def apply(refs: Seq[Long])             : Ns with Attr = ??? // Todo: not implemented yet
+    def apply(refs: Seq[Long])             : Ns with Attr = ???
 
     def add(ref: Long, moreRefs: Long*)    : Ns with Attr = ???
     def add(refs: Seq[Long])               : Ns with Attr = ???

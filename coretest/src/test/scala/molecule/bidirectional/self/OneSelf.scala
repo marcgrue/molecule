@@ -8,6 +8,9 @@ import molecule.bidirectional.Setup
 
 class OneSelf extends MoleculeSpec {
 
+  class setup extends Setup {
+    val spouses = m(Person.name.Spouse.name)
+  }
 
   "Save new" in new Setup {
 

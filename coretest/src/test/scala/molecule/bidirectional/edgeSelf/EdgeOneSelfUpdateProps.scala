@@ -1,17 +1,14 @@
 package molecule.bidirectional.edgeSelf
 
 import molecule._
+import molecule.bidirectional.Setup
 import molecule.bidirectional.dsl.bidirectional._
-import molecule.bidirectional.schema.BidirectionalSchema
 import molecule.util._
-import org.specs2.specification.Scope
 
 
 class EdgeOneSelfUpdateProps extends MoleculeSpec {
 
-  class Setup extends Scope with DatomicFacade {
-    implicit val conn = recreateDbFrom(BidirectionalSchema)
-
+  class setup extends Setup {
     val love                    = Quality.name("Love").save.eid
     val List(patience, humor)   = Quality.name.insert("Patience", "Humor").eids
     val List(ann, annBen, _, _) = Person.name("Ann")
@@ -25,6 +22,9 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       .inCommon(Seq(patience, humor))
       .Person.name("Ben")
       .save.eids
+  }
+
+  "base data" in new setup {
 
     // All edge properties have been saved in both directions
     Person.name.Loves
@@ -61,14 +61,12 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
 
   "Card-one" >> {
 
-    "value" in new Setup {
-
-      println(Person(ann).Loves.howWeMet("inSchool")._model)
+    "value" in new setup {
 
       // Updating edge properties from the base entity is not allowed
       (Person(ann).Loves.howWeMet("inSchool").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.save_edgeComplete]  Can't update edge `Loves` " +
+        s"[molecule.api.CheckModel.update_edgeComplete]  Can't update edge `Loves` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Loves(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -87,13 +85,13 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
         ("Ben", 2)
       )
 
-      // Retract value
+      // Retract edge
       Loves(annBen).weight().update
       Person.name("Ann" or "Ben").Loves.weight.get === List()
     }
 
 
-    "enum" in new Setup {
+    "enum" in new setup {
 
       // Current howWeMet enum value
       Person.name("Ann" or "Ben").Loves.howWeMet.get.sortBy(_._1) === List(
@@ -114,7 +112,7 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
     }
 
 
-    "ref" in new Setup {
+    "ref" in new setup {
 
       // Current value
       Person.name("Ann" or "Ben").Loves.CoreQuality.name.get.sortBy(_._1) === List(
@@ -160,94 +158,100 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
 
   "Card-many" >> {
 
-    "values" in new Setup {
+    "values" in new setup {
+
+      val commonInterestsOf = m(Person.name(?).Loves.commonInterests)
 
       // Current values
-      Person.name("Ann" or "Ben").Loves.commonInterests.get.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Food", "Walking", "Travelling")),
         ("Ben", Set("Food", "Walking", "Travelling"))
       )
 
       // Replace
       Loves(annBen).commonInterests.replace("Food" -> "Cuisine").update
-      Person.name("Ann" or "Ben").Loves.commonInterests.get.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking", "Travelling")),
         ("Ben", Set("Cuisine", "Walking", "Travelling"))
       )
 
       // Remove
       Loves(annBen).commonInterests.remove("Travelling").update
-      Person.name("Ann" or "Ben").Loves.commonInterests.get.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking")),
         ("Ben", Set("Cuisine", "Walking"))
       )
 
       // Add
       Loves(annBen).commonInterests.add("Meditating").update
-      Person.name("Ann" or "Ben").Loves.commonInterests.get.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking", "Meditating")),
         ("Ben", Set("Cuisine", "Walking", "Meditating"))
       )
 
       // Apply new values
       Loves(annBen).commonInterests("Running", "Cycling").update
-      Person.name("Ann" or "Ben").Loves.commonInterests.get.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Running", "Cycling")),
         ("Ben", Set("Running", "Cycling"))
       )
 
       // Retract all
       Loves(annBen).commonInterests().update
-      Person.name("Ann" or "Ben").Loves.commonInterests.get === List()
+      commonInterestsOf("Ann" or "Ben").get === List()
     }
 
 
-    "enums" in new Setup {
+    "enums" in new setup {
+
+      val commonLicencesOf = m(Person.name(?).Loves.commonLicences)
 
       // Current enum values
-      Person.name("Ann" or "Ben").Loves.commonLicences.get.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "flying")),
         ("Ben", Set("climbing", "flying"))
       )
 
       // Replace
       Loves(annBen).commonLicences.replace("flying" -> "diving").update
-      Person.name("Ann" or "Ben").Loves.commonLicences.get.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "diving")),
         ("Ben", Set("climbing", "diving"))
       )
 
       // Remove
       Loves(annBen).commonLicences.remove("climbing").update
-      Person.name("Ann" or "Ben").Loves.commonLicences.get.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving")),
         ("Ben", Set("diving"))
       )
 
       // Add
       Loves(annBen).commonLicences.add("parachuting").update
-      Person.name("Ann" or "Ben").Loves.commonLicences.get.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving", "parachuting")),
         ("Ben", Set("diving", "parachuting"))
       )
 
       // Apply new values
       Loves(annBen).commonLicences("climbing", "flying").update
-      Person.name("Ann" or "Ben").Loves.commonLicences.get.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "flying")),
         ("Ben", Set("climbing", "flying"))
       )
 
       // Retract all
       Loves(annBen).commonLicences().update
-      Person.name("Ann" or "Ben").Loves.commonLicences.get === List()
+      commonLicencesOf("Ann" or "Ben").get === List()
     }
 
 
-    "refs" in new Setup {
+    "refs" in new setup {
+
+      val inCommonOf = m(Person.name(?).Loves.InCommon.*(Quality.name))
 
       // Current value
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Patience", "Humor")),
         ("Ben", List("Patience", "Humor"))
       )
@@ -260,7 +264,7 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       Quality(humor).name("Funny").update
 
       // Same references, new value(s)
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Funny")),
         ("Ben", List("Waiting ability", "Funny"))
       )
@@ -272,77 +276,79 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
 
       // replace
       Loves(annBen).inCommon.replace(humor -> sporty).update
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Sporty")),
         ("Ben", List("Waiting ability", "Sporty"))
       )
 
       // remove
       Loves(annBen).inCommon.remove(patience).update
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Sporty")),
         ("Ben", List("Sporty"))
       )
 
       // add
       Loves(annBen).inCommon.add(patience).update
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Sporty")),
         ("Ben", List("Waiting ability", "Sporty"))
       )
 
       // Apply new values
       Loves(annBen).inCommon(sporty, humor).update
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Funny", "Sporty")),
         ("Ben", List("Funny", "Sporty"))
       )
 
       // Retract all references
       Loves(annBen).inCommon().update
-      Person.name("Ann" or "Ben").Loves.InCommon.*(Quality.name).get === List()
+      inCommonOf("Ann" or "Ben").get === List()
     }
   }
 
 
-  "Map" in new Setup {
+  "Map" in new setup {
+
+    val commonScoresOf = m(Person.name(?).Loves.commonScores)
 
     // Current values
-    Person.name("Ann" or "Ben").Loves.commonScores.get.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 9, "golf" -> 7)),
       ("Ben", Map("baseball" -> 9, "golf" -> 7))
     )
 
     // Replace values by key
     Loves(annBen).commonScores.replace("baseball" -> 8, "golf" -> 6).update
-    Person.name("Ann" or "Ben").Loves.commonScores.get.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8, "golf" -> 6)),
       ("Ben", Map("baseball" -> 8, "golf" -> 6))
     )
 
     // Remove by key
     Loves(annBen).commonScores.remove("golf").update
-    Person.name("Ann" or "Ben").Loves.commonScores.get.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8)),
       ("Ben", Map("baseball" -> 8))
     )
 
     // Add
     Loves(annBen).commonScores.add("parachuting" -> 4).update
-    Person.name("Ann" or "Ben").Loves.commonScores.get.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8, "parachuting" -> 4)),
       ("Ben", Map("baseball" -> 8, "parachuting" -> 4))
     )
 
     // Apply new values (replacing all current values!)
     Loves(annBen).commonScores("volleball" -> 4, "handball" -> 5).update
-    Person.name("Ann" or "Ben").Loves.commonScores.get.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("volleball" -> 4, "handball" -> 5)),
       ("Ben", Map("volleball" -> 4, "handball" -> 5))
     )
 
     // Delete all
     Loves(annBen).commonScores().update
-    Person.name("Ann" or "Ben").Loves.commonScores.get === List()
+    commonScoresOf("Ann" or "Ben").get === List()
   }
 }

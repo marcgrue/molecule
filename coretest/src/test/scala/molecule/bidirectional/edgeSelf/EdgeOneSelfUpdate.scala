@@ -7,58 +7,76 @@ import molecule.util._
 
 class EdgeOneSelfUpdate extends MoleculeSpec {
 
+  class setup extends Setup {
+    val loveOf = m(Person.name_(?).Loves.weight.Person.name)
+    val ann    = Person.name("Ann").save.eid
+  }
 
-  "New edge and new target entity" in new Setup {
 
-    val ann = Person.name("Ann").save.eid
+  "apply edge to new target" in new setup {
 
     // New edge and new target entity
-    // Update Ann with new friendship to new Ben
-    Person(ann).Loves.weight(7).Person.name("Ben").update
+    Person(ann).Loves.weight(5).Person.name("Ben").update
 
-    Person.name_("Ann").Loves.weight.Person.name.get === List((7, "Ben"))
-    Person.name_("Ben").Loves.weight.Person.name.get === List((7, "Ann"))
-  }
-
-
-  "New edge with reference to existing target entity" in new Setup {
-
-    val List(ann, annBen, benAnn, ben) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
-    val joe = Person.name("Joe").save.eid
-
-    Person.name_("Ann").Loves.weight.Person.name.get === List((5, "Ben"))
-    Person.name_("Ben").Loves.weight.Person.name.get === List((5, "Ann"))
-    Person.name_("Joe").Loves.weight.Person.name.get === List()
+    // Ann and Ben loves each other
+    loveOf("Ann").get === List((5, "Ben"))
+    loveOf("Ben").get === List((5, "Ann"))
+    loveOf("Joe").get === List() // Joe doesn't exist yet
 
     // Ann now loves Joe
-    Person(ann).Loves.weight(9).person(joe).update
+    Person(ann).Loves.weight(8).Person.name("Joe").update
 
     // Both bidirectional edges have been added from/to Ann
-    Person.name_("Ann").Loves.weight.Person.name.get === List((9, "Joe"))
-    Person.name_("Ben").Loves.weight.Person.name.get === List()
-    Person.name_("Joe").Loves.weight.Person.name.get === List((9, "Ann"))
+    loveOf("Ann").get === List((8, "Joe"))
+    loveOf("Ben").get === List()
+    loveOf("Joe").get === List((8, "Ann"))
+
+    // Even though Ann now loves Joe, Ben still exists
+    Person.name.get.sorted === List("Ann", "Ben", "Joe")
   }
 
 
-  "retract edge" in new Setup {
+  "apply edge to existing target" in new setup {
 
-    val List(ann, annBen, benAnn, ben) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
+    val List(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
-    Person.name_("Ann").Loves.weight.Person.name.get === List((5, "Ben"))
-    Person.name_("Ben").Loves.weight.Person.name.get === List((5, "Ann"))
+    Person(ann).Loves.weight(5).person(ben).update
+
+    loveOf("Ann").get === List((5, "Ben"))
+    loveOf("Ben").get === List((5, "Ann"))
+    loveOf("Joe").get === List()
+
+    // Ann now loves Joe
+    Person(ann).Loves.weight(8).person(joe).update
+
+    loveOf("Ann").get === List((8, "Joe"))
+    loveOf("Ben").get === List()
+    loveOf("Joe").get === List((8, "Ann"))
+  }
+
+
+  "retract edge" in new setup {
+
+    val List(_, annBen, _, _) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
+
+    loveOf("Ann").get === List((5, "Ben"))
+    loveOf("Ben").get === List((5, "Ann"))
 
     // Retract edge
     annBen.retract
 
     // Divorce complete
-    Person.name_("Ann").Loves.weight.Person.name.get === List()
-    Person.name_("Ben").Loves.weight.Person.name.get === List()
+    loveOf("Ann").get === List()
+    loveOf("Ben").get === List()
   }
 
 
-  "retract base/target entity" in new Setup {
+  "retract base/target entity" in new setup {
 
-    val List(ann, annBen, benAnn, ben) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
+    val List(_, _, _, ben) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
+
+    loveOf("Ann").get === List((5, "Ben"))
+    loveOf("Ben").get === List((5, "Ann"))
 
     // Retract base entity with single edge
     ben.retract
@@ -67,7 +85,7 @@ class EdgeOneSelfUpdate extends MoleculeSpec {
     Person.name("Ann").get === List("Ann")
     Person.name("Ben").get === List()
 
-    Person.name("Ann").Loves.weight.Person.name.get === List()
-    Person.name("Ben").Loves.weight.Person.name.get === List()
+    loveOf("Ann").get === List()
+    loveOf("Ben").get === List()
   }
 }

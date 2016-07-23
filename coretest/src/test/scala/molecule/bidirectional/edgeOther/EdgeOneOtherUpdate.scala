@@ -7,67 +7,88 @@ import molecule.util._
 
 class EdgeOneOtherUpdate extends MoleculeSpec {
 
+  class setup extends Setup {
+    val ann    = Person.name("Ann").save.eid
+    
+    val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
+    val favoritePersonOf = m(Animal.name_(?).Favorite.weight.Person.name)
+  }
 
-  "New edge and new target entity" in new Setup {
 
-    val ben = Person.name("Ben").save.eid
+  "apply edge to new target" in new setup {
 
     // New edge and new target entity
-    // Update Ben with new friendship to new Rex
-    Person(ben).Favorite.weight(7).Animal.name("Rex").update
+    Person(ann).Favorite.weight(5).Animal.name("Rex").update
 
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+    // Ann and Rex favorite each other
+    favoriteAnimalOf("Ann").get === List((5, "Rex"))
+    favoritePersonOf("Rex").get === List((5, "Ann"))
+    favoritePersonOf("Zup").get === List() // Zup doesn't exist yet
+
+    // Ann now favorite Zup
+    Person(ann).Favorite.weight(8).Animal.name("Zup").update
+
+    // Both bidirectional edges have been added from/to Ann
+    favoriteAnimalOf("Ann").get === List((8, "Zup"))
+    favoritePersonOf("Rex").get === List()
+    favoritePersonOf("Zup").get === List((8, "Ann"))
+
+    // Even though Ann now favorite Zup, Rex still exists
+    Person.name.get.sorted === List("Ann")
+    Animal.name.get.sorted === List("Rex", "Zup")
   }
 
 
-  "New edge with reference to existing target entity" in new Setup {
+  "apply edge to existing target" in new setup {
 
-    val List(ben, benRex, rexBen, rex) = Person.name("Ben").Favorite.weight(5).Animal.name("Rex").save.eids
-    val zip = Animal.name("Zip").save.eid
+    val List(rex, zup) = Animal.name.insert("Rex", "Zup").eids
 
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((5, "Rex"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((5, "Ben"))
-    Animal.name_("Zip").Favorite.weight.Person.name.get === List()
+    Person(ann).Favorite.weight(5).animal(rex).update
 
-    // Ben now loves Zip
-    Person(ben).Favorite.weight(9).animal(zip).update
+    favoriteAnimalOf("Ann").get === List((5, "Rex"))
+    favoritePersonOf("Rex").get === List((5, "Ann"))
+    favoritePersonOf("Zup").get === List()
 
-    // Both bidirectional edges have been added from/to Ben
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((9, "Zip"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List()
-    Animal.name_("Zip").Favorite.weight.Person.name.get === List((9, "Ben"))
+    // Ann now favorite Zup
+    Person(ann).Favorite.weight(8).animal(zup).update
+
+    favoriteAnimalOf("Ann").get === List((8, "Zup"))
+    favoritePersonOf("Rex").get === List()
+    favoritePersonOf("Zup").get === List((8, "Ann"))
   }
 
 
-  "retract edge" in new Setup {
+  "retract edge" in new setup {
 
-    val List(ben, benRex, rexBen, rex) = Person.name("Ben").Favorite.weight(5).Animal.name("Rex").save.eids
+    val List(_, annRex, _, _) = Person.name("Ann").Favorite.weight(5).Animal.name("Rex").save.eids
 
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((5, "Rex"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((5, "Ben"))
+    favoriteAnimalOf("Ann").get === List((5, "Rex"))
+    favoritePersonOf("Rex").get === List((5, "Ann"))
 
     // Retract edge
-    benRex.retract
+    annRex.retract
 
-    // Rex got another owner
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List()
-    Person.name_("Rex").Favorite.weight.Animal.name.get === List()
+    // Divorce complete
+
+    Person.name.Favorite.weight.Animal.name.get.sorted === List()
   }
 
 
-  "retract base/target entity" in new Setup {
+  "retract base/target entity" in new setup {
 
-    val List(ben, benRex, rexBen, rex) = Person.name("Ben").Favorite.weight(5).Animal.name("Rex").save.eids
+    val List(_, _, _, rex) = Person.name("Ann").Favorite.weight(5).Animal.name("Rex").save.eids
+
+    favoriteAnimalOf("Ann").get === List((5, "Rex"))
+    favoritePersonOf("Rex").get === List((5, "Ann"))
 
     // Retract base entity with single edge
     rex.retract
 
-    // Ben still exists, Rex is gone
-    Person.name("Ben").get === List("Ben")
-    Person.name("Rex").get === List()
+    // Ann becomes widow
+    Person.name("Ann").get === List("Ann")
+    Animal.name("Rex").get === List()
 
-    Person.name("Ben").Favorite.weight.Animal.name.get === List()
-    Person.name("Rex").Favorite.weight.Animal.name.get === List()
+    favoriteAnimalOf("Ann").get === List()
+    favoritePersonOf("Rex").get === List()
   }
 }

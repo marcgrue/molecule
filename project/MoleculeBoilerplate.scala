@@ -453,7 +453,7 @@ object MoleculeBoilerplate {
         case r"package (.*)$path\.[\w]*"                                   => d.copy(pkg = path)
         case "import molecule.schema.definition._"                         => d
         case r"@InOut\((\d+)$inS, (\d+)$outS\)"                            => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
-        case r"object (.*)${dmn}Definition \{"                             => d.copy(domain = dmn)
+        case r"object ([A-Z][a-zA-Z0-9]*)${dmn}Definition \{"              => d.copy(domain = dmn)
         case r"object ([a-z]\w*)$part\s*\{"                                => d.copy(curPart = part)
         case r"object (\w*)$part\s*\{"                                     => sys.error(s"Partition name '$part' in ${defFile.getName} should start with a lowercase letter")
         case r"trait ([A-Z]\w*)$ns\s*\{" if d.curPart.nonEmpty             => d.copy(nss = d.nss :+ Namespace(d.curPart, d.curPart + "_" + ns))
@@ -857,7 +857,7 @@ object MoleculeBoilerplate {
 
     val refCode = attrs.foldLeft(Seq("")) {
       case (acc, Ref(attr, attrClean, _, clazz2, _, baseType, refNs, opts, _, _)) => {
-        val p1 = padS(maxAttr0, attrClean)
+        val p1 = padS(maxAttr0 + 1, attrClean)
         val p2 = padS("ManyRef".length, clazz2)
         val p3 = padS(maxRefNs.max, refNs)
 
@@ -867,15 +867,18 @@ object MoleculeBoilerplate {
 
         val ref = (in, out) match {
           case (0, 0) if baseType.isEmpty                => s"${refNs}_0$p3$bidirectional"
-          case (0, 0)                                    => s"${refNs}_0$p3$bidirectional with Nested0[${refNs}_0$p3, ${refNs}_1$p3]"
-          case (0, o) if o == maxOut || baseType.isEmpty => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional"
-          case (0, o)                                    => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested$o[${refNs}_$o$p3, ${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
-          case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (0, 0)                                    => s"${refNs}_0$p3$bidirectional with Nested0[${refNs}_1$p3]"
+          case (0, o) if baseType.isEmpty || o == maxOut => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional"
+          case (0, o)                                    => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested$o[${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
+          case (i, 0) if baseType.isEmpty                => s"${refNs}_In_${i}_0$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (i, 0)                                    => s"${refNs}_In_${i}_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_${i}_0[${refNs}_In_${i}_1$p3, ${InTypes mkString ", "}]"
+          case (i, o) if baseType.isEmpty || o == maxOut => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (i, o)                                    => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_${i}_$o[${refNs}_In_${i}_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
         }
         acc :+ s"def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref = ???"
       }
       case (acc, BackRef(backAttr, backRef, _, _, _, _, _, opts))                 =>
-        val p1 = padS(maxAttr0, backAttr)
+        val p1 = padS(maxAttr0 + 1, backAttr)
         val p2 = padS(maxClazz2.max, backRef)
         val ref = (in, out) match {
           case (0, 0) => s"${backRef}_0$p2"

@@ -7,135 +7,79 @@ import molecule.util._
 
 class EdgeOneOtherInsert extends MoleculeSpec {
 
-
-  "1 new" in new Setup {
-
-    // Insert 1 pair of entities with bidirectional property edge between them
-    Person.name.Favorite.weight.Animal.name.insert("Ben", 7, "Rex")
-
-    // Bidirectional property edge has been inserted
-    // Note how we query differently from each end
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
+  class setup extends Setup {
+    val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
+    val favoritePersonOf = m(Animal.name_(?).Favorite.weight.Person.name)
   }
 
-  "1 existing" in new Setup {
+  "base/edge/target" >> {
 
-    val ben = Person.name.insert("Ben").eid
+    "new target" in new setup {
 
-    // We can insert from the other end as well
-    Animal.name.Favorite.weight.person.insert("Rex", 7, ben)
+      Person.name.Favorite.weight.Animal.name.insert("Ann", 7, "Rex")
 
-    // Bidirectional property edge has been inserted
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
-  }
+      // Bidirectional property edge has been inserted
+      // Note how we query differently from each end
+      favoriteAnimalOf("Ann").get === List((7, "Rex"))
+      favoritePersonOf("Rex").get === List((7, "Ann"))
+    }
 
+    "existing target" in new setup {
 
-  "multiple new" in new Setup {
+      val ann = Person.name.insert("Ann").eid
 
-    // Insert 2 pair of entities with bidirectional property edge between them
-    Person.name.Favorite.weight.Animal.name insert List(
-      ("Ben", 7, "Rex"),
-      ("Kim", 6, "Zip")
-    )
+      // We can insert from the other end as well
+      Animal.name.Favorite.weight.person.insert("Rex", 7, ann)
 
-    // Bidirectional property edges have been inserted
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-    Person.name_("Kim").Favorite.weight.Animal.name.get === List((6, "Zip"))
-
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
-    Animal.name_("Zip").Favorite.weight.Person.name.get === List((6, "Kim"))
-  }
-
-  "multiple existing" in new Setup {
-
-    val List(rex, zip) = Animal.name.insert("Rex", "Zip").eids
-
-    // Insert 2 entities with bidirectional property edges to existing entities
-    Person.name.Favorite.weight.animal insert List(
-      ("Ben", 7, rex),
-      ("Kim", 6, zip)
-    )
-
-    // Bidirectional property edges have been inserted
-    Person.name_("Ben").Favorite.weight.Animal.name.get === List((7, "Rex"))
-    Person.name_("Kim").Favorite.weight.Animal.name.get === List((6, "Zip"))
-
-    Animal.name_("Rex").Favorite.weight.Person.name.get === List((7, "Ben"))
-    Animal.name_("Zip").Favorite.weight.Person.name.get === List((6, "Kim"))
+      // Bidirectional property edge has been inserted
+      favoriteAnimalOf("Ann").get === List((7, "Rex"))
+      favoritePersonOf("Rex").get === List((7, "Ann"))
+    }
   }
 
 
-  "1 large edge to new entity" in new Setup {
+  "base + edge/target" >> {
 
-    Person.name
-      .Favorite
-      .weight
-      .howWeMet
-      .commonInterests
-      .commonLicences
-      .commonScores
-      .CoreQuality.name._Favorite
-      .InCommon.*(Quality.name)._Favorite
-      .Animal.name insert List(
-      ("Ben"
-        , 7
-        , "inSchool"
-        , Set("Food", "Walking", "Travelling")
-        , Set("climbing", "flying")
-        , Map("baseball" -> 9, "golf" -> 7)
-        , "Love"
-        , List("Patience", "Humor")
-        , "Rex")
-    )
+    "new target" in new setup {
 
-    // All edge properties have been inserted in both directions:
+      // Create edges to/from Rex
+      val favoriteRex = Favorite.weight.Animal.name.insert(7, "Rex").eid
 
-    // Person -> Animal
-    Person.name
-      .Favorite
-      .weight
-      .howWeMet
-      .commonInterests
-      .commonLicences
-      .commonScores
-      .CoreQuality.name._Favorite
-      .InCommon.*(Quality.name)._Favorite
-      .Animal.name
-      .get === List(
-      ("Ben"
-        , 7
-        , "inSchool"
-        , Set("Food", "Walking", "Travelling")
-        , Set("climbing", "flying")
-        , Map("baseball" -> 9, "golf" -> 7)
-        , "Love"
-        , List("Patience", "Humor")
-        , "Rex")
-    )
+      // Base entity Ann points to one of the edges (doesn't matter which of them - Molecule connects Ann to both)
+      Person.name.favorite.insert("Ann", favoriteRex)
 
-    // Animal -> Person
-    Animal.name
-      .Favorite
-      .weight
-      .howWeMet
-      .commonInterests
-      .commonLicences
-      .commonScores
-      .CoreQuality.name._Favorite
-      .InCommon.*(Quality.name)._Favorite
-      .Person.name
-      .get === List(
-      ("Rex"
-        , 7
-        , "inSchool"
-        , Set("Food", "Walking", "Travelling")
-        , Set("climbing", "flying")
-        , Map("baseball" -> 9, "golf" -> 7)
-        , "Love"
-        , List("Patience", "Humor")
-        , "Ben")
-    )
+      // Ann loves Rex and Rex loves Ann - that is 70% love
+      favoriteAnimalOf("Ann").get === List((7, "Rex"))
+      favoritePersonOf("Rex").get === List((7, "Ann"))
+    }
+
+    "existing target" in new setup {
+
+      val rex = Animal.name.insert("Rex").eid
+
+      // Create edges to existing Rex
+      val List(favoriteRex, rexFavorite) = Favorite.weight.animal.insert(7, rex).eids
+
+      // Base entity Ann points to one of the edges (doesn't matter which of them - Molecule connects Ann to both)
+      Person.name.favorite.insert("Ann", rexFavorite)
+
+      // Ann loves Rex and Rex loves Ann - that is 70% love
+      favoriteAnimalOf("Ann").get === List((7, "Rex"))
+      favoritePersonOf("Rex").get === List((7, "Ann"))
+    }
+  }
+
+  "base/edge - <missing target>" in new Setup {
+    // Can't allow edge without ref to target entity
+    (Person.name.Favorite.weight.insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `Favorite`."
+  }
+
+  "<missing base> - edge - <missing target>" in new Setup {
+    // Edge always have to have a ref to a target entity
+    (Favorite.weight.insert must throwA[IllegalArgumentException])
+      .message === "Got the exception java.lang.IllegalArgumentException: " +
+      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
   }
 }
