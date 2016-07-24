@@ -70,10 +70,10 @@ object BidirectionalDefinition {
   // (card-one)
   object Favorite extends Favorite
   trait Favorite {
-    // a --- edge ==> b
-    val animal: AnyRef = target[Animal.favorite.type]
     // a <== edge --- b
     val person: AnyRef = target[Person.favorite.type]
+    // a --- edge ==> b
+    val animal: AnyRef = target[Animal.favorite.type]
 
     // Edge properties
     val weight          = oneInt
@@ -88,10 +88,10 @@ object BidirectionalDefinition {
   // (card-many)
   object CloseTo extends CloseTo
   trait CloseTo {
-    // a --- edge ==> b
-    val animal: AnyRef = target[Animal.closeTo.type]
     // a <== edge --- b
     val person: AnyRef = target[Person.closeTo.type]
+    // a --- edge ==> b
+    val animal: AnyRef = target[Animal.closeTo.type]
 
     // Edge properties
     val weight          = oneInt

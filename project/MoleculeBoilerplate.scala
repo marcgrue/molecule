@@ -1,6 +1,6 @@
 import java.io.File
 
-import sbt.{IO, _}
+import sbt._
 
 object MoleculeBoilerplate {
 

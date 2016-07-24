@@ -19,9 +19,9 @@ class EdgeManySelfInsert extends MoleculeSpec {
       Person.name.Knows.*(Knows.weight.Person.name).insert("Ann", List((7, "Ben"), (8, "Joe")))
 
       // Bidirectional property edges have been inserted
-      knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
-      knownBy("Ben").one === List((7, "Ann"))
-      knownBy("Joe").one === List((8, "Ann"))
+knownBy("Ann").one === List((7, "Ben"), (8, "Joe"))
+knownBy("Ben").one === List((7, "Ann"))
+knownBy("Joe").one === List((8, "Ann"))
     }
 
     "existing targets" in new setup {

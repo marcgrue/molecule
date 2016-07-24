@@ -7,34 +7,30 @@ import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
 /*
-  Full property edge version (with more features than demonstrated in the tutorial)
+  Bidirectional property edge - expanding on the Gremlin tutorial at:
 
-  Gremlin comparison using tutorial at
   http://tinkerpop.apache.org/docs/current/tutorials/getting-started/
 
   In the tutorial, the weight property of the edges are not used. To see what we can use
   properties for we
 
+  Here we make use of a bidirectional property edge Knows that has a weight property:
 
-      Person --> Knows(weight) --> Person
-      Person <-- Knows(weight) <-- Person
+      Person --> Knows.weight --> Person
+      Person <-- Knows.weight <-- Person
 
-  We also have the uni-directional relationship Created from Person to Software:
+  For each edge/ref created, a reverse edge is created in the background by Molecule
+  so that we can uniformly query in both directions.
 
-      Person --> Created(weight) ---> Software
+  We now have a unidirectional edge from Perons to Software that we call Created:
 
+      Person --> Created.weight --> Software
 
-  But here we'll use the
-  property edge called `Knows` with a property `weight`
-
-  at all and we therefor use a simple
-  bidirectional self-reference called `knows` that points back to the same `Person` namespace.
-
-  Then, to explore using the properties of edges, we'll use the original `Knows` relationship
-  that also has a `weight` property.
+  This allow us to assert a weight property to how much a person has been involved in
+  a software project.
 
   See schema definition in
-  examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition.scala
+  examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition2.scala
 */
 
 class Knows extends MoleculeSpec with DatomicFacade {
@@ -55,7 +51,7 @@ class Knows extends MoleculeSpec with DatomicFacade {
     // Software
     val List(lop, ripple) = Software.name.lang insert Seq(
       ("lop", "java"),
-      ("riple", "java")
+      ("ripple", "java")
     ) eids
 
     // People and software created
@@ -153,7 +149,7 @@ class Knows extends MoleculeSpec with DatomicFacade {
     // With a namespace prefix we though can similar and type safe results
     // g.V().group().by(label).by('name')
     Person.name.get === List("peter", "vadas", "josh", "marko")
-    Software.name.get === List("riple", "lop")
+    Software.name.get === List("ripple", "lop")
   }
 
 
@@ -241,7 +237,28 @@ class Knows extends MoleculeSpec with DatomicFacade {
   }
 
 
-  "What else could we ask?" in new BidirectionalPropertyEdgeSetup {
+  "Using the edge properties" in new BidirectionalPropertyEdgeSetup {
 
+    // Well-known friends
+    Person(marko).Knows.weight_.>(0.8).Person.name.get === List("josh")
+
+    // Well-known friends heavily involved in projects
+    Person(marko).Knows.weight_.>(0.8).Person.name.Created.weight_.>(0.8).Software.name.get === List(("josh", "ripple"))
+
+
+    // Friends of friends' side projects
+    Person(marko).Knows.Person.Knows.Person.name.not("marko").Created.weight.<(0.5).Software.name.get === List(("peter", 0.2, "lop"))
+
+    // .. or elaborated:
+    Person(marko) // marko entity
+      .Knows.Person // friends of marko
+      .Knows.Person.name.not("marko") // friends of friends of marko that are not marko
+      .Created.weight.<(0.5) // Created (software) with a low weight property
+      .Software.name // name of software created
+      .get === List((
+      "peter", // peter is a friend of vadas who is a friend of marko
+        0.2, // peter participated with a weight of 0.2 in creating
+        "lop" // the software "lop"
+        ))
   }
 }

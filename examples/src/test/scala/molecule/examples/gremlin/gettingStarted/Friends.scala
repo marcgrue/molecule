@@ -7,23 +7,21 @@ import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
 /*
-  Simple version (demonstrating
+  Bidirectional references - comparing with Gremlin tutorial at:
 
-  Gremlin comparison using tutorial at
   http://tinkerpop.apache.org/docs/current/tutorials/getting-started/
 
   In the tutorial, the weight property is not used at all and we therefor here use a
   bidirectional self-reference Friends without the weight property:
 
-      Person --> Friends --> Person
-      Person <-- Friends <-- Person
+      Person <--> Friends[Person]
 
-  We also have the uni-directional relationship Created from Person to Software:
+  We also have a normal uni-directional relationship from Person to Software:
 
-      Person --> Created(weight) ---> Software
+      Person --> Software
 
   See schema definition in
-  examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition.scala
+  examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition1.scala
 */
 
 class Friends extends MoleculeSpec with DatomicFacade {
@@ -43,7 +41,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
     // Software
     val List(lop, ripple) = Software.name.lang insert Seq(
       ("lop", "java"),
-      ("riple", "java")
+      ("ripple", "java")
     ) eids
 
     // People and software created
@@ -130,7 +128,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
     // With a namespace prefix we though can similar and type safe results
     // g.V().group().by(label).by('name')
     Person.name.get === List("peter", "vadas", "josh", "marko")
-    Software.name.get === List("riple", "lop")
+    Software.name.get === List("ripple", "lop")
   }
 
 

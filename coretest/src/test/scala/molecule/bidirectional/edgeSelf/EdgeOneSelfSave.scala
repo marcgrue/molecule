@@ -15,9 +15,9 @@ class EdgeOneSelfSave extends MoleculeSpec {
       /*
           When a "property edge" is created, Molecule automatically creates a reverse reference in the opposite direction:
 
-          Ann --> annLovesBen (7) -->  Ben
-            \                         /
-              <-- benLovesAnn (7) <--
+Ann --> annLovesBen (7) -->  Ben
+  \                         /
+    <-- benLovesAnn (7) <--
 
           This allow us to query from Ann to Ben and Ben to Ann in a uniform way.
 

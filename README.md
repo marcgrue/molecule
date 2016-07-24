@@ -20,7 +20,7 @@ Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [
 For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.1.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.2.0")
 ```
 
 Add the following in your `build.sbt`:
@@ -36,13 +36,13 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.8.0",
+      "org.scalamolecule" %% "molecule" % "0.9.0",
       "com.datomic" % "datomic-free" % "0.9.5372"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
   )
 ```
-Molecule 0.8.0 for Scala 2.11.8 is available at 
+Molecule 0.9.0 for Scala 2.11.8 is available at 
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.11/).
 
 [Getting started](http://scalamolecule.org/manual/getting-started)...

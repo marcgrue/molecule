@@ -358,8 +358,6 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
           case edge                            =>
             val (edgeA, edgeB) = edgeAB(edge, targetAttr)
             Seq(
-              //              Add(edgeA, ":molecule_Meta/otherEdge", edgeB, Card(card)),
-              //              Add(edgeB, ":molecule_Meta/otherEdge", edgeA, Card(card)),
               Add(edgeB, targetAttr, e, Card(card)),
               Add(e, a, edgeA, Card(card))
             )
@@ -650,13 +648,11 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       case BiOtherRefAttr(card, attr)  => biOther(card, attr)
       case BiEdgeRefAttr(card, attr)   => biEdgeRefAttr(card, attr)
       case BiEdgeRef(card, attr)       => biEdgeRef(card, attr)
-      case BiEdgePropAttr(card)        =>
-        biEdgeProp(card)
+      case BiEdgePropAttr(card)        => biEdgeProp(card)
       case BiEdgePropRefAttr(card)     => biEdgeProp(card)
       case BiEdgePropRef(card)         => biEdgeProp(card)
       case BiTargetRef(card, attr)     => biTarget(card, attr)
-      case BiTargetRefAttr(card, attr) =>
-        biTarget(card, attr)
+      case BiTargetRefAttr(card, attr) => biTarget(card, attr)
       case Card(card)                  => default(card)
       case other                       => sys.error(
         s"""Unexpected or missing Generic `$other`:
@@ -726,12 +722,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     // Advance cursor for next value in data row
     case Add('tempId, a, 'arg, bi@BiEdgePropAttr(_))                    => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB1))
     case Add('tempId, a, 'arg, bi@BiTargetRefAttr(_, _))                => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB1))
-    case Add('tempId, a, 'arg, bi)                                      => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB))
     case Add('tempId, a, Values(EnumVal, pf), bi@BiEdgePropAttr(_))     => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, arg, pf, bi, edgeB1))
     case Add('tempId, a, Values(EnumVal, pf), bi@BiTargetRefAttr(_, _)) => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, arg, pf, bi, edgeB1))
-    case Add('tempId, a, Values(EnumVal, prefix), bi)                   => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, prefix, bi, edgeB))
     case Add('tempId, a, Values(vs, pf), bi@BiEdgePropAttr(_))          => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
     case Add('tempId, a, Values(vs, pf), bi@BiTargetRefAttr(_, _))      => val edgeB1 = Some(tempId(a)); (next, edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
+    case Add('tempId, a, 'arg, bi)                                      => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, None, bi, edgeB))
+    case Add('tempId, a, Values(EnumVal, pf), bi)                       => (next, edgeB, valueStmts(stmts, tempId(a), a, arg, pf, bi, edgeB))
     case Add('tempId, a, Values(vs, pf), bi)                            => (next, edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
     case Add('remove_me, a, 'arg, bi)                                   => (next, edgeB, valueStmts(stmts, -1, a, arg, None, bi, edgeB))
     case Add('arg, a, 'tempId, bi)                                      => (next, edgeB, valueStmts(stmts, arg, a, tempId(a), None, bi, edgeB))
