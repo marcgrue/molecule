@@ -12,9 +12,8 @@ import org.specs2.specification.Scope
   http://tinkerpop.apache.org/docs/current/tutorials/getting-started/
 
   In the tutorial, the weight property of the edges are not used. To see what we can use
-  properties for we
-
-  Here we make use of a bidirectional property edge Knows that has a weight property:
+  edge properties for we now implement the same tutorial with a bidirectional property
+  edge `Knows` that has a weight property:
 
       Person --> Knows.weight --> Person
       Person <-- Knows.weight <-- Person
@@ -22,11 +21,11 @@ import org.specs2.specification.Scope
   For each edge/ref created, a reverse edge is created in the background by Molecule
   so that we can uniformly query in both directions.
 
-  We now have a unidirectional edge from Perons to Software that we call Created:
+  We now have a unidirectional edge from `Person` to `Software` that we call `Created`:
 
       Person --> Created.weight --> Software
 
-  This allow us to assert a weight property to how much a person has been involved in
+  This allow us to assert a weight property of how much a person has been involved in
   a software project.
 
   See schema definition in
@@ -177,7 +176,7 @@ class Knows extends MoleculeSpec with DatomicFacade {
     // Josh's friends older than 30 (none)
     Person(josh).Knows.Person.name.age.>(30).get === List()
 
-    // Who friends young people?
+    // Who knows young people?
     // Since we save bidirectional references we get friendships in both directions:
     Person.name.Knows.Person.name.age.<(30).get === List(
       ("vadas", "marko", 29), // vadas knows marko who is 29
@@ -194,12 +193,11 @@ class Knows extends MoleculeSpec with DatomicFacade {
 
     // How many young friends does the older people have?
     Person.name.age.>=(30).Knows.Person.e(count).age_.<(30).get === List(
-//    Person.name.age.>=(30).Knows.e(count).Person.age_.<(30).get === List(
       ("josh", 32, 1), // josh (32) knows 1
       ("peter", 35, 1) // peter (35) knows 1
     )
 
-    // My friends and their friends
+    // Marko's friends and their friends
     Person.name("marko").Knows.Person.name.Knows.Person.name.get === List(
       ("marko", "vadas", "peter"),
       ("marko", "josh", "marko"),
@@ -219,17 +217,17 @@ class Knows extends MoleculeSpec with DatomicFacade {
         )
     )
 
-    // My friends and their friends (excluding myself)
+    // Marko's friends and their friends (excluding marko)
     Person.name("marko").Knows.Person.name.Knows.Person.name.not("marko").get === List(
       ("marko", "vadas", "peter")
     )
 
-    // My friends' friends
+    // Marko's friends' friends
     Person.name_("marko").Knows.Person.Knows.Person.name.not("marko").get === List(
       "peter"
     )
 
-    // My friends' friends that are not already my friends (or myself)
+    // Marko's friends' friends that are not already marko's friends (or marko)
     val ownCircle = Person(marko).Knows.Person.name.get :+ "marko"
     Person(marko).Knows.Person.Knows.Person.name.not(ownCircle).get === List(
       "peter"
@@ -244,7 +242,6 @@ class Knows extends MoleculeSpec with DatomicFacade {
 
     // Well-known friends heavily involved in projects
     Person(marko).Knows.weight_.>(0.8).Person.name.Created.weight_.>(0.8).Software.name.get === List(("josh", "ripple"))
-
 
     // Friends of friends' side projects
     Person(marko).Knows.Person.Knows.Person.name.not("marko").Created.weight.<(0.5).Software.name.get === List(("peter", 0.2, "lop"))

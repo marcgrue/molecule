@@ -12,11 +12,11 @@ import org.specs2.specification.Scope
   http://tinkerpop.apache.org/docs/current/tutorials/getting-started/
 
   In the tutorial, the weight property is not used at all and we therefor here use a
-  bidirectional self-reference Friends without the weight property:
+  bidirectional self-reference `Friends` without the weight property:
 
       Person <--> Friends[Person]
 
-  We also have a normal uni-directional relationship from Person to Software:
+  We also have a normal uni-directional relationship from `Person` to `Software`:
 
       Person --> Software
 
@@ -197,88 +197,20 @@ class Friends extends MoleculeSpec with DatomicFacade {
         )
     )
 
-    // My friends and their friends (excluding myself)
+    // Marko's friends and their friends (excluding marko)
     Person.name("marko").Friends.name.Friends.name.not("marko").get === List(
       ("marko", "vadas", "peter")
     )
 
-    // My friends' friends
+    // Marko's friends' friends
     Person.name_("marko").Friends.Friends.name.not("marko").get === List(
       "peter"
     )
 
-    // My friends' friends that are not already my friends (or myself)
+    // Marko's friends' friends that are not already marko's friends (or marko)
     val markoFriends = Person(marko).Friends.name.get :+ "marko"
     Person(marko).Friends.Friends.name.not(markoFriends).get === List(
       "peter"
     )
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
