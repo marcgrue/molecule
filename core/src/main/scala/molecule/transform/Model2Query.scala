@@ -495,6 +495,7 @@ object Model2Query extends Helpers {
         case Meta(_, _, "e", _, Fn("count", _))         => q.find("count", Seq(), e, Seq())
         case Meta(_, _, "e", _, Length(Some(Fn(_, _)))) => q.find(e, Seq())
         case Meta(_, _, _, Id(eid), IndexVal)           => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+        case Meta(_, _, "r", _, IndexVal)               => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
         case Meta(_, _, _, _, IndexVal)                 => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
         case Meta(_, _, _, _, EntValue)                 => q.find(e, Seq())
         case Meta(_, _, _, _, _)                        => q
@@ -586,12 +587,12 @@ object Model2Query extends Helpers {
         case Meta(ns, attr, "e", NoValue, Eq(Seq(id: Long)))            => (resolve(query, id.toString, v, element), id.toString, v, ns, attr, prevRefNs)
         case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        => (resolve(query, e, v, element), e, w, ns, attr, "")
         case Meta(ns, attr, "e", _, IndexVal)                           => (resolve(query, v, w, element), v, y, ns, attr, "IndexVal")
+        case Meta(ns, attr, "r", _, IndexVal)                           => (resolve(query, w, v, element), e, w, ns, attr, "IndexVal")
         case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         => (resolve(query, e, v, element), e, w, ns, attr, "")
         case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" => (resolve(query, e, y, element), e, y, ns, attr, "")
-
-        case Meta(ns, attr, "e", NoValue, EntValue) => (resolve(query, v, w, element), v, w, ns, attr, "")
-        case Meta(ns, attr, "e", NoValue, _)        => (resolve(query, v, w, element), e, w, ns, attr, "")
-        case Meta(ns, attr, _, _, _)                => (resolve(query, e, v, element), e, v, ns, attr, "")
+        case Meta(ns, attr, "e", NoValue, EntValue)                     => (resolve(query, v, w, element), v, w, ns, attr, "")
+        case Meta(ns, attr, "e", NoValue, _)                            => (resolve(query, v, w, element), e, w, ns, attr, "")
+        case Meta(ns, attr, _, _, _)                                    => (resolve(query, e, v, element), e, v, ns, attr, "")
 
         case TxMetaData(elements) =>
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {

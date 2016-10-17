@@ -210,7 +210,7 @@ object actions {
     def add(values: Seq[T])                          : Ns with Attr = ???
 
     def replace(oldNew: (T, T), oldNewMore: (T, T)*) : Ns with Attr = ???
-    def replace(oldNew: Seq[(T, T)])                   : Ns with Attr = ???
+    def replace(oldNew: Seq[(T, T)])                 : Ns with Attr = ???
 
     def remove(value: T, more: T*)                   : Ns with Attr = ???
     def remove(values: Seq[T])                       : Ns with Attr = ???

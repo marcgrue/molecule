@@ -26,6 +26,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
       }
       val firstMeta = model.elements.head match {
         case Meta(_, _, "e", NoValue, Eq(List(eid))) => Meta("", "", "e", Id(eid), IndexVal)
+        case Bond(ns, refAttr, refNs, _, _)          => Meta("", "", "r", NoValue, IndexVal)
         case _                                       => Meta("", "", "e", NoValue, IndexVal)
       }
       Model(firstMeta +: (model.elements map recurse))
@@ -762,6 +763,11 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
             case  (Meta(_, _, _, _, IndexVal), i) => i
           }
 //println("===============================================")
+//println(model)
+//println(modelE)
+//println(queryE)
+//println(queryE.datalog)
+//println("---- ")
 //flatModel foreach println
 //println("---- " + entityIndexes)
 
