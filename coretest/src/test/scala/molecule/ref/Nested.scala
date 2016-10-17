@@ -177,4 +177,83 @@ class NestedTests extends CoreSpec {
       (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
     )
   }
+
+  "Applied eid" in new CoreSetup {
+    val eid = Ns.str.Refs1.*(Ref1.int1).insert("a", List(1, 2)).eid
+    Ns(eid).str.one === "a"
+    Ns(eid).Refs1.*(Ref1.int1).one === List(1, 2)
+  }
+
+  "Implicit references" in new CoreSetup {
+
+    // This test illustrates what might seem counter-intuitive
+    // when one has two namespaces followed by each other and then
+    // some nested attributes.
+
+    // Test data
+    val List(ref1a, _, _, _, _, _) = Ref1.str1.Refs2.*(Ref2.str2) insert List(
+      ("r1a", List("r2a", "r2b")),
+      ("r1b", List("r2c", "r2d")) // <-- will not be referenced from Ns
+    ) eids
+
+    // Both Ns entities reference the same Ref1 entity
+    Ns.str.refs1 insert List(
+      ("a", Set(ref1a)),
+      ("b", Set(ref1a))
+    ) eids
+
+    // Level 2-3 has expected output
+    Ref1.str1.Refs2.str2.get.sorted === List(
+      ("r1a", "r2a"),
+      ("r1a", "r2b"),
+      ("r1b", "r2c"),
+      ("r1b", "r2d")
+    )
+    // Nested structure reveals the same
+    Ref1.str1.Refs2.*(Ref2.str2).get === List(
+      ("r1a", List("r2a", "r2b")),
+      ("r1b", List("r2c", "r2d"))
+    )
+
+
+    // Level 1-3 has expected output
+    Ns.str.Refs1.str1.Refs2.str2.get.sorted === List(
+      ("a", "r1a", "r2a"),
+      ("a", "r1a", "r2b"),
+      ("b", "r1a", "r2a"),
+      ("b", "r1a", "r2b")
+    )
+    // Nested structure reveals the same
+    Ns.str.Refs1.str1.Refs2.*(Ref2.str2).get === List(
+      ("a", "r1a", List("r2a", "r2b")),
+      ("b", "r1a", List("r2a", "r2b"))
+    )
+
+    // "Implicit" reference from Ns to Ref1 implies that
+    // some Ns entity is referencing some Ref1 entity.
+    // This excludes "r1b" since no Ns entities reference it.
+    Ns.Refs1.str1.Refs2.str2.get.sorted === List(
+      ("r1a", "r2a"),
+      ("r1a", "r2b")
+    )
+    // We would then from the nested version expect only
+    // one tuple. But since we implicitly have two different
+    // Ns entities referencing Ref1, we will also get two
+    // nested tuples!
+    Ns.Refs1.str1.Refs2.*(Ref2.str2).get === List(
+      ("r1a", List("r2a", "r2b")),
+      ("r1a", List("r2a", "r2b")) // <-- Might come as a surprise
+    )
+    /*
+      The result is grouped according to entity ids like this:
+
+          NS eid (!)           Ref2 eid
+
+      [17592186045452 "r1a" 17592186045446 "r2a"]
+      [17592186045452 "r1a" 17592186045447 "r2b"]
+
+      [17592186045453 "r1a" 17592186045446 "r2a"]
+      [17592186045453 "r1a" 17592186045447 "r2b"]
+    */
+  }
 }

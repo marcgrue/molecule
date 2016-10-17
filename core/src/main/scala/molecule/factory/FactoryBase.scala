@@ -24,7 +24,11 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case g: Nested => Nested(g.bond, Meta("", "", "e", NoValue, IndexVal) +: (g.elements map recurse))
         case other     => other
       }
-      Model(Meta("", "", "e", NoValue, IndexVal) +: (model.elements map recurse))
+      val firstMeta = model.elements.head match {
+        case Meta(_, _, "e", NoValue, Eq(List(eid))) => Meta("", "", "e", Id(eid), IndexVal)
+        case _                                       => Meta("", "", "e", NoValue, IndexVal)
+      }
+      Model(firstMeta +: (model.elements map recurse))
     }
 
     val p = dsl.tree.pos
@@ -65,6 +69,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, MapRemove(idents), _, _, keyIdents)  => mapIdents(idents ++ keyIdents)
         case atom@Atom(_, _, _, _, MapKeys(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
         case meta@Meta(_, _, _, _, Eq(idents))                          => mapIdents(idents)
+        case meta@Meta(_, _, _, Id(eid), _)                             => mapIdents(Seq(eid))
         case Nested(_, nestedElements)                                  => mapIdentifiers(nestedElements, identifiers0)
         case Composite(compositeElements)                               => mapIdentifiers(compositeElements, identifiers0)
         case TxMetaData(txElements)                                     => mapIdentifiers(txElements, identifiers0)
@@ -142,6 +147,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
         case atom@Atom(_, _, _, _, MapRemove(idents), _, _, keyIdents)  => atom.copy(value = MapRemove(getValues(idents).map(_.toString)), keys = getKeys(keyIdents))
         case atom@Atom(_, _, _, _, MapKeys(idents), _, _, _)            => atom.copy(value = MapKeys(getValues(idents).asInstanceOf[Seq[String]]))
         case meta@Meta(_, _, _, _, Eq(idents))                          => meta.copy(value = Eq(getValues(idents)))
+        case meta@Meta(_, _, _, Id(eid), _)                             => meta.copy(generic = Id(getValues(Seq(eid)).head))
         case Nested(ns, nestedElements)                                 => Nested(ns, resolveIdentifiers(nestedElements))
         case Composite(compositeElements)                               => Composite(resolveIdentifiers(compositeElements))
         case TxMetaData(txElements)                                     => TxMetaData(resolveIdentifiers(txElements))
@@ -741,6 +747,7 @@ trait FactoryBase[Ctx <: Context] extends TreeOps[Ctx] {
               case n: Nested                                             => n.elements flatMap recurse
               case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
               case a: Atom                                               => Seq(a)
+              case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
               case m: Meta                                               => Seq(m)
               case other                                                 => Seq()
             }

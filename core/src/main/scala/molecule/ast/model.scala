@@ -130,6 +130,7 @@ object model {
   case object OpValue extends Generic
   case class NsValue(values: Seq[String]) extends Generic
   case object NoValue extends Generic
+  case class Id(eid: Any) extends Generic
   case class Card(card: Int) extends Generic
 
 

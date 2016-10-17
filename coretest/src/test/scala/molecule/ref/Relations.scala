@@ -175,6 +175,18 @@ class Relations extends CoreSpec {
     m(Ns.str.Parents.str).get === List(("child", "parent1"), ("child", "parent2"))
   }
 
+  "Many attribute + ref" in new CoreSetup {
+    m(Ns.str.Refs1.*(Ref1.int1)) insert List(("a", List(1, 2)))
+
+    expectCompileError(
+      "m(Ns.str.refs1.Refs1.int1)",
+      "[Dsl2Model:apply (10)] Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Ref1.e ...`")
+
+    expectCompileError(
+      "m(Ns.refs1.str.Refs1.int1)",
+      "[Dsl2Model:apply (10)] Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Ref1.e ...`")
+  }
+
   "Molecule has to end with attribute" >> {
 
     "Ending with ref" in new CoreSetup {

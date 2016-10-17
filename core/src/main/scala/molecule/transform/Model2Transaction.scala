@@ -76,8 +76,9 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
       // Add one extra generic statement to receive the eid arg for the following statement to use
       // (we then discard that temporary statement from the value statements)
-      case ('arg, Atom(ns, name, _, c, VarValue, _, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", 'arg, Card(c)))
-      case ('arg, Bond(ns, refAttr, _, c, gs))             => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+      case ('arg, Atom(ns, name, _, c, VarValue, _, _, _))     => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", 'arg, Card(c)))
+      case ('arg, Atom(ns, name, _, c, value, prefix, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", Values(value, prefix), Card(c)))
+      case ('arg, Bond(ns, refAttr, _, c, gs))                 => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", "", NoValue))

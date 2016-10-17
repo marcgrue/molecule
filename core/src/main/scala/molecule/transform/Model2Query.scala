@@ -266,30 +266,30 @@ object Model2Query extends Helpers {
         // Map Atom (mandatory)
 
         case a@Atom(_, _, t, 3, value, _, gs, keys) => value match {
-          case Qm                          => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-          case Fulltext(Seq(Qm))           => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
-          case Neq(Seq(Qm))                => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
-          case Gt(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
-          case Ge(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
-          case Lt(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
-          case Le(Qm)                      => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
-          case Gt(arg)                     => q.findD(v, gs).mapCompareTo(">", e, a, v, keys, arg, gs)
-          case Ge(arg)                     => q.findD(v, gs).mapCompareTo(">=", e, a, v, keys, arg, gs)
-          case Lt(arg)                     => q.findD(v, gs).mapCompareTo("<", e, a, v, keys, arg, gs)
-          case Le(arg)                     => q.findD(v, gs).mapCompareTo("<=", e, a, v, keys, arg, gs)
-          case VarValue                    => q.findD(v, gs).where(e, a, v, gs)
-          case Fulltext(arg :: Nil)        => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
-          case Fulltext(args)              => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
-          case Eq((set: Set[_]) :: Nil)    => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
-          case Eq(arg :: Nil)              => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
-          case Eq(args)                    => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
-          case Neq(args)                   => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
-          case MapKeys(arg :: Nil)         => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
-          case MapKeys(args)               => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
+          case Qm                              => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+          case Fulltext(Seq(Qm))               => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
+          case Neq(Seq(Qm))                    => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
+          case Gt(Qm)                          => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
+          case Ge(Qm)                          => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
+          case Lt(Qm)                          => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
+          case Le(Qm)                          => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
+          case Gt(arg)                         => q.findD(v, gs).mapCompareTo(">", e, a, v, keys, arg, gs)
+          case Ge(arg)                         => q.findD(v, gs).mapCompareTo(">=", e, a, v, keys, arg, gs)
+          case Lt(arg)                         => q.findD(v, gs).mapCompareTo("<", e, a, v, keys, arg, gs)
+          case Le(arg)                         => q.findD(v, gs).mapCompareTo("<=", e, a, v, keys, arg, gs)
+          case VarValue                        => q.findD(v, gs).where(e, a, v, gs)
+          case Fulltext(arg :: Nil)            => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
+          case Fulltext(args)                  => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
+          case Eq((set: Set[_]) :: Nil)        => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
+          case Eq(arg :: Nil)                  => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
+          case Eq(args)                        => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
+          case Neq(args)                       => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
+          case MapKeys(arg :: Nil)             => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
+          case MapKeys(args)                   => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
           case MapEq(pairs) if pairs.size == 1 => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")$")
-          case MapEq(pairs)                => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs.toSeq)
-          case And(args)                   => q.findD(v, gs).whereAnd(e, a, v, args)
-          case other                       => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
+          case MapEq(pairs)                    => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs.toSeq)
+          case And(args)                       => q.findD(v, gs).whereAnd(e, a, v, args)
+          case other                           => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
         }
 
 
@@ -494,6 +494,7 @@ object Model2Query extends Helpers {
         case Meta(_, _, "e", _, Fn("count", Some(i)))   => q.find("count", Seq(i), e, Seq())
         case Meta(_, _, "e", _, Fn("count", _))         => q.find("count", Seq(), e, Seq())
         case Meta(_, _, "e", _, Length(Some(Fn(_, _)))) => q.find(e, Seq())
+        case Meta(_, _, _, Id(eid), IndexVal)           => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
         case Meta(_, _, _, _, IndexVal)                 => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
         case Meta(_, _, _, _, EntValue)                 => q.find(e, Seq())
         case Meta(_, _, _, _, _)                        => q
@@ -549,8 +550,7 @@ object Model2Query extends Helpers {
         case Atom(ns, attr, _, _, _, _, _, _)                            => (resolve(query, e, v, element), e, v, ns, attr, "")
 
         case Bond(ns, refAttr, refNs, _, bi: Bidirectional) if ns == prevNs && refAttr == prevAttr => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
-        case Bond(ns, refAttr, refNs, _, _) if ns == prevNs && refAttr == prevAttr                 =>
-          (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
+        case Bond(ns, refAttr, refNs, _, _) if ns == prevNs && refAttr == prevAttr                 => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevNs                                        => (resolve(query, e, w, element), e, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevAttr                                      => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
         case Bond(ns, refAttr, refNs, _, _) if ns == prevRefNs                                     => (resolve(query, v, w, element), v, w, ns, refAttr, refNs)
@@ -584,8 +584,8 @@ object Model2Query extends Helpers {
           (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
 
         case Meta(ns, attr, "e", NoValue, Eq(Seq(id: Long)))            => (resolve(query, id.toString, v, element), id.toString, v, ns, attr, prevRefNs)
-        case Meta(ns, attr, "e", NoValue, IndexVal) if prevRefNs == ""  => (resolve(query, e, v, element), e, w, ns, attr, "")
-        case Meta(ns, attr, "e", NoValue, IndexVal)                     => (resolve(query, v, w, element), v, y, ns, attr, "IndexVal")
+        case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        => (resolve(query, e, v, element), e, w, ns, attr, "")
+        case Meta(ns, attr, "e", _, IndexVal)                           => (resolve(query, v, w, element), v, y, ns, attr, "IndexVal")
         case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         => (resolve(query, e, v, element), e, w, ns, attr, "")
         case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" => (resolve(query, e, y, element), e, y, ns, attr, "")
 
@@ -616,7 +616,7 @@ object Model2Query extends Helpers {
           }
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
-        case other => sys.error("[Model2Query:make] Unresolved query variables from model: " +(other, e, v, prevNs, prevAttr, prevRefNs))
+        case other => sys.error("[Model2Query:make] Unresolved query variables from model: " + (other, e, v, prevNs, prevAttr, prevRefNs))
       }
     }
 
@@ -671,14 +671,14 @@ object Model2Query extends Helpers {
             case other          => makeSelfJoinClauses(other)
           }
           def dataClauses(dc: DataClause): Seq[Clause] = dc match {
-            case DataClause(ds, e, a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) ==(ns2, attr2) && card == 3 =>
+            case DataClause(ds, e, a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
               // Add next And-value
               Seq(
                 DataClause(ds, vi(e), a, Var(v + "_" + i), queryTerm(tx), queryTerm(op)),
                 Funct(".matches ^String", List(Var(v + "_" + i), Val(".+@(" + andValue + ")$")), NoBinding)
               )
 
-            case DataClause(ds, e, a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) ==(ns2, attr2) =>
+            case DataClause(ds, e, a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
               // Add next And-value
               Seq(DataClause(ds, vi(e), a, Val(andValue), queryTerm(tx), queryTerm(op)))
 
