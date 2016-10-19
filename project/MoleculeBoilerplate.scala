@@ -141,9 +141,9 @@ object MoleculeBoilerplate {
         case r"oneBigDec(.*)$str"  => Seq(Val(attr, attrClean, "OneBigDec", "BigDecimal", "", "bigdec", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneByte(.*)$str"    => Seq(Val(attr, attrClean, "OneByte", "Byte", "", "bytes", parseOptions(str, Nil, attr, curFullNs)))
         case r"oneBoolean(.*)$str" => Seq(Val(attr, attrClean, "OneBoolean", "Boolean", "", "boolean", parseOptions(str, Nil, attr, curFullNs)))
-        case r"oneDate(.*)$str"    => Seq(Val(attr, attrClean, "OneDate", "java.util.Date", "", "instant", parseOptions(str, Nil, attr, curFullNs)))
-        case r"oneUUID(.*)$str"    => Seq(Val(attr, attrClean, "OneUUID", "java.util.UUID", "", "uuid", parseOptions(str, Nil, attr, curFullNs)))
-        case r"oneURI(.*)$str"     => Seq(Val(attr, attrClean, "OneURI", "java.net.URI", "", "uri", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneDate(.*)$str"    => Seq(Val(attr, attrClean, "OneDate", "Date", "", "instant", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneUUID(.*)$str"    => Seq(Val(attr, attrClean, "OneUUID", "UUID", "", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+        case r"oneURI(.*)$str"     => Seq(Val(attr, attrClean, "OneURI", "URI", "", "uri", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"manyString(.*)$str"  => Seq(Val(attr, attrClean, "ManyString", "Set[String]", "String", "string", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyInt(.*)$str"     => Seq(Val(attr, attrClean, "ManyInt", "Set[Int]", "Int", "long", parseOptions(str, Nil, attr, curFullNs)))
@@ -154,9 +154,9 @@ object MoleculeBoilerplate {
         case r"manyBigDec(.*)$str"  => Seq(Val(attr, attrClean, "ManyBigDec", "Set[BigDecimal]", "BigDecimal", "bigdec", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyByte(.*)$str"    => Seq(Val(attr, attrClean, "ManyByte", "Set[Byte]", "Byte", "bytes", parseOptions(str, Nil, attr, curFullNs)))
         case r"manyBoolean(.*)$str" => Seq(Val(attr, attrClean, "ManyBoolean", "Set[Boolean]", "Boolean", "boolean", parseOptions(str, Nil, attr, curFullNs)))
-        case r"manyDate(.*)$str"    => Seq(Val(attr, attrClean, "ManyDate", "Set[java.util.Date]", "java.util.Date", "instant", parseOptions(str, Nil, attr, curFullNs)))
-        case r"manyUUID(.*)$str"    => Seq(Val(attr, attrClean, "ManyUUID", "Set[java.util.UUID]", "java.util.UUID", "uuid", parseOptions(str, Nil, attr, curFullNs)))
-        case r"manyURI(.*)$str"     => Seq(Val(attr, attrClean, "ManyURI", "Set[java.net.URI]", "java.net.URI", "uri", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyDate(.*)$str"    => Seq(Val(attr, attrClean, "ManyDate", "Set[Date]", "Date", "instant", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyUUID(.*)$str"    => Seq(Val(attr, attrClean, "ManyUUID", "Set[UUID]", "UUID", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+        case r"manyURI(.*)$str"     => Seq(Val(attr, attrClean, "ManyURI", "Set[URI]", "URI", "uri", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"mapString(.*)$str" => Seq(
           Val(attr, attrClean, "MapString", "Map[String, String]", "String", "string", parseOptions(str, Nil, attr, curFullNs)),
@@ -195,16 +195,16 @@ object MoleculeBoilerplate {
           Val(attrK, attrK, "OneBoolean", "Boolean", "K", "boolean", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"mapDate(.*)$str" => Seq(
-          Val(attr, attrClean, "MapDate", "Map[String, java.util.Date]", "java.util.Date", "string", parseOptions(str, Nil, attr, curFullNs)),
-          Val(attrK, attrK, "OneDate", "java.util.Date", "K", "instant", parseOptions(str, Nil, attr, curFullNs)))
+          Val(attr, attrClean, "MapDate", "Map[String, Date]", "Date", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneDate", "Date", "K", "instant", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"mapUUID(.*)$str" => Seq(
-          Val(attr, attrClean, "MapUUID", "Map[String, java.util.UUID]", "java.util.UUID", "string", parseOptions(str, Nil, attr, curFullNs)),
-          Val(attrK, attrK, "OneUUID", "java.util.UUID", "K", "uuid", parseOptions(str, Nil, attr, curFullNs)))
+          Val(attr, attrClean, "MapUUID", "Map[String, UUID]", "UUID", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneUUID", "UUID", "K", "uuid", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"mapURI(.*)$str" => Seq(
-          Val(attr, attrClean, "MapURI", "Map[String, java.net.URI]", "java.net.URI", "string", parseOptions(str, Nil, attr, curFullNs)),
-          Val(attrK, attrK, "OneURI", "java.net.URI", "K", "uri", parseOptions(str, Nil, attr, curFullNs)))
+          Val(attr, attrClean, "MapURI", "Map[String, URI]", "URI", "string", parseOptions(str, Nil, attr, curFullNs)),
+          Val(attrK, attrK, "OneURI", "URI", "K", "uri", parseOptions(str, Nil, attr, curFullNs)))
 
         case r"oneEnum\((.*?)$enums\)(.*)$str"  => Seq(Enum(attr, attrClean, "OneEnum", "String", "", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
         case r"manyEnum\((.*?)$enums\)(.*)$str" => Seq(Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", enums.replaceAll("'", "").split(",").toList.map(_.trim), parseOptions(str, Nil, attr, curFullNs)))
@@ -973,12 +973,6 @@ object MoleculeBoilerplate {
     }
     val p1 = (s: String) => padS(attrs.map(_.attr).filter(!_.startsWith("_")).map(_.length).max, s)
     val p2 = (s: String) => padS(attrs.map(_.clazz).filter(!_.startsWith("Back")).map(_.length).max, s)
-    def mapType(s: String) = s match {
-      case "java.util.Date" => "Date"
-      case "java.util.UUID" => "UUID"
-      case "java.net.URI"   => "URI"
-      case other            => other
-    }
 
     val attrClasses = attrs.flatMap {
 
@@ -1059,7 +1053,9 @@ object MoleculeBoilerplate {
     val nsArities = d.nss.map(ns => ns.ns -> ns.attrs.size).toMap
 
     val extraImports0 = attrs.collect {
-      case Val(_, _, _, tpe, _, _, _, _, _) if tpe.take(4) == "java" => tpe
+      case Val(_, _, _, "Date", _, _, _, _, _) => "java.util.Date"
+      case Val(_, _, _, "UUID", _, _, _, _, _) => "java.util.UUID"
+      case Val(_, _, _, "URI", _, _, _, _, _)  => "java.net.URI"
     }.distinct
     val extraImports = if (extraImports0.isEmpty) "" else extraImports0.mkString(s"\nimport ", "\nimport ", "")
 
@@ -1071,7 +1067,14 @@ object MoleculeBoilerplate {
 
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
+    val (inputEids, inputSpace) = if(inArity > 0)
+      (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "           ")
+    else
+      ("", "")
+
     val nsTraitsOut = (0 to outArity).map(nsTrait(d.domain, namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
+
+
     val outFile: String =
       s"""/*
           |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
@@ -1088,7 +1091,9 @@ object MoleculeBoilerplate {
           |
           |
           |object $ns extends ${ns}_0 with FirstNS {
-          |  def apply(e: Long): ${ns}_0 = ???
+          |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+          |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
+          |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
           |}
           |
           |trait $ns {
@@ -1131,6 +1136,11 @@ object MoleculeBoilerplate {
 
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
+    val (inputEids, inputSpace) = if(inArity > 0)
+      (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "          ")
+    else
+      ("", "")
+
     val nsTraits = (for {
       in <- 0 to inArity
       out <- 0 to outArity
@@ -1151,7 +1161,9 @@ object MoleculeBoilerplate {
         |
         |
         |object $ns extends ${ns}_0 with FirstNS {
-        |  def apply(e: Long): ${ns}_0 = ???
+        |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+        |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
+        |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
         |}
         |
         |trait $ns $ext{

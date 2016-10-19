@@ -491,14 +491,16 @@ object Model2Query extends Helpers {
 
         // Meta ===================================================================================
 
-        case Meta(_, _, "e", _, Fn("count", Some(i)))   => q.find("count", Seq(i), e, Seq())
-        case Meta(_, _, "e", _, Fn("count", _))         => q.find("count", Seq(), e, Seq())
-        case Meta(_, _, "e", _, Length(Some(Fn(_, _)))) => q.find(e, Seq())
-        case Meta(_, _, _, Id(eid), IndexVal)           => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-        case Meta(_, _, "r", _, IndexVal)               => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, IndexVal)                 => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, EntValue)                 => q.find(e, Seq())
-        case Meta(_, _, _, _, _)                        => q
+        case Meta(_, _, "e", _, Fn("count", Some(i)))      => q.find("count", Seq(i), e, Seq())
+        case Meta(_, _, "e", _, Fn("count", _))            => q.find("count", Seq(), e, Seq())
+        case Meta(_, _, "e", _, Length(Some(Fn(_, _))))    => q.find(e, Seq())
+        case Meta(_, _, "e", _, Eq(Seq(Qm)))               => q.in(e)
+        case Meta(_, _, "e", _, Eq(eids)) if eids.size > 1 => q.in(eids, e)
+        case Meta(_, _, "r", _, IndexVal)                  => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, Id(eid), IndexVal)              => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, _, IndexVal)                    => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, _, EntValue)                    => q.find(e, Seq())
+        case Meta(_, _, _, _, _)                           => q
 
         case unresolved => sys.error("[Model2Query:resolve] Unresolved model: " + unresolved)
       }
@@ -585,6 +587,8 @@ object Model2Query extends Helpers {
           (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
 
         case Meta(ns, attr, "e", NoValue, Eq(Seq(id: Long)))            => (resolve(query, id.toString, v, element), id.toString, v, ns, attr, prevRefNs)
+        case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  => (resolve(query, e, v, element), e, v, ns, attr, prevRefNs)
+        case Meta(ns, attr, "e", NoValue, Eq(eids))                     => (resolve(query, e, v, element), e, v, ns, attr, prevRefNs)
         case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        => (resolve(query, e, v, element), e, w, ns, attr, "")
         case Meta(ns, attr, "e", _, IndexVal)                           => (resolve(query, v, w, element), v, y, ns, attr, "IndexVal")
         case Meta(ns, attr, "r", _, IndexVal)                           => (resolve(query, w, v, element), e, w, ns, attr, "IndexVal")

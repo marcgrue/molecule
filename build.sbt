@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.9.1-SNAPSHOT",
+  version := "0.10.0",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -12,7 +12,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.datomic" % "datomic-free" % "0.9.5372",
+    "com.datomic" % "datomic-free" % "0.9.5404",
     "org.specs2" %% "specs2" % "2.4.11"
   ),
   // Remove Java directories
@@ -34,65 +34,65 @@ lazy val moleculeCore = project.in(file("core"))
 
 lazy val moleculeCoretest = project.in(file("coretest"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
   .settings(
-    moduleName := "molecule-coretest",
-    moleculeSchemas := Seq(
-      "molecule/partition",
-      "molecule/bidirectional",
-      "molecule/util"
-    )
+    moduleName := "molecule-coretest"
+//    moleculeSchemas := Seq(
+//      "molecule/partition",
+//      "molecule/bidirectional",
+//      "molecule/util"
+//    )
   )
   // Add schema definition directories for boilerplate generation testing
-//  .settings(Seq(definitionDirsSeparate(
-//  "molecule/util"
-//)))
-//  .settings(Seq(definitionDirs(
-//  "molecule/partition",
-//  "molecule/bidirectional"
-//)))
+  .settings(Seq(definitionDirsSeparate(
+  "molecule/util"
+)))
+  .settings(Seq(definitionDirs(
+  "molecule/partition",
+  "molecule/bidirectional"
+)))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
   .settings(
-    moduleName := "molecule-examples",
-    moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/gremlin",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
-    )
+    moduleName := "molecule-examples"
+//    moleculeSchemas := Seq(
+//      "molecule/examples/dayOfDatomic",
+//      "molecule/examples/gremlin",
+//      "molecule/examples/mbrainz",
+//      "molecule/examples/seattle"
+//    )
   )
-//  .settings(Seq(definitionDirs(
-//  "molecule/examples/dayOfDatomic",
-//  "molecule/examples/gremlin",
-//  "molecule/examples/mbrainz",
-//  "molecule/examples/seattle"
-//)))
+  .settings(Seq(definitionDirs(
+  "molecule/examples/dayOfDatomic",
+  "molecule/examples/gremlin",
+  "molecule/examples/mbrainz",
+  "molecule/examples/seattle"
+)))
 
 
-//def definitionDirsSeparate(domainDirs: String*) = definitionDirs0(true, domainDirs: _*)
-//def definitionDirs(domainDirs: String*) = definitionDirs0(false, domainDirs: _*)
-//def definitionDirs0(separateInFiles: Boolean, domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
-//  val codeDir = (scalaSource in Compile).value
-//  val sourceDir = (sourceManaged in Compile).value
-//
-//  // generate source files
-//  val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq, separateInFiles)
-//
-//  // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
-//  val cache = FileFunction.cached(
-//    streams.value.cacheDirectory / "moleculeBoilerplateTesting",
-//    inStyle = FilesInfo.lastModified,
-//    outStyle = FilesInfo.hash
-//  ) {
-//    in: Set[File] => sourceFiles.toSet
-//  }
-//  cache(sourceFiles.toSet).toSeq
-//}.taskValue
+def definitionDirsSeparate(domainDirs: String*) = definitionDirs0(true, domainDirs: _*)
+def definitionDirs(domainDirs: String*) = definitionDirs0(false, domainDirs: _*)
+def definitionDirs0(separateInFiles: Boolean, domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
+  val codeDir = (scalaSource in Compile).value
+  val sourceDir = (sourceManaged in Compile).value
+
+  // generate source files
+  val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq, separateInFiles)
+
+  // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
+  val cache = FileFunction.cached(
+    streams.value.cacheDirectory / "moleculeBoilerplateTesting",
+    inStyle = FilesInfo.lastModified,
+    outStyle = FilesInfo.hash
+  ) {
+    in: Set[File] => sourceFiles.toSet
+  }
+  cache(sourceFiles.toSet).toSeq
+}.taskValue
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

@@ -34,7 +34,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"TermValue.apply($ns)" => resolve(ns)
 
     // Namespace(eid).attr1...
+    case q"$prev.$ns.apply($pkg.?)" if q"$prev.$ns".isFirstNS                        => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(Qm))))
     case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS && q"$prev.$ns".isBiEdge => traverse(q"$prev", Meta(firstLow(ns), "", "e", BiEdge, Eq(Seq(extract(eid)))))
+    case q"$prev.$ns.apply(..$eids)" if q"$prev.$ns".isFirstNS                       => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(eids map extract)))
     case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS                          => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(extract(eid)))))
 
 

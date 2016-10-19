@@ -35,6 +35,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
       case ('_, Meta(ns, "", "e", _, EntValue))             => ('arg, stmts)
       case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))    => (Eid(id), stmts)
+      case ('_, Meta(ns, "", "e", _, Eq(ids: Seq[_])))      => (Eids(ids), stmts)
       case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs, c)))
       case ('_, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs, c)))
       case ('_, Bond(ns, refAttr, refNs, c, gs))            => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
@@ -47,7 +48,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         }._2
         ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, bi(gs, c)))
 
-      // First with id
+      // Entity ids applied to initial namespace
+      case (Eids(ids), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      case (Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
+
+      // Entity id applied to initial namespace
       case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
       case (Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
       case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))

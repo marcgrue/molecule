@@ -69,6 +69,12 @@ object QueryOps extends Helpers {
     def in(v: String, ns: String, attr: String, e: String): Query =
       q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(v, KW(ns, attr), None, e)))
 
+    def in(eids: Seq[Any], e: String): Query =
+      q.copy(i = q.i.copy(inputs = q.i.inputs :+ InVar(CollectionBinding(Var(e)), Seq(eids))))
+
+    def in(e: String): Query =
+      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(e, KW("", ""), None, e)))
+
 
     // With ...........................................
 

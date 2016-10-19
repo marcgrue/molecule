@@ -21,7 +21,7 @@ class UpdateInt extends CoreSpec {
       Ns(eid).int(2).update
       Ns.int.one === 2
 
-      // Delete value (apply no value)
+      // Apply empty value (delete value)
       Ns(eid).int().update
       Ns.int.get === List()
 
@@ -118,7 +118,7 @@ class UpdateInt extends CoreSpec {
       Ns(eid).ints.replace(6 -> 8).update
       Ns.ints.one.toList.sorted === List(1, 2, 3, 4, 5, 8)
 
-      // Replace value to existing value simply retracts it
+      // Replacing value to existing value simply retracts it
       Ns(eid).ints.replace(5 -> 8).update
       Ns.ints.one.toList.sorted === List(1, 2, 3, 4, 8)
 
@@ -165,7 +165,7 @@ class UpdateInt extends CoreSpec {
       Ns(eid).ints.remove(7).update
       Ns.ints.one.toList.sorted === List(1, 2, 3, 4, 5)
 
-      // Removing duplicate values removes the distinc value
+      // Removing duplicate values removes the distinct value
       Ns(eid).ints.remove(5, 5).update
       Ns.ints.one.toList.sorted === List(1, 2, 3, 4)
 

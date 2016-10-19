@@ -33,6 +33,7 @@ object transaction {
   }
 
   case class Eid(id: Long)
+  case class Eids(ids: Seq[Any])
   case class Prefix(s: String)
   case class Values(vs: Any, prefix: Option[String] = None)
 }

@@ -64,9 +64,9 @@ case class CheckModel(model: Model, op: String) {
     case ok                                       => ok
   }
   private def missingAppliedId = model.elements.head match {
-    case Meta(_, _, "e", BiEdge, Eq(List(eid)))  => true
-    case Meta(_, _, "e", NoValue, Eq(List(eid))) => true
-    case Atom(ns, _, _, _, _, _, _, _)           => iae("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
+    case Meta(_, _, "e", BiEdge, Eq(List(eid))) => true
+    case Meta(_, _, "e", NoValue, Eq(eids))     => true
+    case Atom(ns, _, _, _, _, _, _, _)          => iae("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
   }
 
   private def noGenericsInTail = model.elements.tail.collectFirst {
@@ -115,7 +115,7 @@ case class CheckModel(model: Model, op: String) {
     def catchConflictingCardOneValues(elements: Seq[Element]): Unit = elements.collectFirst {
       case Atom(ns, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => iae("noConflictingCardOneValues",
         s"""Can't $op multiple values for cardinality-one attribute:
-            |  ${Ns(ns)} ... $attr(${vs.mkString(", ")})""".stripMargin)
+           |  ${Ns(ns)} ... $attr(${vs.mkString(", ")})""".stripMargin)
       case Nested(ref, es)                                        => catchConflictingCardOneValues(es)
       case Composite(es)                                          => catchConflictingCardOneValues(es)
     }
@@ -183,14 +183,14 @@ case class CheckModel(model: Model, op: String) {
         case Atom(_, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) if extractNs(edgeRefAttr) == edgeNs => true
       }
 
-//      elements.collectFirst {
-        // ?.. TargetNs
-//        case Bond(edgeNs, _, _, _, Seq(BiTargetRef(_, _))) => hasBase(elements, edgeNs) getOrElse
-//          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
-        // ?.. targetAttr
-//        case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, _)), _) => hasBase(elements, edgeNs) getOrElse
-//          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
-//      }
+      //      elements.collectFirst {
+      // ?.. TargetNs
+      //        case Bond(edgeNs, _, _, _, Seq(BiTargetRef(_, _))) => hasBase(elements, edgeNs) getOrElse
+      //          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
+      // ?.. targetAttr
+      //        case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, _)), _) => hasBase(elements, edgeNs) getOrElse
+      //          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
+      //      }
     }
 
     def missingTarget(elements: Seq[Element]): Unit = {
@@ -207,20 +207,20 @@ case class CheckModel(model: Model, op: String) {
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
           iae("edgeComplete", s"Missing target namespace after edge namespace `${Ns(edgeNs)}`.")
         // Base.attr.edge ..?
-//        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, extractNs(edgeRefAttr)) getOrElse
-//          iae("edgeComplete", s"Missing target namespace after edge namespace `${extractNs(edgeRefAttr)}`.")
+        //        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, extractNs(edgeRefAttr)) getOrElse
+        //          iae("edgeComplete", s"Missing target namespace after edge namespace `${extractNs(edgeRefAttr)}`.")
 
         // Edge.prop ..?
         case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) =>
           hasTarget(elements, edgeNs) getOrElse
-          iae("edgeComplete", s"Missing target namespace somewhere after edge property `${Ns(edgeNs)}/$prop`.")
+            iae("edgeComplete", s"Missing target namespace somewhere after edge property `${Ns(edgeNs)}/$prop`.")
       }
     }
 
     model.elements.head match {
       case Meta(ns, _, "e", BiEdge, Eq(List(eid))) =>
       case checkNext                               =>
-//        missingBase(model.elements)
+        //        missingBase(model.elements)
         missingTarget(model.elements)
     }
   }
