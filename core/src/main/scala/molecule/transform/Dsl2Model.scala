@@ -155,7 +155,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
-      //      x(1, t, prev, cur, op, values, element)
+//      x(1, t, prev, cur, op, values, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
 
@@ -357,13 +357,13 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-//    x(10
-//      , values0
-//      , values
-//      , op
-//      , attr
-//      //          , attr.isMapAttr
-//    )
+    //    x(10
+    //      , values0
+    //      , values
+    //      , op
+    //      , attr
+    //      //          , attr.isMapAttr
+    //    )
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
@@ -437,7 +437,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         && !(vs.head.tpe <:< weakTypeOf[Seq[Nothing]])
         && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => vs.head match {
         case Apply(_, pairs) =>
-//          x(3, vs)
+          //          x(3, vs)
           mapPairs(pairs, attr)
         case ident           => mapPairs(Seq(ident), attr)
       }
@@ -450,7 +450,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       //      }
       case q"Seq(..$vs)"
         if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] =>
-//        x(5, vs)
+        //        x(5, vs)
         mapPairs(vs, attr)
       case q"Seq(..$vs)" if attr == null                     => vs.flatMap(v => resolveValues(q"$v"))
       case q"Seq(..$vs)"                                     => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
@@ -463,9 +463,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
 //    x(23, vs, attr)
     val keyValues = vs.map {
-      case q"scala.this.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
-      case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"              => (extract(q"$k"), extract(q"$v"))
-      case ident                                                => (extract(ident), "__pair__")
+      case q"scala.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
+      case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"         => (extract(q"$k"), extract(q"$v"))
+      case ident                                           => (extract(ident), "__pair__")
     }
     if (attr.isMapAttr)
       MapEq(keyValues.map(kv => (kv._1.asInstanceOf[String], kv._2)))
@@ -658,8 +658,8 @@ object Dsl2Model {
     }._1
 
     val model = Model(elements1)
-//                inst(c).x(30, dsl, elements0, elements1, model)
-//                    inst(c).x(30, elements0, elements1)
+    //                inst(c).x(30, dsl, elements0, elements1, model)
+    //                    inst(c).x(30, elements0, elements1)
     //            inst(c).x(30, model)
 
     model

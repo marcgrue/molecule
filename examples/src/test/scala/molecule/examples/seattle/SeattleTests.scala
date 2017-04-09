@@ -8,7 +8,6 @@ import molecule.schema._
 
 import scala.language.reflectiveCalls
 
-
 class SeattleTests extends SeattleSpec {
 
   "A first query" >> {

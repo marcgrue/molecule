@@ -4,7 +4,6 @@ import java.util.{Date, UUID, Collection => jCollection, List => jList, Map => j
 import datomic._
 import molecule.util.Debug
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.language.{existentials, higherKinds}
 
@@ -45,20 +44,21 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case other                   => other
   }
 
+
   private def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
     val builder = Map.newBuilder[String, Any]
-    val iter = entity.keySet.toList.sorted.asJava.iterator()
+    val iter = entity.keySet.asScala.toList.sorted.asJava.iterator()
 
     // Add id also
     builder += ":db/id" -> entity.get(":db/id")
     while (iter.hasNext) {
       val key = iter.next()
-      val scalaValue = toScala(entity.get(key), depth, maxDepth, "Map")
+      val scalaValue = toScala(entity.get(key), depth, maxDepth)
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
-          case m1: Map[_, _] if m1.containsKey(":db/id") =>
+          case m1: Map[_, _] if m1.asInstanceOf[Map[String, Any]].isDefinedAt(":db/id") =>
             val indexedRefMaps: Seq[(Long, Map[String, Any])] = l.map {
-              case m2: Map[_, _] => m2.get(":db/id").asInstanceOf[Long] -> m2.asInstanceOf[Map[String, Any]]
+              case m2: Map[_, _] => m2.asInstanceOf[Map[String, Any]].apply(":db/id").asInstanceOf[Long] -> m2.asInstanceOf[Map[String, Any]]
             }
             indexedRefMaps.sortBy(_._1).map(_._2)
           case _                                         => l
@@ -70,9 +70,10 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     builder.result()
   }
 
+
   private def asList(depth: Int = 1, maxDepth: Int = 5): List[(String, Any)] = {
     val builder = List.newBuilder[(String, Any)]
-    val iter = entity.keySet.toList.sorted.asJava.iterator()
+    val iter = entity.keySet.asScala.toList.sorted.asJava.iterator()
 
     // Add id first
     builder += ":db/id" -> entity.get(":db/id")
@@ -92,7 +93,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
               if (typedSeq.head.map(_._1).contains(":db/id")) {
                 // We now know we have :db/id's to sort on
                 val indexedRefLists: Seq[(Long, Seq[(String, Any)])] = typedSeq.map {
-                  subSeq => subSeq.toMap.get(":db/id").get.asInstanceOf[Long] -> subSeq
+                    subSeq => subSeq.toMap.apply(":db/id").asInstanceOf[Long] -> subSeq
                 }
                 // Sort sub Seq's by :db/id
                 indexedRefLists.sortBy(_._1).map(_._2)
@@ -132,9 +133,9 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     }
     case many: Many[_, _, _, _]   => entity.get(attr._kw) match {
       case null                                    => None
-      case results: clojure.lang.PersistentHashSet => results.head match {
-        case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[A])
+      case results: clojure.lang.PersistentHashSet => results.asScala.head match {
+        case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
+        case manySet             => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[A])
       }
       case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
     }
@@ -142,9 +143,9 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     // How to treat map attributes?
     case mapped: MapAttr[_, _, _, _] => entity.get(attr._kw) match {
       case null                                    => None
-      case results: clojure.lang.PersistentHashSet => results.head match {
-        case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[A])
+      case results: clojure.lang.PersistentHashSet => results.asScala.head match {
+        case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
+        case manySet             => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[A])
       }
       case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
     }
@@ -180,9 +181,9 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   def getTyped[T](kw: String): Option[T] = entity.get(kw) match {
     case null                                    => None
-    case results: clojure.lang.PersistentHashSet => results.head match {
-      case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[T])
-      case manyValue           => Some(results.toList.map(toScala(_)).toSet.asInstanceOf[T])
+    case results: clojure.lang.PersistentHashSet => results.asScala.head match {
+      case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[T])
+      case manyValue           => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[T])
     }
     case result                                  => Some(toScala(result).asInstanceOf[T])
   }
@@ -195,9 +196,9 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   def apply(kw: String): Option[Any] = entity.get(kw) match {
     case null                                    => None
-    case results: clojure.lang.PersistentHashSet => results.head match {
-      case ent: datomic.Entity => Some(results.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted)
-      case manyValue           => Some(results.toList.map(toScala(_)).toSet)
+    case results: clojure.lang.PersistentHashSet => results.asScala.head match {
+      case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted)
+      case manyValue           => Some(results.asScala.toList.map(toScala(_)).toSet)
     }
     case result                                  => Some(toScala(result))
   }
@@ -239,8 +240,8 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case e: datomic.Entity                                      => e.get(":db/id").asInstanceOf[Long]
 
     // :db.type/keyword
-    case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.toList.map(toScala(_, depth, maxDepth, tpe))
-    case set: clojure.lang.PersistentHashSet                     => set.toList.map(toScala(_, depth, maxDepth, tpe).asInstanceOf[Long]).toSet
+    case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.asScala.toList.map(toScala(_, depth, maxDepth, tpe))
+    case set: clojure.lang.PersistentHashSet                     => set.asScala.toList.map(toScala(_, depth, maxDepth, tpe).asInstanceOf[Long]).toSet
 
     // a collection
     case coll: java.util.Collection[_] =>

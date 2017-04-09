@@ -14,6 +14,7 @@ trait InputMolecule {
       case Or(or1: Or[I1], TermValue(v2))   => traverse(or1) :+ v2
       case Or(TermValue(v1), or2: Or[I1])   => v1 +: traverse(or2)
       case Or(or1: Or[I1], or2: Or[I1])     => traverse(or1) ++ traverse(or2)
+      case _                                => sys.error(s"Unexpected expression: " + expr)
     }
     traverse(or)
   }

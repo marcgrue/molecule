@@ -1,16 +1,14 @@
 package molecule.transform
-import java.util.{Date, List => jList}
+import java.util.Date
 
 import molecule._
 import molecule.ast.transaction.RetractEntity
-//import datomic.{Connection, Database, Peer}
 import datomic._
-//import molecule.DatomicFacade
 import molecule.ast.model._
 import molecule.ast.transaction._
 import molecule.util.{Debug, Helpers}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
@@ -119,17 +117,17 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
   // Lookup if key is already populated
   def pairStrs(e: Any, a: String, key: String) = {
     val query = s"[:find ?v :in $$ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).map(_.get(0))
+    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
   }
 
-  def getPairs(e: Any, a: String, key: String = ""): Map[String, String] = {
+  def getPairs(e: Any, a: String, key: String = "") = {
     val strs = if (key.isEmpty) {
       val query = s"[:find ?v :in $$ ?e ?a :where [?e ?a ?v]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).map(_.get(0))
+      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
       result
     } else {
       val query = s"[:find ?v :in $$ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).map(_.get(0))
+      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
       result
     }
     strs.map {
@@ -168,7 +166,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
       else
         s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
-      Peer.q(query, conn.db, id.asInstanceOf[Object]).map(_.get(0))
+      Peer.q(query, conn.db, id.asInstanceOf[Object]).asScala.map(_.get(0))
     }
 
     def edgeAB(edge1: Any, targetAttr: String) = {
@@ -190,7 +188,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
     def otherEdge(edgeA: Any): AnyRef = {
       val query = s"[:find ?edgeB :in $$ ?edgeA :where [?edgeA :molecule_Meta/otherEdge ?edgeB]]"
-      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).map(_.get(0))
+      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
       result match {
         case Seq(edgeB) => edgeB
         case Nil        =>
@@ -206,7 +204,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
     }
 
     def checkDupKeys(pairs: Seq[(String, Any)], host: String, op: String) {
-      val dupKeys = pairs.map(_._1).groupBy(identity).collect { case (key, keys) if keys.size > 1 => key }
+      val dupKeys: Seq[String] = pairs.map(_._1).groupBy(identity).collect { case (key, keys) if keys.size > 1 => key }.toSeq
       if (dupKeys.nonEmpty) {
         val dupPairs = pairs.filter(p => dupKeys.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         iae(s"valueStmts:$host", s"Can't $op multiple key/value pairs with the same key for attribute `$a`:\n" + dupPairs.mkString("\n"))
@@ -436,11 +434,12 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
         case MapAdd(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "add")
+//          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
           val curPairs = getPairs(edgeA, a)
           val curKeys = curPairs.keys
           newPairs.flatMap {
-            case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
-            case (k, v) if curKeys.contains(k)                   => Seq(
+            case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
+            case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(
               Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v), Card(card)),
               Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v), Card(card))
             )
@@ -453,11 +452,11 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         case MapReplace(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "replace")
           val curPairs = getPairs(edgeA, a)
-          val curKeys = curPairs.keys.toSeq
-          checkUnknownKeys(newPairs, curKeys, "biEdgeProp")
+          val curKeys = curPairs.keys
+          checkUnknownKeys(newPairs, curKeys.toSeq, "biEdgeProp")
           newPairs.flatMap {
-            case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
-            case (k, v) if curKeys.contains(k)                   => Seq(
+            case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
+            case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(
               Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v), Card(card)),
               Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v), Card(card))
             )
@@ -573,8 +572,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         val curPairs = getPairs(e, a)
         val curKeys = curPairs.keys
         newPairs.flatMap {
-          case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
-          case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
+          case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
+          case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
           case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
@@ -584,8 +583,8 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
         val curKeys = curPairs.keys.toSeq
         checkUnknownKeys(newPairs, curKeys, "default")
         newPairs.flatMap {
-          case (k, v) if curPairs.contains((k, d(v).toString)) => Nil
-          case (k, v) if curKeys.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
+          case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
+          case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
           case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
@@ -850,7 +849,7 @@ case class Model2Transaction(conn: Connection, model: Model) extends Helpers {
 
   def resolveStmts(genericStmts: Seq[Statement], row: Seq[Any], nestedE0: Any = 0, edgeB0: Option[AnyRef] = None): Seq[Statement] = {
     genericStmts.foldLeft(0, edgeB0, Seq[Statement]()) { case ((cur, edgeB, stmts0), genericStmt0) =>
-      val arg0 = row.get(cur)
+      val arg0 = row.asJava.get(cur)
       val next = if ((cur + 1) < row.size) cur + 1 else cur
 
       val (stmts, nestedE) = if (stmts0.isEmpty)

@@ -194,7 +194,7 @@ class UpdateUUID extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).uuids(uuid1).update
       Ns(eid).uuids.remove(Seq[UUID]()).update
-      Ns.uuids.one.toList.sorted === List(uuid1)
+      Ns.uuids.one.toList === List(uuid1)
     }
 
 
@@ -204,15 +204,15 @@ class UpdateUUID extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).uuids(uuid1).update
-      Ns.uuids.one.toList.sorted === List(uuid1)
+      Ns.uuids.one.toList === List(uuid1)
 
       // Apply multiple values (vararg)
       Ns(eid).uuids(uuid2, uuid3).update
-      Ns.uuids.one.toList.sorted === List(uuid2, uuid3)
+      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid2, uuid3)
 
       // Apply Seq of values
       Ns(eid).uuids(Set(uuid4)).update
-      Ns.uuids.one.toList.sorted === List(uuid4)
+      Ns.uuids.one.toList === List(uuid4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).uuids(Set[UUID]()).update
@@ -221,7 +221,7 @@ class UpdateUUID extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(uuid1, uuid2)
       Ns(eid).uuids(values).update
-      Ns.uuids.one.toList.sorted === List(uuid1, uuid2)
+      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2)
 
       // Delete all (apply no values)
       Ns(eid).uuids().update

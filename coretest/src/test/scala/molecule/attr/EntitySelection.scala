@@ -1,8 +1,8 @@
 package molecule
 package attr
 
-import molecule.util.dsl.coreTest._
 import molecule.util.{CoreSetup, CoreSpec}
+import molecule.util.dsl.coreTest._
 
 class EntitySelection extends CoreSpec {
 

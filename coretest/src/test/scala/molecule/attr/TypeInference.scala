@@ -3,8 +3,9 @@ package attr
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.util.dsl.coreTest._
+
 import molecule.util.{CoreSetup, CoreSpec}
+import molecule.util.dsl.coreTest._
 
 class TypeInference extends CoreSpec {
 

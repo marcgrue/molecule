@@ -422,7 +422,8 @@ class Insert extends CoreSpec {
         ":db/id" -> 17592186045445L,
         ":ns/refs1" -> List(
           Map(":db/id" -> 17592186045446L, ":ref1/str1" -> "r1"),
-          Map(":db/id" -> 17592186045447L, ":ref1/str1" -> "r2")))
+          Map(":db/id" -> 17592186045447L, ":ref1/str1" -> "r2")
+        ))
 
       // Like the classical order/products example
       // Note how our "sub-molecule" `Ref1.int.str` is regarded as
@@ -433,7 +434,8 @@ class Insert extends CoreSpec {
         ":db/id" -> 17592186045449L,
         ":ns/refs1" -> List(
           Map(":db/id" -> 17592186045450L, ":ref1/int1" -> 4, ":ref1/str1" -> "product1"),
-          Map(":db/id" -> 17592186045451L, ":ref1/int1" -> 7, ":ref1/str1" -> "product2")),
+          Map(":db/id" -> 17592186045451L, ":ref1/int1" -> 7, ":ref1/str1" -> "product2")
+        ),
         ":ns/str" -> "order")
     }
   }

@@ -4,7 +4,8 @@ import java.util.{List => jList}
 import molecule.ast.model._
 import molecule.ast.transaction._
 
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99) {
 
@@ -40,15 +41,15 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
           case RetractEntity(e)         =>
             indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
 
-          case l: java.util.List[_] if l.size() == 4 && l.head.toString.take(4) == ":db/" => {
-            val List(action, e, a, v) = l.toList
+          case l: java.util.List[_] if l.size() == 4 && l.asScala.head.toString.take(4) == ":db/" => {
+            val List(action, e, a, v) = l.asScala.toList
             indent + action + padS(13, action.toString) + e + padS(34, e.toString) + a + padS(26, a.toString) + "   " + v
           }
 
           case l: List[_] if max      => indent + "List(" + l.mkString(",   ") + ")"
           case l: List[_]             => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: jList[_] if max     => indent + "JavaList(" + l.mkString(",   ") + ")"
-          case l: jList[_]            => indent + "JavaList(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: jList[_] if max     => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
+          case l: jList[_]            => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case l: Map[_, _] if max    => indent + "Map(" + l.mkString(",   ") + ")"
           case l: Map[_, _]           => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Nested(bond, nested)   => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
@@ -57,17 +58,17 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
           case Composite(elements)    => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case m: Model               => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case m: java.util.Map[_, _] => {
-            if (m.size() == 4 && m.keys.map(_.toString).contains(":db-before")) {
-              val tx = m.toList
+            if (m.size() == 4 && m.asScala.keys.map(_.toString).toSeq.contains(":db-before")) {
+              val tx = m.asScala.toList
               indent + "Transaction(\n" +
                 traverse(tx(0), level + 1, 1) + "\n" +
                 traverse(tx(1), level + 1, 2) + "\n" +
                 traverse(tx(2), level + 1, 3) + "\n" +
-                traverse(":tempids(\n" + tx(3)._2.asInstanceOf[java.util.Map[_, _]].iterator.zipWithIndex.map { case (y, j) => traverse(y, level + 2, j + 1) }.mkString("\n") + "))", level + 1, 4)
+                traverse(":tempids(\n" + tx(3)._2.asInstanceOf[java.util.Map[_, _]].asScala.iterator.zipWithIndex.map { case (y, j) => traverse(y, level + 2, j + 1) }.mkString("\n") + "))", level + 1, 4)
             } else if (max)
-              indent + "JavaMap(" + m.iterator.mkString(",   ") + ")"
+              indent + "JavaMap(" + m.asScala.iterator.mkString(",   ") + ")"
             else
-              indent + "JavaMap(\n" + m.iterator.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+              indent + "JavaMap(\n" + m.asScala.iterator.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           }
 
           case (a, b) => {

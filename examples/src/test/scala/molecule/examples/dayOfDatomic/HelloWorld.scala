@@ -1,9 +1,8 @@
 package molecule.examples.dayOfDatomic
 import datomic.Peer
 import datomic.Util._
-//import molecule._
 import molecule.util.MoleculeSpec
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 class HelloWorld extends MoleculeSpec {
@@ -28,7 +27,9 @@ class HelloWorld extends MoleculeSpec {
     val qresult = Peer.q( """[:find ?e :where [?e :db/doc "Hello world"]]""", dbValue)
 
     // Query result is data
-    val id = qresult.toList.head.head
+//    val id1: Object  = qresult.asScala.toList.head .head
+//    val a: String = qresult.asScala.head.asScala.head
+    val id: Object = qresult.asScala.toList.head.asScala.head
 
     // Entity is a navigable view over data
     dbValue.entity(id).get(":db/id") === 17592186045417L

@@ -15,6 +15,7 @@ import molecule.util.MoleculeSpec
 
 class ProductsAndOrders extends MoleculeSpec {
 
+
   "Nested data, 1 level without initial namespace asserts" >> {
 
     // See: http://blog.datomic.com/2013/06/component-entities.html

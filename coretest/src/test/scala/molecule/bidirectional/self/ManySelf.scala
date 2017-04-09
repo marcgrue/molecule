@@ -64,7 +64,6 @@ class ManySelf extends MoleculeSpec {
       // Use `insert` for this or save existing entity ids (see below).
     }
 
-
     "1 existing" in new setup {
 
       val ben = Person.name.insert("Ben").eid
@@ -144,6 +143,7 @@ class ManySelf extends MoleculeSpec {
       friendsOf("Tim").get === List("Ben")
     }
 
+
     "multiple existing" in new setup {
 
       val List(joe, tim) = Person.name.insert("Joe", "Tim").eids
@@ -181,6 +181,7 @@ class ManySelf extends MoleculeSpec {
         ("Tom", List("Don"))
       )
     }
+
 
     "nested existing" in new Setup {
 

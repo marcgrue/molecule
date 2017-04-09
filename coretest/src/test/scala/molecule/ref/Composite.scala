@@ -470,6 +470,68 @@ class Composite extends CoreSpec {
     }
 
 
+    "Card-many ref - one value 2" in new CoreSetup {
+
+      val List(e1, r11, e2, r22) = insert(
+        Ref2.int2.str2, Ns.Refs1.int1
+      )(
+        Seq(
+          ((1, "a"), 11),
+          ((2, "b"), 22)
+        )
+      )().eids
+
+      // First entity (including referenced entity)
+      e1.touchList === List(
+        ":db/id" -> 17592186045445L,
+        ":ns/refs1" -> List(List((":db/id", 17592186045446L), (":ref1/int1", 11))),
+//        ":ns/str" -> "aa",
+        ":ref2/int2" -> 1,
+        ":ref2/str2" -> "a"
+      )
+
+      // First referenced entity (same as we see included above)
+      r11.touchList === List(
+        ":db/id" -> 17592186045446L,
+        ":ref1/int1" -> 11
+      )
+
+      // Second entity (including referenced entity)
+      e2.touchList === List(
+        ":db/id" -> 17592186045447L,
+        ":ns/refs1" -> List(List((":db/id", 17592186045448L), (":ref1/int1", 22))),
+//        ":ns/str" -> "bb",
+        ":ref2/int2" -> 2,
+        ":ref2/str2" -> "b"
+      )
+      // Second referenced entity (same as we see included above)
+      r22.touchList === List(
+        ":db/id" -> 17592186045448L,
+        ":ref1/int1" -> 22
+      )
+
+      // Queries via each namespace
+      Ref2.int2.str2.get.sorted === List(
+        (1, "a"),
+        (2, "b")
+      )
+//      Ns.str.Refs1.int1.get.sorted === List(
+//        ("aa", 11),
+//        ("bb", 22)
+//      )
+
+      // Composite query
+      m(Ref2.int2.str2 ~ Ns.Refs1.int1).get.sorted === List(
+        ((1, "a"), 11),
+        ((2, "b"), 22)
+      )
+      m(Ref2.int2.str2 ~ Ns.refs1).get === List(
+        ((1, "a"), Set(17592186045446L)),
+        ((2, "b"), Set(17592186045448L))
+      )
+    }
+
+
     "Nested" in new CoreSetup {
 
       // We can insert composites with nested data

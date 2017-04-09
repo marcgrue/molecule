@@ -14,7 +14,7 @@ import molecule.transform._
 import molecule.util._
 import org.specs2.main.ArgProperties
 
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 // ArgProperties for some reason makes FactoryBase happy when creating nested molecules
@@ -79,7 +79,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
   }
 
   def inputs(query: Query) = query.i.inputs.map {
-    case InVar(RelationBinding(_), argss)   => Util.list(argss.map(args => Util.list(args map cast: _*)).asJava: _*)
+    case InVar(RelationBinding(_), argss)   => Util.list(argss.map(args => Util.list(args map cast: _*)): _*)
     case InVar(CollectionBinding(_), argss) => Util.list(argss.head map cast: _*)
     case InVar(_, argss)                    => cast(argss.head.head)
     case InDataSource(_, argss)             => cast(argss.head.head)
@@ -106,7 +106,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val allInputs = first ++ inputs(query)
 
     try {
-      Peer.q(query.toMap, allInputs: _*).toList
+      Peer.q(query.toMap, allInputs: _*).asScala.toList
     } catch {
       case e: Throwable => throw new RuntimeException(
         s"""
@@ -314,7 +314,7 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     val txData = txResult.get(Connection.TX_DATA)
 
     // Omit first transaction datom
-    val datoms = txData.asInstanceOf[java.util.Collection[Datom]].toList.tail
+    val datoms = txData.asInstanceOf[java.util.Collection[Datom]].asScala.toList.tail
 
     val tempIds = stmtss.flatten.collect {
       case Add(e, _, _, meta) if e.toString.take(6) == "#db/id" => e

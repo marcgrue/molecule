@@ -13,6 +13,7 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     def traverse(expr: And2[I1, I2]): (Seq[I1], Seq[I2]) = expr match {
       case And2(TermValue(v1), TermValue(v2)) => (Seq(v1), Seq(v2))
       case And2(or1: Or[I1], or2: Or[I2])     => (resolveOr(or1), resolveOr(or2))
+      case _                                  => sys.error(s"Unexpected expression: " + expr)
     }
     traverse(and)
   }
@@ -22,6 +23,7 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     def traverse(expr: Or2[I1, I2]): Seq[(I1, I2)] = expr match {
       case Or2(And2(TermValue(a1), TermValue(a2)), or2: Or2[I1, I2])                   => (a1, a2) +: traverse(or2)
       case Or2(And2(TermValue(a1), TermValue(a2)), And2(TermValue(b1), TermValue(b2))) => Seq((a1, a2), (b1, b2))
+      case _                                                                           => sys.error(s"Unexpected expression: " + expr)
     }
     traverse(or)
   }
@@ -106,6 +108,7 @@ abstract class InputMolecule_2_0[I1, I2](val _model: Model, val _query: Query) e
   def apply(and: And2[I1, I2])              (implicit conn: Connection): Molecule0 = and match {
     case And2(TermValue(v1), TermValue(v2)) => apply(Seq((v1, v2)))(conn)
     case And2(or1: Or[I1], or2: Or[I2])     => apply(resolveOr(or1), resolveOr(or2))(conn)
+    case _                                  => sys.error(s"[InputMolecule_2] Unexpected `and`: " + and)
   }
 }
 
@@ -118,6 +121,7 @@ abstract class InputMolecule_2_1[I1, I2, A](val _model: Model, val _query: Query
   def apply(and: And2[I1, I2])              (implicit conn: Connection): Molecule1[A] = and match {
     case And2(TermValue(v1), TermValue(v2)) => apply(Seq((v1, v2)))(conn)
     case And2(or1: Or[I1], or2: Or[I2])     => apply(resolveOr(or1), resolveOr(or2))(conn)
+    case _                                  => sys.error(s"[InputMolecule_2] Unexpected `and`: " + and)
   }
 }
 

@@ -6,6 +6,7 @@ import molecule.util.{CoreSetup, CoreSpec, expectCompileError}
 
 class OptionalValues extends CoreSpec {
 
+
   "Correct card-one types returned" >> {
 
     "String (no assertion)" in new CoreSetup {

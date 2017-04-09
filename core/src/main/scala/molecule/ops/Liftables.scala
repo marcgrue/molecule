@@ -44,7 +44,6 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   }
 
   implicit val liftTuple2 = Liftable[Product] {
-    //    case (pair1@(k1: String, v1: Any), pair2@(k2: String, v2: Any)) => q"($pair1, $pair2)"
     case (k: String, v: String) => q"($k, $v)"
     case (k: Int, v: Int)       => q"($k, $v)"
     case (k: Long, v: Long)     => q"($k, $v)"

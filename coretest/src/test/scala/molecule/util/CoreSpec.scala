@@ -1,4 +1,5 @@
-package molecule.util
+package molecule
+package util
 
 import java.net.URI
 import java.text.SimpleDateFormat
