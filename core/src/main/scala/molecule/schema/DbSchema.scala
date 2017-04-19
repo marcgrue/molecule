@@ -18,7 +18,7 @@ trait Db {
 }
 
 trait Db_0 extends Db with Out_0[Db_0, Db_1, Db_In_1_0, Db_In_1_1] {
-  lazy val valueType  : valueType[Db_1[String], Db_In_1_1[String, String]] with Db_1[String] = new valueType[Db_1[String], Db_In_1_1[String, String]] with Db_1[String] { override val _kw = ":Db/valueType" }
+  lazy val valueType  : valueType[Db_1[String], Db_In_1_1[String, String]] with Db_1[String] = ???
 
   lazy val valueType_ : valueType[Db_0, Db_In_1_0[String]] with Db_0 = ???
 }

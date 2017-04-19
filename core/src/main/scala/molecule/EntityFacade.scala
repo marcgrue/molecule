@@ -44,7 +44,6 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case other                   => other
   }
 
-
   private def asMap(depth: Int = 1, maxDepth: Int = 5): Map[String, Any] = {
     val builder = Map.newBuilder[String, Any]
     val iter = entity.keySet.asScala.toList.sorted.asJava.iterator()
@@ -61,7 +60,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
               case m2: Map[_, _] => m2.asInstanceOf[Map[String, Any]].apply(":db/id").asInstanceOf[Long] -> m2.asInstanceOf[Map[String, Any]]
             }
             indexedRefMaps.sortBy(_._1).map(_._2)
-          case _                                         => l
+          case _                                                                        => l
         }
         case other     => other
       }
@@ -69,7 +68,6 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     }
     builder.result()
   }
-
 
   private def asList(depth: Int = 1, maxDepth: Int = 5): List[(String, Any)] = {
     val builder = List.newBuilder[(String, Any)]
@@ -93,7 +91,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
               if (typedSeq.head.map(_._1).contains(":db/id")) {
                 // We now know we have :db/id's to sort on
                 val indexedRefLists: Seq[(Long, Seq[(String, Any)])] = typedSeq.map {
-                    subSeq => subSeq.toMap.apply(":db/id").asInstanceOf[Long] -> subSeq
+                  subSeq => subSeq.toMap.apply(":db/id").asInstanceOf[Long] -> subSeq
                 }
                 // Sort sub Seq's by :db/id
                 indexedRefLists.sortBy(_._1).map(_._2)
@@ -111,75 +109,9 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
   }
 
 
-  // Entity api from ValueAttribute (typed) .................................................................
-
-  import dsl.actions._
-  type VA[Out] = ValueAttr[_, _, _, Out]
-  type Op[T] = Option[T]
-
-  // Single value
-  def apply[A](attr: VA[A]): Option[A] = attr match {
-    case oneInt: OneInt[_, _]     => entity.get(attr._kw) match {
-      case null    => None
-      case oneInt_ => Some(toScala(oneInt_).asInstanceOf[Long].toInt.asInstanceOf[A])
-    }
-    case oneFloat: OneFloat[_, _] => entity.get(attr._kw) match {
-      case null      => None
-      case oneFloat_ => Some(toScala(oneFloat_).asInstanceOf[Double].toFloat.asInstanceOf[A])
-    }
-    case oneOther: One[_, _, _]   => entity.get(attr._kw) match {
-      case null     => None
-      case oneValue => Some(toScala(oneValue).asInstanceOf[A])
-    }
-    case many: Many[_, _, _, _]   => entity.get(attr._kw) match {
-      case null                                    => None
-      case results: clojure.lang.PersistentHashSet => results.asScala.head match {
-        case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[A])
-      }
-      case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
-    }
-
-    // How to treat map attributes?
-    case mapped: MapAttr[_, _, _, _] => entity.get(attr._kw) match {
-      case null                                    => None
-      case results: clojure.lang.PersistentHashSet => results.asScala.head match {
-        case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[A])
-        case manySet             => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[A])
-      }
-      case shouldWeEverGetHere_?                   => Some(toScala(shouldWeEverGetHere_?).asInstanceOf[A])
-    }
-
-    case _ => None
-  }
-
-  // Tuples, arity 2-22
-  def apply[A, B](a: VA[A], b: VA[B]): (Op[A], Op[B]) = (apply(a), apply(b))
-  def apply[A, B, C](a: VA[A], b: VA[B], c: VA[C]): (Op[A], Op[B], Op[C]) = (apply(a), apply(b), apply(c))
-  def apply[A, B, C, D](a: VA[A], b: VA[B], c: VA[C], d: VA[D]): (Op[A], Op[B], Op[C], Op[D]) = (apply(a), apply(b), apply(c), apply(d))
-  def apply[A, B, C, D, E](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E]): (Op[A], Op[B], Op[C], Op[D], Op[E]) = (apply(a), apply(b), apply(c), apply(d), apply(e))
-  def apply[A, B, C, D, E, F](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f))
-  def apply[A, B, C, D, E, F, G](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g))
-  def apply[A, B, C, D, E, F, G, H](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h))
-  def apply[A, B, C, D, E, F, G, H, I](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i))
-  def apply[A, B, C, D, E, F, G, H, I, J](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j))
-  def apply[A, B, C, D, E, F, G, H, I, J, K](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S], t: VA[T]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S], Op[T]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s), apply(t))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S], t: VA[T], u: VA[U]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S], Op[T], Op[U]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s), apply(t), apply(u))
-  def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](a: VA[A], b: VA[B], c: VA[C], d: VA[D], e: VA[E], f: VA[F], g: VA[G], h: VA[H], i: VA[I], j: VA[J], k: VA[K], l: VA[L], m: VA[M], n: VA[N], o: VA[O], p: VA[P], q: VA[Q], r: VA[R], s: VA[S], t: VA[T], u: VA[U], v: VA[V]): (Op[A], Op[B], Op[C], Op[D], Op[E], Op[F], Op[G], Op[H], Op[I], Op[J], Op[K], Op[L], Op[M], Op[N], Op[O], Op[P], Op[Q], Op[R], Op[S], Op[T], Op[U], Op[V]) = (apply(a), apply(b), apply(c), apply(d), apply(e), apply(f), apply(g), apply(h), apply(i), apply(j), apply(k), apply(l), apply(m), apply(n), apply(o), apply(p), apply(q), apply(r), apply(s), apply(t), apply(u), apply(v))
-
-
   // Entity api from string (typed) .................................................................
 
-  def getTyped[T](kw: String): Option[T] = entity.get(kw) match {
+  def apply[T](kw: String): Option[T] = entity.get(kw) match {
     case null                                    => None
     case results: clojure.lang.PersistentHashSet => results.asScala.head match {
       case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[T])
@@ -188,52 +120,30 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
     case result                                  => Some(toScala(result).asInstanceOf[T])
   }
 
-  // Entity api from string (untyped) .................................................................
+  // untyped
 
   def apply(kw1: String, kw2: String, kwx: String*): Seq[Option[Any]] = {
-    (kw1 +: kw2 +: kwx.toList) map apply
-  }
-
-  def apply(kw: String): Option[Any] = entity.get(kw) match {
-    case null                                    => None
-    case results: clojure.lang.PersistentHashSet => results.asScala.head match {
-      case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted)
-      case manyValue           => Some(results.asScala.toList.map(toScala(_)).toSet)
-    }
-    case result                                  => Some(toScala(result))
+    (kw1 +: kw2 +: kwx.toList) map apply[Any]
   }
 
 
   // Conversions ..........................................................................
 
   private[molecule] def toScala(v: Any, depth: Int = 1, maxDepth: Int = 5, tpe: String = "Map"): Any = v match {
-    // :db.type/string
-    case s: java.lang.String => s
-    // :db.type/boolean
-    case b: java.lang.Boolean => b: Boolean
-    // :db.type/long
-    case l: java.lang.Long => l: Long
-    // attribute id
-    case i: java.lang.Integer => i.toLong: Long
-    // :db.type/float
-    case f: java.lang.Float => f: Float
-    // :db.type/double
-    case d: java.lang.Double => d: Double
-    // :db.type/bigint
-    case bi: java.math.BigInteger => BigInt(bi)
-    // :db.type/bigdec
-    case bd: java.math.BigDecimal => BigDecimal(bd)
-    // :db.type/instant
-    case d: Date => d
-    // :db.type/uuid
-    case u: UUID => u
-    // :db.type/uri
-    case u: java.net.URI => u
-    // :db.type/keyword
-    case kw: clojure.lang.Keyword => kw.toString // Clojure Keywords not used in Molecule
+    case s: java.lang.String /* :db.type/string */       => s
+    case b: java.lang.Boolean /* :db.type/boolean */     => b: Boolean
+    case l: java.lang.Long /* :db.type/long */           => l: Long
+    case i: java.lang.Integer /* attribute id */         => i.toLong: Long
+    case f: java.lang.Float /* :db.type/float */         => f: Float
+    case d: java.lang.Double /* :db.type/double */       => d: Double
+    case bi: java.math.BigInteger /* :db.type/bigint */  => BigInt(bi)
+    case bd: java.math.BigDecimal /* :db.type/bigdec */  => BigDecimal(bd)
+    case d: Date /* :db.type/instant */                  => d
+    case u: UUID /* :db.type/uuid */                     => u
+    case u: java.net.URI /* :db.type/uri */              => u
+    case kw: clojure.lang.Keyword /* :db.type/keyword */ => kw.toString // Clojure Keywords not used in Molecule
+    case bytes: Array[Byte] /* :db.type/bytes */         => bytes
 
-    // :db.type/bytes
-    case bytes: Array[Byte] => bytes
     // an entity map
     case e: datomic.Entity if depth < maxDepth && tpe == "Map"  => new EntityFacade(e, conn, e.get(":db/id")).asMap(depth + 1, maxDepth)
     case e: datomic.Entity if depth < maxDepth && tpe == "List" => new EntityFacade(e, conn, e.get(":db/id")).asList(depth + 1, maxDepth)

@@ -6,7 +6,7 @@ import molecule.util.dsl.coreTest._
 
 class EntitySelection extends CoreSpec {
 
-  "Applied eid" in new CoreSetup {
+  "Applied eid to namespace" in new CoreSetup {
 
     val List(e1, e2, e3) = Ns.int.insert(1, 2, 3).eids
 
@@ -22,6 +22,24 @@ class EntitySelection extends CoreSpec {
     val e23s = Set(e2, e3)
     Ns(e23s).int.get === List(2, 3)
   }
+
+  // Not supported (todo?)
+//  "Applied eid to `e`" in new CoreSetup {
+//
+//    val List(e1, e2, e3) = Ns.int.insert(1, 2, 3).eids
+//
+//    Ns.int.get === List(1, 2, 3)
+//
+//    Ns.e(e1).int.get === List(1)
+//
+//    Ns.e(e1, e2).int.get === List(1, 2)
+//
+//    val e23 = Seq(e2, e3)
+//    Ns.e(e23).int.get === List(2, 3)
+//
+//    val e23s = Set(e2, e3)
+//    Ns.e(e23s).int.get === List(2, 3)
+//  }
 
 
   "Input molecule" in new CoreSetup {

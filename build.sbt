@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.10.1",
+  version := "0.10.2",
   scalaVersion := "2.12.1",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -45,9 +45,7 @@ lazy val moleculeCoretest = project.in(file("coretest"))
   )
 // Manually add schema definition directories for boilerplate generation testing
 //  .settings(Seq(definitionDirsSeparate(
-//  "molecule/util"
-//)))
-//  .settings(Seq(definitionDirs(
+//  "molecule/util",
 //  "molecule/partition",
 //  "molecule/bidirectional"
 //)))

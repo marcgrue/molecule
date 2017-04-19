@@ -137,9 +137,6 @@ object actions {
 
   sealed trait ValueAttr[Ns, In, T, U] extends Attr {
 
-    // Keyword for entity api
-    val _kw: String = ""
-
     // Null (datom not asserted)
     def apply(noValue: nil)    : Ns with Attr = ???
 

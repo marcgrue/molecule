@@ -7,6 +7,30 @@ import scala.language.higherKinds
 trait Composite extends NS
 
 
+trait Composite1[T1] extends Composite {
+  def ~[a                                                               ] (nextMolecule: NS1 [a                                                               ]): Composite2[T1, a                                                                 ] = ???
+  def ~[a, b                                                            ] (nextMolecule: NS2 [a, b                                                            ]): Composite2[T1, (a, b                                                            )] = ???
+  def ~[a, b, c                                                         ] (nextMolecule: NS3 [a, b, c                                                         ]): Composite2[T1, (a, b, c                                                         )] = ???
+  def ~[a, b, c, d                                                      ] (nextMolecule: NS4 [a, b, c, d                                                      ]): Composite2[T1, (a, b, c, d                                                      )] = ???
+  def ~[a, b, c, d, e                                                   ] (nextMolecule: NS5 [a, b, c, d, e                                                   ]): Composite2[T1, (a, b, c, d, e                                                   )] = ???
+  def ~[a, b, c, d, e, f                                                ] (nextMolecule: NS6 [a, b, c, d, e, f                                                ]): Composite2[T1, (a, b, c, d, e, f                                                )] = ???
+  def ~[a, b, c, d, e, f, g                                             ] (nextMolecule: NS7 [a, b, c, d, e, f, g                                             ]): Composite2[T1, (a, b, c, d, e, f, g                                             )] = ???
+  def ~[a, b, c, d, e, f, g, h                                          ] (nextMolecule: NS8 [a, b, c, d, e, f, g, h                                          ]): Composite2[T1, (a, b, c, d, e, f, g, h                                          )] = ???
+  def ~[a, b, c, d, e, f, g, h, i                                       ] (nextMolecule: NS9 [a, b, c, d, e, f, g, h, i                                       ]): Composite2[T1, (a, b, c, d, e, f, g, h, i                                       )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j                                    ] (nextMolecule: NS10[a, b, c, d, e, f, g, h, i, j                                    ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j                                    )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k                                 ] (nextMolecule: NS11[a, b, c, d, e, f, g, h, i, j, k                                 ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k                                 )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l                              ] (nextMolecule: NS12[a, b, c, d, e, f, g, h, i, j, k, l                              ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l                              )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m                           ] (nextMolecule: NS13[a, b, c, d, e, f, g, h, i, j, k, l, m                           ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m                           )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n                        ] (nextMolecule: NS14[a, b, c, d, e, f, g, h, i, j, k, l, m, n                        ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n                        )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o                     ] (nextMolecule: NS15[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o                     ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o                     )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p                  ] (nextMolecule: NS16[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p                  ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p                  )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q               ] (nextMolecule: NS17[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q               ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q               )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r            ] (nextMolecule: NS18[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r            ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r            )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s         ] (nextMolecule: NS19[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s         ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s         )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t      ] (nextMolecule: NS20[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t      ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t      )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u   ] (nextMolecule: NS21[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u   ]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u   )] = ???
+  def ~[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v] (nextMolecule: NS22[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v]): Composite2[T1, (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)] = ???
+}
 
 trait Composite2[T1, T2] extends Composite {
   def ~[a                                                               ] (nextMolecule: NS1 [a                                                               ]): Composite3[T1, T2, a                                                                 ] = ???

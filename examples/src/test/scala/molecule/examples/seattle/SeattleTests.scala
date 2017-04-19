@@ -40,6 +40,9 @@ class SeattleTests extends SeattleSpec {
       ":community/name" -> "Greenlake Community Wiki")
 
     // We can also retrive a single (optional) attribute value
+    val untyped: Option[Any] = communityId(":community/name")
+    val typed: Option[String ]= communityId[String](":community/name")
+    
     communityId(":community/name") === Some("Greenlake Community Wiki")
     communityId(":community/url") === Some("http://greenlake.wetpaint.com/")
     communityId(":community/category") === Some(Set("services", "for sale", "events"))

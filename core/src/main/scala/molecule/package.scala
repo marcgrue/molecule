@@ -122,6 +122,7 @@ package object molecule {
 
   // Composites
 
+  implicit def m[T1](dsl: Composite1[T1]): Molecule1[T1] = macro MakeMolecule.from1tuple[T1]
   implicit def m[T1, T2](dsl: Composite2[T1, T2]): Molecule2[T1, T2] = macro MakeMolecule.from2tuples[T1, T2]
   implicit def m[T1, T2, T3](dsl: Composite3[T1, T2, T3]): Molecule3[T1, T2, T3] = macro MakeMolecule.from3tuples[T1, T2, T3]
   implicit def m[T1, T2, T3, T4](dsl: Composite4[T1, T2, T3, T4]): Molecule4[T1, T2, T3, T4] = macro MakeMolecule.from4tuples[T1, T2, T3, T4]

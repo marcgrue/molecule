@@ -247,32 +247,32 @@ object MoleculeBoilerplate {
 
         case r"oneBi(.*)$str" => sys.error(
           s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
-              |Please add something like:
-              |  val $attr = oneBi[$curNs] // for bidirectional self-reference, or:
-              |  val $attr = oneBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
+             |Please add something like:
+             |  val $attr = oneBi[$curNs] // for bidirectional self-reference, or:
+             |  val $attr = oneBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
 
         case r"manyBi(.*)$str" => sys.error(
           s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
-              |Please add something like:
-              |  val $attr = manyBi[$curNs] // for bidirectional self-reference, or:
-              |  val $attr = manyBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
+             |Please add something like:
+             |  val $attr = manyBi[$curNs] // for bidirectional self-reference, or:
+             |  val $attr = manyBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
 
         case r"rev(.*)$str" => sys.error(
           s"""Type arg missing for bidirectional reverse ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
-              |Please add the namespace where the bidirectional ref pointing to this attribute was defined:
-              |  val $attr = rev[<definingNamespace>]""".stripMargin)
+             |Please add the namespace where the bidirectional ref pointing to this attribute was defined:
+             |  val $attr = rev[<definingNamespace>]""".stripMargin)
 
         case r"one(.*)$str" => sys.error(
           s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
-              |Please add something like:
-              |  val $attr = one[$curNs] // for self-reference, or
-              |  val $attr = one[<otherNamespace>] // for ref towards other namespace""".stripMargin)
+             |Please add something like:
+             |  val $attr = one[$curNs] // for self-reference, or
+             |  val $attr = one[<otherNamespace>] // for ref towards other namespace""".stripMargin)
 
         case r"many(.*)$str" => sys.error(
           s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
-              |Please add something like:
-              |  val $attr = many[$curNs] // for self-reference, or
-              |  val $attr = many[<otherNamespace>] // for ref towards other namespace""".stripMargin)
+             |Please add something like:
+             |  val $attr = many[$curNs] // for self-reference, or
+             |  val $attr = many[<otherNamespace>] // for ref towards other namespace""".stripMargin)
 
         case unexpected => sys.error(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
       }
@@ -368,9 +368,9 @@ object MoleculeBoilerplate {
         case other =>
           sys.error(
             s"""Target reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have a type arg pointing to
-                |the attribute that points to this. Something like:
-                |  val $baseAttr: AnyRef = target[<baseNs>.<biAttr>.type]
-                |(Since this is a recursive definitionn, we need to add a return type)""".stripMargin)
+               |the attribute that points to this. Something like:
+               |  val $baseAttr: AnyRef = target[<baseNs>.<biAttr>.type]
+               |(Since this is a recursive definitionn, we need to add a return type)""".stripMargin)
       }
     }
 
@@ -790,12 +790,8 @@ object MoleculeBoilerplate {
         val t = s"[$nextNS, $nextIn] with $nextNS"
 
         val attrVal = a match {
-          case valueAttr: Val if a.baseTpe == "K" && in == 0 && out == 0 => s"""lazy val $attr  $p1: String => $attr$p7$t = (key: String) => new $attr$p8$t { override val _kw = ":${firstLow(ns)}/$attr" }"""
-          case enumAttr: Enum if a.baseTpe == "K" && in == 0 && out == 0 => s"""lazy val $attr  $p1: String => $attr$p7$t = (key: String) => new $attr$p8$t { override val _kw = ":${firstLow(ns)}/$attr" }"""
-          case _ if a.baseTpe == "K"                                     => s"""lazy val $attr  $p1: String => $attr$p7$t = ???"""
-          case valueAttr: Val if in == 0 && out == 0                     => s"""lazy val $attr  $p1: $attr$p5$t = new $attr$p6$t { override val _kw = ":${firstLow(ns)}/$attr" }"""
-          case enumAttr: Enum if in == 0 && out == 0                     => s"""lazy val $attr  $p1: $attr$p5$t = new $attr$p6$t { override val _kw = ":${firstLow(ns)}/$attr" }"""
-          case _                                                         => s"""lazy val $attr  $p1: $attr$p5$t = ???"""
+          case _ if a.baseTpe == "K" => s"""lazy val $attr  $p1: String => $attr$p7$t = ???"""
+          case _                     => s"""lazy val $attr  $p1: $attr$p5$t = ???"""
         }
 
         val p2 = padS(maxAttr, attrClean)
@@ -894,8 +890,8 @@ object MoleculeBoilerplate {
       case (0, 0) =>
         val (thisIn, nextIn) = if (maxIn == 0 || in == maxIn) ("P" + (out + in + 1), "P" + (out + in + 2)) else (s"${ns}_In_1_0", s"${ns}_In_1_1")
         s"""trait ${ns}_0 extends $ns with Out_0[${ns}_0, ${ns}_1, $thisIn, $nextIn] {
-            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
-            |}
+           |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
+           |}
          """.stripMargin
 
       // Last output trait
@@ -903,18 +899,18 @@ object MoleculeBoilerplate {
         val thisIn = if (maxIn == 0 || in == maxIn) "P" + (out + in + 1) else s"${ns}_In_1_$o"
         val types = OutTypes mkString ", "
         s"""trait ${ns}_$o[$types] extends $ns with Out_$o[${ns}_$o, P${out + in + 1}, $thisIn, P${out + in + 2}, $types] {
-            |  ${(attrVals_ ++ refCode).mkString("\n  ").trim}
-            |}""".stripMargin
+           |  ${(attrVals_ ++ refCode).mkString("\n  ").trim}
+           |}""".stripMargin
 
       // Other output traits
       case (0, o) =>
         val (thisIn, nextIn) = if (maxIn == 0 || in == maxIn) ("P" + (out + in + 1), "P" + (out + in + 2)) else (s"${ns}_In_1_$o", s"${ns}_In_1_${o + 1}")
         val types = OutTypes mkString ", "
         s"""trait ${ns}_$o[$types] extends $ns with Out_$o[${ns}_$o, ${ns}_${o + 1}, $thisIn, $nextIn, $types] {
-            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
-            |
+           |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
+           |
             |  def Self: ${ns}_$o[$types] with SelfJoin = ???
-            |}
+           |}
          """.stripMargin
 
 
@@ -937,15 +933,15 @@ object MoleculeBoilerplate {
         val thisIn = if (maxIn == 0 || i == maxIn) "P" + (out + in + 1) else s"${ns}_In_${i + 1}_$o"
         val types = (InTypes ++ OutTypes) mkString ", "
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, P${out + in + 1}, $thisIn, P${out + in + 2}, $types] {
-            |  ${(attrVals_ ++ refCode).mkString("\n  ").trim}
-            |}""".stripMargin
+           |  ${(attrVals_ ++ refCode).mkString("\n  ").trim}
+           |}""".stripMargin
 
       // Max input traits
       case (i, o) if i == maxIn =>
         val types = (InTypes ++ OutTypes) mkString ", "
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, ${ns}_In_${i}_${o + 1}, P${out + in + 1}, P${out + in + 2}, $types] {
-            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
-            |}
+           |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
+           |}
          """.stripMargin
 
       // Other input traits
@@ -953,10 +949,10 @@ object MoleculeBoilerplate {
         val (thisIn, nextIn) = if (i == maxIn) ("P" + (out + in + 1), "P" + (out + in + 2)) else (s"${ns}_In_${i + 1}_$o", s"${ns}_In_${i + 1}_${o + 1}")
         val types = (InTypes ++ OutTypes) mkString ", "
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, ${ns}_In_${i}_${o + 1}, $thisIn, $nextIn, $types] {
-            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
-            |
+           |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
+           |
             |  def Self: ${ns}_In_${i}_$o[$types] with SelfJoin = ???
-            |}
+           |}
          """.stripMargin
     }
   }
@@ -1067,7 +1063,7 @@ object MoleculeBoilerplate {
 
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
-    val (inputEids, inputSpace) = if(inArity > 0)
+    val (inputEids, inputSpace) = if (inArity > 0)
       (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
@@ -1077,31 +1073,31 @@ object MoleculeBoilerplate {
 
     val outFile: String =
       s"""/*
-          |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
-          |*
-          |* To change:
-          |* 1. edit schema definition file in `${d.pkg}.schema/`
-          |* 2. `sbt compile` in terminal
-          |* 3. Refresh and re-compile project in IDE
-          |*/
-          |package ${d.pkg}.dsl
-          |package ${firstLow(d.domain)}
-          |import molecule.dsl.actions._
-          |import molecule.dsl._$extraImports
-          |
+         |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
+         |*
+         |* To change:
+         |* 1. edit schema definition file in `${d.pkg}.schema/`
+         |* 2. `sbt compile` in terminal
+         |* 3. Refresh and re-compile project in IDE
+         |*/
+         |package ${d.pkg}.dsl
+         |package ${firstLow(d.domain)}
+         |import molecule.dsl.actions._
+         |import molecule.dsl._$extraImports
+         |
           |
           |object $ns extends ${ns}_0 with FirstNS {
-          |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-          |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
-          |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
-          |}
-          |
+         |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+         |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
+         |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
+         |}
+         |
           |trait $ns {
-          |  $attrClasses
-          |
+         |  $attrClasses
+         |
           |  $attrClassesOpt
-          |}
-          |
+         |}
+         |
           |$nsTraitsOut""".stripMargin
 
     val nsTraitsIn: Seq[(Int, String)] = if (inArity == 0) Nil
@@ -1111,18 +1107,18 @@ object MoleculeBoilerplate {
     val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
       val inFile: String =
         s"""/*
-            |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
-            |*
-            |* To change:
-            |* 1. edit schema definition file in `${d.pkg}.schema/`
-            |* 2. `sbt compile` in terminal
-            |* 3. Refresh and re-compile project in IDE
-            |*/
-            |package ${d.pkg}.dsl
-            |package ${firstLow(d.domain)}
-            |import molecule.dsl.actions._
-            |import molecule.dsl._$extraImports
-            |
+           |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
+           |*
+           |* To change:
+           |* 1. edit schema definition file in `${d.pkg}.schema/`
+           |* 2. `sbt compile` in terminal
+           |* 3. Refresh and re-compile project in IDE
+           |*/
+           |package ${d.pkg}.dsl
+           |package ${firstLow(d.domain)}
+           |import molecule.dsl.actions._
+           |import molecule.dsl._$extraImports
+           |
             |$inTraits""".stripMargin
 
       (in, inFile)
@@ -1136,7 +1132,7 @@ object MoleculeBoilerplate {
 
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
-    val (inputEids, inputSpace) = if(inArity > 0)
+    val (inputEids, inputSpace) = if (inArity > 0)
       (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "          ")
     else
       ("", "")
@@ -1147,31 +1143,31 @@ object MoleculeBoilerplate {
     } yield nsTrait(d.domain, namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
 
     s"""/*
-        |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
-        |*
-        |* To change:
-        |* 1. edit schema definition file in `${d.pkg}.schema/`
-        |* 2. `sbt compile` in terminal
-        |* 3. Refresh and re-compile project in IDE
-        |*/
-        |package ${d.pkg}.dsl
-        |package ${firstLow(d.domain)}
-        |import molecule.dsl.actions._
-        |import molecule.dsl._$extraImports
-        |
+       |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
+       |*
+       |* To change:
+       |* 1. edit schema definition file in `${d.pkg}.schema/`
+       |* 2. `sbt compile` in terminal
+       |* 3. Refresh and re-compile project in IDE
+       |*/
+       |package ${d.pkg}.dsl
+       |package ${firstLow(d.domain)}
+       |import molecule.dsl.actions._
+       |import molecule.dsl._$extraImports
+       |
         |
         |object $ns extends ${ns}_0 with FirstNS {
-        |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-        |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
-        |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
-        |}
-        |
+       |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+       |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
+       |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
+       |}
+       |
         |trait $ns $ext{
-        |  $attrClasses
-        |
+       |  $attrClasses
+       |
         |  $attrClassesOpt
-        |}
-        |
+       |}
+       |
         |$nsTraits""".stripMargin
   }
 

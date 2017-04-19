@@ -4,10 +4,9 @@ import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
+// http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html
 
 class QueryTour extends MoleculeSpec {
-
-  // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html
 
   "Queries and joins" in new SocialNewsSetup {
 
@@ -135,10 +134,10 @@ class QueryTour extends MoleculeSpec {
     } yield editorCommentComment.head._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)
-    Parent.e_(Comment.author_(editor)).comment.get.sorted === List(c3, c6, c8, c12)
+    m(Comment.author_(editor) ~ Parent.comment).get.sorted === List(c3, c6, c8, c12)
 
     // Editors comments and responses (note that c4 wasn't commented on)
-    Parent.e(Comment.author_(editor)).comment.get.sorted === List(
+    m(Comment.author_(editor) ~ Parent.e.comment).get.sorted === List(
       (c2, c3),
       (c5, c6),
       (c7, c8),
@@ -146,7 +145,7 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Editors comments having responses (c4 not commented on)
-    Parent.e(Comment.author_(editor)).comment_.get.sorted === List(c2, c5, c7, c11)
+    m(Comment.author_(editor) ~ Parent.e.comment_).get.sorted === List(c2, c5, c7, c11)
   }
 
 

@@ -25,7 +25,7 @@ class SelfJoin extends CoreSpec {
     Ns.int_(23).str.Refs1.str1_("Pepsi").get === List("Liz", "Joe")
 
     // But when we need to compare values of the same attribute
-    // accross entities we need self-joins.
+    // across entities we need self-joins.
 
     // Here's an example of a self-join where we take pairs of entities
     // where one is 23 years old and the other 25 years old and then see

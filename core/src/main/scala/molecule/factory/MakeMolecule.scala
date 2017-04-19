@@ -222,6 +222,11 @@ object MakeMolecule {
 
   // Composites ....................................................
 
+  def from1tuple[T1: c.WeakTypeTag]
+  (c: Context)(dsl: c.Expr[Composite1[T1]])
+  : c.Expr[Molecule1[T1]] =
+    build(c).fromXtuples(dsl, c.weakTypeOf[T1])
+
   def from2tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Composite2[T1, T2]])
   : c.Expr[Molecule2[T1, T2]] =
