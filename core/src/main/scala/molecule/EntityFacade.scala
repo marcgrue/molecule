@@ -15,6 +15,8 @@ case class EntityFacade(entity: datomic.Entity, conn: Connection, id: Object) {
 
   def retract = conn.transact(Util.list(Util.list(":db.fn/retractEntity", id))).get()
 
+  def retractTx = Util.list(Util.list(":db.fn/retractEntity", id))
+
 
   // Touch - traverse entity attributes ...........................................................
 

@@ -6,7 +6,7 @@ import molecule.ops.QueryOps._
 import molecule.util.{Debug, Helpers}
 
 object Model2Query extends Helpers {
-  val x = Debug("Model2Query", 20, 9, false)
+  val x = Debug("Model2Query", 20, 19, false)
   def uri(t: String) = t == "java.net.URI"
   def u(t: String, v: String) = if (t == "java.net.URI") v else ""
 
@@ -531,7 +531,7 @@ object Model2Query extends Helpers {
           query.wh.clauses.reverse.collectFirst {
             // Having a value var to unify with
             case dc@DataClause(_, Var(e0), a@KW(ns0, attr0, _), Var(v0), _, _) if ns0 == ns && attr0 == attr1 => ns match {
-              case s if s == prevNs => (resolve(query, e, v0, element), v, v, ns, attr, "")
+              case s if s == prevNs => (resolve(query, e, v0, element), e, v, ns, attr, "")
               case s                => (resolve(query, v, v0, element), v, v, ns, attr, "")
             }
 
@@ -576,7 +576,11 @@ object Model2Query extends Helpers {
           (query, backRefE, v, backRef, "", "")
         }
 
-        case Self => (query, w, y, prevNs, prevAttr, prevRefNs)
+        case Self =>
+          // Self-reference should be distinct
+//          val distinctQuery = query.func("!=", Seq(Var(e), Var(w)))
+//          (distinctQuery, w, y, prevNs, prevAttr, prevRefNs)
+          (query, w, y, prevNs, prevAttr, prevRefNs)
 
         case Nested(b@Bond(ns, refAttr, refNs, _, _), elements) =>
           val (e2, elements2) = if (ns == "") (e, elements) else (w, b +: elements)
@@ -623,6 +627,90 @@ object Model2Query extends Helpers {
 
         case other => sys.error("[Model2Query:make] Unresolved query variables from model: " + (other, e, v, prevNs, prevAttr, prevRefNs))
       }
+    }
+
+    // Process And-semantics (self-joins)
+    def postProcessOLD(q: Query) = {
+      def getAndAtoms(elements: Seq[Element]): Seq[Atom] = elements flatMap {
+        case a@Atom(_, _, _, 2, And(andValues), _, _, _) => Seq(a)
+        case Nested(_, elements2)                        => getAndAtoms(elements2)
+        case _                                           => Nil
+      }
+
+      val andAtoms: Seq[Atom] = model.elements.collect {
+        case a@Atom(_, attr0, _, card, And(_), _, _, _) if card == 1 || card == 3 => a
+      }
+
+      if (andAtoms.size > 1)
+        sys.error("[Model2Query:postProcess] For now, only 1 And-expression can be used. Found: " + andAtoms)
+
+      if (andAtoms.size == 1) {
+        val clauses = q.wh.clauses
+        val andAtom = andAtoms.head
+        val Atom(ns, attr0, _, card, And(andValues), _, _, _) = andAtom
+        val attr = if (attr0.last == '_') attr0.init else attr0
+        val unifyAttrs = model.elements.collect {
+          case a@Atom(ns1, attr1, _, _, _, _, _, _) if a != andAtom => (ns1, if (attr1.last == '_') attr1.init else attr1)
+        }
+
+        // The first arg is already modelled in the query
+        val selfJoinClauses = andValues.zipWithIndex.tail.flatMap { case (andValue, i) =>
+
+          // Todo: complete matches...
+          def vi(v0: Var) = Var(v0.v + "_" + i)
+          def queryValue(qv: QueryValue): QueryValue = qv match {
+            case Var(v) => vi(Var(v))
+            case _      => qv
+          }
+          def queryTerm(qt: QueryTerm): QueryTerm = qt match {
+            case Rule(name, args, cls) => Rule(name, args map queryValue, cls flatMap clause)
+            case InVar(b, argss)       => InVar(binding(b), argss)
+            case qv: QueryValue        => queryValue(qv)
+            case other                 => qt
+          }
+          def binding(b: Binding) = b match {
+            case ScalarBinding(v)     => ScalarBinding(vi(v))
+            case CollectionBinding(v) => CollectionBinding(vi(v))
+            case TupleBinding(vs)     => TupleBinding(vs map vi)
+            case RelationBinding(vs)  => RelationBinding(vs map vi)
+            case _                    => b
+          }
+          def clause(cl: Clause): Seq[Clause] = cl match {
+            case dc: DataClause => dataClauses(dc)
+            case other          => makeSelfJoinClauses(other)
+          }
+          def dataClauses(dc: DataClause): Seq[Clause] = dc match {
+            case DataClause(ds, e, a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
+              // Add next And-value
+              Seq(
+                DataClause(ds, vi(e), a, Var(v + "_" + i), queryTerm(tx), queryTerm(op)),
+                Funct(".matches ^String", List(Var(v + "_" + i), Val(".+@(" + andValue + ")$")), NoBinding)
+              )
+
+            case DataClause(ds, e, a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
+              // Add next And-value
+              Seq(DataClause(ds, vi(e), a, Val(andValue), queryTerm(tx), queryTerm(op)))
+
+            case DataClause(ds, e, a@KW(ns2, attr2, _), v, tx, op) if unifyAttrs.contains((ns2, attr2)) =>
+              // Keep value-position value to unify
+              Seq(DataClause(ds, vi(e), a, v, queryTerm(tx), queryTerm(op)))
+
+            case DataClause(ds, e, a, v, tx, op) =>
+              // Add i to variables
+              Seq(DataClause(ds, vi(e), a, queryValue(v), queryTerm(tx), queryTerm(op)))
+          }
+          def makeSelfJoinClauses(expr: QueryExpr): Seq[Clause] = expr match {
+            case dc@DataClause(ds, e, a, v, tx, op)                    => dataClauses(dc)
+            case RuleInvocation(name, args)                            => Seq(RuleInvocation(name, args map queryTerm))
+            case Funct(".startsWith ^String", List(v, key), NoBinding) => Nil
+            case Funct(".matches ^String", List(v, key), NoBinding)    => Nil
+            case Funct("second", ins, outSame)                         => Seq(Funct("second", ins map queryTerm, outSame))
+            case Funct(name, ins, outs)                                => Seq(Funct(name, ins map queryTerm, binding(outs)))
+          }
+          clauses flatMap makeSelfJoinClauses
+        }
+        q.copy(wh = Where(q.wh.clauses ++ selfJoinClauses))
+      } else q
     }
 
     // Process And-semantics (self-joins)
@@ -713,9 +801,8 @@ object Model2Query extends Helpers {
       make(query_, element, e, v, prevNs, prevAttr, prevRefNs)
     }._1
 
-    x(20, query, query.datalog)
-
-    postProcess(query)
-    //    query
+    val query2 = postProcess(query)
+    x(21, query, query2, query2.datalog)
+    query2
   }
 }

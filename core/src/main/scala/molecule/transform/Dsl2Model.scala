@@ -90,10 +90,14 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.op" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `op` after an attribute or another transaction value")
 
     // ns.attr.txInstant etc.. (transaction related to previous attribute)
-    case q"$prev.tx"        => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
-    case q"$prev.txT"       => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue, NoValue))
-    case q"$prev.txInstant" => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue, NoValue))
-    case q"$prev.op"        => traverse(q"$prev", Meta("db", "op", "tx", OpValue, NoValue))
+    case q"$prev.tx"               => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
+    case q"$prev.txT"              => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue, NoValue))
+    case q"$prev.txInstant"        => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue, NoValue))
+    case q"$prev.op.apply(true)"   => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(true)), NoValue))
+    case q"$prev.op.apply(false)"  => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(false)), NoValue))
+    case q"$prev.op_.apply(true)"  => traverse(q"$prev", Meta("db", "op", "tx", OpValue_(Some(true)), NoValue))
+    case q"$prev.op_.apply(false)" => traverse(q"$prev", Meta("db", "op", "tx", OpValue_(Some(false)), NoValue))
+    case q"$prev.op"               => traverse(q"$prev", Meta("db", "op", "tx", OpValue(None), NoValue))
 
 
     // Optional ----------------------
@@ -155,7 +159,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
-//      x(1, t, prev, cur, op, values, element)
+      //      x(1, t, prev, cur, op, values, element)
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
 
@@ -461,7 +465,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
-//    x(23, vs, attr)
+    //    x(23, vs, attr)
     val keyValues = vs.map {
       case q"scala.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
       case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"         => (extract(q"$k"), extract(q"$v"))

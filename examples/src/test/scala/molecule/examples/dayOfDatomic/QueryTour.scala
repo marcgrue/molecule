@@ -133,6 +133,12 @@ class QueryTour extends MoleculeSpec {
       editorCommentComment <- editorComment(":parent/comment").asInstanceOf[Option[Map[String, Any]]]
     } yield editorCommentComment.head._2) === List(c3, c6, c8, c12)
 
+    // todo - make some nice entity traversal dsl instead of this...
+//    (for {
+//      comments <- editor.apply[Seq[Long]](":comment/_author").get
+//      subComments <- comments.apply[Map[String, Any]](":parent/comment").get
+//    } yield subComments._2) === List(c3, c6, c8, c12)
+
     // Comments to the editors comments (with query)
     m(Comment.author_(editor) ~ Parent.comment).get.sorted === List(c3, c6, c8, c12)
 
@@ -182,7 +188,6 @@ class QueryTour extends MoleculeSpec {
 
     // We can use the transaction value also
     User(ed).firstName.asOf(tx).get.head === "Edward"
-    User(ed).firstName.asOf(tx - 1).get.head === "Ed"
 
 
     // Auditing ................................................................

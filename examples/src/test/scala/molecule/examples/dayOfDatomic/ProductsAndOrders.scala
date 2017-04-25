@@ -252,7 +252,6 @@ class ProductsAndOrders extends MoleculeSpec {
           Map(":db/id" -> 17592186045430L, ":product/description" -> "Licorice"), ":lineItem/quantity" -> 4)),
       ":order/orderid" -> 24)
 
-
     // Get ................................
 
     // Get nested data

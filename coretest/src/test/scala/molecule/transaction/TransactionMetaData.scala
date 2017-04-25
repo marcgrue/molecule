@@ -8,7 +8,6 @@ class TransactionMetaData extends CoreSpec {
 
   // See molecule.examples.dayOfDatomic.Provenance for more examples
 
-
   "Basic insert/retrieval" in new CoreSetup {
 
     // Can't add transaction meta data along other data of molecule

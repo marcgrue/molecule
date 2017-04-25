@@ -34,13 +34,14 @@ object QueryOps extends Helpers {
 
     def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query = {
       val genericVars = gs.flatMap {
-        case AttrVar(v)     => Some(Var(attrV))
-        case TxValue        => Some(Var("tx"))
-        case TxValue_       => None
-        case TxTValue       => Some(Var("txT"))
-        case TxInstantValue => Some(Var("txInst"))
-        case OpValue        => Some(Var("op"))
-        case other          => None
+        case AttrVar(v)      => Some(Var(attrV))
+        case TxValue         => Some(Var("tx"))
+        case TxValue_        => None
+        case TxTValue        => Some(Var("txT"))
+        case TxInstantValue  => Some(Var("txInst"))
+        case OpValue(added)  => Some(Var("op"))
+        case OpValue_(added) => None
+        case other           => None
       }.distinct
       val moreOutputs = o match {
         case NoVal => genericVars
@@ -87,7 +88,12 @@ object QueryOps extends Helpers {
       val attrClauses = if (gs.isEmpty)
         Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty))
       else {
-        val extendedClause = if (gs.contains(OpValue))
+        val opValue = gs.collectFirst {
+          case ov: OpValue    => Some(ov)
+//          case ov_ : OpValue_ => Some(ov_)
+        } getOrElse None
+
+        val extendedClause = if (opValue.nonEmpty)
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Var("op"))
         else if (gs.contains(TxValue) || gs.contains(TxValue_) || gs.contains(TxTValue) || gs.contains(TxInstantValue))
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), NoBinding)
@@ -95,9 +101,11 @@ object QueryOps extends Helpers {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, NoBinding, NoBinding)
 
         val extraClauses = gs.flatMap {
-          case TxTValue       => Seq(Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))))
-          case TxInstantValue => Seq(DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty))
-          case _              => Nil
+          case TxTValue              => Seq(Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))))
+          case TxInstantValue        => Seq(DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty))
+          case OpValue(Some(added))  => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added)))
+          case OpValue_(Some(added)) => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added)))
+          case _                     => Nil
         }
         extendedClause +: extraClauses
       }
@@ -200,11 +208,11 @@ object QueryOps extends Helpers {
 
     def mapCompareTo(op: String, e: String, a: Atom, v: String, keys: Seq[String], arg: Any, gs: Seq[Generic] = Seq()) = {
       lazy val q1 = keys match {
-        case Nil        =>
+        case Nil   =>
           q.where(e, a, v, gs)
             .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
             .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
-        case keys_      =>
+        case keys_ =>
           q.where(e, a, v, gs)
             .func(".matches ^String", Seq(Var(v), Val("(" + keys_.mkString("|") + ")" + "@.*")))
             .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))

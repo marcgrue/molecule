@@ -79,6 +79,7 @@ class Composite extends CoreSpec {
       )
 
       // Composite query
+      val (i1, (i2, s)): (Int, (Int, String)) =  m(Ref2.int2 ~ Ns.int.str).get.head
       m(Ref2.int2 ~ Ns.int.str).get.sorted === Seq(
         (1, (11, "aa")),
         (2, (22, "bb"))

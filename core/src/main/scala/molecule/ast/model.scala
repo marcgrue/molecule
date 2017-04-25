@@ -127,7 +127,8 @@ object model {
   case object TxValue_ extends Generic
   case object TxTValue extends Generic
   case object TxInstantValue extends Generic
-  case object OpValue extends Generic
+  case class OpValue(added: Option[Boolean] = None) extends Generic
+  case class OpValue_(added: Option[Boolean] = None) extends Generic
   case class NsValue(values: Seq[String]) extends Generic
   case object NoValue extends Generic
   case class Id(eid: Any) extends Generic

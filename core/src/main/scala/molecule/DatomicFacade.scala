@@ -42,7 +42,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     }
   }
 
-  def loadList(txlist: java.util.List[_], identifier: String = "", protocol: String = "mem"): Connection = {
+  def loadList(txlist: jList[_], identifier: String = "", protocol: String = "mem"): Connection = {
     val id = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {
@@ -60,14 +60,14 @@ trait DatomicFacade extends Helpers with ArgProperties {
   // Query ==================================================================
 
   sealed trait TxType
-  case class txDate(txInstant: Date) extends TxType
+  case class txDate(d: Date) extends TxType
   case class txLong(t: Long) extends TxType
-  case class txlObj(tx: java.util.List[Object]) extends TxType
+  case class txlObj(tx: jList[jList[_]]) extends TxType
 
   sealed trait DbOp
   case class AsOf(tx: TxType) extends DbOp
-  case class Since(date: Date) extends DbOp
-  case class Imagine(tx: java.util.List[Object]) extends DbOp
+  case class Since(tx: TxType) extends DbOp
+  case class Imagine(tx: jList[jList[_]]) extends DbOp
   case object History extends DbOp
 
   private[molecule] var dbOp: DbOp = null
@@ -90,13 +90,15 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val p = (expr: QueryExpr) => Query2String(query).p(expr)
     val rules = "[" + (query.i.rules map p mkString " ") + "]"
     val db = dbOp match {
-      case AsOf(txDate(txInstant)) => conn.db.asOf(txInstant)
-      case AsOf(txLong(t))         => conn.db.asOf(t)
-      case AsOf(txlObj(tx))        => conn.db.asOf(tx)
-      case Since(date)             => conn.db.since(date)
-      case Imagine(tx)             => conn.db.`with`(tx).get(Connection.DB_AFTER).asInstanceOf[AnyRef]
-      case History                 => conn.db.history()
-      case _                       => conn.db
+      case AsOf(txDate(d))   => conn.db.asOf(d)
+      case AsOf(txLong(t))   => conn.db.asOf(t)
+      case AsOf(txlObj(tx))  => conn.db.asOf(tx)
+      case Since(txDate(d))  => conn.db.since(d)
+      case Since(txLong(t))  => conn.db.since(t)
+      case Since(txlObj(tx)) => conn.db.since(tx)
+      case Imagine(tx)       => conn.db.`with`(tx).get(Connection.DB_AFTER).asInstanceOf[AnyRef]
+      case History           => conn.db.history()
+      case _                 => conn.db
     }
 
     // reset db settings
@@ -136,7 +138,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     //        x(2, model, transformer.stmtsModel, dataRows, stmtss)
     //        x(2, model, transformer.stmtsModel, stmtss)
     //            x(2, transformer.stmtsModel, stmtss)
-    Tx(conn, stmtss)
+    Tx(conn, stmtss).transact
   }
 
 
@@ -184,7 +186,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
 
     //    x(4, stmtss)
     //    x(4, molecules(0)._model, molecules(1)._model, dataModel)
-    Tx(conn, stmtss)
+    Tx(conn, stmtss).transact
   }
 
   def insert[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])
@@ -278,7 +280,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val transformer = Model2Transaction(conn, model)
     val stmts = transformer.saveStmts()
     //        x(6, model, transformer.stmtsModel, stmts)
-    Tx(conn, Seq(stmts))
+    Tx(conn, Seq(stmts)).transact
   }
 
   protected[molecule] def update(conn: Connection, model: Model): Tx = {
@@ -286,7 +288,7 @@ trait DatomicFacade extends Helpers with ArgProperties {
     val stmts = transformer.updateStmts()
     //            x(7, model, transformer.stmtsModel, stmts)
     //            x(7, transformer.stmtsModel, stmts)
-    Tx(conn, Seq(stmts))
+    Tx(conn, Seq(stmts)).transact
   }
 }
 
@@ -296,7 +298,7 @@ object DatomicFacade extends DatomicFacade
 case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
   private val x = Debug("Tx", 1, 99, false, 3)
 
-  val flatStmts = stmtss.flatten.map {
+  def flatStmts: Seq[jList[_]] = stmtss.flatten.map {
     case Add(e, a, i: Int, meta)             => Add(e, a, i.toLong: java.lang.Long, meta).toJava
     case Add(e, a, f: Float, meta)           => Add(e, a, f.toDouble: java.lang.Double, meta).toJava
     case Add(e, a, bigInt: BigInt, meta)     => Add(e, a, bigInt.bigInteger, meta).toJava
@@ -305,10 +307,16 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
     //    case Add(e, a, v: UUID)  => Add(e, a, v).toJava
     //    case Add(e, a, v: URI)   => Add(e, a, v).toJava
     case other => other.toJava
-  }.asJava
-//        x(7, stmtss, flatStmts)
+  }
 
-  val txResult: jMap[_, _] = conn.transact(flatStmts).get
+  lazy val txResult: jMap[_, _] = conn.transact(flatStmts.asJava).get
+
+  def transact = {
+    txResult
+    this
+  }
+
+  //        x(7, stmtss, flatStmts, txResult, txResult.get(Connection.TX_DATA))
 
   def eids: List[Long] = {
     val txData = txResult.get(Connection.TX_DATA)
@@ -333,8 +341,9 @@ case class Tx(conn: Connection, stmtss: Seq[Seq[Statement]]) {
   def eid: Long = eids.head
   def db: Db = txResult.get(Connection.DB_AFTER).asInstanceOf[Db]
   def t: Long = db.basisT()
-  def tx: datomic.Entity = db.entity(Peer.toTx(t))
-  def inst: Date = tx.get(":db/txInstant").asInstanceOf[Date]
+  def tx: Object = Peer.toTx(t)
+  def txE: datomic.Entity = db.entity(tx)
+  def inst: Date = txE.get(":db/txInstant").asInstanceOf[Date]
 }
 
 //import scala.language.existentials
