@@ -58,7 +58,7 @@ class TransactionMetaData extends CoreSpec {
     // Add data without tx meta data
     Ns.str.insert("Without tx meta data")
 
-    // Data with an without tx meta data created
+    // Data with and without tx meta data created
     Ns.str.get === List(
       "With tx meta data",
       "Without tx meta data"
@@ -120,29 +120,29 @@ class TransactionMetaData extends CoreSpec {
 
     // Since both attributes are from the same namespace
     // the two following queries will return both entities
-    m(Ns.str.int).get.sorted === List(
+    m(Ns.str.int).get.toSeq.sorted === List(
       ("with tx meta data", 1),
       ("without tx meta data", 2)
     )
-    m(Ns.str ~ Ns.int).get.sorted === List(
+    m(Ns.str ~ Ns.int).get.toSeq.sorted === List(
       ("with tx meta data", 1),
       ("without tx meta data", 2)
     )
 
     // Find by some meta data
-    m(Ns.str.int.tx_(Ns.float_(7f))).get.sorted === List(("with tx meta data", 1))
-    m(Ns.str ~ Ns.int.tx_(Ns.float_(7f))).get.sorted === List(("with tx meta data", 1))
+    m(Ns.str.int.tx_(Ns.float_(7f))).get.toSeq.sorted === List(("with tx meta data", 1))
+    m(Ns.str ~ Ns.int.tx_(Ns.float_(7f))).get.toSeq.sorted === List(("with tx meta data", 1))
 
     // Find by other meta data
-    m(Ns.str.int.tx_(Ns.long_(7L))).get.sorted === List(("with tx meta data", 1))
-    m(Ns.str ~ Ns.int.tx_(Ns.long_(7L))).get.sorted === List(("with tx meta data", 1))
+    m(Ns.str.int.tx_(Ns.long_(7L))).get.toSeq.sorted === List(("with tx meta data", 1))
+    m(Ns.str ~ Ns.int.tx_(Ns.long_(7L))).get.toSeq.sorted === List(("with tx meta data", 1))
 
     // Find by two meta values
     m(Ns.str.int.tx_(Ns.float_(7f).long_(7L))).get === List(("with tx meta data", 1))
     m(Ns.str ~ Ns.int.tx_(Ns.float_(7f).long_(7L))).get === List(("with tx meta data", 1))
 
     // Entities _without_ meta data
-    m(Ns.str.int.tx_(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
-    m(Ns.str ~ Ns.int.tx_(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
+    m(Ns.str.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
+    m(Ns.str ~ Ns.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
   }
 }

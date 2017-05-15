@@ -24,9 +24,9 @@ import org.specs2.specification.Scope
   examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition1.scala
 */
 
-class Friends extends MoleculeSpec with DatomicFacade {
+class Friends extends MoleculeSpec {
 
-  class BidirectionalSelfRefSetup extends Scope with DatomicFacade {
+  class BidirectionalSelfRefSetup extends Scope {
     implicit val conn = recreateDbFrom(ModernGraph1Schema)
 
     /*
@@ -64,22 +64,22 @@ class Friends extends MoleculeSpec with DatomicFacade {
 
     // Marko's name
     // gremlin> g.V(1).values('name')
-    Person(marko).name.one === "marko"
+    Person(marko).name.get.head === "marko"
 
     // Marko knows (entity ids)
     // g.V(1).outE('knows')
-    Person(marko).friends.one === Set(vadas, josh)
+    Person(marko).friends.get.head === Set(vadas, josh)
 
     // Marko knows (by name)
     // g.V(1).outE('knows').inV().values('name')
     // g.V(1).out('knows').values('name')
     Person(marko).Friends.name.get === Set("vadas", "josh")
-    Person(marko).friends.one === Set(vadas, josh)
+    Person(marko).friends.get.head === Set(vadas, josh)
 
     // We can uniformly query in the other direction too
     // vadas and josh also know marko
-    Person(vadas).friends.one === Set(peter, marko)
-    Person(josh).friends.one === Set(marko)
+    Person(vadas).friends.get.head === Set(peter, marko)
+    Person(josh).friends.get.head === Set(marko)
 
     // "Markos friends older than 30"
     // g.V(1).out('knows').has('age', gt(30)).values('name')
@@ -105,7 +105,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
 
     // Mean/average age of marko and vadas
     // g.V().has('name',within('vadas','marko')).values('age').mean()
-    Person.name_("marko", "vadas").age(avg).one === 28.0
+    Person.name_("marko", "vadas").age(avg).get.head === 28.0
 
 
     // Who are the people that marko develops software with?
@@ -115,7 +115,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
     // one query as input for the next one.
 
     // First find ids of software projects that marko has participated in
-    val markoSoftware = Person.name_("marko").software.one.toSeq
+    val markoSoftware = Person.name_("marko").software.get.head.toSeq
 
     // Then find names of persons that have participated in those projects
     Person.name.software_(markoSoftware).get === List("peter", "josh", "marko")
@@ -143,7 +143,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
     )
 
     // Who has most friends
-    Person.name.friends(count).get.sortBy(_._2).reverse === List(
+    Person.name.friends(count).get.toSeq.sortBy(_._2).reverse === List(
       ("vadas", 2),
       ("marko", 2),
       ("peter", 1),
@@ -208,7 +208,7 @@ class Friends extends MoleculeSpec with DatomicFacade {
     )
 
     // Marko's friends' friends that are not already marko's friends (or marko)
-    val markoFriends = Person(marko).Friends.name.get :+ "marko"
+    val markoFriends = Person(marko).Friends.name.get.toSeq :+ "marko"
     Person(marko).Friends.Friends.name.not(markoFriends).get === List(
       "peter"
     )

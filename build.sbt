@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.10.3",
+  version := "0.11.0",
   scalaVersion := "2.12.1",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -33,13 +33,13 @@ lazy val moleculeCore = project.in(file("core"))
 
 lazy val moleculeCoretest = project.in(file("coretest"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
+  .enablePlugins(MoleculePlugin)
   .settings(
     moduleName := "molecule-coretest",
     moleculeSchemas := Seq(
       "molecule/partition",
-      "molecule/bidirectional",
+      "molecule/bidirectionals",
       "molecule/util"
     )
   )
@@ -47,13 +47,13 @@ lazy val moleculeCoretest = project.in(file("coretest"))
 //  .settings(Seq(definitionDirsSeparate(
 //  "molecule/util",
 //  "molecule/partition",
-//  "molecule/bidirectional"
+//  "molecule/bidirectionals"
 //)))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
-  .enablePlugins(MoleculePlugin)
   .settings(commonSettings ++ noPublishSettings)
+  .enablePlugins(MoleculePlugin)
   .settings(
     moduleName := "molecule-examples",
     moleculeSchemas := Seq(

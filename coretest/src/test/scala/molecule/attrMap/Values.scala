@@ -328,10 +328,10 @@ class Values extends Base {
       (2, Map("fr" -> "Bonjour", "it" -> "Bon giorno"))
     )
 
-    Ns.int.strMap_.>("Hej").get.sorted === List(1, 2, 3)
-    Ns.int.strMap_.>=("Hej").get.sorted === List(1, 2, 3, 4)
-    Ns.int.strMap_.<=("Hej").get.sorted === List(2, 3, 4)
-    Ns.int.strMap_.<("Hej").get.sorted === List(2)
+    Ns.int.strMap_.>("Hej").get.toSeq.sorted === List(1, 2, 3)
+    Ns.int.strMap_.>=("Hej").get.toSeq.sorted === List(1, 2, 3, 4)
+    Ns.int.strMap_.<=("Hej").get.toSeq.sorted === List(2, 3, 4)
+    Ns.int.strMap_.<("Hej").get.toSeq.sorted === List(2)
 
 
     // Int

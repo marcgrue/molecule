@@ -1,9 +1,57 @@
-# ☍ Molecule
+![](Molecule-logo.png)
+
 
 Molecule is a type safe and intuitive Scala query/modelling DSL for 
 [Datomic][datomic] - the immutable database of facts. 
 
 Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [Molecule forum](https://groups.google.com/forum/#!forum/molecule-dsl)
+
+
+# What Molecule does
+
+As an example: to find
+
+_Names of twitter/facebook_page communities in neighborhoods of southern districts_
+ 
+we can compose a "molecule query" that is very close to our
+human sentence:
+
+```scala
+Community.name.`type`("twitter" or "facebook_page")
+  .Neighborhood.District.region("sw" or "s" or "se")
+```
+
+Molecule transforms this at compile time (with macros) to a little more elaborate Datalog query string and
+ input rules that finds those communities in the Datomic database:
+
+<pre>
+[:find ?a
+ :in $ %
+ :where
+   [?ent :community/name ?a]
+   (rule1 ?ent)
+   [?ent :community/neighborhood ?c]
+   [?c :neighborhood/district ?d]
+   (rule2 ?d)]
+
+INPUTS:
+List(
+  datomic.db.Db@xxx,
+  [[[rule1 ?ent] [?ent :community/type ":community.type/twitter"]]
+   [[rule1 ?ent] [?ent :community/type ":community.type/facebook_page"]]
+   [[rule2 ?d] [?d :district/region ":district.region/sw"]]
+   [[rule2 ?d] [?d :district/region ":district.region/s"]]
+   [[rule2 ?d] [?d :district/region ":district.region/se"]]]
+)
+</pre>
+
+By not having to write such complex Datalog queries and rules "by hand", Molecule 
+allows you to
+
+- Type less
+- Make type safe queries with inferred return types
+- Use your domain terms directly as query building blocks
+- Model complex queries intuitively (easier to understand and maintain)
 
 
 ### Try demo
@@ -55,54 +103,6 @@ Molecule 0.10.3 for Scala 2.12.1 is available at
 
 [Getting started](http://scalamolecule.org/manual/getting-started)...
 
-
-# What Molecule does
-
-As an example: to find
-
-_Names of twitter/facebook_page communities in neighborhoods of southern districts_
- 
-we can compose a "molecule query" that is very close to our
-human sentence:
-
-```scala
-Community.name.`type`("twitter" or "facebook_page")
-  .Neighborhood.District.region("sw" or "s" or "se")
-```
-
-Molecule transforms this at compile time (with macros) to a little more elaborate Datalog query string and
- input rules that finds those communities in the Datomic database:
-
-<pre>
-[:find ?a
- :in $ %
- :where
-   [?ent :community/name ?a]
-   (rule1 ?ent)
-   [?ent :community/neighborhood ?c]
-   [?c :neighborhood/district ?d]
-   (rule2 ?d)]
-
-INPUTS:
-List(
-  datomic.db.Db@xxx,
-  [[[rule1 ?ent] [?ent :community/type ":community.type/twitter"]]
-   [[rule1 ?ent] [?ent :community/type ":community.type/facebook_page"]]
-   [[rule2 ?d] [?d :district/region ":district.region/sw"]]
-   [[rule2 ?d] [?d :district/region ":district.region/s"]]
-   [[rule2 ?d] [?d :district/region ":district.region/se"]]]
-)
-</pre>
-
-By not having to write such complex Datalog queries and rules "by hand", Molecule 
-allows you to
-
-- Type less
-- Make type safe queries with inferred return types
-- Use your domain terms directly as query building blocks
-- Model complex queries intuitively (easier to understand and maintain)
-- Reduce syntactic noise
-- Focus more on your domain and less on queries
 
 
    

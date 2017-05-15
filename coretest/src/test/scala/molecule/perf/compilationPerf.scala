@@ -4,7 +4,7 @@ import molecule._
 import molecule.util.MoleculeSpec
 import molecule.util.schema.CoreTestSchema
 
-class CompilationPerf extends MoleculeSpec with DatomicFacade {
+class CompilationPerf extends MoleculeSpec {
 
   // Simple (un-scientific) compilation time tests with increasing arity molecules.
 

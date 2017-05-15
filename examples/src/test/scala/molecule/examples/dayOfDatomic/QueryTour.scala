@@ -28,10 +28,10 @@ class QueryTour extends MoleculeSpec {
 
 
     // 5. Finding a User's Comments
-    Comment.e.Author.email_("editor@example.com").get.sorted === List(c2, c4, c5, c7, c11)
-    Comment.e.Author.email_("stuarthalloway@datomic.com").get.sorted === List(c1, c3, c6, c8, c9, c10, c12)
+    Comment.e.Author.email_("editor@example.com").get.toSeq.sorted === List(c2, c4, c5, c7, c11)
+    Comment.e.Author.email_("stuarthalloway@datomic.com").get.toSeq.sorted === List(c1, c3, c6, c8, c9, c10, c12)
 
-    Comment.e.text.Author.email_("editor@example.com").firstName.get.sorted === List(
+    Comment.e.text.Author.email_("editor@example.com").firstName.get.toSeq.sorted === List(
       (c2, "blah 2", "Ed"),
       (c4, "blah 4", "Ed"),
       (c5, "blah 5", "Ed"),
@@ -60,7 +60,7 @@ class QueryTour extends MoleculeSpec {
     // 8. A Schema Query
 
     // Attributes of all entities having comments
-    Parent.a.comment_.get.sorted === List(
+    Parent.a.comment_.get.toSeq.sorted === List(
       ":comment/author",
       ":comment/text",
       ":parent/comment",
@@ -69,14 +69,14 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Attributes of stories having comments
-    Parent(Story.a.title_).comment_.get.sorted === List(
+    Parent(Story.a.title_).comment_.get.toSeq.sorted === List(
       ":parent/comment",
       ":story/title",
       ":story/url"
     )
 
     // Attributes of comments having a sub-comment
-    Parent(Comment.a.text_).comment_.get.sorted === List(
+    Parent(Comment.a.text_).comment_.get.toSeq.sorted === List(
       ":comment/author",
       ":comment/text",
       ":parent/comment"
@@ -115,7 +115,7 @@ class QueryTour extends MoleculeSpec {
 
     // .. almost same as: (here, only matching data is returned)
     // Comments of editor
-    Comment.e.author_(editor).get.sorted === List(c2, c4, c5, c7, c11)
+    Comment.e.author_(editor).get.toSeq.sorted === List(c2, c4, c5, c7, c11)
 
 
     // 15. Navigating Deeper with entity api
@@ -140,10 +140,10 @@ class QueryTour extends MoleculeSpec {
 //    } yield subComments._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)
-    m(Comment.author_(editor) ~ Parent.comment).get.sorted === List(c3, c6, c8, c12)
+    m(Comment.author_(editor) ~ Parent.comment).get.toSeq.sorted === List(c3, c6, c8, c12)
 
     // Editors comments and responses (note that c4 wasn't commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment).get.sorted === List(
+    m(Comment.author_(editor) ~ Parent.e.comment).get.toSeq.sorted === List(
       (c2, c3),
       (c5, c6),
       (c7, c8),
@@ -151,7 +151,7 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Editors comments having responses (c4 not commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment_).get.sorted === List(c2, c5, c7, c11)
+    m(Comment.author_(editor) ~ Parent.e.comment_).get.toSeq.sorted === List(c2, c5, c7, c11)
   }
 
 
@@ -181,19 +181,19 @@ class QueryTour extends MoleculeSpec {
     // 19. Going back in Time
 
     // Current name
-    User(ed).firstName.asOf(t).get.head === "Edward"
+    User(ed).firstName.getAsOf(t).head === "Edward"
 
     // Name before change (from previous transaction)
-    User(ed).firstName.asOf(t - 1).get.head === "Ed"
+    User(ed).firstName.getAsOf(t - 1).head === "Ed"
 
     // We can use the transaction value also
-    User(ed).firstName.asOf(tx).get.head === "Edward"
+    User(ed).firstName.getAsOf(tx).head === "Edward"
 
 
     // Auditing ................................................................
 
     // 20. Querying Across All time (sort by transactions)
-    User(ed).firstName.tx.op.history.get.sortBy(_._2) === List(
+    User(ed).firstName.tx.op.getHistory.toSeq.sortBy(_._2) === List(
       ("Ed", 13194139534318L, true),
       ("Ed", 13194139534345L, false),
       ("Edward", 13194139534345L, true)

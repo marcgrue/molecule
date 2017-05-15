@@ -122,20 +122,27 @@ object model {
 
   sealed trait Generic extends Value
 
+  case class Id(eid: Any) extends Generic
+  case class NsValue(values: Seq[String]) extends Generic
   case class AttrVar(v: String) extends Generic
+
   case object TxValue extends Generic
   case object TxValue_ extends Generic
-  case object TxTValue extends Generic
-  case object TxInstantValue extends Generic
-  case class OpValue(added: Option[Boolean] = None) extends Generic
-  case class OpValue_(added: Option[Boolean] = None) extends Generic
-  case class NsValue(values: Seq[String]) extends Generic
+
+  case class TxTValue(t: Option[Any] = None) extends Generic
+  case class TxTValue_(t: Option[Any] = None) extends Generic
+
+  case class TxInstantValue(date: Option[Any] = None) extends Generic
+  case class TxInstantValue_(date: Option[Any] = None) extends Generic
+
+  case class OpValue(added: Option[Any] = None) extends Generic
+  case class OpValue_(added: Option[Any] = None) extends Generic
+
   case object NoValue extends Generic
-  case class Id(eid: Any) extends Generic
   case class Card(card: Int) extends Generic
 
 
-  sealed trait Bidirectional  extends Generic
+  sealed trait Bidirectional extends Generic
 
   case class BiSelfRef(card: Int) extends Bidirectional
   case class BiSelfRefAttr(card: Int) extends Bidirectional

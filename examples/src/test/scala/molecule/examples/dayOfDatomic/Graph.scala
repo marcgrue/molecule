@@ -1,11 +1,10 @@
-package molecule
-package examples.dayOfDatomic
+package molecule.examples.dayOfDatomic
 import molecule._
 import molecule.examples.dayOfDatomic.schema.{Graph2Schema, GraphSchema}
 import org.specs2.mutable.Specification
 
 
-class Graph extends Specification with DatomicFacade {
+class Graph extends Specification {
 
   // See http://docs.neo4j.org/chunked/stable/cypher-cookbook-hyperedges.html
 
@@ -99,7 +98,7 @@ class Graph extends Specification with DatomicFacade {
     // All groups and the roles a user has, sorted by the name of the role
     User.name_("User1")
       .RoleInGroup.Role.name
-      ._RoleInGroup.Group.name.get.sorted === List(
+      ._RoleInGroup.Group.name.get.toSeq.sorted === List(
       ("Role1", "Group2"),
       ("Role2", "Group1")
     )
@@ -138,7 +137,7 @@ class Graph extends Specification with DatomicFacade {
     // Users and their Roles in Groups
     User.name
       .RoleInGroup.Roles.name
-      ._RoleInGroup.Group.name.get.sorted === List(
+      ._RoleInGroup.Group.name.get.toSeq.sorted === List(
       ("User1", "Role1", "Group1"),
       ("User1", "Role2", "Group1"), // Sharing Role2 in Group 1
       ("User1", "Role2", "Group2"),
@@ -155,13 +154,13 @@ class Graph extends Specification with DatomicFacade {
     // Groups where User1 and User2 share a role
 
     // Since we unify on both Group name and Role name we can use the AND notation:
-    User.name_("User1" and "User2").RoleInGroup.Group.name._RoleInGroup.Roles.name.get.sorted === List(
+    User.name_("User1" and "User2").RoleInGroup.Group.name._RoleInGroup.Roles.name.get.toSeq.sorted === List(
       ("Group1", "Role2"),
       ("Group2", "Role3"))
 
     // .. or we could use the full SelfJoin notation
     User.name_("User1").RoleInGroup.Group.name._RoleInGroup.Roles.name._RoleInGroup._User.Self
-        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.Roles.name_(unify).get.sorted === List(
+        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.Roles.name_(unify).get.toSeq.sorted === List(
       ("Group1", "Role2"),
       ("Group2", "Role3"))
 
@@ -173,7 +172,7 @@ class Graph extends Specification with DatomicFacade {
       ("Group2", 1))
     // .. or
     User.name_("User1").RoleInGroup.Group.name._RoleInGroup.roles(count)._User.Self
-        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.roles_(unify).get.sortBy(_._1) === List(
+        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.roles_(unify).get.toSeq.sortBy(_._1) === List(
       ("Group1", 1),
       ("Group2", 1))
 

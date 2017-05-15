@@ -9,7 +9,7 @@ import org.specs2.specification.Scope
 
 import scala.language.reflectiveCalls
 
-class PartitionSetup extends Scope with DatomicFacade {
+class PartitionSetup extends Scope {
   implicit val conn = recreateDbFrom(PartitionTestSchema)
 }
 
@@ -70,7 +70,7 @@ class Partition extends MoleculeSpec {
 
     "Back only" in new PartitionSetup {
       lit_Book.title("A good book").cat("good").Author.name("Marc").save
-      lit_Book.title.Author.name._Book.cat.one ===("A good book", "Marc", "good")
+      lit_Book.title.Author.name._Book.cat.get.head ===("A good book", "Marc", "good")
     }
 
     "Adjacent" in new PartitionSetup {

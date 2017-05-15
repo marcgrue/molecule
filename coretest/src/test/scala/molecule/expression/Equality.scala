@@ -196,10 +196,10 @@ class Equality extends Base {
     Ns.date.dates(date4).get === List((date3, Set(date4, date2)))
 
 
-    Ns.uuid.uuids(uuid1).get.sortBy(_.toString) === List((uuid1, Set(uuid1, uuid2)))
-    Ns.uuid.uuids(uuid2).get.sortBy(_.toString) === List((uuid1, Set(uuid2, uuid1)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid2)))
-    Ns.uuid.uuids(uuid3).get.sortBy(_.toString) === List((uuid2, Set(uuid2, uuid3)))
-    Ns.uuid.uuids(uuid4).get.sortBy(_.toString) === List((uuid3, Set(uuid2, uuid4)))
+    Ns.uuid.uuids(uuid1).get.toSeq.sortBy(_.toString) === List((uuid1, Set(uuid1, uuid2)))
+    Ns.uuid.uuids(uuid2).get.toSeq.sortBy(_.toString) === List((uuid1, Set(uuid2, uuid1)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid2)))
+    Ns.uuid.uuids(uuid3).get.toSeq.sortBy(_.toString) === List((uuid2, Set(uuid2, uuid3)))
+    Ns.uuid.uuids(uuid4).get.toSeq.sortBy(_.toString) === List((uuid3, Set(uuid2, uuid4)))
 
 
     //    Ns.ur.urs(ur1).get === List((ur1, Set(ur1, ur2)))

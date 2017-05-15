@@ -92,7 +92,7 @@ class SeattleQueryTests extends SeattleSpec {
     /** ******* Single input parameter **************************/
 
     // Community input molecule awaiting some type value
-    m(Community.name.type_(?)) -->
+    m(Community.name.type_.apply(?)) -->
       """[:find  ?b
         | :in    $ ?c
         | :where [?a :community/name ?b]

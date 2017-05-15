@@ -1,6 +1,6 @@
-package molecule
-package attr
+package molecule.attr
 
+import molecule._
 import molecule.util.{CoreSetup, CoreSpec}
 import molecule.util.dsl.coreTest._
 

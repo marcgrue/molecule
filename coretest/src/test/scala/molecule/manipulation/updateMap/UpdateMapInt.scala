@@ -15,23 +15,23 @@ class UpdateMapInt extends CoreSpec {
 
       // Add pair
       Ns(eid).intMap.add("str2" -> 3).update
-      Ns.intMap.one === Map("str1" -> 1, "str2" -> 3)
+      Ns.intMap.get.head === Map("str1" -> 1, "str2" -> 3)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).intMap.add("str2" -> 2).update
-      Ns.intMap.one === Map("str1" -> 1, "str2" -> 2)
+      Ns.intMap.get.head === Map("str1" -> 1, "str2" -> 2)
 
       // Add multiple pairs (vararg)
       Ns(eid).intMap.add("str3" -> 3, "str4" -> 4).update
-      Ns.intMap.one === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4)
+      Ns.intMap.get.head === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).intMap.add(Seq("str4" -> 4, "str5" -> 5)).update
-      Ns.intMap.one === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
+      Ns.intMap.get.head === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
 
       // Add empty Map of pair (no effect)
       Ns(eid).intMap.add(Seq[(String, Int)]()).update
-      Ns.intMap.one === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
+      Ns.intMap.get.head === Map("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
 
 
       // Can't add pairs with duplicate keys
@@ -58,27 +58,27 @@ class UpdateMapInt extends CoreSpec {
 
       // Replace value
       Ns(eid).intMap.replace("str6" -> 8).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5, "str6" -> 8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).intMap.replace("str5" -> 8).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 8, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 8, "str6" -> 8)
 
       // Replace multiple values (vararg)
       Ns(eid).intMap.replace("str3" -> 6, "str4" -> 7).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).intMap.replace("str3" -> 6, "str4" -> 7).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).intMap.replace(Seq("str2" -> 5)).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 5, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 5, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).intMap.replace(Seq[(String, Int)]()).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 5, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 5, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
 
 
       // Can't replace pairs with duplicate keys
@@ -110,27 +110,27 @@ class UpdateMapInt extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).intMap.remove("str6").update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).intMap.remove("str7").update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4, "str5" -> 5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).intMap.remove("str5", "str5").update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 3, "str4" -> 4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).intMap.remove("str3", "str4").update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1, "str2" -> 2)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2)
 
       // Remove pairs by Seq of keys
       Ns(eid).intMap.remove(Seq("str2")).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).intMap.remove(Seq[String]()).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1)
     }
 
 
@@ -140,15 +140,15 @@ class UpdateMapInt extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).intMap("str1" -> 1).update
-      Ns.intMap.one.toList.sorted === List("str1" -> 1)
+      Ns.intMap.get.head.toList.sorted === List("str1" -> 1)
 
       // Apply multiple values (vararg)
       Ns(eid).intMap("str2" -> 2, "str3" -> 3).update
-      Ns.intMap.one.toList.sorted === List("str2" -> 2, "str3" -> 3)
+      Ns.intMap.get.head.toList.sorted === List("str2" -> 2, "str3" -> 3)
 
       // Apply Map of values
       Ns(eid).intMap(Seq("str4" -> 4)).update
-      Ns.intMap.one.toList.sorted === List("str4" -> 4)
+      Ns.intMap.get.head.toList.sorted === List("str4" -> 4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).intMap(Seq[(String, Int)]()).update
@@ -189,23 +189,23 @@ class UpdateMapInt extends CoreSpec {
 
       // Add pair
       Ns(eid).intMap.add(str2 -> int3).update
-      Ns.intMap.one === Map(str1 -> int1, str2 -> int3)
+      Ns.intMap.get.head === Map(str1 -> int1, str2 -> int3)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).intMap.add(str2 -> int2).update
-      Ns.intMap.one === Map(str1 -> int1, str2 -> int2)
+      Ns.intMap.get.head === Map(str1 -> int1, str2 -> int2)
 
       // Add multiple pairs (vararg)
       Ns(eid).intMap.add(str3 -> int3, str4 -> int4).update
-      Ns.intMap.one === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4)
+      Ns.intMap.get.head === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).intMap.add(Seq(str4 -> int4, str5 -> int5)).update
-      Ns.intMap.one === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
+      Ns.intMap.get.head === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
 
       // Add empty Map of pair (no effect)
       Ns(eid).intMap.add(Seq[(String, Int)]()).update
-      Ns.intMap.one === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
+      Ns.intMap.get.head === Map(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
 
 
       // Can't add pairs with duplicate keys
@@ -250,27 +250,27 @@ class UpdateMapInt extends CoreSpec {
 
       // Replace value
       Ns(eid).intMap.replace(str6 -> int8).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5, str6 -> int8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).intMap.replace(str5 -> int8).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int8, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int8, str6 -> int8)
 
       // Replace multiple values (vararg)
       Ns(eid).intMap.replace(str3 -> int6, str4 -> int7).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).intMap.replace(str3 -> int6, str4 -> int7).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).intMap.replace(Seq(str2 -> int5)).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int5, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int5, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).intMap.replace(Seq[(String, Int)]()).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int5, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int5, str3 -> int6, str4 -> int7, str5 -> int8, str6 -> int8)
 
 
       // Can't replace pairs with duplicate keys
@@ -295,27 +295,27 @@ class UpdateMapInt extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).intMap.remove(str6).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).intMap.remove(str7).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4, str5 -> int5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).intMap.remove(str5, str5).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2, str3 -> int3, str4 -> int4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).intMap.remove(str3, str4).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1, str2 -> int2)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1, str2 -> int2)
 
       // Remove pairs by Seq of keys
       Ns(eid).intMap.remove(Seq(str2)).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).intMap.remove(Seq[String]()).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1)
     }
 
 
@@ -325,15 +325,15 @@ class UpdateMapInt extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).intMap(str1 -> int1).update
-      Ns.intMap.one.toList.sorted === List(str1 -> int1)
+      Ns.intMap.get.head.toList.sorted === List(str1 -> int1)
 
       // Apply multiple values (vararg)
       Ns(eid).intMap(str2 -> int2, str3 -> int3).update
-      Ns.intMap.one.toList.sorted === List(str2 -> int2, str3 -> int3)
+      Ns.intMap.get.head.toList.sorted === List(str2 -> int2, str3 -> int3)
 
       // Apply Map of values
       Ns(eid).intMap(Seq(str4 -> int4)).update
-      Ns.intMap.one.toList.sorted === List(str4 -> int4)
+      Ns.intMap.get.head.toList.sorted === List(str4 -> int4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).intMap(Seq[(String, Int)]()).update

@@ -17,11 +17,11 @@ class UpdateDate extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).date(date1).update
-      Ns.date.one === date1
+      Ns.date.get.head === date1
 
       // Apply new value
       Ns(eid).date(date2).update
-      Ns.date.one === date2
+      Ns.date.get.head === date2
 
       // Delete value (apply no value)
       Ns(eid).date().update
@@ -46,28 +46,28 @@ class UpdateDate extends CoreSpec {
 
       // Add value
       Ns(eid).dates.add(date2).update
-      Ns.dates.one === Set(date1, date2)
+      Ns.dates.get.head === Set(date1, date2)
 
       // Add exisiting value (no effect)
       Ns(eid).dates.add(date2).update
-      Ns.dates.one === Set(date1, date2)
+      Ns.dates.get.head === Set(date1, date2)
 
       // Add multiple values
       Ns(eid).dates.add(date3, date4).update
-      Ns.dates.one === Set(date1, date2, date3, date4)
+      Ns.dates.get.head === Set(date1, date2, date3, date4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).dates.add(Seq(date4, date5)).update
-      Ns.dates.one === Set(date1, date2, date3, date4, date5)
+      Ns.dates.get.head === Set(date1, date2, date3, date4, date5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(date6, date7)
       Ns(eid).dates.add(values).update
-      Ns.dates.one === Set(date1, date2, date3, date4, date5, date6, date7)
+      Ns.dates.get.head === Set(date1, date2, date3, date4, date5, date6, date7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).dates.add(Seq[Date]()).update
-      Ns.dates.one === Set(date1, date2, date3, date4, date5, date6, date7)
+      Ns.dates.get.head === Set(date1, date2, date3, date4, date5, date6, date7)
 
 
       // Can't add duplicate values
@@ -111,28 +111,28 @@ class UpdateDate extends CoreSpec {
 
       // Replace value
       Ns(eid).dates.replace(date6 -> date8).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date3, date4, date5, date8)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date3, date4, date5, date8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).dates.replace(date5 -> date8).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date3, date4, date8)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date3, date4, date8)
 
       // Replace multiple values (vararg)
       Ns(eid).dates.replace(date3 -> date6, date4 -> date7).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date6, date7, date8)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date6, date7, date8)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).dates.replace(Seq(date2 -> date5)).update
-      Ns.dates.one.toList.sorted === List(date1, date5, date6, date7, date8)
+      Ns.dates.get.head.toList.sorted === List(date1, date5, date6, date7, date8)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(date1 -> date4)
       Ns(eid).dates.replace(values).update
-      Ns.dates.one.toList.sorted === List(date4, date5, date6, date7, date8)
+      Ns.dates.get.head.toList.sorted === List(date4, date5, date6, date7, date8)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).dates.replace(Seq[(Date, Date)]()).update
-      Ns.dates.one.toList.sorted === List(date4, date5, date6, date7, date8)
+      Ns.dates.get.head.toList.sorted === List(date4, date5, date6, date7, date8)
 
 
       // Can't replace duplicate values
@@ -170,23 +170,23 @@ class UpdateDate extends CoreSpec {
 
       // Remove value
       Ns(eid).dates.remove(date6).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date3, date4, date5)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date3, date4, date5)
 
       // Removing non-existing value has no effect
       Ns(eid).dates.remove(date7).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date3, date4, date5)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date3, date4, date5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).dates.remove(date5, date5).update
-      Ns.dates.one.toList.sorted === List(date1, date2, date3, date4)
+      Ns.dates.get.head.toList.sorted === List(date1, date2, date3, date4)
 
       // Remove multiple values (vararg)
       Ns(eid).dates.remove(date3, date4).update
-      Ns.dates.one.toList.sorted === List(date1, date2)
+      Ns.dates.get.head.toList.sorted === List(date1, date2)
 
       // Remove Seq of values
       Ns(eid).dates.remove(Seq(date2)).update
-      Ns.dates.one.toList.sorted === List(date1)
+      Ns.dates.get.head.toList.sorted === List(date1)
 
       // Remove Seq of values as variable
       val values = Seq(date1)
@@ -196,7 +196,7 @@ class UpdateDate extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).dates(date1).update
       Ns(eid).dates.remove(Seq[Date]()).update
-      Ns.dates.one.toList.sorted === List(date1)
+      Ns.dates.get.head.toList.sorted === List(date1)
     }
 
 
@@ -206,15 +206,15 @@ class UpdateDate extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).dates(date1).update
-      Ns.dates.one.toList.sorted === List(date1)
+      Ns.dates.get.head.toList.sorted === List(date1)
 
       // Apply multiple values (vararg)
       Ns(eid).dates(date2, date3).update
-      Ns.dates.one.toList.sorted === List(date2, date3)
+      Ns.dates.get.head.toList.sorted === List(date2, date3)
 
       // Apply Seq of values
       Ns(eid).dates(Set(date4)).update
-      Ns.dates.one.toList.sorted === List(date4)
+      Ns.dates.get.head.toList.sorted === List(date4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).dates(Set[Date]()).update
@@ -223,7 +223,7 @@ class UpdateDate extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(date1, date2)
       Ns(eid).dates(values).update
-      Ns.dates.one.toList.sorted === List(date1, date2)
+      Ns.dates.get.head.toList.sorted === List(date1, date2)
 
       // Delete all (apply no values)
       Ns(eid).dates().update

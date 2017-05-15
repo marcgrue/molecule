@@ -403,7 +403,7 @@ object Model2Query extends Helpers {
             case Fulltext(Seq(Qm))        => q.fulltext(e, a, v, Var(v1)).in(v1, a)
             case VarValue                 => q.where(e, a, v, gs).find(gs)
             case Eq((seq: Seq[_]) :: Nil) => q.orRules(e, a, seq, gs)
-            case Eq(arg :: Nil)           => q.where(e, a, Val(arg), gs)
+            case Eq(arg :: Nil)           => q.where(e, a, Val(arg), gs).find(gs)
             case Eq(args)                 => q.orRules(e, a, args, gs)
             case Neq(args)                => q.where(e, a, v, gs).compareTo("!=", a, v, args map Val)
             case Gt(arg)                  => q.where(e, a, v, gs).compareTo(">", a, v, Val(arg))
@@ -496,9 +496,9 @@ object Model2Query extends Helpers {
         case Meta(_, _, "e", _, Length(Some(Fn(_, _))))    => q.find(e, Seq())
         case Meta(_, _, "e", _, Eq(Seq(Qm)))               => q.in(e)
         case Meta(_, _, "e", _, Eq(eids)) if eids.size > 1 => q.in(eids, e)
-        case Meta(_, _, "r", _, IndexVal)                  => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, Id(eid), IndexVal)              => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, IndexVal)                    => q.find(v, Seq()).func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, "r", _, IndexVal)                  => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, Id(eid), IndexVal)              => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, _, IndexVal)                    => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
         case Meta(_, _, _, _, EntValue)                    => q.find(e, Seq())
         case Meta(_, _, _, _, _)                           => q
 
@@ -578,8 +578,8 @@ object Model2Query extends Helpers {
 
         case Self =>
           // Self-reference should be distinct
-//          val distinctQuery = query.func("!=", Seq(Var(e), Var(w)))
-//          (distinctQuery, w, y, prevNs, prevAttr, prevRefNs)
+          //          val distinctQuery = query.func("!=", Seq(Var(e), Var(w)))
+          //          (distinctQuery, w, y, prevNs, prevAttr, prevRefNs)
           (query, w, y, prevNs, prevAttr, prevRefNs)
 
         case Nested(b@Bond(ns, refAttr, refNs, _, _), elements) =>
@@ -618,6 +618,7 @@ object Model2Query extends Helpers {
           val eid = if (query.wh.clauses.isEmpty) e
           else query.wh.clauses.head match {
             case DataClause(_, Var(firstE), _, _, _, _) => firstE
+            case Funct(_, Seq(Var(firstE)), _)          => firstE
             case otherClause                            => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
           }
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
@@ -627,90 +628,6 @@ object Model2Query extends Helpers {
 
         case other => sys.error("[Model2Query:make] Unresolved query variables from model: " + (other, e, v, prevNs, prevAttr, prevRefNs))
       }
-    }
-
-    // Process And-semantics (self-joins)
-    def postProcessOLD(q: Query) = {
-      def getAndAtoms(elements: Seq[Element]): Seq[Atom] = elements flatMap {
-        case a@Atom(_, _, _, 2, And(andValues), _, _, _) => Seq(a)
-        case Nested(_, elements2)                        => getAndAtoms(elements2)
-        case _                                           => Nil
-      }
-
-      val andAtoms: Seq[Atom] = model.elements.collect {
-        case a@Atom(_, attr0, _, card, And(_), _, _, _) if card == 1 || card == 3 => a
-      }
-
-      if (andAtoms.size > 1)
-        sys.error("[Model2Query:postProcess] For now, only 1 And-expression can be used. Found: " + andAtoms)
-
-      if (andAtoms.size == 1) {
-        val clauses = q.wh.clauses
-        val andAtom = andAtoms.head
-        val Atom(ns, attr0, _, card, And(andValues), _, _, _) = andAtom
-        val attr = if (attr0.last == '_') attr0.init else attr0
-        val unifyAttrs = model.elements.collect {
-          case a@Atom(ns1, attr1, _, _, _, _, _, _) if a != andAtom => (ns1, if (attr1.last == '_') attr1.init else attr1)
-        }
-
-        // The first arg is already modelled in the query
-        val selfJoinClauses = andValues.zipWithIndex.tail.flatMap { case (andValue, i) =>
-
-          // Todo: complete matches...
-          def vi(v0: Var) = Var(v0.v + "_" + i)
-          def queryValue(qv: QueryValue): QueryValue = qv match {
-            case Var(v) => vi(Var(v))
-            case _      => qv
-          }
-          def queryTerm(qt: QueryTerm): QueryTerm = qt match {
-            case Rule(name, args, cls) => Rule(name, args map queryValue, cls flatMap clause)
-            case InVar(b, argss)       => InVar(binding(b), argss)
-            case qv: QueryValue        => queryValue(qv)
-            case other                 => qt
-          }
-          def binding(b: Binding) = b match {
-            case ScalarBinding(v)     => ScalarBinding(vi(v))
-            case CollectionBinding(v) => CollectionBinding(vi(v))
-            case TupleBinding(vs)     => TupleBinding(vs map vi)
-            case RelationBinding(vs)  => RelationBinding(vs map vi)
-            case _                    => b
-          }
-          def clause(cl: Clause): Seq[Clause] = cl match {
-            case dc: DataClause => dataClauses(dc)
-            case other          => makeSelfJoinClauses(other)
-          }
-          def dataClauses(dc: DataClause): Seq[Clause] = dc match {
-            case DataClause(ds, e, a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
-              // Add next And-value
-              Seq(
-                DataClause(ds, vi(e), a, Var(v + "_" + i), queryTerm(tx), queryTerm(op)),
-                Funct(".matches ^String", List(Var(v + "_" + i), Val(".+@(" + andValue + ")$")), NoBinding)
-              )
-
-            case DataClause(ds, e, a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
-              // Add next And-value
-              Seq(DataClause(ds, vi(e), a, Val(andValue), queryTerm(tx), queryTerm(op)))
-
-            case DataClause(ds, e, a@KW(ns2, attr2, _), v, tx, op) if unifyAttrs.contains((ns2, attr2)) =>
-              // Keep value-position value to unify
-              Seq(DataClause(ds, vi(e), a, v, queryTerm(tx), queryTerm(op)))
-
-            case DataClause(ds, e, a, v, tx, op) =>
-              // Add i to variables
-              Seq(DataClause(ds, vi(e), a, queryValue(v), queryTerm(tx), queryTerm(op)))
-          }
-          def makeSelfJoinClauses(expr: QueryExpr): Seq[Clause] = expr match {
-            case dc@DataClause(ds, e, a, v, tx, op)                    => dataClauses(dc)
-            case RuleInvocation(name, args)                            => Seq(RuleInvocation(name, args map queryTerm))
-            case Funct(".startsWith ^String", List(v, key), NoBinding) => Nil
-            case Funct(".matches ^String", List(v, key), NoBinding)    => Nil
-            case Funct("second", ins, outSame)                         => Seq(Funct("second", ins map queryTerm, outSame))
-            case Funct(name, ins, outs)                                => Seq(Funct(name, ins map queryTerm, binding(outs)))
-          }
-          clauses flatMap makeSelfJoinClauses
-        }
-        q.copy(wh = Where(q.wh.clauses ++ selfJoinClauses))
-      } else q
     }
 
     // Process And-semantics (self-joins)

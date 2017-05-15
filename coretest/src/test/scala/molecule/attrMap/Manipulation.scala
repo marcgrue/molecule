@@ -11,7 +11,7 @@ class Manipulation extends Base {
     // Insert
 
     val eid: Long = Ns.strMap.insert(Map("en" -> "Hi")).eid
-    Ns.strMap.one === Map("en" -> "Hi")
+    Ns.strMap.get.head === Map("en" -> "Hi")
 
 
     // Update + Add
@@ -19,13 +19,13 @@ class Manipulation extends Base {
     // When a previous populated key is encountered the old fact is
     // retracted and the new one asserted (like an update).
     Ns(eid).strMap.add("en" -> "Hi there", "fr" -> "Bonjour").update
-    Ns.strMap.one === Map("en" -> "Hi there", "fr" -> "Bonjour")
+    Ns.strMap.get.head === Map("en" -> "Hi there", "fr" -> "Bonjour")
 
 
     // Remove pair (by key)
 
     Ns(eid).strMap.remove("en").update
-    Ns.strMap.one === Map("fr" -> "Bonjour")
+    Ns.strMap.get.head === Map("fr" -> "Bonjour")
 
 
     // Applying nothing (empty parenthesises)

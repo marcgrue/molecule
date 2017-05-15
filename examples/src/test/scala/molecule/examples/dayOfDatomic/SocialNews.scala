@@ -37,7 +37,7 @@ class SocialNews extends MoleculeSpec {
     User(john).upVotes().update
 
     // John now has no upvotes
-    User(john).upVotes.get.length === 0
+    User(john).upVotes.get.size === 0
 
     // No Users with upvotes anymore
     User.email.upVotes.get === List()

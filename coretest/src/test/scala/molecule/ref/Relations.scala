@@ -20,7 +20,7 @@ class Relations extends CoreSpec {
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get.sorted === List(
+    Ns.str.Ref1.str1.get.toSeq.sorted === List(
       ("a0", "a1"),
       ("b0", "b1"),
       ("c0", "c1")
@@ -28,7 +28,7 @@ class Relations extends CoreSpec {
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get.sorted === List(
+    Ns.str.ref1.get.toSeq.sorted === List(
       ("a0", a1),
       ("b0", b1),
       ("c0", c1))
@@ -48,7 +48,7 @@ class Relations extends CoreSpec {
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get.sorted === List(
+    Ns.str.Ref1.str1.get.toSeq.sorted === List(
       ("kid1", "father1"),
       ("kid2", "father2"),
       ("kid3", "father3")
@@ -56,7 +56,7 @@ class Relations extends CoreSpec {
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get.sorted === List(
+    Ns.str.ref1.get.toSeq.sorted === List(
       ("kid1", father1),
       ("kid2", father2),
       ("kid3", father3))

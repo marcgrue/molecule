@@ -1,17 +1,16 @@
 package molecule.factory
 import molecule._
 import molecule.api._
-import molecule.dsl.actions._
 import molecule.ops.QueryOps._
 import molecule.ops.TreeOps
-import molecule.dsl._
+import molecule.boilerplate._
 import molecule.transform._
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
 
-trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
+trait MakeInputMolecule[Ctx <: Context] extends MakeBase[Ctx] {
   import c.universe._
 
   def await_in_x_out_0(inputDsl: c.Expr[NS], InTypes: Type*) = {
@@ -19,13 +18,10 @@ trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
     val InputTypes = if (InTypes.length == 1) tq"Seq[..$InTypes]" else tq"Seq[(..$InTypes)]"
     expr( q"""
       ..${basics(inputDsl)}
-      new $InputMoleculeTpe[..$InTypes](model, query) {
-        def apply(args: $InputTypes)(implicit conn: Connection): Molecule0 = {
-          val query1  = bindValues1(query, args)
-          //val query1E = bindValues1(queryE, args)
-          new Molecule0(model, query1) {
-            def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query1)
-          }
+      new $InputMoleculeTpe[..$InTypes](r.model, r.query) {
+        def apply(args: $InputTypes)(implicit conn: Conn): Molecule0 = {
+          val query1  = bindValues1(_query, args)
+          new Molecule0(_model, query1) with Util
         }
       }
     """)
@@ -46,19 +42,18 @@ trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
     val bindValues2 = if (InTypes.size == 2) {
       val (inParams, inTerm1, inTerm2) = resolve2(InTypes)
       q"""
-        def apply(..$inParams)(implicit conn: Connection): Molecule1[$A] = {
-          val query2 = bindValues2(query, $inTerm1, $inTerm2)
-          new Molecule1[$A](model, query2) {
-            def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = results(conn, modelE, queryE).toList.map(row => (..${castTpl(q"queryE", q"row", OutTypes2)}))
+        def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
+          val query2 = bindValues2(_query, $inTerm1, $inTerm2)
 
-            def get(implicit conn: Connection): Seq[$A] = model.elements.collectFirst {
+          new Molecule1[$A](_model, query2) with Util {
+            def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, query2)
+
+            def get(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
               case n: Nested if !n.bond.ns.isEmpty =>
-                val query2E = bindValues2(queryE, $inTerm1, $inTerm2)
-                ${castNestedTpls(q"query2E", q"results(conn, modelE, query2E)", Seq(A))}
+                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
+                ${castNestedTpls(q"query2E", q"conn.query(_modelE, query2E)", Seq(A))}
             } getOrElse
-              results(conn, model, query2).toList.map(row => ${cast(q"query", q"row", A, 0)}.asInstanceOf[$A])
-
-            def getD(implicit conn: Connection): Unit   = debugMolecule(conn, model, query2)
+              conn.query(_model, query2).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
           }
         }
       """
@@ -66,23 +61,28 @@ trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
 
     expr( q"""
       ..${basics(inputDsl)}
-      new $InputMoleculeTpe[..$InTypes, $A](model, query) {
-        def apply(args: $InputTypes)(implicit conn: Connection): Molecule1[$A] = {
-          def query1  = bindValues1(query, args)
-          def query1E = bindValues1(queryE, args)
-          new Molecule1[$A](model, query1) {
-            def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = results(conn, modelE, queryE).toList.map(row => (..${castTpl(q"queryE", q"row", OutTypes2)}))
+      new $InputMoleculeTpe[..$InTypes, $A](r.model, r.query) {
+        ..$imports
 
-            def get(implicit conn: Connection): Seq[$A] = model.elements.collectFirst {
+        private val _modelE = r.modelE
+        private val _queryE = r.queryE
+
+        def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
+          def query1  = bindValues1(_query, args)
+          def query1E = bindValues1(_queryE, args)
+
+          new Molecule1[$A](_model, query1) with Util {
+            def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, query1)
+
+            def get(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
               case n: Nested if !n.bond.ns.isEmpty =>
-                val query1E = bindValues1(queryE, args)
-                ${castNestedTpls(q"query1E", q"results(conn, modelE, query1E)", Seq(A))}
+                val query1E = bindValues1(_queryE, args)
+                ${castNestedTpls(q"query1E", q"conn.query(_modelE, query1E)", Seq(A))}
             } getOrElse
-              results(conn, model, query1).toList.map(row => ${cast(q"query", q"row", A, 0)}.asInstanceOf[$A])
-
-            def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query1)
+              conn.query(_model, query1).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
           }
         }
+
         $bindValues2
       }
     """)
@@ -96,19 +96,17 @@ trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
     val bindValues2 = if (InTypes.size == 2) {
       val (inParams, inTerm1, inTerm2) = resolve2(InTypes)
       q"""
-        def apply(..$inParams)(implicit conn: Connection): $MoleculeTpe[..$OutTypes] = {
-          def query2 = bindValues2(query, $inTerm1, $inTerm2)
-          new $MoleculeTpe[..$OutTypes](model, query2) {
-            def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = results(conn, modelE, queryE).toList.map(row => (..${castTpl(q"queryE", q"row", OutTypes2)}))
+        def apply(..$inParams)(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
+          def query2 = bindValues2(_query, $inTerm1, $inTerm2)
+          new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
+            def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, query2)
 
-            def get(implicit conn: Connection): Seq[(..$OutTypes)] = model.elements.collectFirst {
+            def get(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
               case n: Nested if !n.bond.ns.isEmpty =>
-                val query2E = bindValues2(queryE, $inTerm1, $inTerm2)
-                ${castNestedTpls(q"query2E", q"results(conn, modelE, query2E)", OutTypes)}
+                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
+                ${castNestedTpls(q"query2E", q"conn.query(_modelE, query2E)", OutTypes)}
             } getOrElse
-              results(conn, model, query2).toList.map(row => (..${castTpl(q"query", q"row", OutTypes)}))
-
-            def getD(implicit conn: Connection): Unit              = debugMolecule(conn, model, query2)
+              conn.query(_model, query2).toList.map(row => (..${castTpl(q"_query", q"row", OutTypes)}))
           }
         }
       """
@@ -116,22 +114,26 @@ trait MakeInputMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
 
     expr( q"""
       ..${basics(inputDsl)}
-      new $InputMoleculeTpe[..$InTypes, ..$OutTypes](model, query) {
-        def apply(args: Seq[(..$InTypes)])(implicit conn: Connection): $MoleculeTpe[..$OutTypes] = {
-          val query1  = bindValues1(query, args)
-          new $MoleculeTpe[..$OutTypes](model, query1) {
-            def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = results(conn, modelE, queryE).toList.map(row => (..${castTpl(q"queryE", q"row", OutTypes2)}))
+      new $InputMoleculeTpe[..$InTypes, ..$OutTypes](r.model, r.query) {
+        ..$imports
 
-            def get(implicit conn: Connection): Seq[(..$OutTypes)] = model.elements.collectFirst {
+        private val _modelE = r.modelE
+        private val _queryE = r.queryE
+
+        def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
+          val query1  = bindValues1(_query, args)
+          new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
+            def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, query1)
+
+            def get(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
               case n: Nested if !n.bond.ns.isEmpty =>
-                val query1E = bindValues1(queryE, args)
-                ${castNestedTpls(q"query1E", q"results(conn, modelE, query1E)", OutTypes)}
+                val query1E = bindValues1(_queryE, args)
+                ${castNestedTpls(q"query1E", q"conn.query(_modelE, query1E)", OutTypes)}
             } getOrElse
-              results(conn, model, query1).toList.map(row => (..${castTpl(q"query", q"row", OutTypes)}))
-
-            def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query1)
+              conn.query(_model, query1).toList.map(row => (..${castTpl(q"_query", q"row", OutTypes)}))
           }
         }
+
         $bindValues2
       }
     """)

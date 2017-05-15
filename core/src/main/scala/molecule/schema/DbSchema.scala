@@ -5,8 +5,9 @@ package molecule.schema
  * Manual changes to this file will likely break molecules!
  * Instead, change the molecule definition files and recompile your project with `sbt compile`.
  */
-import molecule.dsl.actions._
-import molecule.dsl._
+import molecule._
+import molecule.boilerplate._
+import molecule.boilerplate.attributes._
 
 
 object Db extends Db_0 {

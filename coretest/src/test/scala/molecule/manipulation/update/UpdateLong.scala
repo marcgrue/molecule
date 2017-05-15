@@ -15,11 +15,11 @@ class UpdateLong extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).long(1L).update
-      Ns.long.one === 1L
+      Ns.long.get.head === 1L
 
       // Apply new value
       Ns(eid).long(2L).update
-      Ns.long.one === 2L
+      Ns.long.get.head === 2L
 
       // Delete value (apply no value)
       Ns(eid).long().update
@@ -44,11 +44,11 @@ class UpdateLong extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).long(long1).update
-      Ns.long.one === long1
+      Ns.long.get.head === long1
 
       // Apply new value
       Ns(eid).long(long2).update
-      Ns.long.one === long2
+      Ns.long.get.head === long2
 
       // Delete value (apply no value)
       Ns(eid).long().update
@@ -73,23 +73,23 @@ class UpdateLong extends CoreSpec {
 
       // Add value
       Ns(eid).longs.add(2L).update
-      Ns.longs.one === Set(1L, 2L)
+      Ns.longs.get.head === Set(1L, 2L)
 
       // Add exisiting value (no effect)
       Ns(eid).longs.add(2L).update
-      Ns.longs.one === Set(1L, 2L)
+      Ns.longs.get.head === Set(1L, 2L)
 
       // Add multiple values (vararg)
       Ns(eid).longs.add(3L, 4L).update
-      Ns.longs.one === Set(1L, 2L, 3L, 4L)
+      Ns.longs.get.head === Set(1L, 2L, 3L, 4L)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).longs.add(Seq(4L, 5L)).update
-      Ns.longs.one === Set(1L, 2L, 3L, 4L, 5L)
+      Ns.longs.get.head === Set(1L, 2L, 3L, 4L, 5L)
 
       // Add empty Seq of values (no effect)
       Ns(eid).longs.add(Seq[Long]()).update
-      Ns.longs.one === Set(1L, 2L, 3L, 4L, 5L)
+      Ns.longs.get.head === Set(1L, 2L, 3L, 4L, 5L)
 
 
       // Can't add duplicate values
@@ -116,27 +116,27 @@ class UpdateLong extends CoreSpec {
 
       // Replace value
       Ns(eid).longs.replace(6L -> 8L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 3L, 4L, 5L, 8L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 3L, 4L, 5L, 8L)
 
       // Replace value to existing value simply retracts it
       Ns(eid).longs.replace(5L -> 8L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 3L, 4L, 8L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 3L, 4L, 8L)
 
       // Replace multiple values (vararg)
       Ns(eid).longs.replace(3L -> 6L, 4L -> 7L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 6L, 7L, 8L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 6L, 7L, 8L)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).longs.replace(42L -> 9L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 6L, 7L, 8L, 9L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 6L, 7L, 8L, 9L)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).longs.replace(Seq(2L -> 5L)).update
-      Ns.longs.one.toList.sorted === List(1L, 5L, 6L, 7L, 8L, 9L)
+      Ns.longs.get.head.toList.sorted === List(1L, 5L, 6L, 7L, 8L, 9L)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).longs.replace(Seq[(Long, Long)]()).update
-      Ns.longs.one.toList.sorted === List(1L, 5L, 6L, 7L, 8L, 9L)
+      Ns.longs.get.head.toList.sorted === List(1L, 5L, 6L, 7L, 8L, 9L)
 
 
       // Can't replace duplicate values
@@ -159,27 +159,27 @@ class UpdateLong extends CoreSpec {
 
       // Remove value
       Ns(eid).longs.remove(6L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 3L, 4L, 5L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 3L, 4L, 5L)
 
       // Removing non-existing value has no effect
       Ns(eid).longs.remove(7L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 3L, 4L, 5L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 3L, 4L, 5L)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).longs.remove(5L, 5L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L, 3L, 4L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L, 3L, 4L)
 
       // Remove multiple values (vararg)
       Ns(eid).longs.remove(3L, 4L).update
-      Ns.longs.one.toList.sorted === List(1L, 2L)
+      Ns.longs.get.head.toList.sorted === List(1L, 2L)
 
       // Remove Seq of values
       Ns(eid).longs.remove(Seq(2L)).update
-      Ns.longs.one.toList.sorted === List(1L)
+      Ns.longs.get.head.toList.sorted === List(1L)
 
       // Removing empty Seq of values has no effect
       Ns(eid).longs.remove(Seq[Long]()).update
-      Ns.longs.one.toList.sorted === List(1L)
+      Ns.longs.get.head.toList.sorted === List(1L)
     }
 
 
@@ -189,15 +189,15 @@ class UpdateLong extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).longs(1L).update
-      Ns.longs.one.toList.sorted === List(1L)
+      Ns.longs.get.head.toList.sorted === List(1L)
 
       // Apply multiple values (vararg)
       Ns(eid).longs(2L, 3L).update
-      Ns.longs.one.toList.sorted === List(2L, 3L)
+      Ns.longs.get.head.toList.sorted === List(2L, 3L)
 
       // Apply Seq of values
       Ns(eid).longs(Set(4L)).update
-      Ns.longs.one.toList.sorted === List(4L)
+      Ns.longs.get.head.toList.sorted === List(4L)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).longs(Set[Long]()).update
@@ -230,28 +230,28 @@ class UpdateLong extends CoreSpec {
 
       // Add value
       Ns(eid).longs.add(long2).update
-      Ns.longs.one === Set(long1, long2)
+      Ns.longs.get.head === Set(long1, long2)
 
       // Add exisiting value (no effect)
       Ns(eid).longs.add(long2).update
-      Ns.longs.one === Set(long1, long2)
+      Ns.longs.get.head === Set(long1, long2)
 
       // Add multiple values
       Ns(eid).longs.add(long3, long4).update
-      Ns.longs.one === Set(long1, long2, long3, long4)
+      Ns.longs.get.head === Set(long1, long2, long3, long4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).longs.add(Seq(long4, long5)).update
-      Ns.longs.one === Set(long1, long2, long3, long4, long5)
+      Ns.longs.get.head === Set(long1, long2, long3, long4, long5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(long6, long7)
       Ns(eid).longs.add(values).update
-      Ns.longs.one === Set(long1, long2, long3, long4, long5, long6, long7)
+      Ns.longs.get.head === Set(long1, long2, long3, long4, long5, long6, long7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).longs.add(Seq[Long]()).update
-      Ns.longs.one === Set(long1, long2, long3, long4, long5, long6, long7)
+      Ns.longs.get.head === Set(long1, long2, long3, long4, long5, long6, long7)
 
 
       // Can't add duplicate values
@@ -297,32 +297,32 @@ class UpdateLong extends CoreSpec {
 
       // Replace value
       Ns(eid).longs.replace(long6 -> long8).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long3, long4, long5, long8)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long3, long4, long5, long8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).longs.replace(long5 -> long8).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long3, long4, long8)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long3, long4, long8)
 
       // Replace multiple values (vararg)
       Ns(eid).longs.replace(long3 -> long6, long4 -> long7).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long6, long7, long8)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long6, long7, long8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).longs.replace(42L -> long9).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long6, long7, long8, long9)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long6, long7, long8, long9)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).longs.replace(Seq(long2 -> long5)).update
-      Ns.longs.one.toList.sorted === List(long1, long5, long6, long7, long8, long9)
+      Ns.longs.get.head.toList.sorted === List(long1, long5, long6, long7, long8, long9)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(long1 -> long4)
       Ns(eid).longs.replace(values).update
-      Ns.longs.one.toList.sorted === List(long4, long5, long6, long7, long8, long9)
+      Ns.longs.get.head.toList.sorted === List(long4, long5, long6, long7, long8, long9)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).longs.replace(Seq[(Long, Long)]()).update
-      Ns.longs.one.toList.sorted === List(long4, long5, long6, long7, long8, long9)
+      Ns.longs.get.head.toList.sorted === List(long4, long5, long6, long7, long8, long9)
 
 
       // Can't replace duplicate values
@@ -360,23 +360,23 @@ class UpdateLong extends CoreSpec {
 
       // Remove value
       Ns(eid).longs.remove(long6).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long3, long4, long5)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long3, long4, long5)
 
       // Removing non-existing value has no effect
       Ns(eid).longs.remove(long7).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long3, long4, long5)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long3, long4, long5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).longs.remove(long5, long5).update
-      Ns.longs.one.toList.sorted === List(long1, long2, long3, long4)
+      Ns.longs.get.head.toList.sorted === List(long1, long2, long3, long4)
 
       // Remove multiple values (vararg)
       Ns(eid).longs.remove(long3, long4).update
-      Ns.longs.one.toList.sorted === List(long1, long2)
+      Ns.longs.get.head.toList.sorted === List(long1, long2)
 
       // Remove Seq of values
       Ns(eid).longs.remove(Seq(long2)).update
-      Ns.longs.one.toList.sorted === List(long1)
+      Ns.longs.get.head.toList.sorted === List(long1)
 
       // Remove Seq of values as variable
       val values = Seq(long1)
@@ -386,7 +386,7 @@ class UpdateLong extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).longs(long1).update
       Ns(eid).longs.remove(Seq[Long]()).update
-      Ns.longs.one.toList.sorted === List(long1)
+      Ns.longs.get.head.toList.sorted === List(long1)
     }
 
 
@@ -396,15 +396,15 @@ class UpdateLong extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).longs(long1).update
-      Ns.longs.one.toList.sorted === List(long1)
+      Ns.longs.get.head.toList.sorted === List(long1)
 
       // Apply multiple values (vararg)
       Ns(eid).longs(long2, long3).update
-      Ns.longs.one.toList.sorted === List(long2, long3)
+      Ns.longs.get.head.toList.sorted === List(long2, long3)
 
       // Apply Seq of values
       Ns(eid).longs(Set(long4)).update
-      Ns.longs.one.toList.sorted === List(long4)
+      Ns.longs.get.head.toList.sorted === List(long4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).longs(Set[Long]()).update
@@ -413,7 +413,7 @@ class UpdateLong extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(long1, long2)
       Ns(eid).longs(values).update
-      Ns.longs.one.toList.sorted === List(long1, long2)
+      Ns.longs.get.head.toList.sorted === List(long1, long2)
 
       // Delete all (apply no values)
       Ns(eid).longs().update

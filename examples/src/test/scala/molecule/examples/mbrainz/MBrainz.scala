@@ -28,7 +28,7 @@ import scala.language.postfixOps
 
 class MBrainz extends MoleculeSpec {
 
-  implicit val conn = Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973")
+  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
 
 
   "Data" >> {
@@ -83,7 +83,7 @@ class MBrainz extends MoleculeSpec {
     val collaborators = m(Track.Artists.name_(?).name)
 
     // George Harrison's collaborators
-    val collabs1 = collaborators("George Harrison").get
+    val collabs1 = collaborators("George Harrison").get.toSeq
     collabs1 === List("Bob Dylan", "Ravi Shankar")
 
     // George Harrison's collaborators collaborators (includes George...)
@@ -95,7 +95,7 @@ class MBrainz extends MoleculeSpec {
 
     // 2-step querying:
     // First get songs of The Who
-    val whoSongs = Track.name.!=("Outro", "[outro]", "Intro", "[intro]").Artists.name_("The Who").get
+    val whoSongs = Track.name.!=("Outro", "[outro]", "Intro", "[intro]").Artists.name_("The Who").get.toSeq
     // Then get songs with same titles by other artists (using output from first query)
     Track.name(whoSongs).Artists.name.!=("The Who").get(5) === List(
       ("The Last Time", "The Rolling Stones"),

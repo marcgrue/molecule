@@ -1,16 +1,17 @@
 package molecule
 package examples.seattle
 import java.io.FileReader
-import datomic.{Connection, Peer, Util}
+import datomic.{Peer, Util}
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.seattle.schema.SeattleSchema
+import molecule.Conn
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
 //import org.specs2.control.NoLanguageFeatures
 
 
-trait SeattleSpec extends MoleculeSpec with DatomicFacade {
+trait SeattleSpec extends MoleculeSpec {
 
   def loadFromFiles(schemaFile: String, dataFile: String, version: Int) = {
     val uri = "datomic:mem://seattle" + version
@@ -30,15 +31,15 @@ trait SeattleSpec extends MoleculeSpec with DatomicFacade {
     conn
   }
 
-//  class SeattleSetup extends Scope with NoLanguageFeatures with DatomicFacade {
-  class SeattleSetup extends Scope with DatomicFacade {
+//  class SeattleSetup extends Scope with NoLanguageFeatures {
+  class SeattleSetup extends Scope {
     implicit val conn = recreateDbFrom(SeattleSchema)
     // Insert data
     //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
-  def loadSeattle(version: Int): Connection = {
+  def loadSeattle(version: Int): Conn = {
     implicit val conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
     // Insert data
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData

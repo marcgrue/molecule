@@ -15,23 +15,23 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Add pair
       Ns(eid).bigIntMap.add(str2 -> bigInt3).update
-      Ns.bigIntMap.one === Map(str1 -> bigInt1, str2 -> bigInt3)
+      Ns.bigIntMap.get.head === Map(str1 -> bigInt1, str2 -> bigInt3)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).bigIntMap.add(str2 -> bigInt2).update
-      Ns.bigIntMap.one === Map(str1 -> bigInt1, str2 -> bigInt2)
+      Ns.bigIntMap.get.head === Map(str1 -> bigInt1, str2 -> bigInt2)
 
       // Add multiple pairs (vararg)
       Ns(eid).bigIntMap.add(str3 -> bigInt3, str4 -> bigInt4).update
-      Ns.bigIntMap.one === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4)
+      Ns.bigIntMap.get.head === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).bigIntMap.add(Seq(str4 -> bigInt4, str5 -> bigInt5)).update
-      Ns.bigIntMap.one === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
+      Ns.bigIntMap.get.head === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
 
       // Add empty Map of pair (no effect)
       Ns(eid).bigIntMap.add(Seq[(String, BigInt)]()).update
-      Ns.bigIntMap.one === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
+      Ns.bigIntMap.get.head === Map(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
 
 
       // Can't add pairs with duplicate keys
@@ -76,27 +76,27 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Replace value
       Ns(eid).bigIntMap.replace(str6 -> bigInt8).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5, str6 -> bigInt8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).bigIntMap.replace(str5 -> bigInt8).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt8, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt8, str6 -> bigInt8)
 
       // Replace multiple values (vararg)
       Ns(eid).bigIntMap.replace(str3 -> bigInt6, str4 -> bigInt7).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).bigIntMap.replace(str3 -> bigInt6, str4 -> bigInt7).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).bigIntMap.replace(Seq(str2 -> bigInt5)).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt5, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt5, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).bigIntMap.replace(Seq[(String, BigInt)]()).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt5, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt5, str3 -> bigInt6, str4 -> bigInt7, str5 -> bigInt8, str6 -> bigInt8)
 
 
       // Can't replace pairs with duplicate keys
@@ -121,27 +121,27 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).bigIntMap.remove(str6).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).bigIntMap.remove(str7).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4, str5 -> bigInt5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).bigIntMap.remove(str5, str5).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2, str3 -> bigInt3, str4 -> bigInt4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).bigIntMap.remove(str3, str4).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1, str2 -> bigInt2)
 
       // Remove pairs by Seq of keys
       Ns(eid).bigIntMap.remove(Seq(str2)).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).bigIntMap.remove(Seq[String]()).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1)
     }
 
 
@@ -151,15 +151,15 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).bigIntMap(str1 -> bigInt1).update
-      Ns.bigIntMap.one.toList.sorted === List(str1 -> bigInt1)
+      Ns.bigIntMap.get.head.toList.sorted === List(str1 -> bigInt1)
 
       // Apply multiple values (vararg)
       Ns(eid).bigIntMap(str2 -> bigInt2, str3 -> bigInt3).update
-      Ns.bigIntMap.one.toList.sorted === List(str2 -> bigInt2, str3 -> bigInt3)
+      Ns.bigIntMap.get.head.toList.sorted === List(str2 -> bigInt2, str3 -> bigInt3)
 
       // Apply Map of values
       Ns(eid).bigIntMap(Seq(str4 -> bigInt4)).update
-      Ns.bigIntMap.one.toList.sorted === List(str4 -> bigInt4)
+      Ns.bigIntMap.get.head.toList.sorted === List(str4 -> bigInt4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).bigIntMap(Seq[(String, BigInt)]()).update

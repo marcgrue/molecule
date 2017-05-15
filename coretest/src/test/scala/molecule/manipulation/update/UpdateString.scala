@@ -15,11 +15,11 @@ class UpdateString extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).str("a").update
-      Ns.str.one === "a"
+      Ns.str.get.head === "a"
 
       // Apply new value
       Ns(eid).str("b").update
-      Ns.str.one === "b"
+      Ns.str.get.head === "b"
 
       // Delete value (apply no value)
       Ns(eid).str().update
@@ -44,11 +44,11 @@ class UpdateString extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).str(str1).update
-      Ns.str.one === str1
+      Ns.str.get.head === str1
 
       // Apply new value
       Ns(eid).str(str2).update
-      Ns.str.one === str2
+      Ns.str.get.head === str2
 
       // Delete value (apply no value)
       Ns(eid).str().update
@@ -73,23 +73,23 @@ class UpdateString extends CoreSpec {
 
       // Add value
       Ns(eid).strs.add("b").update
-      Ns.strs.one === Set("a", "b")
+      Ns.strs.get.head === Set("a", "b")
 
       // Add exisiting value (no effect)
       Ns(eid).strs.add("b").update
-      Ns.strs.one === Set("a", "b")
+      Ns.strs.get.head === Set("a", "b")
 
       // Add multiple values (vararg)
       Ns(eid).strs.add("c", "d").update
-      Ns.strs.one === Set("a", "b", "c", "d")
+      Ns.strs.get.head === Set("a", "b", "c", "d")
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).strs.add(Seq("d", "e")).update
-      Ns.strs.one === Set("a", "b", "c", "d", "e")
+      Ns.strs.get.head === Set("a", "b", "c", "d", "e")
 
       // Add empty Seq of values (no effect)
       Ns(eid).strs.add(Seq[String]()).update
-      Ns.strs.one === Set("a", "b", "c", "d", "e")
+      Ns.strs.get.head === Set("a", "b", "c", "d", "e")
 
 
       // Can't add duplicate values
@@ -116,27 +116,27 @@ class UpdateString extends CoreSpec {
 
       // Replace value
       Ns(eid).strs.replace("f" -> "h").update
-      Ns.strs.one.toList.sorted === List("a", "b", "c", "d", "e", "h")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "c", "d", "e", "h")
 
       // Replace value to existing value simply retracts it
       Ns(eid).strs.replace("e" -> "h").update
-      Ns.strs.one.toList.sorted === List("a", "b", "c", "d", "h")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "c", "d", "h")
 
       // Replace multiple values (vararg)
       Ns(eid).strs.replace("c" -> "f", "d" -> "g").update
-      Ns.strs.one.toList.sorted === List("a", "b", "f", "g", "h")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "f", "g", "h")
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).strs.replace("x" -> "i").update
-      Ns.strs.one.toList.sorted === List("a", "b", "f", "g", "h", "i")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "f", "g", "h", "i")
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).strs.replace(Seq("b" -> "e")).update
-      Ns.strs.one.toList.sorted === List("a", "e", "f", "g", "h", "i")
+      Ns.strs.get.head.toList.sorted === List("a", "e", "f", "g", "h", "i")
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).strs.replace(Seq[(String, String)]()).update
-      Ns.strs.one.toList.sorted === List("a", "e", "f", "g", "h", "i")
+      Ns.strs.get.head.toList.sorted === List("a", "e", "f", "g", "h", "i")
 
 
       // Can't replace duplicate values
@@ -159,27 +159,27 @@ class UpdateString extends CoreSpec {
 
       // Remove value
       Ns(eid).strs.remove("f").update
-      Ns.strs.one.toList.sorted === List("a", "b", "c", "d", "e")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "c", "d", "e")
 
       // Removing non-existing value has no effect
       Ns(eid).strs.remove("g").update
-      Ns.strs.one.toList.sorted === List("a", "b", "c", "d", "e")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "c", "d", "e")
 
       // Removing duplicate values removes the distinc value
       Ns(eid).strs.remove("e", "e").update
-      Ns.strs.one.toList.sorted === List("a", "b", "c", "d")
+      Ns.strs.get.head.toList.sorted === List("a", "b", "c", "d")
 
       // Remove multiple values (vararg)
       Ns(eid).strs.remove("c", "d").update
-      Ns.strs.one.toList.sorted === List("a", "b")
+      Ns.strs.get.head.toList.sorted === List("a", "b")
 
       // Remove Seq of values
       Ns(eid).strs.remove(Seq("b")).update
-      Ns.strs.one.toList.sorted === List("a")
+      Ns.strs.get.head.toList.sorted === List("a")
 
       // Removing empty Seq of values has no effect
       Ns(eid).strs.remove(Seq[String]()).update
-      Ns.strs.one.toList.sorted === List("a")
+      Ns.strs.get.head.toList.sorted === List("a")
     }
 
 
@@ -189,15 +189,15 @@ class UpdateString extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).strs("a").update
-      Ns.strs.one.toList.sorted === List("a")
+      Ns.strs.get.head.toList.sorted === List("a")
 
       // Apply multiple values (vararg)
       Ns(eid).strs("b", "c").update
-      Ns.strs.one.toList.sorted === List("b", "c")
+      Ns.strs.get.head.toList.sorted === List("b", "c")
 
       // Apply Seq of values
       Ns(eid).strs(Set("d")).update
-      Ns.strs.one.toList.sorted === List("d")
+      Ns.strs.get.head.toList.sorted === List("d")
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).strs(Set[String]()).update
@@ -230,28 +230,28 @@ class UpdateString extends CoreSpec {
 
       // Add value
       Ns(eid).strs.add(str2).update
-      Ns.strs.one === Set(str1, str2)
+      Ns.strs.get.head === Set(str1, str2)
 
       // Add exisiting value (no effect)
       Ns(eid).strs.add(str2).update
-      Ns.strs.one === Set(str1, str2)
+      Ns.strs.get.head === Set(str1, str2)
 
       // Add multiple values
       Ns(eid).strs.add(str3, str4).update
-      Ns.strs.one === Set(str1, str2, str3, str4)
+      Ns.strs.get.head === Set(str1, str2, str3, str4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).strs.add(Seq(str4, str5)).update
-      Ns.strs.one === Set(str1, str2, str3, str4, str5)
+      Ns.strs.get.head === Set(str1, str2, str3, str4, str5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(str6, str7)
       Ns(eid).strs.add(values).update
-      Ns.strs.one === Set(str1, str2, str3, str4, str5, str6, str7)
+      Ns.strs.get.head === Set(str1, str2, str3, str4, str5, str6, str7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).strs.add(Seq[String]()).update
-      Ns.strs.one === Set(str1, str2, str3, str4, str5, str6, str7)
+      Ns.strs.get.head === Set(str1, str2, str3, str4, str5, str6, str7)
 
 
       // Can't add duplicate values
@@ -295,32 +295,32 @@ class UpdateString extends CoreSpec {
 
       // Replace value
       Ns(eid).strs.replace(str6 -> str8).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str3, str4, str5, str8)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str3, str4, str5, str8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).strs.replace(str5 -> str8).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str3, str4, str8)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str3, str4, str8)
 
       // Replace multiple values (vararg)
       Ns(eid).strs.replace(str3 -> str6, str4 -> str7).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str6, str7, str8)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str6, str7, str8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).strs.replace("x" -> str9).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str6, str7, str8, str9)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str6, str7, str8, str9)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).strs.replace(Seq(str2 -> str5)).update
-      Ns.strs.one.toList.sorted === List(str1, str5, str6, str7, str8, str9)
+      Ns.strs.get.head.toList.sorted === List(str1, str5, str6, str7, str8, str9)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(str1 -> str4)
       Ns(eid).strs.replace(values).update
-      Ns.strs.one.toList.sorted === List(str4, str5, str6, str7, str8, str9)
+      Ns.strs.get.head.toList.sorted === List(str4, str5, str6, str7, str8, str9)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).strs.replace(Seq[(String, String)]()).update
-      Ns.strs.one.toList.sorted === List(str4, str5, str6, str7, str8, str9)
+      Ns.strs.get.head.toList.sorted === List(str4, str5, str6, str7, str8, str9)
 
 
       // Can't replace duplicate values
@@ -358,23 +358,23 @@ class UpdateString extends CoreSpec {
 
       // Remove value
       Ns(eid).strs.remove(str6).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str3, str4, str5)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str3, str4, str5)
 
       // Removing non-existing value has no effect
       Ns(eid).strs.remove(str7).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str3, str4, str5)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str3, str4, str5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).strs.remove(str5, str5).update
-      Ns.strs.one.toList.sorted === List(str1, str2, str3, str4)
+      Ns.strs.get.head.toList.sorted === List(str1, str2, str3, str4)
 
       // Remove multiple values (vararg)
       Ns(eid).strs.remove(str3, str4).update
-      Ns.strs.one.toList.sorted === List(str1, str2)
+      Ns.strs.get.head.toList.sorted === List(str1, str2)
 
       // Remove Seq of values
       Ns(eid).strs.remove(Seq(str2)).update
-      Ns.strs.one.toList.sorted === List(str1)
+      Ns.strs.get.head.toList.sorted === List(str1)
 
       // Remove Seq of values as variable
       val values = Seq(str1)
@@ -384,7 +384,7 @@ class UpdateString extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).strs(str1).update
       Ns(eid).strs.remove(Seq[String]()).update
-      Ns.strs.one.toList.sorted === List(str1)
+      Ns.strs.get.head.toList.sorted === List(str1)
     }
 
 
@@ -394,15 +394,15 @@ class UpdateString extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).strs(str1).update
-      Ns.strs.one.toList.sorted === List(str1)
+      Ns.strs.get.head.toList.sorted === List(str1)
 
       // Apply multiple values (vararg)
       Ns(eid).strs(str2, str3).update
-      Ns.strs.one.toList.sorted === List(str2, str3)
+      Ns.strs.get.head.toList.sorted === List(str2, str3)
 
       // Apply Seq of values
       Ns(eid).strs(Set(str4)).update
-      Ns.strs.one.toList.sorted === List(str4)
+      Ns.strs.get.head.toList.sorted === List(str4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).strs(Set[String]()).update
@@ -411,7 +411,7 @@ class UpdateString extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(str1, str2)
       Ns(eid).strs(values).update
-      Ns.strs.one.toList.sorted === List(str1, str2)
+      Ns.strs.get.head.toList.sorted === List(str1, str2)
 
       // Delete all (apply no values)
       Ns(eid).strs().update

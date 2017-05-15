@@ -1,22 +1,19 @@
 package molecule.factory
 import molecule.api._
-import molecule.dsl._
-import molecule.dsl.actions._
+import molecule.boilerplate._
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
 
-trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
+trait MakeMolecule[Ctx <: Context] extends MakeBase[Ctx] {
   import c.universe._
 
   def from0attr(dsl: c.Expr[NS]) = {
     expr(
       q"""
       ..${basics(dsl)}
-      new Molecule0(model, query) {
-        def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
-      }
+      new molecule.api.Molecule0(r.model, r.query) with Util
     """)
   }
 
@@ -26,15 +23,18 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
     expr(
       q"""
       ..${basics(dsl)}
-      new $MoleculeTpe[..$OutTypes](model, query) {
-        def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
+      new $MoleculeTpe[..$OutTypes](r.model, r.query) with Util {
+        ..$imports
 
-        def get(implicit conn: Connection): Seq[(..$OutTypes)] = model.elements.collectFirst {
-          case n: Nested if !n.bond.ns.isEmpty => ${castNestedTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes)}
+        private val _modelE = r.modelE
+        private val _queryE = r.queryE
+
+        def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, _query)
+
+        def get(implicit conn: Conn): Iterable[(..$OutTypes)] = _model.elements.collectFirst {
+          case n: Nested if !n.bond.ns.isEmpty => ${castNestedTpls(q"_queryE", q"conn.query(_modelE, _queryE)", OutTypes)}
         } getOrElse
-          results(conn, model, query).map(data => (..${castTpl(q"query", q"data", OutTypes)}))
-
-        def getD(implicit conn: Connection): Unit = debugMolecule(conn, model, query)
+          conn.query(_model, _query).map(data => (..${castTpl(q"_query", q"data", OutTypes)}))
       }
     """
     )
@@ -46,11 +46,10 @@ trait MakeMolecule[Ctx <: Context] extends FactoryBase[Ctx] {
     expr(
       q"""
       ..${basics(dsl)}
-      new $MoleculeTpe[..$OutTypes](model, query) {
-        def getE(implicit conn: Connection): Seq[(..$OutTypes2)] = ${castTpls(q"queryE", q"results(conn, modelE, queryE)", OutTypes2)}
-
-        def get(implicit conn: Connection): Seq[(..$OutTypes)] = results(conn, model, query).map(data => (..${castComposite(q"query", q"data", OutTypes)}))
-        def getD(implicit conn: Connection): Unit              = debugMolecule(conn, model, query)
+      new $MoleculeTpe[..$OutTypes](r.model, r.query) with Util {
+        ..$imports
+        def getRaw(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, _query)
+        def get   (implicit conn: Conn): Iterable[(..$OutTypes)] = getRaw.map(data => (..${castComposite(q"_query", q"data", OutTypes)}))
       }
     """
     )

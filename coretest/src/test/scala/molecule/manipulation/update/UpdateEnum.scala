@@ -17,11 +17,11 @@ class UpdateEnum extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).enum("enum1").update
-      Ns.enum.one === "enum1"
+      Ns.enum.get.head === "enum1"
 
       // Apply new value
       Ns(eid).enum("enum2").update
-      Ns.enum.one === "enum2"
+      Ns.enum.get.head === "enum2"
 
       // Delete value (apply no value)
       Ns(eid).enum().update
@@ -46,11 +46,11 @@ class UpdateEnum extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).enum(enum1).update
-      Ns.enum.one === enum1
+      Ns.enum.get.head === enum1
 
       // Apply new value
       Ns(eid).enum(enum2).update
-      Ns.enum.one === enum2
+      Ns.enum.get.head === enum2
 
       // Delete value (apply no value)
       Ns(eid).enum().update
@@ -75,23 +75,23 @@ class UpdateEnum extends CoreSpec {
 
       // Add value
       Ns(eid).enums.add("enum2").update
-      Ns.enums.one === Set("enum1", "enum2")
+      Ns.enums.get.head === Set("enum1", "enum2")
 
       // Add exisiting value (no effect)
       Ns(eid).enums.add("enum2").update
-      Ns.enums.one === Set("enum1", "enum2")
+      Ns.enums.get.head === Set("enum1", "enum2")
 
       // Add multiple values (vararg)
       Ns(eid).enums.add("enum3", "enum4").update
-      Ns.enums.one === Set("enum1", "enum2", "enum3", "enum4")
+      Ns.enums.get.head === Set("enum1", "enum2", "enum3", "enum4")
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).enums.add(Seq("enum4", "enum5")).update
-      Ns.enums.one === Set("enum1", "enum2", "enum3", "enum4", "enum5")
+      Ns.enums.get.head === Set("enum1", "enum2", "enum3", "enum4", "enum5")
 
       // Add empty Seq of values (no effect)
       Ns(eid).enums.add(Seq[String]()).update
-      Ns.enums.one === Set("enum1", "enum2", "enum3", "enum4", "enum5")
+      Ns.enums.get.head === Set("enum1", "enum2", "enum3", "enum4", "enum5")
 
 
       // Can't add duplicate values
@@ -118,15 +118,15 @@ class UpdateEnum extends CoreSpec {
 
       // Replace value
       Ns(eid).enums.replace("enum6" -> "enum8").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5", "enum8")
 
       // Replace value to existing value simply retracts it
       Ns(eid).enums.replace("enum5" -> "enum8").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum8")
 
       // Replace multiple values (vararg)
       Ns(eid).enums.replace("enum3" -> "enum6", "enum4" -> "enum7").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
 
       // Trying to use a non-existing enum not possibole
       (Ns(eid).enums.replace("x" -> "enum9").update must throwA[ExecutionException])
@@ -135,15 +135,15 @@ class UpdateEnum extends CoreSpec {
         """Unable to resolve entity: :ns.enums/x in datom [17592186045445 ":ns/enums" ":ns.enums/x"]""".stripMargin
 
 
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).enums.replace(Seq("enum2" -> "enum5")).update
-      Ns.enums.one.toList.sorted === List("enum1", "enum5", "enum6", "enum7", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum5", "enum6", "enum7", "enum8")
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).enums.replace(Seq[(String, String)]()).update
-      Ns.enums.one.toList.sorted === List("enum1", "enum5", "enum6", "enum7", "enum8")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum5", "enum6", "enum7", "enum8")
 
 
       // Can't replace duplicate values
@@ -166,27 +166,27 @@ class UpdateEnum extends CoreSpec {
 
       // Remove value
       Ns(eid).enums.remove("enum6").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5")
 
       // Removing non-existing value has no effect
       Ns(eid).enums.remove("enum7").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum3", "enum4", "enum5")
 
       // Removing duplicate values removes the distinc value
       Ns(eid).enums.remove("enum5", "enum5").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2", "enum3", "enum4")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum3", "enum4")
 
       // Remove multiple values (vararg)
       Ns(eid).enums.remove("enum3", "enum4").update
-      Ns.enums.one.toList.sorted === List("enum1", "enum2")
+      Ns.enums.get.head.toList.sorted === List("enum1", "enum2")
 
       // Remove Seq of values
       Ns(eid).enums.remove(Seq("enum2")).update
-      Ns.enums.one.toList.sorted === List("enum1")
+      Ns.enums.get.head.toList.sorted === List("enum1")
 
       // Removing empty Seq of values has no effect
       Ns(eid).enums.remove(Seq[String]()).update
-      Ns.enums.one.toList.sorted === List("enum1")
+      Ns.enums.get.head.toList.sorted === List("enum1")
     }
 
 
@@ -196,15 +196,15 @@ class UpdateEnum extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).enums("enum1").update
-      Ns.enums.one.toList.sorted === List("enum1")
+      Ns.enums.get.head.toList.sorted === List("enum1")
 
       // Apply multiple values (vararg)
       Ns(eid).enums("enum2", "enum3").update
-      Ns.enums.one.toList.sorted === List("enum2", "enum3")
+      Ns.enums.get.head.toList.sorted === List("enum2", "enum3")
 
       // Apply Seq of values
       Ns(eid).enums(Set("enum4")).update
-      Ns.enums.one.toList.sorted === List("enum4")
+      Ns.enums.get.head.toList.sorted === List("enum4")
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).enums(Set[String]()).update
@@ -237,28 +237,28 @@ class UpdateEnum extends CoreSpec {
 
       // Add value
       Ns(eid).enums.add(enum2).update
-      Ns.enums.one === Set(enum1, enum2)
+      Ns.enums.get.head === Set(enum1, enum2)
 
       // Add exisiting value (no effect)
       Ns(eid).enums.add(enum2).update
-      Ns.enums.one === Set(enum1, enum2)
+      Ns.enums.get.head === Set(enum1, enum2)
 
       // Add multiple values
       Ns(eid).enums.add(enum3, enum4).update
-      Ns.enums.one === Set(enum1, enum2, enum3, enum4)
+      Ns.enums.get.head === Set(enum1, enum2, enum3, enum4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).enums.add(Seq(enum4, enum5)).update
-      Ns.enums.one === Set(enum1, enum2, enum3, enum4, enum5)
+      Ns.enums.get.head === Set(enum1, enum2, enum3, enum4, enum5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(enum6, enum7)
       Ns(eid).enums.add(values).update
-      Ns.enums.one === Set(enum1, enum2, enum3, enum4, enum5, enum6, enum7)
+      Ns.enums.get.head === Set(enum1, enum2, enum3, enum4, enum5, enum6, enum7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).enums.add(Seq[String]()).update
-      Ns.enums.one === Set(enum1, enum2, enum3, enum4, enum5, enum6, enum7)
+      Ns.enums.get.head === Set(enum1, enum2, enum3, enum4, enum5, enum6, enum7)
 
 
       // Can't add duplicate values
@@ -302,28 +302,28 @@ class UpdateEnum extends CoreSpec {
 
       // Replace value
       Ns(eid).enums.replace(enum6 -> enum8).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum3, enum4, enum5, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum3, enum4, enum5, enum8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).enums.replace(enum5 -> enum8).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum3, enum4, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum3, enum4, enum8)
 
       // Replace multiple values (vararg)
       Ns(eid).enums.replace(enum3 -> enum6, enum4 -> enum7).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum6, enum7, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum6, enum7, enum8)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).enums.replace(Seq(enum2 -> enum5)).update
-      Ns.enums.one.toList.sorted === List(enum1, enum5, enum6, enum7, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum5, enum6, enum7, enum8)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(enum1 -> enum4)
       Ns(eid).enums.replace(values).update
-      Ns.enums.one.toList.sorted === List(enum4, enum5, enum6, enum7, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum4, enum5, enum6, enum7, enum8)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).enums.replace(Seq[(String, String)]()).update
-      Ns.enums.one.toList.sorted === List(enum4, enum5, enum6, enum7, enum8)
+      Ns.enums.get.head.toList.sorted === List(enum4, enum5, enum6, enum7, enum8)
 
 
       // Can't replace duplicate values
@@ -361,23 +361,23 @@ class UpdateEnum extends CoreSpec {
 
       // Remove value
       Ns(eid).enums.remove(enum6).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum3, enum4, enum5)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum3, enum4, enum5)
 
       // Removing non-existing value has no effect
       Ns(eid).enums.remove(enum7).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum3, enum4, enum5)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum3, enum4, enum5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).enums.remove(enum5, enum5).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2, enum3, enum4)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2, enum3, enum4)
 
       // Remove multiple values (vararg)
       Ns(eid).enums.remove(enum3, enum4).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2)
 
       // Remove Seq of values
       Ns(eid).enums.remove(Seq(enum2)).update
-      Ns.enums.one.toList.sorted === List(enum1)
+      Ns.enums.get.head.toList.sorted === List(enum1)
 
       // Remove Seq of values as variable
       val values = Seq(enum1)
@@ -387,7 +387,7 @@ class UpdateEnum extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).enums(enum1).update
       Ns(eid).enums.remove(Seq[String]()).update
-      Ns.enums.one.toList.sorted === List(enum1)
+      Ns.enums.get.head.toList.sorted === List(enum1)
     }
 
 
@@ -397,15 +397,15 @@ class UpdateEnum extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).enums(enum1).update
-      Ns.enums.one.toList.sorted === List(enum1)
+      Ns.enums.get.head.toList.sorted === List(enum1)
 
       // Apply multiple values (vararg)
       Ns(eid).enums(enum2, enum3).update
-      Ns.enums.one.toList.sorted === List(enum2, enum3)
+      Ns.enums.get.head.toList.sorted === List(enum2, enum3)
 
       // Apply Seq of values
       Ns(eid).enums(Set(enum4)).update
-      Ns.enums.one.toList.sorted === List(enum4)
+      Ns.enums.get.head.toList.sorted === List(enum4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).enums(Set[String]()).update
@@ -414,7 +414,7 @@ class UpdateEnum extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(enum1, enum2)
       Ns(eid).enums(values).update
-      Ns.enums.one.toList.sorted === List(enum1, enum2)
+      Ns.enums.get.head.toList.sorted === List(enum1, enum2)
 
       // Delete all (apply no values)
       Ns(eid).enums().update

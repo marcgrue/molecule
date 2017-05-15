@@ -15,11 +15,11 @@ class UpdateFloat extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).float(1f).update
-      Ns.float.one === 1f
+      Ns.float.get.head === 1f
 
       // Apply new value
       Ns(eid).float(2f).update
-      Ns.float.one === 2f
+      Ns.float.get.head === 2f
 
       // Delete value (apply no value)
       Ns(eid).float().update
@@ -44,11 +44,11 @@ class UpdateFloat extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).float(float1).update
-      Ns.float.one === float1
+      Ns.float.get.head === float1
 
       // Apply new value
       Ns(eid).float(float2).update
-      Ns.float.one === float2
+      Ns.float.get.head === float2
 
       // Delete value (apply no value)
       Ns(eid).float().update
@@ -73,23 +73,23 @@ class UpdateFloat extends CoreSpec {
 
       // Add value
       Ns(eid).floats.add(2f).update
-      Ns.floats.one === Set(1f, 2f)
+      Ns.floats.get.head === Set(1f, 2f)
 
       // Add exisiting value (no effect)
       Ns(eid).floats.add(2f).update
-      Ns.floats.one === Set(1f, 2f)
+      Ns.floats.get.head === Set(1f, 2f)
 
       // Add multiple values (vararg)
       Ns(eid).floats.add(3f, 4f).update
-      Ns.floats.one === Set(1f, 2f, 3f, 4f)
+      Ns.floats.get.head === Set(1f, 2f, 3f, 4f)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).floats.add(Seq(4f, 5f)).update
-      Ns.floats.one === Set(1f, 2f, 3f, 4f, 5f)
+      Ns.floats.get.head === Set(1f, 2f, 3f, 4f, 5f)
 
       // Add empty Seq of values (no effect)
       Ns(eid).floats.add(Seq[Float]()).update
-      Ns.floats.one === Set(1f, 2f, 3f, 4f, 5f)
+      Ns.floats.get.head === Set(1f, 2f, 3f, 4f, 5f)
 
 
       // Can't add duplicate values
@@ -116,27 +116,27 @@ class UpdateFloat extends CoreSpec {
 
       // Replace value
       Ns(eid).floats.replace(6f -> 8f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 3f, 4f, 5f, 8f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 3f, 4f, 5f, 8f)
 
       // Replace value to existing value simply retracts it
       Ns(eid).floats.replace(5f -> 8f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 3f, 4f, 8f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 3f, 4f, 8f)
 
       // Replace multiple values (vararg)
       Ns(eid).floats.replace(3f -> 6f, 4f -> 7f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 6f, 7f, 8f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 6f, 7f, 8f)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).floats.replace(42f -> 9f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 6f, 7f, 8f, 9f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 6f, 7f, 8f, 9f)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).floats.replace(Seq(2f -> 5f)).update
-      Ns.floats.one.toList.sorted === List(1f, 5f, 6f, 7f, 8f, 9f)
+      Ns.floats.get.head.toList.sorted === List(1f, 5f, 6f, 7f, 8f, 9f)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).floats.replace(Seq[(Float, Float)]()).update
-      Ns.floats.one.toList.sorted === List(1f, 5f, 6f, 7f, 8f, 9f)
+      Ns.floats.get.head.toList.sorted === List(1f, 5f, 6f, 7f, 8f, 9f)
 
 
       // Can't replace duplicate values
@@ -159,27 +159,27 @@ class UpdateFloat extends CoreSpec {
 
       // Remove value
       Ns(eid).floats.remove(6f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 3f, 4f, 5f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 3f, 4f, 5f)
 
       // Removing non-existing value has no effect
       Ns(eid).floats.remove(7f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 3f, 4f, 5f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 3f, 4f, 5f)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).floats.remove(5f, 5f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f, 3f, 4f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f, 3f, 4f)
 
       // Remove multiple values (vararg)
       Ns(eid).floats.remove(3f, 4f).update
-      Ns.floats.one.toList.sorted === List(1f, 2f)
+      Ns.floats.get.head.toList.sorted === List(1f, 2f)
 
       // Remove Seq of values
       Ns(eid).floats.remove(Seq(2f)).update
-      Ns.floats.one.toList.sorted === List(1f)
+      Ns.floats.get.head.toList.sorted === List(1f)
 
       // Removing empty Seq of values has no effect
       Ns(eid).floats.remove(Seq[Float]()).update
-      Ns.floats.one.toList.sorted === List(1f)
+      Ns.floats.get.head.toList.sorted === List(1f)
     }
 
 
@@ -189,15 +189,15 @@ class UpdateFloat extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).floats(1f).update
-      Ns.floats.one.toList.sorted === List(1f)
+      Ns.floats.get.head.toList.sorted === List(1f)
 
       // Apply multiple values (vararg)
       Ns(eid).floats(2f, 3f).update
-      Ns.floats.one.toList.sorted === List(2f, 3f)
+      Ns.floats.get.head.toList.sorted === List(2f, 3f)
 
       // Apply Seq of values
       Ns(eid).floats(Set(4f)).update
-      Ns.floats.one.toList.sorted === List(4f)
+      Ns.floats.get.head.toList.sorted === List(4f)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).floats(Set[Float]()).update
@@ -230,28 +230,28 @@ class UpdateFloat extends CoreSpec {
 
       // Add value
       Ns(eid).floats.add(float2).update
-      Ns.floats.one === Set(float1, float2)
+      Ns.floats.get.head === Set(float1, float2)
 
       // Add exisiting value (no effect)
       Ns(eid).floats.add(float2).update
-      Ns.floats.one === Set(float1, float2)
+      Ns.floats.get.head === Set(float1, float2)
 
       // Add multiple values
       Ns(eid).floats.add(float3, float4).update
-      Ns.floats.one === Set(float1, float2, float3, float4)
+      Ns.floats.get.head === Set(float1, float2, float3, float4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).floats.add(Seq(float4, float5)).update
-      Ns.floats.one === Set(float1, float2, float3, float4, float5)
+      Ns.floats.get.head === Set(float1, float2, float3, float4, float5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(float6, float7)
       Ns(eid).floats.add(values).update
-      Ns.floats.one === Set(float1, float2, float3, float4, float5, float6, float7)
+      Ns.floats.get.head === Set(float1, float2, float3, float4, float5, float6, float7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).floats.add(Seq[Float]()).update
-      Ns.floats.one === Set(float1, float2, float3, float4, float5, float6, float7)
+      Ns.floats.get.head === Set(float1, float2, float3, float4, float5, float6, float7)
 
 
       // Can't add duplicate values
@@ -297,32 +297,32 @@ class UpdateFloat extends CoreSpec {
 
       // Replace value
       Ns(eid).floats.replace(float6 -> float8).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float3, float4, float5, float8)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float3, float4, float5, float8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).floats.replace(float5 -> float8).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float3, float4, float8)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float3, float4, float8)
 
       // Replace multiple values (vararg)
       Ns(eid).floats.replace(float3 -> float6, float4 -> float7).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float6, float7, float8)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float6, float7, float8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).floats.replace(42f -> float9).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float6, float7, float8, float9)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float6, float7, float8, float9)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).floats.replace(Seq(float2 -> float5)).update
-      Ns.floats.one.toList.sorted === List(float1, float5, float6, float7, float8, float9)
+      Ns.floats.get.head.toList.sorted === List(float1, float5, float6, float7, float8, float9)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(float1 -> float4)
       Ns(eid).floats.replace(values).update
-      Ns.floats.one.toList.sorted === List(float4, float5, float6, float7, float8, float9)
+      Ns.floats.get.head.toList.sorted === List(float4, float5, float6, float7, float8, float9)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).floats.replace(Seq[(Float, Float)]()).update
-      Ns.floats.one.toList.sorted === List(float4, float5, float6, float7, float8, float9)
+      Ns.floats.get.head.toList.sorted === List(float4, float5, float6, float7, float8, float9)
 
 
       // Can't replace duplicate values
@@ -360,23 +360,23 @@ class UpdateFloat extends CoreSpec {
 
       // Remove value
       Ns(eid).floats.remove(float6).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float3, float4, float5)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float3, float4, float5)
 
       // Removing non-existing value has no effect
       Ns(eid).floats.remove(float7).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float3, float4, float5)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float3, float4, float5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).floats.remove(float5, float5).update
-      Ns.floats.one.toList.sorted === List(float1, float2, float3, float4)
+      Ns.floats.get.head.toList.sorted === List(float1, float2, float3, float4)
 
       // Remove multiple values (vararg)
       Ns(eid).floats.remove(float3, float4).update
-      Ns.floats.one.toList.sorted === List(float1, float2)
+      Ns.floats.get.head.toList.sorted === List(float1, float2)
 
       // Remove Seq of values
       Ns(eid).floats.remove(Seq(float2)).update
-      Ns.floats.one.toList.sorted === List(float1)
+      Ns.floats.get.head.toList.sorted === List(float1)
 
       // Remove Seq of values as variable
       val values = Seq(float1)
@@ -386,7 +386,7 @@ class UpdateFloat extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).floats(float1).update
       Ns(eid).floats.remove(Seq[Float]()).update
-      Ns.floats.one.toList.sorted === List(float1)
+      Ns.floats.get.head.toList.sorted === List(float1)
     }
 
 
@@ -396,15 +396,15 @@ class UpdateFloat extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).floats(float1).update
-      Ns.floats.one.toList.sorted === List(float1)
+      Ns.floats.get.head.toList.sorted === List(float1)
 
       // Apply multiple values (vararg)
       Ns(eid).floats(float2, float3).update
-      Ns.floats.one.toList.sorted === List(float2, float3)
+      Ns.floats.get.head.toList.sorted === List(float2, float3)
 
       // Apply Seq of values
       Ns(eid).floats(Set(float4)).update
-      Ns.floats.one.toList.sorted === List(float4)
+      Ns.floats.get.head.toList.sorted === List(float4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).floats(Set[Float]()).update
@@ -413,7 +413,7 @@ class UpdateFloat extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(float1, float2)
       Ns(eid).floats(values).update
-      Ns.floats.one.toList.sorted === List(float1, float2)
+      Ns.floats.get.head.toList.sorted === List(float1, float2)
 
       // Delete all (apply no values)
       Ns(eid).floats().update

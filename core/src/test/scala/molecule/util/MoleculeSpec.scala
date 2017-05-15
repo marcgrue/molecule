@@ -1,9 +1,10 @@
 package molecule.util
-import datomic.Connection
-import molecule.DatomicFacade
+import molecule._
 import molecule.api.{InputMolecule, Molecule}
 import molecule.ast.model.Model
 import molecule.ast.query._
+import molecule.Conn
+import molecule.ops.QueryOps._
 import molecule.ast.transaction._
 import molecule.transform.{Model2Transaction, Query2String}
 import org.specs2.mutable._
@@ -11,7 +12,7 @@ import org.specs2.mutable._
 import scala.language.postfixOps
 
 
-trait MoleculeSpec extends Specification with DatomicFacade {
+trait MoleculeSpec extends Specification {
 
   def typed[T](t: => T) {}
 
@@ -60,14 +61,14 @@ trait MoleculeSpec extends Specification with DatomicFacade {
       query.i.rules map p mkString("[", "\n     ", "]")
     }
     val first = if (query.i.rules.isEmpty) Seq("datomic.db.Db@xxx") else Seq("datomic.db.Db@xxx", rules)
-    val allInputs = first ++ inputs(query)
+    val allInputs = first ++ query.inputs
     if (allInputs.size == 1)
       ""
     else
       "\n\nINPUTS:" + allInputs.zipWithIndex.map(e => (e._2 + 1) + " " + e._1).mkString("\nList(\n  ", "\n  ", "\n)")
   }
 
-  implicit class dsl2model2query2string(molecule: Molecule)(implicit conn: Connection) {
+  implicit class dsl2model2query2string(molecule: Molecule)(implicit conn: Conn) {
     def -->(model: Model) = new {
       molecule._model === model
 
@@ -124,7 +125,7 @@ trait MoleculeSpec extends Specification with DatomicFacade {
     }
   }
 
-  def testUpdateMolecule(molecule: Molecule)(implicit conn: Connection) = new {
+  def testUpdateMolecule(molecule: Molecule)(implicit conn: Conn) = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {
@@ -139,7 +140,7 @@ trait MoleculeSpec extends Specification with DatomicFacade {
     }
   }
 
-  def testInsertMolecule(molecule: Molecule, ids: Seq[Long] = Seq())(implicit conn: Connection) = new {
+  def testInsertMolecule(molecule: Molecule, ids: Seq[Long] = Seq())(implicit conn: Conn) = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {

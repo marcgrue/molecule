@@ -49,7 +49,7 @@ class Provenance extends MoleculeSpec {
 
     // Now we have 5 stories - the two last from the transaction above
     //    Story.title.url.tx.debug
-    Story.title.url.tx.get.sortBy(_._3) === List(
+    Story.title.url.tx.get.toSeq.sortBy(_._3) === List(
       ("Clojure Rationale", "http://clojure.org/rationale", 13194139534314L),
       ("Teach Yourself Programming in Ten Years", "http://norvig.com/21-days.html", 13194139534314L),
       ("Beating the Averages", "http://www.paulgraham.com/avg.html", 13194139534314L),
@@ -136,7 +136,7 @@ class Provenance extends MoleculeSpec {
     )
 
     // Count of stories added by a user with email "stuarthalloway@datomic.com"
-    Story.title(count).tx_(MetaData.User.email_("stuarthalloway@datomic.com")).one === 2
+    Story.title(count).tx_(MetaData.User.email_("stuarthalloway@datomic.com")).get.head === 2
 
     // Emails of users who added stories
     Story.title_.tx_(MetaData.usecase_("AddStories").User.email).get === List(
@@ -154,17 +154,17 @@ class Provenance extends MoleculeSpec {
     Story.url_(ecURL).title.get.head === "ElastiCache in 5 minutes"
 
     // Title before (using database as of the first transaction)
-    Story.url_(ecURL).title.asOf(stuTx.inst).get.head === "ElastiCache in 6 minutes"
+    Story.url_(ecURL).title.getAsOf(stuTx.inst).head === "ElastiCache in 6 minutes"
 
-    // Who changed the title and when? Using the history database containing all datoms ever
-    Story.url_(ecURL).title.op.tx(MetaData.usecase.User.firstName).history.get === List(
+    // Who changed the title and when? Using the history database
+    Story.url_(ecURL).title.op.tx(MetaData.usecase.User.firstName).getHistory === List(
       ("ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"), // Stu adds the story
       ("ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"), // retraction automatically added by Datomic
       ("ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")   // Ed's update of the title
     )
 
     // Entire attributes history of ElastiCache story _entity_
-    Story(elasticacheStory).a.v.op.tx(MetaData.usecase.User.firstName).history.get === List(
+    Story(elasticacheStory).a.v.op.tx(MetaData.usecase.User.firstName).getHistory === List(
       (":story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
       (":story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
       (":story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),

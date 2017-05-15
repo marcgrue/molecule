@@ -15,23 +15,23 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Add pair
       Ns(eid).boolMap.add(str2 -> bool3).update
-      Ns.boolMap.one === Map(str1 -> bool1, str2 -> bool3)
+      Ns.boolMap.get.head === Map(str1 -> bool1, str2 -> bool3)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).boolMap.add(str2 -> bool2).update
-      Ns.boolMap.one === Map(str1 -> bool1, str2 -> bool2)
+      Ns.boolMap.get.head === Map(str1 -> bool1, str2 -> bool2)
 
       // Add multiple pairs (vararg)
       Ns(eid).boolMap.add(str3 -> bool3, str4 -> bool4).update
-      Ns.boolMap.one === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4)
+      Ns.boolMap.get.head === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).boolMap.add(Seq(str4 -> bool4, str5 -> bool5)).update
-      Ns.boolMap.one === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
+      Ns.boolMap.get.head === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
 
       // Add empty Map of pair (no effect)
       Ns(eid).boolMap.add(Seq[(String, Boolean)]()).update
-      Ns.boolMap.one === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
+      Ns.boolMap.get.head === Map(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
 
 
       // Can't add pairs with duplicate keys
@@ -76,27 +76,27 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Replace value
       Ns(eid).boolMap.replace(str6 -> bool8).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5, str6 -> bool8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).boolMap.replace(str5 -> bool8).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool8, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool8, str6 -> bool8)
 
       // Replace multiple values (vararg)
       Ns(eid).boolMap.replace(str3 -> bool6, str4 -> bool7).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).boolMap.replace(str3 -> bool6, str4 -> bool7).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).boolMap.replace(Seq(str2 -> bool5)).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool5, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool5, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).boolMap.replace(Seq[(String, Boolean)]()).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool5, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool5, str3 -> bool6, str4 -> bool7, str5 -> bool8, str6 -> bool8)
 
 
       // Can't replace pairs with duplicate keys
@@ -121,27 +121,27 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).boolMap.remove(str6).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).boolMap.remove(str7).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4, str5 -> bool5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).boolMap.remove(str5, str5).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2, str3 -> bool3, str4 -> bool4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).boolMap.remove(str3, str4).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1, str2 -> bool2)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1, str2 -> bool2)
 
       // Remove pairs by Seq of keys
       Ns(eid).boolMap.remove(Seq(str2)).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).boolMap.remove(Seq[String]()).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1)
     }
 
 
@@ -151,15 +151,15 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).boolMap(str1 -> bool1).update
-      Ns.boolMap.one.toList.sorted === List(str1 -> bool1)
+      Ns.boolMap.get.head.toList.sorted === List(str1 -> bool1)
 
       // Apply multiple values (vararg)
       Ns(eid).boolMap(str2 -> bool2, str3 -> bool3).update
-      Ns.boolMap.one.toList.sorted === List(str2 -> bool2, str3 -> bool3)
+      Ns.boolMap.get.head.toList.sorted === List(str2 -> bool2, str3 -> bool3)
 
       // Apply Map of values
       Ns(eid).boolMap(Seq(str4 -> bool4)).update
-      Ns.boolMap.one.toList.sorted === List(str4 -> bool4)
+      Ns.boolMap.get.head.toList.sorted === List(str4 -> bool4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).boolMap(Seq[(String, Boolean)]()).update

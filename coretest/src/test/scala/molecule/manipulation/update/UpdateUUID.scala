@@ -17,11 +17,11 @@ class UpdateUUID extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).uuid(uuid1).update
-      Ns.uuid.one === uuid1
+      Ns.uuid.get.head === uuid1
 
       // Apply new value
       Ns(eid).uuid(uuid2).update
-      Ns.uuid.one === uuid2
+      Ns.uuid.get.head === uuid2
 
       // Delete value (apply no value)
       Ns(eid).uuid().update
@@ -46,28 +46,28 @@ class UpdateUUID extends CoreSpec {
 
       // Add value
       Ns(eid).uuids.add(uuid2).update
-      Ns.uuids.one === Set(uuid1, uuid2)
+      Ns.uuids.get.head === Set(uuid1, uuid2)
 
       // Add exisiting value (no effect)
       Ns(eid).uuids.add(uuid2).update
-      Ns.uuids.one === Set(uuid1, uuid2)
+      Ns.uuids.get.head === Set(uuid1, uuid2)
 
       // Add multiple values
       Ns(eid).uuids.add(uuid3, uuid4).update
-      Ns.uuids.one === Set(uuid1, uuid2, uuid3, uuid4)
+      Ns.uuids.get.head === Set(uuid1, uuid2, uuid3, uuid4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).uuids.add(Seq(uuid4, uuid5)).update
-      Ns.uuids.one === Set(uuid1, uuid2, uuid3, uuid4, uuid5)
+      Ns.uuids.get.head === Set(uuid1, uuid2, uuid3, uuid4, uuid5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(uuid6, uuid7)
       Ns(eid).uuids.add(values).update
-      Ns.uuids.one === Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7)
+      Ns.uuids.get.head === Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).uuids.add(Seq[UUID]()).update
-      Ns.uuids.one === Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7)
+      Ns.uuids.get.head === Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7)
 
 
       // Can't add duplicate values
@@ -109,28 +109,28 @@ class UpdateUUID extends CoreSpec {
 
       // Replace value
       Ns(eid).uuids.replace(uuid6 -> uuid8).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5, uuid8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).uuids.replace(uuid5 -> uuid8).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid8)
 
       // Replace multiple values (vararg)
       Ns(eid).uuids.replace(uuid3 -> uuid6, uuid4 -> uuid7).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid6, uuid7, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid6, uuid7, uuid8)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).uuids.replace(Seq(uuid2 -> uuid5)).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid5, uuid6, uuid7, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid5, uuid6, uuid7, uuid8)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(uuid1 -> uuid4)
       Ns(eid).uuids.replace(values).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid4, uuid5, uuid6, uuid7, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid4, uuid5, uuid6, uuid7, uuid8)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).uuids.replace(Seq[(UUID, UUID)]()).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid4, uuid5, uuid6, uuid7, uuid8)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid4, uuid5, uuid6, uuid7, uuid8)
 
 
       // Can't replace duplicate values
@@ -168,23 +168,23 @@ class UpdateUUID extends CoreSpec {
 
       // Remove value
       Ns(eid).uuids.remove(uuid6).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5)
 
       // Removing non-existing value has no effect
       Ns(eid).uuids.remove(uuid7).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4, uuid5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).uuids.remove(uuid5, uuid5).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2, uuid3, uuid4)
 
       // Remove multiple values (vararg)
       Ns(eid).uuids.remove(uuid3, uuid4).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2)
 
       // Remove Seq of values
       Ns(eid).uuids.remove(Seq(uuid2)).update
-      Ns.uuids.one.toList === List(uuid1)
+      Ns.uuids.get.head.toList === List(uuid1)
 
       // Remove Seq of values as variable
       val values = Seq(uuid1)
@@ -194,7 +194,7 @@ class UpdateUUID extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).uuids(uuid1).update
       Ns(eid).uuids.remove(Seq[UUID]()).update
-      Ns.uuids.one.toList === List(uuid1)
+      Ns.uuids.get.head.toList === List(uuid1)
     }
 
 
@@ -204,15 +204,15 @@ class UpdateUUID extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).uuids(uuid1).update
-      Ns.uuids.one.toList === List(uuid1)
+      Ns.uuids.get.head.toList === List(uuid1)
 
       // Apply multiple values (vararg)
       Ns(eid).uuids(uuid2, uuid3).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid2, uuid3)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid2, uuid3)
 
       // Apply Seq of values
       Ns(eid).uuids(Set(uuid4)).update
-      Ns.uuids.one.toList === List(uuid4)
+      Ns.uuids.get.head.toList === List(uuid4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).uuids(Set[UUID]()).update
@@ -221,7 +221,7 @@ class UpdateUUID extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(uuid1, uuid2)
       Ns(eid).uuids(values).update
-      Ns.uuids.one.toList.sortBy(_.toString) === List(uuid1, uuid2)
+      Ns.uuids.get.head.toList.sortBy(_.toString) === List(uuid1, uuid2)
 
       // Delete all (apply no values)
       Ns(eid).uuids().update

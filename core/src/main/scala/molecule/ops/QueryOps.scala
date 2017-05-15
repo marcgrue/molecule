@@ -3,12 +3,13 @@ package ops
 import java.net.URI
 import java.util.{Date, UUID}
 
+import datomic.Util
 import molecule.ast.model._
 import molecule.ast.query._
 import molecule.util.Helpers
 
 object QueryOps extends Helpers {
-  type KeepQueryOps = Int
+  //  type KeepQueryOps = Int
 
   implicit class QueryOps(q: Query) {
 
@@ -34,14 +35,16 @@ object QueryOps extends Helpers {
 
     def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query = {
       val genericVars = gs.flatMap {
-        case AttrVar(v)      => Some(Var(attrV))
-        case TxValue         => Some(Var("tx"))
-        case TxValue_        => None
-        case TxTValue        => Some(Var("txT"))
-        case TxInstantValue  => Some(Var("txInst"))
-        case OpValue(added)  => Some(Var("op"))
-        case OpValue_(added) => None
-        case other           => None
+        case AttrVar(v)         => Some(Var(attrV))
+        case TxValue            => Some(Var("tx"))
+        case TxValue_           => None
+        case TxTValue(_)        => Some(Var("txT"))
+        case TxTValue_(_)       => None
+        case TxInstantValue(_)  => Some(Var("txInst"))
+        case TxInstantValue_(_) => None
+        case OpValue(_)         => Some(Var("op"))
+        case OpValue_(_)        => None
+        case other              => None
       }.distinct
       val moreOutputs = o match {
         case NoVal => genericVars
@@ -55,11 +58,11 @@ object QueryOps extends Helpers {
 
     def pull(e: String, atom: Atom) =
       q.copy(f = Find(q.f.outputs :+ Pull(e + "_" + atom.name, atom.ns, atom.name)))
-        .func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
+        .func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
 
     def pullEnum(e: String, atom: Atom) =
       q.copy(f = Find(q.f.outputs :+ Pull(e + "_" + atom.name, atom.ns, atom.name, atom.enumPrefix)))
-        .func("molecule.Functions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
+        .func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
 
 
     // In ..........................................
@@ -85,27 +88,59 @@ object QueryOps extends Helpers {
     // Where ..........................................
 
     def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String, gs: Seq[Generic]): Query = {
-      val attrClauses = if (gs.isEmpty)
+      val attrClauses = if (gs.isEmpty) {
         Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty))
-      else {
+      } else {
         val opValue = gs.collectFirst {
-          case ov: OpValue    => Some(ov)
-//          case ov_ : OpValue_ => Some(ov_)
+          case ov: OpValue => Some(ov)
         } getOrElse None
 
-        val extendedClause = if (opValue.nonEmpty)
+        val extendedClause = if (opValue.nonEmpty) {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Var("op"))
-        else if (gs.contains(TxValue) || gs.contains(TxValue_) || gs.contains(TxTValue) || gs.contains(TxInstantValue))
+        } else if (
+          gs.collectFirst {
+            case TxValue            => true
+            case TxValue_           => true
+            case TxTValue(_)        => true
+            case TxTValue_(_)       => true
+            case TxInstantValue(_)  => true
+            case TxInstantValue_(_) => true
+          }.getOrElse(false)
+        ) {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), NoBinding)
-        else
+        } else {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, NoBinding, NoBinding)
+        }
 
         val extraClauses = gs.flatMap {
-          case TxTValue              => Seq(Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))))
-          case TxInstantValue        => Seq(DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty))
-          case OpValue(Some(added))  => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added)))
-          case OpValue_(Some(added)) => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added)))
-          case _                     => Nil
+          case TxTValue(None)              => Seq(
+            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT")))
+          )
+          case TxTValue(Some(t))           => Seq(
+            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))),
+            Funct("=", Seq(Var("txT"), Val(t)), NoBinding)
+          )
+          case TxTValue_(Some(t))          => Seq(
+            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))),
+            Funct("=", Seq(Var("txT"), Val(t)), NoBinding)
+          )
+          case TxInstantValue(None)        => Seq(
+            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty)
+          )
+          case TxInstantValue(Some(date))  => Seq(
+            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty),
+            Funct("=", Seq(Var("txInst"), Val(date)), NoBinding)
+          )
+          case TxInstantValue_(Some(date)) => Seq(
+            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Val(date), Empty)
+          )
+          case OpValue(Some(added))        => Seq(
+            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added))
+          )
+          case OpValue_(Some(added))       => Seq(
+            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added))
+          )
+          case _                           => Nil
         }
         extendedClause +: extraClauses
       }
@@ -116,7 +151,8 @@ object QueryOps extends Helpers {
       where(e, a.ns, a.name, Var(v), "", gs)
 
     def where(e: String, a: Atom, qv: Val, gs: Seq[Generic]): Query =
-      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(a.ns, a.name), qv, Empty)))
+      where(e, a.ns, a.name, qv, "", gs)
+    //      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(a.ns, a.name), qv, Empty)))
 
     def whereAnd[T](e: String, a: Atom, v: String, args: Seq[T]): Query =
       args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(arg), Nil) }.where(e, a, v, Nil)
@@ -337,5 +373,22 @@ object QueryOps extends Helpers {
 
     def ref(e: String, ns: String, refAttr: String, v: String, refNs: String): Query =
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(ns, refAttr, refNs), Var(v), Empty)))
+
+
+    // Java conversions ...........................................................
+
+    private def cast(a: Any) = a match {
+      case i: Int   => i.toLong.asInstanceOf[Object]
+      case f: Float => f.toDouble.asInstanceOf[Object]
+      case other    => other.asInstanceOf[Object]
+    }
+
+    def inputs = q.i.inputs.map {
+      case InVar(RelationBinding(_), argss)   => Util.list(argss.map(args => Util.list(args map cast: _*)): _*)
+      case InVar(CollectionBinding(_), argss) => Util.list(argss.head map cast: _*)
+      case InVar(_, argss)                    => cast(argss.head.head)
+      case InDataSource(_, argss)             => cast(argss.head.head)
+      case other                              => sys.error(s"[molecule.ops.QueryOps] UNEXPECTED inputs: $other")
+    }
   }
 }

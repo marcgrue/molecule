@@ -119,7 +119,7 @@ class NestedTests extends CoreSpec {
         (3, List(31)))))
 
 
-    m(Ns.str.Refs1.int1.Refs2.int2).get.sortBy(r => (r._1, r._2, r._3)) === List(
+    m(Ns.str.Refs1.int1.Refs2.int2).get.toSeq.sortBy(r => (r._1, r._2, r._3)) === List(
       ("a", 1, 11),
       ("b", 2, 21),
       ("b", 2, 22),
@@ -130,7 +130,7 @@ class NestedTests extends CoreSpec {
       ("b", List((2, 22), (2, 21), (3, 31))))
 
 
-    m(Ns.str.Refs1.Refs2.int2).get.sortBy(r => (r._1, r._2)) === List(
+    m(Ns.str.Refs1.Refs2.int2).get.toSeq.sortBy(r => (r._1, r._2)) === List(
       ("a", 11),
       ("b", 21),
       ("b", 22),
@@ -181,8 +181,8 @@ class NestedTests extends CoreSpec {
 
   "Applied eid" in new CoreSetup {
     val eid = Ns.str.Refs1.*(Ref1.int1).insert("a", List(1, 2)).eid
-    Ns(eid).str.one === "a"
-    Ns(eid).Refs1.*(Ref1.int1).one === List(1, 2)
+    Ns(eid).str.get.head === "a"
+    Ns(eid).Refs1.*(Ref1.int1).get.head === List(1, 2)
   }
 
 

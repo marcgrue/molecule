@@ -6,7 +6,7 @@ import org.specs2.specification.Scope
 import scala.language.postfixOps
 
 
-class SocialNewsSetup extends Scope with DatomicFacade {
+class SocialNewsSetup extends Scope {
 
   // 1-2. Make db
   implicit val conn = recreateDbFrom(SocialNewsSchema)

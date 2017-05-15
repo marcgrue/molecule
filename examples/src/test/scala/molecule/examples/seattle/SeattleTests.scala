@@ -1,5 +1,4 @@
-package molecule
-package examples.seattle
+package molecule.examples.seattle
 import java.io.FileReader
 import datomic._
 import molecule._
@@ -49,7 +48,7 @@ class SeattleTests extends SeattleSpec {
     communityId(":community/emptyOrBogusAttribute") === None
 
     // We can also use the entity id to query for an attribute value
-    Community(communityId).name.one === "Greenlake Community Wiki"
+    Community(communityId).name.get.head === "Greenlake Community Wiki"
   }
 
 
@@ -76,7 +75,7 @@ class SeattleTests extends SeattleSpec {
   "Querying _by_ attribute values" >> {
 
     // Find attributes with a certain applied value
-    Community.name.`type`("twitter").get(3).sortBy(_._1) === List(
+    Community.name.`type`("twitter").get(3).toSeq.sortBy(_._1) === List(
       ("Columbia Citizens", "twitter"),
       ("Discover SLU", "twitter"),
       ("Fremont Universe", "twitter"))
@@ -95,7 +94,7 @@ class SeattleTests extends SeattleSpec {
     // Many-cardinality attributes
 
     // Retrieving Set of `category` values for Belltown
-    Community.name_("belltown").category.one === Set("events", "news")
+    Community.name_("belltown").category.get.head === Set("events", "news")
 
     // Communities with some possible categories
     Community.name.category("news" or "arts").get(3) === List(
@@ -237,12 +236,12 @@ class SeattleTests extends SeattleSpec {
 
     val beforeC = List("Ballard Blog", "Beach Drive Blog", "Beacon Hill Blog")
 
-    m(Community.name < "C").get(3).sorted === beforeC
-    Community.name.<("C").get(3).sorted === beforeC
+    m(Community.name < "C").get(3).toSeq.sorted === beforeC
+    Community.name.<("C").get(3).toSeq.sorted === beforeC
 
     val communitiesBefore = m(Community.name < ?)
-    communitiesBefore("C").get(3).sorted === beforeC
-    communitiesBefore("A").get(3).sorted === List("15th Ave Community")
+    communitiesBefore("C").get(3).toSeq.sorted === beforeC
+    communitiesBefore("A").get(3).toSeq.sorted === List("15th Ave Community")
   }
 
 
@@ -345,28 +344,27 @@ class SeattleTests extends SeattleSpec {
 
   "Working with time" in new SeattleSetup {
 
-    val txDates      = Db.txInstant.get.sorted.reverse
-    val dataTxDate   = txDates(0)
+    val txDates      = Db.txInstant.get.toSeq.sorted.reverse
     val schemaTxDate = txDates(1)
+    val dataTxDate   = txDates(0)
 
     // Take all Community entities
     val communities = m(Community.e.name_)
 
     // Revisiting the past
 
-    communities.asOf(schemaTxDate).get.size === 0
-    communities.asOf(dataTxDate).get.size === 150
+    communities.getAsOf(schemaTxDate).size === 0
+    communities.getAsOf(dataTxDate).size === 150
 
-    communities.since(schemaTxDate).get.size === 150
-    communities.since(dataTxDate).get.size === 0
+    communities.getSince(schemaTxDate).size === 150
+    communities.getSince(dataTxDate).size === 0
 
     // Imagining the future
     val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
     val newDataTx = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
 
     // future db
-    communities.imagine(newDataTx).get.size === 258
-    // Todo: imagine molecular data...
+    communities.getWith(newDataTx).size === 258
 
     // existing db
     communities.get.size === 150
@@ -378,7 +376,7 @@ class SeattleTests extends SeattleSpec {
     communities.get.size === 258
 
     // number of new transactions
-    communities.since(dataTxDate).get.size === 108
+    communities.getSince(dataTxDate).size === 108
   }
 
 
@@ -417,7 +415,7 @@ class SeattleTests extends SeattleSpec {
     Community.name.url.insert(Seq(("Com A", "A.com"), ("Com B", "B.com"))).eids === Seq(17592186045898L, 17592186045899L)
 
     // Confirm that new entities have been inserted
-    Community.name.contains("Com").get.sorted === List("Com A", "Com B")
+    Community.name.contains("Com").get.toSeq.sorted === List("Com A", "Com B")
     Community.e.name_.get.size === 154
 
 

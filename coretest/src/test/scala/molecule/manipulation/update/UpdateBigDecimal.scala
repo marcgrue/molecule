@@ -15,11 +15,11 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).bigDec(bigDec1).update
-      Ns.bigDec.one === bigDec1
+      Ns.bigDec.get.head === bigDec1
 
       // Apply new value
       Ns(eid).bigDec(bigDec2).update
-      Ns.bigDec.one === bigDec2
+      Ns.bigDec.get.head === bigDec2
 
       // Delete value (apply no value)
       Ns(eid).bigDec().update
@@ -44,28 +44,28 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Add value
       Ns(eid).bigDecs.add(bigDec2).update
-      Ns.bigDecs.one === Set(bigDec2, bigDec1)
+      Ns.bigDecs.get.head === Set(bigDec2, bigDec1)
 
       // Add exisiting value (no effect)
       Ns(eid).bigDecs.add(bigDec2).update
-      Ns.bigDecs.one === Set(bigDec1, bigDec2)
+      Ns.bigDecs.get.head === Set(bigDec1, bigDec2)
 
       // Add multiple values
       Ns(eid).bigDecs.add(bigDec3, bigDec4).update
-      Ns.bigDecs.one === Set(bigDec1, bigDec2, bigDec3, bigDec4)
+      Ns.bigDecs.get.head === Set(bigDec1, bigDec2, bigDec3, bigDec4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).bigDecs.add(Seq(bigDec4, bigDec5)).update
-      Ns.bigDecs.one === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
+      Ns.bigDecs.get.head === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(bigDec6, bigDec7)
       Ns(eid).bigDecs.add(values).update
-      Ns.bigDecs.one === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec6, bigDec7)
+      Ns.bigDecs.get.head === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec6, bigDec7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).bigDecs.add(Seq[BigDecimal]()).update
-      Ns.bigDecs.one === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec6, bigDec7)
+      Ns.bigDecs.get.head === Set(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec6, bigDec7)
 
 
       // Can't add duplicate values
@@ -109,33 +109,33 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Replace value
       Ns(eid).bigDecs.replace(bigDec6 -> bigDec8).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec8)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5, bigDec8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).bigDecs.replace(bigDec5 -> bigDec8).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec8)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec8)
 
       // Replace multiple values (vararg)
       Ns(eid).bigDecs.replace(bigDec3 -> bigDec6, bigDec4 -> bigDec7).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec6, bigDec7, bigDec8)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec6, bigDec7, bigDec8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       val bigDec42 = BigDecimal(42)
       Ns(eid).bigDecs.replace(bigDec42 -> bigDec9).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec6, bigDec7, bigDec8, bigDec9)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec6, bigDec7, bigDec8, bigDec9)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).bigDecs.replace(Seq(bigDec2 -> bigDec5)).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(bigDec1 -> bigDec4)
       Ns(eid).bigDecs.replace(values).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec4, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec4, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).bigDecs.replace(Seq[(BigDecimal, BigDecimal)]()).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec4, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec4, bigDec5, bigDec6, bigDec7, bigDec8, bigDec9)
 
 
       // Can't replace duplicate values
@@ -173,23 +173,23 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Remove value
       Ns(eid).bigDecs.remove(bigDec6).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
 
       // Removing non-existing value has no effect
       Ns(eid).bigDecs.remove(bigDec7).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).bigDecs.remove(bigDec5, bigDec5).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4)
 
       // Remove multiple values (vararg)
       Ns(eid).bigDecs.remove(bigDec3, bigDec4).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2)
 
       // Remove Seq of values
       Ns(eid).bigDecs.remove(Seq(bigDec2)).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1)
 
       // Remove Seq of values as variable
       val values = Seq(bigDec1)
@@ -199,7 +199,7 @@ class UpdateBigDecimal extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).bigDecs(bigDec1).update
       Ns(eid).bigDecs.remove(Seq[BigDecimal]()).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1)
     }
 
 
@@ -209,15 +209,15 @@ class UpdateBigDecimal extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).bigDecs(bigDec1).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1)
 
       // Apply multiple values (vararg)
       Ns(eid).bigDecs(bigDec2, bigDec3).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec2, bigDec3)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec2, bigDec3)
 
       // Apply Seq of values
       Ns(eid).bigDecs(Set(bigDec4)).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec4)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).bigDecs(Set[BigDecimal]()).update
@@ -226,7 +226,7 @@ class UpdateBigDecimal extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(bigDec1, bigDec2)
       Ns(eid).bigDecs(values).update
-      Ns.bigDecs.one.toList.sorted === List(bigDec1, bigDec2)
+      Ns.bigDecs.get.head.toList.sorted === List(bigDec1, bigDec2)
 
       // Delete all (apply no values)
       Ns(eid).bigDecs().update

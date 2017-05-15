@@ -17,7 +17,7 @@ class UpdateBoolean extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).bool(false).update
-      Ns.bool.one === false
+      Ns.bool.get.head === false
 
       // Delete value (apply no value)
       Ns(eid).bool().update
@@ -42,7 +42,7 @@ class UpdateBoolean extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).bool(bool1).update
-      Ns.bool.one === bool1
+      Ns.bool.get.head === bool1
 
       // Delete value (apply no value)
       Ns(eid).bool().update

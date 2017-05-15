@@ -1,20 +1,19 @@
-package molecule
-package util
+package molecule.util
 
+import molecule._
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID._
 
-import molecule.DatomicFacade
 import molecule.util.schema.CoreTestSchema
 import org.specs2.specification.Scope
 
-class CoreSetup extends Scope with DatomicFacade {
+class CoreSetup extends Scope {
   implicit val conn = recreateDbFrom(CoreTestSchema)
 }
 
-class CoreSpec extends MoleculeSpec with DatomicFacade {
+class CoreSpec extends MoleculeSpec {
 
   def da(s: Int): Date = {
     val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")

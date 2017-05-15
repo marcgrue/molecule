@@ -700,7 +700,7 @@ object MoleculeBoilerplate {
         |* 3. Refresh and re-compile project in IDE
         |*/
         |package ${d.pkg}.schema
-        |import molecule.dsl.Transaction
+        |import molecule.schema.Transaction
         |import datomic.{Util, Peer}
         |
         |object ${d.domain}Schema extends Transaction {
@@ -909,7 +909,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_$o[$types] extends $ns with Out_$o[${ns}_$o, ${ns}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-            |  def Self: ${ns}_$o[$types] with SelfJoin = ???
+           |  def Self: ${ns}_$o[$types] with SelfJoin = ???
            |}
          """.stripMargin
 
@@ -951,7 +951,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, ${ns}_In_${i}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-            |  def Self: ${ns}_In_${i}_$o[$types] with SelfJoin = ???
+           |  def Self: ${ns}_In_${i}_$o[$types] with SelfJoin = ???
            |}
          """.stripMargin
     }
@@ -1064,7 +1064,7 @@ object MoleculeBoilerplate {
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "           ")
+      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
@@ -1082,20 +1082,21 @@ object MoleculeBoilerplate {
          |*/
          |package ${d.pkg}.dsl
          |package ${firstLow(d.domain)}
-         |import molecule.dsl.actions._
-         |import molecule.dsl._$extraImports
+         |import molecule.boilerplate._
+         |import molecule.boilerplate.attributes._
+         |import molecule._$extraImports
          |
-          |
-          |object $ns extends ${ns}_0 with FirstNS {
+         |
+         |object $ns extends ${ns}_0 with FirstNS {
          |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
          |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
          |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
          |}
          |
-          |trait $ns {
+         |trait $ns {
          |  $attrClasses
          |
-          |  $attrClassesOpt
+         |  $attrClassesOpt
          |}
          |
           |$nsTraitsOut""".stripMargin
@@ -1116,10 +1117,11 @@ object MoleculeBoilerplate {
            |*/
            |package ${d.pkg}.dsl
            |package ${firstLow(d.domain)}
-           |import molecule.dsl.actions._
-           |import molecule.dsl._$extraImports
+           |import molecule.boilerplate._
+           |import molecule.boilerplate.attributes._
+           |import molecule._$extraImports
            |
-            |$inTraits""".stripMargin
+           |$inTraits""".stripMargin
 
       (in, inFile)
     }
@@ -1133,7 +1135,7 @@ object MoleculeBoilerplate {
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  def apply(eids: molecule.?)      : ${ns}_In_1_0[Long] = ???", "          ")
+      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "          ")
     else
       ("", "")
 
@@ -1152,23 +1154,24 @@ object MoleculeBoilerplate {
        |*/
        |package ${d.pkg}.dsl
        |package ${firstLow(d.domain)}
-       |import molecule.dsl.actions._
-       |import molecule.dsl._$extraImports
+       |import molecule.boilerplate._
+       |import molecule.boilerplate.attributes._
+       |import molecule._$extraImports
        |
-        |
-        |object $ns extends ${ns}_0 with FirstNS {
+       |
+       |object $ns extends ${ns}_0 with FirstNS {
        |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
        |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
        |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
        |}
        |
-        |trait $ns $ext{
+       |trait $ns $ext{
        |  $attrClasses
        |
-        |  $attrClassesOpt
+       |  $attrClassesOpt
        |}
        |
-        |$nsTraits""".stripMargin
+       |$nsTraits""".stripMargin
   }
 
 

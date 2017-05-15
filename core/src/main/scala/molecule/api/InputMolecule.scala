@@ -4,9 +4,7 @@ import molecule.ast.model.{Model, Or, TermValue}
 import molecule.ast.query.{Placeholder, Query, Var}
 
 
-trait InputMolecule {
-  val _model: Model
-  val _query: Query
+trait InputMolecule extends MoleculeBase {
 
   def resolveOr[I1](or: Or[I1]): Seq[I1] = {
     def traverse(expr: Or[I1]): Seq[I1] = expr match {

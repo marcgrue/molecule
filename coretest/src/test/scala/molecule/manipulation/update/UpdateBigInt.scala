@@ -15,11 +15,11 @@ class UpdateBigInt extends CoreSpec {
 
       // Apply value (retracts current value)
       Ns(eid).bigInt(bigInt1).update
-      Ns.bigInt.one === bigInt1
+      Ns.bigInt.get.head === bigInt1
 
       // Apply new value
       Ns(eid).bigInt(bigInt2).update
-      Ns.bigInt.one === bigInt2
+      Ns.bigInt.get.head === bigInt2
 
       // Delete value (apply no value)
       Ns(eid).bigInt().update
@@ -44,28 +44,28 @@ class UpdateBigInt extends CoreSpec {
 
       // Add value
       Ns(eid).bigInts.add(bigInt2).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2)
 
       // Add exisiting value (no effect)
       Ns(eid).bigInts.add(bigInt2).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2)
 
       // Add multiple values
       Ns(eid).bigInts.add(bigInt3, bigInt4).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2, bigInt3, bigInt4)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2, bigInt3, bigInt4)
 
       // Add Seq of values (existing values unaffected)
       Ns(eid).bigInts.add(Seq(bigInt4, bigInt5)).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
 
       // Add Seq of values as variable (existing values unaffected)
       val values = Seq(bigInt6, bigInt7)
       Ns(eid).bigInts.add(values).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7)
 
       // Add empty Seq of values (no effect)
       Ns(eid).bigInts.add(Seq[BigInt]()).update
-      Ns.bigInts.one === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7)
+      Ns.bigInts.get.head === Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6, bigInt7)
 
 
       // Can't add duplicate values
@@ -109,33 +109,33 @@ class UpdateBigInt extends CoreSpec {
 
       // Replace value
       Ns(eid).bigInts.replace(bigInt6 -> bigInt8).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt8)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt8)
 
       // Replace value to existing value simply retracts it
       Ns(eid).bigInts.replace(bigInt5 -> bigInt8).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt8)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt8)
 
       // Replace multiple values (vararg)
       Ns(eid).bigInts.replace(bigInt3 -> bigInt6, bigInt4 -> bigInt7).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt6, bigInt7, bigInt8)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt6, bigInt7, bigInt8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       val bigInt42 = BigInt(42)
       Ns(eid).bigInts.replace(bigInt42 -> bigInt9).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt6, bigInt7, bigInt8, bigInt9)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt6, bigInt7, bigInt8, bigInt9)
 
       // Replace with Seq of oldValue->newValue pairs
       Ns(eid).bigInts.replace(Seq(bigInt2 -> bigInt5)).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
 
       // Replace with Seq of oldValue->newValue pairs as variable
       val values = Seq(bigInt1 -> bigInt4)
       Ns(eid).bigInts.replace(values).update
-      Ns.bigInts.one.toList.sorted === List(bigInt4, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt4, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
 
       // Replacing with empty Seq of oldValue->newValue pairs has no effect
       Ns(eid).bigInts.replace(Seq[(BigInt, BigInt)]()).update
-      Ns.bigInts.one.toList.sorted === List(bigInt4, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt4, bigInt5, bigInt6, bigInt7, bigInt8, bigInt9)
 
 
       // Can't replace duplicate values
@@ -173,23 +173,23 @@ class UpdateBigInt extends CoreSpec {
 
       // Remove value
       Ns(eid).bigInts.remove(bigInt6).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
 
       // Removing non-existing value has no effect
       Ns(eid).bigInts.remove(bigInt7).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5)
 
       // Removing duplicate values removes the distinc value
       Ns(eid).bigInts.remove(bigInt5, bigInt5).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2, bigInt3, bigInt4)
 
       // Remove multiple values (vararg)
       Ns(eid).bigInts.remove(bigInt3, bigInt4).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2)
 
       // Remove Seq of values
       Ns(eid).bigInts.remove(Seq(bigInt2)).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1)
 
       // Remove Seq of values as variable
       val values = Seq(bigInt1)
@@ -199,7 +199,7 @@ class UpdateBigInt extends CoreSpec {
       // Removing empty Seq of values has no effect
       Ns(eid).bigInts(bigInt1).update
       Ns(eid).bigInts.remove(Seq[BigInt]()).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1)
     }
 
 
@@ -209,15 +209,15 @@ class UpdateBigInt extends CoreSpec {
 
       // Apply value (retracts all current values!)
       Ns(eid).bigInts(bigInt1).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1)
 
       // Apply multiple values (vararg)
       Ns(eid).bigInts(bigInt2, bigInt3).update
-      Ns.bigInts.one.toList.sorted === List(bigInt2, bigInt3)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt2, bigInt3)
 
       // Apply Seq of values
       Ns(eid).bigInts(Set(bigInt4)).update
-      Ns.bigInts.one.toList.sorted === List(bigInt4)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt4)
 
       // Apply empty Seq of values (retracting all values!)
       Ns(eid).bigInts(Set[BigInt]()).update
@@ -226,7 +226,7 @@ class UpdateBigInt extends CoreSpec {
       // Apply Seq of values as variable
       val values = Set(bigInt1, bigInt2)
       Ns(eid).bigInts(values).update
-      Ns.bigInts.one.toList.sorted === List(bigInt1, bigInt2)
+      Ns.bigInts.get.head.toList.sorted === List(bigInt1, bigInt2)
 
       // Delete all (apply no values)
       Ns(eid).bigInts().update

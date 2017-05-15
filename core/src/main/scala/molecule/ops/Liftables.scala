@@ -152,14 +152,16 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   }
 
   implicit val liftGeneric = Liftable[Generic] {
+    case NsValue(values)             => q"NsValue(Seq(..$values))"
     case AttrVar(v)                  => q"AttrVar($v)"
     case TxValue                     => q"TxValue"
     case TxValue_                    => q"TxValue_"
-    case TxTValue                    => q"TxTValue"
-    case TxInstantValue              => q"TxInstantValue"
+    case TxTValue(t)                 => q"TxTValue($t)"
+    case TxTValue_(t)                => q"TxTValue_($t)"
+    case TxInstantValue(tx)          => q"TxInstantValue($tx)"
+    case TxInstantValue_(tx)         => q"TxInstantValue_($tx)"
     case OpValue(added)              => q"OpValue($added)"
     case OpValue_(added)             => q"OpValue_($added)"
-    case NsValue(values)             => q"NsValue(Seq(..$values))"
     case NoValue                     => q"NoValue"
     case Id(eid)                     => q"Id($eid)"
     case Card(card)                  => q"Card($card)"
@@ -180,13 +182,15 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   implicit val liftFn    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
   implicit val liftValue = Liftable[Value] {
     case EntValue                    => q"EntValue"
+    case NsValue(values)             => q"NsValue(Seq(..$values))"
     case VarValue                    => q"VarValue"
     case AttrVar(v)                  => q"AttrVar($v)"
     case TxValue                     => q"TxValue"
     case TxValue_                    => q"TxValue_"
-    case TxTValue                    => q"TxTValue"
-    case TxInstantValue              => q"TxInstantValue"
-    case NsValue(values)             => q"NsValue(Seq(..$values))"
+    case TxTValue(t)                 => q"TxTValue($t)"
+    case TxTValue_(t)                => q"TxTValue_($t)"
+    case TxInstantValue(tx)          => q"TxInstantValue($tx)"
+    case TxInstantValue_(tx)         => q"TxInstantValue_($tx)"
     case OpValue(added)              => q"OpValue($added)"
     case OpValue_(added)             => q"OpValue_($added)"
     case NoValue                     => q"NoValue"

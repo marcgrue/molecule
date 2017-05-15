@@ -29,25 +29,23 @@ class Attribute extends CoreSpec {
 
     // Get optional value
     Ns.str.get.headOption === Some(str1)
-    // same as
-    Ns.str.some === Some(str1)
 
     // Single value from list
     Ns.str.get.head === str1
     // same as
-    Ns.str.one === str1
+    Ns.str.get.head === str1
 
     // Get one value (RuntimeException if no value)
-    Ns.str.one === str1
-    Ns.int.one === int1
-    Ns.long.one === long1
-    Ns.float.one === float1
-    Ns.double.one === double1
-    Ns.bool.one === bool1
-    Ns.date.one === date1
-    Ns.uuid.one === uuid1
-    Ns.uri.one === uri1
-    Ns.enum.one === enum1
+    Ns.str.get.head === str1
+    Ns.int.get.head === int1
+    Ns.long.get.head === long1
+    Ns.float.get.head === float1
+    Ns.double.get.head === double1
+    Ns.bool.get.head === bool1
+    Ns.date.get.head === date1
+    Ns.uuid.get.head === uuid1
+    Ns.uri.get.head === uri1
+    Ns.enum.get.head === enum1
   }
 
   "Single cardinality-2 attribute - one entity" in new CoreSetup {
@@ -65,16 +63,16 @@ class Attribute extends CoreSpec {
     Ns.enums insert enums1
 
     // Get one value (RuntimeException if no value)
-    Ns.strs.one === strs1
-    Ns.ints.one === ints1
-    Ns.longs.one === longs1
-    Ns.floats.one === floats1
-    Ns.doubles.one === doubles1
+    Ns.strs.get.head === strs1
+    Ns.ints.get.head === ints1
+    Ns.longs.get.head === longs1
+    Ns.floats.get.head === floats1
+    Ns.doubles.get.head === doubles1
     // No Set of boolean values
-    Ns.dates.one === dates1
-    Ns.uuids.one === uuids1
-    Ns.uris.one === uris1
-    Ns.enums.one === enums1
+    Ns.dates.get.head === dates1
+    Ns.uuids.get.head === uuids1
+    Ns.uris.get.head === uris1
+    Ns.enums.get.head === enums1
   }
 
 
@@ -99,8 +97,8 @@ class Attribute extends CoreSpec {
     Ns.float.get === List(float1, float2)
     Ns.double.get === List(double1, double2)
     Ns.bool.get === List(bool2, bool1)
-    Ns.date.get.sorted === List(date1, date2)
-    Ns.uuid.get.sortBy(_.toString) === List(uuid1, uuid2)
+    Ns.date.get.toSeq.sorted === List(date1, date2)
+    Ns.uuid.get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
     Ns.uri.get === List(uri1, uri2)
     Ns.enum.get === List(enum2, enum1)
   }
@@ -140,7 +138,7 @@ class Attribute extends CoreSpec {
       str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
 
     // Get single molecule as tuple of values
-    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.one ===(
+    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.get.head ===(
       str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
   }
 
@@ -151,7 +149,7 @@ class Attribute extends CoreSpec {
       strs1, ints1, longs1, floats1, doubles1, dates1, uuids1, uris1, enums1)
 
     // Get single molecule as tuple of Sets of values
-    Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.one ===(
+    Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.get.head ===(
       strs1, ints1, longs1, floats1, doubles1, dates1, uuids1, uris1, enums1)
   }
 
@@ -165,7 +163,7 @@ class Attribute extends CoreSpec {
     )
 
     // Get two molecules as tuples of values
-    Ns.str.int.long.float.double.date.uuid.uri.enum.get.sortBy(_._1.toString) === List(
+    Ns.str.int.long.float.double.date.uuid.uri.enum.get.toSeq.sortBy(_._1.toString) === List(
       (str1, int1, long1, float1, double1, date1, uuid1, uri1, enum1),
       (str2, int2, long2, float2, double2, date2, uuid2, uri2, enum2)
     )

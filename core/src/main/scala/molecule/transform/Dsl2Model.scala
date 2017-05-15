@@ -1,7 +1,8 @@
 package molecule
 package transform
 import molecule.ast.model._
-import molecule.dsl.actions._
+import molecule.boilerplate.NS
+import molecule.boilerplate.attributes._
 import molecule.ops.TreeOps
 
 import scala.language.experimental.macros
@@ -76,12 +77,6 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
     case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
 
-    // Tacet transaction attributes not allowed
-    case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
-    case q"$prev.txT_"       => abort(s"[Dsl2Model:dslStructure] Tacet `txT_` not allowed since all datoms have a txT value")
-    case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacet `txInstant_` not allowed since all datoms have a txInstant value")
-    case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacet `op_` not allowed since all datoms have a `op value")
-
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
     case q"$prev.txT" if !q"$prev".isAttr       => abort(s"[Dsl2Model:dslStructure] Please add `txT` after an attribute or another transaction value")
@@ -90,14 +85,22 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.op" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `op` after an attribute or another transaction value")
 
     // ns.attr.txInstant etc.. (transaction related to previous attribute)
-    case q"$prev.tx"               => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
-    case q"$prev.txT"              => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue, NoValue))
-    case q"$prev.txInstant"        => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue, NoValue))
-    case q"$prev.op.apply(true)"   => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(true)), NoValue))
-    case q"$prev.op.apply(false)"  => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(false)), NoValue))
-    case q"$prev.op_.apply(true)"  => traverse(q"$prev", Meta("db", "op", "tx", OpValue_(Some(true)), NoValue))
-    case q"$prev.op_.apply(false)" => traverse(q"$prev", Meta("db", "op", "tx", OpValue_(Some(false)), NoValue))
-    case q"$prev.op"               => traverse(q"$prev", Meta("db", "op", "tx", OpValue(None), NoValue))
+    case q"$prev.tx"                      => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
+    case q"$prev.txT_.apply($t)"          => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue_(Some(extract(q"$t"))), NoValue))
+    case q"$prev.txT.apply($t)"           => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(Some(extract(q"$t"))), NoValue))
+    case q"$prev.txT"                     => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(None), NoValue))
+    case q"$prev.txInstant_.apply($date)" => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue_(Some(extract(q"$date"))), NoValue))
+    case q"$prev.txInstant.apply($date)"  => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue(Some(extract(q"$date"))), NoValue))
+    case q"$prev.txInstant"               => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue(None), NoValue))
+    case q"$prev.op_.apply($added)"       => traverse(q"$prev", Meta("db", "op", "tx", OpValue_(Some(extract(q"$added"))), NoValue))
+    case q"$prev.op.apply($added)"        => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(extract(q"$added"))), NoValue))
+    case q"$prev.op"                      => traverse(q"$prev", Meta("db", "op", "tx", OpValue(None), NoValue))
+
+    // Tacet transaction attributes not allowed
+    case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
+    case q"$prev.txT_"       => abort(s"[Dsl2Model:dslStructure] Tacet `txT_` not allowed since all datoms have a txT value")
+    case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacet `txInstant_` not allowed since all datoms have a txInstant value")
+    case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacet `op_` not allowed since all datoms have a `op value")
 
 
     // Optional ----------------------
@@ -572,7 +575,7 @@ object Dsl2Model {
     }
     checkAndSemantics(elements0)
 
-    // Nested molecules not allowed in composites (for now - todo: implement!)
+    // Nested molecules not allowed in composites (for now - todo)
     elements0.collect {
       case c: Composite => c.elements collectFirst {
         case n: Nested => abort(6, "Nested molecules in composites not yet implemented (todo)")
@@ -620,7 +623,7 @@ object Dsl2Model {
     // Resolve generic elements ............................................................
 
     // Transfer generic values from Meta elements to Atoms and skip Meta elements
-    val elements1 = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
+    val elements1: Seq[Element] = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
       element match {
         case a@Atom(ns1, attr, _, _, _, _, _, _) if es.collectFirst {
           case Bond(ns, refAttr, refNs, _, _) if ns1 == ns && attr == refAttr => abort(10,
@@ -661,11 +664,21 @@ object Dsl2Model {
       }
     }._1
 
-    val model = Model(elements1)
-    //                inst(c).x(30, dsl, elements0, elements1, model)
-    //                    inst(c).x(30, elements0, elements1)
-    //            inst(c).x(30, model)
+    // inst(c).x(30, dsl, elements0, elements1, model)
+    // inst(c).x(30, elements0, elements1)
+    // inst(c).x(30, model)
 
-    model
+    // Can't use generics on multiple attributes
+    if (elements1.foldLeft(Seq[Boolean]()) {
+      case (gss, Atom(_, _, _, _, _, _, gs, _)) if gs.nonEmpty && gs.flatMap {
+        case b: Bidirectional => None // Bidirectional definitions are ok
+        case generic          => Some(generic)
+      }.nonEmpty    => gss :+ true
+      case (gss, _) => gss
+    }.length > 1)
+      abort(16, "Generics (`v`, `tx`, `txT`, `txInstant`, `op`) not allowed on multiple attributes")
+
+    // Return checked model
+    Model(elements1)
   }
 }

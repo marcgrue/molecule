@@ -16,7 +16,7 @@ class Logic extends Base {
     Ns.str("c", "a").get === List("a")
 
     // 3. List of values
-    Ns.str(List("c", "a")).get.sorted === List("a")
+    Ns.str(List("c", "a")).get.toSeq.sorted === List("a")
 
 
     // order of values not relevant
@@ -25,9 +25,9 @@ class Logic extends Base {
     Ns.str(List("a", "c")).get === List("a")
 
     // No limit on number of applied values
-    Ns.str("a", "b", "c", "d").get.sorted === List("a", "b")
-    Ns.str("a" or "b" or "c" or "d").get.sorted === List("a", "b")
-    Ns.str(List("a", "b", "c", "d")).get.sorted === List("a", "b")
+    Ns.str("a", "b", "c", "d").get.toSeq.sorted === List("a", "b")
+    Ns.str("a" or "b" or "c" or "d").get.toSeq.sorted === List("a", "b")
+    Ns.str(List("a", "b", "c", "d")).get.toSeq.sorted === List("a", "b")
 
 
     // Can't apply same value
@@ -55,69 +55,69 @@ class Logic extends Base {
 
     // Empty/space character values treated as strings too
     Ns.str("", "    ").get === List("")
-    Ns.str("", " ").get.sorted === List("", " ")
+    Ns.str("", " ").get.toSeq.sorted === List("", " ")
 
     // We can apply values assigned to variables
-    Ns.str(str1 or str2).get.sorted === List("a", "b")
-    Ns.str(str1, str2).get.sorted === List("a", "b")
-    Ns.str(List(str1, str2)).get.sorted === List("a", "b")
+    Ns.str(str1 or str2).get.toSeq.sorted === List("a", "b")
+    Ns.str(str1, str2).get.toSeq.sorted === List("a", "b")
+    Ns.str(List(str1, str2)).get.toSeq.sorted === List("a", "b")
     val strList = List(str1, str2)
-    Ns.str(strList).get.sorted === List("a", "b")
+    Ns.str(strList).get.toSeq.sorted === List("a", "b")
 
     // We can mix variables and static values
-    Ns.str(str1 or "b").get.sorted === List("a", "b")
-    Ns.str("a", str2).get.sorted === List("a", "b")
-    Ns.str(List(str1, "b")).get.sorted === List("a", "b")
+    Ns.str(str1 or "b").get.toSeq.sorted === List("a", "b")
+    Ns.str("a", str2).get.toSeq.sorted === List("a", "b")
+    Ns.str(List(str1, "b")).get.toSeq.sorted === List("a", "b")
     val strListMixed = List("a", str2)
-    Ns.str(strListMixed).get.sorted === List("a", "b")
+    Ns.str(strListMixed).get.toSeq.sorted === List("a", "b")
 
 
-    Ns.int(-1, 0, 1).get.sorted === List(-1, 0, 1)
-    Ns.int(0, 1, 2).get.sorted === List(0, 1, 2)
-    Ns.int(1, 2, 3).get.sorted === List(1, 2)
-    Ns.int(2, 3, 4).get.sorted === List(2)
-    Ns.int(3, 4, 5).get.sorted === List()
-    Ns.int(int1, int2).get.sorted === List(1, 2)
-    Ns.int(int1 or int2).get.sorted === List(1, 2)
-    Ns.int(List(int1, int2)).get.sorted === List(1, 2)
+    Ns.int(-1, 0, 1).get.toSeq.sorted === List(-1, 0, 1)
+    Ns.int(0, 1, 2).get.toSeq.sorted === List(0, 1, 2)
+    Ns.int(1, 2, 3).get.toSeq.sorted === List(1, 2)
+    Ns.int(2, 3, 4).get.toSeq.sorted === List(2)
+    Ns.int(3, 4, 5).get.toSeq.sorted === List()
+    Ns.int(int1, int2).get.toSeq.sorted === List(1, 2)
+    Ns.int(int1 or int2).get.toSeq.sorted === List(1, 2)
+    Ns.int(List(int1, int2)).get.toSeq.sorted === List(1, 2)
     val intList = List(int1, int2)
-    Ns.int(intList).get.sorted === List(1, 2)
+    Ns.int(intList).get.toSeq.sorted === List(1, 2)
 
 
-    Ns.long(-1L, 0L, 1L).get.sorted === List(-1L, 0L, 1L)
-    Ns.long(0L, 1L, 2L).get.sorted === List(0L, 1L, 2L)
-    Ns.long(1L, 2L, 3L).get.sorted === List(1L, 2L)
-    Ns.long(2L, 3L, 4L).get.sorted === List(2L)
-    Ns.long(3L, 4L, 5L).get.sorted === List()
-    Ns.long(long1, long2).get.sorted === List(1L, 2L)
-    Ns.long(long1 or long2).get.sorted === List(1L, 2L)
-    Ns.long(List(long1, long2)).get.sorted === List(1L, 2L)
+    Ns.long(-1L, 0L, 1L).get.toSeq.sorted === List(-1L, 0L, 1L)
+    Ns.long(0L, 1L, 2L).get.toSeq.sorted === List(0L, 1L, 2L)
+    Ns.long(1L, 2L, 3L).get.toSeq.sorted === List(1L, 2L)
+    Ns.long(2L, 3L, 4L).get.toSeq.sorted === List(2L)
+    Ns.long(3L, 4L, 5L).get.toSeq.sorted === List()
+    Ns.long(long1, long2).get.toSeq.sorted === List(1L, 2L)
+    Ns.long(long1 or long2).get.toSeq.sorted === List(1L, 2L)
+    Ns.long(List(long1, long2)).get.toSeq.sorted === List(1L, 2L)
     val longList = List(long1, long2)
-    Ns.long(longList).get.sorted === List(1L, 2L)
+    Ns.long(longList).get.toSeq.sorted === List(1L, 2L)
 
 
-    Ns.float(-1f, 0f, 1f).get.sorted === List(-1f, 0f, 1f)
-    Ns.float(0f, 1f, 2f).get.sorted === List(0f, 1f, 2f)
-    Ns.float(1f, 2f, 3f).get.sorted === List(1f, 2f)
-    Ns.float(2f, 3f, 4f).get.sorted === List(2f)
-    Ns.float(3f, 4f, 5f).get.sorted === List()
-    Ns.float(float1, float2).get.sorted === List(1f, 2f)
-    Ns.float(float1 or float2).get.sorted === List(1f, 2f)
-    Ns.float(List(float1, float2)).get.sorted === List(1f, 2f)
+    Ns.float(-1f, 0f, 1f).get.toSeq.sorted === List(-1f, 0f, 1f)
+    Ns.float(0f, 1f, 2f).get.toSeq.sorted === List(0f, 1f, 2f)
+    Ns.float(1f, 2f, 3f).get.toSeq.sorted === List(1f, 2f)
+    Ns.float(2f, 3f, 4f).get.toSeq.sorted === List(2f)
+    Ns.float(3f, 4f, 5f).get.toSeq.sorted === List()
+    Ns.float(float1, float2).get.toSeq.sorted === List(1f, 2f)
+    Ns.float(float1 or float2).get.toSeq.sorted === List(1f, 2f)
+    Ns.float(List(float1, float2)).get.toSeq.sorted === List(1f, 2f)
     val floatList = List(float1, float2)
-    Ns.float(floatList).get.sorted === List(1.0f, 2.0f)
+    Ns.float(floatList).get.toSeq.sorted === List(1.0f, 2.0f)
 
 
-    Ns.double(-1.0, 0.0, 1.0).get.sorted === List(-1.0, 0.0, 1.0)
-    Ns.double(0.0, 1.0, 2.0).get.sorted === List(0.0, 1.0, 2.0)
-    Ns.double(1.0, 2.0, 3.0).get.sorted === List(1.0, 2.0)
-    Ns.double(2.0, 3.0, 4.0).get.sorted === List(2.0)
-    Ns.double(3.0, 4.0, 5.0).get.sorted === List()
-    Ns.double(double1, double2).get.sorted === List(1.0, 2.0)
-    Ns.double(double1 or double2).get.sorted === List(1.0, 2.0)
-    Ns.double(List(double1, double2)).get.sorted === List(1.0, 2.0)
+    Ns.double(-1.0, 0.0, 1.0).get.toSeq.sorted === List(-1.0, 0.0, 1.0)
+    Ns.double(0.0, 1.0, 2.0).get.toSeq.sorted === List(0.0, 1.0, 2.0)
+    Ns.double(1.0, 2.0, 3.0).get.toSeq.sorted === List(1.0, 2.0)
+    Ns.double(2.0, 3.0, 4.0).get.toSeq.sorted === List(2.0)
+    Ns.double(3.0, 4.0, 5.0).get.toSeq.sorted === List()
+    Ns.double(double1, double2).get.toSeq.sorted === List(1.0, 2.0)
+    Ns.double(double1 or double2).get.toSeq.sorted === List(1.0, 2.0)
+    Ns.double(List(double1, double2)).get.toSeq.sorted === List(1.0, 2.0)
     val doubleList = List(double1, double2)
-    Ns.double(doubleList).get.sorted === List(1.0, 2.0)
+    Ns.double(doubleList).get.toSeq.sorted === List(1.0, 2.0)
 
 
     // Weird case though to apply OR-semantics to Boolean attribute...
@@ -127,38 +127,38 @@ class Logic extends Base {
     Ns.bool(bool0 or bool1).get === List(false, true)
     Ns.bool(List(bool0, bool1)).get === List(false, true)
     val boolList = List(bool1, bool2)
-    Ns.bool(boolList).get.sorted === List(false, true)
+    Ns.bool(boolList).get.toSeq.sorted === List(false, true)
 
 
     val now = new java.util.Date()
     Ns.date(date1, now).get === List(date1)
-    Ns.date(date1, date2).get.sorted === List(date1, date2)
-    Ns.date(date1 or date2).get.sorted === List(date1, date2)
-    Ns.date(List(date1, date2)).get.sorted === List(date1, date2)
+    Ns.date(date1, date2).get.toSeq.sorted === List(date1, date2)
+    Ns.date(date1 or date2).get.toSeq.sorted === List(date1, date2)
+    Ns.date(List(date1, date2)).get.toSeq.sorted === List(date1, date2)
     val dateList = List(date1, date2)
-    Ns.date(dateList).get.sorted === List(date1, date2)
+    Ns.date(dateList).get.toSeq.sorted === List(date1, date2)
 
 
-    Ns.uuid(uuid1, uuid2).get.sortBy(_.toString) === List(uuid1, uuid2)
-    Ns.uuid(uuid1 or uuid2).get.sortBy(_.toString) === List(uuid1, uuid2)
-    Ns.uuid(List(uuid1, uuid2)).get.sortBy(_.toString) === List(uuid1, uuid2)
+    Ns.uuid(uuid1, uuid2).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
+    Ns.uuid(uuid1 or uuid2).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
+    Ns.uuid(List(uuid1, uuid2)).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
     val uuidList = List(uuid1, uuid2)
-    Ns.uuid(uuidList).get.sortBy(_.toString) === List(uuid1, uuid2)
+    Ns.uuid(uuidList).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
 
 
-    Ns.uri(uri1, uri2).get.sortBy(_.toString) === List(uri1, uri2)
-    Ns.uri(uri1 or uri2).get.sortBy(_.toString) === List(uri1, uri2)
-    Ns.uri(List(uri1, uri2)).get.sortBy(_.toString) === List(uri1, uri2)
+    Ns.uri(uri1, uri2).get.toSeq.sortBy(_.toString) === List(uri1, uri2)
+    Ns.uri(uri1 or uri2).get.toSeq.sortBy(_.toString) === List(uri1, uri2)
+    Ns.uri(List(uri1, uri2)).get.toSeq.sortBy(_.toString) === List(uri1, uri2)
     val uriList = List(uri1, uri2)
-    Ns.uri(uriList).get.sortBy(_.toString) === List(uri1, uri2)
+    Ns.uri(uriList).get.toSeq.sortBy(_.toString) === List(uri1, uri2)
 
 
-    Ns.enum("enum1", "enum2").get.sorted === List("enum1", "enum2")
-    Ns.enum(enum1, enum2).get.sorted === List("enum1", "enum2")
-    Ns.enum(enum1 or enum2).get.sorted === List("enum1", "enum2")
-    Ns.enum(List(enum1, enum2)).get.sorted === List("enum1", "enum2")
+    Ns.enum("enum1", "enum2").get.toSeq.sorted === List("enum1", "enum2")
+    Ns.enum(enum1, enum2).get.toSeq.sorted === List("enum1", "enum2")
+    Ns.enum(enum1 or enum2).get.toSeq.sorted === List("enum1", "enum2")
+    Ns.enum(List(enum1, enum2)).get.toSeq.sorted === List("enum1", "enum2")
     val enumList = List(enum1, enum2)
-    Ns.enum(enumList).get.sorted === List(enum1, enum2)
+    Ns.enum(enumList).get.toSeq.sorted === List(enum1, enum2)
   }
 
 

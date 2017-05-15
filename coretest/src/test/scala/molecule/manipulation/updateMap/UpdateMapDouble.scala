@@ -15,23 +15,23 @@ class UpdateMapDouble extends CoreSpec {
 
       // Add pair
       Ns(eid).doubleMap.add("str2" -> 3.0).update
-      Ns.doubleMap.one === Map("str1" -> 1.0, "str2" -> 3.0)
+      Ns.doubleMap.get.head === Map("str1" -> 1.0, "str2" -> 3.0)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).doubleMap.add("str2" -> 2.0).update
-      Ns.doubleMap.one === Map("str1" -> 1.0, "str2" -> 2.0)
+      Ns.doubleMap.get.head === Map("str1" -> 1.0, "str2" -> 2.0)
 
       // Add multiple pairs (vararg)
       Ns(eid).doubleMap.add("str3" -> 3.0, "str4" -> 4.0).update
-      Ns.doubleMap.one === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0)
+      Ns.doubleMap.get.head === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).doubleMap.add(Seq("str4" -> 4.0, "str5" -> 5.0)).update
-      Ns.doubleMap.one === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
+      Ns.doubleMap.get.head === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
 
       // Add empty Map of pair (no effect)
       Ns(eid).doubleMap.add(Seq[(String, Double)]()).update
-      Ns.doubleMap.one === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
+      Ns.doubleMap.get.head === Map("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
 
 
       // Can't add pairs with duplicate keys
@@ -58,27 +58,27 @@ class UpdateMapDouble extends CoreSpec {
 
       // Replace value
       Ns(eid).doubleMap.replace("str6" -> 8.0).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0, "str6" -> 8.0)
 
       // Replace value to existing value at another key is ok
       Ns(eid).doubleMap.replace("str5" -> 8.0).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 8.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 8.0, "str6" -> 8.0)
 
       // Replace multiple values (vararg)
       Ns(eid).doubleMap.replace("str3" -> 6.0, "str4" -> 7.0).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).doubleMap.replace("str3" -> 6.0, "str4" -> 7.0).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).doubleMap.replace(Seq("str2" -> 5.0)).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 5.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 5.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).doubleMap.replace(Seq[(String, Double)]()).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 5.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 5.0, "str3" -> 6.0, "str4" -> 7.0, "str5" -> 8.0, "str6" -> 8.0)
 
 
       // Can't replace pairs with duplicate keys
@@ -103,27 +103,27 @@ class UpdateMapDouble extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).doubleMap.remove("str6").update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).doubleMap.remove("str7").update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0, "str5" -> 5.0)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).doubleMap.remove("str5", "str5").update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0, "str3" -> 3.0, "str4" -> 4.0)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).doubleMap.remove("str3", "str4").update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0, "str2" -> 2.0)
 
       // Remove pairs by Seq of keys
       Ns(eid).doubleMap.remove(Seq("str2")).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).doubleMap.remove(Seq[String]()).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0)
     }
 
 
@@ -133,15 +133,15 @@ class UpdateMapDouble extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).doubleMap("str1" -> 1.0).update
-      Ns.doubleMap.one.toList.sorted === List("str1" -> 1.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str1" -> 1.0)
 
       // Apply multiple values (vararg)
       Ns(eid).doubleMap("str2" -> 2.0, "str3" -> 3.0).update
-      Ns.doubleMap.one.toList.sorted === List("str2" -> 2.0, "str3" -> 3.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str2" -> 2.0, "str3" -> 3.0)
 
       // Apply Map of values
       Ns(eid).doubleMap(Seq("str4" -> 4.0)).update
-      Ns.doubleMap.one.toList.sorted === List("str4" -> 4.0)
+      Ns.doubleMap.get.head.toList.sorted === List("str4" -> 4.0)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).doubleMap(Seq[(String, Double)]()).update
@@ -182,23 +182,23 @@ class UpdateMapDouble extends CoreSpec {
 
       // Add pair
       Ns(eid).doubleMap.add(str2 -> double3).update
-      Ns.doubleMap.one === Map(str1 -> double1, str2 -> double3)
+      Ns.doubleMap.get.head === Map(str1 -> double1, str2 -> double3)
 
       // Add pair at existing key - replaces the value (not the key)
       Ns(eid).doubleMap.add(str2 -> double2).update
-      Ns.doubleMap.one === Map(str1 -> double1, str2 -> double2)
+      Ns.doubleMap.get.head === Map(str1 -> double1, str2 -> double2)
 
       // Add multiple pairs (vararg)
       Ns(eid).doubleMap.add(str3 -> double3, str4 -> double4).update
-      Ns.doubleMap.one === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4)
+      Ns.doubleMap.get.head === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4)
 
       // Add Map of pairs. Existing identical pairs (key and value the same) unaffected
       Ns(eid).doubleMap.add(Seq(str4 -> double4, str5 -> double5)).update
-      Ns.doubleMap.one === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
+      Ns.doubleMap.get.head === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
 
       // Add empty Map of pair (no effect)
       Ns(eid).doubleMap.add(Seq[(String, Double)]()).update
-      Ns.doubleMap.one === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
+      Ns.doubleMap.get.head === Map(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
 
 
       // Can't add pairs with duplicate keys
@@ -242,27 +242,27 @@ class UpdateMapDouble extends CoreSpec {
 
       // Replace value
       Ns(eid).doubleMap.replace(str6 -> double8).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5, str6 -> double8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).doubleMap.replace(str5 -> double8).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double8, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double8, str6 -> double8)
 
       // Replace multiple values (vararg)
       Ns(eid).doubleMap.replace(str3 -> double6, str4 -> double7).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).doubleMap.replace(str3 -> double6, str4 -> double7).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).doubleMap.replace(Seq(str2 -> double5)).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double5, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double5, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).doubleMap.replace(Seq[(String, Double)]()).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double5, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double5, str3 -> double6, str4 -> double7, str5 -> double8, str6 -> double8)
 
 
       // Can't replace pairs with duplicate keys
@@ -287,27 +287,27 @@ class UpdateMapDouble extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).doubleMap.remove(str6).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).doubleMap.remove(str7).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4, str5 -> double5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).doubleMap.remove(str5, str5).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2, str3 -> double3, str4 -> double4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).doubleMap.remove(str3, str4).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1, str2 -> double2)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1, str2 -> double2)
 
       // Remove pairs by Seq of keys
       Ns(eid).doubleMap.remove(Seq(str2)).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).doubleMap.remove(Seq[String]()).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1)
     }
 
 
@@ -317,15 +317,15 @@ class UpdateMapDouble extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).doubleMap(str1 -> double1).update
-      Ns.doubleMap.one.toList.sorted === List(str1 -> double1)
+      Ns.doubleMap.get.head.toList.sorted === List(str1 -> double1)
 
       // Apply multiple values (vararg)
       Ns(eid).doubleMap(str2 -> double2, str3 -> double3).update
-      Ns.doubleMap.one.toList.sorted === List(str2 -> double2, str3 -> double3)
+      Ns.doubleMap.get.head.toList.sorted === List(str2 -> double2, str3 -> double3)
 
       // Apply Map of values
       Ns(eid).doubleMap(Seq(str4 -> double4)).update
-      Ns.doubleMap.one.toList.sorted === List(str4 -> double4)
+      Ns.doubleMap.get.head.toList.sorted === List(str4 -> double4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).doubleMap(Seq[(String, Double)]()).update
