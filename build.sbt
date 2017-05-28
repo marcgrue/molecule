@@ -1,14 +1,13 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.11.0",
-  scalaVersion := "2.12.1",
+  version := "0.12.0",
+  scalaVersion := "2.12.2",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
     "datomic" at "http://files.datomic.com/maven",
     "clojars" at "http://clojars.org/repo",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots"),
-    "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
+    Resolver.sonatypeRepo("snapshots")
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
@@ -23,7 +22,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
 lazy val molecule = project.in(file("."))
   .settings(moduleName := "molecule-root")
   .settings(commonSettings ++ noPublishSettings)
-  .aggregate(moleculeCore, moleculeCoretest, moleculeExamples)
+  .aggregate(moleculeCore, moleculeCoretests, moleculeExamples)
 
 
 lazy val moleculeCore = project.in(file("core"))
@@ -31,23 +30,23 @@ lazy val moleculeCore = project.in(file("core"))
   .settings(commonSettings ++ publishSettings)
 
 
-lazy val moleculeCoretest = project.in(file("coretest"))
+lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
   .enablePlugins(MoleculePlugin)
   .settings(
-    moduleName := "molecule-coretest",
+    moduleName := "molecule-coretests",
     moleculeSchemas := Seq(
-      "molecule/partition",
-      "molecule/bidirectionals",
-      "molecule/util"
+      "molecule/coretests/bidirectionals",
+      "molecule/coretests/schemaDef",
+      "molecule/coretests/util"
     )
   )
 // Manually add schema definition directories for boilerplate generation testing
 //  .settings(Seq(definitionDirsSeparate(
-//  "molecule/util",
-//  "molecule/partition",
-//  "molecule/bidirectionals"
+//  "molecule/coretests/bidirectionals",
+//  "molecule/coretests/schemaDef",
+//  "molecule/coretests/util"
 //)))
 
 lazy val moleculeExamples = project.in(file("examples"))

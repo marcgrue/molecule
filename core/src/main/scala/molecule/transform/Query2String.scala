@@ -6,6 +6,11 @@ import molecule.util.Helpers
 
 case class Query2String(q: Query) extends Helpers {
 
+  // If needing to typecheck value
+  import scala.reflect.ClassTag
+  def f[T](v: T)(implicit ev: ClassTag[T]) = ev.toString
+//    case Val(v)                            => "\"" + v + "  " + f(v) + "  \""
+
   def p(expr: QueryExpr): String = expr match {
     case Query(find, widh, in, where)      => pp(find, widh, in, where)
     case Find(outputs)                     => ":find  " + (outputs map p mkString " ")
@@ -24,6 +29,8 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: Float)                     => v.toString
     case Val(v: Double)                    => v.toString
     case Val(v: Boolean)                   => v.toString
+    case Val(v: BigInt)                    => v.toString
+    case Val(v: BigDecimal)                => v.toString + "M"
     case Val(date: Date)                   => format(date)
     case Val(v: UUID)                      => "#uuid \"" + v + "\""
     case Val(v)                            => "\"" + v + "\""

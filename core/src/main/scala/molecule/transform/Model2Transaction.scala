@@ -1,12 +1,10 @@
 package molecule.transform
 import java.util.Date
 
-import molecule._
-import molecule.ast.transaction.RetractEntity
 import datomic._
 import molecule.Conn
 import molecule.ast.model._
-import molecule.ast.transaction._
+import molecule.ast.transaction.{RetractEntity, _}
 import molecule.facade.EntityFacade
 import molecule.util.{Debug, Helpers}
 
@@ -33,6 +31,11 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     } getOrElse Card(card)
 
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
+
+      // None
+      case (e, Atom(_, _, _, _, Fn("not", _), _, _, _))  => (e, stmts)
+      case (e, Atom(_, _, _, _, Eq(Seq(None)), _, _, _)) => (e, stmts)
+
       case ('_, Meta(ns, "", "e", _, EntValue))             => ('arg, stmts)
       case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))    => (Eid(id), stmts)
       case ('_, Meta(ns, "", "e", _, Eq(ids: Seq[_])))      => (Eids(ids), stmts)
@@ -82,9 +85,9 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       // Add one extra generic statement to receive the eid arg for the following statement to use
       // (we then discard that temporary statement from the value statements)
-      case ('arg, Atom(ns, name, _, c, VarValue, _, _, _))     => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", 'arg, Card(c)))
+      case ('arg, Atom(ns, name, _, c, VarValue, _, _, _))   => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", 'arg, Card(c)))
       case ('arg, Atom(ns, name, _, c, value, prefix, _, _)) => ('e, stmts :+ Add('remove_me, s":$ns/$name", 'arg, Card(c)) :+ Add('v, s":$ns/$name", Values(value, prefix), Card(c)))
-      case ('arg, Bond(ns, refAttr, _, c, gs))                 => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+      case ('arg, Bond(ns, refAttr, _, c, gs))               => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // BackRef
       case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", "", NoValue))
@@ -160,11 +163,11 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def attrValues(id: Any, attr: String) = {
       val query = if (prefix.isDefined)
         s"""[:find ?enums
-            | :in $$ ?id
-            | :where [?id $attr ?a]
-            |        [?a :db/ident ?b]
-            |        [(.getName ^clojure.lang.Keyword ?b) ?enums]
-            |]""".stripMargin
+           | :in $$ ?id
+           | :where [?id $attr ?a]
+           |        [?a :db/ident ?b]
+           |        [(.getName ^clojure.lang.Keyword ?b) ?enums]
+           |]""".stripMargin
       else
         s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
@@ -436,7 +439,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
         case MapAdd(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "add")
-//          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
+          //          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
           val curPairs = getPairs(edgeA, a)
           val curKeys = curPairs.keys
           newPairs.flatMap {
@@ -445,7 +448,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
               Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v), Card(card)),
               Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v), Card(card))
             )
-            case (k, v)                                          => Seq(
+            case (k, v)                                                           => Seq(
               Add(edgeB, a, k + "@" + d(v), Card(card)),
               Add(edgeA, a, k + "@" + d(v), Card(card))
             )
@@ -462,7 +465,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
               Retract(edgeB, a, k + "@" + curPairs(k)), Add(edgeB, a, k + "@" + d(v), Card(card)),
               Retract(edgeA, a, k + "@" + curPairs(k)), Add(edgeA, a, k + "@" + d(v), Card(card))
             )
-            case (k, v)                                          => Seq(
+            case (k, v)                                                           => Seq(
               Add(edgeB, a, k + "@" + d(v), Card(card)),
               Add(edgeA, a, k + "@" + d(v), Card(card))
             )
@@ -576,7 +579,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         newPairs.flatMap {
           case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
           case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
-          case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v), Card(card)))
+          case (k, v)                                                           => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
       case MapReplace(newPairs) =>
@@ -587,7 +590,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         newPairs.flatMap {
           case (k, v) if curPairs.asJavaCollection.contains((k, d(v).toString)) => Nil
           case (k, v) if curKeys.asJavaCollection.contains(k)                   => Seq(Retract(e, a, k + "@" + curPairs(k)), Add(e, a, k + "@" + d(v), Card(card)))
-          case (k, v)                                          => Seq(Add(e, a, k + "@" + d(v), Card(card)))
+          case (k, v)                                                           => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
       case MapRemove(removeKeys0) =>
@@ -664,9 +667,9 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case Card(card)                  => default(card)
       case other                       => sys.error(
         s"""Unexpected or missing Generic `$other`:
-            |e  : $e
-            |a  : $a
-            |arg: $arg
+           |e  : $e
+           |a  : $a
+           |arg: $arg
          """.stripMargin)
     }
 

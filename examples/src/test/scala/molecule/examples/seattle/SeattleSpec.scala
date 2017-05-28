@@ -1,5 +1,6 @@
-package molecule
-package examples.seattle
+package molecule.examples.seattle
+
+import molecule._
 import java.io.FileReader
 import datomic.{Peer, Util}
 import molecule.examples.seattle.dsl.seattle._

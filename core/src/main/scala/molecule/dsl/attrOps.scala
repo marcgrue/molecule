@@ -119,6 +119,7 @@ trait MapAttrOps[Ns, In, M, T] {
   def apply(pair: (String, T), morePairs: (String, T)*)       : Ns with Attr = ???
   def apply(pairs: Seq[(String, T)])                          : Ns with Attr = ???
   def apply(pairs: Or[(String, T)])                           : Ns with Attr = ???
+  def apply(map: M)                                           : Ns with Attr = ???
 
   def add(pair: (String, T), morePairs: (String, T)*)         : Ns with Attr = ???
   def add(pairs: Seq[(String, T)])                            : Ns with Attr = ???
@@ -161,4 +162,9 @@ trait MapAttrOps[Ns, In, M, T] {
     def contains(that: T): Ns with Attr = ???
     def contains(in: ?)  : In with Attr = ???
   }
+}
+
+
+trait OneOptional[Ns, T] {
+  def apply(some: Option[T]) : Ns with Attr = ???
 }

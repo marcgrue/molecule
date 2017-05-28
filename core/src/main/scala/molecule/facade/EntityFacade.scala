@@ -115,7 +115,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Conn, id: Object) {
   // Entity api from string (typed) .................................................................
 
   def apply[T](kw: String): Option[T] = entity.get(kw) match {
-    case null                                    => None
+    case null                                    => Option.empty[T]
     case results: clojure.lang.PersistentHashSet => results.asScala.head match {
       case ent: datomic.Entity => Some(results.asScala.toList.map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long]).sorted.asInstanceOf[T])
       case manyValue           => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[T])

@@ -10,8 +10,7 @@ import scala.reflect.macros.whitebox.Context
 
 trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 1, 78)
-  //  val x = Debug("Dsl2Model", 30, 32, true)
+  val x = DebugMacro("Dsl2Model", 80, 80)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
     tree, (t: Tree) => abort(s"[Dsl2Model:resolve] Unexpected tree: $t\nRAW: ${showRaw(t)}"))
@@ -32,13 +31,11 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 
   val dslStructure: PartialFunction[Tree, Seq[Element]] = {
-    case q"TermValue.apply($ns)" => resolve(ns)
 
     // Namespace(eid).attr1...
     case q"$prev.$ns.apply($pkg.?)" if q"$prev.$ns".isFirstNS                        => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(Qm))))
     case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS && q"$prev.$ns".isBiEdge => traverse(q"$prev", Meta(firstLow(ns), "", "e", BiEdge, Eq(Seq(extract(eid)))))
-    case q"$prev.$ns.apply(..$eids)" if q"$prev.$ns".isFirstNS                       => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(eids map extract)))
-    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS                          => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(extract(eid)))))
+    case q"$prev.$ns.apply(..$eids)" if q"$prev.$ns".isFirstNS                       => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(resolveValues(q"Seq(..$eids)"))))
 
 
     // Functions ---------------------------
@@ -103,70 +100,24 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacet `op_` not allowed since all datoms have a `op value")
 
 
-    // Optional ----------------------
-
-    case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
-    case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
-    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
-    case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
-
-
     // Self join -----------------------------
     case q"$prev.Self" => traverse(q"$prev", Self)
 
 
-    // Attribute maps -----------------------------------------------------
+    // Clean attributes --------------------------------------
 
-    // Attribute map using k/apply
-    case t@q"$prev.$cur.k(..$keys).$op(..$values)" =>
-      val keyList = getValues(q"$keys").asInstanceOf[Seq[String]]
-      val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)") match {
-        case a: Atom => a.copy(keys = keyList)
-      }
-      //      x(75, element)
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
+    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
+    case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
-    // Keyed attribute map operation
-    case t@q"$prev.$cur.apply($key).$op(..$values)" if q"$prev.$cur.apply($key)".isMapAttrK =>
-      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
-      val attrTpe = funcLitTpe.typeArgs(1)
-      val ns = new nsp(attrTpe.typeSymbol.owner).toString
-      val tpe0 = funcLitTpe.typeArgs.last
-      val tpe = tpe0 match {
-        case t1 if t1 <:< weakTypeOf[One[_, _, _]]     => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
-        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
-      }
-      val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
-      //      x(76, element)
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+    // Clean optional attributes ----------------------
 
-    // Keyed attribute map
-    case t@q"$prev.$cur.apply($key)" if t.isMapAttrK =>
-      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
-      val attrTpe = funcLitTpe.typeArgs(1)
-      val ns = new nsp(attrTpe.typeSymbol.owner).toString
-      val tpe0 = funcLitTpe.typeArgs.last
-      val tpe = tpe0 match {
-        case t1 if t1 <:< weakTypeOf[One[_, _, _]]     => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
-        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_]].typeSymbol).typeArgs.head
-      }
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
-      //      x(77, element)
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+    case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
+    case a@q"$prev.$cur" if a.isEnum$        => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
+    case a@q"$prev.$cur" if a.isMapAttr$     => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
+    case a@q"$prev.$cur" if a.isValueAttr$   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
-
-    // Attribute operations -----------------------------
-
-    case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
-
-    case t@q"$prev.$cur.$op(..$values)" =>
-      val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
-      //      x(1, t, prev, cur, op, values, element)
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
-
-
-    // References --------------------------------------
+    // Clean references --------------------------------------
 
     case r@q"$prev.$backRefAttr" if backRefAttr.toString.head == '_' =>
       val backRef = c.typecheck(q"$prev.$backRefAttr").tpe.typeSymbol.name.toString // "partition_Ns_<arity>"
@@ -176,11 +127,51 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
 
 
-    // Attributes --------------------------------------
+    // Attribute map operations -----------------------------------------------------
 
-    case a@q"$prev.$cur" if a.isEnum      => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, EnumVal, Some(a.enumPrefix), bi(a)))
-    case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
-    case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
+    // Attribute map using k/apply
+    case t@q"$prev.$cur.k(..$keys).$op(..$values)" =>
+      val keyList = getValues(q"$keys").asInstanceOf[Seq[String]]
+      val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)") match {
+        case a: Atom => a.copy(keys = keyList)
+      }
+      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+
+    // Keyed attribute map operation
+    case t@q"$prev.$cur.apply($key).$op(..$values)" if q"$prev.$cur.apply($key)".isMapAttrK =>
+      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
+      val attrTpe = funcLitTpe.typeArgs(1)
+      val ns = new nsp(attrTpe.typeSymbol.owner).toString
+      val tpe0 = funcLitTpe.typeArgs.last
+      val tpe = tpe0 match {
+        case t1 if t1 <:< weakTypeOf[One[_, _, _]]        => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
+        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_, _]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_, _]].typeSymbol).typeArgs.head
+      }
+      val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+
+    // Keyed attribute map
+    case t@q"$prev.$cur.apply($key)" if t.isMapAttrK =>
+      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
+      val attrTpe = funcLitTpe.typeArgs(1)
+      val ns = new nsp(attrTpe.typeSymbol.owner).toString
+      val tpe0 = funcLitTpe.typeArgs.last
+      val tpe = tpe0 match {
+        case t1 if t1 <:< weakTypeOf[One[_, _, _]]        => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
+        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_, _]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_, _]].typeSymbol).typeArgs.head
+      }
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
+      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+
+
+    // Attribute operations -----------------------------
+
+    case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
+
+    case t@q"$prev.$cur.$op(..$values)" =>
+      val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
+      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
 
     // Nested ------------------------
@@ -202,10 +193,8 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       if (prevComposites.isEmpty) {
         val lookForward = traverse(q"$prev", Seq(Composite(prevElements), Composite(resolve(q"$next"))))
         val composites = lookForward.collect { case fm: Composite => fm }
-        //        x(18, prevElements, resolve(q"$next"), lookForward, freeModels)
         composites
       } else {
-        //        x(19, prevElements, resolve(q"$next"), prevComposites)
         prevComposites :+ Composite(resolve(q"$next"))
       }
 
@@ -216,7 +205,6 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
     val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
-    //    x(2, prevElements, curNs, attr, thisElement)
     if (prevElements.isEmpty) {
       traverse(q"$prev", thisElement)
     } else {
@@ -225,19 +213,15 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
           val (_, similarAtoms, transitive) = {
             prevElements.foldRight(prevElements, Seq[Atom](), None: Option[Transitive]) {
               case (prevElement, (previous, similarAtoms1, trans)) =>
-                //                x(6, previous, prevElement)
                 prevElement match {
                   case prevAtom@Atom(prevNs, prevAttr, _, _, _, _, _, _) if prevNs == curNs && clean(prevAttr) == clean(attr) =>
                     val t = previous.init.reverse.collectFirst {
                       // Find first previous Bond (relating to this attribute)
                       case prevBond@Bond(ns2, refAttr, refNs, _, _) =>
-                        //                        x(2, prevAtom, prevBond, ns2, refAttr, refNs)
                         Transitive(ns2, refAttr, refNs, 0)
                     } getOrElse {
-                      //                      x(3, curNs, cur)
                       Transitive(prevNs, prevAttr, prevNs, 0)
                     }
-                    //                    x(4, prevElements.last, prevNs, prevAttr)
                     (previous.init, similarAtoms1 :+ prevAtom, Some(t))
                   case _                                                                                                      =>
                     (previous.init, similarAtoms1, trans)
@@ -339,9 +323,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
   def resolveOp(previous: Tree, curTree: Tree, attr: Tree, op: Tree, values0: Tree): Element = {
     val value: Value = modelValue(op.toString(), attr, values0)
-    val enumPrefix = if (attr.isEnum) Some(attr.at.enumPrefix) else None
+    val enumPrefix = if (attr.isAnyEnum) Some(attr.at.enumPrefix) else None
     val cur = curTree.toString()
-    //    x(35, previous, previous.isRef, previous.isAttr, previous.isBiEdge)
+    //        x(35, value, enumPrefix, attr.name)
     previous match {
       case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
       case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
@@ -364,13 +348,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-    //    x(10
-    //      , values0
-    //      , values
-    //      , op
-    //      , attr
-    //      //          , attr.isMapAttr
-    //    )
+    //        x(10, values0, values, op, attr, attr.tpe)
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
@@ -417,6 +395,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     else
       Fn(fn, value)
 
+    x(2, attr, values)
     values match {
       case q"Seq($pkg.?)"                                          => Qm
       case q"Seq($pkg.nil)" if attr.name.last == '_'               => Fn("not")
@@ -440,59 +419,65 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq($pkg.stddev)"                                     => aggr("stddev")
       case q"Seq($a.and[$t]($b).and[$u]($c))"                      => And(resolveValues(q"Seq($a, $b, $c)"))
       case q"Seq($a.and[$t]($b))"                                  => And(resolveValues(q"Seq($a, $b)"))
+      case q"Seq(scala.None)"                                      => Fn("not")
+      case q"Seq(scala.Some.apply[$t]($v))"                        => x(3, v);
+        v match {
+          case vm if vm.tpe <:< weakTypeOf[Map[_, _]]     => vm match {
+            case Apply(_, pairs) =>
+              mapPairs(pairs, attr)
+            case ident           => mapPairs(Seq(ident), attr)
+          }
+          case ident if attr.isMapAttr || attr.isMapAttr$ => mapPairs(Seq(ident), attr)
+          case _                                          => Eq(resolveValues(q"$v"))
+        }
       case q"Seq(..$vs)" if vs.size == 1
         && !(vs.head.tpe <:< weakTypeOf[Seq[Nothing]])
-        && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => vs.head match {
-        case Apply(_, pairs) =>
-          //          x(3, vs)
-          mapPairs(pairs, attr)
-        case ident           => mapPairs(Seq(ident), attr)
-      }
-      //      case q"Seq(..$vs)"
-      //        if vs.size == 1 && vs.head.tpe <:< weakTypeOf[Map[_, _]]   => vs.head match {
-      //        case Apply(_, pairs) =>
-      //          //          x(4, "map")
-      //          mapPairs(pairs, attr)
-      //        case ident           => mapPairs(Seq(ident), attr)
-      //      }
-      case q"Seq(..$vs)"
-        if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] =>
-        //        x(5, vs)
-        mapPairs(vs, attr)
-      case q"Seq(..$vs)" if attr == null                     => vs.flatMap(v => resolveValues(q"$v"))
-      case q"Seq(..$vs)"                                     => vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
-      case other if attr == null                             => resolveValues(other)
-      case other                                             => resolveValues(other, att(q"$attr"))
-      //      case other if attr.isOneURI || attr.isManyURI                => Fn("URI", resolveValues(other))
+        && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => x(4, vs);
+        vs.head match {
+          case Apply(_, pairs) =>
+            mapPairs(pairs, attr)
+          case ident           => mapPairs(Seq(ident), attr)
+        }
+      case q"Seq(..$vs)" if vs.size == 1
+        && !(vs.head.tpe <:< weakTypeOf[Map[Nothing, Nothing]])
+        && vs.head.tpe <:< weakTypeOf[Map[_, _]]                   => x(5, vs);
+        vs.head match {
+          case Apply(_, pairs) =>
+            mapPairs(pairs, attr)
+          case ident           => mapPairs(Seq(ident), attr)
+        }
+
+      case q"Seq(..$vs)" if attr == null                                      => x(6, vs); vs.flatMap(v => resolveValues(q"$v"))
+      case q"Seq(..$vs)" if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] => x(7, vs); mapPairs(vs, attr)
+      case q"Seq(..$vs)" if vs.size == 1 && attr.isMapAttr$                   => x(8, vs); mapPairs(vs, attr)
+      case q"Seq(..$vs)"                                                      => x(9, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
+      case other if attr == null                                              => x(10, other); resolveValues(other)
+      case other                                                              => x(11, other); resolveValues(other, att(q"$attr"))
     }
   }
 
   def mapPairs(vs: Seq[Tree], attr: Tree = null) = {
-    //    x(23, vs, attr)
     val keyValues = vs.map {
       case q"scala.Predef.ArrowAssoc[$t1]($k).->[$t2]($v)" => (extract(q"$k"), extract(q"$v"))
       case q"scala.Tuple2.apply[$t1, $t2]($k, $v)"         => (extract(q"$k"), extract(q"$v"))
       case ident                                           => (extract(ident), "__pair__")
     }
-    if (attr.isMapAttr)
+    if (attr.isMapAttr || attr.isMapAttr$)
       MapEq(keyValues.map(kv => (kv._1.asInstanceOf[String], kv._2)))
     else
       Replace(keyValues)
   }
 
-  def extract(t: Tree) = {
-    //        x(31, t.raw)
-    t match {
-      case Constant(v: String)                            => v
-      case Literal(Constant(v: String))                   => v
-      case Ident(TermName(v: String))                     => "__ident__" + v
-      case Select(This(TypeName(_)), TermName(v: String)) => "__ident__" + v
-      case v                                              => v
-    }
+  def extract(t: Tree) = t match {
+    case Constant(v: String)                            => v
+    case Literal(Constant(v: String))                   => v
+    case Ident(TermName(v: String))                     => "__ident__" + v
+    case Select(This(TypeName(_)), TermName(v: String)) => "__ident__" + v
+    case v                                              => v
   }
 
+
   def resolveValues(tree: Tree, at: att = null) = {
-    //    x(1,tree)
     def resolve(tree0: Tree, values: Seq[Tree] = Seq()): Seq[Tree] = tree0 match {
       case q"$a.or($b)"             => resolve(b, resolve(a, values))
       case q"${_}.string2Model($v)" => values :+ v
@@ -500,7 +485,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case v                        => values :+ v
     }
     def validateStaticEnums(value: Any) = {
-      if (at.isEnum
+      if (at.isAnyEnum
         && value != "?"
         && !value.toString.startsWith("__ident__")
         && !at.enumValues.contains(value.toString)
@@ -508,12 +493,10 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         at.enumValues.sorted.mkString("\n  "))
       value
     }
-    val values = if (at == null)
+    if (at == null)
       resolve(tree) map extract
     else
       resolve(tree) map extract map validateStaticEnums
-    //    if (values.isEmpty) abort(s"[Dsl2Model:resolveValues] Unexpected empty values for attribute `$at`")
-    values
   }
 }
 

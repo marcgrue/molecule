@@ -325,7 +325,7 @@ object QueryOps extends Helpers {
     def matchRegEx(v: String, regex: Seq[QueryTerm]) =
       q.func("str", regex, ScalarBinding(Var(v + 1))).matches(v, Var(v + 1))
 
-    def orRules(e: String, a: Atom, args: Seq[Any], gs: Seq[Generic] = Seq(), v: String = ""): Query = {
+    def orRules(e: String, a: Atom, args: Seq[Any], gs: Seq[Generic] = Seq(), uriV: String = ""): Query = {
       val ruleName = "rule" + (q.i.rules.map(_.name).distinct.size + 1)
       val newRules = args.foldLeft(q.i.rules) { case (rules, arg) =>
         val arg1 = arg match {
@@ -335,10 +335,12 @@ object QueryOps extends Helpers {
         }
         val dataClauses = if (a.card == 3)
           Seq(Funct(".matches ^String", Seq(Var(e), Val(".+@" + arg1)), NoBinding))
-        else if (v.nonEmpty) {
-          Seq(Funct( s"""ground (java.net.URI. "$arg1")""", Nil, ScalarBinding(Var(v))),
-            DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(v), Empty))
-        } else
+        else if (uriV.nonEmpty)
+          Seq(
+            Funct( s"""ground (java.net.URI. "$arg1")""", Nil, ScalarBinding(Var(uriV))),
+            DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(uriV), Empty)
+          )
+        else
           Seq(DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(arg1), Empty))
 
         val rule = Rule(ruleName, Seq(Var(e)), dataClauses)

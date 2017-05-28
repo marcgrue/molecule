@@ -82,7 +82,7 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
         import molecule.ast.query._
         import molecule.ops.QueryOps._
         import molecule.transform.{Model2Query, Model2Transaction, Query2String}
-        import java.lang.{Long => jLong, Double => jDouble}
+        import java.lang.{Long => jLong, Double => jDouble, Boolean => jBoolean}
         import java.util.{Date, UUID, Map => jMap, List => jList}
         import java.net.URI
         import java.math.{BigInteger => jBigInt, BigDecimal => jBigDec}
@@ -90,36 +90,40 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
         import scala.collection.JavaConverters._
      """
 
-  def modelResolver(model: Model, modelE: Model, identMap: Map[String, Tree]) =
+  def valueResolver(identMap: Map[String, Tree]) =
+    q"""
+      private def convert(v: Any): Any = v match {
+        case seq: Seq[_]   => seq map convert
+        case m: Map[_, _]  => m.toSeq map convert
+        case (k, v)        => (convert(k), convert(v))
+        case Some(v)       => convert(v)
+        case f: Float      => f.toDouble
+        case unchanged     => unchanged
+      }
+
+      private def flatSeq(a: Any): Seq[Any] = (a match {
+        case seq: Seq[_] => seq
+        case set: Set[_] => set.toSeq
+        case v           => Seq(v)
+      }) map convert
+
+      private def getValues(idents: Seq[Any]) = idents.flatMap {
+        case v: String               if v.startsWith("__ident__")                              => flatSeq($identMap.get(v).get)
+        case (k: String, "__pair__") if k.startsWith("__ident__")                              => flatSeq($identMap.get(k).get)
+        case (k: String, v: String)  if k.startsWith("__ident__") && v.startsWith("__ident__") => Seq(($identMap.get(k).get, $identMap.get(v).get))
+        case (k: String, v: Any)     if k.startsWith("__ident__")                              => Seq(($identMap.get(k).get, convert(v)))
+        case (k: Any, v: String)     if v.startsWith("__ident__")                              => Seq((convert(k), $identMap.get(v).get))
+        case (k, v)                                                                            => Seq((convert(k), convert(v)))
+        case seq: Seq[_]                                                                       => seq map convert
+        case v                                                                                 => Seq(convert(v))
+      }
+     """
+
+  def modelResolver(model: Model, modelE: Model, valueResolver: Tree) =
     q"""
       private object r {
         ..$imports
-
-        private def convert(v: Any): Any = v match {
-          case seq: Seq[_]   => seq map convert
-          case (k, v)        => (convert(k), convert(v))
-          case f: Float      => f.toDouble
-          case i: BigInt     => i.bigInteger
-          case d: BigDecimal => d.bigDecimal
-          case unchanged     => unchanged
-        }
-
-        private def flatSeq(a: Any): Seq[Any] = (a match {
-          case seq: Seq[_] => seq
-          case set: Set[_] => set.toSeq
-          case v           => Seq(v)
-        }) map convert
-
-        private def getValues(idents: Seq[Any]) = idents.flatMap {
-          case v: String               if v.startsWith("__ident__")                              => flatSeq($identMap.get(v).get)
-          case (k: String, "__pair__") if k.startsWith("__ident__")                              => flatSeq($identMap.get(k).get)
-          case (k: String, v: String)  if k.startsWith("__ident__") && v.startsWith("__ident__") => Seq(($identMap.get(k).get, $identMap.get(v).get))
-          case (k: String, v: Any)     if k.startsWith("__ident__")                              => Seq(($identMap.get(k).get, convert(v)))
-          case (k: Any, v: String)     if v.startsWith("__ident__")                              => Seq((convert(k), $identMap.get(v).get))
-          case (k, v)                                                                            => Seq((convert(k), convert(v)))
-          case seq: Seq[_]                                                                       => seq map convert
-          case v                                                                                 => Seq(convert(v))
-        }
+        ..$valueResolver
 
         private def getKeys(keyIdents: Seq[String]): Seq[String] = getValues(keyIdents).flatMap {
           case keys: Seq[_] => keys
@@ -133,12 +137,23 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
           case TxInstantValue_(Some(ident)) => TxInstantValue_(Some(getValues(Seq(ident)).head))
           case OpValue(Some(ident))         => OpValue(Some(getValues(Seq(ident)).head))
           case OpValue_(Some(ident))        => OpValue_(Some(getValues(Seq(ident)).head))
-          case g                            => g
+          case otherGeneric                 => otherGeneric
         }
 
         private def resolveIdentifiers(elements: Seq[Element]): Seq[Element] = elements map {
-          case atom@Atom(_, _, _, 2, Eq(idents), _, gs2, keyIdents)         => atom.copy(value = Eq(getValues(idents)),          gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, Eq(idents), _, gs2, keyIdents)         => atom.copy(value = Eq(getValues(idents)),          gs = getGenerics(gs2), keys = getKeys(keyIdents))
+          case atom@Atom(_, _, _, _, MapEq(idents), _, gs2, keyIdents)      => idents match {
+            case List((ident, "__pair__"))
+              if ident.startsWith("__ident__") && getValues(Seq(ident)) == Seq(None) => atom.copy(value = Fn("not", None),                                           gs = getGenerics(gs2), keys = getKeys(keyIdents))
+            case idents                                                              => atom.copy(value = MapEq(getValues(idents).asInstanceOf[Seq[(String, Any)]]), gs = getGenerics(gs2), keys = getKeys(keyIdents))
+          }
+          case atom@Atom(_, _, _, 2, Eq(idents), _, gs2, keyIdents)         => getValues(idents) match {
+            case Seq(None) => atom.copy(value = Fn("not", None), gs = getGenerics(gs2))
+            case values    => atom.copy(value = Eq(values)     , gs = getGenerics(gs2))
+          }
+          case atom@Atom(_, _, _, _, Eq(idents), _, gs2, keyIdents)         => getValues(idents) match {
+            case Seq(None) => atom.copy(value = Fn("not", None), gs = getGenerics(gs2), keys = getKeys(keyIdents))
+            case values    => atom.copy(value = Eq(values)     , gs = getGenerics(gs2), keys = getKeys(keyIdents))
+          }
           case atom@Atom(_, _, _, _, Neq(idents), _, gs2, keyIdents)        => atom.copy(value = Neq(getValues(idents)),         gs = getGenerics(gs2), keys = getKeys(keyIdents))
           case atom@Atom(_, _, _, _, And(idents), _, gs2, keyIdents)        => atom.copy(value = And(getValues(idents)),         gs = getGenerics(gs2), keys = getKeys(keyIdents))
           case atom@Atom(_, _, _, _, Lt(ident), _, gs2, keyIdents)          => atom.copy(value = Lt(getValues(Seq(ident)).head), gs = getGenerics(gs2), keys = getKeys(keyIdents))
@@ -148,7 +163,6 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
           case atom@Atom(_, _, _, _, Add_(idents), _, gs2, _)               => atom.copy(value = Add_(getValues(idents)),        gs = getGenerics(gs2))
           case atom@Atom(_, _, _, _, Remove(idents), _, gs2, _)             => atom.copy(value = Remove(getValues(idents)),      gs = getGenerics(gs2))
           case atom@Atom(_, _, _, _, Replace(oldNew), _, gs2, _)            => atom.copy(value = Replace(getValues(oldNew).asInstanceOf[Seq[(Any, Any)]]),       gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, MapEq(idents), _, gs2, keyIdents)      => atom.copy(value = MapEq(getValues(idents).asInstanceOf[Seq[(String, Any)]]),      gs = getGenerics(gs2), keys = getKeys(keyIdents))
           case atom@Atom(_, _, _, _, MapAdd(idents), _, gs2, keyIdents)     => atom.copy(value = MapAdd(getValues(idents).asInstanceOf[Seq[(String, Any)]]),     gs = getGenerics(gs2), keys = getKeys(keyIdents))
           case atom@Atom(_, _, _, _, MapReplace(idents), _, gs2, keyIdents) => atom.copy(value = MapReplace(getValues(idents).asInstanceOf[Seq[(String, Any)]]), gs = getGenerics(gs2), keys = getKeys(keyIdents))
           case atom@Atom(_, _, _, _, MapRemove(idents), _, gs2, keyIdents)  => atom.copy(value = MapRemove(getValues(idents).map(_.toString)),                   gs = getGenerics(gs2), keys = getKeys(keyIdents))
@@ -162,7 +176,6 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
           case TxMetaData_(txElements)                                      => TxMetaData_(resolveIdentifiers(txElements))
           case other                                                        => other
         }
-
         val model: Model = Model(resolveIdentifiers($model.elements))
         val query: Query = Model2Query(model)
 
@@ -175,7 +188,8 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
     val model = Dsl2Model(c)(dsl)
     val modelE = makeModelE(model)
     val identMap = mapIdentifiers(model.elements).toMap
-    val resolverTree = modelResolver(model, modelE, identMap)
+    val resolverTree = modelResolver(model, modelE, valueResolver(identMap))
+
     q"""
       ..$resolverTree
 
@@ -220,210 +234,304 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
   def castOptionMap(value: Tree, tpe: Type) = tpe match {
     case t if t <:< typeOf[Option[Map[String, String]]]     =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, String]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Int]]]        =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Int]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Long]]]       =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Long]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Float]]]      =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Float]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Double]]]     =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Double]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Boolean]]]    =>
       q"""
-      if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Boolean]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, BigInt]]]     =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1).toString)}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, BigInt]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1))}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1))}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, BigDecimal]]] =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1).toString)}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, BigDecimal]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1))}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1))}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, Date]]]       =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, Date]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, UUID]]]       =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap).asInstanceOf[$t]
-      """
+        $value match {
+          case null                  => Option.empty[Map[String, UUID]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap)
+        }
+       """
     case t if t <:< typeOf[Option[Map[String, URI]]]        =>
       q"""
-        if($value == null)
-          None
-        else
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap).asInstanceOf[$t]
-      """
-    //    case t if t <:< typeOf[Option[Map[String, Byte]]]  =>
-    //      q"""
-    //        if($value == null)
-    //          None
-    //        else
-    //          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap).asInstanceOf[$t]
-    //      """
+        $value match {
+          case null                  => Option.empty[Map[String, URI]]
+          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap)
+          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap)
+        }
+       """
   }
 
 
   def castOptionSet(value: Tree, tpe: Type) = tpe match {
-
-    case t if t <:< typeOf[Option[Set[String]]] =>
+    case t if t <:< typeOf[Option[Set[String]]]  =>
       q"""
-        if($value == null) {
-          None
-        } else if ($value.toString.contains(":db/ident")) {
-          // {:ns/enums [{:db/ident :ns.enums/enum1} {:db/ident :ns.enums/enum2}]}
-          val identMaps = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
-          val enums = identMaps.map(_.asInstanceOf[jMap[String, Keyword]].asScala.toMap.values.head.getName)
-          Some(enums.toSet.asInstanceOf[Set[String]])
-        } else {
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[String]])
+        $value match {
+          case null                                    => Option.empty[Set[String]]
+          case vs: PersistentHashSet                   => Some(vs.asScala.map(_.toString).toSet.asInstanceOf[Set[String]])
+          case vs if vs.toString.contains(":db/ident") =>
+            // {:ns/enums [{:db/ident :ns.enums/enum1} {:db/ident :ns.enums/enum2}]}
+            val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+            val enums = identMaps.map(_.asInstanceOf[jMap[String, Keyword]].asScala.toMap.values.head.getName)
+            Some(enums.toSet.asInstanceOf[Set[String]])
+          case vs                                      =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[String]])
         }
-      """
-
-    case t if t <:< typeOf[Option[Set[Int]]] =>
+       """
+    case t if t <:< typeOf[Option[Set[Int]]]     =>
       q"""
-        if ($value == null) None else {
-          val values = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
-          Some(values.map(_.asInstanceOf[jLong].toInt).toSet.asInstanceOf[Set[Int]])
+        $value match {
+          case null                  => Option.empty[Set[Int]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jLong].toInt).toSet.asInstanceOf[Set[Int]])
+          case vs                    =>
+            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+            Some(values.map(_.asInstanceOf[jLong].toInt).toSet.asInstanceOf[Set[Int]])
         }
-      """
-
-    case t if t <:< typeOf[Option[Set[Float]]] =>
+       """
+    case t if t <:< typeOf[Option[Set[Float]]]   =>
       q"""
-        if ($value == null) None else {
-          val values = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
-          Some(values.map(_.asInstanceOf[jDouble].toFloat).toSet.asInstanceOf[Set[Float]])
+        $value match {
+          case null                  => Option.empty[Set[Float]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jDouble].toFloat).toSet.asInstanceOf[Set[Float]])
+          case vs                    =>
+            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+            Some(values.map(_.asInstanceOf[jDouble].toFloat).toSet.asInstanceOf[Set[Float]])
         }
-      """
-
-    case t if t <:< typeOf[Option[Set[Long]]] =>
+       """
+    case t if t <:< typeOf[Option[Set[Long]]]    =>
       q"""
-        if ($value == null) {
-          None
-        } else if ($value.toString.contains("{:db/id")) {
-          // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
-          val idMaps = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
-          Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
-        } else {
-          // {:ns/longs [3 4 5]}
-          Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Long]])
+        $value match {
+          case null                                 => Option.empty[Set[Long]]
+          case vs: PersistentHashSet                => Some(vs.asScala.map(_.asInstanceOf[jLong].toLong).toSet.asInstanceOf[Set[Long]])
+          case vs if vs.toString.contains(":db/id") =>
+            // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
+            val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+            Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
+          case vs                                   =>
+            // {:ns/longs [3 4 5]}
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Long]])
         }
-      """
-
-    case t if t <:< typeOf[Option[Set[Double]]] =>
-      q"""if ($value == null) None else
-            Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Double]])"""
-
+       """
+    case t if t <:< typeOf[Option[Set[Double]]]  =>
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[Double]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jDouble].toDouble).toSet.asInstanceOf[Set[Double]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Double]])
+        }
+       """
     case t if t <:< typeOf[Option[Set[Boolean]]] =>
-      q"""if ($value == null) None else
-            Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Boolean]])"""
-
-    case t if t <:< typeOf[Option[Set[BigInt]]] =>
-      q"""if ($value == null) None else {
-            val javaSet = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector]
-            Some(javaSet.toSeq.map{ case i: jBigInt => BigInt(i.toString) }.toSet)
-          }
-        """
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[Boolean]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[Boolean]).toSet.asInstanceOf[Set[Boolean]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Boolean]])
+        }
+       """
+    case t if t <:< typeOf[Option[Set[BigInt]]]  =>
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[BigInt]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt].toString)).toSet.asInstanceOf[Set[BigInt]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala
+            .map(v => BigInt(v.asInstanceOf[jBigInt].toString)).toSet.asInstanceOf[Set[BigInt]])
+        }
+       """
 
     case t if t <:< typeOf[Option[Set[BigDecimal]]] =>
-      q"""if ($value == null) None else {
-            val javaSet = $value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector]
-            Some(javaSet.toSeq.map{ case d: jBigDec => BigDecimal(d.toString) }.toSet)
-          }
-        """
-
-    case t if t <:< typeOf[Option[Set[Date]]] =>
-      q"""if ($value == null) None else
-            Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Date]])"""
-
-    case t if t <:< typeOf[Option[Set[UUID]]] =>
-      q"""if ($value == null) None else
-            Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[UUID]])"""
-
-    case t if t <:< typeOf[Option[Set[URI]]] =>
       q"""
-         if ($value == null) None else
-         Some($value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[URI]])"""
+        $value match {
+          case null                  => Option.empty[Set[BigDecimal]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDec].toString)).toSet.asInstanceOf[Set[BigDecimal]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala
+            .map(v => BigDecimal(v.asInstanceOf[jBigDec].toString)).toSet.asInstanceOf[Set[BigDecimal]])
+        }
+       """
+    case t if t <:< typeOf[Option[Set[Date]]]       =>
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[Date]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[Date]).toSet.asInstanceOf[Set[Date]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Date]])
+        }
+       """
+    case t if t <:< typeOf[Option[Set[UUID]]]       =>
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[UUID]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[UUID]).toSet.asInstanceOf[Set[UUID]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[UUID]])
+        }
+       """
+    case t if t <:< typeOf[Option[Set[URI]]]        =>
+      q"""
+        $value match {
+          case null                  => Option.empty[Set[URI]]
+          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[URI]).toSet.asInstanceOf[Set[URI]])
+          case vs                    =>
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[URI]])
+        }
+       """
   }
 
 
   def castOption(value: Tree, tpe: Type) = tpe match {
-
-    case t if t <:< typeOf[Option[Int]]        => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toInt)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[Float]]      => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toFloat)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[Double]]     => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toDouble)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[Boolean]]    => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, Boolean]].asScala.toMap.values.head)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[BigInt]]     => q"(if($value == null) None else Some(BigInt($value.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString))).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[BigDecimal]] => q"(if($value == null) None else Some(BigDecimal($value.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString))).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[Date]]       => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[UUID]]       => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head)).asInstanceOf[$t]"
-    case t if t <:< typeOf[Option[URI]]        => q"(if($value == null) None else Some($value.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head)).asInstanceOf[$t]"
+    case t if t <:< typeOf[Option[String]]     =>
+      q"""
+        $value match {
+          case null                                  => Option.empty[String]
+          case v: String                             => Some(v)
+          case v if v.toString.contains(":db/ident") => val v2 = v.toString; Some(v2.substring(v2.lastIndexOf("/")+1).init.init)
+          case v                                     => Some(v.asInstanceOf[jMap[String, String]].asScala.toMap.values.head)
+        }
+       """
+    case t if t <:< typeOf[Option[Int]]        =>
+      q"""
+        $value match {
+          case null     => Option.empty[Int]
+          case v: jLong => Some(v.asInstanceOf[jLong].toInt)
+          case v        => Some(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toInt) // pull result map: {:ns/int 42}
+        }
+       """
+    case t if t <:< typeOf[Option[Float]]      =>
+      q"""
+        $value match {
+          case null       => Option.empty[Float]
+          case v: jDouble => Some(v.asInstanceOf[jDouble].toFloat)
+          case v          => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toFloat)
+        }
+       """
     case t if t <:< typeOf[Option[Long]]       =>
       q"""
-            if($value == null) {
-              None
-            } else if ($value.toString.contains("{:db/id")) {
-              // {:ns/ref1 {:db/id 3}}
-              Some($value.toString.substring($value.toString.lastIndexOf(" ")+1).init.init.toLong).asInstanceOf[$t]
-              // Or this?: Some(value.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head)
-            } else {
-              Some($value.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toLong).asInstanceOf[$t]
-            }
-          """
-
-    case t if t <:< typeOf[Option[String]] =>
+        $value match {
+          case null                               => Option.empty[Long]
+          case v: jLong                           => Some(v.asInstanceOf[jLong].toLong)
+          case v if v.toString.contains(":db/id") => val v2 = v.toString; Some(v2.substring(v2.lastIndexOf(" ")+1).init.init.toLong)
+          case v                                  => Some(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toLong)
+        }
+       """
+    case t if t <:< typeOf[Option[Double]]     =>
       q"""
-            if($value == null) {
-              None
-            } else if ($value.toString.contains(":db/ident")) {
-              // {:ns/enum {:db/ident :ns.enum/enum1}}
-              val value = $value.toString
-              Some(value.substring(value.lastIndexOf("/")+1).init.init).asInstanceOf[$t]
-            } else {
-              Some($value.asInstanceOf[jMap[String, String]].asScala.toMap.values.head).asInstanceOf[$t]
-            }
-          """
+        $value match {
+          case null       => Option.empty[Double]
+          case v: jDouble => Some(v.asInstanceOf[jDouble].toDouble)
+          case v          => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toDouble)
+        }
+       """
+    case t if t <:< typeOf[Option[Boolean]]    =>
+      q"""
+        $value match {
+          case null        => Option.empty[Boolean]
+          case v: jBoolean => Some(v.asInstanceOf[Boolean])
+          case v           => Some(v.asInstanceOf[jMap[String, Boolean]].asScala.toMap.values.head)
+        }
+       """
+    case t if t <:< typeOf[Option[BigInt]]     =>
+      q"""
+        $value match {
+          case null       => Option.empty[BigInt]
+          case v: jBigInt => Some(BigInt(v.asInstanceOf[jBigInt].toString))
+          case v          => Some(BigInt(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString))
+        }
+       """
+    case t if t <:< typeOf[Option[BigDecimal]] =>
+      q"""
+        $value match {
+          case null       => Option.empty[BigDecimal]
+          case v: jBigDec => Some(BigDecimal(v.asInstanceOf[jBigDec].toString))
+          case v          => Some(BigDecimal(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString))
+        }
+       """
+    case t if t <:< typeOf[Option[Date]]       =>
+      q"""
+        $value match {
+          case null    => Option.empty[Date]
+          case v: Date => Some(v)
+          case v       => Some(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head)
+        }
+       """
+    case t if t <:< typeOf[Option[UUID]]       =>
+      q"""
+        $value match {
+          case null    => Option.empty[UUID]
+          case v: UUID => Some(v)
+          case v       => Some(v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head)
+        }
+       """
+    case t if t <:< typeOf[Option[URI]]        =>
+      q"""
+        $value match {
+          case null   => Option.empty[URI]
+          case v: URI => Some(v)
+          case v      => Some(v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head)
+        }
+       """
   }
 
   def castMap(value: Tree, tpe: Type) = tpe match {
@@ -459,57 +567,42 @@ trait MakeBase[Ctx <: Context] extends TreeOps[Ctx] {
     case t if t <:< typeOf[Date]       => q"(if($value.isInstanceOf[String]) date($value.asInstanceOf[String]) else $value).asInstanceOf[$t]"
     case t if t <:< typeOf[UUID]       => q"(if($value.isInstanceOf[String]) UUID.fromString($value.asInstanceOf[String]) else $value).asInstanceOf[$t]"
     case t if t <:< typeOf[URI]        => q"(if($value.isInstanceOf[String]) new URI($value.asInstanceOf[String]) else $value).asInstanceOf[$t]"
-
-    case t if t <:< typeOf[Int] =>
+    case t if t <:< typeOf[Int]        =>
       q"""
-        if($value.isInstanceOf[jLong])
-          $value.asInstanceOf[jLong].toInt.asInstanceOf[$t]
-        else if($value.isInstanceOf[String])
-          $value.asInstanceOf[String].toInt.asInstanceOf[$t]
-        else
-          $value.asInstanceOf[$t]
+        $value match {
+          case l: jLong  => l.toInt.asInstanceOf[$t]
+          case s: String => s.toInt.asInstanceOf[$t]
+          case other     => other.asInstanceOf[$t]
+        }
       """
-
-    case t if t <:< typeOf[Float] =>
+    case t if t <:< typeOf[Float]      =>
       q"""
-        if($value.isInstanceOf[jDouble])
-          $value.asInstanceOf[jDouble].toFloat.asInstanceOf[$t]
-        else if($value.isInstanceOf[String])
-          $value.asInstanceOf[String].toFloat.asInstanceOf[$t]
-        else
-          $value.asInstanceOf[$t]
+        $value match {
+          case d: jDouble => d.toFloat.asInstanceOf[$t]
+          case s: String  => s.toFloat.asInstanceOf[$t]
+          case other      => other.asInstanceOf[$t]
+        }
       """
-
-    case t =>
+    case t /* String */                =>
       q"""
         $query.f.outputs($i) match {
-          case AggrExpr("sum",_,_) =>
-            ${t.toString} match {
-              case "Int"   => if($value.isInstanceOf[jLong]) $value.asInstanceOf[jLong].toInt.asInstanceOf[$t] else $value.asInstanceOf[$t]
-              case "Float" => if($value.isInstanceOf[jDouble]) $value.asInstanceOf[jDouble].toFloat.asInstanceOf[$t] else $value.asInstanceOf[$t]
-              case _       => $value.asInstanceOf[$t]
-            }
-
-          case AggrExpr("median",_,_) =>
-            ${t.toString} match {
-              case "Int"   => if($value.isInstanceOf[jLong]) $value.asInstanceOf[jLong].toInt.asInstanceOf[$t] else $value.asInstanceOf[$t]
-              case "Float" => if($value.isInstanceOf[jDouble]) $value.asInstanceOf[jDouble].toFloat.asInstanceOf[$t] else $value.asInstanceOf[$t]
-              case _       => $value.asInstanceOf[$t]
-            }
-
-          case other => {
-//               sys.error("Default value: " + t.toString)
-//               println("Default value type  : " + {t.toString})
-//               println("Default value       : " + value.toString)
-//               println("Default value casted: " + value.asInstanceOf[t].toString)
-            $value.asInstanceOf[$t]
+          case AggrExpr("sum",_,_)    => ${t.toString} match {
+            case "Int"   => if($value.isInstanceOf[jLong]) $value.asInstanceOf[jLong].toInt.asInstanceOf[$t] else $value.asInstanceOf[$t]
+            case "Float" => if($value.isInstanceOf[jDouble]) $value.asInstanceOf[jDouble].toFloat.asInstanceOf[$t] else $value.asInstanceOf[$t]
+            case _       => $value.asInstanceOf[$t]
           }
+          case AggrExpr("median",_,_) => ${t.toString} match {
+            case "Int"   => if($value.isInstanceOf[jLong]) $value.asInstanceOf[jLong].toInt.asInstanceOf[$t] else $value.asInstanceOf[$t]
+            case "Float" => if($value.isInstanceOf[jDouble]) $value.asInstanceOf[jDouble].toFloat.asInstanceOf[$t] else $value.asInstanceOf[$t]
+            case _       => $value.asInstanceOf[$t]
+          }
+          case other                  => $value.asInstanceOf[$t]
         }
       """
   }
 
   def cast(query: Tree, row: Tree, tpe: Type, i: Int): Tree = {
-    val value: Tree = q"$row.get($i)"
+    val value: Tree = q"if($i >= $row.size) null else $row.get($i)"
     tpe match {
       case t if t <:< typeOf[Option[Map[String, _]]] => castOptionMap(value, t)
       case t if t <:< typeOf[Option[Set[_]]]         => castOptionSet(value, t)

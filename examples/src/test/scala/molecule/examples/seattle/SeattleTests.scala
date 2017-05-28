@@ -1,9 +1,10 @@
 package molecule.examples.seattle
 import java.io.FileReader
+
 import datomic._
 import molecule._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.schema._
+import molecule.schema.Db
 
 import scala.language.reflectiveCalls
 
@@ -40,9 +41,9 @@ class SeattleTests extends SeattleSpec {
 
     // We can also retrive a single (optional) attribute value
     val untyped: Option[Any] = communityId(":community/name")
-    val typed: Option[String ]= communityId[String](":community/name")
-    
-    communityId(":community/name") === Some("Greenlake Community Wiki")
+    val typed: Option[String] = communityId[String](":community/name")
+
+    communityId.apply(":community/name") === Some("Greenlake Community Wiki")
     communityId(":community/url") === Some("http://greenlake.wetpaint.com/")
     communityId(":community/category") === Some(Set("services", "for sale", "events"))
     communityId(":community/emptyOrBogusAttribute") === None

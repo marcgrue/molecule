@@ -14,6 +14,9 @@ import molecule.transform.Query2String
 
 import scala.collection.JavaConverters._
 
+object Conn {
+  def apply(uri: String): Conn = new Conn(datomic.Peer.connect(uri))
+}
 
 case class Conn(datConn: datomic.Connection) {
 

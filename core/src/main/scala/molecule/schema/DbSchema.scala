@@ -1,4 +1,5 @@
 package molecule.schema
+
 /*
  * AUTO-GENERATED CODE - DON'T CHANGE!
  *

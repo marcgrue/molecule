@@ -2,6 +2,7 @@ package molecule
 package examples.seattle
 import molecule.ast.model._
 import molecule.ast.query._
+import molecule.schema.Db
 //import molecule.dsl.DbSchema._
 import molecule.examples.seattle.dsl.seattle._
 import scala.language.reflectiveCalls
@@ -978,7 +979,6 @@ class SeattleTransformationTests extends SeattleSpec {
   "Working with time" >> {
 
 //    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
-    import molecule.schema._
 
     m(Db.txInstant) -->
       Model(List(

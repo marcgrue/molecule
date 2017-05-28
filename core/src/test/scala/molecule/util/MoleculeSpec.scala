@@ -1,5 +1,4 @@
 package molecule.util
-import molecule._
 import molecule.api.{InputMolecule, Molecule}
 import molecule.ast.model.Model
 import molecule.ast.query._

@@ -519,53 +519,6 @@ object MoleculeBoilerplate {
 
   def markBidrectionalEdgeProperties(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
 
-    // Todo: check correct bidirectional definitions
-    //    ns.attrs.collect {
-    //      //      case ref@Ref(attr, _, _, _, _, _, refNs, opts) => opts.collect {
-    //      case ref@Ref(attr, _, _, _, _, _, refNs, opts, Some("BiEdgeRef_"), revRef) =>
-    //        println("")
-    //        println("A " + ns.ns + "     -----     " + attr + "     -----     " + refNs + "     -----     " + revRef)
-    //
-    //        refNs.replace("_", ".").split('.').toList match {
-    //
-    //          case part2 :: ns2 :: Nil => nss.collect {
-    //
-    //            case Namespace(part3, ns3, _, attrs3) if part3 == part2 && ns3 == refNs =>
-    //              val otherNs = ns3.replace("_", ".").split('.').last
-    //              println("B    " + ns3 + "     -----     " + otherNs + "     -----     " + revRef)
-    //
-    //              attrs3.collect {
-    //
-    //                case ref4@Ref(attr4, _, _, _, _, _, refNs4, opts4, bi, revRef4) if attr4 == revRef && revRef4 != attr =>
-    //                  val baseNs = refNs4.replace("_", ".").split('.').last
-    //                  println("C       " + attr4 + "     -----     " + refNs4 + "     -----     " + revRef4+ "     -----     " + bi)
-    //
-    ////                  bi match {
-    ////                    case "BiTargetRef_" if =>
-    ////                  }
-    //
-    //
-    //                  opts4.collectFirst {
-    //
-    //                    case Optional(a5, "BiTargetRef_", xx) if a5.replace("_", ".").split('.').last != attr =>
-    //                      println("D          " + a5 + "     -----     " + a5.replace("_", ".").split('.').last + "     -----     " + xx)
-    //                      sys.error(s"Target ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
-    //                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
-    //
-    //                    case Optional(a5, "BiEdgeRef_", _) if a5.replace("_", ".").split('.').last != attr    =>
-    //                      sys.error(s"Other ref attribute `$part3.$otherNs.$attr4` is unexpectedly pointing back to `${a5.replace("_", ".")}`. It should point back to the base attribute that points here:" +
-    //                        s"\nval $attr4: AnyRef = target[$baseNs.$attr.type]")
-    //                    //                        sys.error("got you!")
-    //                  }
-    //                //                      println("      " + attr4 + "     -----     " + part2)
-    //              }
-    //          }
-    //          case ns2 :: Nil =>
-    //          case other =>
-    //        }
-    //    }
-
-
     val isEdge = ns.attrs.collectFirst {
       case Ref(_, _, _, _, _, _, _, _, Some("BiTargetRef_"), _) => true
     } getOrElse false
@@ -1016,18 +969,18 @@ object MoleculeBoilerplate {
       case Val(attr, attrClean, clazz, tpe, baseTpe, _, opts, bi, revRef) if tpe.take(3) == "Map" =>
         val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions")
 
       case Val(attr, attrClean, clazz, _, _, _, opts, bi, revRef) =>
         val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions")
 
       case Enum(attr, attrClean, clazz, _, _, enums, opts, bi, revRef) =>
         val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
-        Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions { $enumValues }""")
+        Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions { $enumValues }""")
 
       case Ref(attr, attrClean, clazz, _, _, _, revNs, opts, bi, revRef) =>
         val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ (bi match {
@@ -1041,7 +994,7 @@ object MoleculeBoilerplate {
         })
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
 
-        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}$extensions")
+        Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions")
 
       case BackRef(backAttr, _, clazz, _, _, _, _, _) => Nil
     }.mkString("\n  ").trim

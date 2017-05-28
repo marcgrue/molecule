@@ -1,7 +1,8 @@
 package molecule.ops
 import molecule.ast.query._
 import molecule.boilerplate.attributes._
-import molecule.boilerplate.{NS, FirstNS}
+import molecule.boilerplate.{FirstNS, NS}
+import molecule.dsl.OneOptional
 
 import scala.language.existentials
 //import scala.language.higherKinds
@@ -13,7 +14,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
   def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
 
   implicit class richTree(t: Tree) {
-    lazy val tpe_       = if(t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
+    lazy val tpe_       = if (t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
     lazy val at         = att(t)
     lazy val ns         = at.ns.toString
     lazy val name       = at.toString
@@ -52,7 +53,9 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
 
     def isAttr = tpe_ <:< typeOf[Attr]
 
-    def isRefAttr$ = tpe_ <:< weakTypeOf[RefAttr$]
+    def isOneOptional = tpe_ <:< typeOf[OneOptional[_, _]]
+
+    def isRefAttr$ = tpe_ <:< weakTypeOf[RefAttr$[_, _]]
     def isRefAttr = tpe_ <:< weakTypeOf[RefAttr[_, _]]
     def isOneRefAttr = tpe_ <:< weakTypeOf[OneRefAttr[_, _]]
     def isManyRefAttr = tpe_ <:< weakTypeOf[ManyRefAttr[_, _]]
@@ -62,11 +65,12 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def isValueAttr$ = tpe_ <:< weakTypeOf[ValueAttr$[_]]
     def isMapAttrK = tpe_ <:< typeOf[MapAttrK]
     def isMapAttr = tpe_ <:< weakTypeOf[MapAttr[_, _, _, _]]
-    def isMapAttr$ = tpe_ <:< weakTypeOf[MapAttr$[_]]
+    def isMapAttr$ = tpe_ <:< weakTypeOf[MapAttr$[_, _]]
     def isOne = tpe_ <:< weakTypeOf[One[_, _, _]]
     def isMany = tpe_ <:< weakTypeOf[Many[_, _, _, _]]
     def isEnum = tpe_ <:< weakTypeOf[Enum]
-    def isEnum$ = tpe_ <:< weakTypeOf[Enum$]
+    def isEnum$ = tpe_ <:< weakTypeOf[Enum$[_, _]]
+    def isAnyEnum = isEnum || isEnum$
     def isOneEnum = tpe_ <:< weakTypeOf[OneEnum[_, _]]
     def isManyEnum = tpe_ <:< weakTypeOf[ManyEnums[_, _]]
     def isOneURI = tpe_ <:< weakTypeOf[OneURI[_, _]]
@@ -229,7 +233,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
       case s: MethodSymbol if s.asMethod.returnType <:< weakTypeOf[Attr] => new att(s)
     }.toList.reverse
 
-    def enums = attrs.filter(_.isEnum).distinct
+    def enums = attrs.filter(_.isAnyEnum).distinct
     def isNamespace = true
   }
 
@@ -261,31 +265,60 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
         abortTree(q"$unexpected", s"[TreeOps:tpe] ModelOps.att(sym) can only take an Attr symbol")
     }
 
-    def name = TermName(toString)
-    def fullName = attrType.typeSymbol.fullName
     def owner = attrType.typeSymbol.owner
     def ns = new nsp(owner)
+
+    def name = TermName(toString)
+    def fullName = attrType.typeSymbol.fullName
+
     def tpeS = if (tpe =:= NoType) "" else tpe.toString
     def contentType = tpe
-    def isOne = attrType <:< weakTypeOf[One[_, _, _]] || attrType <:< weakTypeOf[OneRefAttr[_, _]]
-    def isMany = attrType <:< weakTypeOf[Many[_, _, _, _]] || attrType <:< weakTypeOf[ManyRefAttr[_, _]]
-    def isEnum = attrType <:< weakTypeOf[Enum]
+
+    def isOne = attrType <:< weakTypeOf[One[_, _, _]] ||
+      attrType <:< weakTypeOf[OneValueAttr$[_, _]] ||
+      attrType <:< weakTypeOf[OneEnum$[_]] ||
+      attrType <:< weakTypeOf[OneRefAttr[_, _]] ||
+      attrType <:< weakTypeOf[OneRefAttr$[_]]
+
+    def isMany = attrType <:< weakTypeOf[Many[_, _, _, _]] ||
+      attrType <:< weakTypeOf[ManyValueAttr$[_, _]] ||
+      attrType <:< weakTypeOf[ManyEnums[_, _]] ||
+      attrType <:< weakTypeOf[ManyEnums$[_]] ||
+      attrType <:< weakTypeOf[ManyRefAttr[_, _]] ||
+      attrType <:< weakTypeOf[ManyRefAttr$[_]]
+
+    def isMap = attrType <:< weakTypeOf[MapAttr[_, _, _, _]] ||
+      attrType <:< weakTypeOf[MapAttr$[_, _]]
+
+    def isMapK = attrType <:< weakTypeOf[MapAttrK]
+
+    def card = if (isMapK) 4 else if (isMap) 3 else if (isMany) 2 else 1
+
+    def isValue = attrType <:< weakTypeOf[One[_, _, _]] ||
+      attrType <:< weakTypeOf[Many[_, _, _, _]] ||
+      attrType <:< weakTypeOf[OneEnum[_, _]]
+
+    def isAnyEnum = attrType <:< weakTypeOf[Enum] || attrType <:< weakTypeOf[Enum$[_, _]]
+
+    def keyw = KW(ns.toString, this.toString)
+    def kw = KW(ns.toString, this.toString)
+    def kwS = s":$ns/$name"
+
     def enumValues = attrType.members.collect {
       case v: TermSymbol
         if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type]
       => v.name.decodedName.toString.trim
     }.toList.reverse
     def hasEnum(enumCandidate: String) = enumValues.contains(enumCandidate)
-    def card = if (isMany || attrType <:< weakTypeOf[ManyEnums[_, _]]) 2 else 1
-    def isValue = attrType <:< weakTypeOf[One[_, _, _]] || attrType <:< weakTypeOf[Many[_, _, _, _]] || attrType <:< weakTypeOf[OneEnum[_, _]]
-    def keyw = KW(ns.toString, this.toString)
-    override def toString = sym.name.toString.head.toLower + sym.name.toString.tail
-    def kw = KW(ns.toString, this.toString)
-    def kwS = s":$ns/$name"
     def enumPrefix = ns.enums.size match {
       case 0 => ""
-      case _ => s":$ns." + (if (name.toString.last == '_') name.toString.init else name) + "/"
+      case _ =>
+        val last = name.toString.last
+        val name0 = if (last == '_' || last == '$') name.toString.init else name
+        s":$ns.$name0/"
     }
+
+    override def toString = sym.name.toString.head.toLower + sym.name.toString.tail
   }
 
   object att {

@@ -1,9 +1,7 @@
 package molecule
 package examples.seattle
-import java.io.FileReader
-
 import molecule.examples.seattle.dsl.seattle._
-import molecule.schema._
+import molecule.schema.Db
 
 import scala.language.reflectiveCalls
 
@@ -135,7 +133,6 @@ class SeattleQueryTests extends SeattleSpec {
         |  1 datomic.db.Db@xxx
         |  2 :community.type/twitter
         |)""".stripMargin
-
 
 
     // Multiple input values - logical OR ------------------------

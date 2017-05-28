@@ -8,7 +8,7 @@ import molecule.util.{Debug, Helpers}
 object Model2Query extends Helpers {
   val x = Debug("Model2Query", 20, 19, false)
   def uri(t: String) = t == "java.net.URI"
-  def u(t: String, v: String) = if (t == "java.net.URI") v else ""
+  def u(t: String, v: String) = if (t.contains("java.net.URI")) v else ""
 
   def apply(model: Model): Query = {
 
@@ -225,8 +225,11 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 3, value, _, gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case VarValue => q.pull(e, a)
-            case other    => sys.error("[Model2Query:resolve[Map Atom]] Unresolved optional mapped Atom$:\nAtom$   : " + s"$a\nElement: $other")
+            case VarValue                        => q.pull(e, a)
+            case Fn("not", _)                    => q.not(e, a, v, gs)
+            case MapEq(pairs) if pairs.size == 1 => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")$")
+            case MapEq(pairs)                    => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs)
+            case other                           => sys.error("[Model2Query:resolve[Map Atom]] Unresolved optional mapped Atom$:\nAtom$   : " + s"$a\nElement: $other")
           }
         }
 
@@ -287,7 +290,7 @@ object Model2Query extends Helpers {
           case MapKeys(arg :: Nil)             => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
           case MapKeys(args)                   => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
           case MapEq(pairs) if pairs.size == 1 => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pairs.head._1 + ")@(" + pairs.head._2 + ")$")
-          case MapEq(pairs)                    => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs.toSeq)
+          case MapEq(pairs)                    => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs)
           case And(args)                       => q.findD(v, gs).whereAnd(e, a, v, args)
           case other                           => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
         }
@@ -300,16 +303,21 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, _, 2, value, Some(prefix), gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case EnumVal => q.pullEnum(e, a)
-            case other   => sys.error("[Model2Query:resolve[Enum Atom]] Unresolved optional cardinality-many enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
+            case EnumVal      => q.pullEnum(e, a)
+            case Fn("not", _) => q.not(e, a, v, gs) // None
+            case Eq(args)     => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args.map(prefix + _), gs)
+            case other        => sys.error("[Model2Query:resolve[Enum Atom]] Unresolved optional cardinality-many enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
           }
         }
 
         case a0@Atom(_, attr0, _, 1, value, Some(prefix), gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case EnumVal => q.pullEnum(e, a)
-            case other   => sys.error("[Model2Query:resolve[Enum Atom]] Unresolved optional cardinality-one enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
+            case EnumVal        => q.pullEnum(e, a)
+            case Fn("not", _)   => q.not(e, a, v, gs) // None
+            case Eq(arg :: Nil) => q.find(v2, gs).enum(e, a, v, gs).where(e, a, Val(prefix + arg), gs)
+            case Eq(args)       => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, args.map(prefix + _), gs)
+            case other          => sys.error("[Model2Query:resolve[Enum Atom]] Unresolved optional cardinality-one enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
           }
         }
 
@@ -376,16 +384,23 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 2, value, _, gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case VarValue => q.pull(e, a)
-            case other    => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a\nElement: $other")
+            case VarValue       => q.pull(e, a)
+            case Fn("not", _)   => q.not(e, a, v, gs) // None
+            case Eq(arg :: Nil) => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
+            case Eq(args)       => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, Nil, u(t, v))
+            case other          => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
           }
         }
 
         case a0@Atom(_, attr0, t, 1, value, _, gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case VarValue => q.pull(e, a)
-            case other    => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-one Atom$:\nAtom$   : " + s"$a\nElement: $other")
+            case VarValue                 => q.pull(e, a)
+            case Fn("not", _)             => q.not(e, a, v, gs) // None
+            case Eq(arg :: Nil) if uri(t) => q.find(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Seq())
+            case Eq(arg :: Nil)           => q.find(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
+            case Eq(args)                 => q.find(v, gs).where(e, a, v, gs).orRules(e, a, args, gs, u(t, v))
+            case other                    => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-one Atom$:\nAtom$   : " + s"$a0\nElement: $other")
           }
         }
 

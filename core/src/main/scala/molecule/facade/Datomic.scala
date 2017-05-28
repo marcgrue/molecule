@@ -10,30 +10,47 @@ trait Datomic {
 
   // Database operations ..................................................................
 
-  def recreateDbFrom(tx: Transaction, identifier: String = "", protocol: String = "mem"): Conn = {
+  // From Molecule auto-generated schema transaction data
+  def recreateDbFrom(schema: Transaction, identifier: String = "", protocol: String = "mem"): Conn = {
     val id = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {
       Peer.deleteDatabase(uri)
       Peer.createDatabase(uri)
-      val connection = Peer.connect(uri)
-      connection.transact(tx.partitions)
-      connection.transact(tx.namespaces)
-      Conn(connection)
+      val datConn = Peer.connect(uri)
+      datConn.transact(schema.partitions)
+      datConn.transact(schema.namespaces)
+      Conn(datConn)
     } catch {
       case e: Throwable => sys.error("@@@@@@@@@@ " + e.getCause)
     }
   }
 
-  def loadList(txlist: jList[_], identifier: String = "", protocol: String = "mem"): Conn = {
+  // From raw data like EDN file
+  def recreateDbFromRaw(schemaData: jList[_], identifier: String = "", protocol: String = "mem"): Conn = {
     val id = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {
       Peer.deleteDatabase(uri)
       Peer.createDatabase(uri)
-      val conn = Peer.connect(uri)
-      conn.transact(txlist).get()
-      Conn(conn)
+      val datConn = Peer.connect(uri)
+      datConn.transact(schemaData).get()
+      Conn(datConn)
+    } catch {
+      case e: Throwable => sys.error("@@@@@@@@@@ " + e.getCause)
+    }
+  }
+
+  // Migration ............................................................................
+
+  // From Molecule auto-generated schema transaction data
+  def transactSchema(schema: Transaction, identifier: String, protocol: String = "mem"): Conn = {
+    val uri = s"datomic:$protocol://$identifier"
+    try {
+      val datConn = Peer.connect(uri)
+      datConn.transact(schema.partitions)
+      datConn.transact(schema.namespaces)
+      Conn(datConn)
     } catch {
       case e: Throwable => sys.error("@@@@@@@@@@ " + e.getCause)
     }

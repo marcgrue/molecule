@@ -71,6 +71,7 @@ class Provenance extends MoleculeSpec {
     // Time of transaction
     val stuTxInstant = stuTxId[java.util.Date](":db/txInstant").get
 
+    // Limit entity traversal 1 level deep
     stuTxId.touch(1) === Map(
       ":db/id" -> stuTxId,
       ":db/txInstant" -> stuTxInstant,
