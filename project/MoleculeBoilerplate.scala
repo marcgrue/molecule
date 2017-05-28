@@ -923,31 +923,39 @@ object MoleculeBoilerplate {
     val p1 = (s: String) => padS(attrs.map(_.attr).filter(!_.startsWith("_")).map(_.length).max, s)
     val p2 = (s: String) => padS(attrs.map(_.clazz).filter(!_.startsWith("Back")).map(_.length).max, s)
 
+    def indexedFirst(opts: Seq[Optional]) = {
+      val classes = opts.filter(_.clazz.nonEmpty).map(_.clazz)
+      if(classes.contains("Indexed"))
+        "Indexed" +: classes.filterNot(_ == "Indexed")
+      else
+        classes
+    }
+
     val attrClasses = attrs.flatMap {
 
       case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, opts, bi, revRef) if tpe.take(3) == "Map" =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case Val(attr, _, clazz, tpe, baseTpe, datomicTpe, opts, bi, revRef) if baseTpe == "K" =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList :+ "MapAttrK"
+        val extensions0 = indexedFirst(opts) ++ bi.toList :+ "MapAttrK"
         val extensions = " with " + extensions0.mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case Val(attr, _, clazz, _, _, _, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         Seq(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions")
 
       case Enum(attr, _, clazz, _, _, enums, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]$extensions { $enumValues }""")
 
       case Ref(attr, _, clazz, _, _, _, revNs, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ (bi match {
+        val extensions0 = indexedFirst(opts) ++ (bi match {
           case Some("BiSelfRef_")     => Seq(s"BiSelfRefAttr_")
           case Some("BiOtherRef_")    => Seq(s"BiOtherRefAttr_[$revNs.$revRef[NS, NS]]")
           case Some("BiEdgeRef_")     => Seq(s"BiEdgeRefAttr_[$revNs.$revRef[NS, NS]]")
@@ -967,23 +975,23 @@ object MoleculeBoilerplate {
     val attrClassesOpt = attrs.flatMap {
 
       case Val(attr, attrClean, clazz, tpe, baseTpe, _, opts, bi, revRef) if tpe.take(3) == "Map" =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions")
 
       case Val(attr, attrClean, clazz, _, _, _, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         Seq(s"class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions")
 
       case Enum(attr, attrClean, clazz, _, _, enums, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ bi.toList
+        val extensions0 = indexedFirst(opts) ++ bi.toList
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue"
         Seq( s"""class $attrClean$$${p1(attrClean)}[Ns, In] extends $clazz$$${p2(clazz)}[Ns]$extensions { $enumValues }""")
 
       case Ref(attr, attrClean, clazz, _, _, _, revNs, opts, bi, revRef) =>
-        val extensions0 = opts.filter(_.clazz.nonEmpty).map(_.clazz) ++ (bi match {
+        val extensions0 = indexedFirst(opts) ++ (bi match {
           case Some("BiSelfRef_")     => Seq(s"BiSelfRefAttr_")
           case Some("BiOtherRef_")    => Seq(s"BiOtherRefAttr_[$revNs.$revRef[NS, NS]]")
           case Some("BiEdgeRef_")     => Seq(s"BiEdgeRefAttr_[$revNs.$revRef[NS, NS]]")
@@ -1042,8 +1050,7 @@ object MoleculeBoilerplate {
          |
          |object $ns extends ${ns}_0 with FirstNS {
          |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-         |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
-         |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
+         |  def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
          |}
          |
          |trait $ns {
@@ -1088,7 +1095,7 @@ object MoleculeBoilerplate {
     val (inArity, outArity, ns, attrs, ext, attrClasses, attrClassesOpt, nsArities, extraImports) = resolveNs(d, namespace)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "          ")
+      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
@@ -1114,8 +1121,7 @@ object MoleculeBoilerplate {
        |
        |object $ns extends ${ns}_0 with FirstNS {
        |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-       |  def apply(eids: Seq[Long])       : ${ns}_0 $inputSpace= ???
-       |  def apply(eids: Set[Long])       : ${ns}_0 $inputSpace= ???$inputEids
+       |  def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
        |}
        |
        |trait $ns $ext{

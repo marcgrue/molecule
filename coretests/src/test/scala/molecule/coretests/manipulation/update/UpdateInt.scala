@@ -88,9 +88,17 @@ class UpdateInt extends CoreSpec {
       Ns(eid).ints.add(Seq(4, 5)).update
       Ns.ints.get.head === Set(1, 2, 3, 4, 5)
 
+      // Add Set of values
+      Ns(eid).ints.add(Set(6)).update
+      Ns.ints.get.head === Set(1, 2, 3, 4, 5, 6)
+
+      // Add Iterable of values
+      Ns(eid).ints.add(Iterable(7)).update
+      Ns.ints.get.head === Set(1, 2, 3, 4, 5, 6, 7)
+
       // Add empty Seq of values (no effect)
       Ns(eid).ints.add(Seq[Int]()).update
-      Ns.ints.get.head === Set(1, 2, 3, 4, 5)
+      Ns.ints.get.head === Set(1, 2, 3, 4, 5, 6, 7)
 
 
       // Can't add duplicate values

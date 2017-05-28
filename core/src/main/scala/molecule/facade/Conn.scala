@@ -124,6 +124,12 @@ case class Conn(datConn: datomic.Connection) {
     TxReport(datConn.transact(tx).get)
   }
 
+  // Convenience function for querying directly against Datomic
+  // Note how we can still use a test db!
+  def q(query: String, input: String*) = {
+    val args = db +: input.toSeq
+    Peer.q(query, args: _*).asScala
+  }
 
   def query(m: Model, q: Query): Iterable[jList[AnyRef]] = {
     val p = (expr: QueryExpr) => Query2String(q).p(expr)

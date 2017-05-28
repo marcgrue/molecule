@@ -7,7 +7,7 @@ import molecule.util.{Debug, Helpers}
 
 object Model2Query extends Helpers {
   val x = Debug("Model2Query", 20, 19, false)
-  def uri(t: String) = t == "java.net.URI"
+  def uri(t: String) = t.contains("java.net.URI")
   def u(t: String, v: String) = if (t.contains("java.net.URI")) v else ""
 
   def apply(model: Model): Query = {
@@ -384,11 +384,12 @@ object Model2Query extends Helpers {
         case a0@Atom(_, attr0, t, 2, value, _, gs, _) if attr0.last == '$' => {
           val a = a0.copy(name = attr0.init)
           value match {
-            case VarValue       => q.pull(e, a)
-            case Fn("not", _)   => q.not(e, a, v, gs) // None
-            case Eq(arg :: Nil) => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
-            case Eq(args)       => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, Nil, u(t, v))
-            case other          => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
+            case VarValue                 => q.pull(e, a)
+            case Fn("not", _)             => q.not(e, a, v, gs) // None
+            case Eq(arg :: Nil) if uri(t) => q.findD(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Seq())
+            case Eq(arg :: Nil)           => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
+            case Eq(args)                 => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, Nil, u(t, v))
+            case other                    => sys.error("[Model2Query:resolve[Atom]] Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
           }
         }
 
@@ -406,7 +407,7 @@ object Model2Query extends Helpers {
 
         // Atom_ (tacet)
 
-        case a0@Atom(_, attr0, _, card, value, _, gs, _) if attr0.last == '_' => {
+        case a0@Atom(_, attr0, t, card, value, _, gs, _) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.init)
           value match {
             case Qm                       => q.where(e, a, v, gs).in(v, a)
@@ -418,6 +419,7 @@ object Model2Query extends Helpers {
             case Fulltext(Seq(Qm))        => q.fulltext(e, a, v, Var(v1)).in(v1, a)
             case VarValue                 => q.where(e, a, v, gs).find(gs)
             case Eq((seq: Seq[_]) :: Nil) => q.orRules(e, a, seq, gs)
+            case Eq(arg :: Nil) if uri(t) => q.func( s"""ground (java.net.URI. "$arg")""", Empty, v).find(gs)
             case Eq(arg :: Nil)           => q.where(e, a, Val(arg), gs).find(gs)
             case Eq(args)                 => q.orRules(e, a, args, gs)
             case Neq(args)                => q.where(e, a, v, gs).compareTo("!=", a, v, args map Val)
@@ -448,6 +450,7 @@ object Model2Query extends Helpers {
           case Fulltext(Seq(Qm))        => q.findD(v, gs).fulltext(e, a, v, Var(v1)).in(v1, a)
           case VarValue                 => q.findD(v, gs).where(e, a, v, gs)
           case Eq((set: Set[_]) :: Nil) => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, set.toSeq, gs, u(t, v))
+          case Eq(arg :: Nil) if uri(t) => q.findD(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Seq())
           case Eq(arg :: Nil)           => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
           case Eq(args)                 => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, Nil, u(t, v))
           case Neq(args)                => q.findD(v, gs).where(e, a, v, gs).compareTo("!=", a, v, args map Val)

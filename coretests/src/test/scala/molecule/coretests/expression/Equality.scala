@@ -5,6 +5,7 @@ import java.util.Date
 import molecule._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
+import molecule.util.expectCompileError
 
 class Equality extends Base {
 
@@ -49,11 +50,9 @@ class Equality extends Base {
     Ns.double(-1.0).get === List(-1.0)
     Ns.double(double1).get === List(1.0)
 
-
     Ns.bool(true).get === List(true)
-    Ns.bool(false).get === List(false)
     Ns.bool(bool1).get === List(true)
-
+    Ns.bool(false).get === List(false)
 
     val now = new Date()
     Ns.date(now).get === List()
@@ -76,8 +75,22 @@ class Equality extends Base {
     Ns.enum("enum2").get === List("enum2")
     Ns.enum(enum2).get === List("enum2")
 
-    // Applying a non-existing enum value ("enum3") won't compile!
-    // Ns.enum("enum3").get === List("enum3")
+    // Applying a non-existing enum value ("zzz") won't compile!
+    expectCompileError(
+      """m(Ns.enum("zzz"))""",
+      """
+        |[Dsl2Model:validateStaticEnums] 'zzz' is not among available enum values of attribute :ns/enum:
+        |  enum0
+        |  enum1
+        |  enum2
+        |  enum3
+        |  enum4
+        |  enum5
+        |  enum6
+        |  enum7
+        |  enum8
+        |  enum9
+      """)
   }
 
 
@@ -123,7 +136,9 @@ class Equality extends Base {
     Ns.doubles(double1).get === List(Set(1.0, 2.0))
 
 
-    // Cardinality-many attribute for boolean values not implemented (doesn't make sense)
+    // Cardinality-many attribute for boolean values are maybe not so useful
+    Ns.bools(false).get === List(Set(true, false))
+    Ns.bools(true).get === List(Set(true, false))
 
 
     Ns.dates(date1).get === List(Set(date1, date2))
@@ -138,6 +153,7 @@ class Equality extends Base {
     Ns.uuids(uuid4).get === List(Set(uuid4, uuid2))
 
 
+    // Todo: card-many URI
     //    Ns.uris(uri1).get === List(Set(uri1, uri2))
     //    Ns.uris(uri2).get === List(Set(uri1, uri4, uri3, uri2))
     //    Ns.uris(uri3).get === List(Set(uri3, uri2))
@@ -189,6 +205,10 @@ class Equality extends Base {
     Ns.double.doubles(double3).get === List((2.0, Set(3.0, 2.0)))
 
 
+    Ns.bool.bools(false).get === List((false, Set(false)), (true, Set(true, false)))
+    Ns.bool.bools(true).get === List((true, Set(false, true)))
+
+
     Ns.date.dates(date1).get === List((date1, Set(date1, date2)))
     Ns.date.dates(date2).get === List((date1, Set(date1, date2)), (date2, Set(date3, date2)), (date3, Set(date4, date2)))
     Ns.date.dates(date3).get === List((date2, Set(date3, date2)))
@@ -201,10 +221,12 @@ class Equality extends Base {
     Ns.uuid.uuids(uuid4).get.toSeq.sortBy(_.toString) === List((uuid3, Set(uuid2, uuid4)))
 
 
-    //    Ns.ur.urs(ur1).get === List((ur1, Set(ur1, ur2)))
-    //    Ns.ur.urs(ur2).get === List((ur1, Set(ur1, ur2)), (ur2, Set(ur3, ur2)), (ur3, Set(ur4, ur2)))
-    //    Ns.ur.urs(ur3).get === List((ur2, Set(ur3, ur2)))
-    //    Ns.ur.urs(ur4).get === List((ur3, Set(ur4, ur2)))
+    // Todo: card-many URI
+    //    Ns.uri.uris(uri1).getD
+    //    Ns.uri.uris(uri1).get === List((uri1, Set(uri1, uri2)))
+    //    Ns.uri.uris(uri2).get === List((uri1, Set(uri1, uri2)), (uri2, Set(uri3, uri2)), (uri3, Set(uri4, uri2)))
+    //    Ns.uri.uris(uri3).get === List((uri2, Set(uri3, uri2)))
+    //    Ns.uri.uris(uri4).get === List((uri3, Set(uri4, uri2)))
 
 
     Ns.enum.enums("enum1").get === List(("enum1", Set("enum1", "enum2")))
@@ -229,6 +251,7 @@ class Equality extends Base {
     val List(e1, e2, e3, e4) = Ns.int insert List(1, 2, 3, 4) eids
     val seq                  = Set(e1, e2)
     val set                  = Seq(e3, e4)
+    val iterable             = Iterable(e3, e4)
 
     Ns.int.get === List(1, 2, 3, 4)
 
@@ -245,5 +268,9 @@ class Equality extends Base {
     // Set
     Ns(Set(e3, e4)).int.get === List(3, 4)
     Ns(set).int.get === List(3, 4)
+
+    // Iterable
+    Ns(Iterable(e3, e4)).int.get === List(3, 4)
+    Ns(iterable).int.get === List(3, 4)
   }
 }

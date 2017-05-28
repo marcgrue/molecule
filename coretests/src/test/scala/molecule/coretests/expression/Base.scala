@@ -51,7 +51,10 @@ class Base extends CoreSpec {
       (2.0, Set(2.0, 3.0)),
       (3.0, Set(2.5, 4.0)))
 
-    // Set of boolean values not relevant
+    // Set of boolean values maybe not so useful
+    Ns.bool.bools insert List(
+      (false, Set(false)),
+      (true, Set(false, true)))
 
     Ns.date.dates insert List(
       (date1, Set(date1, date2)),
@@ -63,10 +66,10 @@ class Base extends CoreSpec {
       (uuid2, Set(uuid2, uuid3)),
       (uuid3, Set(uuid2, uuid4)))
 
-    //    Ns.uri.uris insert List(
-    //      (uri1, Set(uri1, uri2)),
-    //      (uri2, Set(uri2, uri3)),
-    //      (uri3, Set(uri2, uri4)))
+    Ns.uri.uris insert List(
+      (uri1, Set(uri1, uri2)),
+      (uri2, Set(uri2, uri3)),
+      (uri3, Set(uri2, uri4)))
 
     Ns.enum.enums insert List(
       ("enum1", Set("enum1", "enum2")),
@@ -90,22 +93,23 @@ class Base extends CoreSpec {
       ("da", List(3, 4))
     )
   }
-//
-//  class OneRefSetup extends CoreSetup {
-//
-//    m(Ns.strMap.Ref1.int1) insert List(
-//      (Map("en" -> "Hi there"), 1),
-//      (Map("fr" -> "Bonjour", "en" -> "Oh, Hi"), 1)
-//    )
-//  }
-//
-//  class ManyRefSetup extends CoreSetup {
-//
-//    m(Ns.strMap.Refs1 * Ref1.int1) insert List(
-//      (Map("en" -> "Hi there"), List(1, 2)),
-//      (Map("fr" -> "Bonjour", "en" -> "Oh, Hi"), List(1, 2)),
-//      (Map("en" -> "Hello"), List(2, 3)),
-//      (Map("da" -> "Hej"), List(3, 4))
-//    )
-//  }
+
+  // Todo
+  //  class OneRefSetup extends CoreSetup {
+  //
+  //    m(Ns.strMap.Ref1.int1) insert List(
+  //      (Map("en" -> "Hi there"), 1),
+  //      (Map("fr" -> "Bonjour", "en" -> "Oh, Hi"), 1)
+  //    )
+  //  }
+  //
+  //  class ManyRefSetup extends CoreSetup {
+  //
+  //    m(Ns.strMap.Refs1 * Ref1.int1) insert List(
+  //      (Map("en" -> "Hi there"), List(1, 2)),
+  //      (Map("fr" -> "Bonjour", "en" -> "Oh, Hi"), List(1, 2)),
+  //      (Map("en" -> "Hello"), List(2, 3)),
+  //      (Map("da" -> "Hej"), List(3, 4))
+  //    )
+  //  }
 }
