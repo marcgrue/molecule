@@ -171,7 +171,7 @@ class QueryTour extends MoleculeSpec {
     t === 1033
 
     // Or query for relative system time directly
-    User(ed).firstName_.txT.get.head === t
+    User(ed).firstName_.t.get.head === t
 
 
     // 18. Getting a Tx Instant

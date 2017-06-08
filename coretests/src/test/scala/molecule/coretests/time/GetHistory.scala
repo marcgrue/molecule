@@ -19,7 +19,6 @@ class GetHistory extends Specification {
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
   // First entity - 3 transactions
-
   val tx1 = Ns.str("a").int(1).save
   val e1  = tx1.eid
   val t1  = tx1.t
@@ -48,21 +47,21 @@ class GetHistory extends Specification {
     Ns(e1).int.op_(false).get === List()
 
     // str updated at t2
-    Ns(e1).str.txT.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns(e1).str.t.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       ("a", t1, true), // "a" asserted
       ("a", t2, false), // "a" retracted
       ("b", t2, true) // "b" asserted
     )
 
     // int updated at t3
-    Ns(e1).int.txT.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns(e1).int.t.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       (1, t1, true), // 1 asserted
       (1, t3, false), // 1 retracted
       (2, t3, true) // 2 asserted
     )
 
     // int history with entity
-    Ns.e.int.txT.op.getHistory.toSeq.sortBy(t => (t1, t._3, t._4)) === List(
+    Ns.e.int.t.op.getHistory.toSeq.sortBy(t => (t1, t._3, t._4)) === List(
       // e1
       (e1, 1, t1, true),
       (e1, 1, t3, false),
@@ -91,7 +90,7 @@ class GetHistory extends Specification {
     // To illustrate, let's revisit the str datoms:
 
     // str updated at t2
-    Ns(e1).str.txT.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns(e1).str.t.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       ("a", t1, true), // "a" asserted
       ("a", t2, false), // "a" retracted
       ("b", t2, true) // "b" asserted
@@ -99,7 +98,7 @@ class GetHistory extends Specification {
 
     // Adding the int attribute will cause its historic values 1 and 2 to repeatedly
     // be unified with each str value from above so that we get 3 x 2 datoms:
-    Ns(e1).str.txT.op.int.getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
+    Ns(e1).str.t.op.int.getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
       ("a", t1, true, 1),
       ("a", t1, true, 2),
 
@@ -111,7 +110,7 @@ class GetHistory extends Specification {
     )
 
     // Without a given entity, this approach quickly explodes and becomes useless:
-    Ns.str.txT.op.int.getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
+    Ns.str.t.op.int.getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
       ("a", t1, true, 1),
       ("a", t1, true, 2),
 
@@ -128,20 +127,15 @@ class GetHistory extends Specification {
 
     // Additional attributes are better used to filter the result
     // "str operations on enties having had an int value 1"
-    Ns.str.txT.op.int(1).getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
+    Ns.str.t.op.int(1).getHistory.toSeq.sortBy(t => (t._2, t._3, t._4)) === List(
       ("a", t1, true, 1),
-      ("a", t1, true, 2),
-
       ("a", t2, false, 1),
-      ("a", t2, false, 2),
-
-      ("b", t2, true, 1),
-      ("b", t2, true, 2)
+      ("b", t2, true, 1)
     )
 
     // ..and even better as tacet attributes
     // "str operations on entities having had an int value of 1"
-    Ns.str.txT.op.int_(1).getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.str.t.op.int_(1).getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       ("a", t1, true),
       ("a", t2, false),
       ("b", t2, true)
@@ -149,7 +143,7 @@ class GetHistory extends Specification {
 
     // Giving the int value 5 we get to the second entity
     // "str operations on entities having had an int value of 5"
-    Ns.str.txT.op.int_(5).getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.str.t.op.int_(5).getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       ("x", t4, true)
     )
 
@@ -159,13 +153,13 @@ class GetHistory extends Specification {
 
     // Reversing the attributes we get to the first entity via a or b:
     // "int operations on entities having had an int value of a"
-    Ns.int.txT.op.str_("a").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.int.t.op.str_("a").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       (1, t1, true),
       (1, t3, false),
       (2, t3, true)
     )
     // "int operations on entities having had a str value of b"
-    Ns.int.txT.op.str_("b").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.int.t.op.str_("b").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       (1, t1, true),
       (1, t3, false),
       (2, t3, true)
@@ -173,7 +167,7 @@ class GetHistory extends Specification {
 
     // Getting historic operations on second entity via str value x
     // "int operations on entities having had a str value of x"
-    Ns.int.txT.op.str_("x").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.int.t.op.str_("x").getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       (4, t4, true),
       (4, t5, false),
       (5, t5, true)
@@ -181,7 +175,7 @@ class GetHistory extends Specification {
 
     // Order of attributes is free.
     // All generic attributes always relate to the previous domain attribute (`int` here)
-    Ns.str_("x").int.txT.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
+    Ns.str_("x").int.t.op.getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       (4, t4, true),
       (4, t5, false),
       (5, t5, true)
@@ -191,36 +185,20 @@ class GetHistory extends Specification {
 
   "Multiple attrs" >> {
 
-    // Imagine we were to retrieve tx data from multiple attribute histories:
-    //   Ns.str.txT.op.int.txT.op.getHistory
-    // Then Datomic would unify two timelines of history for each attribute (str, int)
-    // and the result is not so useful:
-    Peer.q(
-      s"""
-         |[:find  ?c ?txT ?op ?d ?txT2 ?op2
-         | :where [$e1 :ns/str ?c ?tx ?op]
-         |        [(datomic.Peer/toT ^Long ?tx) ?txT]
-         |        [$e1 :ns/int ?d ?tx2 ?op2]
-         |        [(datomic.Peer/toT ^Long ?tx2) ?txT2]]
-      """.stripMargin, conn.db.history).asScala.map(_.asScala.toSeq) === List(
-      Seq("a", 1030, false, 1, 1031, false),
-      Seq("b", 1030, true, 1, 1028, true),
-      Seq("b", 1030, true, 2, 1031, true),
-      Seq("a", 1028, true, 1, 1028, true),
-      Seq("b", 1030, true, 1, 1031, false),
-      Seq("a", 1028, true, 1, 1031, false),
-      Seq("a", 1030, false, 2, 1031, true),
-      Seq("a", 1030, false, 1, 1028, true),
-      Seq("a", 1028, true, 2, 1031, true)
+    // We _can_ combine multiple attrs with generic attributes in a history
+    // query but then two individual attribute history "timelines" of changes
+    // are unified which can become less useful:
+    Ns(e1).str.t.op.int.t.op.getHistory  === List(
+      ("a", 1030, false, 1, 1031, false),
+      ("b", 1030, true, 1, 1028, true),
+      ("b", 1030, true, 2, 1031, true),
+      ("a", 1028, true, 1, 1028, true),
+      ("b", 1030, true, 1, 1031, false),
+      ("a", 1028, true, 1, 1031, false),
+      ("a", 1030, false, 2, 1031, true),
+      ("a", 1030, false, 1, 1028, true),
+      ("a", 1028, true, 2, 1031, true)
     )
-
-    // Instead we would likely look only for transactional generic data as shown in the previous test
-
-    // Consequently, generic tx data like `v`, `tx`, `txT`, `txInstant`, `op` is only allowed on one attribute
-    expectCompileError(
-      "m(Ns.str.txT.op.int.txT.op)",
-      "[Dsl2Model:apply (16)] Generics (`v`, `tx`, `txT`, `txInstant`, `op`) not allowed on multiple attributes")
-    ok
   }
 
 
@@ -230,7 +208,7 @@ class GetHistory extends Specification {
     // as a molecule we can also look for _any_ attribute involved in an entity's history:
 
     // All attribute assertions/retractions of entity e1
-    Ns(e1).a.v.txT.op.getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op.getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
       (":ns/str", "a", t1, true),
       (":ns/int", 1, t1, true),
       (":ns/str", "a", t2, false),
@@ -240,7 +218,7 @@ class GetHistory extends Specification {
     )
 
     // All attribute assertions of entity e1
-    Ns(e1).a.v.txT.op(true).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op(true).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
       (":ns/str", "a", t1, true),
       (":ns/int", 1, t1, true),
       (":ns/str", "b", t2, true),
@@ -248,28 +226,39 @@ class GetHistory extends Specification {
     )
 
     // All attribute retractions of entity e1
-    Ns(e1).a.v.txT.op(false).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op(false).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
       (":ns/str", "a", t2, false),
       (":ns/int", 1, t3, false)
     )
 
     // All attribute assertions/retractions of entity e1 at t2
-    Ns(e1).a.v.txT(t2).op.getHistory.toSeq.sortBy(t => t._4) === List(
+    Ns(e1).a.v.t(t2).op.getHistory.toSeq.sortBy(t => t._4) === List(
       // str value was updated from "a" to "b"
       (":ns/str", "a", t2, false),
       (":ns/str", "b", t2, true)
     )
 
     // All attribute retractions of entity e1 at t2
-    Ns(e1).a.v.txT(t2).op(false).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t(t2).op(false).getHistory.toSeq.sortBy(t => (t._3, t._4)) === List(
       // str value "a" was retracted at t2
       (":ns/str", "a", t2, false)
     )
 
     // All attribute assertions of entity e1 at t2
-    Ns(e1).a.v.txT(t2).op(true).getHistory.toSeq.sortBy(t => (t._1, t._3)) === List(
+    Ns(e1).a.v.t(t2).op(true).getHistory.toSeq.sortBy(t => (t._1, t._3)) === List(
       // str value "b" was asserted at t2
       (":ns/str", "b", t2, true)
+    )
+
+    // All attribute assertions with value "a" of entity e1
+    Ns(e1).a.v("a").t.op.getHistory.toSeq.sortBy(t => (t._1, t._3)) === List(
+      (":ns/str", "a", t1, true),
+      (":ns/str", "a", t2, false)
+    )
+
+    // All attribute assertions with value "a" of entity e1 at t2
+    Ns(e1).a.v("a").t(t2).op.getHistory.toSeq.sortBy(t => (t._1, t._3)) === List(
+      (":ns/str", "a", t2, false)
     )
   }
 
@@ -282,7 +271,7 @@ class GetHistory extends Specification {
     val date5 = tx5.inst
 
     // Entities with retractions
-    Ns.e.a.v.txT.op_(false).getHistory.toSeq.sortBy(t => (t._1, t._4)) === List(
+    Ns.e.a.v.t.op_(false).getHistory.toSeq.sortBy(t => (t._1, t._4)) === List(
       (e1, ":ns/str", "a", t2),
       (e1, ":ns/int", 1, t3),
       (e2, ":ns/int", 4, t5)
@@ -296,7 +285,7 @@ class GetHistory extends Specification {
 
     // Entities involved in transaction t2
     // Note how the transaction itself is included
-    Ns.e.a.v.txT_(t2).op.getHistory.toSeq.sortBy(t => (t._1, t._4)) === List(
+    Ns.e.a.v.t_(t2).op.getHistory.toSeq.sortBy(t => (t._1, t._4)) === List(
       (tx2.tx, ":db/txInstant", tx2.inst, true), // tx instant
       (e1, ":ns/str", "a", false),
       (e1, ":ns/str", "b", true)

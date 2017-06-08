@@ -1,20 +1,14 @@
 package molecule.coretests.transaction
 import molecule._
+import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest.Ns
-import molecule.coretests.util.schema.CoreTestSchema
+import molecule.util.expectCompileError
 import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
+
 
 class TransactionData extends Specification {
 
-  sequential
-
-  // Create new db from schema
-  implicit val conn = recreateDbFrom(CoreTestSchema)
-
-
-
-  "2 attr + 1 op" >> {
+  "2 attr + 1 op" in new CoreSetup {
 
     val result = Ns.str("Fred").int(1).save
     val eid    = result.eid
@@ -79,4 +73,37 @@ class TransactionData extends Specification {
     )
   }
 
+
+  "Multiple tx attributes" in new CoreSetup {
+    val result1 = Ns.str("Fred").save
+    val tx1     = result1.tx
+    val eid     = result1.eid
+
+    val tx2 = Ns(eid).int(38).update.tx
+
+    // Tacet attributes can be followed by generic attributes
+    Ns(eid).str_.tx.get.head === tx1
+    Ns(eid).int_.tx.get.head === tx2
+
+    Ns(eid).str_.tx.int_.tx.get.head === (tx1, tx2)
+  }
+
+
+  "Optional tx data not allowed" in new CoreSetup {
+    expectCompileError(
+      """m(Ns.int$.tx.str)""",
+      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`tx`).")
+
+    expectCompileError(
+      """m(Ns.int$.t.str)""",
+      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`t`).")
+
+    expectCompileError(
+      """m(Ns.int$.txInstant.str)""",
+      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`txInstant`).")
+
+    expectCompileError(
+      """m(Ns.int$.op.str)""",
+      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`op`).")
+  }
 }

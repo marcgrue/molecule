@@ -4,7 +4,13 @@ import java.util.UUID.randomUUID
 import java.util.{Collection => jColl, List => jList, Map => jMap}
 
 import datomic.Peer
+import molecule.api.MoleculeOutBase
+import molecule.ast.model.{Model, TxMetaData}
+import molecule.ast.transaction.RetractEntity
+import molecule.ops.VerifyModel
 import molecule.schema.Transaction
+import molecule.transform.Model2Transaction
+import molecule.util.Debug
 
 trait Datomic {
 
@@ -41,7 +47,8 @@ trait Datomic {
     }
   }
 
-  // Migration ............................................................................
+
+  // Schema ............................................................................
 
   // From Molecule auto-generated schema transaction data
   def transactSchema(schema: Transaction, identifier: String, protocol: String = "mem"): Conn = {
@@ -55,4 +62,45 @@ trait Datomic {
       case e: Throwable => sys.error("@@@@@@@@@@ " + e.getCause)
     }
   }
+
+
+  // Retracting entities with tx meta data .........................................................
+
+  def retract(eids: Iterable[Long], txMeta: MoleculeOutBase = null)(implicit conn: Conn): TxReport = {
+    val retractStmts = eids.toSeq.distinct map RetractEntity
+
+    val _model = Model(Seq(TxMetaData(txMeta._model.elements)))
+    VerifyModel(_model, "save")
+    val txMetaStmts = Model2Transaction(conn, _model).saveStmts()
+
+    val stmtss = Seq(retractStmts ++ txMetaStmts)
+
+    conn.transact(stmtss)
+  }
+
+  def retractD(eids: Iterable[Long], txMeta: MoleculeOutBase = null)(implicit conn: Conn) {
+    val retractStmts = eids.toSeq.distinct map RetractEntity
+    val _model = Model(Seq(TxMetaData(txMeta._model.elements)))
+    VerifyModel(_model, "save")
+    val transformer = Model2Transaction(conn, _model)
+
+    val stmts = try {
+      Seq(retractStmts ++ transformer.saveStmts())
+    } catch {
+      case e: Throwable =>
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+        Debug("molecule.Datomic.retractD", 1)(1, _model, transformer.stmtsModel)
+        throw e
+    }
+    Debug("molecule.Datomic.retractD", 1)(1, _model, transformer.stmtsModel, stmts)
+  }
+
+  // Hacks to allow multiple overloaded methods with default argument
+  object retract {
+    def apply(eid: Long, txMeta: MoleculeOutBase = null)(implicit conn: Conn): TxReport = retract(Seq(eid), txMeta)(conn)
+  }
+  object retractD {
+    def apply(eid: Long, txMeta: MoleculeOutBase = null)(implicit conn: Conn): Unit = retractD(Seq(eid), txMeta)(conn)
+  }
+
 }

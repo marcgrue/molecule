@@ -71,7 +71,7 @@ case class VerifyModel(model: Model, op: String) {
 
   private def noGenericsInTail = model.elements.tail.collectFirst {
     case Meta(_, _, "e", _, Eq(List(eid))) => iae("noGenerics",
-      s"Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
+      s"Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in $op molecules. Found `e($eid)`")
   }
 

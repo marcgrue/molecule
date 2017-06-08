@@ -84,7 +84,7 @@ class ManySelf extends MoleculeSpec {
       // (instead apply ref to ref attribute as shown above)
       (Person.name("Ann").Friends.e(ben).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `txT`, `txInstant` and `op` " +
+        s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($ben)`"
     }
 

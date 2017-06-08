@@ -3,7 +3,11 @@ package molecule.facade
 import java.util.{Date, UUID, Collection => jCollection, List => jList, Map => jMap}
 
 import molecule.Conn
+import molecule.api._
+import molecule.ast.model.{Model, TxMetaData}
 import molecule.ast.transaction.RetractEntity
+import molecule.ops.VerifyModel
+import molecule.transform.Model2Transaction
 import molecule.util.Debug
 
 import scala.collection.JavaConverters._
@@ -13,10 +17,33 @@ case class EntityFacade(entity: datomic.Entity, conn: Conn, id: Object) {
   private val x = Debug("EntityFacade", 1, 99, false, 3)
 
 
-  // Retract entity ......................................................................
+  // Retract entity ...............................................................................
+  // To retract with tx meta data, use retract(eid, txMetaMolecule) in Datomic
 
   def retractTx = Seq(Seq(RetractEntity(id)))
   def retract: TxReport = conn.transact(retractTx)
+
+  def retractD {x(1, retractTx)}
+
+  // Retract entity with tx meta data .............................................................
+
+  def tx(metaMolecule: MoleculeOutBase) = RetractMolecule(metaMolecule)
+
+  case class RetractMolecule(txMeta: MoleculeOutBase) {
+    val retractStmts = Seq(RetractEntity(id))
+
+    val _model = Model(Seq(TxMetaData(txMeta._model.elements)))
+    VerifyModel(_model, "save")
+    val txMetaStmts = Model2Transaction(conn, _model).saveStmts()
+
+    val stmtss = Seq(retractStmts ++ txMetaStmts)
+
+    // Retract
+    def retract: TxReport = conn.transact(stmtss)
+
+    // Debug retract - for semantic consistency
+    def retractD: Unit = x(2, stmtss)
+  }
 
 
   // Touch - traverse entity attributes ...........................................................

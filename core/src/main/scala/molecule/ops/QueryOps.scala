@@ -34,18 +34,29 @@ object QueryOps extends Helpers {
       find(Var(v), gs, attrV)
 
     def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query = {
-      val genericVars = gs.flatMap {
-        case AttrVar(v)         => Some(Var(attrV))
-        case TxValue            => Some(Var("tx"))
-        case TxValue_           => None
-        case TxTValue(_)        => Some(Var("txT"))
-        case TxTValue_(_)       => None
-        case TxInstantValue(_)  => Some(Var("txInst"))
-        case TxInstantValue_(_) => None
-        case OpValue(_)         => Some(Var("op"))
-        case OpValue_(_)        => None
-        case other              => None
-      }.distinct
+
+      val genericVars = if (gs.isEmpty) Nil else {
+        // unique transaction find variable
+        def gV(g: String): String = g + q.f.outputs.foldLeft(Option.empty[Int]) {
+          case (None, Var(v)) if g == v        => Some(2)
+          case (Some(i), Var(v)) if g + i == v => Some(i + 1)
+          case (count, _)                      => count
+        }.getOrElse("")
+
+        gs.flatMap {
+          case AttrVar(v)         => Some(Var(attrV))
+          case TxValue            => Some(Var(gV("tx")))
+          case TxValue_           => None
+          case TxTValue(_)        => Some(Var(gV("txT")))
+          case TxTValue_(_)       => None
+          case TxInstantValue(_)  => Some(Var(gV("txInst")))
+          case TxInstantValue_(_) => None
+          case OpValue(_)         => Some(Var(gV("op")))
+          case OpValue_(_)        => None
+          case other              => None
+        }.distinct
+      }
+
       val moreOutputs = o match {
         case NoVal => genericVars
         case _     => o +: genericVars
@@ -95,8 +106,22 @@ object QueryOps extends Helpers {
           case ov: OpValue => Some(ov)
         } getOrElse None
 
+        // unique tx variable
+        val tx = "tx" + q.wh.clauses.foldLeft(Option.empty[Int]) {
+          case (None, DataClause(_, _, _, _, Var(txV), _)) if "tx" == txV        => Some(2)
+          case (Some(i), DataClause(_, _, _, _, Var(txV), _)) if "tx" + i == txV => Some(i + 1)
+          case (count, _)                                                        => count
+        }.getOrElse("")
+
         val extendedClause = if (opValue.nonEmpty) {
-          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Var("op"))
+          // unique operation variable
+          val op = "op" + q.wh.clauses.foldLeft(Option.empty[Int]) {
+            case (None, DataClause(_, _, _, _, _, Var(opV))) if "op" == opV        => Some(2)
+            case (Some(i), DataClause(_, _, _, _, _, Var(opV))) if "op" + i == opV => Some(i + 1)
+            case (count, _)                                                        => count
+          }.getOrElse("")
+
+          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Var(op))
         } else if (
           gs.collectFirst {
             case TxValue            => true
@@ -107,38 +132,47 @@ object QueryOps extends Helpers {
             case TxInstantValue_(_) => true
           }.getOrElse(false)
         ) {
-          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), NoBinding)
+          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), NoBinding)
         } else {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, NoBinding, NoBinding)
         }
 
+        // unique txT/txInstant variable
+        def gV(g: String): String = g + q.wh.clauses.foldLeft(Option.empty[Int]) {
+          case (None, Funct(_, _, ScalarBinding(Var(txV)))) if g == txV        => Some(2)
+          case (None, DataClause(_, _, _, Var(txV), _, _)) if g == txV         => Some(2)
+          case (Some(i), Funct(_, _, ScalarBinding(Var(txV)))) if g + i == txV => Some(i + 1)
+          case (Some(i), DataClause(_, _, _, Var(txV), _, _)) if g + i == txV  => Some(i + 1)
+          case (count, _)                                                      => count
+        }.getOrElse("")
+
         val extraClauses = gs.flatMap {
           case TxTValue(None)              => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT")))
+            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT"))))
           )
           case TxTValue(Some(t))           => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))),
-            Funct("=", Seq(Var("txT"), Val(t)), NoBinding)
+            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT")))),
+            Funct("=", Seq(Var(gV("txT")), Val(t)), NoBinding)
           )
           case TxTValue_(Some(t))          => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("txT"))),
-            Funct("=", Seq(Var("txT"), Val(t)), NoBinding)
+            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT")))),
+            Funct("=", Seq(Var(gV("txT")), Val(t)), NoBinding)
           )
           case TxInstantValue(None)        => Seq(
-            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty)
+            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Var(gV("txInst")), Empty)
           )
           case TxInstantValue(Some(date))  => Seq(
-            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInst"), Empty),
+            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Var(gV("txInst")), Empty),
             Funct("=", Seq(Var("txInst"), Val(date)), NoBinding)
           )
           case TxInstantValue_(Some(date)) => Seq(
-            DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Val(date), Empty)
+            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Val(date), Empty)
           )
           case OpValue(Some(added))        => Seq(
-            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added))
+            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Val(added))
           )
           case OpValue_(Some(added))       => Seq(
-            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var("tx"), Val(added))
+            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Val(added))
           )
           case _                           => Nil
         }

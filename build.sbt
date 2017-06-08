@@ -1,6 +1,6 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.12.1",
+  version := "0.12.2",
   scalaVersion := "2.12.2",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -11,7 +11,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.datomic" % "datomic-free" % "0.9.5561",
+    "com.datomic" % "datomic-free" % "0.9.5561.50",
     "org.specs2" %% "specs2" % "2.4.17"
   ),
   // Remove Java directories

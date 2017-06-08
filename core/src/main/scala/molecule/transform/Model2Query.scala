@@ -26,7 +26,7 @@ object Model2Query extends Helpers {
         case Atom(_, _, _, _, MapRemove(_), _, _, _)  => q
 
 
-        // Schema =================================================================================
+        // Generic =================================================================================
 
         case Atom("?", "attr_", _, _, value, _, gs, _) => value match {
           case Distinct                  => q.attr(e, Var(v), v1, v2, gs)
@@ -35,7 +35,7 @@ object Model2Query extends Helpers {
           case Length(Some(Fn(fn, _)))   => q.attr(e, Var(v), v1, v2, gs).func("count", Var(v2), v3)
           case Length(_)                 => q.attr(e, Var(v), v1, v2, gs)
           case Eq(args) if args.size > 1 => q.attr(e, Var(v), v1, v2, gs)
-          case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, gs).where(e, "?", "attr", Val(arg), "", Seq())
+          case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, gs).func("=", Seq(Var(v3), Val(arg)))
           case _                         => q.attr(e, Var(v), v1, v2, gs)
         }
 
@@ -46,7 +46,7 @@ object Model2Query extends Helpers {
           case Length(Some(Fn(fn, _)))   => q.attr(e, Var(v), v1, v2, gs).func("count", Var(v2), v3).find(fn, Seq(), v3, gs)
           case Length(_)                 => q.attr(e, Var(v), v1, v2, gs).find("count", Seq(), v2, gs)
           case Eq(args) if args.size > 1 => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
-          case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, gs).where(e, "?", "attr", Val(arg), "", Seq()).find(v2, gs, v3)
+          case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, gs).func("=", Seq(Var(v3), Val(arg))).find(v2, gs, v3)
           case _                         => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
         }
 
@@ -478,7 +478,7 @@ object Model2Query extends Helpers {
           case BackValue(backNs)             => q.find(e, gs).where(v, a.ns, a.name, Var(e), backNs, gs)
           case Eq((seq: Seq[_]) :: Nil)      => q.find(v, gs).where(e, a, v, gs).orRules(e, a, seq, gs, u(t, v))
           case Eq(arg :: Nil) if uri(t)      => q.find(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Seq())
-          case Eq(arg :: Nil)                => q.find(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Seq())
+          case Eq(arg :: Nil)                => q.find(v, gs).where(e, a, v, gs).compareTo("=", a, v, Val(arg))
           case Eq(args)                      => q.find(v, gs).where(e, a, v, gs).orRules(e, a, args, gs, u(t, v))
           case Neq(args)                     => q.find(v, gs).where(e, a, v, gs).compareTo("!=", a, v, args map Val)
           case Gt(arg)                       => q.find(v, gs).where(e, a, v, gs).compareTo(">", a, v, Val(arg))

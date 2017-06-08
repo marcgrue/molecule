@@ -3,6 +3,7 @@ package molecule.coretests.manipulation
 import molecule._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.util.expectCompileError
 
 class Save extends CoreSpec {
 
@@ -78,47 +79,172 @@ class Save extends CoreSpec {
   }
 
 
-  "Card many attrs" in new CoreSetup {
+  "Card many attrs" >> {
 
-    // Construct a "Data-Molecule" with an attribute value and add it to the database
+    "Vararg, various types" in new CoreSetup {
 
-    Ns.strs("a").save
-    Ns.strs("b", "c").save
-    Ns.strs.get.head === Set("a", "b", "c")
+      Ns.strs("a").save
+      Ns.strs("a", "b", "c").save
+      Ns.strs.get.head === Set("a", "b", "c")
 
-    Ns.ints(1).save
-    Ns.ints(2, 3).save
-    Ns.ints.get.head === Set(1, 2, 3)
+      Ns.longs(1L).save
+      Ns.longs(2L, 3L).save
+      Ns.longs.get.head === Set(1L, 2L, 3L)
 
-    Ns.longs(1L).save
-    Ns.longs(2L, 3L).save
-    Ns.longs.get.head === Set(1L, 2L, 3L)
+      Ns.floats(1.0f).save
+      Ns.floats(2.0f, 3.0f).save
+      Ns.floats.get.head === Set(1.0f, 2.0f, 3.0f)
 
-    Ns.floats(1.0f).save
-    Ns.floats(2.0f, 3.0f).save
-    Ns.floats.get.head === Set(1.0f, 2.0f, 3.0f)
+      Ns.doubles(1.0).save
+      Ns.doubles(2.0, 3.0).save
+      Ns.doubles.get.head === Set(1.0, 2.0, 3.0)
 
-    Ns.doubles(1.0).save
-    Ns.doubles(2.0, 3.0).save
-    Ns.doubles.get.head === Set(1.0, 2.0, 3.0)
+      // Ns.bools not implemented...
 
-    // Ns.bools not implemented...
+      Ns.dates(date1).save
+      Ns.dates(date2, date3).save
+      Ns.dates.get.head === Set(date1, date2, date3)
 
-    Ns.dates(date1).save
-    Ns.dates(date2, date3).save
-    Ns.dates.get.head === Set(date1, date2, date3)
+      Ns.uuids(uuid1).save
+      Ns.uuids(uuid2, uuid3).save
+      Ns.uuids.get.head === Set(uuid1, uuid2, uuid3)
 
-    Ns.uuids(uuid1).save
-    Ns.uuids(uuid2, uuid3).save
-    Ns.uuids.get.head === Set(uuid1, uuid2, uuid3)
+      Ns.uris(uri1).save
+      Ns.uris(uri2, uri3).save
+      Ns.uris.get.head === Set(uri1, uri2, uri3)
 
-    Ns.uris(uri1).save
-    Ns.uris(uri2, uri3).save
-    Ns.uris.get.head === Set(uri1, uri2, uri3)
+      Ns.enums("enum1").save
+      Ns.enums("enum2", "enum3").save
+      Ns.enums.get.head === Set("enum1", "enum2", "enum3")
+    }
 
-    Ns.enums("enum1").save
-    Ns.enums("enum2", "enum3").save
-    Ns.enums.get.head === Set("enum1", "enum2", "enum3")
+    "Vararg" in new CoreSetup {
+
+      // Applying empty arg asserts nothing
+      Ns.ints().save
+      // Nothing asserted
+      Ns.ints.get === List()
+
+      // Entity 1
+      Ns.ints(1).save
+
+      // Saving an applied empty arg doesn't affect other entities
+      Ns.ints().save
+      Ns.ints.get === List(Set(1))
+
+      // Entity 2
+      Ns.ints(2, 3).save
+      // Values of all entities are unified
+      Ns.ints.get.head === Set(1, 2, 3)
+
+      // Can't apply duplicate values
+      expectCompileError(
+        """Ns.int(1).ints(1, 2, 2).save""",
+        "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/ints`:" +
+          "\n2")
+    }
+
+
+    "Vararg, as variables" in new CoreSetup {
+
+      Ns.ints(int1).save
+      Ns.ints(int2, int3).save
+      Ns.ints.get.head === Set(int1, int2, int3)
+
+
+      // Can't apply duplicate values
+
+      expectCompileError(
+        """Ns.ints(int1, int2, int2).save""",
+        "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/ints`:" +
+          "\n__ident__int2")
+
+      // If duplicate values are added with non-equally-named variables we can still catch them at runtime
+      val other2 = 2
+      (Ns.ints(int1, int2, other2).save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply duplicate new values to attribute `:ns/ints`:" +
+        "\n2"
+    }
+
+
+    "Iterables" in new CoreSetup {
+
+      // Set
+      Ns.int(1).ints(Set(1, 2)).save
+      Ns.int_(1).ints.get.head === Set(1, 2)
+
+      // Seq
+      Ns.int(2).ints(Seq(1, 2)).save
+      Ns.int_(2).ints.get.head === Seq(1, 2)
+
+      // List
+      Ns.int(2).ints(List(1, 2)).save
+      Ns.int_(2).ints.get.head === List(1, 2)
+
+      // Iterable
+      Ns.int(4).ints(Iterable(1, 2)).save
+      Ns.int_(4).ints.get.head === Iterable(1, 2)
+
+      // Set with duplicate values not allowed
+      expectCompileError(
+        """Ns.int(5).ints(Set(1, 2, 2)).save""",
+        "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/ints`:" +
+          "\n2")
+
+      // Multiple Iterables
+      Ns.int(6).ints(Set(1, 2), List(3, 4)).save
+      Ns.int_(6).ints.get.head === Set(1, 2, 3, 4)
+
+      // Sets with duplicate values not allowed
+      expectCompileError(
+        """Ns.int(7).ints(Set(1, 2), Set(2, 3)).save""",
+        "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/ints`:" +
+          "\n2")
+    }
+
+    "Iterables as variable" in new CoreSetup {
+
+      val set0   = Set.empty[Int]
+      val set12  = Set(1, 2)
+      val seq122 = Seq(1, 2, 2) // Seq with duplicate values
+      val set23 = Set(2, 3)
+      val set45 = Set(4, 5)
+
+      // Empty Set - no facts asserted
+      Ns.int(0).ints(set0).save
+      // `int` was asserted!
+      Ns.int(0).ints$.get === List((0, None))
+
+      // 1 Set
+      Ns.int(1).ints(set12).save
+      Ns.int_(1).ints.get.head === Set(1, 2)
+
+      // Multiple Iterables
+      // - mixing static/variable data
+      // - empty sets ignored
+      Ns.int(2).ints(Seq(1, 2), set0, set45).save
+      Ns.int_(2).ints.get.head === Set(1, 2, 4, 5)
+
+
+      // Duplicate values in Seq rejected at runtime
+      (Ns.ints(seq122).save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply duplicate new values to attribute `:ns/ints`:" +
+        "\n2"
+
+      // Can't apply duplicate arguments
+      expectCompileError(
+        """Ns.ints(set12, set12, set23).save""",
+        "[Dsl2Model:apply (13)] Can't apply duplicate values to attribute `:ns/ints`:" +
+          "\n__ident__set12")
+
+      // Duplicate values across multiple Seqs rejected at runtime
+      (Ns.ints(set12, set23).save must throwA[IllegalArgumentException])
+        .message === "Got the exception java.lang.IllegalArgumentException: " +
+        "[molecule.transform.Model2Transaction.valueStmts:default]  Can't apply duplicate new values to attribute `:ns/ints`:" +
+        "\n2"
+    }
   }
 
 
@@ -202,7 +328,7 @@ class Save extends CoreSpec {
     }
 
 
-    "attributes multi" in new CoreSetup {
+    "attributes multiple" in new CoreSetup {
       Ns.ints(1)
         .str$(Some("a"))
         .int$(Some(1))
@@ -351,7 +477,7 @@ class Save extends CoreSpec {
     }
 
 
-    "attributes" in new CoreSetup {
+    "attributes, multiple" in new CoreSetup {
 
       Ns.int(1)
         .strs$(Some(Set("a", "b")))

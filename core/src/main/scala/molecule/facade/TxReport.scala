@@ -36,7 +36,6 @@ case class TxReport(txResult: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) {
 
   def t: Long = dbAfter.basisT()
   def tx: Long = Peer.toTx(t).asInstanceOf[Long]
-//  def tx: Object = Peer.toTx(t)
   def txE: datomic.Entity = dbAfter.entity(tx)
   def inst: Date = txE.get(":db/txInstant").asInstanceOf[Date]
 }

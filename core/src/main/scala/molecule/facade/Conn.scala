@@ -126,7 +126,8 @@ case class Conn(datConn: datomic.Connection) {
 
   // Convenience function for querying directly against Datomic
   // Note how we can still use a test db!
-  def q(query: String, input: String*) = {
+  def q(query: String, input: String*): Iterable[jList[AnyRef]] = q(query, db, input: _*)
+  def q(query: String, db: Database, input: String*): Iterable[jList[AnyRef]] = {
     val args = db +: input.toSeq
     Peer.q(query, args: _*).asScala
   }

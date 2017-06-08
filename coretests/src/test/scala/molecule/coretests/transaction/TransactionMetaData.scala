@@ -145,4 +145,109 @@ class TransactionMetaData extends CoreSpec {
     m(Ns.str.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
     m(Ns.str ~ Ns.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
   }
+
+
+  "Save" in new CoreSetup {
+
+    // `tx` and meta attributes with/without underscore gives same result
+    Ns.int(1).tx_(Ns.str_("a")).save
+    Ns.int(2).tx_(Ns.str("b")).save
+    Ns.int(3).tx(Ns.str("c")).save
+
+    // Without the tx value
+    Ns.int.tx_(Ns.str).get.toSeq.sorted === List(
+      (1, "a"),
+      (2, "b"),
+      (3, "c")
+    )
+  }
+
+
+  "Update" in new CoreSetup {
+
+    // tx 1: save
+    val e = Ns.int(1).tx(Ns.str("a")).save.eid
+
+    // tx2: Update without tx meta data
+    Ns(e).int(2).update
+
+    // tx3: Update with tx meta data
+    Ns(e).int(3).tx(Ns.str("b")).update
+
+
+    // History without tx meta data
+    Ns(e).int.t.op.getHistory.toSeq.sortBy(r => (r._2, r._3)) === List(
+      // tx 1
+      (1, 1028, true), // 1 asserted (save)
+
+      // tx 2
+      (1, 1030, false), // 1 retracted
+      (2, 1030, true), // 2 asserted (update)
+
+      // tx 3
+      (2, 1031, false), // 2 retracted
+      (3, 1031, true) // 3 asserted (update)
+    )
+
+    // History with tx meta data
+    Ns(e).int.t.op.tx_(Ns.str).getHistory.toSeq.sortBy(r => (r._2, r._3)) === List(
+      // tx 1
+      (1, 1028, true, "a"), // 1 asserted (save)
+
+      // (tx2 has no tx meta data)
+
+      // tx 3
+      (2, 1031, false, "b"), // 2 retracted
+      (3, 1031, true, "b") // 3 asserted (update)
+    )
+  }
+
+
+  "Retract" in new CoreSetup {
+
+    val e = Ns.int(1).tx(Ns.str("a")).save.eid
+
+    // Retract entity with tx meta data
+    e.tx(Ns.str("b")).retract
+
+    Ns(e).int.t.op.getHistory.toSeq.sortBy(r => (r._2, r._3)) === List(
+      (1, 1028, true), // 1 asserted (save)
+      (1, 1030, false) // 1 retracted (delete)
+    )
+
+    Ns(e).int.t.op.tx_(Ns.str).getHistory.toSeq.sortBy(r => (r._2, r._3)) === List(
+      (1, 1028, true, "a"),
+
+      // 1 was retracted with tx meta data "b"
+      (1, 1030, false, "b")
+    )
+  }
+
+
+  "Retract multiple" in new CoreSetup {
+
+    val List(e1, e2, e3, tx) = Ns.int.tx_(Ns.str_("a")) insert List(1, 2, 3) eids
+
+    // Retract multiple entities with tx meta data
+    retract(Seq(e1, e2), Ns.str("b"))
+
+    Ns.int.t.op.getHistory.toSeq.sortBy(r => (r._2, r._1)) === List(
+      (1, 1028, true),
+      (2, 1028, true),
+      (3, 1028, true),
+
+      (1, 1032, false),
+      (2, 1032, false)
+    )
+
+    Ns.int.t.op.tx_(Ns.str).getHistory.toSeq.sortBy(r => (r._2, r._1, r._3)) === List(
+      (1, 1028, true, "a"),
+      (2, 1028, true, "a"),
+      (3, 1028, true, "a"),
+
+      // 1 and 2 were retracted with tx meta data "b"
+      (1, 1032, false, "b"),
+      (2, 1032, false, "b")
+    )
+  }
 }

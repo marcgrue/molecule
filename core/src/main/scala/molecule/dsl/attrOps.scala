@@ -98,7 +98,7 @@ trait ManyOps[Ns, In, S, T] {
   // Empty `apply` in update molecule retracts all values!
   def apply()                                      : Ns with Attr = ???
   def apply(values: T*)                            : Ns with Attr = ???
-  def apply(set: S, moreSets: S*)                  : Ns with Attr = ???
+  def apply(vs: Iterable[T], vss: Iterable[T]*)    : Ns with Attr = ???
 
   def add(value: T, more: T*)                      : Ns with Attr = ???
   def add(values: Iterable[T])                     : Ns with Attr = ???
@@ -117,7 +117,7 @@ trait MapAttrOps[Ns, In, M, T] {
   def apply(pair: (String, T), morePairs: (String, T)*)       : Ns with Attr = ???
   def apply(pairs: Iterable[(String, T)])                     : Ns with Attr = ???
   def apply(pairs: Or[(String, T)])                           : Ns with Attr = ???
-  def apply(map: M)                                           : Ns with Attr = ???
+  def apply(map: Map[String, T])                              : Ns with Attr = ???
 
   def add(pair: (String, T), morePairs: (String, T)*)         : Ns with Attr = ???
   def add(pairs: Iterable[(String, T)])                       : Ns with Attr = ???

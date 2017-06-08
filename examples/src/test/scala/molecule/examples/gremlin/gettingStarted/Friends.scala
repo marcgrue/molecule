@@ -115,7 +115,7 @@ class Friends extends MoleculeSpec {
     // one query as input for the next one.
 
     // First find ids of software projects that marko has participated in
-    val markoSoftware = Person.name_("marko").software.get.head.toSeq
+    val markoSoftware = Person.name_("marko").software.get.head
 
     // Then find names of persons that have participated in those projects
     Person.name.software_(markoSoftware).get === List("peter", "josh", "marko")
