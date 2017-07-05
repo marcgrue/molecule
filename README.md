@@ -76,7 +76,7 @@ sbt.version=0.13.13
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.4.2")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.4.3")
 ```
 
 `build.sbt`:

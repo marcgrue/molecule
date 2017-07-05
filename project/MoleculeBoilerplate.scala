@@ -581,11 +581,7 @@ object MoleculeBoilerplate {
         case a: Attr                                                            => Seq(tpe("ref"), card("many")) ++ a.options.map(_.datomicKeyValue)
         case unexpected                                                         => sys.error(s"Unexpected attribute statement:\n" + unexpected)
       }
-      val all = (ident +: stmts) ++ Seq(
-        """":db/id"                , Peer.tempid(":db.part/db")""",
-        """":db.install/_attribute", ":db.part/db""""
-      )
-      s"Util.map(${all.mkString(",\n             ")})"
+      s"Util.map(${(ident +: stmts).mkString(",\n             ")})"
     }
 
     def enums(part: String, ns: String, a: String, es: Seq[String]) = {
