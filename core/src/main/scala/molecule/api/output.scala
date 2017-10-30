@@ -159,7 +159,7 @@ trait MoleculeOutBase extends MoleculeBase with Molecule
 
 trait MoleculeOut[T] extends MoleculeOutBase with Molecule {
   def get                        (implicit conn: Conn): Iterable[T]
-  def get     (n: Int)           (implicit conn: Conn): Iterable[T] = get(conn).take(n)
+  def get     (n: Int)           (implicit conn: Conn): Iterable[T]
   def getAsOf (t: Long)          (implicit conn: Conn): Iterable[T] = get(conn.usingTempDb(AsOf(TxLong(t))))
   def getAsOf (txR: TxReport)    (implicit conn: Conn): Iterable[T] = get(conn.usingTempDb(AsOf(TxLong(txR.t))))
   def getAsOf (d: Date)          (implicit conn: Conn): Iterable[T] = get(conn.usingTempDb(AsOf(TxDate(d))))
@@ -171,6 +171,7 @@ trait MoleculeOut[T] extends MoleculeOutBase with Molecule {
   def getHistory                 (implicit conn: Conn): Iterable[T] = get(conn.usingTempDb(History))
 
   def getRaw                        (implicit conn: Conn): Iterable[lObj]
+  def getRaw     (n: Int)           (implicit conn: Conn): Iterable[lObj]
   def getRawAsOf (t: Long)          (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(AsOf(TxLong(t))))
   def getRawAsOf (d: Date)          (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(AsOf(TxDate(d))))
   def getRawSince(t: Long)          (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(Since(TxLong(t))))
@@ -178,6 +179,9 @@ trait MoleculeOut[T] extends MoleculeOutBase with Molecule {
   def getRawWith (txMolecules: SS*) (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
   def getRawWith (txs: lObj)        (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(With(txs.asInstanceOf[LL])))
   def getRawHistory                 (implicit conn: Conn): Iterable[lObj] = getRaw(conn.usingTempDb(History))
+
+  def getJson        (implicit conn: Conn): String
+  def getJson(n: Int)(implicit conn: Conn): String
 }
 
 abstract class Molecule0(val _model: Model, val _query: Query) extends MoleculeOutBase

@@ -1,7 +1,6 @@
 package molecule.coretests.ref
 
 import molecule._
-
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -12,7 +11,6 @@ class NestedTests extends CoreSpec {
     m(Ns.str.Refs1 * Ref1.enum1) insert List(("d", List("enum11")))
     m(Ns.str.Refs1 * Ref1.enum1).get === List(("d", List("enum11")))
   }
-
 
   "Nested enum after attr" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.int1.enum1) insert List(("e", List((12, "enum12"))))
@@ -97,6 +95,83 @@ class NestedTests extends CoreSpec {
   }
 
 
+  "Flat ManyRef simple" in new CoreSetup {
+    Ns.str.Refs1.int1.Refs2.int2.insert("a", 1, 2)
+
+    Ns.str.Refs1.int1.Refs2.int2.get === List(
+      ("a", 1, 2)
+    )
+
+    m(Ns.str.Refs1.int1.Refs2 * Ref2.int2).get === List(
+      ("a", 1, List(2))
+    )
+
+    m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).get === List(
+      (1, List(2))
+    )
+
+    m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(
+      ("a", List(2))
+    )
+
+    m(Ns.str_("a").Refs1.Refs2 * Ref2.int2).get === List(
+      List(2)
+    )
+  }
+
+
+  "Flat ManyRef + many" in new CoreSetup {
+    m(Ns.str.Refs1.*(Ref1.int1.Refs2 * Ref2.int2)) insert List(
+      ("a", List(
+        (1, List(11)),
+        (2, List(21, 22)))),
+      ("b", List(
+        (3, List(31, 32)),
+        (4, List(41))))
+    )
+
+    m(Ns.str.Refs1.*(Ref1.int1.Refs2 * Ref2.int2)).get === List(
+      ("a", List(
+        (1, List(11)),
+        (2, List(21, 22)))),
+      ("b", List(
+        (3, List(31, 32)),
+        (4, List(41))))
+    )
+
+    m(Ns.str.Refs1.int1.Refs2 * Ref2.int2).get === List(
+      ("a", 1, List(11)),
+      ("a", 2, List(21, 22)),
+      ("b", 3, List(31, 32)),
+      ("b", 4, List(41))
+    )
+
+    m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).get === List(
+      (1, List(11)),
+      (2, List(21, 22))
+    )
+
+    m(Ns.str_("a").Refs1.int1_(2).Refs2 * Ref2.int2).get === List(
+      List(21, 22)
+    )
+  }
+
+
+  "Flat ManyRef + many with extra attrs" in new CoreSetup {
+
+    m(Ns.str.Refs1.*(Ref1.int1.str1.Refs2 * Ref2.int2.str2)) insert List(
+      ("a", List(
+        (1, "x", List((11, "xx"), (12, "xxx"))),
+        (2, "y", List((21, "yy"), (22, "yyy")))))
+    )
+
+    m(Ns.str.Refs1.int1.str1.Refs2 * Ref2.int2.str2).get === List(
+      ("a", 1, "x", List((11, "xx"), (12, "xxx"))),
+      ("a", 2, "y", List((21, "yy"), (22, "yyy")))
+    )
+  }
+
+
   "None - one" in new CoreSetup {
     m(Ns.str.Refs1.Refs2 * Ref2.int2) insert List(("a", List(2)))
 
@@ -110,36 +185,45 @@ class NestedTests extends CoreSpec {
         (1, List(11)))),
       ("b", List(
         (2, List(21, 22)),
-        (3, List(31)))))
+        (3, List(31))))
+    )
 
     m(Ns.str.Refs1 * (Ref1.int1.Refs2 * Ref2.int2)).get === List(
       ("a", List(
         (1, List(11)))),
       ("b", List(
         (2, List(21, 22)),
-        (3, List(31)))))
-
+        (3, List(31))))
+    )
 
     m(Ns.str.Refs1.int1.Refs2.int2).get.toSeq.sortBy(r => (r._1, r._2, r._3)) === List(
       ("a", 1, 11),
       ("b", 2, 21),
       ("b", 2, 22),
-      ("b", 3, 31))
+      ("b", 3, 31)
+    )
 
     m(Ns.str.Refs1 * Ref1.int1.Refs2.int2).get === List(
-      ("a", List((1, 11))),
-      ("b", List((2, 22), (2, 21), (3, 31))))
+      ("a",List((1,11))),
+      ("b",List((2,21))),
+      ("b",List((2,22))),
+      ("b",List((3,31)))
+    )
 
+    // Still grouped by ref1 values
+    m(Ns.str.Refs1 * Ref1.Refs2.int2).get === List(
+      ("a", List(11)),
+      ("b", List(21)),
+      ("b", List(22)),
+      ("b", List(31))
+    )
 
     m(Ns.str.Refs1.Refs2.int2).get.toSeq.sortBy(r => (r._1, r._2)) === List(
       ("a", 11),
       ("b", 21),
       ("b", 22),
-      ("b", 31))
-
-    m(Ns.str.Refs1 * Ref1.Refs2.int2).get === List(
-      ("a", List(11)),
-      ("b", List(22, 21, 31)))
+      ("b", 31)
+    )
   }
 
 

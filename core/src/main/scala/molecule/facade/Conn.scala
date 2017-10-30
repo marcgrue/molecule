@@ -132,7 +132,7 @@ case class Conn(datConn: datomic.Connection) {
     Peer.q(query, args: _*).asScala
   }
 
-  def query(m: Model, q: Query): Iterable[jList[AnyRef]] = {
+  def query(m: Model, q: Query, n: Int = -1): Iterable[jList[AnyRef]] = {
     val p = (expr: QueryExpr) => Query2String(q).p(expr)
     val rules = "[" + (q.i.rules map p mkString " ") + "]"
     val dbUsed = if (_adhocDb.isDefined) {
@@ -165,7 +165,10 @@ case class Conn(datConn: datomic.Connection) {
     val allInputs: Seq[AnyRef] = first ++ q.inputs
 
     try {
-      Peer.q(q.toMap, allInputs: _*).asScala
+      if(n > 0)
+        Peer.q(q.toMap, allInputs: _*).asScala.take(n)
+      else
+        Peer.q(q.toMap, allInputs: _*).asScala
     } catch {
       case e: Throwable => throw QueryException(e, m, q, allInputs, p)
     }

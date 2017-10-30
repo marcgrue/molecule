@@ -1,6 +1,13 @@
 package molecule.boilerplate
 import scala.language.higherKinds
 
+sealed trait Getter
+trait TupleGetter extends Getter
+trait JsonGetter extends Getter
+trait NoGetter extends Getter
+case object TupleGetter extends TupleGetter
+case object JsonGetter extends JsonGetter
+case object NoGetter extends NoGetter
 
 trait Out_0[Ns0, Ns1[_], In1_0[_], In1_1[_, _]]
   extends NS0[Nothing]
