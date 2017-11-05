@@ -7,7 +7,7 @@ import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
 
-trait MakeMolecule[Ctx <: Context] extends GetTuples7[Ctx] {
+trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
   import c.universe._
 
 
@@ -23,22 +23,26 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples7[Ctx] {
     val MoleculeTpe = molecule_o(OutTypes.size)
     val (model, basicsTree) = basics(dsl)
 
-    val jsonGetters = if(jsonGetter <:< weakTypeOf[JsonGetter]) {
-      q"""
-          private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-          def getJson        (implicit conn: Conn): String = json(-1) // All
-          def getJson(n: Int)(implicit conn: Conn): String = json(n)
-       """
-    } else {
-      q"""
-          def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
-          def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
-       """
-    }
-
     model.elements.collectFirst {
-      case nested: molecule.ast.model.Nested if nested.bond.ns.nonEmpty =>
-        val treeX =
+      case nested: molecule.ast.model.Nested if nested.bond.ns.nonEmpty => {
+//        x(1, jsonGetter)
+
+        val jsonGetters = if (jsonGetter <:< weakTypeOf[JsonGetter]) {
+          q"""
+              import molecule.factory.JsonBaseNested
+
+//              private def json(n: Int): String = {nestedJson(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
+              private def json(n: Int): String = JsonBaseNested(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
+              def getJson        (implicit conn: Conn): String = json(-1) // All
+              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+           """
+        } else {
+          q"""
+              def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
+              def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
+           """
+        }
+        expr(
           q"""
             ..$basicsTree
 
@@ -46,36 +50,34 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples7[Ctx] {
               val _modelE = r.modelE
               val _queryE = r.queryE
 
-              private def nestedTuples(conn: Conn, n: Int) = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
+              private def nestedTuples(n: Int) = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
 
-              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, -1) // All
-              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, n)
+              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(-1) // All
+              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(n)
 
-              def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
-              def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
+              ..$jsonGetters
+
+//              def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
+//              def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
             }
           """
-
-        val tree =
-          q"""
-            ..$basicsTree
-            ..${nestedResolver(OutTypes)}
-
-            new $MoleculeTpe[..$OutTypes](r.model, r.query) with NestedResolver with Util {
-              val _modelE = r.modelE
-              val _queryE = r.queryE
-
-              private def nestedTuples(conn: Conn, n: Int) = getNestedTuples(conn.query(_modelE, _queryE, n))
-
-              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, -1) // All
-              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, n)
-
-              def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
-              def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for nested data structures.")
-            }
-          """
-        expr(treeX)
+        )
+      }
     } getOrElse {
+//      x(2, jsonGetter)
+
+      val jsonGetters = if(jsonGetter <:< weakTypeOf[JsonGetter]) {
+        q"""
+            private def json(n: Int): String = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
+            def getJson        (implicit conn: Conn): String = json(-1) // All
+            def getJson(n: Int)(implicit conn: Conn): String = json(n)
+         """
+      } else {
+        q"""
+            def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
+            def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("Please add an `implicit val useJson = JsonGetter` in scope to use `getJson`.")
+         """
+      }
       expr(
         q"""
           ..$basicsTree

@@ -34,27 +34,6 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
     }
   }
 
-  def cast2(query: Tree, row: Tree, tpe0: Tree, i: Tree): Tree = {
-    val value: Tree =
-      q"""
-         val value = if($i >= $row.size) null else $row.get($i)
-//         println(i + ": " + value.toString)
-         value
-        """
-//    val tq"$name: $TypeName" = tq"$tpe0"
-    val tpe: Type =  c.typecheck(tpe0).tpe
-    tpe match {
-      case t if t <:< typeOf[Option[Map[String, _]]] => castOptionMap(value, t)
-      case t if t <:< typeOf[Option[Set[_]]]         => castOptionSet(value, t)
-      case t if t <:< typeOf[Option[_]]              => castOption(value, t)
-      case t if t <:< typeOf[Map[String, _]]         => castMap(value, t)
-      case t if t <:< typeOf[Vector[_]]              => q"$value.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]"
-      case t if t <:< typeOf[Stream[_]]              => q"$value.asInstanceOf[LazySeq].asScala.toStream.asInstanceOf[$t]"
-      case t if t <:< typeOf[Set[_]]                 => castSet(value, t)
-      case t                                         => castType(query, value, t, i)
-    }
-  }
-
   def castType(query: Tree, value: Tree, tpe: Type, i: Tree) = tpe match {
     case t if t <:< typeOf[Long]       => q"(if($value.isInstanceOf[String]) $value.asInstanceOf[String].toLong else $value).asInstanceOf[$t]"
     case t if t <:< typeOf[Double]     => q"(if($value.isInstanceOf[String]) $value.asInstanceOf[String].toDouble else $value).asInstanceOf[$t]"
@@ -434,86 +413,53 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
 
   // Nested ------------------------------------------------------------------
 
-  def getFlatModel =
-    q"""
-       def recurse(element: Element): Seq[Element] = element match {
-          case n: Nested                                             => n.elements flatMap recurse
-          case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
-          case a: Atom                                               => Seq(a)
-          case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
-          case m: Meta                                               => Seq(m)
-          case other                                                 => Seq()
-        }
-        val elements = _modelE.elements flatMap recurse
-        if (elements.size != _queryE.f.outputs.size)
-          sys.error("[FactoryBase:castNestedTpls]  Flattened model elements (" + elements.size + ") don't match query outputs (" + _queryE.f.outputs.size + "):\n" +
-            _modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + _queryE + "\n----------------\n")
-        elements
-     """
-
-  def sortRows(entityIndexes: Tree, rows: Tree) = {
-    q"""
-       $entityIndexes match {
-          case List(a)                               => $rows.sortBy(row => row.get(a).asInstanceOf[Long])
-          case List(a, b)                            => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long]))
-          case List(a, b, c)                         => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long]))
-          case List(a, b, c, d)                      => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long]))
-          case List(a, b, c, d, e)                   => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long]))
-          case List(a, b, c, d, e, f)                => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long]))
-          case List(a, b, c, d, e, f, g)             => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long]))
-          case List(a, b, c, d, e, f, g, h)          => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long]))
-          case List(a, b, c, d, e, f, g, h, i)       => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long]))
-          case List(a, b, c, d, e, f, g, h, i, j)    => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => row.get(j).asInstanceOf[Long])
-          case List(a, b, c, d, e, f, g, h, i, j, k) => $rows.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => (row.get(j).asInstanceOf[Long], row.get(k).asInstanceOf[Long]))
-       }
-     """
-  }
-
 
   def nestedTuples(query: Tree, rows: Tree, tpes: Seq[Type]) = {
     q"""
-        if ($rows.isEmpty) {
-          Seq[(..$tpes)]()
-        } else {
-          val flatModel = $getFlatModel
+      if ($rows.isEmpty) {
+        Seq[(..$tpes)]()
+      } else {
+        ..${nestedTuples1(query, rows, tpes)}
+        nestedTuples1.get
+      }
+     """
+  }
 
-          val entityIndexes = flatModel.zipWithIndex.collect {
-            case  (Meta(_, _, _, _, IndexVal), i) => i
-          }
+  def nestedTuples1(query: Tree, rows: Tree, tpes: Seq[Type]) = {
+    q"""
+        import molecule.factory.TupleBaseNested
+        val tupleBaseNested = TupleBaseNested(_modelE, _queryE)
+        import tupleBaseNested._
 
-          val manyRefIndexes = flatModel.zipWithIndex.collect {
-            case  (Meta(_, "many-ref", _, _, IndexVal), i) => i
-          }
+        val doDebug = false
+        def debug(s: String): Unit = {
+          if(doDebug)
+            println(s)
+        }
 
-          val indexMap = flatModel.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-            case ((rawIndex, indexMap), (meta, i)) => meta match {
-              case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
-              case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
-              case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-            }
-          }._2.toMap
+        object nestedTuples1 {
 
-//println("===================================================================================")
-//println(_model)
-//println(_modelE)
-//println(_queryE)
-//println(_queryE.datalog)
-//println("---- ")
-flatModel foreach println
-println("---- " + entityIndexes)
-println("---- " + indexMap)
+//debug("===================================================================================")
+//debug(_model)
+//debug(_modelE)
+//debug(_queryE)
+//debug(_queryE.datalog)
+//debug("---- ")
+//flatModel foreach debug
+//debug("---- " + entityIndexes)
+//debug("---- " + indexMap)
 
-          val sortedRows = ${sortRows(q"entityIndexes", q"$rows.toSeq")}
+         val sortedRows = sortRows($rows.toSeq, entityIndexes)
 
-sortedRows foreach println
+//sortedRows foreach debug
 
           val rowCount = sortedRows.length
 
-          sortedRows.foldLeft((Seq[(..$tpes)](), None: Option[(..$tpes)], Seq(0L), Seq[Any](0L), 1)) { case ((accTpls0, prevTpl, prevEntities, prevRow, r), row0) =>
+          val tuples = sortedRows.foldLeft((Seq[(..$tpes)](), None: Option[(..$tpes)], Seq(0L), Seq[Any](0L), 1)) { case ((accTpls0, prevTpl, prevEntities, prevRow, r), row0) =>
 
             val row = row0.asScala.asInstanceOf[Seq[Any]]
 
-println("--- " + r + " ---------------------------------------------------")
+//debug("--- " + r + " ---------------------------------------------------")
             val currentEntities = entityIndexes.map(i => row.apply(i).asInstanceOf[Long])
             val manyRefEntities = manyRefIndexes.map(i => row.apply(i).asInstanceOf[Long])
 
@@ -521,40 +467,43 @@ println("--- " + r + " ---------------------------------------------------")
             val isLastRow = rowCount == r
             val isNewTpl = prevEntities.head != 0 && currentEntities.head != prevEntities.head
             val isNewManyRef = prevEntities.head != 0 && manyRefEntities.nonEmpty && !prevEntities.contains(manyRefEntities.head)
-println("currentEntities: " + currentEntities)
-println("manyRefEntities: " + manyRefEntities)
-println("TPL0 " + prevTpl + "    " + isNewTpl + "    " + isNewManyRef)
+//debug("currentEntities: " + currentEntities)
+//debug("manyRefEntities: " + manyRefEntities)
+//debug("TPL0 " + prevTpl + "    " + isNewTpl + "    " + isNewManyRef)
 
             val tpl = ${resolveNested(query, tpes, q"prevTpl", q"prevRow", q"row", 0, 1, q"entityIndexes.size - 1", 1)}
 
-println("TPL1 " + tpl)
+//debug("TPL1 " + tpl)
 
             val accTpls = if (isLastRow && (isNewTpl || isNewManyRef)) {
               // Add previous and current tuple
-println("TPL2 " + (accTpls0 ++ Seq(prevTpl.get, tpl)).toString)
+//debug("TPL2 " + (accTpls0 ++ Seq(prevTpl.get, tpl)).toString)
               accTpls0 ++ Seq(prevTpl.get, tpl)
 
             } else if (isLastRow) {
               // Add current tuple
-println("TPL3 " + (accTpls0 :+ tpl).toString)
+//debug("TPL3 " + (accTpls0 :+ tpl).toString)
               accTpls0 :+ tpl
 
             } else if (isNewTpl || isNewManyRef) {
               // Add finished previous tuple
-println("TPL4 " + (accTpls0 :+ prevTpl.get).toString)
+//debug("TPL4 " + (accTpls0 :+ prevTpl.get).toString)
               accTpls0 :+ prevTpl.get
 
             } else {
               // Continue building current tuple
-println("TPL5 " + accTpls0.toString)
+//debug("TPL5 " + accTpls0.toString)
               accTpls0
             }
 
-//println("ACC " + accTpls)
+//debug("ACC " + accTpls)
 
             (accTpls, Some(tpl), currentEntities, row, r + 1)
           }._1
-        }
+
+          def get = tuples
+
+        } // object nestedTuples1
       """
   }
 
@@ -562,76 +511,99 @@ println("TPL5 " + accTpls0.toString)
 
     def resolve(nestedTpes: Seq[Type], typeIndex: Int): Tree = {
       val rowIndex = entityIndex + shift + typeIndex
+//val tab = "  " * $rowIndex
+//debug(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
       q"""
-        val prevEnt = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
-        val curEnt = $row.apply($entityIndex).asInstanceOf[Long]
-        val isNewNested = if (prevEnt == 0L) true else prevEnt != curEnt
-        val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
+        object resolve {
+          val prevEnt = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
+          val curEnt = $row.apply($entityIndex).asInstanceOf[Long]
+          val isNewNested = if (prevEnt == 0L) true else prevEnt != curEnt
+          val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
 
-val tab = "  " * $rowIndex
-println(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
-println(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
+//debug(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
 
-        if ($prevTpl.isEmpty || isNewNested|| isNewManyRef) {
 
-          // ==========================================================================
+          val result = if ($prevTpl.isEmpty || isNewNested|| isNewManyRef) {
+            // ==========================================================================
 
-          val toAdd = ${
-            resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]",
-              prevRow, row, rowIndex, depth + 1, maxDepth, shift)
-          }
-println(tab + "a toAdd  : " + toAdd)
-println(tab + "a added  : " + Seq(toAdd))
-          Seq(toAdd)
+//debug(tab + "a prevTpl: " + prevTpl)
 
-        } else if ($prevTpl.get.isInstanceOf[Seq[_]]) {
+            val toAdd = ${
+        resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]",
+          prevRow, row, rowIndex, depth + 1, maxDepth, shift)
+      }
+//debug(tab + "a toAdd  : " + toAdd)
+//debug(tab + "a added  : " + Seq(toAdd))
 
-          // ==========================================================================
+            Seq(toAdd)
 
-println(tab + "b prevTpl: " + $prevTpl)
 
-          val toAdd = ${
-          resolveNested(query, nestedTpes,
-            q"Some($prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-              prevRow, row, rowIndex, depth + 1, maxDepth, shift)
-          }.asInstanceOf[(..$nestedTpes)]
-println(tab + "b toAdd  : " + toAdd)
+          } else if ($prevTpl.isDefined && $prevTpl.get.isInstanceOf[::[_]]) {
+            // ==========================================================================
 
-          val added = $prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ toAdd
-println(tab + "b added  : " + added)
-          added
+//debug(tab + "b prevTpl: " + prevTpl + "    " + prevTpl.getOrElse(null).getClass)
+//debug(tab + "b prevTpl: " + prevTpl.getOrElse(null).isInstanceOf[Seq[_]])
+//debug(tab + "b prevTpl: " + prevTpl.getOrElse(null).isInstanceOf[::[_]])
 
-        } else {
+//debug(tab + "c tpes   : " + ..{tpes.map(_.toString)})
+//debug(tab + "c nestedt: " + ..{nestedTpes.map(_.toString)})
 
-          // ==========================================================================
 
-println(tab + "c prevTpl: " + $prevTpl)
+            val tpl1: (..$tpes) = $prevTpl.get.asInstanceOf[(..$tpes)]
+//debug(tab + "c tpl1   : " + tpl1 + "    " + prevTpl.get.getClass + "    " + tpl1.getClass)
 
-          val tpl1 = $prevTpl.get.asInstanceOf[(..$tpes)]
-println(tab + "c tpl1   : " + tpl1)
+            val toAdd = ${
+        resolveNested(query, nestedTpes,
+          q"Some($prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
+          prevRow, row, rowIndex, depth + 1, maxDepth, shift)
+      }.asInstanceOf[(..$nestedTpes)]
+//debug(tab + "b toAdd  : " + toAdd)
 
-          val tpl2 = tpl1.productElement($typeIndex).asInstanceOf[Seq[(..$nestedTpes)]]
-println(tab + "c tpl2   : " + tpl2)
+            val added = $prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ toAdd
+//debug(tab + "b added  : " + added)
+            added
 
-          val toAdd = ${
-          resolveNested(query, nestedTpes,
-            q"Some($prevTpl.get.asInstanceOf[(..$tpes)].productElement($typeIndex).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
-              prevRow, row, rowIndex, depth + 1, maxDepth, shift)
-          }.asInstanceOf[(..$nestedTpes)]
 
-          val adjustedIndex = indexMap($rowIndex)
-          val newNested = $prevRow.apply(adjustedIndex).asInstanceOf[Long] != $row.apply(adjustedIndex).asInstanceOf[Long] || $depth == $maxDepth
-          val isNewManyRef = manyRefIndexes.nonEmpty && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
-println(tab + "c toAdd  : " + toAdd)
-
-          val added = if (newNested) {
-            tpl2 :+ toAdd
           } else {
-            tpl2.init :+ toAdd
-          }
-println(tab + "c added  : " + added + "    " + newNested + "    " + isNewManyRef)
-          added
+            // ==========================================================================
+//debug(tab + "c prevTpl: " + prevTpl)
+
+            ${
+        if(tpes.size == 1) {
+          // Even though we never get here, the compiler only accepts this
+          q"null.asInstanceOf[(..$nestedTpes)]"
+        } else {
+          q"""
+            val tpl1 = $prevTpl.get.asInstanceOf[(..$tpes)]
+//debug(tab + "c tpl1   : " + tpl1 + "    " + prevTpl.getClass + "    " + tpl1.getClass)
+
+            val tpl2 = tpl1.productElement($typeIndex).asInstanceOf[Seq[(..$nestedTpes)]]
+//debug(tab + "c tpl2   : " + tpl2)
+
+            val toAdd = ${
+            resolveNested(query, nestedTpes,
+              q"Some($prevTpl.get.asInstanceOf[(..$tpes)].productElement($typeIndex).asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
+              prevRow, row, rowIndex, depth + 1, maxDepth, shift)
+          }.asInstanceOf[(..$nestedTpes)]
+
+            val adjustedIndex = indexMap($rowIndex)
+            val newNested = $prevRow.apply(adjustedIndex).asInstanceOf[Long] != $row.apply(adjustedIndex).asInstanceOf[Long] || $depth == $maxDepth
+            val isNewManyRef = manyRefIndexes.nonEmpty && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
+//debug(tab + "c toAdd  : " + toAdd)
+
+            val added = if (newNested) {
+              tpl2 :+ toAdd
+            } else {
+              tpl2.init :+ toAdd
+            }
+//debug(tab + "c added  : " + added + "    " + newNested + "    " + isNewManyRef)
+            added
+           """
         }
+      }
+          }
+        }
+        resolve.result
        """
     }
 
@@ -640,13 +612,16 @@ println(tab + "c added  : " + added + "    " + newNested + "    " + isNewManyRef
 
         case tpe if tpe <:< weakTypeOf[Seq[Product]] =>
           val nestedTpes = tpe.typeArgs.head.typeArgs
+//          x(2, tpe, nestedTpes)
           (shift + nestedTpes.length, vs :+ resolve(nestedTpes, typeIndex))
 
         case tpe if tpe <:< weakTypeOf[Seq[_]] =>
           val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
+//          x(3, tpe, nestedTpe)
           (shift + 1, vs :+ resolve(Seq(nestedTpe), typeIndex))
 
         case tpe =>
+//          x(4, tpe)
           (shift, vs :+ cast(query, q"$row.asJava", tpe, q"indexMap(${entityIndex + shift + typeIndex})"))
       }
     }._2

@@ -128,6 +128,7 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
         import molecule.api._
         import molecule.ast.model._
         import molecule.ast.query._
+        import molecule.facade.Conn
         import molecule.ops.QueryOps._
         import molecule.transform.{Model2Query, Model2Transaction, Query2String}
         import java.lang.{Long => jLong, Double => jDouble, Boolean => jBoolean}
@@ -243,11 +244,11 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
       ..$resolverTree
 
       private trait Util { self: molecule.api.MoleculeBase =>
-        import molecule.Conn
-        import molecule.ops.QueryOps._
-        import molecule.transform.Query2String
+//        import molecule.facade.Conn
+//        import molecule.ops.QueryOps._
+//        import molecule.transform.Query2String
         import java.text.SimpleDateFormat
-        import java.util.Date
+//        import java.util.Date
 
         private val m = _model
         private val q = _query

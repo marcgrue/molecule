@@ -2,7 +2,7 @@ package molecule.api
 
 import java.util.Date
 
-import molecule.Conn
+import molecule.facade.Conn
 import molecule.ast.tempDb._
 import molecule.ast.model._
 import molecule.ast.query.Query

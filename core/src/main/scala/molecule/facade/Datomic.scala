@@ -1,5 +1,4 @@
-package molecule
-package facade
+package molecule.facade
 import java.util.UUID.randomUUID
 import java.util.{Collection => jColl, List => jList, Map => jMap}
 

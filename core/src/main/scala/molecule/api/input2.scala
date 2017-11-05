@@ -1,6 +1,6 @@
 package molecule.api
 
-import molecule.Conn
+import molecule.facade.Conn
 import molecule.ast.model._
 import molecule.ast.query._
 

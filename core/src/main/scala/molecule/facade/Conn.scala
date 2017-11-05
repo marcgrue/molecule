@@ -1,4 +1,4 @@
-package molecule // At top level only to be available in client code
+package molecule.facade // At top level only to be available in client code
 
 import java.util.{Date, List => jList, Map => jMap}
 
@@ -8,7 +8,7 @@ import molecule.ast.query.{Query, QueryExpr}
 import molecule.ast.tempDb._
 import molecule.ast.transaction._
 import molecule.exceptions.QueryException
-import molecule.facade._
+//import molecule.facade._
 import molecule.ops.QueryOps._
 import molecule.transform.Query2String
 
@@ -16,9 +16,10 @@ import scala.collection.JavaConverters._
 
 object Conn {
   def apply(uri: String): Conn = new Conn(datomic.Peer.connect(uri))
+  def apply(datConn: datomic.Connection): Conn = new Conn(datConn)
 }
 
-case class Conn(datConn: datomic.Connection) {
+class Conn(datConn: datomic.Connection) {
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
@@ -165,7 +166,7 @@ case class Conn(datConn: datomic.Connection) {
     val allInputs: Seq[AnyRef] = first ++ q.inputs
 
     try {
-      if(n > 0)
+      if (n > 0)
         Peer.q(q.toMap, allInputs: _*).asScala.take(n)
       else
         Peer.q(q.toMap, allInputs: _*).asScala

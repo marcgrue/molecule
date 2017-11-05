@@ -1,20 +1,28 @@
 package molecule.coretests.ref
 
-import molecule._
+import molecule.Base._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 // (`Nested` is a model class..)
-class NestedTests extends CoreSpec {
+class Nested_ extends CoreSpec {
 
-  "Nested enum after ref" in new CoreSetup {
-    m(Ns.str.Refs1 * Ref1.enum1) insert List(("d", List("enum11")))
-    m(Ns.str.Refs1 * Ref1.enum1).get === List(("d", List("enum11")))
+
+  "1 nested attr" in new CoreSetup {
+    (Ns.int.str.Refs1 * Ref1.int1) insert List(
+      (1, "a", List(10, 11)),
+      (2, "b", List(20, 21))
+    )
+
+    (Ns.int.str.Refs1 * Ref1.int1).get === List(
+      (1, "a", List(10, 11)),
+      (2, "b", List(20, 21))
+    )
   }
 
-  "Nested enum after attr" in new CoreSetup {
-    m(Ns.str.Refs1 * Ref1.int1.enum1) insert List(("e", List((12, "enum12"))))
-    m(Ns.str.Refs1 * Ref1.int1.enum1).get === List(("e", List((12, "enum12"))))
+  "Nested enum after ref" in new CoreSetup {
+    m(Ns.str.Refs1 * Ref1.enum1) insert List(("a", List("enum11")))
+    m(Ns.str.Refs1 * Ref1.enum1).get === List(("a", List("enum11")))
   }
 
 
@@ -204,10 +212,10 @@ class NestedTests extends CoreSpec {
     )
 
     m(Ns.str.Refs1 * Ref1.int1.Refs2.int2).get === List(
-      ("a",List((1,11))),
-      ("b",List((2,21))),
-      ("b",List((2,22))),
-      ("b",List((3,31)))
+      ("a", List((1, 11))),
+      ("b", List((2, 21))),
+      ("b", List((2, 22))),
+      ("b", List((3, 31)))
     )
 
     // Still grouped by ref1 values

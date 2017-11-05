@@ -1,7 +1,8 @@
+
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
   version := "0.13.0",
-  scalaVersion := "2.12.2",
+  scalaVersion := "2.12.4",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
     "datomic" at "http://files.datomic.com/maven",
@@ -12,8 +13,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.datomic" % "datomic-free" % "0.9.5561.50",
-    "org.specs2" %% "specs2" % "2.4.17"
-//    "net.liftweb" %% "lift-json" % "3.1.0"
+    "org.specs2" %% "specs2-core" % "4.0.1"
   ),
   // Remove Java directories
   excludeFilter in unmanagedSources := HiddenFileFilter || "*.java"

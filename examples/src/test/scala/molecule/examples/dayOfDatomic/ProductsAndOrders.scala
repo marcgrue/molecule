@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule._
+import molecule.Base._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
 import molecule.util.MoleculeSpec

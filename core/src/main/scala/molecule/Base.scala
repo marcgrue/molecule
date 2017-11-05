@@ -1,30 +1,33 @@
+package molecule
+
 /**
-  * Main Molecule API
+  * Molecule base API
   *
   * To use Molecule, this object is imported
   *
-  * ```import molecule._```
+  * ```import molecule.Base._```
   *
   * Consists of various interfaces and implicits that make Molecule
-  * creation and queries possible (see below)
+  * creation and queries possible.
   *
-  * Note that facade.Conn is also included directly in the molecule package level
-  * in order ofr it to be available without extra imports in client code.
+  * Note that facade.Conn is also included to be available without extra imports in client code.
+  *
+  * Import `molecule.Json._` instead to enable json output.
   **/
-package object molecule
 
+trait Base
 /**
   * Implicit Molecule factory methods `m`
   *
   * val explicitMoleculeResult = m(Person.name.age).get
   * val implicitMoleculeResult = Person.name.age.get
   **/
-  extends factory.MacroImplicits
+  extends molecule.factory.MacroImplicits
 
     /**
       * Facade to Datomic with selected methods
       **/
-    with facade.Datomic
+    with molecule.facade.Datomic
 
     /**
       * Expression keywords
@@ -34,7 +37,7 @@ package object molecule
       * `count` can be used to aggregate attribute values:
       * val howManyJohns = Person.name_("John").e(count).get.head
       **/
-    with dsl.expr
+    with molecule.dsl.expr
 
     /**
       * Composite inserts
@@ -43,7 +46,7 @@ package object molecule
       * to compose a bigger molecule of several sub-molecules and then
       * supply the data for insertion as tuples of tuples
       **/
-    with api.CompositeInserts
+    with molecule.api.CompositeInserts
 
     /**
       * Entity facade implicit
@@ -51,4 +54,6 @@ package object molecule
       * Implicit conversion of entity ids to EntityFacades to allow accessing
       * the Entity API directly from an entity id (of type Long).
       **/
-    with api.EntityImplicit
+    with molecule.api.EntityImplicit
+
+object Base extends Base

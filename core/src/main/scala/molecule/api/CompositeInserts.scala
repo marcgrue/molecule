@@ -1,7 +1,6 @@
 package molecule.api
-import molecule.Conn
 import molecule.ast.model.{Atom, Bond, Model, TxMetaData}
-import molecule.facade.TxReport
+import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
 import molecule.util.Helpers
 

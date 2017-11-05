@@ -2,7 +2,6 @@ package molecule.facade
 
 import java.util.{Date, UUID, Collection => jCollection, List => jList, Map => jMap}
 
-import molecule.Conn
 import molecule.api._
 import molecule.ast.model.{Model, TxMetaData}
 import molecule.ast.transaction.RetractEntity

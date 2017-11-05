@@ -7,7 +7,7 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
-trait GetJson[Ctx <: Context] extends Base[Ctx] {
+trait GetJsonOLD[Ctx <: Context] extends Base[Ctx] {
   import c.universe._
 
   // Shamelessly adopted from lift-json:
@@ -630,469 +630,348 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
 
   // Nested ------------------------------------------------------------------
 
-//  def jsonBaseNested =
-//    q"""
-//      object jsonBaseNested {
-//
-//        val jsEscapeChars: Set[Char] =
-//          List(('\u00ad', '\u00ad'),
-//                ('\u0600', '\u0604'),
-//                ('\u070f', '\u070f'),
-//                ('\u17b4', '\u17b5'),
-//                ('\u200c', '\u200f'),
-//                ('\u2028', '\u202f'),
-//                ('\u2060', '\u206f'),
-//                ('\ufeff', '\ufeff'),
-//                ('\ufff0', '\uffff'))
-//            .foldLeft(Set[Char]()) {
-//              case (set, (start, end)) =>
-//                set ++ (start to end).toSet
-//            }
-//
-//        def appendEscapedString(buf: StringBuilder, s: String): Unit = {
-//          s.foreach { c =>
-//            val strReplacement = c match {
-//              case '"'  => "\\\""
-//              case '\\' => "\\\\"
-//              case '\b' => "\\b"
-//              case '\f' => "\\f"
-//              case '\n' => "\\n"
-//              case '\r' => "\\r"
-//              case '\t' => "\\t"
-//              // Set.contains will cause boxing of c to Character, try and avoid this
-//              case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
-//                "\\u%04x".format(c: Int)
-//
-//              case _ => ""
-//            }
-//
-//            // Use Char version of append if we can, as it's cheaper.
-//            if (strReplacement.isEmpty) {
-//              buf.append(c)
-//            } else {
-//              buf.append(strReplacement)
-//            }
-//          }
-//        }
-//
-//        def quote(buf: StringBuilder, s: String): Unit = {
-//          buf.append('"') //open quote
-//          appendEscapedString(buf, s)
-//          buf.append('"') //close quote
-//        }
-//
-//        lazy val flatModel: Seq[Element] = {
-//          def recurse(element: Element): Seq[Element] = element match {
-//            case n: Nested                                             => n.elements flatMap recurse
-//            case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
-//            case a: Atom                                               => Seq(a)
-//            case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
-//            case m: Meta                                               => Seq(m)
-//            case other                                                 => Seq()
-//          }
-//          val elements = _modelE.elements flatMap recurse
-//          if (elements.size != _queryE.f.outputs.size)
-//            sys.error("[FactoryBase:castNestedTpls]  Flattened model elements (" + elements.size + ") don't match query outputs (" + _queryE.f.outputs.size + "):\n" +
-//              _modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + _queryE + "\n----------------\n")
-//          elements
-//        }
-//
-//       lazy val levelFields = $
-//
-//        lazy val entityIndexes: List[Int] = flatModel.zipWithIndex.collect {
-//          case  (Meta(_, _, _, _, IndexVal), i) => i
-//        }.toList
-//
-//        lazy val manyRefIndexes: Seq[Int] = flatModel.zipWithIndex.collect {
-//          case  (Meta(_, "many-ref", _, _, IndexVal), i) => i
-//        }
-//
-//        lazy val indexMap: Map[Int, Int] = flatModel.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-//          case ((rawIndex, indexMap), (meta, i)) => meta match {
-//            case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
-//            case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//            case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//          }
-//        }._2.toMap
-//
-//        def sortRows(rowSeq: Seq[jList[AnyRef]], entityIndexes: Seq[Int]): Seq[jList[AnyRef]] = entityIndexes match {
-//          case List(a)                               => rowSeq.sortBy(row => row.get(a).asInstanceOf[Long])
-//          case List(a, b)                            => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long]))
-//          case List(a, b, c)                         => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long]))
-//          case List(a, b, c, d)                      => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long]))
-//          case List(a, b, c, d, e)                   => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long]))
-//          case List(a, b, c, d, e, f)                => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long]))
-//          case List(a, b, c, d, e, f, g)             => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long]))
-//          case List(a, b, c, d, e, f, g, h)          => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long]))
-//          case List(a, b, c, d, e, f, g, h, i)       => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long]))
-//          case List(a, b, c, d, e, f, g, h, i, j)    => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => row.get(j).asInstanceOf[Long])
-//          case List(a, b, c, d, e, f, g, h, i, j, k) => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => (row.get(j).asInstanceOf[Long], row.get(k).asInstanceOf[Long]))
-//       }
-//
-//      } // object jsonBaseNested
-//     """
-//
-//    import molecule.ast.model._
-//  import molecule.ast.query._
-//  import java.util.{List => jList}
-//
-//
-//  case class JsonBaseNested(_modelE: Model, _queryE: Query) {
-//
-//
-//    val jsEscapeChars: Set[Char] =
-//      List(('\u00ad', '\u00ad'),
-//            ('\u0600', '\u0604'),
-//            ('\u070f', '\u070f'),
-//            ('\u17b4', '\u17b5'),
-//            ('\u200c', '\u200f'),
-//            ('\u2028', '\u202f'),
-//            ('\u2060', '\u206f'),
-//            ('\ufeff', '\ufeff'),
-//            ('\ufff0', '\uffff'))
-//        .foldLeft(Set[Char]()) {
-//          case (set, (start, end)) =>
-//            set ++ (start to end).toSet
-//        }
-//
-//    def appendEscapedString(buf: StringBuilder, s: String): Unit = {
-//      s.foreach { c =>
-//        val strReplacement = c match {
-//          case '"'  => "\\\""
-//          case '\\' => "\\\\"
-//          case '\b' => "\\b"
-//          case '\f' => "\\f"
-//          case '\n' => "\\n"
-//          case '\r' => "\\r"
-//          case '\t' => "\\t"
-//          // Set.contains will cause boxing of c to Character, try and avoid this
-//          case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
-//            "\\u%04x".format(c: Int)
-//
-//          case _ => ""
-//        }
-//
-//        // Use Char version of append if we can, as it's cheaper.
-//        if (strReplacement.isEmpty) {
-//          buf.append(c)
-//        } else {
-//          buf.append(strReplacement)
-//        }
-//      }
-//    }
-//
-//    def quote(buf: StringBuilder, s: String): Unit = {
-//      buf.append('"') //open quote
-//      appendEscapedString(buf, s)
-//      buf.append('"') //close quote
-//    }
-//
-//    lazy val flatModel: Seq[Element] = {
-//      def recurse(element: Element): Seq[Element] = element match {
-//        case n: Nested                                             => n.elements flatMap recurse
-//        case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
-//        case a: Atom                                               => Seq(a)
-//        case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
-//        case m: Meta                                               => Seq(m)
-//        case other                                                 => Seq()
-//      }
-//      val elements = _modelE.elements flatMap recurse
-//      if (elements.size != _queryE.f.outputs.size)
-//        sys.error("[FactoryBase:castNestedTpls]  Flattened model elements (" + elements.size + ") don't match query outputs (" + _queryE.f.outputs.size + "):\n" +
-//          _modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + _queryE + "\n----------------\n")
-//      elements
-//    }
-//
-////    def levelFields(elements: Seq[Element]): Map[Int, Seq[String]] = {
-//    lazy val levelFields: Map[Int, Seq[String]] = {
-//        /*
-//          m(Ns.int.str * Refs1.int1)
-//
-//          Seq(
-//            0 -> "int",
-//            0 -> "str",
-//            0 -> "refs1",
-//            1 -> "int1"
-//          )
-//        */
-//        def recurse(level: Int, element: Element): Seq[(Int, String)] = element match {
-//          case Atom(_, attr, _, _, _, _, _, _)             => Seq(level -> attr)
-//          case Nested(Bond(_, refAttr, _, _, _), elements) => (level -> refAttr) +: elements.flatMap(e => recurse(level + 1, e))
-//          case other                                       => Nil
-//        }
-//        val levelFields0: Seq[(Int, String)] = _modelE.elements.flatMap(e => recurse(0, e))
-//
-//        /*
-//          Map(
-//            0 -> Seq("int", "str", "refs1"),
-//            1 -> Seq("int1")
-//          )
-//        */
-//        levelFields0.foldLeft(0, Seq.empty[(Int, Seq[String])]) {
-//          case ((prevLevel, acc), (level, field)) if acc.isEmpty        => (level, Seq(0 -> Seq(field)))
-//          case ((prevLevel, acc), (level, field)) if prevLevel != level => (level, acc :+ (level -> Seq(field)))
-//          case ((prevLevel, acc), (level, field))                       => (level, acc.init :+ (acc.last._1 -> (acc.last._2 :+ field)))
-//        }._2.toMap
-//      }
-//
-//    lazy val entityIndexes: List[Int] = flatModel.zipWithIndex.collect {
-//      case  (Meta(_, _, _, _, IndexVal), i) => i
-//    }.toList
-//
-//    lazy val manyRefIndexes: Seq[Int] = flatModel.zipWithIndex.collect {
-//      case  (Meta(_, "many-ref", _, _, IndexVal), i) => i
-//    }
-//
-//    lazy val indexMap: Map[Int, Int] = flatModel.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-//      case ((rawIndex, indexMap), (meta, i)) => meta match {
-//        case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
-//        case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//        case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//      }
-//    }._2.toMap
-//
-//    def sortRows(rowSeq: Seq[jList[AnyRef]], entityIndexes: Seq[Int]): Seq[jList[AnyRef]] = entityIndexes match {
-//      case List(a)                               => rowSeq.sortBy(row => row.get(a).asInstanceOf[Long])
-//      case List(a, b)                            => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long]))
-//      case List(a, b, c)                         => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long]))
-//      case List(a, b, c, d)                      => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long]))
-//      case List(a, b, c, d, e)                   => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long]))
-//      case List(a, b, c, d, e, f)                => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long]))
-//      case List(a, b, c, d, e, f, g)             => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long]))
-//      case List(a, b, c, d, e, f, g, h)          => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long]))
-//      case List(a, b, c, d, e, f, g, h, i)       => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long]))
-//      case List(a, b, c, d, e, f, g, h, i, j)    => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => row.get(j).asInstanceOf[Long])
-//      case List(a, b, c, d, e, f, g, h, i, j, k) => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => (row.get(j).asInstanceOf[Long], row.get(k).asInstanceOf[Long]))
-//   }
-//
-//  } // JsonBaseNested
+  def jsonBaseNested =
+    q"""
+      object jsonBaseNested {
+
+        val jsEscapeChars: Set[Char] =
+          List(('\u00ad', '\u00ad'),
+                ('\u0600', '\u0604'),
+                ('\u070f', '\u070f'),
+                ('\u17b4', '\u17b5'),
+                ('\u200c', '\u200f'),
+                ('\u2028', '\u202f'),
+                ('\u2060', '\u206f'),
+                ('\ufeff', '\ufeff'),
+                ('\ufff0', '\uffff'))
+            .foldLeft(Set[Char]()) {
+              case (set, (start, end)) =>
+                set ++ (start to end).toSet
+            }
+
+        def appendEscapedString(buf: StringBuilder, s: String): Unit = {
+          s.foreach { c =>
+            val strReplacement = c match {
+              case '"'  => "\\\""
+              case '\\' => "\\\\"
+              case '\b' => "\\b"
+              case '\f' => "\\f"
+              case '\n' => "\\n"
+              case '\r' => "\\r"
+              case '\t' => "\\t"
+              // Set.contains will cause boxing of c to Character, try and avoid this
+              case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
+                "\\u%04x".format(c: Int)
+
+              case _ => ""
+            }
+
+            // Use Char version of append if we can, as it's cheaper.
+            if (strReplacement.isEmpty) {
+              buf.append(c)
+            } else {
+              buf.append(strReplacement)
+            }
+          }
+        }
+
+        def quote(buf: StringBuilder, s: String): Unit = {
+          buf.append('"') //open quote
+          appendEscapedString(buf, s)
+          buf.append('"') //close quote
+        }
+
+        lazy val flatModel: Seq[Element] = {
+          def recurse(element: Element): Seq[Element] = element match {
+            case n: Nested                                             => n.elements flatMap recurse
+            case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
+            case a: Atom                                               => Seq(a)
+            case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
+            case m: Meta                                               => Seq(m)
+            case other                                                 => Seq()
+          }
+          val elements = _modelE.elements flatMap recurse
+          if (elements.size != _queryE.f.outputs.size)
+            sys.error("[FactoryBase:castNestedTpls]  Flattened model elements (" + elements.size + ") don't match query outputs (" + _queryE.f.outputs.size + "):\n" +
+              _modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + _queryE + "\n----------------\n")
+          elements
+        }
+
+        lazy val entityIndexes: Seq[Int] = flatModel.zipWithIndex.collect {
+          case  (Meta(_, _, _, _, IndexVal), i) => i
+        }
+
+        lazy val manyRefIndexes: Seq[Int] = flatModel.zipWithIndex.collect {
+          case  (Meta(_, "many-ref", _, _, IndexVal), i) => i
+        }
+
+        lazy val indexMap: Map[Int, Int] = flatModel.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
+          case ((rawIndex, indexMap), (meta, i)) => meta match {
+            case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
+            case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
+            case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
+          }
+        }._2.toMap
+
+        def sortRows(rowSeq: Seq[jList[AnyRef]], entityIndexes: Seq[Int]): Seq[jList[AnyRef]] = entityIndexes match {
+          case List(a)                               => rowSeq.sortBy(row => row.get(a).asInstanceOf[Long])
+          case List(a, b)                            => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long]))
+          case List(a, b, c)                         => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long]))
+          case List(a, b, c, d)                      => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long]))
+          case List(a, b, c, d, e)                   => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long]))
+          case List(a, b, c, d, e, f)                => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long]))
+          case List(a, b, c, d, e, f, g)             => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long]))
+          case List(a, b, c, d, e, f, g, h)          => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long]))
+          case List(a, b, c, d, e, f, g, h, i)       => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long]))
+          case List(a, b, c, d, e, f, g, h, i, j)    => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => row.get(j).asInstanceOf[Long])
+          case List(a, b, c, d, e, f, g, h, i, j, k) => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => (row.get(j).asInstanceOf[Long], row.get(k).asInstanceOf[Long]))
+       }
+
+      } // object jsonBaseNested
+     """
 
 
+  def nestedJson(query: Tree, rows: Tree, tpes: Seq[Type]) = {
+    q"""
+      if ($rows.isEmpty) {
+        ""
+      } else {
+        ..${nestedJson1(query, rows, tpes)}
+        nestedJson1.get
+      }
+     """
+  }
+  def nestedJson1(query: Tree, rows: Tree, tpes: Seq[Type]) = {
+    val typeCount = tpes.size
+    q"""
 
-//  def nestedJson(query: Tree, rows: Tree, tpes: Seq[Type]) = {
-//    q"""
-//      if ($rows.isEmpty) {
-//        ""
-//      } else {
-//        ..${nestedJson1(query, rows, tpes)}
-//        nestedJson1.get
-//      }
-//     """
-//  }
-//
-////  import molecule.ast.model._
-////  import molecule.ast.query._
-////val zz = JsonBaseNested(null: Model, null: Query)
-////  import zz._
-////  indexMap
-//// Warning:scala: skipping Scala files without a Scala SDK in module(s) moleculeCore
-//
-//  def nestedJson1(query: Tree, rows: Tree, tpes: Seq[Type]) = {
-//    val typeCount = tpes.size
-//    q"""
-//        import molecule.factory.JsonBaseNested
-//        val jsonBaseNested = JsonBaseNested(_modelE, _queryE)
-//        import jsonBaseNested._
-//
-//        object nestedJson1 {
-//
-////println("===================================================================================")
-////println(_model)
-////println(_modelE)
-////println(_queryE)
-////println(_queryE.datalog)
-////println("---- ")
-////flatModel foreach println
-//levelFields foreach println
+        object nestedJson1 {
+
+//println("===================================================================================")
+//println(_model)
+//println(_modelE)
+//println(_queryE)
+//println(_queryE.datalog)
+//println("---- ")
+//flatModel foreach println
 //println("---- " + entityIndexes)
-//println("---- " + manyRefIndexes)
 //println("---- " + indexMap)
-//
-//        val sortedRows = sortRows($rows.toSeq, entityIndexes)
-//
-//sortedRows foreach println
-//
-//        val rowCount = sortedRows.length
-//
-//        var firstEntry = true
-//        val buf0 = new StringBuilder("[")
-//        val buffers = buf0 :: entityIndexes.tail.map(_ => new StringBuilder(""))
-//
-//        sortedRows.foldLeft(Seq.empty[Long], 1) { case ((prevEntities, r), row0) =>
-//
-//          val row = row0.asScala.asInstanceOf[Seq[Any]]
-//          val curEntities = entityIndexes.map(i => row(i).asInstanceOf[Long])
-//
-//println("------------------ " + r + " --------------------------------")
-//
-//          (0 until entityIndexes.size).reverse.foreach { level =>
-//
-//            level match {
-//              case level if r == 1  => {
-//
-//              }
-//
-//              case 0     => {
-//                val (prevE, curE) = (prevEntities(0), curEntities(0))
-//                if(prevE != curE) {
-//                  println("level 0: new")
-//                } else {
-//                  println("level 0: same")
-//                }
-//              }
-//
-//              case level => {
-//                val (prevParentE, curParentE) = (prevEntities(level - 1), curEntities(level - 1))
-//                val (prevE, curE) = (prevEntities(level), curEntities(level))
-//
-//                if(prevE != curE) {
-//                  println("level " + level + ": new")
-//                } else {
-//                  println("level " + level + ": same")
-//                }
-//                if(prevParentE != curParentE) {
-//                  println("parent : new")
-//                } else {
-//                  println("parent : same")
-//                }
-//              }
+
+        val sortedRows = sortRows($rows.toSeq, entityIndexes)
+
+sortedRows foreach println
+
+        val rowCount = sortedRows.length
+
+
+        val fields: Seq[String] = {
+          val fields0: Seq[String] = _modelE.elements.collect {
+            case Atom(_, attr, _, _, _, _, _, _)             => attr
+            case Nested(Bond(_, refAttr, _, _, _), elements) => refAttr
+          }
+          if (fields0.size != $typeCount)
+            sys.error("Unexpected json field mismatch: model attr count doesn't match output types count." +
+              "\nModel attrs  (" + fields0.size + "): " + fields0.mkString(", ") +
+              "\nOutput types (" + $typeCount + "): " + ..${tpes.map(_.toString)})
+
+          fields0
+        }
+
+        var firstEntry = true
+        val buf0 = new StringBuilder("[")
+
+        sortedRows.foldLeft(("", Seq(0L), Seq[Any](0L), 1)) { case ((prevTpl, prevEntities, prevRow, r), row0) =>
+
+          val row = row0.asScala.asInstanceOf[Seq[Any]]
+
+println("------------------ " + r + " --------------------------------")
+          val currentEntities = entityIndexes.map(i => row.apply(i).asInstanceOf[Long])
+          val manyRefEntities = manyRefIndexes.map(i => row.apply(i).asInstanceOf[Long])
+
+
+          val isLastRow = rowCount == r
+          val isNewTpl = prevEntities.head != 0 && currentEntities.head != prevEntities.head
+          val isNewManyRef = prevEntities.head != 0 && manyRefEntities.nonEmpty && !prevEntities.contains(manyRefEntities.head)
+//println("currentEntities: " + currentEntities)
+//println("manyRefEntities: " + manyRefEntities)
+println("TPL0 " + prevTpl + "    " + isNewTpl + "    " + isNewManyRef)
+
+
+          // Build nested row in own buffer
+          val buf = new StringBuilder("")
+
+          ..${
+      jsonResolveNested(
+        q"buf", q"fields",
+        query,
+        q"""""""", q"_model.elements", tpes,
+        q"prevTpl", q"prevRow", q"row", 0, 1, q"entityIndexes.size - 1", 1)
+    }
+
+          val tpl = buf.toString()
+
+println("TPL1 " + tpl)
+
+          if (isLastRow && (isNewTpl || isNewManyRef)) {
+            // Add previous and current tuple
+            if (firstEntry) { firstEntry = false } else { buf0.append(",") }
+            buf0.append(prevTpl)
+            buf0.append(tpl)
+println("TPL2 " + buf0.toString)
+
+
+          } else if (isLastRow) {
+            // Add current tuple
+            if (firstEntry) { firstEntry = false } else { buf0.append(",") }
+            buf0.append(tpl)
+println("TPL3 " + buf0.toString)
+
+
+          } else if (isNewTpl || isNewManyRef) {
+            // Add finished previous tuple
+            if (firstEntry) { firstEntry = false } else { buf0.append(",") }
+            buf0.append(prevTpl)
+println("TPL4 " + buf0.toString)
+
+
+          } else {
+            // Continue building current tuple
+println("TPL5 " + buf0.toString)
+          }
+
+          (tpl, currentEntities, row, r + 1)
+
+        } // rows loop
+
+        def get = buf0.append("\n]").toString()
+
+      } //object nestedJson1
+      """
+
+  }
+
+  def jsonResolveNested(buf: Tree, fields: Tree,
+                        query: Tree, refAttr: Tree, elements: Tree, tpes: Seq[Type],
+                        prevTpl: Tree, prevRow: Tree, row: Tree, entityIndex: Int, depth: Int, maxDepth: Tree, shift: Int): Tree = {
+
+    def resolve(nestedTpes: Seq[Type], typeIndex: Int, nestedBuf: Tree): Tree = {
+      val rowIndex = entityIndex + shift + typeIndex
+//println(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
+      q"""
+        object resolve {
+          val prevEnt = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
+          val curEnt = $row.apply($entityIndex).asInstanceOf[Long]
+          val isNewNested = if (prevEnt == 0L) true else prevEnt != curEnt
+          val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
+          val (refAttr, nestedElements): (String, Seq[Element]) = $elements.collectFirst {
+            case Nested(Bond(_, refAttr, _, _, _), elements) => (refAttr, elements)
+          }.get
+
+val tab = "  " * $rowIndex
+//println(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
+//println(tab + "refAttr  : " + refAttr)
+//println(tab + "elements : " + nestedElements.mkString("\n" + tab, "\n" + tab, ""))
+
+          val result = if ($prevTpl.isEmpty || isNewNested|| isNewManyRef) {
+
+            // ==========================================================================
+
+            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, q"Option.empty[String]", prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
+println(tab + "a toAdd  : " + toAdd)
+//println(tab + "a added  : " + Seq(toAdd))
+
+//            Seq(toAdd)
+            toAdd
+
+          } else if ($prevTpl.isInstanceOf[Seq[_]]) {
+
+            // ==========================================================================
+println(tab + "b prevTpl: " + $prevTpl)
+
+            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, prevTpl, prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
+println(tab + "b toAdd  : " + toAdd)
+
+            val added = $prevTpl + toAdd
+println(tab + "b added  : " + added)
+            added
+
+          } else {
+
+            // ==========================================================================
+println(tab + "c prevTpl: " + $prevTpl)
+
+            val tpl = $nestedBuf.toString
+println(tab + "c tpl    : " + tpl)
+
+            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, prevTpl, prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
+
+            val adjustedIndex = indexMap($rowIndex)
+            val newNested = $prevRow.apply(adjustedIndex).asInstanceOf[Long] != $row.apply(adjustedIndex).asInstanceOf[Long] || $depth == $maxDepth
+            val isNewManyRef = manyRefIndexes.nonEmpty && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
+println(tab + "c toAdd  : " + toAdd + "    " + newNested + "    " + isNewManyRef)
+
+            val added = tpl + toAdd
+//            if (newNested) {
+//              tpl + toAdd
+//            } else {
+//              tpl.init :+ toAdd
 //            }
-//
-//          }
-//
-//          (curEntities, r + 1)
-//
-//        } // rows loop
-//
-//        def get = buf0.append("\n]").toString()
-//
-//      } //object nestedJson1
-//      """
-//
-//  }
-//
-//  def jsonResolveNested(buf: Tree, fields: Tree,
-//                        query: Tree, refAttr: Tree, elements: Tree, tpes: Seq[Type],
-//                        prevTpl: Tree, prevRow: Tree, row: Tree, entityIndex: Int, depth: Int, maxDepth: Tree, shift: Int): Tree = {
-//
-//    def resolve(nestedTpes: Seq[Type], typeIndex: Int, nestedBuf: Tree): Tree = {
-//      val rowIndex = entityIndex + shift + typeIndex
-//      //println(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
-//      q"""
-//        object resolve {
-//          val prevEnt = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
-//          val curEnt = $row.apply($entityIndex).asInstanceOf[Long]
-//          val isNewNested = if (prevEnt == 0L) true else prevEnt != curEnt
-//          val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
-//          val (refAttr, nestedElements): (String, Seq[Element]) = $elements.collectFirst {
-//            case Nested(Bond(_, refAttr, _, _, _), elements) => (refAttr, elements)
-//          }.get
-//
-//val tab = "  " * $rowIndex
-////println(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
-////println(tab + "refAttr  : " + refAttr)
-////println(tab + "elements : " + nestedElements.mkString("\n" + tab, "\n" + tab, ""))
-//
-//          val result = if ($prevTpl.isEmpty || isNewNested|| isNewManyRef) {
-//
-//            // ==========================================================================
-//
-//            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, q"Option.empty[String]", prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
-//println(tab + "a toAdd  : " + toAdd)
-////println(tab + "a added  : " + Seq(toAdd))
-//
-////            Seq(toAdd)
-//            toAdd
-//
-//          } else if ($prevTpl.isInstanceOf[Seq[_]]) {
-//
-//            // ==========================================================================
-//println(tab + "b prevTpl: " + $prevTpl)
-//
-//            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, prevTpl, prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
-//println(tab + "b toAdd  : " + toAdd)
-//
-//            val added = $prevTpl + toAdd
-//println(tab + "b added  : " + added)
-//            added
-//
-//          } else {
-//
-//            // ==========================================================================
-//println(tab + "c prevTpl: " + $prevTpl)
-//
-//            val tpl = $nestedBuf.toString
-//println(tab + "c tpl    : " + tpl)
-//
-//            val toAdd = ${jsonResolveNested(nestedBuf, fields, query, q"refAttr", q"elements", nestedTpes, prevTpl, prevRow, row, rowIndex, depth + 1, maxDepth, shift)}
-//
-//            val adjustedIndex = indexMap($rowIndex)
-//            val newNested = $prevRow.apply(adjustedIndex).asInstanceOf[Long] != $row.apply(adjustedIndex).asInstanceOf[Long] || $depth == $maxDepth
-//            val isNewManyRef = manyRefIndexes.nonEmpty && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
-//println(tab + "c toAdd  : " + toAdd + "    " + newNested + "    " + isNewManyRef)
-//
-//            val added = tpl + toAdd
-////            if (newNested) {
-////              tpl + toAdd
-////            } else {
-////              tpl.init :+ toAdd
-////            }
-//println(tab + "c added  : " + added)
-//            added
-//          }
-//        }
-//
-//        resolve.result
-//       """
-//    }
-//
-//
-//    q"""
-//      $buf.append("\n")
-//      $buf.append("   " * ${depth - 1})
-//      $buf.append("{")
-//      ..${
-//      tpes.zipWithIndex.foldLeft((shift, q"")) { case ((shift, accTree), (t, typeIndex)) =>
-//        t match {
-//          case tpe if tpe <:< weakTypeOf[Seq[Product]] =>
-//            val nestedTpes = tpe.typeArgs.head.typeArgs
-//            val newTree =
-//              q"""
-//                ..$accTree
-//                val nestedBuf = new StringBuilder(", ")
-//                quote(nestedBuf, $fields.last)
-//                nestedBuf.append(": [")
-//                ${resolve(nestedTpes, typeIndex, q"nestedBuf")}
+println(tab + "c added  : " + added)
+            added
+          }
+        }
+
+        resolve.result
+       """
+    }
+
+
+    q"""
+      $buf.append("\n")
+      $buf.append("   " * ${depth - 1})
+      $buf.append("{")
+      ..${
+      tpes.zipWithIndex.foldLeft((shift, q"")) { case ((shift, accTree), (t, typeIndex)) =>
+        t match {
+          case tpe if tpe <:< weakTypeOf[Seq[Product]] =>
+            val nestedTpes = tpe.typeArgs.head.typeArgs
+            val newTree =
+              q"""
+                ..$accTree
+                val nestedBuf = new StringBuilder(", ")
+                quote(nestedBuf, $fields.last)
+                nestedBuf.append(": [")
+                ${resolve(nestedTpes, typeIndex, q"nestedBuf")}
+                nestedBuf.append("]")
+                $buf.append(nestedBuf.toString)
+              """
+            (shift + nestedTpes.length, newTree)
+
+          case tpe if tpe <:< weakTypeOf[Seq[_]] =>
+            val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
+            val newTree =
+              q"""
+                ..$accTree
+                val nestedBuf = new StringBuilder(", ")
+                quote(nestedBuf, $fields.last)
+                nestedBuf.append(": [")
+                ${resolve(Seq(nestedTpe), typeIndex, q"nestedBuf")}
 //                nestedBuf.append("]")
-//                $buf.append(nestedBuf.toString)
-//              """
-//            (shift + nestedTpes.length, newTree)
-//
-//          case tpe if tpe <:< weakTypeOf[Seq[_]] =>
-//            val nestedTpe = tpe.baseType(weakTypeOf[Seq[_]].typeSymbol).typeArgs.head
-//            val newTree =
-//              q"""
-//                ..$accTree
-//                val nestedBuf = new StringBuilder(", ")
-//                quote(nestedBuf, $fields.last)
-//                nestedBuf.append(": [")
-//                ${resolve(Seq(nestedTpe), typeIndex, q"nestedBuf")}
-////                nestedBuf.append("]")
-//                $buf.append(nestedBuf.toString)
-//              """
-//            (shift + 1, newTree)
-//
-//          case tpe =>
-//            val newTree =
-//              q"""
-//                ..$accTree
-//                ${toJson(buf, query, fields, q"$row.asJava", tpe, q"indexMap(${entityIndex + shift + typeIndex})", typeIndex)}
-//              """
-//            (shift, newTree)
-//        }
-//      }._2
-//    }
-////       buf.append("}")
-//      """
-//  }
+                $buf.append(nestedBuf.toString)
+              """
+            (shift + 1, newTree)
+
+          case tpe =>
+            val newTree =
+              q"""
+                ..$accTree
+                ${toJson(buf, query, fields, q"$row.asJava", tpe, q"indexMap(${entityIndex + shift + typeIndex})", typeIndex)}
+              """
+            (shift, newTree)
+        }
+      }._2
+    }
+//       buf.append("}")
+      """
+  }
 }

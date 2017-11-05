@@ -2,10 +2,9 @@ package molecule.transform
 import java.util.Date
 
 import datomic._
-import molecule.Conn
 import molecule.ast.model._
 import molecule.ast.transaction.{RetractEntity, _}
-import molecule.facade.EntityFacade
+import molecule.facade.{Conn, EntityFacade}
 import molecule.util.{Debug, Helpers}
 
 import scala.collection.JavaConverters._
@@ -105,6 +104,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case Nested(ref, es)                                       => Nested(ref, replace$(es))
       case other                                                 => other
     }
+
     val model1 = Model(replace$(model.elements))
     //    x(50, model, model1)
     model1.elements.foldLeft('_: Any, Seq[Statement]()) {
@@ -144,13 +144,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
 
   private def valueStmts(
-    stmts: Seq[Statement],
-    e: Any,
-    a: String,
-    arg: Any,
-    prefix: Option[String],
-    bi: Generic,
-    otherEdgeId: Option[AnyRef])
+                          stmts: Seq[Statement],
+                          e: Any,
+                          a: String,
+                          arg: Any,
+                          prefix: Option[String],
+                          bi: Generic,
+                          otherEdgeId: Option[AnyRef])
   : Seq[Statement] = {
 
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
@@ -215,11 +215,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         iae(s"valueStmts:$host", s"Can't $op multiple key/value pairs with the same key for attribute `$a`:\n" + dupPairs.mkString("\n"))
       }
     }
+
     def checkDupValuesOfPairs(pairs: Seq[(Any, Any)], host: String, op: String) {
       val dups = pairs.map(_._2).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
       if (dups.nonEmpty)
         iae(s"valueStmts:$host", s"Can't replace with duplicate new values of attribute `$a`:\n" + dups.mkString("\n"))
     }
+
     def checkDupValues(values: Seq[Any], host: String, op: String) {
       val dups = values.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
       if (dups.nonEmpty)

@@ -1,6 +1,5 @@
-package molecule
-package api
-import molecule.facade.EntityFacade
+package molecule.api
+import molecule.facade.{Conn, EntityFacade}
 
 trait EntityImplicit {
 
