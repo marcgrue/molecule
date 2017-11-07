@@ -114,7 +114,6 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
       q"""
         $value match {
           case null                                  => Option.empty[String]
-//          case v: String                             => Some(v)
           case v if v.toString.contains(":db/ident") => val v2 = v.toString; Some(v2.substring(v2.lastIndexOf("/")+1).init.init)
           case v                                     => Some(v.asInstanceOf[jMap[String, String]].asScala.toMap.values.head)
         }
@@ -122,24 +121,21 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
     case t if t <:< typeOf[Option[Int]]        =>
       q"""
         $value match {
-          case null     => Option.empty[Int]
-//          case v: jLong => Some(v.asInstanceOf[jLong].toInt)
-          case v        => Some(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toInt) // pull result map: {:ns/int 42}
+          case null => Option.empty[Int]
+          case v    => Some(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toInt) // pull result map: {:ns/int 42}
         }
        """
     case t if t <:< typeOf[Option[Float]]      =>
       q"""
         $value match {
-          case null       => Option.empty[Float]
-//          case v: jDouble => Some(v.asInstanceOf[jDouble].toFloat)
-          case v          => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toFloat)
+          case null => Option.empty[Float]
+          case v    => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toFloat)
         }
        """
     case t if t <:< typeOf[Option[Long]]       =>
       q"""
         $value match {
           case null                               => Option.empty[Long]
-//          case v: jLong                           => Some(v.asInstanceOf[jLong].toLong)
           case v if v.toString.contains(":db/id") => val v2 = v.toString; Some(v2.substring(v2.lastIndexOf(" ")+1).init.init.toLong)
           case v                                  => Some(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toLong)
         }
@@ -147,57 +143,50 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
     case t if t <:< typeOf[Option[Double]]     =>
       q"""
         $value match {
-          case null       => Option.empty[Double]
-//          case v: jDouble => Some(v.asInstanceOf[jDouble].toDouble)
-          case v          => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toDouble)
+          case null => Option.empty[Double]
+          case v    => Some(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toDouble)
         }
        """
     case t if t <:< typeOf[Option[Boolean]]    =>
       q"""
         $value match {
-          case null        => Option.empty[Boolean]
-//          case v: jBoolean => Some(v.asInstanceOf[Boolean])
-          case v           => Some(v.asInstanceOf[jMap[String, Boolean]].asScala.toMap.values.head)
+          case null => Option.empty[Boolean]
+          case v    => Some(v.asInstanceOf[jMap[String, Boolean]].asScala.toMap.values.head)
         }
        """
     case t if t <:< typeOf[Option[BigInt]]     =>
       q"""
         $value match {
-          case null       => Option.empty[BigInt]
-//          case v: jBigInt => Some(BigInt(v.asInstanceOf[jBigInt].toString))
-          case v          => Some(BigInt(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString))
+          case null => Option.empty[BigInt]
+          case v    => Some(BigInt(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString))
         }
        """
     case t if t <:< typeOf[Option[BigDecimal]] =>
       q"""
         $value match {
-          case null       => Option.empty[BigDecimal]
-//          case v: jBigDec => Some(BigDecimal(v.asInstanceOf[jBigDec].toString))
-          case v          => Some(BigDecimal(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString))
+          case null => Option.empty[BigDecimal]
+          case v    => Some(BigDecimal(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString))
         }
        """
     case t if t <:< typeOf[Option[Date]]       =>
       q"""
         $value match {
-          case null    => Option.empty[Date]
-//          case v: Date => Some(v)
-          case v       => Some(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head)
+          case null => Option.empty[Date]
+          case v    => Some(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head)
         }
        """
     case t if t <:< typeOf[Option[UUID]]       =>
       q"""
         $value match {
-          case null    => Option.empty[UUID]
-//          case v: UUID => Some(v)
-          case v       => Some(v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head)
+          case null => Option.empty[UUID]
+          case v    => Some(v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head)
         }
        """
     case t if t <:< typeOf[Option[URI]]        =>
       q"""
         $value match {
-          case null   => Option.empty[URI]
-//          case v: URI => Some(v)
-          case v      => Some(v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head)
+          case null => Option.empty[URI]
+          case v    => Some(v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head)
         }
        """
   }
@@ -207,33 +196,30 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
       q"""
         $value match {
           case null                                    => Option.empty[Set[String]]
-//          case vs: PersistentHashSet                   => Some(vs.asScala.map(_.toString).toSet.asInstanceOf[Set[String]])
           case vs if vs.toString.contains(":db/ident") =>
             // {:ns/enums [{:db/ident :ns.enums/enum1} {:db/ident :ns.enums/enum2}]}
-            val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+            val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
             val enums = identMaps.map(_.asInstanceOf[jMap[String, Keyword]].asScala.toMap.values.head.getName)
             Some(enums.toSet.asInstanceOf[Set[String]])
           case vs                                      =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[String]])
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet.asInstanceOf[Set[String]])
         }
        """
     case t if t <:< typeOf[Option[Set[Int]]]     =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[Int]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jLong].toInt).toSet.asInstanceOf[Set[Int]])
-          case vs                    =>
-            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+          case null => Option.empty[Set[Int]]
+          case vs   =>
+            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
             Some(values.map(_.asInstanceOf[jLong].toInt).toSet.asInstanceOf[Set[Int]])
         }
        """
     case t if t <:< typeOf[Option[Set[Float]]]   =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[Float]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jDouble].toFloat).toSet.asInstanceOf[Set[Float]])
-          case vs                    =>
-            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+          case null => Option.empty[Set[Float]]
+          case vs   =>
+            val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
             Some(values.map(_.asInstanceOf[jDouble].toFloat).toSet.asInstanceOf[Set[Float]])
         }
        """
@@ -241,80 +227,63 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
       q"""
         $value match {
           case null                                 => Option.empty[Set[Long]]
-//          case vs: PersistentHashSet                => Some(vs.asScala.map(_.asInstanceOf[jLong].toLong).toSet.asInstanceOf[Set[Long]])
           case vs if vs.toString.contains(":db/id") =>
             // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
-            val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
-            Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
+            val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
+            Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet)
           case vs                                   =>
             // {:ns/longs [3 4 5]}
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Long]])
+            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[Double]]]  =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[Double]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[jDouble].toDouble).toSet.asInstanceOf[Set[Double]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Double]])
+          case null => Option.empty[Set[Double]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[Boolean]]] =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[Boolean]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[Boolean]).toSet.asInstanceOf[Set[Boolean]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Boolean]])
+          case null => Option.empty[Set[Boolean]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[BigInt]]]  =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[BigInt]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt].toString)).toSet.asInstanceOf[Set[BigInt]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala
-            .map(v => BigInt(v.asInstanceOf[jBigInt].toString)).toSet.asInstanceOf[Set[BigInt]])
+          case null => Option.empty[Set[BigInt]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map(v => BigInt(v.asInstanceOf[jBigInt].toString)).toSet)
         }
        """
 
     case t if t <:< typeOf[Option[Set[BigDecimal]]] =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[BigDecimal]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDec].toString)).toSet.asInstanceOf[Set[BigDecimal]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala
-            .map(v => BigDecimal(v.asInstanceOf[jBigDec].toString)).toSet.asInstanceOf[Set[BigDecimal]])
+          case null => Option.empty[Set[BigDecimal]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDec].toString)).toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[Date]]]       =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[Date]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[Date]).toSet.asInstanceOf[Set[Date]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[Date]])
+          case null => Option.empty[Set[Date]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[UUID]]]       =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[UUID]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[UUID]).toSet.asInstanceOf[Set[UUID]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[UUID]])
+          case null => Option.empty[Set[UUID]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
     case t if t <:< typeOf[Option[Set[URI]]]        =>
       q"""
         $value match {
-          case null                  => Option.empty[Set[URI]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map(_.asInstanceOf[URI]).toSet.asInstanceOf[Set[URI]])
-          case vs                    =>
-            Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSet.asInstanceOf[Set[URI]])
+          case null => Option.empty[Set[URI]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet)
         }
        """
   }
@@ -323,89 +292,78 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
     case t if t <:< typeOf[Option[Map[String, String]]]     =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, String]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap)
+          case null => Option.empty[Map[String, String]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1)}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Int]]]        =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Int]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap)
+          case null => Option.empty[Map[String, Int]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toInt}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Long]]]       =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Long]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap)
+          case null => Option.empty[Map[String, Long]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toLong}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Float]]]      =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Float]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap)
+          case null => Option.empty[Map[String, Float]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toFloat}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Double]]]     =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Double]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap)
+          case null => Option.empty[Map[String, Double]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toDouble}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Boolean]]]    =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Boolean]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap)
+          case null => Option.empty[Map[String, Boolean]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> p(1).toBoolean}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, BigInt]]]     =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, BigInt]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1))}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1))}.toMap)
+          case null => Option.empty[Map[String, BigInt]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> BigInt(p(1))}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, BigDecimal]]] =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, BigDecimal]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1))}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1))}.toMap)
+          case null => Option.empty[Map[String, BigDecimal]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> BigDecimal(p(1))}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, Date]]]       =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, Date]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap)
+          case null => Option.empty[Map[String, Date]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> date(p(1))}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, UUID]]]       =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, UUID]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap)
+          case null => Option.empty[Map[String, UUID]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> UUID.fromString(p(1))}.toMap)
         }
        """
     case t if t <:< typeOf[Option[Map[String, URI]]]        =>
       q"""
         $value match {
-          case null                  => Option.empty[Map[String, URI]]
-//          case vs: PersistentHashSet => Some(vs.asScala.map{ case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap)
-          case vs                    => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq.map{case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap)
+          case null => Option.empty[Map[String, URI]]
+          case vs   => Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.map{case s:String => val p = s.split("@", 2); p(0) -> new URI(p(1))}.toMap)
         }
        """
   }
@@ -431,7 +389,7 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
         val tupleBaseNested = TupleBaseNested(_modelE, _queryE)
         import tupleBaseNested._
 
-        val doDebug = false
+        val doDebug = true
         def debug(s: String): Unit = {
           if(doDebug)
             println(s)
@@ -439,19 +397,19 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
 
         object nestedTuples1 {
 
-//debug("===================================================================================")
+debug("===================================================================================")
 //debug(_model)
 //debug(_modelE)
 //debug(_queryE)
 //debug(_queryE.datalog)
 //debug("---- ")
-//flatModel foreach debug
-//debug("---- " + entityIndexes)
-//debug("---- " + indexMap)
+flatModel.foreach(e => debug(e.toString))
+debug("---- " + entityIndexes)
+debug("---- " + indexMap)
 
          val sortedRows = sortRows($rows.toSeq, entityIndexes)
 
-//sortedRows foreach debug
+sortedRows.foreach(r => debug(r.toString))
 
           val rowCount = sortedRows.length
 
@@ -459,7 +417,7 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
 
             val row = row0.asScala.asInstanceOf[Seq[Any]]
 
-//debug("--- " + r + " ---------------------------------------------------")
+debug("--- " + r + " ---------------------------------------------------")
             val currentEntities = entityIndexes.map(i => row.apply(i).asInstanceOf[Long])
             val manyRefEntities = manyRefIndexes.map(i => row.apply(i).asInstanceOf[Long])
 
@@ -469,30 +427,30 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
             val isNewManyRef = prevEntities.head != 0 && manyRefEntities.nonEmpty && !prevEntities.contains(manyRefEntities.head)
 //debug("currentEntities: " + currentEntities)
 //debug("manyRefEntities: " + manyRefEntities)
-//debug("TPL0 " + prevTpl + "    " + isNewTpl + "    " + isNewManyRef)
+debug("TPL0 " + prevTpl + "    " + isNewTpl + "    " + isNewManyRef)
 
             val tpl = ${resolveNested(query, tpes, q"prevTpl", q"prevRow", q"row", 0, 1, q"entityIndexes.size - 1", 1)}
 
-//debug("TPL1 " + tpl)
+debug("TPL1 " + tpl)
 
             val accTpls = if (isLastRow && (isNewTpl || isNewManyRef)) {
               // Add previous and current tuple
-//debug("TPL2 " + (accTpls0 ++ Seq(prevTpl.get, tpl)).toString)
+debug("TPL2 " + (accTpls0 ++ Seq(prevTpl.get, tpl)).toString)
               accTpls0 ++ Seq(prevTpl.get, tpl)
 
             } else if (isLastRow) {
               // Add current tuple
-//debug("TPL3 " + (accTpls0 :+ tpl).toString)
+debug("TPL3 " + (accTpls0 :+ tpl).toString)
               accTpls0 :+ tpl
 
             } else if (isNewTpl || isNewManyRef) {
               // Add finished previous tuple
-//debug("TPL4 " + (accTpls0 :+ prevTpl.get).toString)
+debug("TPL4 " + (accTpls0 :+ prevTpl.get).toString)
               accTpls0 :+ prevTpl.get
 
             } else {
               // Continue building current tuple
-//debug("TPL5 " + accTpls0.toString)
+debug("TPL5 " + accTpls0.toString)
               accTpls0
             }
 
@@ -511,8 +469,6 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
 
     def resolve(nestedTpes: Seq[Type], typeIndex: Int): Tree = {
       val rowIndex = entityIndex + shift + typeIndex
-//val tab = "  " * $rowIndex
-//debug(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
       q"""
         object resolve {
           val prevEnt = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
@@ -520,20 +476,22 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
           val isNewNested = if (prevEnt == 0L) true else prevEnt != curEnt
           val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
 
-//debug(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
+val tab = "  " * $rowIndex
+debug(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
+debug(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
 
 
           val result = if ($prevTpl.isEmpty || isNewNested|| isNewManyRef) {
             // ==========================================================================
 
-//debug(tab + "a prevTpl: " + prevTpl)
+debug(tab + "a prevTpl: " + $prevTpl)
 
             val toAdd = ${
         resolveNested(query, nestedTpes, q"None: Option[(..$tpes)]",
           prevRow, row, rowIndex, depth + 1, maxDepth, shift)
       }
-//debug(tab + "a toAdd  : " + toAdd)
-//debug(tab + "a added  : " + Seq(toAdd))
+debug(tab + "a toAdd  : " + toAdd)
+debug(tab + "a added  : " + Seq(toAdd))
 
             Seq(toAdd)
 
@@ -541,32 +499,23 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
           } else if ($prevTpl.isDefined && $prevTpl.get.isInstanceOf[::[_]]) {
             // ==========================================================================
 
-//debug(tab + "b prevTpl: " + prevTpl + "    " + prevTpl.getOrElse(null).getClass)
-//debug(tab + "b prevTpl: " + prevTpl.getOrElse(null).isInstanceOf[Seq[_]])
-//debug(tab + "b prevTpl: " + prevTpl.getOrElse(null).isInstanceOf[::[_]])
-
-//debug(tab + "c tpes   : " + ..{tpes.map(_.toString)})
-//debug(tab + "c nestedt: " + ..{nestedTpes.map(_.toString)})
-
-
-            val tpl1: (..$tpes) = $prevTpl.get.asInstanceOf[(..$tpes)]
-//debug(tab + "c tpl1   : " + tpl1 + "    " + prevTpl.get.getClass + "    " + tpl1.getClass)
+debug(tab + "b prevTpl: " + $prevTpl)
 
             val toAdd = ${
         resolveNested(query, nestedTpes,
           q"Some($prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]].last.asInstanceOf[(..$nestedTpes)])",
           prevRow, row, rowIndex, depth + 1, maxDepth, shift)
       }.asInstanceOf[(..$nestedTpes)]
-//debug(tab + "b toAdd  : " + toAdd)
+debug(tab + "b toAdd  : " + toAdd)
 
             val added = $prevTpl.get.asInstanceOf[Seq[(..$nestedTpes)]] :+ toAdd
-//debug(tab + "b added  : " + added)
+debug(tab + "b added  : " + added)
             added
 
 
           } else {
             // ==========================================================================
-//debug(tab + "c prevTpl: " + prevTpl)
+debug(tab + "c prevTpl: " + $prevTpl)
 
             ${
         if(tpes.size == 1) {
@@ -575,10 +524,7 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
         } else {
           q"""
             val tpl1 = $prevTpl.get.asInstanceOf[(..$tpes)]
-//debug(tab + "c tpl1   : " + tpl1 + "    " + prevTpl.getClass + "    " + tpl1.getClass)
-
             val tpl2 = tpl1.productElement($typeIndex).asInstanceOf[Seq[(..$nestedTpes)]]
-//debug(tab + "c tpl2   : " + tpl2)
 
             val toAdd = ${
             resolveNested(query, nestedTpes,
@@ -589,14 +535,14 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
             val adjustedIndex = indexMap($rowIndex)
             val newNested = $prevRow.apply(adjustedIndex).asInstanceOf[Long] != $row.apply(adjustedIndex).asInstanceOf[Long] || $depth == $maxDepth
             val isNewManyRef = manyRefIndexes.nonEmpty && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
-//debug(tab + "c toAdd  : " + toAdd)
+debug(tab + "c toAdd  : " + toAdd)
 
             val added = if (newNested) {
               tpl2 :+ toAdd
             } else {
               tpl2.init :+ toAdd
             }
-//debug(tab + "c added  : " + added + "    " + newNested + "    " + isNewManyRef)
+debug(tab + "c added  : " + added + "    " + newNested + "    " + isNewManyRef)
             added
            """
         }

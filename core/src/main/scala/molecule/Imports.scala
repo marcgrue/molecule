@@ -5,17 +5,14 @@ package molecule
   *
   * To use Molecule, this object is imported
   *
-  * ```import molecule.Base._```
+  * ```import molecule.Imports._```
   *
   * Consists of various interfaces and implicits that make Molecule
   * creation and queries possible.
   *
-  * Note that facade.Conn is also included to be available without extra imports in client code.
-  *
-  * Import `molecule.Json._` instead to enable json output.
   **/
 
-trait Base
+object Imports
 /**
   * Implicit Molecule factory methods `m`
   *
@@ -56,4 +53,3 @@ trait Base
       **/
     with molecule.api.EntityImplicit
 
-object Base extends Base

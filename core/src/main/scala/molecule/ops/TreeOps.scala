@@ -207,6 +207,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
         case ns@Select(_, name) if ns.tpe <:< typeOf[NS] => ns.tpe.typeSymbol
       }).distinct.reverse.head
     }
+
     traverse(tree)
   }
 
@@ -255,10 +256,11 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     lazy val tpe = sym match {
       case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[Ref[_, _]]             => typeOf[Long]
       case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[RefAttr[_, _]]         => typeOf[Long]
-      case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[ValueAttr$[_]]         =>
-        t.typeSignature.baseType(weakTypeOf[ValueAttr$[_]].typeSymbol).typeArgs.head
+      case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[Enum]                  => typeOf[String]
       case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[ValueAttr[_, _, _, _]] =>
         t.typeSignature.baseType(weakTypeOf[ValueAttr[_, _, _, _]].typeSymbol).typeArgs.init.last
+      case t: TermSymbol if t.isPublic && t.typeSignature.typeSymbol.asType.toType <:< weakTypeOf[OneOptional[_, _]]     =>
+        t.typeSignature.baseType(weakTypeOf[OneOptional[_, _]].typeSymbol).typeArgs.last
       case t: TermSymbol if t.isPublic                                                                                   => NoType
       case t: MethodSymbol if t.asMethod.returnType <:< weakTypeOf[Ref[_, _]]                                            => typeOf[Long]
       case unexpected                                                                                                    =>
@@ -272,6 +274,7 @@ trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def fullName = attrType.typeSymbol.fullName
 
     def tpeS = if (tpe =:= NoType) "" else tpe.toString
+
     def contentType = tpe
 
     def isOne = attrType <:< weakTypeOf[One[_, _, _]] ||

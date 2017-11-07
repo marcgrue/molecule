@@ -1,7 +1,7 @@
 package molecule.dsl
 import molecule.ast.model.{Exp1, Exp2, Exp3, Or}
 import molecule.boilerplate.attributes._
-import molecule._
+import molecule.Imports._
 
 
 trait RefAttrOps[Ns, T] {

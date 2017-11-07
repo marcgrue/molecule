@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.dsl._
 //import molecule.dsl.expr.?
-import molecule._
+import molecule.Imports._
 
 
 object attributes {

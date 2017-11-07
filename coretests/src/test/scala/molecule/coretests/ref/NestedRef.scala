@@ -1,12 +1,11 @@
 package molecule.coretests.ref
 
-import molecule.Base._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 // (`Nested` is a model class..)
-class Nested_ extends CoreSpec {
-
+class NestedRef extends CoreSpec {
 
   "1 nested attr" in new CoreSetup {
     (Ns.int.str.Refs1 * Ref1.int1) insert List(
@@ -26,7 +25,7 @@ class Nested_ extends CoreSpec {
   }
 
 
-  "Nested ref without attribute" in new CoreSetup {
+  "Nested ref with tacit attribute" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.int1.Ref2.int2) insert List(
       ("a", List((11, 12))),
       ("b", List((21, 22))))
@@ -49,6 +48,7 @@ class Nested_ extends CoreSpec {
       ("a", List(10, 20)),
       ("b", List(30))
     )
+
     m(Ns.str.Refs1 * Ref1.Ref2.int2).get === List(
       ("a", List(10, 20)),
       ("b", List(30))
@@ -76,6 +76,23 @@ class Nested_ extends CoreSpec {
 
     m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2).get === List(("a", None, List(2)))
     m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(("a", List(2)))
+  }
+
+  "Optional attribute 2" in new CoreSetup {
+
+    m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2) insert List(
+      ("a", Some(2), List(20)),
+      ("b", None, List(10, 11))
+    )
+
+    m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2).get === List(
+      ("a", Some(2), List(20)),
+      ("b", None, List(10, 11))
+    )
+    m(Ns.str.Refs1.Refs2 * Ref2.int2).get === List(
+      ("a", List(20)),
+      ("b", List(10, 11))
+    )
   }
 
 

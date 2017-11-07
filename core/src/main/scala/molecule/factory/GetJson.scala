@@ -112,7 +112,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
           if($fieldIndex >= $fields.size)
             "[Unknown]"
           else if(${tpe <:< typeOf[Option[_]]})
-            $fields($fieldIndex).init // skip appended '@' in optional attr name
+            $fields($fieldIndex).init // skip appended '$$' in optional attr name
           else
             $fields($fieldIndex)
         """
@@ -190,7 +190,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
           if (firstInArray) {
             firstInArray = false
           } else {
-            $buf.append(",")
+            $buf.append(", ")
           }
           if($quote)
             quote($buf, value.toString)
@@ -219,7 +219,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
   }
 
   def jsonStream(buf: Tree, value: Tree, tpe: Type) = {
-    val values = q"$value.asInstanceOf[LazySeq].asScala.toSeq"
+    val values = q"$value.asInstanceOf[LazySeq].asScala"
     tpe match {
       case t if t <:< typeOf[Stream[String]]  => renderArray(buf, values, true)
       case t if t <:< typeOf[Stream[Date]]    =>
@@ -236,7 +236,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
   }
 
   def jsonVector(buf: Tree, value: Tree, tpe: Type) = {
-    val values = q"$value.asInstanceOf[PersistentVector].asScala.toSeq"
+    val values = q"$value.asInstanceOf[PersistentVector].asScala"
     tpe match {
       case t if t <:< typeOf[Vector[String]]  => renderArray(buf, values, true)
       case t if t <:< typeOf[Vector[Date]]    =>
@@ -264,7 +264,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
             if (firstInObj) {
               firstInObj = false
             } else {
-              $buf.append(",")
+              $buf.append(", ")
             }
 
             $buf.append('"')
@@ -323,7 +323,6 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
       q"""
           $value match {
             case null                                  => $buf.append("null")
-//            case s: String                             => quote(buf, s)
             case v if v.toString.contains(":db/ident") => val s = v.toString; quote($buf, s.substring(s.lastIndexOf("/")+1).init.init)
             case v                                     => quote($buf, v.asInstanceOf[jMap[String, String]].asScala.toMap.values.head) // pull result map: {:ns/str "abc"}
           }
@@ -331,9 +330,8 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
     case t if t <:< typeOf[Option[Date]]       =>
       q"""
           $value match {
-            case null    => $buf.append("null")
-//            case v: Date => quote(buf, v.toString)
-            case v       =>
+            case null => $buf.append("null")
+            case v    =>
               val df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
               val date = v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head.asInstanceOf[Date]
               quote($buf, df.format(date))
@@ -342,48 +340,42 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
     case t if t <:< typeOf[Option[UUID]]       =>
       q"""
           $value match {
-            case null    => $buf.append("null")
-//            case v: UUID => quote(buf, v.toString)
-            case v       => quote($buf, v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => quote($buf, v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[URI]]        =>
       q"""
           $value match {
-            case null   => $buf.append("null")
-//            case v: URI => quote(buf, v.toString)
-            case v      => quote($buf, v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => quote($buf, v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[Boolean]]    =>
       q"""
           $value match {
-            case null        => $buf.append("null")
-//            case v: jBoolean => buf.append(v.toString)
-            case v           => $buf.append(v.asInstanceOf[jMap[String, jBoolean]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jBoolean]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[Int]]        =>
       q"""
           $value match {
-            case null     => $buf.append("null")
-//            case v: jLong => ´buf.append(v.toString)
-            case v        => $buf.append(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toString) // pull result map: {:ns/int 42}
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toString) // pull result map: {:ns/int 42}
           }
          """
     case t if t <:< typeOf[Option[Float]]      =>
       q"""
           $value match {
-            case null       => $buf.append("null")
-//            case v: jDouble => buf.append(v.toString)
-            case v          => $buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[Long]]       =>
       q"""
           $value match {
             case null                               => $buf.append("null")
-//            case v: jLong                           => buf.append(v.toString)
             case v if v.toString.contains(":db/id") => val s = v.toString; $buf.append(s.substring(s.lastIndexOf("/")+1).init.init)
             case v                                  => $buf.append(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toString)
           }
@@ -391,25 +383,22 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
     case t if t <:< typeOf[Option[Double]]     =>
       q"""
           $value match {
-            case null       => $buf.append("null")
-//            case v: jDouble => buf.append(v.toString)
-            case v          => $buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[BigInt]]     =>
       q"""
           $value match {
-            case null       => $buf.append("null")
-//            case v: jBigInt => buf.append(v.toString)
-            case v          => $buf.append(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString)
           }
          """
     case t if t <:< typeOf[Option[BigDecimal]] =>
       q"""
           $value match {
-            case null       => $buf.append("null")
-//            case v: jBigDec => buf.append(v.toString)
-            case v          => $buf.append(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString)
+            case null => $buf.append("null")
+            case v    => $buf.append(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString)
           }
          """
   }
@@ -419,107 +408,96 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
       q"""
           $values match {
             case null                                    => $buf.append("null")
-//            case vs: PersistentHashSet                   => {renderArray(buf, q"vs.asScala.toSeq", true)}
 
             // {:ns/enums [{:db/ident :ns.enums/enum1} {:db/ident :ns.enums/enum2}]}
             case vs if vs.toString.contains(":db/ident") =>
-              val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+              val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
               val enums = identMaps.map(_.asInstanceOf[jMap[String, Keyword]].asScala.toMap.values.head.getName)
               ${renderArray(buf, q"enums", true)}
 
             // {:ns/strs ["a" "b" "c"]}
-            case vs => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case vs => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
        """
     case t if t <:< typeOf[Option[Set[Int]]]     =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[Float]]]   =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[Long]]]    =>
       q"""
           $values match {
             case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
 
             // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
             case vs if vs.toString.contains(":db/id") =>
-              val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+              val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
               Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
 
             // {:ns/longs [3 4 5]}
-            case vs => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[Double]]]  =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[Boolean]]] =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[BigInt]]]  =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
 
     case t if t <:< typeOf[Option[Set[BigDecimal]]] =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", false)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Set[Date]]]       =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", true)}
-            case vs                    =>
+            case null => $buf.append("null")
+            case vs   =>
               val df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-              val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+              val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
               ${renderArray(buf, q"values.map(v => df.format(v.asInstanceOf[Date]))", true)}
           }
          """
     case t if t <:< typeOf[Option[Set[UUID]]]       =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", true)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
          """
     case t if t <:< typeOf[Option[Set[URI]]]        =>
       q"""
           $values match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderArray(buf, q"vs.asScala.toSeq", true)}
-            case vs                    => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case null => $buf.append("null")
+            case vs   => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
          """
   }
@@ -528,9 +506,8 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
     case t if t <:< typeOf[Option[Map[String, String]]] =>
       q"""
           $value match {
-            case null                  => $buf.append("null")
-//            case vs: PersistentHashSet => {renderObj(buf, q"vs.asScala.toSeq", true)}
-            case vs                    => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case null => $buf.append("null")
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
          """
 
@@ -538,49 +515,49 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, Long]]]       =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, Float]]]      =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, Double]]]     =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, Boolean]]]    =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, BigInt]]]     =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, BigDecimal]]] =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", false)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, Date]]]       =>
@@ -588,7 +565,7 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
           $value match {
             case null => $buf.append("null")
             case vs   =>
-              val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq
+              val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
               val df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
               var firstInObj = true
               $buf.append("{")
@@ -615,14 +592,14 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
          """
     case t if t <:< typeOf[Option[Map[String, URI]]]        =>
       q"""
           $value match {
             case null => $buf.append("null")
-            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", true)}
+            case vs   => ${renderObj(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala", true)}
           }
          """
   }

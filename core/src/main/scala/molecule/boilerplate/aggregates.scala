@@ -1,5 +1,5 @@
-package molecule
-package boilerplate
+package molecule.boilerplate
+import molecule.Imports._
 import scala.language.higherKinds
 
 

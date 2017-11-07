@@ -1,5 +1,5 @@
 package molecule.factory
-import molecule._
+import molecule.Imports._
 import molecule.api._
 import molecule.ops.QueryOps._
 import molecule.ops.TreeOps
