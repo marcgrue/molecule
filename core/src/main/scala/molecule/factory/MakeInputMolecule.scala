@@ -1,10 +1,7 @@
 package molecule.factory
-import molecule.Imports._
 import molecule.api._
-import molecule.ops.QueryOps._
-import molecule.ops.TreeOps
 import molecule.boilerplate._
-import molecule.transform._
+
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
@@ -16,7 +13,8 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
   def await_in_x_out_0(inputDsl: c.Expr[NS], InTypes: Type*) = {
     val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, 1)
     val InputTypes = if (InTypes.length == 1) tq"Seq[..$InTypes]" else tq"Seq[(..$InTypes)]"
-    expr( q"""
+    expr(
+      q"""
       ..${basics(inputDsl)._2}
       new $InputMoleculeTpe[..$InTypes](r.model, r.query) {
         def apply(args: $InputTypes)(implicit conn: Conn): Molecule0 = {
@@ -44,16 +42,17 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
     val bindValues2 = if (InTypes.size == 2) {
       val (inParams, inTerm1, inTerm2) = resolve2(InTypes)
-      if(isNested) {
+      if (isNested) {
         q"""
             def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
-              val query2 = bindValues2(_query, $inTerm1, $inTerm2)
+              val query2  = bindValues2(_query, $inTerm1, $inTerm2)
+              def query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
 
               new Molecule1[$A](_model, query2) with Util {
 
-                private def nestedTuples(query2E: Query, n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", Seq(A))}
-                def get        (implicit conn: Conn): Seq[$A] = nestedTuples(bindValues2(_queryE, $inTerm1, $inTerm2), -1) // All
-                def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(bindValues2(_queryE, $inTerm1, $inTerm2), n)
+                private def nestedTuples(n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", Seq(A))}
+                def get        (implicit conn: Conn): Seq[$A] = nestedTuples(-1) // All
+                def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(n)
 
                 private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
                 def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -64,13 +63,14 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
       } else {
         q"""
             def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
-              val query2 = bindValues2(_query, $inTerm1, $inTerm2)
+              val query2  = bindValues2(_query, $inTerm1, $inTerm2)
+
 
               new Molecule1[$A](_model, query2) with Util {
 
                 private def cast(row: jList[AnyRef]) = ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
-                def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, query2   ).toList.map(row => cast(row))
-                def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, query2, n).toList.map(row => cast(row))
+                def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, _query   ).toList.map(row => cast(row))
+                def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, _query, n).toList.map(row => cast(row))
 
                 private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
                 def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -79,52 +79,26 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
             }
           """
       }
-
-//      q"""
-//        def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
-//          val query2 = bindValues2(_query, $inTerm1, $inTerm2)
-//
-//          new Molecule1[$A](_model, query2) with Util {
-//
-//            def get(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
-//              case n: Nested if !n.bond.ns.isEmpty =>
-//                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
-//                ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E)", Seq(A))}
-//            } getOrElse
-//              conn.query(_model, query2).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
-//
-//            def get(n: Int)(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
-//              case nested: Nested if !nested.bond.ns.isEmpty =>
-//                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
-//                ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", Seq(A))}
-//            } getOrElse
-//              conn.query(_model, query2, n).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
-//
-//            private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-//            def getJson        (implicit conn: Conn): String = json(-1) // All
-//            def getJson(n: Int)(implicit conn: Conn): String = json(n)
-//          }
-//        }
-//      """
     } else q""
 
 
-    if(isNested) {
-      expr( q"""
+    if (isNested) {
+      expr(
+        q"""
         ..${basics(inputDsl)._2}
         new $InputMoleculeTpe[..$InTypes, $A](r.model, r.query) {
           private val _modelE = r.modelE
           private val _queryE = r.queryE
 
           def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
-            def query1  = bindValues1(_query, args)
+            val query1  = bindValues1(_query, args)
             def query1E = bindValues1(_queryE, args)
 
             new Molecule1[$A](_model, query1) with Util {
 
-              private def nestedTuples(query1E: Query, n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", Seq(A))}
-              def get        (implicit conn: Conn): Seq[$A] = nestedTuples(bindValues1(_queryE, args), -1) // All
-              def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(bindValues1(_queryE, args), n)
+              private def nestedTuples(n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", Seq(A))}
+              def get        (implicit conn: Conn): Seq[$A] = nestedTuples(-1) // All
+              def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(n)
 
               private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
               def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -136,21 +110,22 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
         }
       """)
     } else {
-      expr( q"""
+      expr(
+        q"""
         ..${basics(inputDsl)._2}
         new $InputMoleculeTpe[..$InTypes, $A](r.model, r.query) {
           private val _modelE = r.modelE
           private val _queryE = r.queryE
 
           def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
-            def query1  = bindValues1(_query, args)
+            val query1  = bindValues1(_query, args)
             def query1E = bindValues1(_queryE, args)
 
             new Molecule1[$A](_model, query1) with Util {
 
               private def cast(row: jList[AnyRef]) = ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
-              def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, query1   ).toList.map(row => cast(row))
-              def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, query1, n).toList.map(row => cast(row))
+              def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, _query   ).toList.map(row => cast(row))
+              def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, _query, n).toList.map(row => cast(row))
 
               private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
               def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -162,44 +137,6 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
         }
       """)
     }
-//
-//    expr( q"""
-//      ..${basics(inputDsl)._2}
-//      new $InputMoleculeTpe[..$InTypes, $A](r.model, r.query) {
-////        ..imports
-//
-//        private val _modelE = r.modelE
-//        private val _queryE = r.queryE
-//
-//        def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
-//          def query1  = bindValues1(_query, args)
-//          def query1E = bindValues1(_queryE, args)
-//
-//          new Molecule1[$A](_model, query1) with Util {
-//
-//            def get(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
-//              case n: Nested if !n.bond.ns.isEmpty =>
-//                val query1E = bindValues1(_queryE, args)
-//                ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E)", Seq(A))}
-//            } getOrElse
-//              conn.query(_model, query1).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
-//
-//            def get(n: Int)(implicit conn: Conn): Seq[$A] = _model.elements.collectFirst {
-//              case nested: Nested if !nested.bond.ns.isEmpty =>
-//                val query1E = bindValues1(_queryE, args)
-//                ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", Seq(A))}
-//            } getOrElse
-//              conn.query(_model, query1, n).toList.map(row => ${cast(q"_query", q"row", A, 0)}.asInstanceOf[$A])
-//
-//            private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-//            def getJson        (implicit conn: Conn): String = json(-1) // All
-//            def getJson(n: Int)(implicit conn: Conn): String = json(n)
-//          }
-//        }
-//
-//        $bindValues2
-//      }
-//    """)
   }
 
   def await(inputDsl: c.Expr[NS], InTypes: Type*)(OutTypes: Type*) = {
@@ -212,16 +149,17 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
     val bindValues2 = if (InTypes.size == 2) {
       val (inParams, inTerm1, inTerm2) = resolve2(InTypes)
-      if(isNested) {
+      if (isNested) {
         q"""
             def apply(..$inParams)(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
-              def query2 = bindValues2(_query, $inTerm1, $inTerm2)
+              val query2  = bindValues2(_query, $inTerm1, $inTerm2)
+              def query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
 
               new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
 
-                private def nestedTuples(query2E: Query, n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", OutTypes)}
-                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(bindValues2(_queryE, $inTerm1, $inTerm2), -1) // All
-                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(bindValues2(_queryE, $inTerm1, $inTerm2), n)
+                private def nestedTuples(n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", OutTypes)}
+                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(-1) // All
+                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(n)
 
                 private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
                 def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -237,8 +175,8 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
               new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
 
                 private def getTuple(row: jList[AnyRef]) = (..${tuple(q"_query", q"row", OutTypes)})
-                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, query2   ).toList.map(row => getTuple(row))
-                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, query2, n).toList.map(row => getTuple(row))
+                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query   ).toList.map(row => getTuple(row))
+                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query, n).toList.map(row => getTuple(row))
 
                 private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
                 def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -247,37 +185,12 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
             }
           """
       }
-
-//      q"""
-//        def apply(..$inParams)(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
-//          def query2 = bindValues2(_query, $inTerm1, $inTerm2)
-//
-//          new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
-//            def get(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
-//              case n: Nested if !n.bond.ns.isEmpty =>
-//                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
-//                ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E)", OutTypes)}
-//            } getOrElse
-//              conn.query(_model, query2).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-//
-//            def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
-//              case nested: Nested if !nested.bond.ns.isEmpty =>
-//                val query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
-//                ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", OutTypes)}
-//            } getOrElse
-//              conn.query(_model, query2, n).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-//
-//            private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-//            def getJson        (implicit conn: Conn): String = json(-1) // All
-//            def getJson(n: Int)(implicit conn: Conn): String = json(n)
-//          }
-//        }
-//      """
     } else q""
 
 
-    if(isNested) {
-      expr( q"""
+    if (isNested) {
+      expr(
+        q"""
         ..${basics(inputDsl)._2}
         new $InputMoleculeTpe[..$InTypes, ..$OutTypes](r.model, r.query) {
           private val _modelE = r.modelE
@@ -285,12 +198,13 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
             val query1  = bindValues1(_query, args)
+            def query1E = bindValues1(_queryE, args)
 
             new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
 
-              private def nestedTuples(query2E: Query, n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", OutTypes)}
-              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(bindValues1(_queryE, args), -1) // All
-              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(bindValues1(_queryE, args), n)
+              private def nestedTuples(n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", OutTypes)}
+              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(-1) // All
+              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(n)
 
               private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
               def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -302,20 +216,21 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
         }
       """)
     } else {
-      expr( q"""
+      expr(
+        q"""
         ..${basics(inputDsl)._2}
         new $InputMoleculeTpe[..$InTypes, ..$OutTypes](r.model, r.query) {
           private val _modelE = r.modelE
           private val _queryE = r.queryE
 
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
-            val query1  = bindValues1(_query, args)
+            val query1 = bindValues1(_query, args)
 
             new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
 
               private def getTuple(row: jList[AnyRef]) = (..${tuple(q"_query", q"row", OutTypes)})
-              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, query1   ).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, query1, n).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
+              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query   ).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
+              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query, n).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
 
               private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
               def getJson        (implicit conn: Conn): String = json(-1) // All
@@ -327,42 +242,6 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
         }
       """)
     }
-
-//    expr( q"""
-//      ..${basics(inputDsl)._2}
-//      new $InputMoleculeTpe[..$InTypes, ..$OutTypes](r.model, r.query) {
-//
-//        private val _modelE = r.modelE
-//        private val _queryE = r.queryE
-//
-//        def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
-//          val query1  = bindValues1(_query, args)
-//
-//          new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
-//
-//            def get(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
-//              case nested: Nested if !nested.bond.ns.isEmpty =>
-//                val query1E = bindValues1(_queryE, args)
-//                ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E)", OutTypes)}
-//            } getOrElse
-//              conn.query(_model, query1).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-//
-//            def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = _model.elements.collectFirst {
-//              case nested: Nested if !nested.bond.ns.isEmpty =>
-//                val query1E = bindValues1(_queryE, args)
-//                ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", OutTypes)}
-//            } getOrElse
-//              conn.query(_model, query1, n).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-//
-//            private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-//            def getJson        (implicit conn: Conn): String = json(-1) // All
-//            def getJson(n: Int)(implicit conn: Conn): String = json(n)
-//          }
-//        }
-//
-//        $bindValues2
-//      }
-//    """)
   }
 }
 

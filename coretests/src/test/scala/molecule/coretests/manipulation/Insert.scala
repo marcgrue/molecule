@@ -1,6 +1,6 @@
 package molecule.coretests.manipulation
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -481,7 +481,7 @@ class Insert extends CoreSpec {
       insertStrs(Set("a"))
       insertStrs(Set("b", "c"))
 
-      Ns.strs.get.head === List("a", "b", "c")
+      Ns.strs.get.head === Set("a", "b", "c")
 
 
       val insertAlls = Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.insert

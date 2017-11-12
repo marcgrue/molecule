@@ -59,68 +59,22 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
     (identifiers0 ++ newIdentifiers).distinct
   }
 
-  //  def xx(model: Model): Map[Int, Int] = model.elements.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-  //    case ((last, shifts), (meta, i)) => meta match {
-  //      case Meta(_, "many-ref", _, _, IndexVal) => (last + 1, shifts :+ (i, last + 1))
-  //      case Meta(_, _, _, _, IndexVal)          => (last, shifts :+ (i, last + 1))
-  //      case _ => (last, shifts :+ (i, last + 1))
-  //    }
-  //  }._2.toMap
-//
-//
-//  def aa(model: Model) = model.elements.zipWithIndex.collect {
-//    case (Meta(_, "many-ref", _, _, IndexVal), i) => i
-//  }
-//
-//  // List((1 -> 1), (3 -> 3), (5 -> 5))
-//  // List((1 -> 1), (2 -> 3), (4 -> 5))
-//  def xx(model: Model) = model.elements.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-//    case ((rawIndex, indexMap), (meta, i)) => meta match {
-//      case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
-//      case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//      case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//    }
-//  }._2 //.toMap
-//
-//  // List((0 -> 0), (2 -> 2), (4 -> 4))
-//  // List((0 -> 0), (3 -> 4), (3 -> 4))
-//  def zz(model: Model) = model.elements.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-//    case ((rawIndex, indexMap), (meta, i)) => meta match {
-//      case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap)
-//      case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap)
-//      case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-//    }
-//  }._2 //.toMap
-//
-//  def makeModelEx(model: Model): Model = {
-//    def recurse(e: Element): Element = e match {
-//      case g: Nested => Nested(g.bond, Meta("", "", "e", NoValue, IndexVal) +: (g.elements map recurse))
-//      case other     => other
-//    }
-//
-//    val firstMeta = model.elements.head match {
-//      case Meta(_, _, "e", NoValue, Eq(List(eid))) => Meta("", "", "e", Id(eid), IndexVal)
-//      case Bond(ns, refAttr, refNs, _, _)          => Meta("", "", "r", NoValue, IndexVal)
-//      case _                                       => Meta("", "", "e", NoValue, IndexVal)
-//    }
-//    Model(firstMeta +: (model.elements map recurse))
-//  }
-
   def makeModelE(model: Model): Model = {
-    def recurse(e: Element): Seq[Element] = e match {
-      case g: Nested => Seq(Nested(g.bond, Meta("", "", "e", NoValue, IndexVal) +: (g.elements flatMap recurse)))
 
-      // Prepare special index for many-refs
-      case b@Bond(_, _, _, 2, _) => Seq(b, Meta("", "many-ref", "e", NoValue, IndexVal))
-      case other                 => Seq(other)
-    }
+    def recurse(elements: Seq[Element], newGroup0: Boolean): Seq[Element] = elements.foldLeft(false, false, newGroup0, Seq.empty[Element]) {
+      case ((_, _, _, acc), nested: Nested)                      => (false, false, false, acc :+ Nested(nested.bond, Meta("", "", "e", NoValue, IndexVal) +: recurse(nested.elements, false)))
+      case ((prevAttr, _, newGroup, acc), b@Bond(_, _, _, 2, _)) => (prevAttr, true, newGroup, acc :+ b)
+      case ((true, true, true, acc), a: Atom)                    => (false, false, false, acc :+ Meta("", "many-ref", "e", NoValue, IndexVal) :+ a)
+      case ((_, manyRefAttr, newGroup, acc), a: Atom)            => (true, manyRefAttr, newGroup, acc :+ a)
+      case ((_, manyRefAttr, newGroup, acc), e)                  => (false, manyRefAttr, newGroup, acc :+ e)
+    }._4
 
     val firstMeta = model.elements.head match {
       case Meta(_, _, "e", NoValue, Eq(List(eid))) => Meta("", "", "e", Id(eid), IndexVal)
       case Bond(ns, refAttr, refNs, _, _)          => Meta("", "", "r", NoValue, IndexVal)
       case _                                       => Meta("", "", "e", NoValue, IndexVal)
     }
-    Model(firstMeta +: (model.elements flatMap recurse))
+    Model(firstMeta +: recurse(model.elements, true))
   }
 
   val imports =
@@ -244,11 +198,7 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
       ..$resolverTree
 
       private trait Util { self: molecule.api.MoleculeBase =>
-//        import molecule.facade.Conn
-//        import molecule.ops.QueryOps._
-//        import molecule.transform.Query2String
         import java.text.SimpleDateFormat
-//        import java.util.Date
 
         private val m = _model
         private val q = _query

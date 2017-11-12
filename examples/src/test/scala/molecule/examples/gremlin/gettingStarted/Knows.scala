@@ -1,6 +1,6 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule._
+import molecule.Imports._
 import molecule.examples.gremlin.dsl.modernGraph2._
 import molecule.examples.gremlin.schema.ModernGraph2Schema
 import molecule.util.MoleculeSpec
@@ -90,7 +90,7 @@ class Knows extends MoleculeSpec {
     // Marko knows (by name)
     // g.V(1).outE('knows').inV().values('name')
     // g.V(1).out('knows').values('name')
-    Person(marko).Knows.Person.name.get === Set("vadas", "josh")
+    Person(marko).Knows.Person.name.get === Seq("vadas", "josh")
     Person(marko).Knows.person.get === Seq(josh, vadas)
 
     // We can uniformly query in the other direction too

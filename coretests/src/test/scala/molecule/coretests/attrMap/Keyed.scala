@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule._
+import molecule.Imports._
 
 import molecule.coretests.util.dsl.coreTest._
 

@@ -1,14 +1,9 @@
 package molecule.coretests.time
 
-import datomic.Peer
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
-
-import scala.collection.JavaConverters._
 
 
 class GetHistory extends Specification {
@@ -133,7 +128,7 @@ class GetHistory extends Specification {
       ("b", t2, true, 1)
     )
 
-    // ..and even better as tacet attributes
+    // ..and even better as tacit attributes
     // "str operations on entities having had an int value of 1"
     Ns.str.t.op.int_(1).getHistory.toSeq.sortBy(t => (t._2, t._3)) === List(
       ("a", t1, true),
@@ -188,7 +183,7 @@ class GetHistory extends Specification {
     // We _can_ combine multiple attrs with generic attributes in a history
     // query but then two individual attribute history "timelines" of changes
     // are unified which can become less useful:
-    Ns(e1).str.t.op.int.t.op.getHistory  === List(
+    Ns(e1).str.t.op.int.t.op.getHistory === List(
       ("a", 1030, false, 1, 1031, false),
       ("b", 1030, true, 1, 1028, true),
       ("b", 1030, true, 2, 1031, true),
@@ -263,7 +258,7 @@ class GetHistory extends Specification {
   }
 
 
-  "Tacet generic attrs" >> {
+  "Tacit generic attrs" >> {
 
     // Transaction dates
     val date2 = tx2.inst

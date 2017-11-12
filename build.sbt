@@ -12,7 +12,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.datomic" % "datomic-free" % "0.9.5561.50",
+    "com.datomic" % "datomic-free" % "0.9.5561.62",
     "org.specs2" %% "specs2-core" % "4.0.1"
   ),
   // Remove Java directories

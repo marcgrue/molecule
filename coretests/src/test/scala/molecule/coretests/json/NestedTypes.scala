@@ -588,6 +588,4 @@ class NestedTypes extends CoreSpec {
          |   {"int1": 2}]}
          |]""".stripMargin
   }
-
-  // Todo: Aggregate types (Vector, Stream)
 }

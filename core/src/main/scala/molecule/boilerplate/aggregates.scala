@@ -12,9 +12,9 @@ trait Aggregate1[Ns1[_], A] {
   def apply(v: rand)    : Ns1[A] = ???
   def apply(v: sample)  : Ns1[A] = ???
 
-  def apply(v: distinct): Ns1[Vector[A]] = ???
   def apply(v: mins)    : Ns1[Vector[A]] = ???
   def apply(v: maxs)    : Ns1[Vector[A]] = ???
+  def apply(v: distinct): Ns1[Vector[A]] = ???
   def apply(v: rands)   : Ns1[Stream[A]] = ???
   def apply(v: samples) : Ns1[Vector[A]] = ???
 

@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule._
+import molecule.Imports._
 import java.util.Date
 import java.util.UUID._
 import java.net.URI

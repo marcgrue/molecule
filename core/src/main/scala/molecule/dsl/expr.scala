@@ -53,19 +53,35 @@ trait expr {
 
   trait max
   private[molecule] trait maxs
-  object max extends max {def apply(i: Int): maxs = ???}
+  object max extends max {
+    def apply(i: Int): maxs = ???
+  }
 
+  /**
+    * Minimum value
+    * `val smallestSize = Car.size(min).get.head`
+    * */
   trait min
   private[molecule] trait mins
-  object min extends min {def apply(i: Int): mins = ???}
+  object min extends min {
+    /**
+      * Minimum n values
+      * `val threeSmallestSizes = Car.size(min(3)).get.head`
+      * */
+    def apply(i: Int): mins = ???
+  }
 
   trait rand
   private[molecule] trait rands
-  object rand extends rand {def apply(i: Int): rands = ???}
+  object rand extends rand {
+    def apply(i: Int): rands = ???
+  }
 
   trait sample
   private[molecule] trait samples
-  object sample extends sample {def apply(i: Int): samples = ???}
+  object sample extends sample {
+    def apply(i: Int): samples = ???
+  }
 
   trait count
   object count extends count

@@ -36,8 +36,8 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
               def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(-1) // All
               def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(n)
 
-              import molecule.factory.JsonBaseNested
-              private def json(n: Int): String = JsonBaseNested(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
+              import molecule.factory.NestedJson
+              private def json(n: Int): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
               def getJson        (implicit conn: Conn): String = json(-1) // All
               def getJson(n: Int)(implicit conn: Conn): String = json(n)
             }
@@ -72,8 +72,9 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
           def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query   ).map(row => compositeTuple(row))
           def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query, n).map(row => compositeTuple(row))
 
-          def getJson        (implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for composite data structures.")
-          def getJson(n: Int)(implicit conn: Conn): String = throw new IllegalArgumentException("`getJson` not (yet) implemented for composite data structures.")
+          private def compositeJson(n: Int) = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
+          def getJson        (implicit conn: Conn): String = compositeJson(-1) // All
+          def getJson(n: Int)(implicit conn: Conn): String = compositeJson(n)
         }
       """
     )

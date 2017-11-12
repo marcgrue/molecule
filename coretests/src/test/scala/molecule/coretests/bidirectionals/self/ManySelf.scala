@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.self
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._

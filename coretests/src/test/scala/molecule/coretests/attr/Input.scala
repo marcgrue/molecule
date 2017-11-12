@@ -1,6 +1,6 @@
 package molecule.coretests.attr
 
-import molecule._
+import molecule.Imports._
 
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
@@ -24,7 +24,7 @@ class Input extends CoreSpec {
 
     // "Input-molecule" with a `?` placeholder for an expected input value
     // Often we are not interested in returning the input value so
-    // we make the integer attribute tacet by adding an underscore
+    // we make the integer attribute tacit by adding an underscore
     val personOfAge = m(Ns.str.int_(?))
 
     // We can now use the input-molecule as a query template
@@ -82,7 +82,7 @@ class Input extends CoreSpec {
 
   "1 input parameter" >> {
 
-    "Tacet expressions" in new OneSetup {
+    "Tacit expressions" in new OneSetup {
       m(Ns.int.str_(?))("b").get === List(2)
       m(Ns.int.str_.<(?))("b").get === List(1)
       m(Ns.int.str_.>(?))("b").get === List(3)
@@ -270,7 +270,7 @@ class Input extends CoreSpec {
       // Asking for a card-many value gives us just that value
       m(Ns.int.strs(?))(Set("b")).get === List((1, Set("b")), (2, Set("b")))
 
-      // So we will more likely use the tacet notation and skip the value itself
+      // So we will more likely use the tacit notation and skip the value itself
       m(Ns.int.strs_(?))(Set("b")).get.toSeq.sorted === List(1, 2)
 
       // If we want the full sets containing the matching value we can't use an
@@ -278,7 +278,7 @@ class Input extends CoreSpec {
       Ns.int.strs.get.filter(_._2.contains("b")) === List((1, Set("a", "b")), (2, Set("b", "c")))
 
 
-      // Input-molecules with tacet expression
+      // Input-molecules with tacit expression
 
       m(Ns.int.strs_(?))(Set("a")).get.toSeq.sorted === List(1)
       m(Ns.int.strs_(?))(Set("b")).get.toSeq.sorted === List(1, 2)

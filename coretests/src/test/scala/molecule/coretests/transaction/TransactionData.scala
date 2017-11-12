@@ -1,5 +1,5 @@
 package molecule.coretests.transaction
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.util.expectCompileError
@@ -81,7 +81,7 @@ class TransactionData extends Specification {
 
     val tx2 = Ns(eid).int(38).update.tx
 
-    // Tacet attributes can be followed by generic attributes
+    // Tacit attributes can be followed by generic attributes
     Ns(eid).str_.tx.get.head === tx1
     Ns(eid).int_.tx.get.head === tx2
 

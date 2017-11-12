@@ -2,7 +2,7 @@ package molecule.coretests.expression
 
 import java.util.Date
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
 import molecule.util.expectCompileError

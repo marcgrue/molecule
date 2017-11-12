@@ -1,6 +1,6 @@
 package molecule.coretests.manipulation.updateMap
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -77,27 +77,27 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       // Replace value
       Ns(eid).bigDecMap.replace(str6 -> bigDec8).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5, str6 -> bigDec8)
 
       // Replace value to existing value at another key is ok
       Ns(eid).bigDecMap.replace(str5 -> bigDec8).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec8, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec8, str6 -> bigDec8)
 
       // Replace multiple values (vararg)
       Ns(eid).bigDecMap.replace(str3 -> bigDec6, str4 -> bigDec7).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
 
       // Missing old value has no effect. The new value is inserted (upsert semantics)
       Ns(eid).bigDecMap.replace(str3 -> bigDec6, str4 -> bigDec7).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
 
       // Replace with Seq of key/newValue pairs
       Ns(eid).bigDecMap.replace(Seq(str2 -> bigDec5)).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec5, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec5, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
 
       // Replacing with empty Seq of key/newValue mapped values has no effect
       Ns(eid).bigDecMap.replace(Seq[(String, BigDecimal)]()).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec5, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec5, str3 -> bigDec6, str4 -> bigDec7, str5 -> bigDec8, str6 -> bigDec8)
 
 
       // Can't replace pairs with duplicate keys
@@ -122,27 +122,27 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       // Remove pair by key
       Ns(eid).bigDecMap.remove(str6).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5)
 
       // Removing pair by non-existing key has no effect
       Ns(eid).bigDecMap.remove(str7).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4, str5 -> bigDec5)
 
       // Removing duplicate keys removes the distinct key
       Ns(eid).bigDecMap.remove(str5, str5).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2, str3 -> bigDec3, str4 -> bigDec4)
 
       // Remove pairs by multiple keys (vararg)
       Ns(eid).bigDecMap.remove(str3, str4).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1, str2 -> bigDec2)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1, str2 -> bigDec2)
 
       // Remove pairs by Seq of keys
       Ns(eid).bigDecMap.remove(Seq(str2)).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1)
 
       // Removing pairs by empty Seq of keys has no effect
       Ns(eid).bigDecMap.remove(Seq[String]()).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1)
     }
 
 
@@ -152,15 +152,15 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       // Apply value (replaces all current values!)
       Ns(eid).bigDecMap(str1 -> bigDec1).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str1 -> bigDec1)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str1 -> bigDec1)
 
       // Apply multiple values (vararg)
       Ns(eid).bigDecMap(str2 -> bigDec2, str3 -> bigDec3).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str2 -> bigDec2, str3 -> bigDec3)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str2 -> bigDec2, str3 -> bigDec3)
 
       // Apply Map of values
       Ns(eid).bigDecMap(Seq(str4 -> bigDec4)).update
-      Ns.bigDecMap.get.head.toList.sorted === List(str4 -> bigDec4)
+      Ns.bigDecMap.get.head.toList.sortBy(_._1) === List(str4 -> bigDec4)
 
       // Apply empty Map of values (retracting all values!)
       Ns(eid).bigDecMap(Seq[(String, BigDecimal)]()).update

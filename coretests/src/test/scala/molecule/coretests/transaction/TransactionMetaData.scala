@@ -1,6 +1,6 @@
 package molecule.coretests.transaction
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -17,7 +17,7 @@ class TransactionMetaData extends CoreSpec {
     // Can't apply transaction meta data to mandatory transaction attributes
     // Ns.int.tx_(Ns.str("use case 42")).insert(0)
 
-    // .. make transaction attributes tacet instead:
+    // .. make transaction attributes tacit instead:
     Ns.int.tx_(Ns.str_("a")).insert(0)
 
     // Data without tx meta data

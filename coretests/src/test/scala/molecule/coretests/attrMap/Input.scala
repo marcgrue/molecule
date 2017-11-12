@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 
 class Input extends Base {
@@ -16,7 +16,7 @@ class Input extends Base {
       (3, Map("en" -> "Hello"))
     )
 
-    // We can use a tacet attribute map (to only return the Int value):
+    // We can use a tacit attribute map (to only return the Int value):
     m(Ns.int.strMap_(?)).apply(Map("en" -> "Hello")).get === List(3)
 
     // Note that text searches for attribute maps are case-sensitive

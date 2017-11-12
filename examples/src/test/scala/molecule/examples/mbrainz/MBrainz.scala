@@ -1,6 +1,7 @@
 package molecule.examples.mbrainz
 import datomic.{Util, Peer}
-import molecule._
+import molecule.facade.Conn
+import molecule.Imports._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.util.MoleculeSpec
 
@@ -15,7 +16,7 @@ import scala.language.postfixOps
   bin/transactor config/samples/dev-transactor-template.properties
 
   [first time (replace full path):]
-  bin/datomic restore-db file:///Users/mg/lib/datomic/datomic-free-0.9.5372/mbrainz-1968-1973 datomic:free://localhost:4334/mbrainz-1968-1973
+  bin/datomic restore-db file:///Users/mg/lib/datomic/datomic-free-0.9.5561.62/mbrainz-1968-1973 datomic:free://localhost:4334/mbrainz-1968-1973
 
   Remember to add -Xmx2g -server to IDE compiler settings ("Additional build process VM options)
   Also, ensure the same java version is used in IDE

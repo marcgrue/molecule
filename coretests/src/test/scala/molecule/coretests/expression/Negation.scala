@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule._
+import molecule.Imports._
 import java.util.Date
 import java.util.UUID._
 import java.net.URI
@@ -26,7 +26,7 @@ class Negation extends Base {
     // Entities with no ref1
     Ns.str.int_.ref1_(nil).get === List("bar", "foo", "baz")
 
-    // Makes no sense to return null, so only tacet attributes are allowed
+    // Makes no sense to return null, so only tacit attributes are allowed
     expectCompileError(
       "m(Ns.str.int_.long(nil))",
       "[Dsl2Model:getValues] Please add underscore to attribute: `long_(nil)`")

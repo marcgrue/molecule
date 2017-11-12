@@ -1,11 +1,11 @@
 package molecule.examples.seattle
 
-import molecule._
+import molecule.Imports._
 import java.io.FileReader
 import datomic.{Peer, Util}
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.seattle.schema.SeattleSchema
-import molecule.Conn
+import molecule.facade.Conn
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 

@@ -12,7 +12,7 @@ case class VerifyModel(model: Model, op: String) {
   private def verifySave() {
     unexpectedAppliedId
     noGenericsInTail
-    noTacetAttrs
+    noTacitAttrs
     noTransitiveAttrs
     missingAttrInStartEnd
     noConflictingCardOneValues
@@ -24,7 +24,7 @@ case class VerifyModel(model: Model, op: String) {
   private def verifyInsert() {
     unexpectedAppliedId
     noGenericsInTail
-    noTacetAttrs
+    noTacitAttrs
     noTransitiveAttrs
     missingAttrInStartEnd
     noNestedEdgesWithoutTarget
@@ -75,14 +75,14 @@ case class VerifyModel(model: Model, op: String) {
         s"not allowed in $op molecules. Found `e($eid)`")
   }
 
-  private def noTacetAttrs {
-    def detectTacetAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
-      case a: Atom if a.name.last == '_' => iae("noTacetAttrs", s"Tacet attributes like `${a.name}` not allowed in $op molecules.")
-      case Nested(ref, es)               => detectTacetAttrs(es)
-      case Composite(es)                 => detectTacetAttrs(es)
+  private def noTacitAttrs {
+    def detectTacitAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
+      case a: Atom if a.name.last == '_' => iae("noTacitAttrs", s"Tacit attributes like `${a.name}` not allowed in $op molecules.")
+      case Nested(ref, es)               => detectTacitAttrs(es)
+      case Composite(es)                 => detectTacitAttrs(es)
       case e: Element                    => Seq(e)
     }
-    detectTacetAttrs(model.elements)
+    detectTacitAttrs(model.elements)
   }
 
   private def noTransitiveAttrs = model.elements collectFirst {

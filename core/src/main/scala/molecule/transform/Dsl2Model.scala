@@ -99,11 +99,11 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.op.apply($added)"        => traverse(q"$prev", Meta("db", "op", "tx", OpValue(Some(extract(q"$added"))), NoValue))
     case q"$prev.op"                      => traverse(q"$prev", Meta("db", "op", "tx", OpValue(None), NoValue))
 
-    // Tacet transaction attributes not allowed
-    case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacet `tx_` not allowed since all datoms have a tx value")
-    case q"$prev.t_"       => abort(s"[Dsl2Model:dslStructure] Tacet `t_` not allowed since all datoms have a t value")
-    case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacet `txInstant_` not allowed since all datoms have a txInstant value")
-    case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacet `op_` not allowed since all datoms have a `op value")
+    // Tacit transaction attributes not allowed
+    case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacit `tx_` not allowed since all datoms have a tx value")
+    case q"$prev.t_"       => abort(s"[Dsl2Model:dslStructure] Tacit `t_` not allowed since all datoms have a t value")
+    case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacit `txInstant_` not allowed since all datoms have a txInstant value")
+    case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacit `op_` not allowed since all datoms have a `op value")
 
 
     // Self join -----------------------------
@@ -407,15 +407,16 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq($pkg.nil)" if attr.name.last == '_'               => Fn("not")
       case q"Seq($pkg.nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute: `${attr.name}_(nil)`")
       case q"Seq($pkg.unify)" if attr.name.last == '_'             => Fn("unify")
-      case q"Seq($pkg.unify)"                                      => abort(s"[Dsl2Model:getValues] Can only unify on tacet attributes. Please add underscore to attribute: `${attr.name}_(unify)`")
-      case q"Seq($pkg.distinct)"                                   => Distinct
-      case q"Seq($pkg.max.apply(${Literal(Constant(i: Int))}))"    => aggr("max", Some(i))
+      case q"Seq($pkg.unify)"                                      => abort(s"[Dsl2Model:getValues] Can only unify on tacit attributes. Please add underscore to attribute: `${attr.name}_(unify)`")
       case q"Seq($pkg.min.apply(${Literal(Constant(i: Int))}))"    => aggr("min", Some(i))
+      case q"Seq($pkg.max.apply(${Literal(Constant(i: Int))}))"    => aggr("max", Some(i))
       case q"Seq($pkg.rand.apply(${Literal(Constant(i: Int))}))"   => aggr("rand", Some(i))
       case q"Seq($pkg.sample.apply(${Literal(Constant(i: Int))}))" => aggr("sample", Some(i))
-      case q"Seq($pkg.max)"                                        => aggr("max")
       case q"Seq($pkg.min)"                                        => aggr("min")
-      case q"Seq($pkg.rand)"                                       => aggr("rand")
+      case q"Seq($pkg.max)"                                        => aggr("max")
+      case q"Seq($pkg.distinct)"                                   => Distinct
+      case q"Seq($pkg.rand)"                                       => aggr("rand", Some(1))
+      case q"Seq($pkg.sample)"                                     => aggr("sample", Some(1))
       case q"Seq($pkg.count)"                                      => aggr("count")
       case q"Seq($pkg.countDistinct)"                              => aggr("count-distinct")
       case q"Seq($pkg.sum)"                                        => aggr("sum")
@@ -548,17 +549,17 @@ object Dsl2Model {
     } getOrElse abort(3, s"Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
 
 
-    // Only tacet attributes allowed to have AND semantics for self-joins
+    // Only tacit attributes allowed to have AND semantics for self-joins
     def checkAndSemantics(elements: Seq[Element]): Unit = elements foreach {
       case a@Atom(_, name, _, 1, And(_), _, _, _) if name.last != '_' =>
         abort(4, s"Card-one attribute `$name` cannot return multiple values.\n" +
-          "A tacet attribute can though have AND expressions to make a self-join.\n" +
-          s"If you want this, please make the attribute tacet by appending an underscore: `${name}_`")
+          "A tacit attribute can though have AND expressions to make a self-join.\n" +
+          s"If you want this, please make the attribute tacit by appending an underscore: `${name}_`")
       case a@Atom(_, name, _, 3, And(_), _, _, _) if name.last != '_' =>
         abort(5, s"Map attribute `$name` is to be considered a card-one container for keyed variations of one value and " +
           """can semantically therefore not return "multiple values".""" +
-          "\nA tacet map attribute can though have AND expressions to make a self-join.\n" +
-          s"If you want this, please make the map attribute tacet by appending an underscore: `${name}_`")
+          "\nA tacit map attribute can though have AND expressions to make a self-join.\n" +
+          s"If you want this, please make the map attribute tacit by appending an underscore: `${name}_`")
       case Nested(bond, elements2)                                    => checkAndSemantics(elements2)
       case _                                                          => "ok"
     }

@@ -86,7 +86,7 @@ object Model2Query extends Helpers {
           }
         }
 
-        // Keyed map Atom_ (tacet)
+        // Keyed map Atom_ (tacit)
 
         case a0@Atom(_, attr0, t, 4, value, _, gs, key :: Nil) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.slice(0, attr0.length - 2))
@@ -137,7 +137,7 @@ object Model2Query extends Helpers {
               .where(e, a, v, gs)
               .func(".matches ^String", Seq(Var(v), Val("(" + key + ")@(" + args.map(f).mkString("|") + ")$")))
 
-            case other => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacet mapped Atom_:\nAtom_   : $a\nElement: $other")
+            case other => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacit mapped Atom_:\nAtom_   : $a\nElement: $other")
           }
         }
 
@@ -233,7 +233,7 @@ object Model2Query extends Helpers {
           }
         }
 
-        // Map Atom_ (tacet)
+        // Map Atom_ (tacit)
 
         case a0@Atom(_, attr0, t, 3, value, _, gs, keys) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.init)
@@ -262,7 +262,7 @@ object Model2Query extends Helpers {
             case MapEq(pairs)                    => q.where(e, a, v, gs).mappings(v, a, pairs.toSeq)
             case And(args)                       => q.where(e, a, v, gs).matches(v, keys, "(" + args.head + ")$") // (post-processed)
             case Fn("not", _)                    => q.not(e, a, v, gs)
-            case other                           => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacet mapped Atom_:\nAtom_   : $a\nElement: $other")
+            case other                           => sys.error(s"[Model2Query:resolve[Map Atom]] Unresolved tacit mapped Atom_:\nAtom_   : $a\nElement: $other")
           }
         }
 
@@ -321,7 +321,7 @@ object Model2Query extends Helpers {
           }
         }
 
-        // Enum Atom_ (tacet) - in where clause but not in output
+        // Enum Atom_ (tacit) - in where clause but not in output
 
         case a0@Atom(_, attr0, _, _, value, Some(prefix), gs, _) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.init)
@@ -337,7 +337,7 @@ object Model2Query extends Helpers {
             case Eq(arg :: Nil)            => q.where(e, a, Val(prefix + arg), gs)
             case Neq(args)                 => q.enum(e, a, v, gs).compareTo("!=", a, v2, args map Val)
             case Fn("not", _)              => q.not(e, a, v, gs)
-            case other                     => sys.error(s"[Model2Query:resolve[Enum Atom]] Unresolved tacet enum Atom_:\nAtom_  : $a\nElement: $other")
+            case other                     => sys.error(s"[Model2Query:resolve[Enum Atom]] Unresolved tacit enum Atom_:\nAtom_  : $a\nElement: $other")
           }
         }
 
@@ -405,7 +405,7 @@ object Model2Query extends Helpers {
           }
         }
 
-        // Atom_ (tacet)
+        // Atom_ (tacit)
 
         case a0@Atom(_, attr0, t, card, value, _, gs, _) if attr0.last == '_' => {
           val a = a0.copy(name = attr0.init)
@@ -434,7 +434,7 @@ object Model2Query extends Helpers {
             case Fulltext(qv :: Nil)      => q.fulltext(e, a, v, Val(qv))
             case Fulltext(qvs)            => q.orRules(v1, a, qvs, gs).fulltext(e, a, v, Var(v1))
             case other                    =>
-              sys.error(s"[Model2Query:resolve[Atom]] Unresolved tacet Atom_:\nAtom_  : $a\nElement: $other")
+              sys.error(s"[Model2Query:resolve[Atom]] Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
           }
         }
 

@@ -1,6 +1,6 @@
 package molecule.coretests.attr
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -293,7 +293,7 @@ class OptionalValues extends CoreSpec {
   }
 
 
-  "Mixing optional and tacet attributes" >> {
+  "Mixing optional and tacit attributes" >> {
 
     "Ok in query" in new CoreSetup {
       Ns.str.int$ insert List(
@@ -307,7 +307,7 @@ class OptionalValues extends CoreSpec {
 
     "IllegalArgumentException when inserting" in new CoreSetup {
       (m(Ns.str_.int$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noTacetAttrs]  Tacet attributes like `str_` not allowed in insert molecules."
+        "[molecule.api.CheckModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
     }
   }
 
@@ -349,7 +349,7 @@ class OptionalValues extends CoreSpec {
 
     // First namespace without any mandatory attributes not allowed
     (Ns.str_.Ref1.int1.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noTacetAttrs]  Tacet attributes like `str_` not allowed in insert molecules."
+      "[molecule.api.CheckModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
 
     // Last namespace without any mandatory attributes not allowed
     (Ns.str.Ref1.int1$.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
@@ -369,9 +369,9 @@ class OptionalValues extends CoreSpec {
   }
 
 
-  "Only tacet attributes" in new CoreSetup {
+  "Only tacit attributes" in new CoreSetup {
 
-    // Queries with only tacet attributes not allowed
+    // Queries with only tacit attributes not allowed
     expectCompileError(
       "m(Ns.str_).get",
       "value get is not a member of molecule.api.Molecule0")

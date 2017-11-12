@@ -1,7 +1,8 @@
 package molecule.coretests.time.domain
 
-import molecule.Conn
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest.Ns
+import molecule.facade.Conn
 
 // Example domain class getting and manipulating the db with molecules
 // Molecules need an implicit conn object at runtime

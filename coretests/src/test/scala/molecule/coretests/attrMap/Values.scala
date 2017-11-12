@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 //import datomic.Peer
 //import molecule.util.expectCompileError
@@ -18,7 +18,7 @@ class Values extends Base {
       (4, Map("da" -> "Hej"))
     )
 
-    // Tacet attribute map
+    // Tacit attribute map
     Ns.int.strMap_.get === List(1, 2, 3, 4)
 
     Ns.int.intMap.get === List(
@@ -80,7 +80,7 @@ class Values extends Base {
     Ns.int.strMap("Hello").get === List(
       (3, Map("en" -> "Hello"))
     )
-    // Tacet value in attribute map
+    // Tacit value in attribute map
     Ns.int.strMap_("Hello").get === List(3)
 
     // Note that text searches for attribute maps are case-sensitive
@@ -194,7 +194,7 @@ class Values extends Base {
     Ns.int.intMap.!=(10, 30).get === List(
       (2, Map("fr" -> 20))
     )
-    // Tacet omitted attribute map values
+    // Tacit omitted attribute map values
     Ns.int.intMap_.!=(10, 30).get === List(2)
 
 
@@ -244,7 +244,7 @@ class Values extends Base {
     Ns.int.dateMap.!=(date1, date3).get === List(
       (2, Map("fr" -> date2))
     )
-    // Tacet omitted attribute map values
+    // Tacit omitted attribute map values
     Ns.int.dateMap_.!=(date1, date3).get === List(2)
 
 
@@ -259,7 +259,7 @@ class Values extends Base {
     Ns.int.uuidMap.!=(uuid1, uuid3).get === List(
       (2, Map("fr" -> uuid2))
     )
-    // Tacet omitted attribute map values
+    // Tacit omitted attribute map values
     Ns.int.uuidMap_.!=(uuid1, uuid3).get === List(2)
 
 
@@ -274,7 +274,7 @@ class Values extends Base {
     Ns.int.uriMap.!=(uri1, uri3).get === List(
       (2, Map("fr" -> uri2))
     )
-    // Tacet omitted attribute map values
+    // Tacit omitted attribute map values
     Ns.int.uriMap_.!=(uri1, uri3).get === List(2)
   }
 

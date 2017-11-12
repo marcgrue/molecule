@@ -1,7 +1,7 @@
 package molecule.coretests.manipulation.updateMap
 
 import java.util.Date
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError

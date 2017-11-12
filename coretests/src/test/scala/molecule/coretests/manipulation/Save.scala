@@ -1,6 +1,6 @@
 package molecule.coretests.manipulation
 
-import molecule._
+import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -176,15 +176,16 @@ class Save extends CoreSpec {
 
       // Seq
       Ns.int(2).ints(Seq(1, 2)).save
-      Ns.int_(2).ints.get.head === Seq(1, 2)
+      // Output is always a Set for card-many attribute values
+      Ns.int_(2).ints.get.head === Set(1, 2)
 
       // List
       Ns.int(2).ints(List(1, 2)).save
-      Ns.int_(2).ints.get.head === List(1, 2)
+      Ns.int_(2).ints.get.head === Set(1, 2)
 
       // Iterable
       Ns.int(4).ints(Iterable(1, 2)).save
-      Ns.int_(4).ints.get.head === Iterable(1, 2)
+      Ns.int_(4).ints.get.head === Set(1, 2)
 
       // Set with duplicate values not allowed
       expectCompileError(

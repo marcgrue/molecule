@@ -1,16 +1,12 @@
 package molecule.factory
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Long => jLong}
-import java.math.{BigDecimal => jBigDec, BigInteger => jBigInt}
-import java.util.{List => jList, Map => jMap}
+import java.util.{List => jList}
 
 import molecule.ast.model._
 import molecule.ast.query._
 
-import scala.collection.JavaConverters._
 
-
-case class TupleBaseNested(modelE: Model, queryE: Query) {
+case class NestedTuples(modelE: Model, queryE: Query) {
 
   lazy val flatModel: Seq[Element] = {
     def recurse(element: Element): Seq[Element] = element match {
