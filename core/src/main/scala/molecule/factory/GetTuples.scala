@@ -16,7 +16,13 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
   def tuple(query: Tree, row: Tree, tpes: Seq[Type]): Seq[Tree] = tpes.zipWithIndex.map { case (tpe, i) => cast(query, row, tpe, q"$i") }
 
   def cast(query: Tree, row: Tree, tpe: Type, i: Tree): Tree = {
-    val value: Tree = q"if($i >= $row.size) null else $row.get($i)"
+    val value: Tree =
+      q"""
+         val value = if($i >= $row.size) null else $row.get($i)
+//         println("TYPE : " + {tpe.toString})
+//         println("ROW(" + i + "): " + value)
+         value
+        """
     tpe match {
       case t if t <:< typeOf[Option[Map[String, _]]] => castOptionMap(value, t)
       case t if t <:< typeOf[Option[Set[_]]]         => castOptionSet(value, t)
@@ -564,20 +570,27 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
 
     def resolve(nestedTpes: Seq[Type], typeIndex: Int): Tree = {
       val rowIndex = entityIndex + shift + typeIndex
-      //val tab = "  " * $rowIndex
-      //debug(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
+//val tab = "  " * $rowIndex
+//debug(tab + "rowIndex : " + $rowIndex + " (" + $entityIndex + "+" + $shift + "+" + $typeIndex + ")")
       q"""
         object resolve {
-          val prevEnt      = if($prevRow.head == 0L) 0L else $prevRow.apply($entityIndex).asInstanceOf[Long]
-          val curEnt       = $row.apply($entityIndex).asInstanceOf[Long]
+          val prevEnt      = if($prevRow.head == 0L) 0L else {
+//debug("_1 " + prevRow.apply(indexMap(entityIndex)))
+              $prevRow.apply(indexMap($entityIndex)).asInstanceOf[Long]
+           }
+
+//debug("_2 " + entityIndex + "   " + row.apply(indexMap(entityIndex)))
+          val curEnt        = $row.apply(indexMap($entityIndex)).asInstanceOf[Long]
+//debug("_3 " + curEnt)
+
           val isNewNested  = if (prevEnt == 0L) true else prevEnt != curEnt
           val isNewManyRef = manyRefIndexes.nonEmpty && prevEnt != 0L && $prevRow.apply(manyRefIndexes.head) != $row.apply(manyRefIndexes.head)
 
 //debug(tab + "entities : " + prevEnt + "   " + curEnt + "   " + isNewNested + "   " + isNewManyRef)
 
 
+          // ==========================================================================
           val result = if ($prevTpl.isEmpty || isNewNested || isNewManyRef) {
-            // ==========================================================================
 
 //debug(tab + "a prevTpl: " + prevTpl)
 
@@ -591,8 +604,8 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
             Seq(toAdd)
 
 
+          // ==========================================================================
           } else if ($prevTpl.isDefined && $prevTpl.get.isInstanceOf[Seq[_]]) {
-            // ==========================================================================
 
 //debug(tab + "b prevTpl: " + prevTpl)
 
@@ -608,8 +621,8 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
             added
 
 
+          // ==========================================================================
           } else {
-            // ==========================================================================
 //debug(tab + "c prevTpl: " + prevTpl)
 
             ${

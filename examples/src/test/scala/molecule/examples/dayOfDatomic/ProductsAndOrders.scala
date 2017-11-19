@@ -551,4 +551,45 @@ class ProductsAndOrders extends MoleculeSpec {
       ))
     )
   }
+
+
+  "Corner case with flat card-many + nested" >> {
+
+    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+
+    // Insert product
+    val whiskyId = Product.description.insert("Cheap Whisky").eid
+
+    // We can use an optional attribute (`Comment.descr$`) for missing values
+    val orderId = Order.orderid.LineItems * (LineItem.product.price.quantity.text.Comments * (Comment.text.descr$.Authors * Person.name)) insert List(
+      (23, List(
+        (whiskyId, 38.00, 2, "in stock", List(
+          ("second", None, List("Don Juan")),
+          ("chance", Some("foo"), List("Marc"))
+        ))
+      ))
+    ) eid
+
+    // Combining flat card-many (LineItems.text) + nested
+    Order.orderid_(23).LineItems.text
+      .Comments.*(Comment.text
+      .Authors.*(Person.name
+    )).get === List(
+      ("in stock", List(
+        ("second", List("Don Juan")),
+        ("chance", List("Marc"))))
+    )
+
+    Order.orderid_(23).LineItems.text
+      .Comments.*(Comment.text
+      .Authors.*(Person.name
+    )).getJson ===
+      """[
+        |{"text": "in stock", "comments": [
+        |   {"text": "second", "authors": [
+        |      {"name": "Don Juan"}]},
+        |   {"text": "chance", "authors": [
+        |      {"name": "Marc"}]}]}
+        |]""".stripMargin
+  }
 }

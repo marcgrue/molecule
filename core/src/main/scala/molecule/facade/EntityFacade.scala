@@ -51,6 +51,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Conn, id: Object) {
   def touch: Map[String, Any] = asMap()
   def touch(maxDepth: Int = 5): Map[String, Any] = asMap(1, maxDepth)
 
+  // Touch quoted for quoted output that can be pasted into tests
   def touchQ: String = touchQ()
   def touchQ(maxDepth: Int = 5): String = asMap(1, maxDepth).map(p => s""""${p._1}" -> ${formatEntity(p._2)}""").mkString("Map(\n  ", ",\n  ", "\n)")
 
