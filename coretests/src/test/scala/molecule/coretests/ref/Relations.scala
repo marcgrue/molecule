@@ -71,14 +71,14 @@ class Relations extends CoreSpec {
     // Avoid mixing update/save semantics
     (Ns(id).Refs1.int1(1).save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.unexpectedAppliedId]  Can't save molecule with an applied eid as in `Ns(eid)`. " +
+      "[molecule.ops.VerifyModel.unexpectedAppliedId]  Can't save molecule with an applied eid as in `Ns(eid)`. " +
       """Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
 
     // Updating across namespaces not allowed
 
     (Ns(id).Refs1.int1(1).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
+      "[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
   }
 
 
@@ -103,6 +103,8 @@ class Relations extends CoreSpec {
       ("a", "a1", 1),
       ("b", "b1", 2))
 
+    Ns.str.Ref1.str1._Ns.Refs1.int1.getD
+
     Ns.str.Ref1.str1._Ns.Refs1.int1.get === List(
       ("a", "a1", 1),
       ("b", "b1", 2))
@@ -110,6 +112,18 @@ class Relations extends CoreSpec {
     Ns.str.Refs1.int1._Ns.Ref1.str1.get === List(
       ("a", 1, "a1"),
       ("b", 2, "b1"))
+  }
+
+  "BackRef, 2 levels" in new CoreSetup {
+    Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1 insert List(
+      ("a", "a1", "a2", 1),
+      ("b", "b1", "b2", 2))
+
+    Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1.getD
+
+    Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1.get === List(
+      ("a", "a1", "a2", 1),
+      ("b", "b1", "b2", 2))
   }
 
 
@@ -144,7 +158,7 @@ class Relations extends CoreSpec {
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Ref1.int1$).insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
+      "[molecule.ops.VerifyModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
   "Aggregates one" in new CoreSetup {

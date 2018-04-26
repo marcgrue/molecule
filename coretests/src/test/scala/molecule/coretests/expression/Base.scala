@@ -14,6 +14,8 @@ class Base extends CoreSpec {
     Ns.double insert List(-2.0, -1.0, 0.0, 1.0, 2.0)
     Ns.bool insert List(true, false)
     Ns.date insert List(date0, date1, date2)
+    Ns.bigInt insert List(bigInt0, bigInt1, bigInt2)
+    Ns.bigDec insert List(bigDec0, bigDec1, bigDec2)
     Ns.uuid insert List(uuid0, uuid1, uuid2)
     Ns.uri insert List(uri0, uri1, uri2)
     Ns.enum insert List("enum0", "enum1", "enum2")
@@ -60,6 +62,16 @@ class Base extends CoreSpec {
       (date1, Set(date1, date2)),
       (date2, Set(date2, date3)),
       (date3, Set(date2, date4)))
+
+    Ns.bigInt.bigInts insert List(
+      (bigInt1, Set(bigInt1, bigInt2)),
+      (bigInt2, Set(bigInt2, bigInt3)),
+      (bigInt3, Set(bigInt2, bigInt4)))
+
+    Ns.bigDec.bigDecs insert List(
+      (bigDec1, Set(bigDec1, bigDec2)),
+      (bigDec2, Set(bigDec2, bigDec3)),
+      (bigDec3, Set(bigDec2, bigDec4)))
 
     Ns.uuid.uuids insert List(
       (uuid1, Set(uuid1, uuid2)),

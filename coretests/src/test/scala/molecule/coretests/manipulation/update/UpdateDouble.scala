@@ -31,7 +31,7 @@ class UpdateDouble extends CoreSpec {
 
       (Ns(eid).double(2.0, 3.0).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... double(2.0, 3.0)"
     }
   }
@@ -60,7 +60,7 @@ class UpdateDouble extends CoreSpec {
 
       (Ns(eid).double(double2, double3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... double($double2, $double3)"
     }
   }

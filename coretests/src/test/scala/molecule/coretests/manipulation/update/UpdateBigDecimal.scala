@@ -31,7 +31,7 @@ class UpdateBigDecimal extends CoreSpec {
 
       (Ns(eid).bigDec(bigDec2, bigDec3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... bigDec($bigDec2, $bigDec3)"
     }
   }

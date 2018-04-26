@@ -32,14 +32,14 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
               val _modelE = r.modelE
               val _queryE = r.queryE
 
-              private def nestedTuples(n: Int) = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
-              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(-1) // All
-              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(n)
+              private def nestedTuples(conn: Conn, n: Int) = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
+              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, -1) // All
+              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, n)
 
               import molecule.factory.NestedJson
-              private def json(n: Int): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
-              def getJson        (implicit conn: Conn): String = json(-1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+              private def json(conn: Conn, n: Int): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
+              def getJson        (implicit conn: Conn): String = json(conn, -1) // All
+              def getJson(n: Int)(implicit conn: Conn): String = json(conn, n)
             }
           """
         )
@@ -53,9 +53,9 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
             def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query   ).map(row => getTuple(row))
             def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query, n).map(row => getTuple(row))
             
-            private def json(n: Int): String = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-            def getJson        (implicit conn: Conn): String = json(-1) // All
-            def getJson(n: Int)(implicit conn: Conn): String = json(n)
+            private def json(conn: Conn, n: Int): String = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
+            def getJson        (implicit conn: Conn): String = json(conn, -1) // All
+            def getJson(n: Int)(implicit conn: Conn): String = json(conn, n)
           }
         """
       )
@@ -72,9 +72,9 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
           def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query   ).map(row => compositeTuple(row))
           def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query, n).map(row => compositeTuple(row))
 
-          private def compositeJson(n: Int) = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-          def getJson        (implicit conn: Conn): String = compositeJson(-1) // All
-          def getJson(n: Int)(implicit conn: Conn): String = compositeJson(n)
+          private def compositeJson(conn: Conn, n: Int) = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
+          def getJson        (implicit conn: Conn): String = compositeJson(conn, -1) // All
+          def getJson(n: Int)(implicit conn: Conn): String = compositeJson(conn, n)
         }
       """
     )

@@ -31,7 +31,7 @@ class UpdateBigInt extends CoreSpec {
 
       (Ns(eid).bigInt(bigInt2, bigInt3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... bigInt($bigInt2, $bigInt3)"
     }
   }

@@ -40,6 +40,7 @@ class Partition extends MoleculeSpec {
     m(lit_Book.title.Reviewers.name.Professions * gen_Profession.name) insert List(("book", "Jan", List("Musician")))
 
     m(lit_Book.title.Reviewers.name.Professions * gen_Profession.name).get === List(("book", "Jan", List("Musician")))
+    // Same as
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Musician")))
   }
 
@@ -47,27 +48,18 @@ class Partition extends MoleculeSpec {
   "Nested 2 levels without intermediary attribute values" in new PartitionSetup {
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name) insert List(("book", List("Hacker", "Magician")))
 
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Magician", "Hacker")))
+    // Same as
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
-
-    // Expecting (todo)
-    //    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Magician", "Hacker")))
-    // Getting
-    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker")), ("book", List("Magician")))
   }
 
 
   "Nested 2 levels + many reference" in new PartitionSetup {
     m(lit_Book.title.Reviewers * gen_Person.Professions.name) insert List(("book", List("Hacker", "Magician")))
 
-    // Expected (todo)
-    //    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
-    // Getting:
-    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker")), ("book", List("Magician")))
-
-    // Expected (todo)
-    //    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
-    // Getting:
-    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker")), ("book", List("Magician")))
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
+    // Same as
+    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
   }
 
 
@@ -75,7 +67,7 @@ class Partition extends MoleculeSpec {
     // Todo: more transitive examples in own file
     (m(lit_Book.title.Author.name.name).insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
+      "[molecule.ops.VerifyModel.noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
   }
 
 

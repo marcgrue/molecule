@@ -433,8 +433,7 @@ object Model2Query extends Helpers {
             case Fn("unify", _)           => q.where(e, a, v, gs)
             case Fulltext(qv :: Nil)      => q.fulltext(e, a, v, Val(qv))
             case Fulltext(qvs)            => q.orRules(v1, a, qvs, gs).fulltext(e, a, v, Var(v1))
-            case other                    =>
-              sys.error(s"[Model2Query:resolve[Atom]] Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
+            case other                    => sys.error(s"[Model2Query:resolve[Atom]] Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
           }
         }
 
@@ -475,6 +474,7 @@ object Model2Query extends Helpers {
           case EntValue                      => q.find(e, gs)
           case VarValue                      => q.find(v, gs).where(e, a, v, gs)
           case NoValue                       => q.find(NoVal, gs).where(e, a, v, gs)
+          case Distinct                      => q.find("distinct", Seq(), v, gs).where(e, a, v, gs)
           case BackValue(backNs)             => q.find(e, gs).where(v, a.ns, a.name, Var(e), backNs, gs)
           case Eq((seq: Seq[_]) :: Nil)      => q.find(v, gs).where(e, a, v, gs).orRules(e, a, seq, gs, u(t, v))
           case Eq(arg :: Nil) if uri(t)      => q.find(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Seq())
@@ -509,16 +509,19 @@ object Model2Query extends Helpers {
 
         // Meta ===================================================================================
 
-        case Meta(_, _, "e", _, Fn("count", Some(i)))      => q.find("count", Seq(i), e, Seq())
-        case Meta(_, _, "e", _, Fn("count", _))            => q.find("count", Seq(), e, Seq())
-        case Meta(_, _, "e", _, Length(Some(Fn(_, _))))    => q.find(e, Seq())
-        case Meta(_, _, "e", _, Eq(Seq(Qm)))               => q.in(e)
-        case Meta(_, _, "e", _, Eq(eids)) if eids.size > 1 => q.in(eids, e)
-        case Meta(_, _, "r", _, IndexVal)                  => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, Id(eid), IndexVal)              => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, IndexVal)                    => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, EntValue)                    => q.find(e, Seq())
-        case Meta(_, _, _, _, _)                           => q
+        case Meta(_, _, "e", _, Fn("count", Some(i)))                 => q.find("count", Seq(i), e, Seq())
+        case Meta(_, _, "e", _, Fn("count", _))                       => q.find("count", Seq(), e, Seq())
+        case Meta(_, _, "e", _, Length(Some(Fn(_, _))))               => q.find(e, Seq())
+        case Meta(_, attr, "e", _, Eq(Seq(Qm))) if attr.endsWith("_") => q.in(e)
+        case Meta(_, _, "e", _, Eq(Seq(Qm)))                          => q.find(e, Seq()).in(e)
+        case Meta(_, attr, "e", _, Eq(eids)) if attr.endsWith("_")    => q.in(eids, e)
+        case Meta(_, _, "e", _, Eq(eids))                             => q.find(e, Seq()).in(eids, e)
+        case Meta(_, _, "r", _, IndexVal)                             => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, Id(eid), IndexVal)                         => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, _, IndexVal)                               => q.find(v, Seq()).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, attr, _, _, EntValue) if attr.endsWith("_")      => q
+        case Meta(_, _, _, _, EntValue)                               => q.find(e, Seq())
+        case Meta(_, _, _, _, _)                                      => q
 
         case unresolved => sys.error("[Model2Query:resolve] Unresolved model: " + unresolved)
       }
@@ -608,7 +611,6 @@ object Model2Query extends Helpers {
           }
           (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
 
-        case Meta(ns, attr, "e", NoValue, Eq(Seq(id: Long)))            => (resolve(query, id.toString, v, element), id.toString, v, ns, attr, prevRefNs)
         case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  => (resolve(query, e, v, element), e, v, ns, attr, prevRefNs)
         case Meta(ns, attr, "e", NoValue, Eq(eids))                     => (resolve(query, e, v, element), e, v, ns, attr, prevRefNs)
         case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        => (resolve(query, e, v, element), e, w, ns, attr, "")

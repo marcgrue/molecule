@@ -19,8 +19,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2 ~ Ns.int).getJson ===
       """[
-        |[{"int2": 2}, {"int": 22}],
-        |[{"int2": 1}, {"int": 11}]
+        |[{"ref2.int2": 2}, {"ns.int": 22}],
+        |[{"ref2.int2": 1}, {"ns.int": 11}]
         |]""".stripMargin
   }
 
@@ -36,8 +36,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2 ~ Ns.int.str).getJson ===
       """[
-        |[{"int2": 1}, {"int": 11, "str": "aa"}],
-        |[{"int2": 2}, {"int": 22, "str": "bb"}]
+        |[{"ref2.int2": 1}, {"ns.int": 11, "ns.str": "aa"}],
+        |[{"ref2.int2": 2}, {"ns.int": 22, "ns.str": "bb"}]
         |]""".stripMargin
   }
 
@@ -53,8 +53,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int).getJson ===
       """[
-        |[{"int2": 2, "str2": "b"}, {"int": 22}],
-        |[{"int2": 1, "str2": "a"}, {"int": 11}]
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22}],
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11}]
         |]""".stripMargin
   }
 
@@ -71,8 +71,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int.str).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"int": 11, "str": "aa"}],
-        |[{"int2": 2, "str2": "b"}, {"int": 22, "str": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ns.str": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ns.str": "bb"}]
         |]""".stripMargin
   }
 
@@ -91,15 +91,15 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ref1.int1.str1).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"int1": 11, "str1": "aa"}],
-        |[{"int2": 2, "str2": "b"}, {"int1": 22, "str1": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb"}]
         |]""".stripMargin
 
     // .. including transaction meta data
     m(Ref2.int2.str2 ~ Ref1.int1.str1.tx_(Ns.str)).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"int1": 11, "str1": "aa", "tx_str": "Tx meta data"}],
-        |[{"int2": 2, "str2": "b"}, {"int1": 22, "str1": "bb", "tx_str": "Tx meta data"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa", "tx.ns.str": "Tx meta data"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb", "tx.ns.str": "Tx meta data"}]
         |]""".stripMargin
   }
 
@@ -116,8 +116,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int.Ref1.str1).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"int": 11, "str1": "aa"}],
-        |[{"int2": 2, "str2": "b"}, {"int": 22, "str1": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.str1": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -134,8 +134,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int.Refs1.str1).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"int": 11, "str1": "aa"}],
-        |[{"int2": 2, "str2": "b"}, {"int": 22, "str1": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.str1": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -152,14 +152,14 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.Refs1.int1).getJson ===
       """[
-        |[{"int2": 2, "str2": "b"}, {"int1": 22}],
-        |[{"int2": 1, "str2": "a"}, {"int1": 11}]
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22}],
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11}]
         |]""".stripMargin
 
     m(Ref2.int2.str2 ~ Ns.refs1).getJson ===
       """[
-        |[{"int2": 1, "str2": "a"}, {"refs1": [17592186045446]}],
-        |[{"int2": 2, "str2": "b"}, {"refs1": [17592186045448]}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.refs1": [17592186045446]}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.refs1": [17592186045448]}]
         |]""".stripMargin
   }
 }

@@ -9,7 +9,7 @@ object ProductsOrderDefinition {
   trait Order {
     val orderid   = oneInt
     val lineItems = many[LineItem].subComponents
-    val lineItem  = one[LineItem].subComponent // dummy for corner case
+    val lineItem  = one[LineItem].subComponent
   }
 
 
@@ -17,7 +17,7 @@ object ProductsOrderDefinition {
     val product  = one[Product]
     val price    = oneDouble
     val quantity = oneInt
-    val text     = oneString // dummy for corner case
+    val text     = oneString
     val comments = many[Comment].subComponents
   }
 

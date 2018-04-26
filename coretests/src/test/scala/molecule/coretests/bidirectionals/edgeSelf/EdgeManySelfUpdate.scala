@@ -209,25 +209,25 @@ class EdgeManySelfUpdate extends MoleculeSpec {
     // Can't update multiple values of cardinality-one attribute `name`
     (Person(ann).Knows.weight(7).Person.name("Joe", "Liz").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+      s"[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
       "\n  Person ... name(Joe, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
     (Person(ann).Knows.*(Knows.weight(4)).Person.name("Joe").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
     (Person(ann).Knows.*(Knows.weight(4)).person(42L).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
     (Person(ann).Knows.*(Knows.weight(4).Person.name("Joe")).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
     (Person(ann).Knows.*(Knows.weight(4).person(42L)).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
     // Note that an edge always have only one target entity.
     // So we can't add multiple (won't compile)

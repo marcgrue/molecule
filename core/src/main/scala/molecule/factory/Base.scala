@@ -85,7 +85,7 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
         import molecule.facade.Conn
         import molecule.ops.QueryOps._
         import molecule.transform.{Model2Query, Model2Transaction, Query2String}
-        import java.lang.{Long => jLong, Double => jDouble, Boolean => jBoolean}
+        import java.lang.{Long => jLong, Double => jDouble, Float => jFloat, Boolean => jBoolean}
         import java.util.{Date, UUID, Map => jMap, List => jList}
         import java.net.URI
         import java.math.{BigInteger => jBigInt, BigDecimal => jBigDec}

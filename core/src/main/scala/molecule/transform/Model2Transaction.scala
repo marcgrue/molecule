@@ -32,12 +32,14 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def resolveElement(eSlot: Any, stmts: Seq[Statement], element: Element): (Any, Seq[Statement]) = (eSlot, element) match {
 
       // None
-      case (e, Atom(_, _, _, _, Fn("not", _), _, _, _))  => (e, stmts)
-      case (e, Atom(_, _, _, _, Eq(Seq(None)), _, _, _)) => (e, stmts)
+      case (eids@Eids(ids), Atom(ns, name, _, c, Fn("not", _), _, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(Eq(Nil)), bi(gs, c))))
+      case (eid@Eid(id), Atom(ns, name, _, c, Fn("not", _), _, gs, _))    => (eid, stmts :+ Add(id, s":$ns/$name", Values(Eq(Nil)), bi(gs, c)))
+      case (e, Atom(_, _, _, _, Fn("not", _), _, _, _))                   => (e, stmts)
+      case (e, Atom(_, _, _, _, Eq(Seq(None)), _, _, _))                  => (e, stmts)
 
-      case ('_, Meta(ns, "", "e", _, EntValue))             => ('arg, stmts)
-      case ('_, Meta(ns, "", "e", _, Eq(Seq(id: Long))))    => (Eid(id), stmts)
-      case ('_, Meta(ns, "", "e", _, Eq(ids: Seq[_])))      => (Eids(ids), stmts)
+      case ('_, Meta(ns, _, "e", _, EntValue))              => ('arg, stmts)
+      case ('_, Meta(ns, _, "e", _, Eq(Seq(id: Long))))     => (Eid(id), stmts)
+      case ('_, Meta(ns, _, "e", _, Eq(ids: Seq[_])))       => (Eids(ids), stmts)
       case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs, c)))
       case ('_, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs, c)))
       case ('_, Bond(ns, refAttr, refNs, c, gs))            => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
@@ -51,14 +53,16 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, bi(gs, c)))
 
       // Entity ids applied to initial namespace
-      case (Eids(ids), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
-      case (Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
-      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
+      case (eids@Eids(ids), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      case (eids@Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))           => (eids, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      //      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                      =>
+      //        ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
 
       // Entity id applied to initial namespace
-      case (Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case (Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+      case (eid@Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eid, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case (eid@Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => (eid, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      //      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      =>
+      //        ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // Same namespace
       case ('e, Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
@@ -931,20 +935,35 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def updateStmts(): Seq[Statement] = {
     val (genericStmts, genericTxStmts) = splitStmts()
-    val dataStmts: Seq[Statement] = genericStmts.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
+    val dataStmts: Seq[Statement] = genericStmts.foldLeft(
+      None: Option[AnyRef],
+      Seq.empty[Statement],
+      0L
+    ) { case ((edgeB, stmts, prevE), genericStmt) =>
       genericStmt match {
-        case Add('e, a, 'tempId, bi)                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
-        case Add(e, a, 'tempId, bi@BiEdgeRef(_, _))          => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB1))
-        case Add(e, a, 'tempId, bi)                          => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
-        case Add('e, a, Values(vs, prefix), bi)              => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB))
-        case Add('e, a, refNs: String, bi@BiTargetRef(_, _)) => (None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add('v, a, Values(vs, prefix), bi)              => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add('tx, a, Values(vs, prefix), bi)             => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add(e, a, Values(vs, prefix), bi)               => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB))
-        case Retract('e, a, Values(vs, prefix), bi)          => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB))
-        case Retract(e, a, Values(vs, prefix), bi)           => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB))
-        case Add(_, a, 'arg, _)                              => iae("updateStmts", s"Attribute `$a` needs a value applied")
-        case unexpected                                      => iae("updateStmts", "Unexpected update statement: " + unexpected)
+        case Add('e, a, 'tempId, bi)                           => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB), 0L)
+        case Add(e, a, 'tempId, bi@BiEdgeRef(_, _))            => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB1), 0L)
+        case Add(e, a, 'tempId, bi)                            => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB), 0L)
+        case Add('e, a, Values(vs, prefix), bi) if prevE == 0L => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB), 0L)
+        case Add('e, a, Values(vs, prefix), bi)                =>
+          val addStmts = valueStmts(stmts, prevE, a, vs, prefix, bi, edgeB)
+          if (addStmts.isEmpty)
+            (edgeB, Nil, prevE)
+          else
+            (edgeB, addStmts, 0L)
+        case Add('e, a, refNs: String, bi@BiTargetRef(_, _))   => (None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB), 0L)
+        case Add('v, a, Values(vs, prefix), bi)                => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB), 0L)
+        case Add('tx, a, Values(vs, prefix), bi)               => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB), 0L)
+        case Add(e, a, Values(vs, prefix), bi)                 =>
+          val addStmts = valueStmts(stmts, e, a, vs, prefix, bi, edgeB)
+          if (addStmts.isEmpty)
+            (edgeB, Nil, e.asInstanceOf[Long]) // pass eid so that we have it for subsequent stmts
+          else
+            (edgeB, addStmts, 0L)
+        case Retract('e, a, Values(vs, prefix), bi)            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB), 0L)
+        case Retract(e, a, Values(vs, prefix), bi)             => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB), 0L)
+        case Add(_, a, 'arg, _)                                => iae("updateStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                                        => iae("updateStmts", "Unexpected update statement: " + unexpected)
       }
     }._2
     val txId = tempId("tx")

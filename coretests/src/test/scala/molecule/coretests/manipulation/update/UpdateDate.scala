@@ -33,7 +33,7 @@ class UpdateDate extends CoreSpec {
 
       (Ns(eid).date(date2, date3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... date($date2, $date3)"
     }
   }

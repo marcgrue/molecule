@@ -31,7 +31,7 @@ class UpdateFloat extends CoreSpec {
 
       (Ns(eid).float(2f, 3f).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... float(2.0, 3.0)"
     }
   }
@@ -60,7 +60,7 @@ class UpdateFloat extends CoreSpec {
 
       (Ns(eid).float(float2, float3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... float($float2, $float3)"
     }
   }

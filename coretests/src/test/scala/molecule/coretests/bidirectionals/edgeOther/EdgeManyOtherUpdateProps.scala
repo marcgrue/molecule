@@ -84,7 +84,7 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       // Updating edge properties from the base entity is not allowed
       (Person(ann).CloseTo.howWeMet("inSchool").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_edgeComplete]  Can't update edge `CloseTo` " +
+        s"[molecule.ops.VerifyModel.update_edgeComplete]  Can't update edge `CloseTo` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `CloseTo(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -133,7 +133,7 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       // We can't update across namespaces
       (CloseTo(annRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
+        s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity
 

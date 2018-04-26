@@ -1,7 +1,7 @@
 package molecule.coretests.expression
 
 import java.util.Date
-
+import datomic.Peer
 import molecule.Imports._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
@@ -61,6 +61,14 @@ class Equality extends Base {
 
     // Todo Allow runtime constructs
     //    Ns.date(new Date()).get === List()
+
+
+    Ns.bigInt(bigInt1).get === List(bigInt1)
+    Ns.bigInt(bigInt2).get === List(bigInt2)
+
+
+    Ns.bigDec(bigDec1).get === List(bigDec1)
+    Ns.bigDec(bigDec2).get === List(bigDec2)
 
 
     Ns.uuid(uuid1).get === List(uuid1)
@@ -153,6 +161,29 @@ class Equality extends Base {
     Ns.uuids(uuid4).get === List(Set(uuid4, uuid2))
 
 
+//    println(Peer.q("""[:find  (distinct ?b)
+//             | :where [?a :ns/bigInts (biginteger 1)]
+//             |        [?a :ns/bigInts ?b]]""".stripMargin, conn.db))
+//
+//    println(Peer.q("""[:find  (distinct ?b)
+//             | :where [?a :ns/bigInts 1N]
+//             |        [?a :ns/bigInts ?b]]""".stripMargin, conn.db))
+//
+//    Ns.ints(int1).getD
+//    Ns.bigInts(bigInt1).getD
+//    Ns.bigInts(bigInt1, bigInt2).getD
+    Ns.bigInts(bigInt1).get === List(Set(bigInt1, bigInt2))
+    Ns.bigInts(bigInt2).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+    Ns.bigInts(bigInt3).get === List(Set(bigInt3, bigInt2))
+    Ns.bigInts(bigInt4).get === List(Set(bigInt4, bigInt2))
+
+
+    Ns.bigDecs(bigDec1).get === List(Set(bigDec1, bigDec2))
+    Ns.bigDecs(bigDec2).get === List(Set(bigDec1, bigDec4, bigDec3, bigDec2))
+    Ns.bigDecs(bigDec3).get === List(Set(bigDec3, bigDec2))
+    Ns.bigDecs(bigDec4).get === List(Set(bigDec4, bigDec2))
+
+
     // Todo: card-many URI
     //    Ns.uris(uri1).get === List(Set(uri1, uri2))
     //    Ns.uris(uri2).get === List(Set(uri1, uri4, uri3, uri2))
@@ -213,6 +244,18 @@ class Equality extends Base {
     Ns.date.dates(date2).get === List((date1, Set(date1, date2)), (date2, Set(date3, date2)), (date3, Set(date4, date2)))
     Ns.date.dates(date3).get === List((date2, Set(date3, date2)))
     Ns.date.dates(date4).get === List((date3, Set(date4, date2)))
+
+
+    Ns.bigInt.bigInts(bigInt1).get.toSeq.sortBy(_.toString) === List((bigInt1, Set(bigInt1, bigInt2)))
+    Ns.bigInt.bigInts(bigInt2).get.toSeq.sortBy(_.toString) === List((bigInt1, Set(bigInt2, bigInt1)), (bigInt2, Set(bigInt3, bigInt2)), (bigInt3, Set(bigInt4, bigInt2)))
+    Ns.bigInt.bigInts(bigInt3).get.toSeq.sortBy(_.toString) === List((bigInt2, Set(bigInt2, bigInt3)))
+    Ns.bigInt.bigInts(bigInt4).get.toSeq.sortBy(_.toString) === List((bigInt3, Set(bigInt2, bigInt4)))
+
+
+    Ns.bigDec.bigDecs(bigDec1).get.toSeq.sortBy(_.toString) === List((bigDec1, Set(bigDec1, bigDec2)))
+    Ns.bigDec.bigDecs(bigDec2).get.toSeq.sortBy(_.toString) === List((bigDec1, Set(bigDec2, bigDec1)), (bigDec2, Set(bigDec3, bigDec2)), (bigDec3, Set(bigDec4, bigDec2)))
+    Ns.bigDec.bigDecs(bigDec3).get.toSeq.sortBy(_.toString) === List((bigDec2, Set(bigDec2, bigDec3)))
+    Ns.bigDec.bigDecs(bigDec4).get.toSeq.sortBy(_.toString) === List((bigDec3, Set(bigDec2, bigDec4)))
 
 
     Ns.uuid.uuids(uuid1).get.toSeq.sortBy(_.toString) === List((uuid1, Set(uuid1, uuid2)))

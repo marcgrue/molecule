@@ -47,7 +47,6 @@ class CoreSpec extends MoleculeSpec {
   lazy val (str8, int8, long8, float8, double8, bigInt8, bigDec8, bool8, enum8) = ("h", 8, 8L, 8.0f, 8.0, BigInt(8), BigDecimal(8.0), false, "enum8")
   lazy val (str9, int9, long9, float9, double9, bigInt9, bigDec9, bool9, enum9) = ("i", 9, 9L, 9.0f, 9.0, BigInt(9), BigDecimal(9.0), true, "enum9")
 
-
   lazy val (strs0, ints0, longs0, floats0, doubles0, bools0, dates0, uuids0, uris0, enums0) = (
     Set(str0),
     Set(int0),

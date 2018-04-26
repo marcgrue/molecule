@@ -73,13 +73,13 @@ class EdgeOneOtherInsert extends MoleculeSpec {
     // Can't allow edge without ref to target entity
     (Person.name.Favorite.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `Favorite`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Favorite`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
     // Edge always have to have a ref to a target entity
     (Favorite.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
   }
 }

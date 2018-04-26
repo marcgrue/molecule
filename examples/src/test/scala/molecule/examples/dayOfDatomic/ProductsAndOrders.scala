@@ -585,11 +585,11 @@ class ProductsAndOrders extends MoleculeSpec {
       .Authors.*(Person.name
     )).getJson ===
       """[
-        |{"text": "in stock", "comments": [
-        |   {"text": "second", "authors": [
-        |      {"name": "Don Juan"}]},
-        |   {"text": "chance", "authors": [
-        |      {"name": "Marc"}]}]}
+        |{"lineItem.text": "in stock", "lineItem.comments": [
+        |   {"comment.text": "second", "comment.authors": [
+        |      {"person.name": "Don Juan"}]},
+        |   {"comment.text": "chance", "comment.authors": [
+        |      {"person.name": "Marc"}]}]}
         |]""".stripMargin
   }
 }

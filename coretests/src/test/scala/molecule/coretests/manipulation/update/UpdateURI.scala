@@ -33,7 +33,7 @@ class UpdateURI extends CoreSpec {
 
       (Ns(eid).uri(uri2, uri3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... uri($uri2, $uri3)"
     }
   }

@@ -29,7 +29,7 @@ class UpdateBoolean extends CoreSpec {
 
       (Ns(eid).bool(true, false).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... bool(true, false)"
     }
   }
@@ -54,7 +54,7 @@ class UpdateBoolean extends CoreSpec {
 
       (Ns(eid).bool(bool2, bool3).update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... bool($bool2, $bool3)"
     }
   }

@@ -307,7 +307,7 @@ class OptionalValues extends CoreSpec {
 
     "IllegalArgumentException when inserting" in new CoreSetup {
       (m(Ns.str_.int$).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
+        "[molecule.ops.VerifyModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
     }
   }
 
@@ -334,11 +334,11 @@ class OptionalValues extends CoreSpec {
 
     // First namespace without any attributes not allowed
     (m(Ns.Ref1.int1).insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
+      "[molecule.ops.VerifyModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
 
     // First namespace without any mandatory attributes not allowed
     (Ns.str$.Ref1.int1.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
+      "[molecule.ops.VerifyModel.missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
 
     // If at least 1 mandatory attribute is present we can have optional attributes too
     Ns.str$.int.insert(Some("a"), 1)
@@ -349,11 +349,11 @@ class OptionalValues extends CoreSpec {
 
     // First namespace without any mandatory attributes not allowed
     (Ns.str_.Ref1.int1.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
+      "[molecule.ops.VerifyModel.noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
 
     // Last namespace without any mandatory attributes not allowed
     (Ns.str.Ref1.int1$.insert must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
+      "[molecule.ops.VerifyModel.missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
 

@@ -1,10 +1,9 @@
 package molecule.examples.mbrainz
-import datomic.{Util, Peer}
-import molecule.facade.Conn
+import datomic.Peer
 import molecule.Imports._
 import molecule.examples.mbrainz.dsl.mBrainz._
+import molecule.facade.Conn
 import molecule.util.MoleculeSpec
-
 import scala.language.postfixOps
 
 /*
@@ -107,6 +106,23 @@ class MBrainz extends MoleculeSpec {
     )
   }
 
+//  "Distinct" >> {
+//
+//    println(conn.q("""[:find (distinct ?sortName)
+//             | :with ?artist
+//             | :where [?artist :artist/name "Fire"]
+//             |        [?artist :artist/sortName ?sortName]]""".stripMargin))
+//
+//    println(conn.q("""[:find ?artist (distinct ?sortName)
+//             | :where [?artist :artist/name "Fire"]
+//             |        [?artist :artist/sortName ?sortName]]""".stripMargin))
+//
+//    Artist.e.name_("Fire").sortName.getD
+//    Artist.name_("Fire").sortName.getD
+//    Artist.name_("Fire").sortName(distinct).getD
+//
+//    ok
+//  }
   //  "Transitive tests" >> {
   //    "No Bonds" >> {
   //      // Todo...

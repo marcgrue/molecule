@@ -40,7 +40,7 @@ class ManySelf extends MoleculeSpec {
       // values (arities) - how many related entities should be created then?
       (Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
         "\n  Person ... name(Ben, Joe)"
 
       // We can save a single value though...
@@ -58,7 +58,7 @@ class ManySelf extends MoleculeSpec {
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (Person.name("Ann").Friends.*(Person.name("Ben")).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
+        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
@@ -84,7 +84,7 @@ class ManySelf extends MoleculeSpec {
       // (instead apply ref to ref attribute as shown above)
       (Person.name("Ann").Friends.e(ben).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
+        s"[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($ben)`"
     }
 

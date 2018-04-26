@@ -104,6 +104,7 @@ object model {
   case class Le(value: Any) extends Value
   case class Ge(value: Any) extends Value
 
+  // Question mark placeholder for input molecules
   case object Qm extends Value
   case object Distinct extends Value
 

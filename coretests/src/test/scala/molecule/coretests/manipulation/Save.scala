@@ -37,7 +37,7 @@ class Save extends CoreSpec {
 
     (Ns.str("a", "b").save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.api.CheckModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+      "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
       s"\n  Ns ... str(a, b)"
   }
 

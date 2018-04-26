@@ -112,13 +112,13 @@ class EdgeOneSelfInsert extends MoleculeSpec {
     // Can't allow edge without ref to target entity
     (Person.name.Loves.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `Loves`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Loves`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
     // Edge always have to have a ref to a target entity
     (Loves.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
   }
 }

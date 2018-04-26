@@ -87,7 +87,7 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       // Updating edge properties from the base entity is not allowed
       (Person(ann).Favorite.howWeMet("inSchool").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_edgeComplete]  Can't update edge `Favorite` " +
+        s"[molecule.ops.VerifyModel.update_edgeComplete]  Can't update edge `Favorite` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Favorite(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -136,7 +136,7 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       // We can't update across namespaces
       (Favorite(annRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
+        s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity
 

@@ -315,7 +315,8 @@ case class NestedJson(modelE: Model, queryE: Query) {
       // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
       case vs if vs.toString.contains(":db/id") =>
         val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet)
+        //        Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet)
+        renderArray(buf, idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head), false)
 
       // {:ns/longs [3 4 5]}
       case vs => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
@@ -510,17 +511,17 @@ case class NestedJson(modelE: Model, queryE: Query) {
     def recurse(level: Int, i0: Int, j0: Int, elements: Seq[Element]): Seq[(Int, Seq[(Int, Int, String, String, Int, Boolean)])] =
       elements.foldLeft(i0, j0, false, Seq.empty[(Int, Seq[(Int, Int, String, String, Int, Boolean)])]) {
 
-        case ((i, j, manyAttr, acc), Atom(_, attr, tpeS, card, _, _, _, _)) if i == -1 && attr.last != '_' =>
-          (i + 1, j + 1, manyAttr, Seq(level -> Seq((i + 1, j + 1, attr, tpeS, card, manyAttr))))
+        case ((i, j, manyAttr, acc), Atom(ns, attr, tpeS, card, _, _, _, _)) if i == -1 && attr.last != '_' =>
+          (i + 1, j + 1, manyAttr, Seq(level -> Seq((i + 1, j + 1, ns + "." + attr, tpeS, card, manyAttr))))
 
-        case ((i, j, manyAttr, acc), Atom(_, attr, tpeS, card, _, _, _, _)) if attr.last != '_' =>
-          (i + 1, j + 1, manyAttr, acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, attr, tpeS, card, manyAttr)))
+        case ((i, j, manyAttr, acc), Atom(ns, attr, tpeS, card, _, _, _, _)) if attr.last != '_' =>
+          (i + 1, j + 1, manyAttr, acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, ns + "." + attr, tpeS, card, manyAttr)))
 
-        case ((i, j, _, acc), Nested(Bond(_, refAttr, _, _, _), es)) if acc.isEmpty =>
-          (i, j, false, Seq(level -> Seq((i + 1, j + 1, refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
+        case ((i, j, _, acc), Nested(Bond(ns, refAttr, _, _, _), es)) if acc.isEmpty =>
+          (i, j, false, Seq(level -> Seq((i + 1, j + 1, ns + "." + refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
 
-        case ((i, j, _, acc), Nested(Bond(_, refAttr, _, _, _), es)) =>
-          (i, j, false, (acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
+        case ((i, j, _, acc), Nested(Bond(ns, refAttr, _, _, _), es)) =>
+          (i, j, false, (acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, ns + "." + refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
 
         case ((i, j, _, acc), Bond(_, _, _, 2, _)) =>
           (i, j, true, acc)
@@ -618,7 +619,7 @@ case class NestedJson(modelE: Model, queryE: Query) {
 
     def addPairs(buf: StringBuilder, level: Int, fields: Seq[(Int, Int, String, String, Int, Boolean)], row: Seq[Any]) {
       buf.append("\n" + "   " * level + "{")
-      for {(i, rowIndex, field, tpeS, card, manyAttr) <- fields} yield {
+      for {(i, rowIndex, field, tpeS, card, _) <- fields} yield {
         if (i > 0) buf.append(", ")
 
         if (tpeS == "Nested") {

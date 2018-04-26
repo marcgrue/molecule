@@ -93,7 +93,7 @@ object QueryOps extends Helpers {
 
     // With ...........................................
 
-    def widh(v: String): Query = q.copy(wi = With(q.wi.variables :+ v))
+    def widh(v: String): Query = q.copy(wi = With((q.wi.variables :+ v).distinct))
 
 
     // Where ..........................................
@@ -246,8 +246,11 @@ object QueryOps extends Helpers {
 
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = if (i > 0) v + "_" + i else v + 2
-      q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(Var(w)))
-        .func(op, Seq(Var(w), Val(0)))
+      val q1 = a.tpeS match {
+        case "BigInt" => q.func(".compareTo", Seq(Var(v), qv), ScalarBinding(Var(w)))
+        case _        => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(Var(w)))
+      }
+      q1.func(op, Seq(Var(w), Val(0)))
     }
 
     def fulltext(e: String, a: Atom, v: String, qv: QueryValue): Query =
@@ -419,7 +422,7 @@ object QueryOps extends Helpers {
       case other    => other.asInstanceOf[Object]
     }
 
-    def inputs = q.i.inputs.map {
+    def inputs: Seq[Object] = q.i.inputs.map {
       case InVar(RelationBinding(_), argss)   => Util.list(argss.map(args => Util.list(args map cast: _*)): _*)
       case InVar(CollectionBinding(_), argss) => Util.list(argss.head map cast: _*)
       case InVar(_, argss)                    => cast(argss.head.head)

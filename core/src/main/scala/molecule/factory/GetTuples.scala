@@ -28,7 +28,7 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
       case t if t <:< typeOf[Option[Set[_]]]         => castOptionSet(value, t)
       case t if t <:< typeOf[Option[_]]              => castOption(value, t)
       case t if t <:< typeOf[Map[String, _]]         => castMap(value, t)
-      case t if t <:< typeOf[Vector[_]]              => q"$value.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]"
+      case t if t <:< typeOf[Vector[_]]              => castVector(value, t)
       case t if t <:< typeOf[Stream[_]]              => q"$value.asInstanceOf[LazySeq].asScala.toStream.asInstanceOf[$t]"
       case t if t <:< typeOf[Set[_]]                 => castSet(value, t)
       case t                                         => castType(query, value, t, i)
@@ -87,6 +87,7 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
           case v: String           => date(v)
           case v: LazySeq          => date(v.asInstanceOf[LazySeq].asScala.toSeq.head.toString)
           case v: PersistentVector => date(v.asInstanceOf[PersistentVector].asScala.toSeq.head.toString)
+          case v: Date             => v
           case v                   => date(v.toString)
         }
       """
@@ -156,6 +157,44 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
     case t if t <:< typeOf[Set[BigInt]]     => q"$value.asInstanceOf[PersistentHashSet].asScala.toSeq.map{ case i: jBigInt => BigInt(i)}.toSet.asInstanceOf[$t]"
     case t if t <:< typeOf[Set[BigDecimal]] => q"$value.asInstanceOf[PersistentHashSet].asScala.toSeq.map{ case d: jBigDec => BigDecimal(d.toString)}.toSet.asInstanceOf[$t]"
     case t if t <:< typeOf[Set[_]]          => q"$value.asInstanceOf[PersistentHashSet].asScala.toSet.asInstanceOf[$t]"
+  }
+
+  def castVector(value: Tree, tpe: Type) = tpe match {
+    case t if t <:< typeOf[Vector[Int]]        =>
+      q"""
+        $value match {
+          case v: PersistentHashSet => v.asInstanceOf[PersistentHashSet].asScala.toSeq.map(_.asInstanceOf[jLong].toInt).toVector.asInstanceOf[$t]
+          case v: PersistentVector  => v.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]
+        }
+      """
+    case t if t <:< typeOf[Vector[Float]]      =>
+      q"""
+        $value match {
+          case v: PersistentHashSet => v.asInstanceOf[PersistentHashSet].asScala.toSeq.map(_.asInstanceOf[jDouble].toFloat).toVector.asInstanceOf[$t]
+          case v: PersistentVector  => v.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]
+        }
+      """
+    case t if t <:< typeOf[Vector[BigInt]]     =>
+      q"""
+        $value match {
+          case v: PersistentHashSet => v.asInstanceOf[PersistentHashSet].asScala.toSeq.map{ case i: jBigInt => BigInt(i)}.toVector.asInstanceOf[$t]
+          case v: PersistentVector  => v.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]
+        }
+      """
+    case t if t <:< typeOf[Vector[BigDecimal]] =>
+      q"""
+        $value match {
+          case v: PersistentHashSet => v.asInstanceOf[PersistentHashSet].asScala.toSeq.map{ case d: jBigDec => BigDecimal(d.toString)}.toVector.asInstanceOf[$t]
+          case v: PersistentVector  => v.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]
+        }
+      """
+    case t if t <:< typeOf[Vector[_]]          =>
+      q"""
+        $value match {
+          case v: PersistentHashSet => v.asInstanceOf[PersistentHashSet].asScala.toVector.asInstanceOf[$t]
+          case v: PersistentVector  => v.asInstanceOf[PersistentVector].asScala.toVector.asInstanceOf[$t]
+        }
+      """
   }
 
   def castMap(value: Tree, tpe: Type) = tpe match {

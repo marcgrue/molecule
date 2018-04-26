@@ -1,10 +1,13 @@
 package molecule.coretests.expression
 
+import datomic.Peer
 import molecule.Imports._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.factory.MacroImplicits
 import molecule.util.expectCompileError
 
 class Logic extends Base {
+
 
   "Card one - OR" in new OneSetup {
 
@@ -140,6 +143,20 @@ class Logic extends Base {
     Ns.date(dateList).get.toSeq.sorted === List(date1, date2)
 
 
+    Ns.bigInt(bigInt1, bigInt2).get.toSeq.sortBy(_.toString) === List(bigInt1, bigInt2)
+    Ns.bigInt(bigInt1 or bigInt2).get.toSeq.sortBy(_.toString) === List(bigInt1, bigInt2)
+    Ns.bigInt(List(bigInt1, bigInt2)).get.toSeq.sortBy(_.toString) === List(bigInt1, bigInt2)
+    val bigIntList = List(bigInt1, bigInt2)
+    Ns.bigInt(bigIntList).get.toSeq.sortBy(_.toString) === List(bigInt1, bigInt2)
+
+
+    Ns.bigDec(bigDec1, bigDec2).get.toSeq.sortBy(_.toString) === List(bigDec1, bigDec2)
+    Ns.bigDec(bigDec1 or bigDec2).get.toSeq.sortBy(_.toString) === List(bigDec1, bigDec2)
+    Ns.bigDec(List(bigDec1, bigDec2)).get.toSeq.sortBy(_.toString) === List(bigDec1, bigDec2)
+    val bigDecList = List(bigDec1, bigDec2)
+    Ns.bigDec(bigDecList).get.toSeq.sortBy(_.toString) === List(bigDec1, bigDec2)
+
+
     Ns.uuid(uuid1, uuid2).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
     Ns.uuid(uuid1 or uuid2).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
     Ns.uuid(List(uuid1, uuid2)).get.toSeq.sortBy(_.toString) === List(uuid1, uuid2)
@@ -266,6 +283,24 @@ class Logic extends Base {
     Ns.dates(dateSet).get === List(Set(date1, date2, date3))
 
 
+    Ns.bigInts(bigInt1 or bigInt3).get === List(Set(bigInt1, bigInt2, bigInt3))
+    Ns.bigInts(Set(bigInt1, bigInt3)).get === List(Set(bigInt1, bigInt2, bigInt3))
+    Ns.bigInts(bigInt1, bigInt2).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+    Ns.bigInts(bigInt1, bigInt3).get === List(Set(bigInt1, bigInt2, bigInt3))
+    Ns.bigInts(bigInt1, bigInt4).get === List(Set(bigInt1, bigInt2, bigInt4))
+    val bigIntSet = Set(bigInt1, bigInt3)
+    Ns.bigInts(bigIntSet).get === List(Set(bigInt1, bigInt2, bigInt3))
+
+
+    Ns.bigDecs(bigDec1 or bigDec3).get === List(Set(bigDec1, bigDec2, bigDec3))
+    Ns.bigDecs(Set(bigDec1, bigDec3)).get === List(Set(bigDec1, bigDec2, bigDec3))
+    Ns.bigDecs(bigDec1, bigDec2).get === List(Set(bigDec1, bigDec4, bigDec3, bigDec2))
+    Ns.bigDecs(bigDec1, bigDec3).get === List(Set(bigDec1, bigDec2, bigDec3))
+    Ns.bigDecs(bigDec1, bigDec4).get === List(Set(bigDec1, bigDec2, bigDec4))
+    val bigDecSet = Set(bigDec1, bigDec3)
+    Ns.bigDecs(bigDecSet).get === List(Set(bigDec1, bigDec2, bigDec3))
+
+
     //    Ns.uris(uri1 or uri2).get === List(Set(uri1, uri4, uri3, uri2))
     //    Ns.uris(Set(uri1, uri2)).get === List(Set(uri1, uri4, uri3, uri2))
     //    Ns.uris(uri1, uri2).get === List(Set(uri1, uri4, uri3, uri2))
@@ -316,6 +351,12 @@ class Logic extends Base {
 
     Ns.date.dates(date1 and date2).get === List((date1, Set(date1, date2)))
     Ns.date.dates(date1 and date3).get === List()
+
+    Ns.bigInt.bigInts(bigInt1 and bigInt2).get === List((bigInt1, Set(bigInt1, bigInt2)))
+    Ns.bigInt.bigInts(bigInt1 and bigInt3).get === List()
+
+    Ns.bigDec.bigDecs(bigDec1 and bigDec2).get === List((bigDec1, Set(bigDec1, bigDec2)))
+    Ns.bigDec.bigDecs(bigDec1 and bigDec3).get === List()
 
     Ns.uuid.uuids(uuid1 and uuid2).get === List((uuid1, Set(uuid1, uuid2)))
     Ns.uuid.uuids(uuid1 and uuid3).get === List()

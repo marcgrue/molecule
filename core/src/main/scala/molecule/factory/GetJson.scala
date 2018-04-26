@@ -74,9 +74,19 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
         ..$jsonBase
 
         val fields: Seq[String] = {
-          val fields0 = $model.elements.collect {
+          val fields0_OLD = $model.elements.collect {
             case Atom(_, attr, _, _, _, _, _, _) => attr
           }
+          val fields0 = $model.elements.foldLeft(Seq.empty[String], Seq.empty[String]) {
+            case ((Nil, fields), Meta(ns, _, "e", _, _))            => (Nil, fields :+ ns + ".e")
+            case ((Nil, fields), Atom(ns, attr, _, _, _, _, _, _))  => (Nil, fields :+ ns + "." + attr)
+            case ((refs, fields), Meta(ns, _, "e", _, _))           => (refs, fields :+ refs.last + "." + ns + ".e")
+            case ((refs, fields), Atom(ns, attr, _, _, _, _, _, _)) => (refs, fields :+ refs.last + "." + ns + "." + attr)
+            case ((refs, fields), Bond(ns, refAttr, refNs, _, _))   => (refs :+ refAttr, fields)
+            case ((refs, fields), r: ReBond)                        => (refs.init, fields)
+            case ((refs, fields), other)                            => throw new IllegalArgumentException("Unexpected Molecule element: " + other)
+          }._2
+
           if (fields0.length != $typesLength)
             sys.error("Unexpected json field mismatch: model attr count doesn't match output types count." +
               "\nModel attrs  (" + fields0.length + "): " + fields0.mkString(", ") +
@@ -697,13 +707,13 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
         ..$jsonBase
 
         def getFieldNames(es: Seq[Element], tx: Boolean = false): Seq[String] = es.collect {
-          case Composite(subElements)                => getFieldNames(subElements)
-          case TxMetaData(txElements)                => getFieldNames(Meta("", "tx", "tx", NoValue, EntValue) +: txElements, true)
-          case TxMetaData_(txElements)               => getFieldNames(txElements, true)
-          case Meta(_, _, _, _, _) if tx             => Seq("tx")
-          case Meta(_, _, kind, _, _)                => Seq(kind)
-          case Atom(_, attr, _, _, _, _, _, _) if tx => Seq("tx_" + attr)
-          case Atom(_, attr, _, _, _, _, _, _)       => Seq(attr)
+          case Composite(subElements)                 => getFieldNames(subElements)
+          case TxMetaData(txElements)                 => getFieldNames(Meta("", "tx", "tx", NoValue, EntValue) +: txElements, true)
+          case TxMetaData_(txElements)                => getFieldNames(txElements, true)
+          case Meta(_, _, _, _, _) if tx              => Seq("tx")
+          case Meta(_, _, kind, _, _)                 => Seq(kind)
+          case Atom(ns, attr, _, _, _, _, _, _) if tx => Seq("tx." + ns + "." + attr)
+          case Atom(ns, attr, _, _, _, _, _, _)       => Seq(ns + "." + attr)
         }.flatten
 
         val fields = getFieldNames($model.elements)

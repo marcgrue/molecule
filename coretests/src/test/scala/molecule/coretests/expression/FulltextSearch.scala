@@ -41,8 +41,8 @@ class FulltextSearch extends Base {
 
   "Card many" in new ManySetup {
 
-    // Searching for text strings in cardinality-many attribute values is rather useless since the
-    // coalesed set of values is searched and not the original sets of values
+    // Searching for text strings of a single cardinality-many attribute values is rather useless since the
+    // coalesced set of values is searched and not the original sets of values
     Ns.strs.contains("c").get === List(Set("c"))
 
     // What we want is probably rather to group by another attribute to

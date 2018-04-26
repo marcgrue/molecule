@@ -211,25 +211,25 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
     // Can't update multiple values of cardinality-one attribute `name`
     (Person(ann).CloseTo.weight(7).Animal.name("Max", "Liz").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+      s"[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
       "\n  Animal ... name(Max, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
     (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     (Person(ann).CloseTo.*(CloseTo.weight(4).animal(42L)).update must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     // Note that an edge always have only one target entity.
     // So we can't add multiple (won't compile)

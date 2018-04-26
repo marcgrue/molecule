@@ -46,7 +46,7 @@ case class VerifyModel(model: Model, op: String) {
   //  living_Person.knows(count).updateD
 
   private def iae(method: String, msg: String) = {
-    throw new IllegalArgumentException(s"[molecule.api.CheckModel.$method]  $msg")
+    throw new IllegalArgumentException(s"[molecule.ops.VerifyModel.$method]  $msg")
   }
 
   private def extractNs(fullAttr: String) = {
@@ -59,6 +59,9 @@ case class VerifyModel(model: Model, op: String) {
   // Avoid mixing insert/update style
   private def unexpectedAppliedId = model.elements.head match {
     case Meta(ns, _, "e", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
+      s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
+        s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
+    case Meta(ns, _, "ns", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
       s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
         s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
     case ok                                       => ok

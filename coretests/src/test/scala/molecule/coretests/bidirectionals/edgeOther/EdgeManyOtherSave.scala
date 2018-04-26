@@ -19,13 +19,13 @@ class EdgeManyOtherSave extends MoleculeSpec {
 
       (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).Animal.name("Rex").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
+        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
 
       // Insert entities, each having one or more connected entities with relationship properties
       val rex = Animal.name.insert("Rex").eid
       (Person.name("Rex").CloseTo.*(CloseTo.weight(7).animal(rex)).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
+        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
     }
 
 
@@ -99,7 +99,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
     // Can't allow edge without ref to target entity
     (Person.name("Gus").CloseTo.weight(5).save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
@@ -107,7 +107,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
     // Edge always have to have a ref to a target entity
     (CloseTo.weight(7).save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
   }
 
 }

@@ -281,4 +281,51 @@ class UpdateMultipleEntities extends CoreSpec {
       )
     }
   }
+
+
+  "Optional values" in new CoreSetup {
+
+    val List(a, b, c, d) = Ns.str.int insert List(
+      ("a", 1),
+      ("b", 2),
+      ("c", 3),
+      ("d", 4)
+    ) eids
+
+    // Apply Some(value) to card-one attribute of multiple entities (retracts current values)
+    Ns(a, b).str("e").int$(Some(5)).update
+    Ns.e.str.int.get.toSeq.sorted === List(
+      (a, "e", 5),
+      (b, "e", 5),
+      (c, "c", 3),
+      (d, "d", 4)
+    )
+
+    // Apply None to card-one attribute of multiple entities (delete values)
+    Ns(c, d).str("f").int$(None).update
+    Ns.e.str.int$.get.toSeq.sorted === List(
+      (a, "e", Some(5)),
+      (b, "e", Some(5)),
+      (c, "f", None),
+      (d, "f", None)
+    )
+
+    // Reversing positions
+
+    Ns(a, b).int$(Some(6)).str("g").update
+    Ns.e.str.int$.get.toSeq.sorted === List(
+      (a, "g", Some(6)),
+      (b, "g", Some(6)),
+      (c, "f", None),
+      (d, "f", None)
+    )
+
+    Ns(b, c).int$(None).str("h").update
+    Ns.e.str.int$.get.toSeq.sorted === List(
+      (a, "g", Some(6)),
+      (b, "h", None),
+      (c, "h", None),
+      (d, "f", None)
+    )
+  }
 }

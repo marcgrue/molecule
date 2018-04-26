@@ -17,6 +17,8 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   // General liftables --------------------------------------------------------------
 
   def mkDate(date: Date) = q"new Date(${date.getTime})"
+  def mkBigInt(bigInt: BigInt) = q"BigInt.apply(${bigInt.toString()})"
+  def mkBigDecimal(bigDec: BigDecimal) = q"BigDecimal.apply(${bigDec.toString()})"
   def mkUUID(uuid: UUID) = q"java.util.UUID.fromString(${uuid.toString})"
   def mkURI(uri: URI) = q"new java.net.URI(${uri.getScheme}, ${uri.getUserInfo}, ${uri.getHost}, ${uri.getPort}, ${uri.getPath}, ${uri.getQuery}, ${uri.getFragment})"
 
@@ -34,6 +36,8 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case d: Double                     => q"$d"
     case b: Boolean                    => q"$b"
     case date: Date                    => mkDate(date)
+    case bigInt: BigInt                => mkBigInt(bigInt)
+    case bigDec: BigDecimal            => mkBigDecimal(bigDec)
     case uuid: UUID                    => mkUUID(uuid)
     case uri: URI                      => mkURI(uri)
     case qm: Qm.type                   => q"Qm"
@@ -44,16 +48,18 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   }
 
   implicit val liftTuple2 = Liftable[Product] {
-    case (k: String, v: String) => q"($k, $v)"
-    case (k: Int, v: Int)       => q"($k, $v)"
-    case (k: Long, v: Long)     => q"($k, $v)"
-    case (k: Float, v: Float)   => q"($k, $v)"
-    case (k: Double, v: Double) => q"($k, $v)"
-    case (k: Date, v: Date)     => q"(${mkDate(k)}, ${mkDate(v)})"
-    case (k: UUID, v: UUID)     => q"(${mkUUID(k)}, ${mkUUID(v)})"
-    case (k: URI, v: URI)       => q"(${mkURI(k)}, ${mkURI(v)})"
-    case (a, b)                 => abort(s"[Liftables:liftTuple2] Can't lift unexpected Tuple2: ($a, $b)")
-    case other                  => abort(s"[Liftables:Product] Can't lift unexpected product type: $other")
+    case (k: String, v: String)         => q"($k, $v)"
+    case (k: Int, v: Int)               => q"($k, $v)"
+    case (k: Long, v: Long)             => q"($k, $v)"
+    case (k: Float, v: Float)           => q"($k, $v)"
+    case (k: Double, v: Double)         => q"($k, $v)"
+    case (k: Date, v: Date)             => q"(${mkDate(k)}, ${mkDate(v)})"
+    case (k: BigInt, v: BigInt)         => q"(${mkBigInt(k)}, ${mkBigInt(v)})"
+    case (k: BigDecimal, v: BigDecimal) => q"(${mkBigDecimal(k)}, ${mkBigDecimal(v)})"
+    case (k: UUID, v: UUID)             => q"(${mkUUID(k)}, ${mkUUID(v)})"
+    case (k: URI, v: URI)               => q"(${mkURI(k)}, ${mkURI(v)})"
+    case (a, b)                         => abort(s"[Liftables:liftTuple2] Can't lift unexpected Tuple2: ($a, $b)")
+    case other                          => abort(s"[Liftables:Product] Can't lift unexpected product type: $other")
   }
 
 
@@ -104,10 +110,7 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case RelationBinding(names)  => q"RelationBinding(Seq(..$names))"
   }
 
-  implicit val liftDataClause = Liftable[DataClause] { cl =>
-    q"DataClause(${cl.ds}, ${cl.e}, ${cl.a}, ${cl.v}, ${cl.tx}, ${cl.op})"
-  }
-
+  implicit val liftDataClause = Liftable[DataClause] { cl => q"DataClause(${cl.ds}, ${cl.e}, ${cl.a}, ${cl.v}, ${cl.tx}, ${cl.op})" }
 
   implicit val liftInput = Liftable[Input] {
     case InDataSource(ds, argss)           => q"InDataSource($ds, Seq(...$argss))"
@@ -122,15 +125,10 @@ trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Funct(name, ins, outs)          => q"Funct($name, Seq(..$ins), $outs)"
   }
 
-  implicit val liftRule = Liftable[Rule] { rd =>
-    q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))"
-  }
-
+  implicit val liftRule = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
   implicit val liftIn    = Liftable[In] { in => q"In(Seq(..${in.inputs}), Seq(..${in.rules}), Seq(..${in.ds}))" }
   implicit val liftWhere = Liftable[Where] { where => q"Where(Seq(..${where.clauses}))" }
-  implicit val liftQuery = Liftable[Query] { q =>
-    q"import molecule.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})"
-  }
+  implicit val liftQuery = Liftable[Query] { q => q"import molecule.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
 
 
   // Liftables for Model --------------------------------------------------------------

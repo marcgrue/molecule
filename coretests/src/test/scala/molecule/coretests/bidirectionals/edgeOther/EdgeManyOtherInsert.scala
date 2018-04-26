@@ -44,7 +44,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
       (Person.name.CloseTo.*(CloseTo.weight).Animal.name insert List(
         ("Ann", List(7, 8), "Gus")
       ) must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNestedEdgesWithoutTarget]  Nested edge ns `CloseTo` should link to " +
+        s"[molecule.ops.VerifyModel.noNestedEdgesWithoutTarget]  Nested edge ns `CloseTo` should link to " +
         s"target ns within the nested group of attributes."
     }
   }
@@ -91,7 +91,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
     // Can't allow edge without ref to target entity
     (Person.name.CloseTo.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
@@ -99,7 +99,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
     // Edge always have to have a ref to a target entity
     (CloseTo.weight.insert must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
   }
 
 }

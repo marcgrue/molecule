@@ -33,9 +33,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   val dslStructure: PartialFunction[Tree, Seq[Element]] = {
 
     // Namespace(eid).attr1...
-    case q"$prev.$ns.apply($pkg.?)" if q"$prev.$ns".isFirstNS                        => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(Seq(Qm))))
-    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS && q"$prev.$ns".isBiEdge => traverse(q"$prev", Meta(firstLow(ns), "", "e", BiEdge, Eq(Seq(extract(eid)))))
-    case q"$prev.$ns.apply(..$eids)" if q"$prev.$ns".isFirstNS                       => traverse(q"$prev", Meta(firstLow(ns), "", "e", NoValue, Eq(resolveValues(q"Seq(..$eids)"))))
+    case q"$prev.$ns.apply($pkg.?)" if q"$prev.$ns".isFirstNS                        => traverse(q"$prev", Meta(firstLow(ns), "eid_", "e", NoValue, Eq(Seq(Qm))))
+    case q"$prev.$ns.apply($eid)" if q"$prev.$ns".isFirstNS && q"$prev.$ns".isBiEdge => traverse(q"$prev", Meta(firstLow(ns), "eid_", "e", BiEdge, Eq(Seq(extract(eid)))))
+    case q"$prev.$ns.apply(..$eids)" if q"$prev.$ns".isFirstNS                       => traverse(q"$prev", Meta(firstLow(ns), "eid_", "e", NoValue, Eq(resolveValues(q"Seq(..$eids)"))))
 
 
     // Functions ---------------------------
@@ -46,8 +46,9 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // EAV + ns -----------------------------
 
-    case q"$prev.e" => traverse(q"$prev", Meta("", "", "e", NoValue, EntValue))
-    case q"$prev.a" => traverse(q"$prev", Atom("?", "attr", "a", 1, NoValue))
+    case q"$prev.e"  => traverse(q"$prev", Meta("", "eid", "e", NoValue, EntValue))
+    case q"$prev.e_" => traverse(q"$prev", Meta("", "eid_", "e", NoValue, EntValue))
+    case q"$prev.a"  => traverse(q"$prev", Atom("?", "attr", "a", 1, NoValue))
 
     case q"$prev.ns.apply(..$values)"  => traverse(q"$prev", Atom("ns", "?", "ns", 1, modelValue("apply", null, q"Seq(..$values)")))
     case q"$prev.ns_.apply(..$values)" => traverse(q"$prev", Atom("ns_", "?", "ns", 1, modelValue("apply", null, q"Seq(..$values)")))
@@ -64,7 +65,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Internal predefined db functions
     case q"$prev.Db.tx"        => traverse(q"$prev", Atom("db", "tx", "Long", 1, VarValue))
-    case q"$prev.Db.t"       => traverse(q"$prev", Atom("db", "txT", "Long", 1, VarValue))
+    case q"$prev.Db.t"         => traverse(q"$prev", Atom("db", "txT", "Long", 1, VarValue))
     case q"$prev.Db.txInstant" => traverse(q"$prev", Atom("db", "txInstant", "Long", 1, VarValue))
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
@@ -76,22 +77,22 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
-    case q"$prev.t" if !q"$prev".isAttr       => abort(s"[Dsl2Model:dslStructure] Please add `t` after an attribute or another transaction value")
-    case q"$prev.t" if !q"$prev".isAttr       => abort(s"[Dsl2Model:dslStructure] Please add `t` after an attribute or another transaction value")
+    case q"$prev.t" if !q"$prev".isAttr         => abort(s"[Dsl2Model:dslStructure] Please add `t` after an attribute or another transaction value")
+    case q"$prev.t" if !q"$prev".isAttr         => abort(s"[Dsl2Model:dslStructure] Please add `t` after an attribute or another transaction value")
     case q"$prev.txInstant" if !q"$prev".isAttr => abort(s"[Dsl2Model:dslStructure] Please add `txInstant` after an attribute or another transaction value")
     case q"$prev.op" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `op` after an attribute or another transaction value")
 
     // Generic attributes not after optional attributes
     case q"$prev.tx" if prev.toString.endsWith("$")        => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`tx`).")
-    case q"$prev.t" if prev.toString.endsWith("$")       => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`t`).")
+    case q"$prev.t" if prev.toString.endsWith("$")         => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`t`).")
     case q"$prev.txInstant" if prev.toString.endsWith("$") => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`txInstant`).")
     case q"$prev.op" if prev.toString.endsWith("$")        => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`op`).")
 
     // ns.attr.txInstant etc.. (transaction related to previous attribute)
     case q"$prev.tx"                      => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
-    case q"$prev.t_.apply($t)"          => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue_(Some(extract(q"$t"))), NoValue))
-    case q"$prev.t.apply($t)"           => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(Some(extract(q"$t"))), NoValue))
-    case q"$prev.t"                     => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(None), NoValue))
+    case q"$prev.t_.apply($t)"            => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue_(Some(extract(q"$t"))), NoValue))
+    case q"$prev.t.apply($t)"             => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(Some(extract(q"$t"))), NoValue))
+    case q"$prev.t"                       => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(None), NoValue))
     case q"$prev.txInstant_.apply($date)" => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue_(Some(extract(q"$date"))), NoValue))
     case q"$prev.txInstant.apply($date)"  => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue(Some(extract(q"$date"))), NoValue))
     case q"$prev.txInstant"               => traverse(q"$prev", Meta("db", "txInstant", "tx", TxInstantValue(None), NoValue))
@@ -101,7 +102,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Tacit transaction attributes not allowed
     case q"$prev.tx_"        => abort(s"[Dsl2Model:dslStructure] Tacit `tx_` not allowed since all datoms have a tx value")
-    case q"$prev.t_"       => abort(s"[Dsl2Model:dslStructure] Tacit `t_` not allowed since all datoms have a t value")
+    case q"$prev.t_"         => abort(s"[Dsl2Model:dslStructure] Tacit `t_` not allowed since all datoms have a t value")
     case q"$prev.txInstant_" => abort(s"[Dsl2Model:dslStructure] Tacit `txInstant_` not allowed since all datoms have a txInstant value")
     case q"$prev.op_"        => abort(s"[Dsl2Model:dslStructure] Tacit `op_` not allowed since all datoms have a `op value")
 
@@ -211,25 +212,30 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
     val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
+    val curIsVarValue = thisElement match {
+      case Atom(_, _, _, _, VarValue, _, _, _) => true
+      case _                                   => false
+    }
     if (prevElements.isEmpty) {
       traverse(q"$prev", thisElement)
     } else {
       prevElements.last match {
-        case Atom(prevNs0, prevAttr0, _, _, _, _, _, _) if prevNs0 == curNs && clean(prevAttr0) == clean(attr) =>
+        case Atom(`curNs`, prevAttr0, _, _, _, _, _, _) if clean(prevAttr0) == clean(attr) && curIsVarValue =>
+          //          x(30, prevElements, thisElement)
           val (_, similarAtoms, transitive) = {
             prevElements.foldRight(prevElements, Seq[Atom](), None: Option[Transitive]) {
               case (prevElement, (previous, similarAtoms1, trans)) =>
                 prevElement match {
-                  case prevAtom@Atom(prevNs, prevAttr, _, _, _, _, _, _) if prevNs == curNs && clean(prevAttr) == clean(attr) =>
+                  case prevAtom@Atom(`curNs`, prevAttr, _, _, _, _, _, _) if clean(prevAttr) == clean(attr) =>
                     val t = previous.init.reverse.collectFirst {
                       // Find first previous Bond (relating to this attribute)
                       case prevBond@Bond(ns2, refAttr, refNs, _, _) =>
                         Transitive(ns2, refAttr, refNs, 0)
                     } getOrElse {
-                      Transitive(prevNs, prevAttr, prevNs, 0)
+                      Transitive(curNs, prevAttr, curNs, 0)
                     }
                     (previous.init, similarAtoms1 :+ prevAtom, Some(t))
-                  case _                                                                                                      =>
+                  case _                                                                                    =>
                     (previous.init, similarAtoms1, trans)
                 }
             }
@@ -333,18 +339,21 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val cur = curTree.toString()
     //        x(35, value, enumPrefix, attr.name)
     previous match {
-      case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
-      case prev if cur == "e" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if cur == "e"                => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "a"                => Atom("?", "attr", "a", 1, value, gs = bi(attr))
-      case prev if cur == "a_"               => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
-      case prev if cur == "ns"               => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
-      case prev if cur == "ns_"              => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
-      case prev if attr.isMapAttr            => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
-      case prev if attr.isAttr               => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if prev.isAttr               => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev                              => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
+      case prev if cur.head.isUpper           => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if cur == "e" && prev.isRef   => Meta(prev.name, prev.refNext, "e", NoValue, value)
+      case prev if cur == "e_" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
+//      case prev if cur == "e_" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+//      case prev if cur == "e" && prev.isAttr  => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if cur == "e"                 => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "e_"                => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "a"                 => Atom("?", "attr", "a", 1, value, gs = bi(attr))
+      case prev if cur == "a_"                => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
+      case prev if cur == "ns"                => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
+      case prev if cur == "ns_"               => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
+      case prev if attr.isMapAttr             => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
+      case prev if attr.isAttr                => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if prev.isAttr                => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev                               => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
     }
   }
 
@@ -516,9 +525,11 @@ object Dsl2Model {
     // Raw model
     val elements0 = inst(c).resolve(dsl.tree)
 
-    def abort(i: Int, msg: String) = c.abort(c.enclosingPosition, s"[Dsl2Model:apply ($i)] " + msg)
 
     // Sanity checks .......................................................................
+
+    def abort(i: Int, msg: String) = c.abort(c.enclosingPosition, s"[Dsl2Model:apply ($i)] " + msg)
+
 
     // Avoid ending with a ref
     elements0.last match {
@@ -588,6 +599,12 @@ object Dsl2Model {
     def dupValues(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._2)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
     def dupKeys(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._1)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
 
+    def clean(attr: String) = attr.last match {
+      case '_' => attr.init
+      case '$' => attr.init
+      case _   => attr
+    }
+
     // Catch duplicate update values
     elements0.collectFirst {
       case a@Atom(ns, name, _, _, Add_(vs), _, _, _) if dupS(vs).nonEmpty =>
@@ -608,6 +625,11 @@ object Dsl2Model {
         val dups = dupKeys(pairs)
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         abort(15, s"Can't replace multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
+
+      case Meta(_, "e_", _, _, EntValue) => abort(16, "Tacit entity only allowed if applying an entity id")
+
+      case Atom(ns, name, _, 2, Distinct, _, _, _) => abort(17,
+        s"`Distinct` keyword not supported for card many attributes like `:$ns/$name` (card many values already returned as Sets of distinct values).")
     }
 
     // Resolve generic elements ............................................................
@@ -616,7 +638,7 @@ object Dsl2Model {
     val elements1: Seq[Element] = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
       element match {
         case a@Atom(ns1, attr, _, _, _, _, _, _) if es.collectFirst {
-          case Bond(ns, refAttr, refNs, _, _) if ns1 == ns && attr == refAttr => abort(10,
+          case Bond(ns, refAttr, refNs, _, _) if ns1 == ns && clean(attr) == refAttr => abort(10,
             s"Instead of getting the ref id with `$attr` please get it via the referenced namespace: `${refNs.capitalize}.e ...`")
         }.getOrElse(false)                                                                => abort(42, "we won't get here")
         case a: Atom if a.name != "attr" && gs.contains(NsValue) && !gs.contains(AttrVar) => abort(7, s"`ns` needs to have a generic `a` before")
@@ -655,8 +677,8 @@ object Dsl2Model {
     }._1
 
     // inst(c).x(30, dsl, elements0, elements1, model)
-//     inst(c).x(30, elements0, elements1)
-    // inst(c).x(30, model)
+    //     inst(c).x(30, elements0, elements1)
+    //    inst(c).x(30, elements1)
 
     // Can't use generics on multiple attributes - why not?
     //    if (elements1.foldLeft(Seq[Boolean]()) {

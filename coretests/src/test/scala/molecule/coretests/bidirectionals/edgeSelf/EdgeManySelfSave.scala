@@ -18,13 +18,13 @@ class EdgeManySelfSave extends MoleculeSpec {
 
       (Person.name("Ann").Knows.*(Knows.weight(7)).Person.name("Ben").save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
+        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
 
       // Insert entities, each having one or more connected entities with relationship properties
       val ben = Person.name.insert("Ben").eid
       (Person.name("Ben").Knows.*(Knows.weight(7).person(ben)).save must throwA[IllegalArgumentException])
         .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.api.CheckModel.noNested]  Nested data structures not allowed in save molecules"
+        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
     }
 
 
@@ -108,12 +108,12 @@ class EdgeManySelfSave extends MoleculeSpec {
     // The edge needs to be complete at all times to preserve consistency.
     (Person.name("Ann").Knows.weight(5).save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace after edge namespace `Knows`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
     (Knows.weight(7).save must throwA[IllegalArgumentException])
       .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.api.CheckModel.edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
+      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
   }
 }
