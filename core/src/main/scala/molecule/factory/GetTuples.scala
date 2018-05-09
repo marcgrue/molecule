@@ -350,7 +350,8 @@ trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
           case vs if vs.toString.contains(":db/id") =>
             // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
             val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSeq
-            Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
+            val ids = idMaps.map(_.asInstanceOf[jMap[clojure.lang.Keyword, Any]].asScala.toSeq.collectFirst{case (keyw, id) if keyw.toString == ":db/id" => id.asInstanceOf[Long]}.get)
+            Some(ids.toSet.asInstanceOf[Set[Long]])
           case vs                                   =>
             // {:ns/longs [3 4 5]}
             Some(vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSet.asInstanceOf[Set[Long]])

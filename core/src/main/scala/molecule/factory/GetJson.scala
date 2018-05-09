@@ -468,8 +468,9 @@ trait GetJson[Ctx <: Context] extends Base[Ctx] {
 
             // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
             case vs if vs.toString.contains(":db/id") =>
-              val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-              Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet.asInstanceOf[Set[Long]])
+              val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala.toSeq
+              val ids = idMaps.map(_.asInstanceOf[jMap[clojure.lang.Keyword, Any]].asScala.toSeq.collectFirst{case (keyw, id) if keyw.toString == ":db/id" => id.asInstanceOf[Long]}.get)
+              Some(ids.toSet.asInstanceOf[Set[Long]])
 
             // {:ns/longs [3 4 5]}
             case vs => ${renderArray(buf, q"vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asInstanceOf[PersistentVector].asScala.toSeq", false)}

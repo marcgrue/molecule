@@ -176,6 +176,13 @@ class OptionalValues extends CoreSpec {
       Ns.int.refs1$.get === List((1, Some(Set(3L, 4L))), (2, None))
       Ns.int.refs1.get === List((1, Set(3L, 4L)))
     }
+
+    "Ref with sub components" in new CoreSetup {
+      Ns.int.refsSub1$ insert Seq((1, Some(Set(3L, 4L))), (2, None))
+
+      Ns.int.refsSub1$.get === List((1, Some(Set(3L, 4L))), (2, None))
+      Ns.int.refsSub1.get === List((1, Set(3L, 4L)))
+    }
   }
 
 
