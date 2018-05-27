@@ -55,14 +55,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       // Entity ids applied to initial namespace
       case (eids@Eids(ids), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
       case (eids@Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))           => (eids, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
-      //      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                      =>
-      //        ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
+      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                           => ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
 
       // Entity id applied to initial namespace
       case (eid@Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eid, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
       case (eid@Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => (eid, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      //      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                      =>
-      //        ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                          => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+
 
       // Same namespace
       case ('e, Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
@@ -71,10 +70,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case ('e, Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
 
       // Transaction annotations
-      case ('_, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
-      case ('_, TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData_(elements))      => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData_(elements))      => ('e, stmts ++ resolveTx(elements))
+      case (Eid(id), TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
+      case (Eid(id), TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
       case ('tx, Atom(ns, name, _, c, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, Card(c)))

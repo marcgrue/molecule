@@ -8,7 +8,7 @@ import molecule.schema.definition._
 object SocialNewsDefinition {
 
   trait Story {
-    val title = oneString.fullTextSearch.indexed
+    val title = oneString.fulltextSearch.indexed
     val url   = oneString.uniqueIdentity
   }
 

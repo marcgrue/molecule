@@ -2,7 +2,7 @@ package molecule.api
 import molecule.ast.model.{Atom, Bond, Model, TxMetaData}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
-import molecule.util.Helpers
+import molecule.util.{Debug, Helpers}
 
 trait CompositeInserts extends Helpers {
 
@@ -48,19 +48,61 @@ trait CompositeInserts extends Helpers {
     } else Nil
 
     val stmtss = dataStmtss :+ txStmts
-    //    x(4, stmtss)
+//        x(4, stmtss)
     //    TxReport(conn, stmtss).transact
 
     conn.transact(stmtss)
+  }
+
+  private def insertMergedD(molecules: MoleculeOutBase*)(tupleTuples: Seq[Any])(txMolecules: Seq[Molecule0])(implicit conn: Conn) {
+    val dataModel = Model(molecules.flatMap(_._model.elements))
+
+    // Prevent attribute conflicts
+    dataModel.elements.foldLeft(Seq.empty[String]) {
+      case (attrs, Atom(ns, attr, _, _, _, _, _, _)) if attrs.contains(s"$ns/$attr") =>
+        throw new RuntimeException(s"[CompositeInserts:insertMerged] Can't insert same attribute :$ns/$attr twice")
+      case (attrs, Atom(ns, attr, _, _, _, _, _, _))                                 => attrs :+ s"$ns/$attr"
+      case (attrs, _)                                                                => Nil // Start over within next namespace
+    }
+
+    // Prevent reference conflicts
+    dataModel.elements.foldLeft(Seq.empty[String]) {
+      case (refs, Bond(ns, refAttr, _, _, _)) if refs.contains(s"$ns/$refAttr") =>
+        throw new RuntimeException(s"[CompositeInserts:insertMerged] Can't insert with same reference :$ns/$refAttr twice")
+      case (refs, Bond(ns, refAttr, _, _, _))                                   => refs :+ s"$ns/$refAttr"
+      case (refs, _)                                                            => refs
+    }
+
+    val data = (tupleTuples map tupleToSeq).map(_ flatMap tupleToSeq)
+    val dataStmtss = mkStmtss(conn, dataModel, data)
+    val dataTransformer = Model2Transaction(conn, dataModel)
+
+    Debug("output.Molecule.insertMergedD-dataStmtss", 1)(1, dataModel, dataTransformer.stmtsModel, dataStmtss)
+
+    if (txMolecules.nonEmpty) {
+      val txElements = txMolecules.flatMap(_._model.elements)
+      val txModel = Model(Seq(TxMetaData(txElements)))
+      val txTransformer = Model2Transaction(conn, txModel)
+      val txStmtss = txTransformer.saveStmts()
+      Debug("output.Molecule.insertMergedD-txStmtss", 1)(1, txModel, txTransformer.stmtsModel, txStmtss)
+    }
   }
 
   def insert[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])
     (data: Seq[(T1, T2)])(txMolecules: Molecule0*)(implicit conn: Conn): TxReport =
     insertMerged(m1, m2)(data)(txMolecules)(conn)
 
+  def insertD[T1, T2](m1: MoleculeOut[T1], m2: MoleculeOut[T2])
+    (data: Seq[(T1, T2)])(txMolecules: Molecule0*)(implicit conn: Conn): Unit =
+    insertMergedD(m1, m2)(data)(txMolecules)(conn)
+
   def insert[T1, T2, T3](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3])
     (data: Seq[(T1, T2, T3)])(txMolecules: Molecule0*)(implicit conn: Conn): TxReport =
     insertMerged(m1, m2, m3)(data)(txMolecules)(conn)
+
+  def insertD[T1, T2, T3](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3])
+    (data: Seq[(T1, T2, T3)])(txMolecules: Molecule0*)(implicit conn: Conn): Unit =
+    insertMergedD(m1, m2, m3)(data)(txMolecules)(conn)
 
   def insert[T1, T2, T3, T4](m1: MoleculeOut[T1], m2: MoleculeOut[T2], m3: MoleculeOut[T3], m4: MoleculeOut[T4])
     (data: Seq[(T1, T2, T3, T4)])(txMolecules: Molecule0*)(implicit conn: Conn): TxReport =

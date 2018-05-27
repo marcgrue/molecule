@@ -22,15 +22,15 @@ object definition {
   // String
   object oneString extends oneString
   trait oneString extends scalarAttr[oneString] {
-    lazy val fullTextSearch: oneString = ???
+    lazy val fulltextSearch: oneString = ???
   }
   object manyString extends manyString
   trait manyString extends scalarAttr[manyString] {
-    lazy val fullTextSearch: manyString = ???
+    lazy val fulltextSearch: manyString = ???
   }
   object mapString extends mapString
   trait mapString extends scalarAttr[mapString] {
-    val fullTextSearch: mapString = ???
+    val fulltextSearch: mapString = ???
   }
 
   // Todo: Specialized attributes with constraints

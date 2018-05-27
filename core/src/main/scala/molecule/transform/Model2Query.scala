@@ -635,12 +635,25 @@ object Model2Query extends Helpers {
           (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
 
         case Composite(elements) =>
+          //          val eid = if (query.wh.clauses.isEmpty) e else query.wh.clauses.head match {
+//          val eid0 = if (query.wh.clauses.isEmpty) e else query.wh.clauses.last match {
+//            case DataClause(_, Var(firstE), _, _, _, _) => firstE
+//            case Funct(_, Seq(Var(firstE)), _)          => firstE
+//            case otherClause                            => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
+//          }
+
+//          println(s"==================\n" + query.wh.clauses.reverse.mkString("\n"))
+//          query.wh.clauses.reverse foreach println
+
           val eid = if (query.wh.clauses.isEmpty) e
-          else query.wh.clauses.head match {
-            case DataClause(_, Var(firstE), _, _, _, _) => firstE
-            case Funct(_, Seq(Var(firstE)), _)          => firstE
-            case otherClause                            => sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from first clause: " + otherClause)
-          }
+          else query.wh.clauses.reverse.collectFirst {
+            case DataClause(_, Var(lastE), KW(ns, _, _), _, _, _) if ns != "db" => lastE
+          } getOrElse query.wh.clauses.reverse.collectFirst {
+            case Funct(_, Seq(Var(lastE)), _) => lastE
+          }.getOrElse(
+            sys.error(s"[Model2Query:make(Composite)] Couldn't find `e` from last data clause")
+          )
+
           val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
             case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
           }

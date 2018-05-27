@@ -6,7 +6,7 @@ object MBrainzDefinition {
 
   trait AbstractRelease {
     val name         = oneString
-    val artistCredit = oneString.fullTextSearch
+    val artistCredit = oneString.fulltextSearch
     val gid          = oneUUID.uniqueIdentity
     val `type`       = oneEnum('album, 'single, 'ep, 'audiobook, 'other)
     val artists      = many[Artist]
@@ -20,7 +20,7 @@ object MBrainzDefinition {
     val endMonth   = oneLong
     val endDay     = oneLong
     val sortName   = oneString
-    val name       = oneString.fullTextSearch
+    val name       = oneString.fulltextSearch
     val gid        = oneUUID.uniqueIdentity
     val `type`     = oneEnum('person, 'group, 'other)
     val gender     = oneEnum('male, 'female, 'other)
@@ -40,7 +40,7 @@ object MBrainzDefinition {
 //    val endMonth   = oneLong
 //    val endDay     = oneLong
 //    val sortName   = oneString
-//    val name       = oneString.fullTextSearch
+//    val name       = oneString.fulltextSearch
 //    val gid        = oneUUID.uniqueIdentity
 //    val `type`     = oneEnum('distributor, 'holding, 'production, 'originalProduction, 'bootlegProduction, 'reissueProduction, 'publisher)
 //    val country    = one[Country]
@@ -51,7 +51,7 @@ object MBrainzDefinition {
 //  }
 
   trait Medium {
-    val name       = oneString.fullTextSearch
+    val name       = oneString.fulltextSearch
     val position   = oneLong
 //    val position   = manyLong
     val trackCount = oneLong
@@ -63,10 +63,10 @@ object MBrainzDefinition {
     val year            = oneLong
     val month           = oneLong
     val day             = oneLong
-    val artistCredit    = oneString.fullTextSearch
+    val artistCredit    = oneString.fulltextSearch
     val status          = oneString
     val barcode         = oneString
-    val name            = oneString.fullTextSearch
+    val name            = oneString.fulltextSearch
     val gid             = oneUUID.uniqueIdentity
     val artists         = many[Artist]
     val abstractRelease = one[AbstractRelease]
@@ -89,8 +89,8 @@ object MBrainzDefinition {
 //    val position     = oneString
 
     val duration     = oneLong
-//    val artistCredit = oneString.fullTextSearch
-    val name         = oneString.fullTextSearch
+//    val artistCredit = oneString.fulltextSearch
+    val name         = oneString.fulltextSearch
     val artists      = many[Artist]
 //    val artists      = many[Release]
   }

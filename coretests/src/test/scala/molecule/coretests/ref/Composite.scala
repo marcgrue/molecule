@@ -80,7 +80,7 @@ class Composite extends CoreSpec {
       )
 
       // Composite query
-      val (i1, (i2, s)): (Int, (Int, String)) =  m(Ref2.int2 ~ Ns.int.str).get.head
+      val (i1, (i2, s)): (Int, (Int, String)) = m(Ref2.int2 ~ Ns.int.str).get.head
       m(Ref2.int2 ~ Ns.int.str).get.toSeq.sorted === Seq(
         (1, (11, "aa")),
         (2, (22, "bb"))
@@ -310,16 +310,28 @@ class Composite extends CoreSpec {
           (
             (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
             (1, Set(2, 3), 1L, Set(2L, 3L), 11L, 12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
-            ),
+          ),
           (
             (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f)),
             (4, Set(5, 6), 4L, Set(5L, 6L), 21L, 22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-            )
+          )
         )
       )().eids
 
       // First entity has all 22 values
       e1.touchList === entity1data
+
+      // Similarly we can retrieve data with a composite molecule
+      m(Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats ~ Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
+        (
+          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f)),
+          (4, Set(5, 6), 4L, Set(5L, 6L), 21L, 22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+        ),
+        (
+          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
+          (1, Set(2, 3), 1L, Set(2L, 3L), 11L, 12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+        )
+      )
     }
 
 
@@ -337,17 +349,30 @@ class Composite extends CoreSpec {
             (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
             (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
             (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
-            ),
+          ),
           (
             (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
             (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
             (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-            )
+          )
         )
       )().eids
 
       // First entity has all 22 values
       e1.touchList === entity1data
+
+      m(Ns.bool.bools.date.dates.double.doubles.enum.enums ~ Ns.float.floats.int.ints.long.longs.ref1 ~ Ns.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
+        (
+          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
+          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
+          (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+        ),
+        (
+          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+          (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
+          (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+        )
+      )
     }
 
     // Etc... We can make composites of up to 22 molecules with each having up to 22 attributes
@@ -487,7 +512,6 @@ class Composite extends CoreSpec {
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
         ":ns/refs1" -> List(List((":db/id", 17592186045446L), (":ref1/int1", 11))),
-//        ":ns/str" -> "aa",
         ":ref2/int2" -> 1,
         ":ref2/str2" -> "a"
       )
@@ -502,7 +526,6 @@ class Composite extends CoreSpec {
       e2.touchList === List(
         ":db/id" -> 17592186045447L,
         ":ns/refs1" -> List(List((":db/id", 17592186045448L), (":ref1/int1", 22))),
-//        ":ns/str" -> "bb",
         ":ref2/int2" -> 2,
         ":ref2/str2" -> "b"
       )
@@ -517,10 +540,6 @@ class Composite extends CoreSpec {
         (1, "a"),
         (2, "b")
       )
-//      Ns.str.Refs1.int1.get.toSeq.sorted === List(
-//        ("aa", 11),
-//        ("bb", 22)
-//      )
 
       // Composite query
       m(Ref2.int2.str2 ~ Ns.Refs1.int1).get.toSeq.sorted === List(
@@ -531,6 +550,36 @@ class Composite extends CoreSpec {
         ((1, "a"), Set(17592186045446L)),
         ((2, "b"), Set(17592186045448L))
       )
+    }
+
+
+    "Splitting namespaces, card one" in new CoreSetup {
+
+      // Insert composite data by splitting in the "middle" of namespaces
+      // - otherwise the reference from Ns to Ref1 is not created!
+      insert(Ns.int.str.Ref1.int1, Ref1.str1)(Seq(((1, "a", 11), "aa")))()
+
+      Ns.int.str.Ref1.int1.str1.get === Seq((1, "a", 11, "aa"))
+
+      m(Ns.int.str.Ref1.int1 ~ Ref1.str1).get === Seq(((1, "a", 11), "aa"))
+      m(Ns.int ~ Ns.str.Ref1.int1.str1).get === Seq((1, ("a", 11, "aa")))
+
+      // Observe though that this composite doesn't include the ref from Ns to Ref1!
+      // So split in the "middle" of namespaces as shown above instead
+      m(Ns.int.str ~ Ref1.int1.str1).get === Nil
+    }
+
+
+    "Splitting namespaces, card many" in new CoreSetup {
+      Ns.int.str.Refs1.int1.str1.insert(1, "a", 11, "aa")
+
+      Ns.int.str.Refs1.int1.str1.get === Seq((1, "a", 11, "aa"))
+
+      m(Ns.int ~ Ns.str.Refs1.int1.str1).get === Seq((1, ("a", 11, "aa")))
+      m(Ns.int.str.Refs1.int1 ~ Ref1.str1).get === Seq(((1, "a", 11), "aa"))
+
+      // Without ref from Ns to Ref1
+      m(Ns.int.str ~ Ref1.int1.str1).get === Nil
     }
 
 

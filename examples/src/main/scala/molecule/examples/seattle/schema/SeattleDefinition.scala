@@ -5,9 +5,9 @@ import molecule.schema.definition._
 object SeattleDefinition {
 
   trait Community {
-    val name         = oneString.fullTextSearch
+    val name         = oneString.fulltextSearch
     val url          = oneString
-    val category     = manyString.fullTextSearch
+    val category     = manyString.fulltextSearch
     val orgtype      = oneEnum('community, 'commercial, 'nonprofit, 'personal)
     val `type`       = oneEnum('email_list, 'twitter, 'facebook_page, 'blog, 'website, 'wiki, 'myspace, 'ning)
     val neighborhood = one[Neighborhood]

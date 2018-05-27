@@ -2,7 +2,7 @@
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
   version := "0.13.2",
-  scalaVersion := "2.12.5",
+  scalaVersion := "2.12.6",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
     "datomic" at "http://files.datomic.com/maven",
