@@ -1,15 +1,20 @@
 package molecule.facade
 import java.util.UUID.randomUUID
-import java.util.{Collection => jColl, List => jList, Map => jMap}
-
+import java.util.{List => jList}
 import datomic.Peer
-import molecule.api.MoleculeOutBase
+import molecule.action.{MoleculeOutBase, TxReport}
 import molecule.ast.model.{Model, TxMetaData}
 import molecule.ast.transaction.RetractEntity
 import molecule.ops.VerifyModel
 import molecule.schema.Transaction
 import molecule.transform.Model2Transaction
 import molecule.util.Debug
+
+
+
+/**
+  * Facade to Datomic with selected methods
+  **/
 
 trait Datomic {
 

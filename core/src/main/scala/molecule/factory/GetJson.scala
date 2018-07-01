@@ -7,7 +7,7 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
-trait GetJson[Ctx <: Context] extends Base[Ctx] {
+private[molecule] trait GetJson[Ctx <: Context] extends Base[Ctx] {
   import c.universe._
 
   // Shamelessly adopted from lift-json:

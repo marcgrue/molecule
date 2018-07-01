@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -34,8 +34,8 @@ class EdgeOneOtherUpdate extends MoleculeSpec {
     favoritePersonOf("Zup").get === List((8, "Ann"))
 
     // Even though Ann now favorite Zup, Rex still exists
-    Person.name.get.toSeq.sorted === List("Ann")
-    Animal.name.get.toSeq.sorted === List("Rex", "Zup")
+    Person.name.get.sorted === List("Ann")
+    Animal.name.get.sorted === List("Rex", "Zup")
   }
 
 
@@ -70,7 +70,7 @@ class EdgeOneOtherUpdate extends MoleculeSpec {
 
     // Divorce complete
 
-    Person.name.Favorite.weight.Animal.name.get.toSeq.sorted === List()
+    Person.name.Favorite.weight.Animal.name.get.sorted === List()
   }
 
 

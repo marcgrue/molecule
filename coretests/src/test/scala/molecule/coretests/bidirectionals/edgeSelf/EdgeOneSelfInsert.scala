@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -83,7 +83,7 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       Person.name.loves.insert("Ann", lovesBen)
 
       // Ann loves Ben and Ben loves Ann - that is 70% love
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )
@@ -100,7 +100,7 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       Person.name.loves.insert("Ann", benLovesAnn)
 
       // Ann loves Ben and Ben loves Ann - that is 70% love
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )

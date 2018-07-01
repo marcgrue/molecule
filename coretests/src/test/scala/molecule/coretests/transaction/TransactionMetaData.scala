@@ -1,6 +1,6 @@
 package molecule.coretests.transaction
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -120,30 +120,30 @@ class TransactionMetaData extends CoreSpec {
 
     // Since both attributes are from the same namespace
     // the two following queries will return both entities
-    m(Ns.str.int).get.toSeq.sorted === List(
+    m(Ns.str.int).get.sorted === List(
       ("with tx meta data", 1),
       ("without tx meta data", 2)
     )
-    m(Ns.str ~ Ns.int).get.toSeq.sorted === List(
+    m(Ns.str ~ Ns.int).get.sorted === List(
       ("with tx meta data", 1),
       ("without tx meta data", 2)
     )
 
     // Find by some meta data
-    m(Ns.str.int.tx_(Ns.float_(7f))).get.toSeq.sorted === List(("with tx meta data", 1))
-    m(Ns.str ~ Ns.int.tx_(Ns.float_(7f))).get.toSeq.sorted === List(("with tx meta data", 1))
+    m(Ns.str.int.tx_(Ns.float_(7f))).get.sorted === List(("with tx meta data", 1))
+    m(Ns.str ~ Ns.int.tx_(Ns.float_(7f))).get.sorted === List(("with tx meta data", 1))
 
     // Find by other meta data
-    m(Ns.str.int.tx_(Ns.long_(7L))).get.toSeq.sorted === List(("with tx meta data", 1))
-    m(Ns.str ~ Ns.int.tx_(Ns.long_(7L))).get.toSeq.sorted === List(("with tx meta data", 1))
+    m(Ns.str.int.tx_(Ns.long_(7L))).get.sorted === List(("with tx meta data", 1))
+    m(Ns.str ~ Ns.int.tx_(Ns.long_(7L))).get.sorted === List(("with tx meta data", 1))
 
     // Find by two meta values
     m(Ns.str.int.tx_(Ns.float_(7f).long_(7L))).get === List(("with tx meta data", 1))
     m(Ns.str ~ Ns.int.tx_(Ns.float_(7f).long_(7L))).get === List(("with tx meta data", 1))
 
     // Entities _without_ meta data
-    m(Ns.str.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
-    m(Ns.str ~ Ns.int.tx_(Ns.long_(nil))).get.toSeq.sorted === List(("without tx meta data", 2))
+    m(Ns.str.int.tx_(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
+    m(Ns.str ~ Ns.int.tx_(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
   }
 
 
@@ -155,7 +155,7 @@ class TransactionMetaData extends CoreSpec {
     Ns.int(3).tx(Ns.str("c")).save
 
     // Without the tx value
-    Ns.int.tx_(Ns.str).get.toSeq.sorted === List(
+    Ns.int.tx_(Ns.str).get.sorted === List(
       (1, "a"),
       (2, "b"),
       (3, "c")

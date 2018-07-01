@@ -1,6 +1,6 @@
 package molecule.ast
 
-object model {
+private[molecule] object model {
 
   case class Model(elements: Seq[Element]) {
     override def toString = {

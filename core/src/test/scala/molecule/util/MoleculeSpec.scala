@@ -1,13 +1,13 @@
 package molecule.util
-import molecule.api.{InputMolecule, Molecule}
+import molecule.action.Molecule
 import molecule.ast.model.Model
 import molecule.ast.query._
+import molecule.ast.transaction._
+import molecule.composition.input.InputMolecule
 import molecule.facade.Conn
 import molecule.ops.QueryOps._
-import molecule.ast.transaction._
 import molecule.transform.{Model2Transaction, Query2String}
 import org.specs2.mutable._
-
 import scala.language.postfixOps
 
 

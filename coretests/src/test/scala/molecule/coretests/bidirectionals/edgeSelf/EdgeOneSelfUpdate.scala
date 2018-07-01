@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -32,7 +32,7 @@ class EdgeOneSelfUpdate extends MoleculeSpec {
     loveOf("Joe").get === List((8, "Ann"))
 
     // Even though Ann now loves Joe, Ben still exists
-    Person.name.get.toSeq.sorted === List("Ann", "Ben", "Joe")
+    Person.name.get.sorted === List("Ann", "Ben", "Joe")
   }
 
 

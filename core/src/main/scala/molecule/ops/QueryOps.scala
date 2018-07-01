@@ -8,7 +8,7 @@ import molecule.ast.model._
 import molecule.ast.query._
 import molecule.util.Helpers
 
-object QueryOps extends Helpers {
+private[molecule] object QueryOps extends Helpers {
   //  type KeepQueryOps = Int
 
   implicit class QueryOps(q: Query) {

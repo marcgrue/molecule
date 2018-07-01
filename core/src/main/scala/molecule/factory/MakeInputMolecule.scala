@@ -1,13 +1,14 @@
 package molecule.factory
-import molecule.api._
 import molecule.boilerplate._
-
+import molecule.composition.input.InputMolecule_1._
+import molecule.composition.input.InputMolecule_2._
+import molecule.composition.input.InputMolecule_3._
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
 
-trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
+private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
   import c.universe._
 
   def await_in_x_out_0(inputDsl: c.Expr[NS], InTypes: Type*) = {
@@ -44,37 +45,48 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
       val (inParams, inTerm1, inTerm2) = resolve2(InTypes)
       if (isNested) {
         q"""
-            def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
+            def apply(..$inParams)(implicit conn: Conn): Molecule01[$A] = {
               val query2  = bindValues2(_query, $inTerm1, $inTerm2)
               def query2E = bindValues2(_queryE, $inTerm1, $inTerm2)
 
-              new Molecule1[$A](_model, query2) with Util {
+              new Molecule01[$A](_model, query2) with Util {
 
-                private def nestedTuples(n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", Seq(A))}
-                def get        (implicit conn: Conn): Seq[$A] = nestedTuples(-1) // All
-                def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(n)
+                override def getIterable(implicit conn: Conn): Iterable[$A] = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E).asScala", Seq(A))}
+                override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                
+                override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", Seq(A))}
+                override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", Seq(A))}
 
-                private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-                def getJson        (implicit conn: Conn): String = json(-1) // All
-                def getJson(n: Int)(implicit conn: Conn): String = json(n)
+                override def getD(implicit conn: Conn) = getD_(conn)
               }
             }
           """
       } else {
         q"""
-            def apply(..$inParams)(implicit conn: Conn): Molecule1[$A] = {
+            def apply(..$inParams)(implicit conn: Conn): Molecule01[$A] = {
               val query2  = bindValues2(_query, $inTerm1, $inTerm2)
 
+              new Molecule01[$A](_model, query2) with Util {
 
-              new Molecule1[$A](_model, query2) with Util {
+                override def getIterable(implicit conn: Conn): Iterable[$A] = new Iterable[$A] {
+                  private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                  override def isEmpty = jColl.isEmpty
+                  override def size = jColl.size
+                  override def iterator = new Iterator[$A] {
+                    private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                    override def hasNext = jIter.hasNext
+                    override def next() = {
+                      val row = jIter.next()
+                      ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
+                    }
+                  }
+                }
+                override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
-                private def cast(row: jList[AnyRef]) = ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
-                def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, _query   ).toList.map(row => cast(row))
-                def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, _query, n).toList.map(row => cast(row))
+                override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", Seq(A))}
+                override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", Seq(A))}
 
-                private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-                def getJson        (implicit conn: Conn): String = json(-1) // All
-                def getJson(n: Int)(implicit conn: Conn): String = json(n)
+                override def getD(implicit conn: Conn) = getD_(conn)
               }
             }
           """
@@ -90,19 +102,19 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
           private val _modelE = r.modelE
           private val _queryE = r.queryE
 
-          def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
+          def apply(args: $InputTypes)(implicit conn: Conn): Molecule01[$A] = {
             val query1  = bindValues1(_query, args)
             def query1E = bindValues1(_queryE, args)
 
-            new Molecule1[$A](_model, query1) with Util {
+            new Molecule01[$A](_model, query1) with Util {
 
-              private def nestedTuples(n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", Seq(A))}
-              def get        (implicit conn: Conn): Seq[$A] = nestedTuples(-1) // All
-              def get(n: Int)(implicit conn: Conn): Seq[$A] = nestedTuples(n)
+              override def getIterable(implicit conn: Conn): Iterable[$A] = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E).asScala", Seq(A))}
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+              
+              override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", Seq(A))}
+              override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", Seq(A))}
 
-              private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-              def getJson        (implicit conn: Conn): String = json(-1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+              override def getD(implicit conn: Conn) = getD_(conn)
             }
           }
 
@@ -117,19 +129,31 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
           private val _modelE = r.modelE
           private val _queryE = r.queryE
 
-          def apply(args: $InputTypes)(implicit conn: Conn): Molecule1[$A] = {
+          def apply(args: $InputTypes)(implicit conn: Conn): Molecule01[$A] = {
             val query1  = bindValues1(_query, args)
             def query1E = bindValues1(_queryE, args)
 
-            new Molecule1[$A](_model, query1) with Util {
+            new Molecule01[$A](_model, query1) with Util {
 
-              private def cast(row: jList[AnyRef]) = ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
-              def get        (implicit conn: Conn): Seq[$A] = conn.query(_model, _query   ).toList.map(row => cast(row))
-              def get(n: Int)(implicit conn: Conn): Seq[$A] = conn.query(_model, _query, n).toList.map(row => cast(row))
+              override def getIterable(implicit conn: Conn): Iterable[$A] = new Iterable[$A] {
+                private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                override def isEmpty = jColl.isEmpty
+                override def size = jColl.size
+                override def iterator = new Iterator[$A] {
+                  private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                  override def hasNext = jIter.hasNext
+                  override def next() = {
+                    val row = jIter.next()
+                    ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
+                  }
+                }
+              }
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
-              private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", Seq(A))}
-              def getJson        (implicit conn: Conn): String = json(-1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+              override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", Seq(A))}
+              override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", Seq(A))}
+
+              override def getD(implicit conn: Conn) = getD_(conn)
             }
           }
 
@@ -157,13 +181,13 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
               new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
 
-                private def nestedTuples(n: Int) = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E, n)", OutTypes)}
-                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(-1) // All
-                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(n)
+                override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = ${nestedTuples(q"query2E", q"conn.query(_modelE, query2E).asScala", OutTypes)}
+                override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                
+                override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+                override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
 
-                private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-                def getJson        (implicit conn: Conn): String = json(-1) // All
-                def getJson(n: Int)(implicit conn: Conn): String = json(n)
+                override def getD(implicit conn: Conn) = getD_(conn)
               }
             }
           """
@@ -174,13 +198,25 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
               new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
 
-                private def getTuple(row: jList[AnyRef]) = (..${tuple(q"_query", q"row", OutTypes)})
-                def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query   ).toList.map(row => getTuple(row))
-                def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query, n).toList.map(row => getTuple(row))
+                override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = new Iterable[(..$OutTypes)] {
+                  private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                  override def isEmpty = jColl.isEmpty
+                  override def size = jColl.size
+                  override def iterator = new Iterator[(..$OutTypes)] {
+                    private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                    override def hasNext = jIter.hasNext
+                    override def next() = {
+                      val row = jIter.next()
+                      (..${tuple(q"_query", q"row", OutTypes)})
+                    }
+                  }
+                }
+                override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
-                private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-                def getJson        (implicit conn: Conn): String = json(-1) // All
-                def getJson(n: Int)(implicit conn: Conn): String = json(n)
+                override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+                override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
+
+                override def getD(implicit conn: Conn) = getD_(conn)
               }
             }
           """
@@ -202,13 +238,13 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
             new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
 
-              private def nestedTuples(n: Int) = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E, n)", OutTypes)}
-              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(-1) // All
-              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = nestedTuples(n)
+              override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = ${nestedTuples(q"query1E", q"conn.query(_modelE, query1E).asScala", OutTypes)}
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+              
+              override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+              override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
 
-              private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-              def getJson        (implicit conn: Conn): String = json(-1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+              override def getD(implicit conn: Conn) = getD_(conn)
             }
           }
 
@@ -228,13 +264,25 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
 
             new $MoleculeTpe[..$OutTypes](_model, query1) with Util {
 
-              private def getTuple(row: jList[AnyRef]) = (..${tuple(q"_query", q"row", OutTypes)})
-              def get        (implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query   ).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
-              def get(n: Int)(implicit conn: Conn): Seq[(..$OutTypes)] = conn.query(_model, _query, n).toList.map(row => (..${tuple(q"_query", q"row", OutTypes)}))
+              override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = new Iterable[(..$OutTypes)] {
+                private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                override def isEmpty = jColl.isEmpty
+                override def size = jColl.size
+                override def iterator = new Iterator[(..$OutTypes)] {
+                  private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                  override def hasNext = jIter.hasNext
+                  override def next() = {
+                    val row = jIter.next()
+                    (..${tuple(q"_query", q"row", OutTypes)})
+                  }
+                }
+              }
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
-              private def json(n: Int) = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-              def getJson        (implicit conn: Conn): String = json(-1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(n)
+              override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+              override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
+
+              override def getD(implicit conn: Conn) = getD_(conn)
             }
           }
 
@@ -245,24 +293,24 @@ trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with GetTuples[Ctx] {
   }
 }
 
-object MakeInputMolecule {
+private[molecule] object MakeInputMolecule {
   def inst(c0: Context) = new {val c: c0.type = c0} with MakeInputMolecule[c0.type]
 
   // Input molecules with 0 output (update templates)
 
   def await_1_0[In1_0[_], In1_1[_, _], In2_0[_, _], In2_1[_, _, _], I1: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_0[In1_0, In1_1, In2_0, In2_1, I1]])
-  : c.Expr[InputMolecule_1_0[I1]] =
+  : c.Expr[InputMolecule_1_00[I1]] =
     inst(c).await_in_x_out_0(inputDsl, c.weakTypeOf[I1])
 
   def await_2_0[In2_0[_, _], In2_1[_, _, _], In3_0[_, _, _], In3_1[_, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_0[In2_0, In2_1, In3_0, In3_1, I1, I2]])
-  : c.Expr[InputMolecule_2_0[I1, I2]] =
+  : c.Expr[InputMolecule_2_00[I1, I2]] =
     inst(c).await_in_x_out_0(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])
 
   def await_3_0[In3_0[_, _, _], In3_1[_, _, _, _], In4_0[_, _, _, _], In4_1[_, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_0[In3_0, In3_1, In4_0, In4_1, I1, I2, I3]])
-  : c.Expr[InputMolecule_3_0[I1, I2, I3]] =
+  : c.Expr[InputMolecule_3_00[I1, I2, I3]] =
     inst(c).await_in_x_out_0(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])
 
 
@@ -270,17 +318,17 @@ object MakeInputMolecule {
 
   def await_1_1[In1_1[_, _], In1_2[_, _, _], In2_1[_, _, _], In2_2[_, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_1[In1_1, In1_2, In2_1, In2_2, I1, A]])
-  : c.Expr[InputMolecule_1_1[I1, A]] =
+  : c.Expr[InputMolecule_1_01[I1, A]] =
     inst(c).await_in_x_out_1(inputDsl, c.weakTypeOf[A], c.weakTypeOf[I1])
 
   def await_2_1[In2_1[_, _, _], In2_2[_, _, _, _], In3_1[_, _, _, _], In3_2[_, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_1[In2_1, In2_2, In3_1, In3_2, I1, I2, A]])
-  : c.Expr[InputMolecule_2_1[I1, I2, A]] =
+  : c.Expr[InputMolecule_2_01[I1, I2, A]] =
     inst(c).await_in_x_out_1(inputDsl, c.weakTypeOf[A], c.weakTypeOf[I1], c.weakTypeOf[I2])
 
   def await_3_1[In3_1[_, _, _, _], In3_2[_, _, _, _, _], In4_1[_, _, _, _, _], In4_2[_, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_1[In3_1, In3_2, In4_1, In4_2, I1, I2, I3, A]])
-  : c.Expr[InputMolecule_3_1[I1, I2, I3, A]] =
+  : c.Expr[InputMolecule_3_01[I1, I2, I3, A]] =
     inst(c).await_in_x_out_1(inputDsl, c.weakTypeOf[A], c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])
 
 
@@ -288,42 +336,42 @@ object MakeInputMolecule {
 
   def await_1_2[In1_2[_, _, _], In1_3[_, _, _, _], In2_2[_, _, _, _], In2_3[_, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_2[In1_2, In1_3, In2_2, In2_3, I1, A, B]])
-  : c.Expr[InputMolecule_1_2[I1, A, B]] =
+  : c.Expr[InputMolecule_1_02[I1, A, B]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B])
 
   def await_1_3[In1_3[_, _, _, _], In1_4[_, _, _, _, _], In2_3[_, _, _, _, _], In2_4[_, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_3[In1_3, In1_4, In2_3, In2_4, I1, A, B, C]])
-  : c.Expr[InputMolecule_1_3[I1, A, B, C]] =
+  : c.Expr[InputMolecule_1_03[I1, A, B, C]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C])
 
   def await_1_4[In1_4[_, _, _, _, _], In1_5[_, _, _, _, _, _], In2_4[_, _, _, _, _, _], In2_5[_, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_4[In1_4, In1_5, In2_4, In2_5, I1, A, B, C, D]])
-  : c.Expr[InputMolecule_1_4[I1, A, B, C, D]] =
+  : c.Expr[InputMolecule_1_04[I1, A, B, C, D]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D])
 
   def await_1_5[In1_5[_, _, _, _, _, _], In1_6[_, _, _, _, _, _, _], In2_5[_, _, _, _, _, _, _], In2_6[_, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_5[In1_5, In1_6, In2_5, In2_6, I1, A, B, C, D, E]])
-  : c.Expr[InputMolecule_1_5[I1, A, B, C, D, E]] =
+  : c.Expr[InputMolecule_1_05[I1, A, B, C, D, E]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E])
 
   def await_1_6[In1_6[_, _, _, _, _, _, _], In1_7[_, _, _, _, _, _, _, _], In2_6[_, _, _, _, _, _, _, _], In2_7[_, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_6[In1_6, In1_7, In2_6, In2_7, I1, A, B, C, D, E, F]])
-  : c.Expr[InputMolecule_1_6[I1, A, B, C, D, E, F]] =
+  : c.Expr[InputMolecule_1_06[I1, A, B, C, D, E, F]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F])
 
   def await_1_7[In1_7[_, _, _, _, _, _, _, _], In1_8[_, _, _, _, _, _, _, _, _], In2_7[_, _, _, _, _, _, _, _, _], In2_8[_, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_7[In1_7, In1_8, In2_7, In2_8, I1, A, B, C, D, E, F, G]])
-  : c.Expr[InputMolecule_1_7[I1, A, B, C, D, E, F, G]] =
+  : c.Expr[InputMolecule_1_07[I1, A, B, C, D, E, F, G]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G])
 
   def await_1_8[In1_8[_, _, _, _, _, _, _, _, _], In1_9[_, _, _, _, _, _, _, _, _, _], In2_8[_, _, _, _, _, _, _, _, _, _], In2_9[_, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_8[In1_8, In1_9, In2_8, In2_9, I1, A, B, C, D, E, F, G, H]])
-  : c.Expr[InputMolecule_1_8[I1, A, B, C, D, E, F, G, H]] =
+  : c.Expr[InputMolecule_1_08[I1, A, B, C, D, E, F, G, H]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H])
 
   def await_1_9[In1_9[_, _, _, _, _, _, _, _, _, _], In1_10[_, _, _, _, _, _, _, _, _, _, _], In2_9[_, _, _, _, _, _, _, _, _, _, _], In2_10[_, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_1_9[In1_9, In1_10, In2_9, In2_10, I1, A, B, C, D, E, F, G, H, I]])
-  : c.Expr[InputMolecule_1_9[I1, A, B, C, D, E, F, G, H, I]] =
+  : c.Expr[InputMolecule_1_09[I1, A, B, C, D, E, F, G, H, I]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H], c.weakTypeOf[I])
 
   def await_1_10[In1_10[_, _, _, _, _, _, _, _, _, _, _], In1_11[_, _, _, _, _, _, _, _, _, _, _, _], In2_10[_, _, _, _, _, _, _, _, _, _, _, _], In2_11[_, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag, J: c.WeakTypeTag]
@@ -396,42 +444,42 @@ object MakeInputMolecule {
 
   def await_2_2[In2_2[_, _, _, _], In2_3[_, _, _, _, _], In3_2[_, _, _, _, _], In3_3[_, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_2[In2_2, In2_3, In3_2, In3_3, I1, I2, A, B]])
-  : c.Expr[InputMolecule_2_2[I1, I2, A, B]] =
+  : c.Expr[InputMolecule_2_02[I1, I2, A, B]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B])
 
   def await_2_3[In2_3[_, _, _, _, _], In2_4[_, _, _, _, _, _], In3_3[_, _, _, _, _, _], In3_4[_, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_3[In2_3, In2_4, In3_3, In3_4, I1, I2, A, B, C]])
-  : c.Expr[InputMolecule_2_3[I1, I2, A, B, C]] =
+  : c.Expr[InputMolecule_2_03[I1, I2, A, B, C]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C])
 
   def await_2_4[In2_4[_, _, _, _, _, _], In2_5[_, _, _, _, _, _, _], In3_4[_, _, _, _, _, _, _], In3_5[_, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_4[In2_4, In2_5, In3_4, In3_5, I1, I2, A, B, C, D]])
-  : c.Expr[InputMolecule_2_4[I1, I2, A, B, C, D]] =
+  : c.Expr[InputMolecule_2_04[I1, I2, A, B, C, D]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D])
 
   def await_2_5[In2_5[_, _, _, _, _, _, _], In2_6[_, _, _, _, _, _, _, _], In3_5[_, _, _, _, _, _, _, _], In3_6[_, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_5[In2_5, In2_6, In3_5, In3_6, I1, I2, A, B, C, D, E]])
-  : c.Expr[InputMolecule_2_5[I1, I2, A, B, C, D, E]] =
+  : c.Expr[InputMolecule_2_05[I1, I2, A, B, C, D, E]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E])
 
   def await_2_6[In2_6[_, _, _, _, _, _, _, _], In2_7[_, _, _, _, _, _, _, _, _], In3_6[_, _, _, _, _, _, _, _, _], In3_7[_, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_6[In2_6, In2_7, In3_6, In3_7, I1, I2, A, B, C, D, E, F]])
-  : c.Expr[InputMolecule_2_6[I1, I2, A, B, C, D, E, F]] =
+  : c.Expr[InputMolecule_2_06[I1, I2, A, B, C, D, E, F]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F])
 
   def await_2_7[In2_7[_, _, _, _, _, _, _, _, _], In2_8[_, _, _, _, _, _, _, _, _, _], In3_7[_, _, _, _, _, _, _, _, _, _], In3_8[_, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_7[In2_7, In2_8, In3_7, In3_8, I1, I2, A, B, C, D, E, F, G]])
-  : c.Expr[InputMolecule_2_7[I1, I2, A, B, C, D, E, F, G]] =
+  : c.Expr[InputMolecule_2_07[I1, I2, A, B, C, D, E, F, G]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G])
 
   def await_2_8[In2_8[_, _, _, _, _, _, _, _, _, _], In2_9[_, _, _, _, _, _, _, _, _, _, _], In3_8[_, _, _, _, _, _, _, _, _, _, _], In3_9[_, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_8[In2_8, In2_9, In3_8, In3_9, I1, I2, A, B, C, D, E, F, G, H]])
-  : c.Expr[InputMolecule_2_8[I1, I2, A, B, C, D, E, F, G, H]] =
+  : c.Expr[InputMolecule_2_08[I1, I2, A, B, C, D, E, F, G, H]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H])
 
   def await_2_9[In2_9[_, _, _, _, _, _, _, _, _, _, _], In2_10[_, _, _, _, _, _, _, _, _, _, _, _], In3_9[_, _, _, _, _, _, _, _, _, _, _, _], In3_10[_, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_2_9[In2_9, In2_10, In3_9, In3_10, I1, I2, A, B, C, D, E, F, G, H, I]])
-  : c.Expr[InputMolecule_2_9[I1, I2, A, B, C, D, E, F, G, H, I]] =
+  : c.Expr[InputMolecule_2_09[I1, I2, A, B, C, D, E, F, G, H, I]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H], c.weakTypeOf[I])
 
   def await_2_10[In2_10[_, _, _, _, _, _, _, _, _, _, _, _], In2_11[_, _, _, _, _, _, _, _, _, _, _, _, _], In3_10[_, _, _, _, _, _, _, _, _, _, _, _, _], In3_11[_, _, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag, J: c.WeakTypeTag]
@@ -504,42 +552,42 @@ object MakeInputMolecule {
 
   def await_3_2[In3_2[_, _, _, _, _], In3_3[_, _, _, _, _, _], In4_2[_, _, _, _, _, _], In4_3[_, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_2[In3_2, In3_3, In4_2, In4_3, I1, I2, I3, A, B]])
-  : c.Expr[InputMolecule_3_2[I1, I2, I3, A, B]] =
+  : c.Expr[InputMolecule_3_02[I1, I2, I3, A, B]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B])
 
   def await_3_3[In3_3[_, _, _, _, _, _], In3_4[_, _, _, _, _, _, _], In4_3[_, _, _, _, _, _, _], In4_4[_, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_3[In3_3, In3_4, In4_3, In4_4, I1, I2, I3, A, B, C]])
-  : c.Expr[InputMolecule_3_3[I1, I2, I3, A, B, C]] =
+  : c.Expr[InputMolecule_3_03[I1, I2, I3, A, B, C]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C])
 
   def await_3_4[In3_4[_, _, _, _, _, _, _], In3_5[_, _, _, _, _, _, _, _], In4_4[_, _, _, _, _, _, _, _], In4_5[_, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_4[In3_4, In3_5, In4_4, In4_5, I1, I2, I3, A, B, C, D]])
-  : c.Expr[InputMolecule_3_4[I1, I2, I3, A, B, C, D]] =
+  : c.Expr[InputMolecule_3_04[I1, I2, I3, A, B, C, D]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D])
 
   def await_3_5[In3_5[_, _, _, _, _, _, _, _], In3_6[_, _, _, _, _, _, _, _, _], In4_5[_, _, _, _, _, _, _, _, _], In4_6[_, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_5[In3_5, In3_6, In4_5, In4_6, I1, I2, I3, A, B, C, D, E]])
-  : c.Expr[InputMolecule_3_5[I1, I2, I3, A, B, C, D, E]] =
+  : c.Expr[InputMolecule_3_05[I1, I2, I3, A, B, C, D, E]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E])
 
   def await_3_6[In3_6[_, _, _, _, _, _, _, _, _], In3_7[_, _, _, _, _, _, _, _, _, _], In4_6[_, _, _, _, _, _, _, _, _, _], In4_7[_, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_6[In3_6, In3_7, In4_6, In4_7, I1, I2, I3, A, B, C, D, E, F]])
-  : c.Expr[InputMolecule_3_6[I1, I2, I3, A, B, C, D, E, F]] =
+  : c.Expr[InputMolecule_3_06[I1, I2, I3, A, B, C, D, E, F]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F])
 
   def await_3_7[In3_7[_, _, _, _, _, _, _, _, _, _], In3_8[_, _, _, _, _, _, _, _, _, _, _], In4_7[_, _, _, _, _, _, _, _, _, _, _], In4_8[_, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_7[In3_7, In3_8, In4_7, In4_8, I1, I2, I3, A, B, C, D, E, F, G]])
-  : c.Expr[InputMolecule_3_7[I1, I2, I3, A, B, C, D, E, F, G]] =
+  : c.Expr[InputMolecule_3_07[I1, I2, I3, A, B, C, D, E, F, G]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G])
 
   def await_3_8[In3_8[_, _, _, _, _, _, _, _, _, _, _], In3_9[_, _, _, _, _, _, _, _, _, _, _, _], In4_8[_, _, _, _, _, _, _, _, _, _, _, _], In4_9[_, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_8[In3_8, In3_9, In4_8, In4_9, I1, I2, I3, A, B, C, D, E, F, G, H]])
-  : c.Expr[InputMolecule_3_8[I1, I2, I3, A, B, C, D, E, F, G, H]] =
+  : c.Expr[InputMolecule_3_08[I1, I2, I3, A, B, C, D, E, F, G, H]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H])
 
   def await_3_9[In3_9[_, _, _, _, _, _, _, _, _, _, _, _], In3_10[_, _, _, _, _, _, _, _, _, _, _, _, _], In4_9[_, _, _, _, _, _, _, _, _, _, _, _, _], In4_10[_, _, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag]
   (c: Context)(inputDsl: c.Expr[In_3_9[In3_9, In3_10, In4_9, In4_10, I1, I2, I3, A, B, C, D, E, F, G, H, I]])
-  : c.Expr[InputMolecule_3_9[I1, I2, I3, A, B, C, D, E, F, G, H, I]] =
+  : c.Expr[InputMolecule_3_09[I1, I2, I3, A, B, C, D, E, F, G, H, I]] =
     inst(c).await(inputDsl, c.weakTypeOf[I1], c.weakTypeOf[I2], c.weakTypeOf[I3])(c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H], c.weakTypeOf[I])
 
   def await_3_10[In3_10[_, _, _, _, _, _, _, _, _, _, _, _, _], In3_11[_, _, _, _, _, _, _, _, _, _, _, _, _, _], In4_10[_, _, _, _, _, _, _, _, _, _, _, _, _, _], In4_11[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], I1: c.WeakTypeTag, I2: c.WeakTypeTag, I3: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag, J: c.WeakTypeTag]

@@ -1,6 +1,6 @@
 package molecule.coretests.schemaDef
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.ast.model.{Atom, Bond, Eq, Model}
 import molecule.coretests.schemaDef.dsl.partitionTest._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema

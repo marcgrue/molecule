@@ -1,17 +1,9 @@
 package molecule.examples.dayOfDatomic
-import molecule.Imports._
+import molecule.imports._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
 import molecule.util.MoleculeSpec
 
-
-//object testNestedOutsideSpedcs2 extends DatomicFacade with App {
-//  implicit val conn = load(ProductsOrderSchema, "Orders")
-//
-//  val order = m(Order.LineItems * LineItem.product.price.quantity) insert List((3L, 48.00, 1), (4L, 38.00, 2)) eid
-//
-//  println(m(Order.LineItems * LineItem.product.price.quantity).get)
-//}
 
 class ProductsAndOrders extends MoleculeSpec {
 

@@ -3,7 +3,7 @@ import java.util.{Date, UUID}
 import molecule.ast.query._
 import molecule.util.Helpers
 
-case class Query2String(q: Query) extends Helpers {
+private[molecule] case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation
   var asN = false

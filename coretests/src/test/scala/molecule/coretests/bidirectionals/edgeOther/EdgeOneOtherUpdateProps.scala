@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema

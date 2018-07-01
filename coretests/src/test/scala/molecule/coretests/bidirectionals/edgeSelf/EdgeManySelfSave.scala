@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -36,7 +36,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       Person.name("Ann").Knows.weight(7).Person.name("Ben").save.eids
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Knows.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Knows.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )
@@ -51,7 +51,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       Person.name("Ann").Knows.weight(7).person(ben).save.eids
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Knows.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Knows.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )
@@ -71,7 +71,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       Person.name("Ann").knows(knowsBen, knowsJoe).save
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Knows.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Knows.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ann", 8, "Joe"),
         ("Ben", 7, "Ann"),
@@ -91,7 +91,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       Person.name("Ann").knows(knowsBen, knowsJoe).save
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Knows.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Knows.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ann", 8, "Joe"),
         ("Ben", 7, "Ann"),

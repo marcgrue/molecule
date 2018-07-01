@@ -1,17 +1,17 @@
-package molecule.facade // At top level only to be available in client code
+package molecule.facade
 
-import java.util.{Date, List => jList, Map => jMap}
-
+import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.{Connection, Database, Peer}
+import molecule.action.TxReport
 import molecule.ast.model.Model
 import molecule.ast.query.{Query, QueryExpr}
 import molecule.ast.tempDb._
 import molecule.ast.transaction._
 import molecule.exceptions.QueryException
+import scala.concurrent.blocking
 //import molecule.facade._
 import molecule.ops.QueryOps._
 import molecule.transform.Query2String
-
 import scala.collection.JavaConverters._
 
 object Conn {
@@ -125,15 +125,12 @@ class Conn(datConn: datomic.Connection) {
     TxReport(datConn.transact(tx).get)
   }
 
-  // Convenience function for querying directly against Datomic
+  // Convenience function for querying directly against Datomic (untyped)
   // Note how we can still use a test db!
-  def q(query: String, input: String*): Iterable[jList[AnyRef]] = q(query, db, input: _*)
-  def q(query: String, db: Database, input: String*): Iterable[jList[AnyRef]] = {
-    val args = db +: input.toSeq
-    Peer.q(query, args: _*).asScala
-  }
+  def q(query: String, inputs: String*): jCollection[jList[AnyRef]] = q(query, db, inputs: _*)
+  def q(query: String, db: Database, inputs: String*): jCollection[jList[AnyRef]] = Peer.q(query, db +: inputs.toSeq: _*)
 
-  def query(m: Model, q: Query, n: Int = -1): Iterable[jList[AnyRef]] = {
+  def query(m: Model, q: Query): jCollection[jList[AnyRef]] = {
     val p = (expr: QueryExpr) => Query2String(q).p(expr)
     val rules = "[" + (q.i.rules map p mkString " ") + "]"
     val dbUsed = if (_adhocDb.isDefined) {
@@ -166,10 +163,9 @@ class Conn(datConn: datomic.Connection) {
     val allInputs: Seq[AnyRef] = first ++ q.inputs
 
     try {
-      if (n > 0)
-        Peer.q(q.toMap, allInputs: _*).asScala.take(n)
-      else
-        Peer.q(q.toMap, allInputs: _*).asScala
+      blocking {
+        Peer.q(q.toMap, allInputs: _*)
+      }
     } catch {
       case e: Throwable => throw QueryException(e, m, q, allInputs, p)
     }

@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
 
@@ -34,7 +34,7 @@ class Aggregates extends CoreSpec {
       ("str1", Set("a", "b")),
       ("str2", Set("b", "c")),
       ("str3", Set("ba", "d")),
-      ("str4", Set[String]())
+      ("str4", Set.empty[String])
     )
 
     Ns.int.ints insert List(

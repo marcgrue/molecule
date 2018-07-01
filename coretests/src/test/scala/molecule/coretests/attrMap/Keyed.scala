@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.Imports._
+import molecule.imports._
 
 import molecule.coretests.util.dsl.coreTest._
 
@@ -13,7 +13,7 @@ class Keyed extends Base {
 
 
   "Key only" in new Setup {
-    Ns.strMapK("fr").get === List("Bonjour")
+    Ns.strMapK("fr"). get === List("Bonjour")
     Ns.intMapK("fr").get === List(20)
     Ns.longMapK("fr").get === List(20L)
     Ns.floatMapK("fr").get === List(20.0f)

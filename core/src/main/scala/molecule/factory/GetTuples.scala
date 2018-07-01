@@ -7,7 +7,7 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
-trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
+private[molecule] trait GetTuples[Ctx <: Context] extends GetJson[Ctx] {
   import c.universe._
 
 

@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 
 class Input extends Base {
@@ -121,10 +121,10 @@ class Input extends Base {
       (2, Map("fr" -> "Bonjour", "it" -> "Bon giorno"))
     )
 
-    m(Ns.int.strMap_.>(?))(Map(".*" -> "Hej")).get.toSeq.sorted === List(1, 2, 3)
-    m(Ns.int.strMap_.>=(?))(Map(".*" -> "Hej")).get.toSeq.sorted === List(1, 2, 3, 4)
-    m(Ns.int.strMap_.<=(?))(Map(".*" -> "Hej")).get.toSeq.sorted === List(2, 3, 4)
-    m(Ns.int.strMap_.<(?))(Map(".*" -> "Hej")).get.toSeq.sorted === List(2)
+    m(Ns.int.strMap_.>(?))(Map(".*" -> "Hej")).get.sorted === List(1, 2, 3)
+    m(Ns.int.strMap_.>=(?))(Map(".*" -> "Hej")).get.sorted === List(1, 2, 3, 4)
+    m(Ns.int.strMap_.<=(?))(Map(".*" -> "Hej")).get.sorted === List(2, 3, 4)
+    m(Ns.int.strMap_.<(?))(Map(".*" -> "Hej")).get.sorted === List(2)
 
 
     // Int

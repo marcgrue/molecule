@@ -5,7 +5,7 @@ import molecule.ast.query.{Val, _}
 import molecule.ops.QueryOps._
 import molecule.util.{Debug, Helpers}
 
-object Model2Query extends Helpers {
+private[molecule] object Model2Query extends Helpers {
   val x = Debug("Model2Query", 20, 19, false)
   def uri(t: String) = t.contains("java.net.URI")
   def u(t: String, v: String) = if (t.contains("java.net.URI")) v else ""

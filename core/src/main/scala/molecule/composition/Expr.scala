@@ -1,11 +1,20 @@
-package molecule.dsl
+package molecule.composition
 import java.net.URI
 import java.util.{Date, UUID}
 
 import molecule.ast.model.TermValue
 
 
-trait expr {
+
+/**
+  * Expression keywords
+  *
+  * Pre-defined keywords are used for specific expressions
+  *
+  * `count` can be used to aggregate attribute values:
+  * val howManyJohns = Person.name_("John").e(count).get.head
+  **/
+trait Expr {
 
   // Attribute expression implicits
 

@@ -1,0 +1,12 @@
+Documentation for the Molecule library - a meta DSL for the [[https://www.datomic.com Datomic]] database.
+
+== Package structure ==
+
+@docRoot hej
+
+<img src="{@docRoot}/doc-files/MoleculeLogo150.png">
+<img src="http://www.scalamolecule.org/front/">
+
+<img src="http://www.scalamolecule.org/img/logo/MoleculeLogo200.png">
+
+@img

@@ -1,11 +1,9 @@
 package molecule.examples.seattle
 import java.io.FileReader
-
 import datomic._
-import molecule.Imports._
+import molecule.composition.meta._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.schema.Db
-
+import molecule.imports._
 import scala.language.reflectiveCalls
 
 class SeattleTests extends SeattleSpec {
@@ -141,7 +139,7 @@ class SeattleTests extends SeattleSpec {
 
     // Community input molecule awaiting some type value
     // Adding an underscore means that we don't want to return that value (will be the same for all result sets...)
-    val communitiesOfType = m(Community.name.type_(?))
+    val communitiesOfType = m(Community.name.type_.apply(?))
 
     // Re-use input molecules to create new molecules with different community types
     val twitterCommunities = communitiesOfType("twitter")
@@ -223,7 +221,7 @@ class SeattleTests extends SeattleSpec {
 
 
     // Logic AND pairs separated by OR
-    typeAndOrgtype2(("email_list" and "community") or ("website" and "commercial")).get(5) === emailListORcommercialWebsites
+    typeAndOrgtype2.apply(("email_list" and "community") or ("website" and "commercial")).get(5) === emailListORcommercialWebsites
 
     // Multiple tuples of AND pairs:
     typeAndOrgtype2(("email_list", "community"), ("website", "commercial")).get(5) === emailListORcommercialWebsites
@@ -345,7 +343,7 @@ class SeattleTests extends SeattleSpec {
 
   "Working with time" in new SeattleSetup {
 
-    val txDates      = Db.txInstant.get.toSeq.sorted.reverse
+    val txDates      = Db.txInstant.get.sorted.reverse
     val schemaTxDate = txDates(1)
     val dataTxDate   = txDates(0)
 
@@ -413,10 +411,11 @@ class SeattleTests extends SeattleSpec {
     // Add multiple molecules..........................
 
     // Data as list of tuples
+    Community.name.insert.apply("Com A", "A.com").eids === Seq(17592186045898L, 17592186045899L)
     Community.name.url.insert(Seq(("Com A", "A.com"), ("Com B", "B.com"))).eids === Seq(17592186045898L, 17592186045899L)
 
     // Confirm that new entities have been inserted
-    Community.name.contains("Com").get.toSeq.sorted === List("Com A", "Com B")
+    Community.name.contains("Com").get.sorted === List("Com A", "Com B")
     Community.e.name_.get.size === 154
 
 

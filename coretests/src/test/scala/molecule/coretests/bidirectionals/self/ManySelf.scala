@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.self
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -20,7 +20,7 @@ class ManySelf extends MoleculeSpec {
       Person.name("Ann").Friends.name("Ben").save.eids
 
       // Reference is bidirectional - both point to each other
-      Person.name.Friends.name.get.toSeq.sorted === List(
+      Person.name.Friends.name.get.sorted === List(
         ("Ann", "Ben"),
         // Reverse reference:
         ("Ben", "Ann")
@@ -71,7 +71,7 @@ class ManySelf extends MoleculeSpec {
       // Save Ann with bidirectional ref to existing Ben
       Person.name("Ann").friends(ben).save.eid
 
-      Person.name.Friends.name.get.toSeq.sorted === List(
+      Person.name.Friends.name.get.sorted === List(
         ("Ann", "Ben"),
         ("Ben", "Ann")
       )
@@ -172,7 +172,7 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name.Friends.*(Person.name).get.toSeq.sortBy(_._1) === List(
+      Person.name.Friends.*(Person.name).get.sortBy(_._1) === List(
         ("Ann", List("Ben", "Joe")),
         ("Ben", List("Ann")),
         ("Don", List("Tim", "Tom")),
@@ -194,7 +194,7 @@ class ManySelf extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted - not how Ben got 2 (reverse) friendships
-      Person.name.Friends.*(Person.name).get.toSeq.sortBy(_._1) === List(
+      Person.name.Friends.*(Person.name).get.sortBy(_._1) === List(
         ("Ann", List("Ben", "Joe")),
         ("Ben", List("Ann", "Don")),
         ("Don", List("Ben", "Tim")),
@@ -223,7 +223,7 @@ class ManySelf extends MoleculeSpec {
       Person(ann).friends.add(Seq(tom)).update
 
       // Friendships have been added in both directions
-      friendsOf("Ann").get.toSeq.sorted === List("Ben", "Joe", "Liz", "Tom")
+      friendsOf("Ann").get.sorted === List("Ben", "Joe", "Liz", "Tom")
       friendsOf("Ben").get === List("Ann")
       friendsOf("Joe").get === List("Ann")
       friendsOf("Liz").get === List("Ann")
@@ -239,7 +239,7 @@ class ManySelf extends MoleculeSpec {
       ) eids
 
       // Friendships have been inserted in both directions
-      friendsOf("Ann").get.toSeq.sorted === List("Ben", "Joe", "Liz", "Tom", "Ulf")
+      friendsOf("Ann").get.sorted === List("Ben", "Joe", "Liz", "Tom", "Ulf")
       friendsOf("Ben").get === List("Ann")
       friendsOf("Joe").get === List("Ann")
       friendsOf("Liz").get === List("Ann")

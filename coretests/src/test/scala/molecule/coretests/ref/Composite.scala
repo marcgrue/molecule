@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -33,11 +33,11 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      m(Ref2.int2).get.toSeq.sorted === Seq(1, 2)
-      m(Ns.int).get.toSeq.sorted === Seq(11, 22)
+      m(Ref2.int2).get.sorted === Seq(1, 2)
+      m(Ns.int).get.sorted === Seq(11, 22)
 
       // Composite query
-      m(Ref2.int2 ~ Ns.int).get.toSeq.sorted === Seq(
+      m(Ref2.int2 ~ Ns.int).get.sorted === Seq(
         (1, 11),
         (2, 22)
       )
@@ -70,18 +70,18 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      m(Ref2.int2).get.toSeq.sorted === Seq(
+      m(Ref2.int2).get.sorted === Seq(
         1,
         2
       )
-      m(Ns.int.str).get.toSeq.sorted === Seq(
+      m(Ns.int.str).get.sorted === Seq(
         (11, "aa"),
         (22, "bb")
       )
 
       // Composite query
       val (i1, (i2, s)): (Int, (Int, String)) = m(Ref2.int2 ~ Ns.int.str).get.head
-      m(Ref2.int2 ~ Ns.int.str).get.toSeq.sorted === Seq(
+      m(Ref2.int2 ~ Ns.int.str).get.sorted === Seq(
         (1, (11, "aa")),
         (2, (22, "bb"))
       )
@@ -114,17 +114,17 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      m(Ref2.int2.str2).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2).get.sorted === Seq(
         (1, "a"),
         (2, "b")
       )
-      m(Ns.int).get.toSeq.sorted === Seq(
+      m(Ns.int).get.sorted === Seq(
         11,
         22
       )
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ns.int).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.int).get.sorted === Seq(
         ((1, "a"), 11),
         ((2, "b"), 22)
       )
@@ -159,17 +159,17 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
-      Ns.str.int.get.toSeq.sorted === List(
+      Ns.str.int.get.sorted === List(
         ("aa", 11),
         ("bb", 22)
       )
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ns.str.int).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.str.int).get.sorted === List(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
@@ -211,24 +211,24 @@ class Composite extends CoreSpec {
         ":ns/str" -> "Tx meta data")
 
       // Queries via one namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
       // .. including transaction meta data
       // Note how transaction meta data is fetched for all entities ("rows") saved in the same transaction
-      Ref2.int2.str2.tx_(Ns.str).get.toSeq.sorted === List(
+      Ref2.int2.str2.tx_(Ns.str).get.sorted === List(
         (1, "a", "Tx meta data"),
         (2, "b", "Tx meta data")
       )
 
       // Queries via other namespace
-      Ref1.str1.int1.get.toSeq.sorted === List(
+      Ref1.str1.int1.get.sorted === List(
         ("aa", 11),
         ("bb", 22)
       )
       // .. including transaction meta data
-      Ref1.str1.int1.tx_(Ns.str).get.toSeq.sorted === List(
+      Ref1.str1.int1.tx_(Ns.str).get.sorted === List(
         ("aa", 11, "Tx meta data"),
         ("bb", 22, "Tx meta data")
       )
@@ -239,12 +239,12 @@ class Composite extends CoreSpec {
 
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ref1.str1.int1).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ref1.str1.int1).get.sorted === List(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
       // .. including transaction meta data
-      m(Ref2.int2.str2 ~ Ref1.str1.int1.tx_(Ns.str)).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ref1.str1.int1.tx_(Ns.str)).get.sorted === List(
         ((1, "a"), ("aa", 11, "Tx meta data")),
         ((2, "b"), ("bb", 22, "Tx meta data"))
       )
@@ -422,17 +422,17 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
-      Ns.str.Ref1.int1.get.toSeq.sorted === List(
+      Ns.str.Ref1.int1.get.sorted === List(
         ("aa", 11),
         ("bb", 22)
       )
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ns.str.Ref1.int1).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.str.Ref1.int1).get.sorted === List(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
@@ -480,17 +480,17 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
-      Ns.str.Refs1.int1.get.toSeq.sorted === List(
+      Ns.str.Refs1.int1.get.sorted === List(
         ("aa", 11),
         ("bb", 22)
       )
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ns.str.Refs1.int1).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.str.Refs1.int1).get.sorted === List(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
@@ -536,13 +536,13 @@ class Composite extends CoreSpec {
       )
 
       // Queries via each namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
 
       // Composite query
-      m(Ref2.int2.str2 ~ Ns.Refs1.int1).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.Refs1.int1).get.sorted === List(
         ((1, "a"), 11),
         ((2, "b"), 22)
       )
@@ -629,7 +629,7 @@ class Composite extends CoreSpec {
       r23.touchList === List(":db/id" -> 17592186045450L, ":ref1/int1" -> 23)
 
       // Queries via each namespace
-      Ref2.int2.str2.get.toSeq.sorted === List(
+      Ref2.int2.str2.get.sorted === List(
         (1, "a"),
         (2, "b")
       )
@@ -707,14 +707,14 @@ class Composite extends CoreSpec {
         (2, ("bb", 22))
       ))().eids
 
-      m(Ns.str).get.toSeq.sorted === Seq("aa", "bb")
-      m(Ns.str.Ref1.int1).get.toSeq.sorted === Seq(("aa", 11), ("bb", 22))
+      m(Ns.str).get.sorted === Seq("aa", "bb")
+      m(Ns.str.Ref1.int1).get.sorted === Seq(("aa", 11), ("bb", 22))
 
       // Note how 4 Ref1.int1 values have been inserted!
-      m(Ref1.int1).get.toSeq.sorted === Seq(1, 2, 11, 22)
+      m(Ref1.int1).get.sorted === Seq(1, 2, 11, 22)
 
       // Composite query
-      m(Ref1.int1 ~ Ns.str.Ref1.int1).get.toSeq.sorted === Seq(
+      m(Ref1.int1 ~ Ns.str.Ref1.int1).get.sorted === Seq(
         (1, ("aa", 11)),
         (2, ("bb", 22))
       )
@@ -749,29 +749,29 @@ class Composite extends CoreSpec {
       )().eids
 
       // Without constraints
-      m(Ref2.int2.str2 ~ Ns.str.int).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.str.int).get.sorted === List(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
 
       // One constraint
-      m(Ref2.int2.>(1).str2 ~ Ns.str.int).get.toSeq.sorted === List(
+      m(Ref2.int2.>(1).str2 ~ Ns.str.int).get.sorted === List(
         ((2, "b"), ("bb", 22))
       )
       // Other constraint
-      m(Ref2.int2.str2 ~ Ns.str.int.<(20)).get.toSeq.sorted === List(
+      m(Ref2.int2.str2 ~ Ns.str.int.<(20)).get.sorted === List(
         ((1, "a"), ("aa", 11))
       )
 
       // Mutually exclusive constraints
-      m(Ref2.int2.>(1).str2 ~ Ns.str.int.<(20)).get.toSeq.sorted === List()
+      m(Ref2.int2.>(1).str2 ~ Ns.str.int.<(20)).get.sorted === List()
 
       // Constraints with all-matching data
-      m(Ref2.int2.<(2).str2 ~ Ns.str.int.<(20)).get.toSeq.sorted === List(
+      m(Ref2.int2.<(2).str2 ~ Ns.str.int.<(20)).get.sorted === List(
         ((1, "a"), ("aa", 11))
       )
 
-      m(Ref2.int2_.<(2).str2 ~ Ns.int_.<(20)).get.toSeq.sorted === List(
+      m(Ref2.int2_.<(2).str2 ~ Ns.int_.<(20)).get.sorted === List(
         "a"
       )
     }
@@ -799,31 +799,31 @@ class Composite extends CoreSpec {
       )().eids
 
       // Non-composite query gets all data
-      m(Ref2.int2.str2).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2).get.sorted === Seq(
         (1, "a"),
         (2, "b"),
         (3, "c")
       )
 
       // Composite query gets composite data only that has a `Ns.str` value too
-      m(Ref2.int2.str2 ~ Ns.str.int).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.str.int).get.sorted === Seq(
         ((1, "a"), ("aa", 11)),
         ((2, "b"), ("bb", 22))
       )
-      m(Ref2.int2.str2 ~ Ns.str).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.str).get.sorted === Seq(
         ((1, "a"), "aa"),
         ((2, "b"), "bb")
       )
 
       // Composite data with `Ns.int` values retrieve all 3 entities
-      m(Ref2.int2.str2 ~ Ns.int).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.int).get.sorted === Seq(
         ((1, "a"), 11),
         ((2, "b"), 22),
         ((3, "c"), 33)
       )
 
       // Composite data that _doesn't_ have a `Ns.str` value retrieve only the last entity
-      m(Ref2.int2.str2 ~ Ns.str_(nil).int).get.toSeq.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.str_(nil).int).get.sorted === Seq(
         ((3, "c"), 33)
       )
     }

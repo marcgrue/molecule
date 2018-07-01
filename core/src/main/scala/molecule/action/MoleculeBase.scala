@@ -1,9 +1,9 @@
-package molecule.api
+package molecule.action
 
 import molecule.ast.model.Model
 import molecule.ast.query.Query
 
-trait MoleculeBase {
+private[molecule] trait MoleculeBase {
   val _model: Model
   val _query: Query
 }

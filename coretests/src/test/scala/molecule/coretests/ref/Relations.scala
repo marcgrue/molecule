@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.Imports._
+import molecule.imports._
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
@@ -22,7 +22,7 @@ class Relations extends CoreSpec {
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get.toSeq.sorted === List(
+    Ns.str.Ref1.str1.get.sorted === List(
       ("a0", "a1"),
       ("b0", "b1"),
       ("c0", "c1")
@@ -30,7 +30,7 @@ class Relations extends CoreSpec {
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get.toSeq.sorted === List(
+    Ns.str.ref1.get.sorted === List(
       ("a0", a1),
       ("b0", b1),
       ("c0", c1))
@@ -50,7 +50,7 @@ class Relations extends CoreSpec {
 
     // Get attribute values from 2 namespaces
     // Namespace references like `Ref1` starts with Capital letter
-    Ns.str.Ref1.str1.get.toSeq.sorted === List(
+    Ns.str.Ref1.str1.get.sorted === List(
       ("kid1", "father1"),
       ("kid2", "father2"),
       ("kid3", "father3")
@@ -58,7 +58,7 @@ class Relations extends CoreSpec {
 
     // We can also retrieve the referenced entity id
     // Referenced entity id `ref1` starts with lower case letter
-    Ns.str.ref1.get.toSeq.sorted === List(
+    Ns.str.ref1.get.sorted === List(
       ("kid1", father1),
       ("kid2", father2),
       ("kid3", father3))

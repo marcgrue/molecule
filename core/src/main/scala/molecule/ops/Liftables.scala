@@ -9,7 +9,7 @@ import molecule.util.MacroHelpers
 
 import scala.reflect.macros.whitebox.Context
 
-trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
+private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   import c.universe._
   val z = DebugMacro("Liftables", 1, 10, true)
 

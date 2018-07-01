@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
-trait Base[Ctx <: Context] extends TreeOps[Ctx] {
+private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
   val x = DebugMacro("Base", 1, 20, false)
 
@@ -79,14 +79,18 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
 
   val imports =
     q"""
-        import molecule.api._
+        import molecule.action._
+        import molecule.action.MoleculeOut._
+        import molecule.composition.input.InputMolecule_1._
+        import molecule.composition.input.InputMolecule_2._
+        import molecule.composition.input.InputMolecule_3._
         import molecule.ast.model._
         import molecule.ast.query._
         import molecule.facade.Conn
         import molecule.ops.QueryOps._
         import molecule.transform.{Model2Query, Model2Transaction, Query2String}
         import java.lang.{Long => jLong, Double => jDouble, Float => jFloat, Boolean => jBoolean}
-        import java.util.{Date, UUID, Map => jMap, List => jList}
+        import java.util.{Date, UUID, Map => jMap, List => jList, Collection => jCollection, Iterator => jIterator}
         import java.net.URI
         import java.math.{BigInteger => jBigInt, BigDecimal => jBigDec}
         import clojure.lang.{PersistentHashSet, PersistentVector, LazySeq, Keyword}
@@ -197,7 +201,7 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
       ..$imports
       ..$resolverTree
 
-      private trait Util { self: molecule.api.MoleculeBase =>
+      private trait Util { self: molecule.action.MoleculeBase =>
         import java.text.SimpleDateFormat
 
         private val m = _model
@@ -206,13 +210,12 @@ trait Base[Ctx <: Context] extends TreeOps[Ctx] {
         def date(s: String): Date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s)
 
         // Raw API
-        def getRaw        (implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, _query)
-        def getRaw(n: Int)(implicit conn: Conn): Iterable[jList[AnyRef]] = conn.query(_model, _query, n)
+        //override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
         // Print transitions of a `get` call to console
-        def getD(implicit conn: Conn) {
+        protected def getD_(implicit conn: Conn) {
           val rows = try {
-            conn.query(m, q).take(500)
+            conn.query(m, q).asScala.take(500)
           } catch {
             case e: Throwable => sys.error(e.toString)
           }

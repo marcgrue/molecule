@@ -1,6 +1,6 @@
 package molecule.coretests.util
 
-import molecule.Imports._
+import molecule.imports._
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date

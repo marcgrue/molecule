@@ -3,7 +3,7 @@ import java.util.{Date, List => jList, Map => jMap}
 
 import datomic.Database
 
-object tempDb {
+private[molecule] object tempDb {
 
   sealed trait TxType
   case class TxDate(d: Date) extends TxType

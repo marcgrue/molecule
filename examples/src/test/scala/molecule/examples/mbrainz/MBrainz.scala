@@ -1,6 +1,6 @@
 package molecule.examples.mbrainz
 import datomic.Peer
-import molecule.Imports._
+import molecule.imports._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec

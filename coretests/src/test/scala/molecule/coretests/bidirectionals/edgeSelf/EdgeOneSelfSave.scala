@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -27,7 +27,7 @@ Ann --> annLovesBen (7) -->  Ben
         Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
 
       // Bidirectional property edges have been saved
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         // Reverse edge:
         ("Ben", 7, "Ann")
@@ -43,7 +43,7 @@ Ann --> annLovesBen (7) -->  Ben
       Person.name("Ann").Loves.weight(7).person(ben).save.eids
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )
@@ -102,7 +102,7 @@ Ann --> annLovesBen (7) -->  Ben
         s"[molecule.transform.Model2Transaction.valueStmts:biEdgeRefAttr]  Current entity and referenced entity ids can't be the same."
 
       // Ann and Ben know each other with a weight of 7
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )
@@ -119,7 +119,7 @@ Ann --> annLovesBen (7) -->  Ben
       Person.name("Ann").loves(benLovesAnn).save
 
       // Ann loves Ben and Ben loves Ann - that is 70% love
-      Person.name.Loves.weight.Person.name.get.toSeq.sorted === List(
+      Person.name.Loves.weight.Person.name.get.sorted === List(
         ("Ann", 7, "Ben"),
         ("Ben", 7, "Ann")
       )

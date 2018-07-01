@@ -6,7 +6,7 @@ import molecule.ast.model._
 
 import scala.collection.JavaConverters._
 
-object transaction {
+private[molecule] object transaction {
 
   sealed trait Statement {
     val action: String

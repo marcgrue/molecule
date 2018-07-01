@@ -1,7 +1,7 @@
 package molecule.ops
 import molecule.ast.model._
 
-case class VerifyModel(model: Model, op: String) {
+private[molecule] case class VerifyModel(model: Model, op: String) {
 
   op match {
     case "save"   => verifySave()

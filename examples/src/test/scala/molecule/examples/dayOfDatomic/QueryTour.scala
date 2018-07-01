@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.Imports._
+import molecule.imports._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec
 import scala.language.postfixOps
@@ -166,7 +166,7 @@ class QueryTour extends MoleculeSpec {
     tx === 13194139534345L
 
 
-    // 17. Converting Transacting to T
+    // 17. Converting Transaction to T
     val t = datomic.Peer.toT(tx)
     t === 1033
 

@@ -2,6 +2,8 @@ package molecule.exceptions
 import molecule.ast.model.Model
 import molecule.ast.query._
 
+
+
 case class QueryException(e: Throwable, model: Model, query: Query, allInputs: Seq[_], p: QueryExpr => String) extends RuntimeException(
   s"""
      |#############################################################################

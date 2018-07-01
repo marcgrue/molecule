@@ -1,6 +1,6 @@
 package molecule.coretests.manipulation
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -14,7 +14,7 @@ class Retract extends CoreSpec {
       (2, "b")
     ) eid
 
-    Ns.int.str.get.toSeq.sorted === List(
+    Ns.int.str.get.sorted === List(
       (1, "a"),
       (2, "b")
     )
@@ -34,11 +34,11 @@ class Retract extends CoreSpec {
       (2, 20)
     ) eid
 
-    Ns.int.RefSub1.int1.get.toSeq.sorted === List(
+    Ns.int.RefSub1.int1.get.sorted === List(
       (1, 10),
       (2, 20)
     )
-    Ref1.int1.get.toSeq.sorted === List(10, 20)
+    Ref1.int1.get.sorted === List(10, 20)
 
     e1.retract
 
@@ -57,11 +57,11 @@ class Retract extends CoreSpec {
       (2, Seq(20, 21))
     )).eid
 
-    m(Ns.int.RefsSub1 * Ref1.int1).get.toSeq.sortBy(_._1) === List(
+    m(Ns.int.RefsSub1 * Ref1.int1).get.sortBy(_._1) === List(
       (1, Seq(10, 11)),
       (2, Seq(20, 21))
     )
-    Ref1.int1.get.toSeq.sorted === List(10, 11, 20, 21)
+    Ref1.int1.get.sorted === List(10, 11, 20, 21)
 
     e1.retract
 
@@ -92,8 +92,8 @@ class Retract extends CoreSpec {
         (20, Seq(200, 201)),
         (21, Seq(210, 211))))
     )
-    Ref1.int1.get.toSeq.sorted === List(10, 11, 20, 21)
-    Ref2.int2.get.toSeq.sorted === List(100, 101, 110, 111, 200, 201, 210, 211)
+    Ref1.int1.get.sorted === List(10, 11, 20, 21)
+    Ref2.int2.get.sorted === List(100, 101, 110, 111, 200, 201, 210, 211)
 
     e1.retract
 
@@ -102,8 +102,8 @@ class Retract extends CoreSpec {
         (20, Seq(200, 201)),
         (21, Seq(210, 211))))
     )
-    Ref1.int1.get.toSeq.sorted === List(20, 21)
-    Ref2.int2.get.toSeq.sorted === List(200, 201, 210, 211)
+    Ref1.int1.get.sorted === List(20, 21)
+    Ref2.int2.get.sorted === List(200, 201, 210, 211)
   }
 
 

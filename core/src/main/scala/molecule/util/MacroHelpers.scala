@@ -4,7 +4,7 @@ import molecule.ast.model._
 
 import scala.reflect.macros.whitebox.Context
 
-trait MacroHelpers[Ctx <: Context] {
+private[molecule] trait MacroHelpers[Ctx <: Context] {
   val c: Ctx
   import c.universe._
 

@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 
 class Keys extends Base {

@@ -56,7 +56,7 @@ object MBrainzDefinition {
 //    val position   = manyLong
     val trackCount = oneLong
     val format     = oneEnum('dvdVideo, 'laserDisc, 'cd, 'hddvd, 'vhs, 'svcd, 'dcc, 'cdr, 'slotMusic, 'bluray, 'waxCylinder, 'cartridge, 'umd, 'miniDisc, 'vinyl, 'vinyl12, 'sacd, 'other, 'dualDisc, 'vinyl10, 'dvd, 'pianoRoll, 'betamax, 'vcd, 'dat, 'reel, 'vinyl7, 'dvdAudio, 'digitalMedia, 'hdcd, 'videotape, 'usbFlashDrive, 'cassette, 'cd8cm)
-    val tracks     = many[Track].subComponents
+    val tracks     = many[Track].isComponent
   }
 
   trait Release {
@@ -71,7 +71,7 @@ object MBrainzDefinition {
     val artists         = many[Artist]
     val abstractRelease = one[AbstractRelease]
 //    val language        = one[Language]
-    val media           = many[Medium].subComponents
+    val media           = many[Medium].isComponent
     val packaging       = oneEnum('jewelCase, 'slimJewelCase, 'digipak, 'none, 'keepCase, 'cardboardPaperSleeve, 'other)
 //    val script          = one[Script]
 //    val label           = one[Label]

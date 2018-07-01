@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.Imports._
+import molecule.imports._
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
@@ -258,37 +258,39 @@ class SelfJoin extends CoreSpec {
     // shouldn't be unified. Say for instance that we want to know the names
     // of 23-/25-year-olds sharing a beverage preference:
 
-    Ns.int_(23).str.Refs1.str1._Ns.Self
-      .int_(25).str.Refs1.str1_(unify).get.toSeq.sorted === List(
+    Ns.int_(23).str("h").Refs1.str1._Ns.Self
+      .int_(25).str.Refs1.str1_(unify).get.sorted === List(
       ("Joe", "Coffee", "Ben"),
       ("Liz", "Coffee", "Ben"),
       ("Liz", "Tea", "Ben")
     )
-    // Now, name (`str`) is not being unified between the two entities.
+    // Now we also fetchg the name of beverage (`str`) which is not being unified between the two entities.
 
     // Let's add the ratings too
     Ns.int_(23).str.Refs1.int1.str1._Ns.Self
-      .int_(25).str.Refs1.str1_(unify).int1.get.toSeq.sorted === List(
+      .int_(25).str.Refs1.str1_(unify).int1.get.sorted === List(
       ("Joe", 3, "Coffee", "Ben", 2),
       ("Liz", 1, "Coffee", "Ben", 2),
       ("Liz", 3, "Tea", "Ben", 3)
     )
 
-    // We can order the attributes as we like (sanity checks):
+    // We can arrange the attributes in the previous molecule in other orders too: (internal sanity checks)
     Ns.int_(23).str.Refs1.int1.str1._Ns.Self
-      .int_(25).str.Refs1.int1.str1_(unify).get.toSeq.sorted === List(
+      .int_(25).str.Refs1.int1.str1_(unify).get.sorted === List(
       ("Joe", 3, "Coffee", "Ben", 2),
       ("Liz", 1, "Coffee", "Ben", 2),
       ("Liz", 3, "Tea", "Ben", 3)
     )
+    // or
     Ns.int_(23).str.Refs1.str1.int1._Ns.Self
-      .int_(25).str.Refs1.str1_(unify).int1.get.toSeq.sorted === List(
+      .int_(25).str.Refs1.str1_(unify).int1.get.sorted === List(
       ("Joe", "Coffee", 3, "Ben", 2),
       ("Liz", "Coffee", 1, "Ben", 2),
       ("Liz", "Tea", 3, "Ben", 3)
     )
+    // or
     Ns.int_(23).str.Refs1.str1.int1._Ns.Self
-      .int_(25).str.Refs1.int1.str1_(unify).get.toSeq.sorted === List(
+      .int_(25).str.Refs1.int1.str1_(unify).get.sorted === List(
       ("Joe", "Coffee", 3, "Ben", 2),
       ("Liz", "Coffee", 1, "Ben", 2),
       ("Liz", "Tea", 3, "Ben", 3)
@@ -296,27 +298,30 @@ class SelfJoin extends CoreSpec {
 
     // Only higher rated beverages
     Ns.int_(23).str.Refs1.int1.>(1).str1._Ns.Self
-      .int_(25).str.Refs1.int1.>(1).str1_(unify).get.toSeq.sorted === List(
+      .int_(25).str.Refs1.int1.>(1).str1_(unify).get.sorted === List(
       ("Joe", 3, "Coffee", "Ben", 2),
       ("Liz", 3, "Tea", "Ben", 3)
     )
 
     // Only highest rated beverages
     Ns.int_(23).str.Refs1.int1(3).str1._Ns.Self
-      .int_(25).str.Refs1.int1(3).str1_(unify).get.toSeq.sorted === List(
+      .int_(25).str.Refs1.int1(3).str1_(unify).get.sorted === List(
       ("Liz", 3, "Tea", "Ben", 3)
     )
 
     // Common beverage of 23-year-old with weak preference and
     // 25-year-old with good preference
     Ns.int_(23).str.Refs1.int1(1).str1._Ns.Self
-      .int_(25).str.Refs1.int1(2).str1_(unify).get.toSeq.sorted === List(
+      .int_(25).str.Refs1.int1(2).str1_(unify).get.sorted === List(
       ("Liz", 1, "Coffee", "Ben", 2)
     )
 
     // Any 23- and 25-year-olds wanting to drink tea together?
     Ns.int_(23).str.Refs1.str1_("Tea")._Ns.Self
       .int_(25).str.Refs1.str1_("Tea").get === List(("Liz", "Ben"))
+
+    // todo - other?
+    Ns.int_(23 or 25).str.Refs1.str1_("Tea") === List(("Liz", "BenX"))
 
     // Any 23-year old Tea drinker and a 25-year-old Coffee drinker?
     Ns.int_(23).str.Refs1.str1_("Tea")._Ns.Self
@@ -328,6 +333,12 @@ class SelfJoin extends CoreSpec {
       ("Liz", "Joe"),
       ("Liz", "Liz")
     )
+    // todo - another example, if this gives the same result!
+    Ns.int_.<(24).str.Refs1.str1_("Tea" or "Coffee").get === List(
+      ("Liz", "Joe"),
+      ("Liz", "LizX")
+    )
+
     // Since Liz is under 24 and drinks both Tea and Coffee she
     // shows up as two persons (one drinking Tea, the other Coffee).
     // We can filter the result to only get different persons:
@@ -347,9 +358,12 @@ class SelfJoin extends CoreSpec {
 
   "Multiple explicit self-joins" in new Setup {
 
+    Ns.str_("Joe" and "Ben" and "Liz").Refs1.str1.get === List("Coffee")
+
     // Beverages liked by all 3 different people
     Ns.str_("Joe").Refs1.str1._Ns.Self
       .str_("Ben").Refs1.str1_(unify)._Ns.Self
       .str_("Liz").Refs1.str1_(unify).get === List("Coffee")
+
   }
 }

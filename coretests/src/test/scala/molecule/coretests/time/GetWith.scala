@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable.Specification
@@ -160,7 +160,7 @@ class GetWith extends Specification with Scope {
     val eid2: Long = Ns.str("b").int(2).save.eid
 
     // Current state
-    Ns.str.int.get.toSeq.sortBy(_._2) === List(
+    Ns.str.int.get.sortBy(_._2) === List(
       ("a", 1),
       ("b", 2)
     )
@@ -171,7 +171,7 @@ class GetWith extends Specification with Scope {
     )
 
     // Live state is unchanged
-    Ns.str.int.get.toSeq.sortBy(_._2) === List(
+    Ns.str.int.get.sortBy(_._2) === List(
       ("a", 1),
       ("b", 2)
     )

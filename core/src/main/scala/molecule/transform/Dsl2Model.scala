@@ -8,7 +8,7 @@ import molecule.ops.TreeOps
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
-trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
+private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
   val x = DebugMacro("Dsl2Model", 30, 30)
 
@@ -516,7 +516,7 @@ trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   }
 }
 
-object Dsl2Model {
+private[molecule] object Dsl2Model {
   def inst(c0: Context) = new {val c: c0.type = c0} with Dsl2Model[c0.type]
 
   // Main dsl-converter + post-checks of created model

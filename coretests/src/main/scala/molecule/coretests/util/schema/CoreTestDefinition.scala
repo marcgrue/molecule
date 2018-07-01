@@ -1,7 +1,7 @@
 package molecule.coretests.util.schema
 import molecule.schema.definition._
 
-@InOut(3, 22)
+@InOut(1, 3)
 object CoreTestDefinition {
 
   trait Ns {
@@ -12,7 +12,7 @@ object CoreTestDefinition {
     val double  = oneDouble
     val bool    = oneBoolean
     val bigInt  = oneBigInt
-    val bigDec  = oneBigDec
+    val bigDec  = oneBigDecimal
     val date    = oneDate
     val uuid    = oneUUID
     val uri     = oneURI
@@ -20,7 +20,7 @@ object CoreTestDefinition {
     val byte    = oneByte
     val parent  = one[Ns]
     val ref1    = one[Ref1]
-    val refSub1 = one[Ref1].subComponent
+    val refSub1 = one[Ref1].isComponent
 //    val oneNs   = oneBi[Ns]
 
     val strs     = manyString.fulltextSearch
@@ -30,7 +30,7 @@ object CoreTestDefinition {
     val doubles  = manyDouble
     val bools    = manyBoolean
     val bigInts  = manyBigInt
-    val bigDecs  = manyBigDec
+    val bigDecs  = manyBigDecimal
     val dates    = manyDate
     val uuids    = manyUUID
     val uris     = manyURI
@@ -38,7 +38,7 @@ object CoreTestDefinition {
     val bytes    = manyByte
     val parents  = many[Ns]
     val refs1    = many[Ref1]
-    val refsSub1 = many[Ref1].subComponents
+    val refsSub1 = many[Ref1].isComponent
 //    val manyNs   = manyBi[Ns]
 
     val strMap    = mapString.fulltextSearch
@@ -48,7 +48,7 @@ object CoreTestDefinition {
     val doubleMap = mapDouble
     val boolMap   = mapBoolean
     val bigIntMap = mapBigInt
-    val bigDecMap = mapBigDec
+    val bigDecMap = mapBigDecimal
     val dateMap   = mapDate
     val uuidMap   = mapUUID
     val uriMap    = mapURI
@@ -61,12 +61,12 @@ object CoreTestDefinition {
     val int1     = oneInt
     val enum1    = oneEnum('enum10, 'enum11, 'enum12)
     val ref2     = one[Ref2]
-    val refSub2  = one[Ref2].subComponent
+    val refSub2  = one[Ref2].isComponent
 
     val strs1    = manyString
     val ints1    = manyInt
     val refs2    = many[Ref2]
-    val refsSub2 = many[Ref2].subComponents
+    val refsSub2 = many[Ref2].isComponent
   }
   object Ref1 extends Ref1
 

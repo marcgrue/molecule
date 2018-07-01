@@ -1,7 +1,7 @@
 package molecule.examples.seattle
-import molecule.Imports._
+import molecule.imports._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.schema.Db
+import molecule.composition.meta._
 
 import scala.language.reflectiveCalls
 

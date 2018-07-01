@@ -1,16 +1,15 @@
 package molecule.transform
 import java.util.Date
-
 import datomic._
 import molecule.ast.model._
 import molecule.ast.transaction.{RetractEntity, _}
-import molecule.facade.{Conn, EntityFacade}
+import molecule.entity.EntityFacade
+import molecule.facade.Conn
 import molecule.util.{Debug, Helpers}
-
 import scala.collection.JavaConverters._
 
 
-case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
+private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
   private def iae(method: String, msg: String) = {

@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.self
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util.MoleculeSpec
 import molecule.coretests.bidirectionals.Setup
@@ -18,7 +18,7 @@ class OneSelf extends MoleculeSpec {
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
     // Reference is bidirectional - both point to each other
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       // Reverse reference:
       ("Lisa", "Adam")
@@ -39,7 +39,7 @@ class OneSelf extends MoleculeSpec {
     // Save Adam with bidirectional ref to existing  Lisa
     val adam = Person.name("Adam").spouse(lisa).save.eid
 
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       ("Lisa", "Adam")
     )
@@ -62,7 +62,7 @@ class OneSelf extends MoleculeSpec {
     ) eids
 
     // Bidirectional references have been inserted
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       ("John", "Nina"),
       // Reverse references:
@@ -82,7 +82,7 @@ class OneSelf extends MoleculeSpec {
     )
 
     // Bidirectional references have been inserted
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       ("John", "Nina"),
       ("Lisa", "Adam"),
@@ -100,7 +100,7 @@ class OneSelf extends MoleculeSpec {
       // Update Adam with creation of Lisa and bidirectional reference between Adam and Lisa
       Person(adam).Spouse.name("Lisa").update
 
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Lisa"),
         ("Lisa", "Adam")
       )
@@ -112,7 +112,7 @@ class OneSelf extends MoleculeSpec {
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
       // Bidirectional references created
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Lisa"),
         ("Lisa", "Adam")
       )
@@ -121,7 +121,7 @@ class OneSelf extends MoleculeSpec {
       Person(adam).Spouse.name("Nina").update
 
       // Bidirectional references to Lisa have been replaced with refs to/from Nina
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Nina"),
         ("Nina", "Adam")
       )
@@ -140,7 +140,7 @@ class OneSelf extends MoleculeSpec {
       // Update Adam with creation of bidirectional reference to existing Lisa
       Person(adam).spouse(lisa).update
 
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Lisa"),
         ("Lisa", "Adam")
       )
@@ -157,7 +157,7 @@ class OneSelf extends MoleculeSpec {
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
       // Bidirectional references created
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Lisa"),
         ("Lisa", "Adam")
       )
@@ -167,7 +167,7 @@ class OneSelf extends MoleculeSpec {
       Person(adam).spouse(nina).update
 
       // Bidirectional references to Lisa have been replaced with refs to/from Nina
-      Person.name.Spouse.name.get.toSeq.sorted === List(
+      Person.name.Spouse.name.get.sorted === List(
         ("Adam", "Nina"),
         ("Nina", "Adam")
       )
@@ -180,7 +180,7 @@ class OneSelf extends MoleculeSpec {
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
     // Bidirectional references created
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       ("Lisa", "Adam")
     )
@@ -189,7 +189,7 @@ class OneSelf extends MoleculeSpec {
     Person(adam).spouse().update
 
     // Bidirectional references retracted
-    Person.name.Spouse.name.get.toSeq.sorted === List()
+    Person.name.Spouse.name.get.sorted === List()
   }
 
 
@@ -203,7 +203,7 @@ class OneSelf extends MoleculeSpec {
     Person(adam).Spouse.name.get === List("Lisa")
     Person(lisa).Spouse.name.get === List("Adam")
 
-    Person.name.Spouse.name.get.toSeq.sorted === List(
+    Person.name.Spouse.name.get.sorted === List(
       ("Adam", "Lisa"),
       ("Lisa", "Adam")
     )
@@ -215,6 +215,6 @@ class OneSelf extends MoleculeSpec {
     Person.name.get === List("Lisa")
     Person(adam).Spouse.name.get === List()
     Person(lisa).Spouse.name.get === List()
-    Person.name.Spouse.name.get.toSeq.sorted === List()
+    Person.name.Spouse.name.get.sorted === List()
   }
 }

@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.Imports._
+import molecule.imports._
 import molecule.ast.model._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec

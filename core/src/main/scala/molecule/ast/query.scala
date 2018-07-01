@@ -1,7 +1,7 @@
 package molecule.ast
 import molecule.transform.Query2String
 
-object query {
+private[molecule] object query {
 
   trait QueryExpr
 

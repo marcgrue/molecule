@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.other
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -104,7 +104,7 @@ class ManyOther extends MoleculeSpec {
       // Save Ann with bidirectional ref to existing Gus and Leo
       Person.name("Ann").buddies(gusLeo).save.eid
 
-      animalBuddiesOf("Ann").get.toSeq.sorted === List("Gus", "Leo")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
     }
@@ -179,11 +179,11 @@ class ManyOther extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted
-      Person.name.Buddies.*(Animal.name).get.toSeq.sortBy(_._1) === List(
+      Person.name.Buddies.*(Animal.name).get.sortBy(_._1) === List(
         ("Ann", List("Gus", "Leo")),
         ("Bob", List("Rex", "Zip"))
       )
-      Animal.name.Buddies.*(Person.name).get.toSeq.sortBy(_._1) === List(
+      Animal.name.Buddies.*(Person.name).get.sortBy(_._1) === List(
         ("Gus", List("Ann")),
         ("Leo", List("Ann")),
         ("Rex", List("Bob")),
@@ -202,11 +202,11 @@ class ManyOther extends MoleculeSpec {
       )
 
       // Bidirectional references have been inserted - not how Gus got 2 (reverse) friendships
-      Person.name.Buddies.*(Animal.name).get.toSeq.sortBy(_._1) === List(
+      Person.name.Buddies.*(Animal.name).get.sortBy(_._1) === List(
         ("Ann", List("Gus", "Leo")),
         ("Bob", List("Gus", "Rex"))
       )
-      Animal.name.Buddies.*(Person.name).get.toSeq.sortBy(_._1) === List(
+      Animal.name.Buddies.*(Person.name).get.sortBy(_._1) === List(
         ("Gus", List("Ann", "Bob")),
         ("Leo", List("Ann")),
         ("Rex", List("Bob"))
@@ -234,7 +234,7 @@ class ManyOther extends MoleculeSpec {
       Person(ann).buddies.add(Seq(zip)).update
 
       // Buddieships have been added in both directions
-      animalBuddiesOf("Ann").get.toSeq.sorted === List("Gus", "Leo", "Rex", "Zip")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo", "Rex", "Zip")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List("Ann")
@@ -250,7 +250,7 @@ class ManyOther extends MoleculeSpec {
       ) eids
 
       // Buddieships have been inserted in both directions
-      animalBuddiesOf("Ann").get.toSeq.sorted === List("Gus", "Leo", "Rex", "Zip", "Zup")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo", "Rex", "Zip", "Zup")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List("Ann")

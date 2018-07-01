@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -223,7 +223,7 @@ class NestedRef extends CoreSpec {
 
 
     // Flat
-    Ns.str.Refs1.int1.Refs2.int2.get.toSeq.sortBy(r => r._3) === List(
+    Ns.str.Refs1.int1.Refs2.int2.get.sortBy(r => r._3) === List(
       ("a", 1, 11),
       ("a", 1, 12),
       ("a", 2, 21),
@@ -235,7 +235,7 @@ class NestedRef extends CoreSpec {
     )
 
     // Flat without intermediary attr `int1`
-    Ns.str.Refs1.Refs2.int2.get.toSeq.sortBy(r => r._2) === List(
+    Ns.str.Refs1.Refs2.int2.get.sortBy(r => r._2) === List(
       ("a", 11),
       ("a", 12),
       ("a", 21),

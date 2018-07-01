@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable._
@@ -35,7 +35,7 @@ class TestDbWith extends Specification {
         Ns(e1).int(0).update
 
         // Updated test state
-        Ns.int.get.toSeq.sorted === List(0, 2, 3, 4)
+        Ns.int.get.sorted === List(0, 2, 3, 4)
       }
 
       "Live db is unchanged" >> {
@@ -43,7 +43,7 @@ class TestDbWith extends Specification {
         conn.useLiveDb
 
         // Current live state is correctly unchanged
-        Ns.int.get.toSeq.sorted === List(1, 2, 3)
+        Ns.int.get.sorted === List(1, 2, 3)
       }
     }
   }
@@ -55,7 +55,7 @@ class TestDbWith extends Specification {
 
     "Current live state" >> {
       // Current live state
-      Ns.int.get.toSeq.sorted === List(1, 2, 3)
+      Ns.int.get.sorted === List(1, 2, 3)
     }
 
     "Setup test db with multiple transactions" >> {
@@ -76,7 +76,7 @@ class TestDbWith extends Specification {
       )
 
       // Adjusted test state to work on
-      Ns.int.get.toSeq.sorted === List(0, 3, 4, 5, 6)
+      Ns.int.get.sorted === List(0, 3, 4, 5, 6)
     }
 
     "Mutate test db with multiple transactions" >> {
@@ -85,19 +85,19 @@ class TestDbWith extends Specification {
       Ns(e3).int(7).update
 
       // Updated test state
-      Ns.int.get.toSeq.sorted === List(0, 4, 5, 6, 7)
+      Ns.int.get.sorted === List(0, 4, 5, 6, 7)
 
       // add 8
       Ns.int(8).save.eid
-      Ns.int.get.toSeq.sorted === List(0, 4, 5, 6, 7, 8)
+      Ns.int.get.sorted === List(0, 4, 5, 6, 7, 8)
 
       // remove entity 1 (value 0)
       Ns(e1).int().update
-      Ns.int.get.toSeq.sorted === List(4, 5, 6, 7, 8)
+      Ns.int.get.sorted === List(4, 5, 6, 7, 8)
 
       // retract entity 3 (value 7)
       e3.retract
-      Ns.int.get.toSeq.sorted === List(4, 5, 6, 8)
+      Ns.int.get.sorted === List(4, 5, 6, 8)
 
       // Etc...
     }
@@ -107,7 +107,7 @@ class TestDbWith extends Specification {
       conn.useLiveDb
 
       // Current live state is correctly unchanged
-      Ns.int.get.toSeq.sorted === List(1, 2, 3)
+      Ns.int.get.sorted === List(1, 2, 3)
     }
   }
 
@@ -118,7 +118,7 @@ class TestDbWith extends Specification {
     val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     // Current live state
-    Ns.int.get.toSeq.sorted === List(1, 2, 3)
+    Ns.int.get.sorted === List(1, 2, 3)
 
     "Setup test db with multiple modularized transactions" >> {
 
@@ -138,25 +138,25 @@ class TestDbWith extends Specification {
       )
 
       // Adjusted test state to work on
-      Ns.int.get.toSeq.sorted === List(0, 3, 4, 5, 6)
+      Ns.int.get.sorted === List(0, 3, 4, 5, 6)
     }
 
     "Use test db for multiple queries/transactions" >> {
       // 3 -> 7
       Ns(e3).int(7).update
-      Ns.int.get.toSeq.sorted === List(0, 4, 5, 6, 7)
+      Ns.int.get.sorted === List(0, 4, 5, 6, 7)
 
       // add 8
       Ns.int(8).save.eid
-      Ns.int.get.toSeq.sorted === List(0, 4, 5, 6, 7, 8)
+      Ns.int.get.sorted === List(0, 4, 5, 6, 7, 8)
 
       // remove entity 1 (value 0)
       Ns(e1).int().update
-      Ns.int.get.toSeq.sorted === List(4, 5, 6, 7, 8)
+      Ns.int.get.sorted === List(4, 5, 6, 7, 8)
 
       // retract entity 3 (value 7)
       e3.retract
-      Ns.int.get.toSeq.sorted === List(4, 5, 6, 8)
+      Ns.int.get.sorted === List(4, 5, 6, 8)
 
       // Etc...
     }
@@ -166,7 +166,7 @@ class TestDbWith extends Specification {
       conn.useLiveDb
 
       // Current live state is correctly unchanged
-      Ns.int.get.toSeq.sorted === List(1, 2, 3)
+      Ns.int.get.sorted === List(1, 2, 3)
     }
   }
 

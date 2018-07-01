@@ -13,7 +13,7 @@ object SocialNewsDefinition {
   }
 
   trait Parent {
-    val comment = one[Comment].subComponent
+    val comment = one[Comment].isComponent
   }
 
   trait Comment {

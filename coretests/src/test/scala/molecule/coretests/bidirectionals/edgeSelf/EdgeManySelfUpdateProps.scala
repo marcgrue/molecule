@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.Imports._
+import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.util._
@@ -72,14 +72,14 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       // Instead update the edge entity itself:
 
       // Current weight value
-      Person.name("Ann" or "Ben").Knows.weight.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.weight.get.sortBy(_._1) === List(
         ("Ann", 7),
         ("Ben", 7)
       )
 
       // Apply new value
       Knows(annBen).weight(2).update
-      Person.name("Ann" or "Ben").Knows.weight.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.weight.get.sortBy(_._1) === List(
         ("Ann", 2),
         ("Ben", 2)
       )
@@ -93,14 +93,14 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
     "enum" in new setup {
 
       // Current howWeMet enum value
-      Person.name("Ann" or "Ben").Knows.howWeMet.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.howWeMet.get.sortBy(_._1) === List(
         ("Ann", "atWork"),
         ("Ben", "atWork")
       )
 
       // Apply new enum value
       Knows(annBen).howWeMet("throughFriend").update
-      Person.name("Ann" or "Ben").Knows.howWeMet.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.howWeMet.get.sortBy(_._1) === List(
         ("Ann", "throughFriend"),
         ("Ben", "throughFriend")
       )
@@ -114,7 +114,7 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
     "ref" in new setup {
 
       // Current value
-      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.sortBy(_._1) === List(
         ("Ann", "Love"),
         ("Ben", "Love")
       )
@@ -131,7 +131,7 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       Quality(love).name("Compassion").update
 
       // Same reference, new value
-      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.sortBy(_._1) === List(
         ("Ann", "Compassion"),
         ("Ben", "Compassion")
       )
@@ -143,7 +143,7 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       Knows(annBen).coreQuality(trust).update
 
       // New reference/value
-      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.toSeq.sortBy(_._1) === List(
+      Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.sortBy(_._1) === List(
         ("Ann", "Trust"),
         ("Ben", "Trust")
       )
@@ -162,35 +162,35 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       val commonInterestsOf = m(Person.name(?).Knows.commonInterests)
 
       // Current values
-      commonInterestsOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Food", "Walking", "Travelling")),
         ("Ben", Set("Food", "Walking", "Travelling"))
       )
 
       // Replace
       Knows(annBen).commonInterests.replace("Food" -> "Cuisine").update
-      commonInterestsOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking", "Travelling")),
         ("Ben", Set("Cuisine", "Walking", "Travelling"))
       )
 
       // Remove
       Knows(annBen).commonInterests.remove("Travelling").update
-      commonInterestsOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking")),
         ("Ben", Set("Cuisine", "Walking"))
       )
 
       // Add
       Knows(annBen).commonInterests.add("Meditating").update
-      commonInterestsOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking", "Meditating")),
         ("Ben", Set("Cuisine", "Walking", "Meditating"))
       )
 
       // Apply new values
       Knows(annBen).commonInterests("Running", "Cycling").update
-      commonInterestsOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Running", "Cycling")),
         ("Ben", Set("Running", "Cycling"))
       )
@@ -206,35 +206,35 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       val commonLicencesOf = m(Person.name(?).Knows.commonLicences)
 
       // Current enum values
-      commonLicencesOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "flying")),
         ("Ben", Set("climbing", "flying"))
       )
 
       // Replace
       Knows(annBen).commonLicences.replace("flying" -> "diving").update
-      commonLicencesOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "diving")),
         ("Ben", Set("climbing", "diving"))
       )
 
       // Remove
       Knows(annBen).commonLicences.remove("climbing").update
-      commonLicencesOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving")),
         ("Ben", Set("diving"))
       )
 
       // Add
       Knows(annBen).commonLicences.add("parachuting").update
-      commonLicencesOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving", "parachuting")),
         ("Ben", Set("diving", "parachuting"))
       )
 
       // Apply new values
       Knows(annBen).commonLicences("climbing", "flying").update
-      commonLicencesOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("climbing", "flying")),
         ("Ben", Set("climbing", "flying"))
       )
@@ -250,7 +250,7 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       val inCommonOf = m(Person.name(?).Knows.InCommon.*(Quality.name))
 
       // Current value
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Patience", "Humor")),
         ("Ben", List("Patience", "Humor"))
       )
@@ -263,7 +263,7 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
       Quality(humor).name("Funny").update
 
       // Same references, new value(s)
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Funny")),
         ("Ben", List("Waiting ability", "Funny"))
       )
@@ -275,28 +275,28 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
 
       // replace
       Knows(annBen).inCommon.replace(humor -> sporty).update
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Sporty")),
         ("Ben", List("Waiting ability", "Sporty"))
       )
 
       // remove
       Knows(annBen).inCommon.remove(patience).update
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Sporty")),
         ("Ben", List("Sporty"))
       )
 
       // add
       Knows(annBen).inCommon.add(patience).update
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Sporty")),
         ("Ben", List("Waiting ability", "Sporty"))
       )
 
       // Apply new values
       Knows(annBen).inCommon(sporty, humor).update
-      inCommonOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Funny", "Sporty")),
         ("Ben", List("Funny", "Sporty"))
       )
@@ -313,35 +313,35 @@ class EdgeManySelfUpdateProps extends MoleculeSpec {
     val commonScoresOf = m(Person.name(?).Knows.commonScores)
 
     // Current values
-    commonScoresOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 9, "golf" -> 7)),
       ("Ben", Map("baseball" -> 9, "golf" -> 7))
     )
 
     // Replace values by key
     Knows(annBen).commonScores.replace("baseball" -> 8, "golf" -> 6).update
-    commonScoresOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8, "golf" -> 6)),
       ("Ben", Map("baseball" -> 8, "golf" -> 6))
     )
 
     // Remove by key
     Knows(annBen).commonScores.remove("golf").update
-    commonScoresOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8)),
       ("Ben", Map("baseball" -> 8))
     )
 
     // Add
     Knows(annBen).commonScores.add("parachuting" -> 4).update
-    commonScoresOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8, "parachuting" -> 4)),
       ("Ben", Map("baseball" -> 8, "parachuting" -> 4))
     )
 
     // Apply new values (replacing all current values!)
     Knows(annBen).commonScores("volleball" -> 4, "handball" -> 5).update
-    commonScoresOf("Ann" or "Ben").get.toSeq.sortBy(_._1) === List(
+    commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("volleball" -> 4, "handball" -> 5)),
       ("Ben", Map("volleball" -> 4, "handball" -> 5))
     )

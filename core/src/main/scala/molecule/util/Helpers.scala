@@ -3,9 +3,9 @@ import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZoneId}
 import java.util.Date
 
-trait Helpers {
+private[molecule] trait Helpers {
 
-  object mkDate {
+  protected object mkDate {
     def apply(year: Int, month: Int = 1, day: Int = 1): Date = {
       val localDate = LocalDate.of(year, month, day)
       val instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant
@@ -15,29 +15,29 @@ trait Helpers {
 
   // Todo: need advice on handling time zones!
 
-  def format(date: Date): String = {
+  protected def format(date: Date): String = {
     val f = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
     //    f.setTimeZone(TimeZone.getTimeZone("UTC"))
     f.format(date)
   }
 
-  def format2(date: Date): String = {
+  protected def format2(date: Date): String = {
     val f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     //    f.setTimeZone(TimeZone.getTimeZone("UTC"))
     f.format(date)
   }
 
-  def f(a: Any) = a match {
+  protected def f(a: Any) = a match {
     case date: Date => format2(date).replace("+", "\\\\+")
     case other      => other
   }
-  def f2(a: Any) = a match {
+  protected def f2(a: Any) = a match {
     case date: Date => format2(date)
     case other      => other
   }
 
 
-  def tupleToSeq(arg: Any) = arg match {
+  protected def tupleToSeq(arg: Any) = arg match {
     case t: (_, _)                                                             => Seq(t._1, t._2)
     case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
     case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)

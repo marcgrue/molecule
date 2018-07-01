@@ -12,7 +12,7 @@ import molecule.ast.query._
 import scala.collection.JavaConverters._
 
 
-case class NestedJson(modelE: Model, queryE: Query) {
+private[molecule] case class NestedJson(modelE: Model, queryE: Query) {
 
   val jsEscapeChars: Set[Char] =
     List(('\u00ad', '\u00ad'),

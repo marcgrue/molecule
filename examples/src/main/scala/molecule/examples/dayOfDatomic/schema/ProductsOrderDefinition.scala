@@ -8,8 +8,8 @@ object ProductsOrderDefinition {
 
   trait Order {
     val orderid   = oneInt
-    val lineItems = many[LineItem].subComponents
-    val lineItem  = one[LineItem].subComponent
+    val lineItems = many[LineItem].isComponent
+    val lineItem  = one[LineItem].isComponent
   }
 
 
@@ -18,7 +18,7 @@ object ProductsOrderDefinition {
     val price    = oneDouble
     val quantity = oneInt
     val text     = oneString
-    val comments = many[Comment].subComponents
+    val comments = many[Comment].isComponent
   }
 
   trait Product {
@@ -30,7 +30,7 @@ object ProductsOrderDefinition {
   trait Comment {
     val text    = oneString
     val descr   = oneString
-    val authors = many[Person].subComponents
+    val authors = many[Person].isComponent
   }
 
   trait Person {

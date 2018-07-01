@@ -1,13 +1,13 @@
 package molecule.factory
-import molecule.api._
+import molecule.action.MoleculeOut._
 import molecule.boilerplate._
-
+import molecule.composition.composite.Composite._
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox.Context
 
 
-trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
+private[molecule] trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
   import c.universe._
 
 
@@ -15,7 +15,7 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
     expr(
       q"""
       ..${basics(dsl)._2}
-      new molecule.api.Molecule0(r.model, r.query) with Util
+      new Molecule0(r.model, r.query) with Util
     """)
   }
 
@@ -32,14 +32,14 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
               val _modelE = r.modelE
               val _queryE = r.queryE
 
-              private def nestedTuples(conn: Conn, n: Int) = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE, n)", OutTypes)}
-              def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, -1) // All
-              def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = nestedTuples(conn, n)
+              override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = ${nestedTuples(q"_queryE", q"conn.query(_modelE, _queryE).asScala", OutTypes)}
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
               import molecule.factory.NestedJson
-              private def json(conn: Conn, n: Int): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE, n))
-              def getJson        (implicit conn: Conn): String = json(conn, -1) // All
-              def getJson(n: Int)(implicit conn: Conn): String = json(conn, n)
+              override def getJson        (implicit conn: Conn): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE).asScala)
+              override def getJson(n: Int)(implicit conn: Conn): String = NestedJson(_modelE, _queryE).nestedJson(conn.query(_modelE, _queryE).asScala.take(n))
+
+              override def getD(implicit conn: Conn) = getD_(conn)
             }
           """
         )
@@ -49,13 +49,26 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
         q"""
           ..$basicsTree
           new $MoleculeTpe[..$OutTypes](r.model, r.query) with Util {
-            private def getTuple(row: jList[AnyRef]) = (..${tuple(q"_query", q"row", OutTypes)})
-            def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query   ).map(row => getTuple(row))
-            def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query, n).map(row => getTuple(row))
-            
-            private def json(conn: Conn, n: Int): String = ${json(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-            def getJson        (implicit conn: Conn): String = json(conn, -1) // All
-            def getJson(n: Int)(implicit conn: Conn): String = json(conn, n)
+
+            override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = new Iterable[(..$OutTypes)] {
+              private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+              override def isEmpty = jColl.isEmpty
+              override def size = jColl.size
+              override def iterator = new Iterator[(..$OutTypes)] {
+                private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                override def hasNext = jIter.hasNext
+                override def next() = {
+                  val row = jIter.next()
+                  (..${tuple(q"_query", q"row", OutTypes)})
+                }
+              }
+            }
+            override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+
+            override def getJson        (implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+            override def getJson(n: Int)(implicit conn: Conn): String = ${json(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
+
+            override def getD(implicit conn: Conn) = getD_(conn)
           }
         """
       )
@@ -68,90 +81,103 @@ trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
       q"""
         ..${basics(dsl)._2}
         new $MoleculeTpe[..$OutTypes](r.model, r.query) with Util {
-          private def compositeTuple(row: jList[AnyRef]) = (..${compositeTuple(q"_query", q"row", OutTypes)})
-          def get        (implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query   ).map(row => compositeTuple(row))
-          def get(n: Int)(implicit conn: Conn): Iterable[(..$OutTypes)] = conn.query(_model, _query, n).map(row => compositeTuple(row))
 
-          private def compositeJson(conn: Conn, n: Int) = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query, n)", OutTypes)}
-          def getJson        (implicit conn: Conn): String = compositeJson(conn, -1) // All
-          def getJson(n: Int)(implicit conn: Conn): String = compositeJson(conn, n)
+          override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = new Iterable[(..$OutTypes)] {
+            private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+            override def isEmpty = jColl.isEmpty
+            override def size = jColl.size
+            override def iterator = new Iterator[(..$OutTypes)] {
+              private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+              override def hasNext = jIter.hasNext
+              override def next() = {
+                val row = jIter.next()
+                (..${compositeTuple(q"_query", q"row", OutTypes)})
+              }
+            }
+          }
+          override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+
+          override def getJson        (implicit conn: Conn): String = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+          override def getJson(n: Int)(implicit conn: Conn): String = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
+
+          override def getD(implicit conn: Conn) = getD_(conn)
         }
       """
     )
   }
 }
 
-object MakeMolecule {
+private[molecule] object MakeMolecule {
 
   def build(c0: Context) = new {val c: c0.type = c0} with MakeMolecule[c0.type]
 
 
   def from0attr[Ns0: c.WeakTypeTag, Ns1[_], In1_0[_], In1_1[_, _]]
   (c: Context)(dsl: c.Expr[Out_0[Ns0, Ns1, In1_0, In1_1]])
-  : c.Expr[Molecule0] =
+  : c.Expr[Molecule00] =
     build(c).from0attr(dsl)
 
 
   def from1attr[Ns1[_], Ns2[_, _], In1_1[_, _], In1_2[_, _, _],
   A: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_1[Ns1, Ns2, In1_1, In1_2, A]])
-  : c.Expr[Molecule1[A]] =
+  : c.Expr[Molecule01[A]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A])
 
 
   def from2attr[Ns2[_, _], Ns3[_, _, _], In1_2[_, _, _], In1_3[_, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_2[Ns2, Ns3, In1_2, In1_3, A, B]])
-  : c.Expr[Molecule2[A, B]] =
+  : c.Expr[Molecule02[A, B]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B])
 
 
   def from3attr[Ns3[_, _, _], Ns4[_, _, _, _], In1_3[_, _, _, _], In1_4[_, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_3[Ns3, Ns4, In1_3, In1_4, A, B, C]])
-  : c.Expr[Molecule3[A, B, C]] =
+  : c.Expr[Molecule03[A, B, C]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C])
 
 
   def from4attr[Ns4[_, _, _, _], Ns5[_, _, _, _, _], In1_4[_, _, _, _, _], In1_5[_, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_4[Ns4, Ns5, In1_4, In1_5, A, B, C, D]])
-  : c.Expr[Molecule4[A, B, C, D]] =
+  : c.Expr[Molecule04[A, B, C, D]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D])
 
 
   def from5attr[Ns5[_, _, _, _, _], Ns6[_, _, _, _, _, _], In1_5[_, _, _, _, _, _], In1_6[_, _, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_5[Ns5, Ns6, In1_5, In1_6, A, B, C, D, E]])
-  : c.Expr[Molecule5[A, B, C, D, E]] =
+  : c.Expr[Molecule05[A, B, C, D, E]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E])
 
 
   def from6attr[Ns6[_, _, _, _, _, _], Ns7[_, _, _, _, _, _, _], In1_6[_, _, _, _, _, _, _], In1_7[_, _, _, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_6[Ns6, Ns7, In1_6, In1_7, A, B, C, D, E, F]])
-  : c.Expr[Molecule6[A, B, C, D, E, F]] =
+  : c.Expr[Molecule06[A, B, C, D, E, F]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F])
 
 
   def from7attr[Ns7[_, _, _, _, _, _, _], Ns8[_, _, _, _, _, _, _, _], In1_7[_, _, _, _, _, _, _, _], In1_8[_, _, _, _, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_7[Ns7, Ns8, In1_7, In1_8, A, B, C, D, E, F, G]])
-  : c.Expr[Molecule7[A, B, C, D, E, F, G]] =
+  : c.Expr[Molecule07[A, B, C, D, E, F, G]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G])
 
 
   def from8attr[Ns8[_, _, _, _, _, _, _, _], Ns9[_, _, _, _, _, _, _, _, _], In1_8[_, _, _, _, _, _, _, _, _], In1_9[_, _, _, _, _, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_8[Ns8, Ns9, In1_8, In1_9, A, B, C, D, E, F, G, H]])
-  : c.Expr[Molecule8[A, B, C, D, E, F, G, H]] =
+  : c.Expr[Molecule08[A, B, C, D, E, F, G, H]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H])
 
 
   def from9attr[Ns9[_, _, _, _, _, _, _, _, _], Ns10[_, _, _, _, _, _, _, _, _, _], In1_9[_, _, _, _, _, _, _, _, _, _], In1_10[_, _, _, _, _, _, _, _, _, _, _],
   A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag, D: c.WeakTypeTag, E: c.WeakTypeTag, F: c.WeakTypeTag, G: c.WeakTypeTag, H: c.WeakTypeTag, I: c.WeakTypeTag]
   (c: Context)(dsl: c.Expr[Out_9[Ns9, Ns10, In1_9, In1_10, A, B, C, D, E, F, G, H, I]])
-  : c.Expr[Molecule9[A, B, C, D, E, F, G, H, I]] =
+  : c.Expr[Molecule09[A, B, C, D, E, F, G, H, I]] =
     build(c).fromXattrs(dsl, c.weakTypeOf[A], c.weakTypeOf[B], c.weakTypeOf[C], c.weakTypeOf[D], c.weakTypeOf[E], c.weakTypeOf[F], c.weakTypeOf[G], c.weakTypeOf[H], c.weakTypeOf[I])
 
 
@@ -248,47 +274,48 @@ object MakeMolecule {
   // Composites ....................................................
 
   def from1tuple[T1: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite1[T1]])
-  : c.Expr[Molecule1[T1]] =
+  (c: Context)(dsl: c.Expr[Composite01[T1]])
+  : c.Expr[Molecule01[T1]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1])
 
   def from2tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite2[T1, T2]])
-  : c.Expr[Molecule2[T1, T2]] =
+  (c: Context)(dsl: c.Expr[Composite02[T1, T2]])
+  : c.Expr[Molecule02[T1, T2]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2])
 
   def from3tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite3[T1, T2, T3]])
-  : c.Expr[Molecule3[T1, T2, T3]] =
+  (c: Context)(dsl: c.Expr[Composite03[T1, T2, T3]])
+  : c.Expr[Molecule03[T1, T2, T3]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3])
 
   def from4tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite4[T1, T2, T3, T4]]): c.Expr[Molecule4[T1, T2, T3, T4]] =
+  (c: Context)(dsl: c.Expr[Composite04[T1, T2, T3, T4]])
+  : c.Expr[Molecule04[T1, T2, T3, T4]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4])
 
   def from5tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite5[T1, T2, T3, T4, T5]])
-  : c.Expr[Molecule5[T1, T2, T3, T4, T5]] =
+  (c: Context)(dsl: c.Expr[Composite05[T1, T2, T3, T4, T5]])
+  : c.Expr[Molecule05[T1, T2, T3, T4, T5]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4], c.weakTypeOf[T5])
 
   def from6tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag, T6: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite6[T1, T2, T3, T4, T5, T6]])
-  : c.Expr[Molecule6[T1, T2, T3, T4, T5, T6]] =
+  (c: Context)(dsl: c.Expr[Composite06[T1, T2, T3, T4, T5, T6]])
+  : c.Expr[Molecule06[T1, T2, T3, T4, T5, T6]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4], c.weakTypeOf[T5], c.weakTypeOf[T6])
 
   def from7tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag, T6: c.WeakTypeTag, T7: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite7[T1, T2, T3, T4, T5, T6, T7]])
-  : c.Expr[Molecule7[T1, T2, T3, T4, T5, T6, T7]] =
+  (c: Context)(dsl: c.Expr[Composite07[T1, T2, T3, T4, T5, T6, T7]])
+  : c.Expr[Molecule07[T1, T2, T3, T4, T5, T6, T7]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4], c.weakTypeOf[T5], c.weakTypeOf[T6], c.weakTypeOf[T7])
 
   def from8tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag, T6: c.WeakTypeTag, T7: c.WeakTypeTag, T8: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite8[T1, T2, T3, T4, T5, T6, T7, T8]])
-  : c.Expr[Molecule8[T1, T2, T3, T4, T5, T6, T7, T8]] =
+  (c: Context)(dsl: c.Expr[Composite08[T1, T2, T3, T4, T5, T6, T7, T8]])
+  : c.Expr[Molecule08[T1, T2, T3, T4, T5, T6, T7, T8]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4], c.weakTypeOf[T5], c.weakTypeOf[T6], c.weakTypeOf[T7], c.weakTypeOf[T8])
 
   def from9tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag, T6: c.WeakTypeTag, T7: c.WeakTypeTag, T8: c.WeakTypeTag, T9: c.WeakTypeTag]
-  (c: Context)(dsl: c.Expr[Composite9[T1, T2, T3, T4, T5, T6, T7, T8, T9]])
-  : c.Expr[Molecule9[T1, T2, T3, T4, T5, T6, T7, T8, T9]] =
+  (c: Context)(dsl: c.Expr[Composite09[T1, T2, T3, T4, T5, T6, T7, T8, T9]])
+  : c.Expr[Molecule09[T1, T2, T3, T4, T5, T6, T7, T8, T9]] =
     build(c).fromXtuples(dsl, c.weakTypeOf[T1], c.weakTypeOf[T2], c.weakTypeOf[T3], c.weakTypeOf[T4], c.weakTypeOf[T5], c.weakTypeOf[T6], c.weakTypeOf[T7], c.weakTypeOf[T8], c.weakTypeOf[T9])
 
   def from10tuples[T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, T5: c.WeakTypeTag, T6: c.WeakTypeTag, T7: c.WeakTypeTag, T8: c.WeakTypeTag, T9: c.WeakTypeTag, T10: c.WeakTypeTag]

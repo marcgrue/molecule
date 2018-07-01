@@ -105,14 +105,14 @@ object definition {
   trait mapBigInt extends number[mapBigInt, BigInt]
 
   // BigDecimal
-  object oneBigDec extends oneBigDec
-  trait oneBigDec extends number[oneBigDec, BigDecimal]
+  object oneBigDecimal extends oneBigDecimal
+  trait oneBigDecimal extends number[oneBigDecimal, BigDecimal]
 
-  object manyBigDec extends manyBigDec
-  trait manyBigDec extends number[manyBigDec, BigDecimal]
+  object manyBigDecimal extends manyBigDecimal
+  trait manyBigDecimal extends number[manyBigDecimal, BigDecimal]
 
-  object mapBigDec extends mapBigDec
-  trait mapBigDec extends number[mapBigDec, BigDecimal]
+  object mapBigDecimal extends mapBigDecimal
+  trait mapBigDecimal extends number[mapBigDecimal, BigDecimal]
 
   // Date
   object oneDate extends oneDate
@@ -167,12 +167,12 @@ object definition {
 
   object one {
     def apply[Ns] = this
-    lazy val subComponent = this
+    lazy val isComponent = this
     def doc(s: String) = ??? // can only be last
   }
   object many {
     def apply[Ns] = this
-    lazy val subComponents = this
+    lazy val isComponent = this
     def doc(s: String) = ???
   }
 
