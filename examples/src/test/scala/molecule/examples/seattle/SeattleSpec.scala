@@ -36,13 +36,17 @@ trait SeattleSpec extends MoleculeSpec {
   class SeattleSetup extends Scope {
     implicit val conn = recreateDbFrom(SeattleSchema)
     // Insert data
-    //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
+//    Community.name.url.Neighborhood.name.getD
+
+//        Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
   def loadSeattle(version: Int): Conn = {
     implicit val conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
+
     // Insert data
+//    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insertD seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
 
     conn
@@ -53,8 +57,8 @@ trait SeattleSpec extends MoleculeSpec {
 
   lazy val seattleData0 = List(
     ("15th Ave Community", "http://groups.yahoo.com/group/15thAve_Community/", "email_list", Some("community"), Some(Set("15th avenue residents", "xx")), "Capitol Hill", "East", Some("e")),
-    ("BikeWorks!", "http://www.bikeworks.org/", "website", None, None, "Columbia City", "Southeast", Some("se")),
-    ("belltown", "http://www.belltownpeople.com/", "blog", Some("commercial"), Some(Set("news", "events")), "Belltown", "Downtown", Some("w"))
+//    ("BikeWorks!", "http://www.bikeworks.org/", "website", None, None, "Columbia City", "Southeast", Some("se")),
+//    ("belltown", "http://www.belltownpeople.com/", "blog", Some("commercial"), Some(Set("news", "events")), "Belltown", "Downtown", Some("w"))
   )
 
   lazy val seattleData = List(

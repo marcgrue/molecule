@@ -1,7 +1,8 @@
 package molecule.coretests.util.schema
 import molecule.schema.definition._
 
-@InOut(1, 3)
+//@InOut(3, 15)
+@InOut(2, 15)
 object CoreTestDefinition {
 
   trait Ns {

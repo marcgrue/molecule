@@ -1,8 +1,7 @@
 package molecule.examples.seattle.schema
 import molecule.schema.definition._
 
-@InOut(3, 8)
-//@InOut(1, 3)
+@InOut(2, 8)
 object SeattleDefinition {
 
   trait Community {

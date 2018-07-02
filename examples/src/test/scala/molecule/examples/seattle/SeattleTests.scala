@@ -400,10 +400,10 @@ class SeattleTests extends SeattleSpec {
 
     // We can also insert data in two steps:
 
-    // 1. Define an "InsertMolecule" (can be re-used!)
+    // 1. Define an "insert-molecule" (can be re-used!)
     val insertCommunity = Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region insert
 
-    // 2. Apply data to the InsertMolecule
+    // 2. Apply data to the insert-molecule
     insertCommunity("BBB", "url B", "twitter", "personal", Set("some", "cat B"), "neighborhood B", "district B", "s").eids === List(
       17592186045894L, 17592186045895L, 17592186045896L)
 
@@ -411,7 +411,6 @@ class SeattleTests extends SeattleSpec {
     // Add multiple molecules..........................
 
     // Data as list of tuples
-    Community.name.insert.apply("Com A", "A.com").eids === Seq(17592186045898L, 17592186045899L)
     Community.name.url.insert(Seq(("Com A", "A.com"), ("Com B", "B.com"))).eids === Seq(17592186045898L, 17592186045899L)
 
     // Confirm that new entities have been inserted

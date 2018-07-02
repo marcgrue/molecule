@@ -1,3 +1,5 @@
+package sbtmolecule
+
 import java.io.File
 import scala.io.Source
 import sbt._
@@ -14,7 +16,18 @@ object MoleculeBoilerplate {
     }
   }
 
-  case class Namespace(part: String, partDescr: Option[String], ns: String, nsDescr: Option[String], opt: Option[Extension] = None, attrs: Seq[DefAttr] = Seq())
+  case class Namespace(part: String, partDescr: Option[String], ns: String, nsDescr: Option[String], opt: Option[Extension] = None, attrs: Seq[DefAttr] = Seq()) {
+    override def toString =
+      s"""Namespace(
+         |   part     : $part
+         |   partDescr: $partDescr
+         |   ns       : $ns
+         |   nsDescr  : $nsDescr
+         |   opt      : $opt
+         |   attrs    :
+         |     ${attrs.mkString("\n     ")}
+         |)""".stripMargin
+  }
 
   sealed trait Extension
   case object Edge extends Extension
@@ -28,6 +41,8 @@ object MoleculeBoilerplate {
     val options  : Seq[Optional]
     val attrGroup: Option[String]
   }
+
+
   case class Val(attr: String, attrClean: String, clazz: String, tpe: String, baseTpe: String, datomicTpe: String,
                  options: Seq[Optional] = Seq(), bi: Option[String] = None, revRef: String = "", attrGroup: Option[String] = None) extends DefAttr
 
@@ -288,7 +303,6 @@ object MoleculeBoilerplate {
     }
 
     def parseBiEdgeRefTypeArg(card: String, refStr: String, baseAttr: String, basePart: String = "", baseFullNs: String = "") = {
-      //            println(s"basePart baseFullNs baseAttr: $basePart      $baseFullNs      $baseAttr")
 
       refStr match {
 
@@ -678,7 +692,19 @@ object MoleculeBoilerplate {
       classes
   }
 
-  def nsTrait(domain0: String, namesp: Namespace, in: Int, out: Int, maxIn: Int, maxOut: Int, nsArities: Map[String, Int]) = {
+  def getCrossAttrs(d: Definition) = {
+    (for {
+      ns <- d.nss
+      attr <- ns.attrs
+    } yield attr).collect {
+      case Ref(_, _, _, _, _, _, edgeNs, _, Some("BiEdgeRef_"), revRef, _)  => s"$edgeNs $revRef"
+      case Ref(_, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef, _) => s"$refNs $revRef"
+      case Ref(_, _, _, _, _, _, refNs, _, Some("BiOtherRef_"), revRef, _)  => s"$refNs $revRef"
+    }.distinct.sorted
+  }
+
+
+  def nsTrait(domain0: String, namesp: Namespace, in: Int, out: Int, maxIn: Int, maxOut: Int, nsArities: Map[String, Int], crossAttrs: Seq[String]) = {
     val (domain, ns, option, attrs) = (firstLow(domain0), namesp.ns, namesp.opt, namesp.attrs)
 
     val InTypes = (0 until in) map (n => "I" + (n + 1))
@@ -691,6 +717,7 @@ object MoleculeBoilerplate {
       val lengths = attrs.filter(!_.clazz.contains("Ref")).map(_.attr.length)
       if (lengths.isEmpty) 0 else lengths.max
     }
+    val maxClazz = attrs.map(_.clazz.length).max
 
     val (maxAttrK, maxClazzK, maxTpeK) = {
       val (attrKs, clazzKs, tpeKs) = attrs.map {
@@ -704,6 +731,29 @@ object MoleculeBoilerplate {
       )
     }
 
+    def exts(a: DefAttr, Ns: String, In: String) = {
+      def resolveFS(opts: Seq[String]) = opts.map {
+        case "FulltextSearch[Ns, In]" => s"FulltextSearch[$Ns, $In]"
+        case other                    => other
+      }
+      val extensions0 = a match {
+        case Val(_, _, _, tpe, _, _, opts, bi, _, _) if tpe.take(3) == "Map" => resolveFS(indexedFirst(opts)) ++ bi.toList
+        case Val(_, _, _, _, baseTpe, _, opts, bi, _, _) if baseTpe == "K"   => resolveFS(indexedFirst(opts)) ++ bi.toList :+ "MapAttrK"
+        case Val(_, _, _, _, _, _, opts, bi, _, _)                           => resolveFS(indexedFirst(opts)) ++ bi.toList
+        case Enum(_, attrClean, _, _, _, _, opts, bi, _, _)                  => indexedFirst(opts) ++ bi.toList :+ s"${attrClean}__enums__"
+        case Ref(_, _, _, _, _, _, refNs, opts, bi, revRef, _)               => indexedFirst(opts) ++ (bi match {
+          case Some("BiSelfRef_")     => Seq(s"BiSelfRefAttr_")
+          case Some("BiOtherRef_")    => Seq(s"BiOtherRefAttr_[$domain.$refNs.$revRef]")
+          case Some("BiEdgeRef_")     => Seq(s"BiEdgeRefAttr_[$domain.$refNs.$revRef]")
+          case Some("BiEdgePropAttr") => Seq(s"BiEdgePropAttr_")
+          case Some("BiEdgePropRef_") => Seq(s"BiEdgePropRefAttr_")
+          case Some("BiTargetRef_")   => Seq(s"BiTargetRefAttr_[$domain.$refNs.$revRef]")
+          case other                  => Nil
+        })
+      }
+      if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
+    }
+
     val (attrVals0, attrVals0_, attrValsK0, attrValsK0_) = attrs.flatMap {
       case BackRef(_, _, _, _, _, _, _, _, _) => None
       case a                                  => {
@@ -711,61 +761,64 @@ object MoleculeBoilerplate {
         val p1 = padS(maxAttr, attr)
         val p2 = padS(maxAttr, attrClean)
         val p3 = padS(maxTpe, tpe)
-        val p4 = padS(maxAttr4, attr)
+        //        val p4 = padS(maxAttr4, attr)
         val p5 = padS(maxAttrK, attr)
-        val p6 = padS(maxClazzK, clazz)
+        //        val p6 = padS(maxClazzK, clazz)
         val p7 = padS(maxTpeK, tpe)
+        val p8 = padS(maxClazz, clazz)
 
-        val bi = a match {
-          case Val(_, _, _, _, _, _, _, bi, _, _)  => bi.toList
-          case Enum(_, _, _, _, _, _, _, bi, _, _) => bi.toList
-          case _                                   => Nil
-        }
 
-        val (nextNS, nextNSK, thisNS) = (in, out) match {
+        val (nextNS, nextNSK, nextNSShort, thisNS) = (in, out) match {
           case (0, 0) => (
             s"${ns}_1[$tpe$p3]",
             s"${ns}_1[$tpe$p7]",
+            s"${ns}_1[$tpe]",
             s"${ns}_0")
 
           case (0, o) => (
             s"${ns}_${o + 1}[${(OutTypes :+ tpe) mkString ", "}$p3]",
             s"${ns}_${o + 1}[${(OutTypes :+ tpe) mkString ", "}$p7]",
+            s"${ns}_${o + 1}[${(OutTypes :+ tpe) mkString ", "}]",
             s"${ns}_$o[${OutTypes mkString ", "}]")
 
           case (i, o) => (
             s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ tpe) mkString ", "}$p3]",
             s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ tpe) mkString ", "}$p7]",
+            s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ tpe) mkString ", "}]",
             s"${ns}_In_${i}_$o[${(InTypes ++ OutTypes) mkString ", "}]")
         }
 
-        val (nextIn, nextInK, thisIn) = if (maxIn == 0 || in == maxIn) {
+        val (nextIn, nextInK, nextInShort, thisIn) = if (maxIn == 0 || in == maxIn) {
           val (n1, n2) = (out + in + 1, out + in + 2)
           val (t1, t2) = ((1 to n1).map(i => "_").mkString(","), (1 to n2).map(i => "_").mkString(","))
-          (s"P$n2[$t2]", s"P$n2[$t2]", s"P$n1[$t1]")
+          (s"P$n2[$t2]", s"P$n2[$t2]", s"P$n2[$t2]", s"P$n1[$t1]")
         } else (in, out) match {
           case (0, 0) => (
             s"${ns}_In_1_1[$tpe$p3, $tpe$p3]",
             s"${ns}_In_1_1[$tpe$p7, $tpe$p7]",
+            s"${ns}_In_1_1[$tpe, $tpe]",
             s"${ns}_In_1_0[$tpe$p3]")
 
           case (0, o) => (
             s"${ns}_In_1_${o + 1}[$tpe$p3, ${(OutTypes :+ tpe) mkString ", "}$p3]",
             s"${ns}_In_1_${o + 1}[$tpe$p7, ${(OutTypes :+ tpe) mkString ", "}$p7]",
+            s"${ns}_In_1_${o + 1}[$tpe, ${(OutTypes :+ tpe) mkString ", "}]",
             s"${ns}_In_1_$o[$tpe$p3, ${OutTypes mkString ", "}]")
 
           case (i, 0) => (
             s"${ns}_In_${i + 1}_1[${(InTypes :+ tpe) mkString ", "}$p3, $tpe$p3]",
             s"${ns}_In_${i + 1}_1[${(InTypes :+ tpe) mkString ", "}$p7, $tpe$p7]",
+            s"${ns}_In_${i + 1}_1[${(InTypes :+ tpe) mkString ", "}, $tpe]",
             s"${ns}_In_${i + 1}_0[${(InTypes :+ tpe) mkString ", "}$p3]")
 
           case (i, o) => (
             s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ tpe) mkString ", "}$p3, ${(OutTypes :+ tpe) mkString ", "}$p3]",
             s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ tpe) mkString ", "}$p7, ${(OutTypes :+ tpe) mkString ", "}$p7]",
+            s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ tpe) mkString ", "}, ${(OutTypes :+ tpe) mkString ", "}]",
             s"${ns}_In_${i + 1}_$o[${(InTypes :+ tpe) mkString ", "}$p3, ${OutTypes mkString ", "}]")
         }
 
-        val (thisInK, thisInKshort) = if (maxIn == 0 || in == maxIn) {
+        val (thisInK, thisInShort) = if (maxIn == 0 || in == maxIn) {
           val n1 = out + in + 1
           val t1 = (1 to n1).map(i => "_").mkString(",")
           (s"P$n1[$t1]", s"P$n1[$t1]")
@@ -786,28 +839,16 @@ object MoleculeBoilerplate {
 
         val (attrVal, attrValK) = a match {
           case _ if a.baseTpe == "K" =>
-            val optionTypes = indexedFirst(opts) map {
-              case "FulltextSearch[Ns, In]" => s"FulltextSearch[$thisNS, $thisInKshort]"
-              case other                    => other
-            }
-            val extensions0 = optionTypes ++ bi :+ "MapAttrK"
-            val extensions = " with " + extensions0.mkString(" with ")
-            (None, Some(s"""override def $attr$p5(key: String): $clazz$p6[$nextNSK, $nextInK] with $nextNSK$extensions = ???"""))
+            (None, Some(s"""/** @inheritdoc */ override def $attr$p5(key: String): $nextNSK with $clazz$p8[$nextNSK, $nextInK]${exts(a, nextNSShort, nextInShort)} = ???"""))
           case _                     =>
-            (Some(s"""object $attr $p1 extends $attr $p1[$nextNS, $nextIn] with $nextNS"""), None)
+            (Some(s"""/** @inheritdoc */ override def $attr $p1 : $nextNS with $clazz$p8[$nextNS, $nextIn]${exts(a, nextNSShort, nextInShort)} = ???"""), None)
         }
 
         val (attrVal_, attrValK_) = a match {
           case _: Val if a.baseTpe == "K" =>
-            val optionTypes = indexedFirst(opts) map {
-              case "FulltextSearch[Ns, In]" => s"FulltextSearch[$thisNS, $thisInKshort]"
-              case other                    => other
-            }
-            val extensions0 = optionTypes ++ bi :+ "MapAttrK"
-            val extensions = " with " + extensions0.mkString(" with ")
-            (None, Some(s"override def ${attrClean}_$p5(key: String): $clazz$p6[$thisNS, $thisInK] with $thisNS$extensions = ???"))
+            (None, Some(s"/** @inheritdoc */ override def ${attrClean}_$p5(key: String): $thisNS with $clazz$p8[$thisNS, $thisInK]${exts(a, thisNS, thisInShort)} = ???"))
           case _                          =>
-            (Some(s"object ${attrClean}_$p2 extends ${attrClean}_$p2[$thisNS, $thisIn] with $thisNS"), None)
+            (Some(s"/** @inheritdoc */ override def ${attrClean}_$p2 : $thisNS with $clazz$p8[$thisNS, $thisIn]${exts(a, thisNS, thisInShort)} = ???"), None)
         }
 
         Some(List(attrVal, attrVal_, attrValK, attrValK_))
@@ -825,46 +866,63 @@ object MoleculeBoilerplate {
     val attrValsOpt = attrs.flatMap {
       case BackRef(_, _, _, _, _, _, _, _, _) => None
       case a                                  => {
-        val (attr, attrClean, tpe) = (a.attr, a.attrClean, a.tpe)
+        val (attr, attrClean, clazz, tpe) = (a.attr, a.attrClean, a.clazz, a.tpe)
         val p2 = padS(maxAttr, attrClean)
         val p3 = padS(maxTpe, tpe)
-        val nextNS = (in, out) match {
-          case (0, 0) => s"${ns}_1[Option[$tpe]$p3]"
-          case (0, o) => s"${ns}_${o + 1}[${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]"
-          case (i, o) => s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]"
+        val p8 = padS(maxClazz, clazz)
+
+        val (nextNS, nextNSShort) = (in, out) match {
+          case (0, 0) => (
+            s"${ns}_1[Option[$tpe]$p3]",
+            s"${ns}_1[Option[$tpe]]")
+          case (0, o) => (
+            s"${ns}_${o + 1}[${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]",
+            s"${ns}_${o + 1}[${(OutTypes :+ s"Option[$tpe]") mkString ", "}]")
+          case (i, o) => (
+            s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]",
+            s"${ns}_In_${i}_${o + 1}[${(InTypes ++ OutTypes :+ s"Option[$tpe]") mkString ", "}]")
         }
-        val nextIn = if (maxIn == 0 || in == maxIn) {
+        val (nextIn, nextInShort) = if (maxIn == 0 || in == maxIn) {
           val n2 = out + in + 2
           val t2 = (1 to n2).map(i => "_").mkString(",")
-          s"P$n2[$t2]"
+          (s"P$n2[$t2]", s"P$n2[$t2]")
         } else (in, out) match {
-          case (0, 0) => s"${ns}_In_1_1[Option[$tpe]$p3, Option[$tpe]$p3]"
-          case (0, o) => s"${ns}_In_1_${o + 1}[Option[$tpe]$p3, ${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]"
-          case (i, 0) => s"${ns}_In_${i + 1}_1[${(InTypes :+ s"Option[$tpe]") mkString ", "}$p3, Option[$tpe]$p3]"
-          case (i, o) => s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ s"Option[$tpe]") mkString ", "}$p3, ${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]"
+          case (0, 0) => (
+            s"${ns}_In_1_1[Option[$tpe]$p3, Option[$tpe]$p3]",
+            s"${ns}_In_1_1[Option[$tpe], Option[$tpe]]")
+          case (0, o) => (
+            s"${ns}_In_1_${o + 1}[Option[$tpe]$p3, ${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]",
+            s"${ns}_In_1_${o + 1}[Option[$tpe], ${(OutTypes :+ s"Option[$tpe]") mkString ", "}]"
+          )
+          case (i, 0) => (
+            s"${ns}_In_${i + 1}_1[${(InTypes :+ s"Option[$tpe]") mkString ", "}$p3, Option[$tpe]$p3]",
+            s"${ns}_In_${i + 1}_1[${(InTypes :+ s"Option[$tpe]") mkString ", "}, Option[$tpe]]")
+          case (i, o) => (
+            s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ s"Option[$tpe]") mkString ", "}$p3, ${(OutTypes :+ s"Option[$tpe]") mkString ", "}$p3]",
+            s"${ns}_In_${i + 1}_${o + 1}[${(InTypes :+ s"Option[$tpe]") mkString ", "}, ${(OutTypes :+ s"Option[$tpe]") mkString ", "}]")
         }
 
         a match {
-          case valueAttr: Val if a.baseTpe == "K" => None
-          case _                                  => Some(s"object $attrClean$$$p2 extends $attrClean$$$p2[$nextNS, $nextIn] with $nextNS")
+          case a: Val if a.baseTpe == "K" => None
+          case a                          => Some(s"/** @inheritdoc */ override def $attrClean$$$p2 : $nextNS with $clazz$p8[$nextNS, $nextIn]${exts(a, nextNSShort, nextInShort)} = ???")
         }
       }
     }
 
     val (maxClazz2, maxRefNs, maxNs) = attrs.map {
-      case Ref(_, _, _, clazz2, _, _, refNs, _, _, _, _) => (clazz2.length, refNs.length, 0)
-      case BackRef(_, clazz2, _, _, _, _, backRef, _, _) => (clazz2.length, backRef.length, ns.length)
-      case other                                         => (0, 0, 0)
+      case Ref(_, ns, _, clazz2, _, _, refNs, _, _, _, _) => (clazz2.length, refNs.length, ns.length)
+      case BackRef(_, clazz2, _, _, _, _, backRef, _, _)  => (clazz2.length, backRef.length, 0)
+      case other                                          => (0, 0, 0)
     }.unzip3
 
     val maxAttr0 = attrs.map(_.attrClean.length).max
 
     val bidirectionals: Map[String, String] = attrs.flatMap {
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiSelfRef_"), revRef, _)     => Some(attr -> s" with BiSelfRef_")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiOtherRef_"), revRef, _)    => Some(attr -> s" with BiOtherRef_[$domain.$refNs.$revRef[NS, NS]]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiOtherRef_"), revRef, _)    => Some(attr -> s" with BiOtherRef_[$domain.$refNs.$revRef]")
       case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgePropRef_"), revRef, _) => Some(attr -> s" with BiEdgePropRef_")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef, _)     => Some(attr -> s" with BiEdgeRef_[$domain.$refNs.$revRef[NS, NS]]")
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef, _)   => Some(attr -> s" with BiTargetRef_[$domain.$refNs.$revRef[NS, NS]]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef, _)     => Some(attr -> s" with BiEdgeRef_[$domain.$refNs.$revRef]")
+      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiTargetRef_"), revRef, _)   => Some(attr -> s" with BiTargetRef_[$domain.$refNs.$revRef]")
       case other                                                                 => None
     }.toMap
     val maxBidirectionals = bidirectionals.values.map(_.length)
@@ -874,6 +932,7 @@ object MoleculeBoilerplate {
         val p1 = padS(maxAttr0 + 1, attrClean)
         val p2 = padS("ManyRef".length, clazz2)
         val p3 = padS(maxRefNs.max, refNs)
+        val p4 = padS(maxNs.max, attrClean)
 
         val bidirectional = if (bidirectionals.nonEmpty && bidirectionals.contains(attr))
           bidirectionals(attr) + padS(maxBidirectionals.max, bidirectionals(attr))
@@ -889,17 +948,17 @@ object MoleculeBoilerplate {
           case (i, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
           case (i, o)                                   => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_${i}_${padI(o)}[${refNs}_In_${i}_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        acc :+ s"override def ${attrClean.capitalize} $p1: $clazz2$p2[$ns, $refNs$p3] with $ref = ???"
+        acc :+ s"/** @inheritdoc */ object ${attrClean.capitalize} $p4 extends ${attrClean.capitalize}__$p4[$ns, $refNs$p3] with $ref"
       }
       case (acc, BackRef(backAttr, _, _, _, _, _, backRef, opts, _))                =>
-        val p1 = padS(maxAttr0 + 1, backAttr)
+        val p1 = padS(maxAttr0, backAttr)
         val p2 = padS(maxClazz2.max, backRef)
         val ref = (in, out) match {
           case (0, 0) => s"${backRef}_0$p2"
           case (0, o) => s"${backRef}_$o$p2[${OutTypes mkString ", "}]"
           case (i, o) => s"${backRef}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        acc :+ s"override def $backAttr $p1: $ref = ???"
+        acc :+ s"/** @inheritdoc */ object $backAttr$p1 extends $backAttr$p1 with $ref"
       case (acc, _)                                                                 => acc
     }.distinct
 
@@ -927,7 +986,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_$o[$types] extends $ns with Out_$o[${ns}_$o, ${ns}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-           |  override def Self: ${ns}_$o[$types] with SelfJoin = ???
+           |  /** @inheritdoc */ object Self extends Self with ${ns}_$o[$types]
            |}
          """.stripMargin
 
@@ -969,7 +1028,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, ${ns}_In_${i}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-           |  override def Self: ${ns}_In_${i}_$o[$types] with SelfJoin = ???
+           |  /** @inheritdoc */ object Self extends Self with ${ns}_In_${i}_$o[$types]
            |}
          """.stripMargin
     }
@@ -986,7 +1045,7 @@ object MoleculeBoilerplate {
   def has(implicit many: Boolean) = if (many) "have" else "has"
 
 
-  def resolveNs(d: Definition, namespace: Namespace) = {
+  def resolveNs(d: Definition, namespace: Namespace, crossAttrs: Seq[String]) = {
     val domain = firstLow(d.domain)
     val inArity = d.in
     val outArity = d.out
@@ -1004,7 +1063,6 @@ object MoleculeBoilerplate {
       case Optional(kv, _) if kv.startsWith("""":db/doc"""") =>
         val doc = kv.substring(27).init
         s"""== $doc ==
-           |    * <br>
            |    * """.stripMargin
     }.getOrElse("")
 
@@ -1019,7 +1077,7 @@ object MoleculeBoilerplate {
         s"""
            |  // $attr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds mandatory Map attribute $attr1 of type `$tpe` to molecule.
+           |  /** ${doc(opts)}Adds mandatory Map attribute $attr1 of type `$tpe` to the molecule.
            |    * <br><br>
            |    * Semantics of $attr1 being mandatory:
            |    * <br>- If molecule is queried, only entities having $attr1 value pairs asserted will be returned.
@@ -1030,10 +1088,10 @@ object MoleculeBoilerplate {
            |    * a cardinality many attribute $attr1. For the end user the $attr1 attribute is treated as a
            |    * cardinality one value of type $tpe.
            |    */
-           |  class $attr[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def $attr: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds optional Map attribute $attr1 of type `$tpe` to molecule..
+           |  /** ${doc(opts)}Adds optional Map attribute $attr1 of type `$tpe` to the molecule..
            |    * <br><br>
            |    * Semantics of $attr1 being optional:
            |    * <br>- If molecule is queried, $attr1 value pairs asserted with entities matching the molecule are returned as
@@ -1041,16 +1099,16 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, Some(map: $tpe) or None can
            |    * be applied to $attr1.
            |    */
-           |  class $attrClean$$[Ns, In] extends $clazz$$[Ns]$extensions
+           |  def $attrClean$$: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds tacit Map attribute $attr1 of type `$tpe` to molecule.
+           |  /** ${doc(opts)}Adds tacit Map attribute $attr1 of type `$tpe` to the molecule.
            |    * <br><br>
            |    * Semantics of $attr1 being tacit:
            |    * <br>- If molecule is queried, only entities having $attr1 values asserted will match,
            |    * but $attr1 values are not returned in the result set (are 'tacit').
            |    */
-           |  class ${attrClean}_[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def ${attrClean}_ : AnyRef = ???
            |  """.stripMargin
 
 
@@ -1062,7 +1120,7 @@ object MoleculeBoilerplate {
         s"""
            |  // $attr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds mandatory "keyed Map attribute" $attr1 to molecule.
+           |  /** ${doc(opts)}Adds mandatory "keyed Map attribute" $attr1 to the molecule.
            |    * <br>$attr1 is automatically generated from the base attribute  '''`${attr.init}`'''.
            |    * <br><br>
            |    * Given a String key, it returns the associated '''`${attr.init}`''' value of type `$tpe` while still allowing us to continue adding
@@ -1071,10 +1129,10 @@ object MoleculeBoilerplate {
            |    *   $Ns.$attr("someKey").otherAttr.get === List((<$attr-value>, <otherAttr-value>), ...)
            |    * }}}
            |    */
-           |  def $attr(key: String): Any = ???
+           |  def $attr(key: String): AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds tacit "keyed Map attribute" $attr1 to molecule.
+           |  /** ${doc(opts)}Adds tacit "keyed Map attribute" $attr1 to the molecule.
            |    * <br>$attr1 is automatically generated from the base attribute  '''`${attr.init}`'''.
            |    * <br><br>
            |    * Given a String key, it ensures that the associated '''`${attr.init}`''' value has been asserted while still allowing us to continue adding
@@ -1084,7 +1142,7 @@ object MoleculeBoilerplate {
            |    *   $Ns.otherAttr.$attr("someKey").get === List(<otherAttr-value>)
            |    * }}}
            |    */
-           |  def ${attrClean}_(key: String): Any = ???
+           |  def ${attrClean}_(key: String): AnyRef = ???
            |  """.stripMargin
 
 
@@ -1096,17 +1154,17 @@ object MoleculeBoilerplate {
         s"""
            |  // $attr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds mandatory cardinality-$card attribute $attr1 of type `$tpe` to molecule.
+           |  /** ${doc(opts)}Adds mandatory cardinality-$card attribute $attr1 of type `$tpe` to the molecule.
            |    * <br><br>
            |    * Semantics of $attr1 being mandatory:
            |    * <br>- If molecule is queried, only entities having $aValue for $attr1 will be returned.
            |    * <br>- If insert, save or update is executed on the molecule, the mandatory $attr1 attribute
            |    * needs value(s) applied.
            |    */
-           |  class $attr[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def $attr: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds optional cardinality-$card attribute $attr1 of type `$tpe` to molecule.
+           |  /** ${doc(opts)}Adds optional cardinality-$card attribute $attr1 of type `$tpe` to the molecule.
            |    * <br><br>
            |    * Semantics of $attr1 being optional:
            |    * <br>- If molecule is queried, $attr1 values asserted with entities matching the molecule are returned as
@@ -1114,17 +1172,18 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, Some(value(s)) or None can
            |    * be applied to $attr1.
            |    */
-           |  class $attrClean$$[Ns, In] extends $clazz$$[Ns]$extensions
+           |  def $attrClean$$: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds tacit cardinality-$card attribute $attr1 of type `$tpe` to molecule.
+           |  /** ${doc(opts)}Adds tacit cardinality-$card attribute $attr1 of type `$tpe` to the molecule.
            |    * <br><br>
            |    * Semantics of $attr1 being tacit:
            |    * <br>- If molecule is queried, only entities having $attr1 values asserted will match,
            |    * but $attr1 values are not returned in the result set (are 'tacit').
            |    */
-           |  class ${attrClean}_[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def ${attrClean}_ : AnyRef = ???
            |  """.stripMargin
+
 
       case Enum(attr, attrClean, clazz, tpe, baseTpe, enums, opts, bi, revRef, _) =>
         val extensions0 = indexedFirst(opts) ++ bi.toList
@@ -1135,7 +1194,9 @@ object MoleculeBoilerplate {
         s"""
            |  // $attr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds mandatory cardinality-$card enum attribute $attr1 of type String to molecule.
+           |  trait ${attrClean}__enums__{ $enumValues }
+           |
+           |  /** ${doc(opts)}Adds mandatory cardinality-$card enum attribute $attr1 of type String to the molecule.
            |    * <br><br>
            |    * Enums available:
            |    * <br> - ${enums.mkString("\n    * <br> - ")}
@@ -1145,10 +1206,10 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, the mandatory $attr1 attribute
            |    * needs value(s) applied.
            |    */
-           |  class $attr[Ns, In] extends $clazz[Ns, In]$extensions { $enumValues }
+           |  def $attr: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds optional cardinality-$card enum attribute $attr1 of type String to molecule.
+           |  /** ${doc(opts)}Adds optional cardinality-$card enum attribute $attr1 of type String to the molecule.
            |    * <br><br>
            |    * Enums available:
            |    * <br> - ${enums.mkString("\n    * <br> - ")}
@@ -1159,10 +1220,10 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, Some(value(s)) or None can
            |    * be applied to $attr1.
            |    */
-           |  class $attrClean$$[Ns, In] extends $clazz$$[Ns]$extensions { $enumValues }
+           |  def $attrClean$$: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds tacit cardinality-$card enum attribute $attr1 of type String to molecule.
+           |  /** ${doc(opts)}Adds tacit cardinality-$card enum attribute $attr1 of type String to the molecule.
            |    * <br><br>
            |    * Enums available:
            |    * <br> - ${enums.mkString("\n    * <br> - ")}
@@ -1171,11 +1232,11 @@ object MoleculeBoilerplate {
            |    * <br>- If molecule is queried, only entities having $attr1 values asserted will match,
            |    * but $attr1 values are not returned in the result set (are 'tacit').
            |    */
-           |  class ${attrClean}_[Ns, In] extends $clazz[Ns, In]$extensions { $enumValues }
+           |  def ${attrClean}_ : AnyRef = ???
            |  """.stripMargin
 
 
-      case Ref(attr, attrClean, clazz, _, tpe, baseTpe, refNs, opts, bi, revRef, _) =>
+      case Ref(attr, attrClean, clazz, clazz2, tpe, baseTpe, refNs, opts, bi, revRef, _) =>
         val extensions0 = indexedFirst(opts) ++ (bi match {
           case Some("BiSelfRef_")     => Seq(s"BiSelfRefAttr_")
           case Some("BiOtherRef_")    => Seq(s"BiOtherRefAttr_[$domain.$refNs.$revRef[NS, NS]]")
@@ -1188,10 +1249,18 @@ object MoleculeBoilerplate {
         val extensions = if (extensions0.isEmpty) "" else " with " + extensions0.mkString(" with ")
         implicit val isMany = baseTpe.nonEmpty
         val attr1 = mkAttr(attr)
+
+        val crossTypeDef = if (crossAttrs.contains(s"$Ns $attr")) {
+          s"""
+             |  // Internal type to connect BiEdges at compile time
+             |  type $attr
+           """.stripMargin
+        } else ""
+
         s"""
            |  // $attr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds mandatory cardinality-$card ref attribute $attr1 of type `Long` to molecule.
+           |  /** ${doc(opts)}Adds mandatory cardinality-$card ref attribute $attr1 of type `Long` to the molecule.
            |    * <br>Ref values point to entities with attributes in namespace `$refNs` (and possibly other namespaces).
            |    * <br><br>
            |    * Semantics of $attr1 being mandatory:
@@ -1199,10 +1268,10 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, the mandatory $attr1 attribute
            |    * needs value(s) applied.
            |    */
-           |  class $attr[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def $attr: AnyRef = ???
+           |  $crossTypeDef
            |
-           |
-           |  /** ${doc(opts)}Adds optional cardinality-$card ref attribute $attr1 of type `Long` to molecule.
+           |  /** ${doc(opts)}Adds optional cardinality-$card ref attribute $attr1 of type `Long` to the molecule.
            |    * <br>Ref values point to entities with attributes in namespace `$refNs` (and possibly other namespaces).
            |    * <br><br>
            |    * Semantics of $attr1 being optional:
@@ -1211,25 +1280,24 @@ object MoleculeBoilerplate {
            |    * <br>- If insert, save or update is executed on the molecule, Some(value(s)) or None can
            |    * be applied to $attr1.
            |    */
-           |  class $attrClean$$[Ns, In] extends $clazz$$[Ns]$extensions
+           |  def $attrClean$$: AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds tacit cardinality-$card ref attribute $attr1 of type `Long` to molecule.
+           |  /** ${doc(opts)}Adds tacit cardinality-$card ref attribute $attr1 of type `Long` to the molecule.
            |    * <br>Ref values point to entities with attributes in namespace `$refNs` (and possibly other namespaces).
            |    * <br><br>
            |    * Semantics of $attr1 being tacit:
            |    * <br>- If molecule is queried, only entities having $attr1 values asserted will match,
            |    * but $attr1 values are not returned in the result set (are 'tacit').
            |    */
-           |  class ${attrClean}_[Ns, In] extends $clazz[Ns, In]$extensions
+           |  def ${attrClean}_ : AnyRef = ???
            |
            |
-           |  /** ${doc(opts)}Adds reference '''`${attrClean.capitalize}`''' pointing to namespace `$refNs` to molecule.
+           |  /** ${doc(opts)}Adds reference '''`${attrClean.capitalize}`''' pointing to namespace `$refNs` to the molecule.
            |    * <br><br>
            |    * @return Unit (tacit ref id - relationship is ensured to exist but is not returned)
            |    */
-           |  def ${attrClean.capitalize}: Any = ???
-           |
+           |  protected trait ${attrClean.capitalize}__[Ns, In] extends $clazz2[Ns, In]
            |  """.stripMargin
 
 
@@ -1237,14 +1305,13 @@ object MoleculeBoilerplate {
         s"""
            |  // BACKREF $backAttr -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds back reference '''`$backAttr`''' pointing back to namespace `$backRef` to molecule.
+           |  /** ${doc(opts)}Adds back reference '''`$backAttr`''' pointing back to namespace `$backRef` to the molecule.
            |    * <br>A back reference allow us to continue adding attributes from the previous namespace to the molecule:
            |    * {{{
            |    *   Order.date.LineItems.qty.item.price._Order.orderComment.get === ...
            |    * }}}
            |    */
-           |  def $backAttr: Any = ???
-           |
+           |  protected trait $backAttr
            |  """.stripMargin
     }
 
@@ -1252,7 +1319,7 @@ object MoleculeBoilerplate {
       s"""
          |  // SELF JOIN -----------------------------------------------------------------------------------
          |
-         |  /** Adds Self join to molecule.
+         |  /** Adds Self join to the molecule.
          |    * <br><br>
          |    * Attributes before '''`Self`''' are joined with attributes added after '''`Self`''' by values that can unify:
          |    * <br><br>
@@ -1267,7 +1334,7 @@ object MoleculeBoilerplate {
          |    *         )
          |    * }}}
          |    */
-         |  def Self: Any = ???
+         |  protected trait Self extends SelfJoin
          |
          |  """.stripMargin
 
@@ -1294,17 +1361,16 @@ object MoleculeBoilerplate {
   }
 
 
-  def namespaceBodies(d: Definition, namespace: Namespace): (String, Seq[(Int, String)]) = {
+  def namespaceBodies(d: Definition, namespace: Namespace, crossAttrs: Seq[String]): (String, Seq[(Int, String)]) = {
 
-    val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace)
+    val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace, crossAttrs)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
+      (s"\n  /** @inheritdoc */ override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
-    val nsTraitsOut = (0 to outArity).map(nsTrait(d.domain, namespace, 0, _, inArity, outArity, nsArities)).mkString("\n")
-
+    val nsTraitsOut = (0 to outArity).map(nsTrait(d.domain, namespace, 0, _, inArity, outArity, nsArities, crossAttrs)).mkString("\n")
 
     val outFile: String =
       s"""/*
@@ -1322,9 +1388,10 @@ object MoleculeBoilerplate {
          |import molecule.imports._
          |
          |
+         |/** == Namespace `$ns` == */
          |object $ns extends ${ns}_0 with FirstNS {
-         |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-         |  def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
+         |  /** @inheritdoc */ override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+         |  /** @inheritdoc */ override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
          |}
          |
          |trait $ns {
@@ -1336,7 +1403,7 @@ object MoleculeBoilerplate {
 
     val nsTraitsIn: Seq[(Int, String)] = if (inArity == 0) Nil
     else (1 to inArity).map(in =>
-      (in, (0 to outArity).map(nsTrait(d.domain, namespace, in, _, inArity, outArity, nsArities)).mkString("\n"))
+      (in, (0 to outArity).map(nsTrait(d.domain, namespace, in, _, inArity, outArity, nsArities, crossAttrs)).mkString("\n"))
     )
     val inFiles: Seq[(Int, String)] = nsTraitsIn.map { case (in, inTraits) =>
       val inFile: String =
@@ -1362,20 +1429,19 @@ object MoleculeBoilerplate {
     (outFile, inFiles)
   }
 
+  def namespaceBody(d: Definition, namespace: Namespace, crossAttrs: Seq[String]): String = {
 
-  def namespaceBody(d: Definition, namespace: Namespace): String = {
-
-    val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace)
+    val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace, crossAttrs)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
+      (s"\n  /** @inheritdoc */ override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
     val nsTraits = (for {
       in <- 0 to inArity
       out <- 0 to outArity
-    } yield nsTrait(d.domain, namespace, in, out, inArity, outArity, nsArities)).mkString("\n")
+    } yield nsTrait(d.domain, namespace, in, out, inArity, outArity, nsArities, crossAttrs)).mkString("\n")
 
     s"""/*
        |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
@@ -1392,9 +1458,10 @@ object MoleculeBoilerplate {
        |import molecule.imports._
        |
        |
+       |/** == Namespace `$ns` == */
        |object $ns extends ${ns}_0 with FirstNS {
-       |  def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-       |  def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
+       |  /** @inheritdoc */ override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+       |  /** @inheritdoc */ override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
        |}
        |
        |trait $ns $ext{
@@ -1428,9 +1495,9 @@ object MoleculeBoilerplate {
         IO.write(schemaFile, schemaBody(d))
 
         val namespaceFiles = if (separateInFiles) {
-
+          val crossAttrs = getCrossAttrs(d)
           d.nss.flatMap { ns =>
-            val (outBody, inBodies) = namespaceBodies(d, ns)
+            val (outBody, inBodies) = namespaceBodies(d, ns, crossAttrs)
 
             // Output namespace files
             val nsOutFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
@@ -1449,9 +1516,10 @@ object MoleculeBoilerplate {
 
           // Namespace files (including output and input)
           // Those could become too big so that you want to separate them
+          val crossAttrs = getCrossAttrs(d)
           d.nss.map { ns =>
             val nsFile: File = d.pkg.split('.').toList.foldLeft(managedDir)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
-            val nsBody = namespaceBody(d, ns)
+            val nsBody = namespaceBody(d, ns, crossAttrs)
             IO.write(nsFile, nsBody)
             nsFile
           }

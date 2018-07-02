@@ -85,7 +85,7 @@ class Aggregates extends MoleculeSpec {
 
 
   "Schema aggregations" >> {
-    import molecule.schema.Db
+    import molecule.composition.meta.Db
 
     // What is the average length of a schema name?
     //    Db.a.length(avg).get.head === 12.777777777777779

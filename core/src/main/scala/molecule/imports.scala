@@ -14,6 +14,7 @@ import molecule.facade.Datomic
   * Consists of various interfaces and implicits that make Molecule
   * creation and queries possible.
   * */
+
 object imports
   extends Datomic
     with Expr

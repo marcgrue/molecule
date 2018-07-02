@@ -10,19 +10,47 @@ import scala.reflect.macros.whitebox.Context
 
 private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 30, 30)
+  val x = DebugMacro("Dsl2Model", 20)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
     tree, (t: Tree) => abort(s"[Dsl2Model:resolve] Unexpected tree: $t\nRAW: ${showRaw(t)}"))
 
   def traverse(prev: Tree, element: Element): Seq[Element] = {
-    //        x(1, prev, element)
-    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) :+ element else Seq(element)
+    //            x(25,
+    //              prev,
+    //              element,
+    //              prev.isAttr,
+    //              prev.symbol.isModule,
+    //              prev.symbol.isMethod,
+    //              prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS,
+    //              prev.isAttr || prev.isNS && !q"$prev".isFirstNS,
+    //              prev.isNS,
+    //              prev.isNS && !q"$prev".isFirstNS
+    //            )
+    //    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) :+ element else Seq(element)
+    //    if (prev.isAttr || prev.symbol.isModule) resolve(prev) :+ element else Seq(element)
+    //    if (prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS) resolve(prev) :+ element else Seq(element)
+    if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) :+ element else Seq(element)
+    //    if(q"$prev".isFirstNS) Seq(element) else resolve(prev) :+ element
   }
 
   def traverse(prev: Tree, elements: Seq[Element]): Seq[Element] = {
     //        x(2, prev, elements)
-    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) ++ elements else elements
+    //    x(26,
+    //      prev,
+    //      elements,
+    //      prev.isAttr,
+    //      prev.symbol.isModule,
+    //      prev.symbol.isMethod,
+    //      prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS,
+    //      prev.isAttr || prev.isNS && !q"$prev".isFirstNS,
+    //      prev.isNS,
+    //      prev.isNS && !q"$prev".isFirstNS
+    //    )
+    //    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) ++ elements else elements
+    //    if (prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS) resolve(prev) ++ elements else elements
+    if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) ++ elements else elements
+    //    if(q"$prev".isFirstNS) elements else resolve(prev) ++ elements
   }
 
   def kw(kwTree: Tree): (String, String) = (kwTree.toString(): String) match {
@@ -117,6 +145,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case a@q"$prev.$cur" if a.isMapAttr   => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), 3, VarValue, None, bi(a)))
     case a@q"$prev.$cur" if a.isValueAttr => walk(q"$prev", a.ns, q"$cur", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
 
+
     // Clean optional attributes ----------------------
 
     case a@q"$prev.$refAttr" if a.isRefAttr$ => traverse(q"$prev", Atom(a.ns, a.name, cast(a), a.card, VarValue, gs = bi(a)))
@@ -128,7 +157,15 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case r@q"$prev.$backRefAttr" if backRefAttr.toString.head == '_' =>
       val backRef = c.typecheck(q"$prev.$backRefAttr").tpe.typeSymbol.name.toString // "partition_Ns_<arity>"
-      traverse(q"$prev", ReBond(firstLow(backRef.replaceFirst("_[0-9]+$", "")), "")) // "partition_Ns"
+//      x(28
+//        ,prev
+//        ,backRefAttr
+//        ,backRef
+//        ,firstLow(backRef.tail)
+//        ,firstLow(backRef.replaceFirst("_[0-9]+$", ""))
+//      )
+//      traverse(q"$prev", ReBond(firstLow(backRef.replaceFirst("_[0-9]+$", "")), "")) // "partition_Ns"
+      traverse(q"$prev", ReBond(firstLow(backRef.tail), "")) // "partition_Ns"
 
     case a@q"$prev.$ref" if a.isRef         => traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard, bi(a)))
     case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
@@ -175,7 +212,6 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     // Attribute operations -----------------------------
 
     case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
-
     case t@q"$prev.$cur.$op(..$values)" =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
@@ -210,15 +246,26 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
 
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
-    val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
+//    val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
+    val prevElements = if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
     val curIsVarValue = thisElement match {
       case Atom(_, _, _, _, VarValue, _, _, _) => true
       case _                                   => false
     }
     if (prevElements.isEmpty) {
+      //      x(22,
+      //        prev,
+      //        thisElement,
+      //        traverse(q"$prev", thisElement)
+      //      )
       traverse(q"$prev", thisElement)
     } else {
+      //      x(23,
+      //        prev,
+      //        thisElement,
+      //        prevElements
+      //      )
       prevElements.last match {
         case Atom(`curNs`, prevAttr0, _, _, _, _, _, _) if clean(prevAttr0) == clean(attr) && curIsVarValue =>
           //          x(30, prevElements, thisElement)
@@ -276,7 +323,17 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val nestedNs = curNs(nestedElements.head)
     if (refNext != nestedNs) {
       // Find refs in `manyRef` namespace and match the target type with the first namespace of the first nested element
-      val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
+//      val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
+      val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isModule && e.typeSignature <:< weakTypeOf[Ref[_, _]])
+
+//      val manyRefs = c.typecheck(manyRef)
+//      x(20,
+//        manyRefs,
+//        manyRefs.tpe.members.filter(_.isModule).last,
+//        manyRefs.tpe.members.filter(_.isModule).last.typeSignature ,
+//        manyRefs.tpe.members.filter(_.isModule).last.typeSignature <:< weakTypeOf[Ref[_, _]],
+//      )
+
       val refPairs = refs.map(r => r.name -> r.typeSignature.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name)
       val refPairsFiltered = refPairs.filter(_._2.toString == nestedNs.capitalize)
       if (refPairsFiltered.isEmpty) {
@@ -339,21 +396,21 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val cur = curTree.toString()
     //        x(35, value, enumPrefix, attr.name)
     previous match {
-      case prev if cur.head.isUpper           => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if cur == "e" && prev.isRef   => Meta(prev.name, prev.refNext, "e", NoValue, value)
-      case prev if cur == "e_" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
-//      case prev if cur == "e_" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-//      case prev if cur == "e" && prev.isAttr  => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if cur == "e"                 => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "e_"                => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "a"                 => Atom("?", "attr", "a", 1, value, gs = bi(attr))
-      case prev if cur == "a_"                => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
-      case prev if cur == "ns"                => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
-      case prev if cur == "ns_"               => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
-      case prev if attr.isMapAttr             => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
-      case prev if attr.isAttr                => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if prev.isAttr                => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev                               => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
+      case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
+      case prev if cur == "e_" && prev.isRef => Meta(prev.name, prev.refNext, "e", NoValue, value)
+      //      case prev if cur == "e_" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      //      case prev if cur == "e" && prev.isAttr  => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if cur == "e"     => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "e_"    => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "a"     => Atom("?", "attr", "a", 1, value, gs = bi(attr))
+      case prev if cur == "a_"    => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
+      case prev if cur == "ns"    => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
+      case prev if cur == "ns_"   => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
+      case prev if attr.isMapAttr => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
+      case prev if attr.isAttr    => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if prev.isAttr    => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev                   => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
     }
   }
 
@@ -676,9 +733,9 @@ private[molecule] object Dsl2Model {
       }
     }._1
 
-    // inst(c).x(30, dsl, elements0, elements1, model)
-    //     inst(c).x(30, elements0, elements1)
-    //    inst(c).x(30, elements1)
+//     inst(c).x(30, dsl, elements0, elements1, Model(elements1))
+//         inst(c).x(30, elements0, elements1)
+//        inst(c).x(30, elements1)
 
     // Can't use generics on multiple attributes - why not?
     //    if (elements1.foldLeft(Seq[Boolean]()) {

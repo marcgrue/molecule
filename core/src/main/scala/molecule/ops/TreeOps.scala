@@ -22,6 +22,7 @@ private[molecule] trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     lazy val card       = at.card
     lazy val enumPrefix = at.enumPrefix
 
+    def isNS = tpe_ <:< typeOf[NS]
     def isFirstNS = tpe_ <:< typeOf[FirstNS]
     def owner = t.symbol.typeSignature.typeParams.head.name.toString
     def alias = t.symbol.typeSignature.typeParams.head.name.toString
@@ -354,13 +355,22 @@ private[molecule] trait TreeOps[Ctx <: Context] extends Liftables[Ctx] {
     def enumValues = {
 //      val name0 = toString.last
 //      val name1 = if (name0 == '_' || name0 == '$') name.toString.init else name
+      val attr = toString
+      val attrClean = if (attr.last == '_' || attr.last == '$') attr.init else attr
+//      val enumsx = attrType.baseClasses.find { cl => cl.isClass && !cl.isModuleClass && cl.name.toString == attrClean + "__enums__" }
 //      x(6,
 //        attrType,
 //        toString,
+//        attrClean,
 //        enumPrefix,
-//        attrType.baseClasses.find { cl => cl.isClass && !cl.isModuleClass && cl.name.toString == toString }
+//        enumsx,
+////        enumsx.get.asClass,
+////        enumsx.get.asClass.toType.members,
+//        enumsx.get.asClass.toType.members.collect {
+//          case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
+//        }.toList.reverse
 //      )
-      attrType.baseClasses.find { cl => cl.isClass && !cl.isModuleClass && cl.name.toString == toString }.get.asClass.toType.members.collect {
+      attrType.baseClasses.find { cl => cl.isClass && !cl.isModuleClass && cl.name.toString == attrClean + "__enums__" }.get.asClass.toType.members.collect {
         case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
       }.toList.reverse
     }

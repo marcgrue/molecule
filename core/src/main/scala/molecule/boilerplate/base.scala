@@ -1,9 +1,33 @@
 package molecule.boilerplate
-
+import molecule.imports.?
 
 private[molecule] trait NS
 
-private[molecule] trait FirstNS extends NS
+private[molecule] trait FirstNS extends NS {
+
+  /** Filter molecule by applying one or more entity ids of type `Long`.
+    *
+    * @param eid  First entity id
+    * @param eids Further entity ids (varargs)
+    * @return molecule to be further expanded with more attributes.
+    */
+  def apply(eid: Long, eids: Long*): AnyRef = ???
+
+  /** Filter molecule by applying one or more entity ids of type `Long`.
+    *
+    * @param eids Iterable of entity ids, typically List, Seq or Set of ids.
+    * @return molecule to be further expanded with more attributes.
+    */
+  def apply(eids: Iterable[Long]): AnyRef = ???
+
+  /** Add entity id(s) input placeholder to the molecule.
+    * <br>At runtime, entity id(s) are applied as vararg(s) or list/sets.
+    *
+    * @param eids Iterable of entity ids, typically List, Seq or Set of ids.
+    * @return molecule to be further expanded with more attributes.
+    */
+  def apply(eids: ?): AnyRef = ???
+}
 
 // Using dummy type parameter to simplify parsing DSL
 private[molecule] trait NS0[Dummy] extends NS

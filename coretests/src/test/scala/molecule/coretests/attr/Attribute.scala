@@ -132,16 +132,16 @@ class Attribute extends CoreSpec {
 //  }
 //
 //
-//  "Multiple cardinality-1 attributes - one entity" in new CoreSetup {
-//
-//    // Insert single molecule with comma-separated values
-//    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.insert(
-//      str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
-//
-//    // Get single molecule as tuple of values
-//    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.get.head ===(
-//      str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
-//  }
+  "Multiple cardinality-1 attributes - one entity" in new CoreSetup {
+
+    // Insert single molecule with comma-separated values
+    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.insert(
+      str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
+
+    // Get single molecule as tuple of values
+    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.get.head ===(
+      str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1)
+  }
 //
 //  "Multiple cardinality-2 attributes - one entity" in new CoreSetup {
 //
