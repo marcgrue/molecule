@@ -1,7 +1,5 @@
 package molecule.coretests.input
 
-import molecule.boilerplate.attributes
-import molecule.coretests.util.dsl.coreTest
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.imports._

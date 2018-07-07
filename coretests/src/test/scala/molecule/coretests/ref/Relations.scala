@@ -103,8 +103,6 @@ class Relations extends CoreSpec {
       ("a", "a1", 1),
       ("b", "b1", 2))
 
-    Ns.str.Ref1.str1._Ns.Refs1.int1.getD
-
     Ns.str.Ref1.str1._Ns.Refs1.int1.get === List(
       ("a", "a1", 1),
       ("b", "b1", 2))
@@ -118,8 +116,6 @@ class Relations extends CoreSpec {
     Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1 insert List(
       ("a", "a1", "a2", 1),
       ("b", "b1", "b2", 2))
-
-    Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1.getD
 
     Ns.str.Ref1.str1.Ref2.str2._Ref1._Ns.Refs1.int1.get === List(
       ("a", "a1", "a2", 1),

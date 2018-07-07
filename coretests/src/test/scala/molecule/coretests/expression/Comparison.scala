@@ -5,189 +5,215 @@ import molecule.coretests.util.dsl.coreTest._
 
 class Comparison extends Base {
 
-    "Card one" in new OneSetup {
+  "Card one" in new OneSetup {
 
-      Ns.str.<("").get.sorted === List()
-      Ns.str.<(" ").get.sorted === List("")
-      Ns.str.<(",").get.sorted === List("", " ")
-      Ns.str.<(".").get.sorted === List("", " ", ",")
-      Ns.str.<("?").get.sorted === List("", " ", ",", ".")
-      Ns.str.<("A").get.sorted === List("", " ", ",", ".", "?")
-      Ns.str.<("B").get.sorted === List("", " ", ",", ".", "?", "A")
-      Ns.str.<("a").get.sorted === List("", " ", ",", ".", "?", "A", "B")
-      Ns.str.<("b").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
-      Ns.str.<("d").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
-      Ns.str.<(str1).get.sorted === List("", " ", ",", ".", "?", "A", "B")
+    Ns.str.<("").get.sorted === List()
+    Ns.str.<(" ").get.sorted === List("")
+    Ns.str.<(",").get.sorted === List("", " ")
+    Ns.str.<(".").get.sorted === List("", " ", ",")
+    Ns.str.<("?").get.sorted === List("", " ", ",", ".")
+    Ns.str.<("A").get.sorted === List("", " ", ",", ".", "?")
+    Ns.str.<("B").get.sorted === List("", " ", ",", ".", "?", "A")
+    Ns.str.<("a").get.sorted === List("", " ", ",", ".", "?", "A", "B")
+    Ns.str.<("b").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
+    Ns.str.<("d").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
+    Ns.str.<(str1).get.sorted === List("", " ", ",", ".", "?", "A", "B")
 
-      Ns.str.>("").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
-      Ns.str.>(" ").get.sorted === List(",", ".", "?", "A", "B", "a", "b")
-      Ns.str.>(",").get.sorted === List(".", "?", "A", "B", "a", "b")
-      Ns.str.>(".").get.sorted === List("?", "A", "B", "a", "b")
-      Ns.str.>("?").get.sorted === List("A", "B", "a", "b")
-      Ns.str.>("A").get.sorted === List("B", "a", "b")
-      Ns.str.>("B").get.sorted === List("a", "b")
-      Ns.str.>("C").get.sorted === List("a", "b")
-      Ns.str.>("a").get.sorted === List("b")
-      Ns.str.>("b").get.sorted === List()
-      Ns.str.>(str1).get.sorted === List("b")
+    Ns.str.>("").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
+    Ns.str.>(" ").get.sorted === List(",", ".", "?", "A", "B", "a", "b")
+    Ns.str.>(",").get.sorted === List(".", "?", "A", "B", "a", "b")
+    Ns.str.>(".").get.sorted === List("?", "A", "B", "a", "b")
+    Ns.str.>("?").get.sorted === List("A", "B", "a", "b")
+    Ns.str.>("A").get.sorted === List("B", "a", "b")
+    Ns.str.>("B").get.sorted === List("a", "b")
+    Ns.str.>("C").get.sorted === List("a", "b")
+    Ns.str.>("a").get.sorted === List("b")
+    Ns.str.>("b").get.sorted === List()
+    Ns.str.>(str1).get.sorted === List("b")
 
-      Ns.str.<=("").get.sorted === List("")
-      Ns.str.<=(" ").get.sorted === List("", " ")
-      Ns.str.<=(",").get.sorted === List("", " ", ",")
-      Ns.str.<=(".").get.sorted === List("", " ", ",", ".")
-      Ns.str.<=("?").get.sorted === List("", " ", ",", ".", "?")
-      Ns.str.<=("A").get.sorted === List("", " ", ",", ".", "?", "A")
-      Ns.str.<=("B").get.sorted === List("", " ", ",", ".", "?", "A", "B")
-      Ns.str.<=("a").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
-      Ns.str.<=("b").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
-      Ns.str.<=(str1).get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
+    Ns.str.<=("").get.sorted === List("")
+    Ns.str.<=(" ").get.sorted === List("", " ")
+    Ns.str.<=(",").get.sorted === List("", " ", ",")
+    Ns.str.<=(".").get.sorted === List("", " ", ",", ".")
+    Ns.str.<=("?").get.sorted === List("", " ", ",", ".", "?")
+    Ns.str.<=("A").get.sorted === List("", " ", ",", ".", "?", "A")
+    Ns.str.<=("B").get.sorted === List("", " ", ",", ".", "?", "A", "B")
+    Ns.str.<=("a").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
+    Ns.str.<=("b").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
+    Ns.str.<=(str1).get.sorted === List("", " ", ",", ".", "?", "A", "B", "a")
 
-      Ns.str.>=("").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
-      Ns.str.>=(" ").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
-      Ns.str.>=(",").get.sorted === List(",", ".", "?", "A", "B", "a", "b")
-      Ns.str.>=(".").get.sorted === List(".", "?", "A", "B", "a", "b")
-      Ns.str.>=("?").get.sorted === List("?", "A", "B", "a", "b")
-      Ns.str.>=("A").get.sorted === List("A", "B", "a", "b")
-      Ns.str.>=("B").get.sorted === List("B", "a", "b")
-      Ns.str.>=("a").get.sorted === List("a", "b")
-      Ns.str.>=("b").get.sorted === List("b")
-      Ns.str.>=("c").get.sorted === List()
-      Ns.str.>=(str1).get.sorted === List("a", "b")
-
-
-      Ns.int.<(-2).get.sorted === List()
-      Ns.int.<(0).get.sorted === List(-2, -1)
-      Ns.int.<(2).get.sorted === List(-2, -1, 0, 1)
-      Ns.int.<(int1).get.sorted === List(-2, -1, 0)
-
-      Ns.int.>(2).get.sorted === List()
-      Ns.int.>(0).get.sorted === List(1, 2)
-      Ns.int.>(-2).get.sorted === List(-1, 0, 1, 2)
-      Ns.int.>(int1).get.sorted === List(2)
-
-      Ns.int.<=(-2).get.sorted === List(-2)
-      Ns.int.<=(0).get.sorted === List(-2, -1, 0)
-      Ns.int.<=(2).get.sorted === List(-2, -1, 0, 1, 2)
-      Ns.int.<=(int1).get.sorted === List(-2, -1, 0, 1)
-
-      Ns.int.>=(2).get.sorted === List(2)
-      Ns.int.>=(0).get.sorted === List(0, 1, 2)
-      Ns.int.>=(-2).get.sorted === List(-2, -1, 0, 1, 2)
-      Ns.int.>=(int1).get.sorted === List(1, 2)
+    Ns.str.>=("").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
+    Ns.str.>=(" ").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
+    Ns.str.>=(",").get.sorted === List(",", ".", "?", "A", "B", "a", "b")
+    Ns.str.>=(".").get.sorted === List(".", "?", "A", "B", "a", "b")
+    Ns.str.>=("?").get.sorted === List("?", "A", "B", "a", "b")
+    Ns.str.>=("A").get.sorted === List("A", "B", "a", "b")
+    Ns.str.>=("B").get.sorted === List("B", "a", "b")
+    Ns.str.>=("a").get.sorted === List("a", "b")
+    Ns.str.>=("b").get.sorted === List("b")
+    Ns.str.>=("c").get.sorted === List()
+    Ns.str.>=(str1).get.sorted === List("a", "b")
 
 
-      Ns.long.<(-2L).get.sorted === List()
-      Ns.long.<(0L).get.sorted === List(-2L, -1L)
-      Ns.long.<(2L).get.sorted === List(-2L, -1L, 0L, 1L)
-      Ns.long.<(long1).get.sorted === List(-2L, -1L, 0L)
+    Ns.int.<(-2).get.sorted === List()
+    Ns.int.<(0).get.sorted === List(-2, -1)
+    Ns.int.<(2).get.sorted === List(-2, -1, 0, 1)
+    Ns.int.<(int1).get.sorted === List(-2, -1, 0)
 
-      Ns.long.>(2L).get.sorted === List()
-      Ns.long.>(0L).get.sorted === List(1L, 2L)
-      Ns.long.>(-2L).get.sorted === List(-1L, 0L, 1L, 2L)
-      Ns.long.>(long1).get.sorted === List(2L)
+    Ns.int.>(2).get.sorted === List()
+    Ns.int.>(0).get.sorted === List(1, 2)
+    Ns.int.>(-2).get.sorted === List(-1, 0, 1, 2)
+    Ns.int.>(int1).get.sorted === List(2)
 
-      Ns.long.<=(-2L).get.sorted === List(-2L)
-      Ns.long.<=(0L).get.sorted === List(-2L, -1L, 0L)
-      Ns.long.<=(2L).get.sorted === List(-2L, -1L, 0L, 1L, 2L)
-      Ns.long.<=(long1).get.sorted === List(-2L, -1L, 0L, 1L)
+    Ns.int.<=(-2).get.sorted === List(-2)
+    Ns.int.<=(0).get.sorted === List(-2, -1, 0)
+    Ns.int.<=(2).get.sorted === List(-2, -1, 0, 1, 2)
+    Ns.int.<=(int1).get.sorted === List(-2, -1, 0, 1)
 
-      Ns.long.>=(2L).get.sorted === List(2L)
-      Ns.long.>=(0L).get.sorted === List(0L, 1L, 2L)
-      Ns.long.>=(-2L).get.sorted === List(-2L, -1L, 0L, 1L, 2L)
-      Ns.long.>=(long1).get.sorted === List(1L, 2L)
-
-
-      Ns.float.<(-2f).get.sorted === List()
-      Ns.float.<(0f).get.sorted === List(-2f, -1f)
-      Ns.float.<(2f).get.sorted === List(-2f, -1f, 0f, 1f)
-      Ns.float.<(float1).get.sorted === List(-2f, -1f, 0f)
-
-      Ns.float.>(2f).get.sorted === List()
-      Ns.float.>(0f).get.sorted === List(1f, 2f)
-      Ns.float.>(-2f).get.sorted === List(-1f, 0f, 1f, 2f)
-      Ns.float.>(float1).get.sorted === List(2f)
-
-      Ns.float.<=(-2f).get.sorted === List(-2f)
-      Ns.float.<=(0f).get.sorted === List(-2f, -1f, 0f)
-      Ns.float.<=(2f).get.sorted === List(-2f, -1f, 0f, 1f, 2f)
-      Ns.float.<=(float1).get.sorted === List(-2f, -1f, 0f, 1f)
-
-      Ns.float.>=(2f).get.sorted === List(2f)
-      Ns.float.>=(0f).get.sorted === List(0f, 1f, 2f)
-      Ns.float.>=(float1).get.sorted === List(1f, 2f)
+    Ns.int.>=(2).get.sorted === List(2)
+    Ns.int.>=(0).get.sorted === List(0, 1, 2)
+    Ns.int.>=(-2).get.sorted === List(-2, -1, 0, 1, 2)
+    Ns.int.>=(int1).get.sorted === List(1, 2)
 
 
-      Ns.double.<(-2.0).get.sorted === List()
-      Ns.double.<(0.0).get.sorted === List(-2.0, -1.0)
-      Ns.double.<(2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0)
-      Ns.double.<(double1).get.sorted === List(-2.0, -1.0, 0.0)
+    Ns.long.<(-2L).get.sorted === List()
+    Ns.long.<(0L).get.sorted === List(-2L, -1L)
+    Ns.long.<(2L).get.sorted === List(-2L, -1L, 0L, 1L)
+    Ns.long.<(long1).get.sorted === List(-2L, -1L, 0L)
 
-      Ns.double.>(2.0).get.sorted === List()
-      Ns.double.>(0.0).get.sorted === List(1.0, 2.0)
-      Ns.double.>(-2.0).get.sorted === List(-1.0, 0.0, 1.0, 2.0)
-      Ns.double.>(double1).get.sorted === List(2.0)
+    Ns.long.>(2L).get.sorted === List()
+    Ns.long.>(0L).get.sorted === List(1L, 2L)
+    Ns.long.>(-2L).get.sorted === List(-1L, 0L, 1L, 2L)
+    Ns.long.>(long1).get.sorted === List(2L)
 
-      Ns.double.<=(-2.0).get.sorted === List(-2.0)
-      Ns.double.<=(0.0).get.sorted === List(-2.0, -1.0, 0.0)
-      Ns.double.<=(2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0, 2.0)
-      Ns.double.<=(double1).get.sorted === List(-2.0, -1.0, 0.0, 1.0)
+    Ns.long.<=(-2L).get.sorted === List(-2L)
+    Ns.long.<=(0L).get.sorted === List(-2L, -1L, 0L)
+    Ns.long.<=(2L).get.sorted === List(-2L, -1L, 0L, 1L, 2L)
+    Ns.long.<=(long1).get.sorted === List(-2L, -1L, 0L, 1L)
 
-      Ns.double.>=(2.0).get.sorted === List(2.0)
-      Ns.double.>=(0.0).get.sorted === List(0.0, 1.0, 2.0)
-      Ns.double.>=(-2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0, 2.0)
-      Ns.double.>=(double1).get.sorted === List(1.0, 2.0)
-
-
-      Ns.bool.<(true).get.sorted === List(false)
-      Ns.bool.<(false).get.sorted === List()
-      Ns.bool.<(bool0).get.sorted === List()
-
-      Ns.bool.>(true).get.sorted === List()
-      Ns.bool.>(false).get.sorted === List(true)
-      Ns.bool.>(bool0).get.sorted === List(true)
-
-      Ns.bool.<=(true).get.sorted === List(false, true)
-      Ns.bool.<=(false).get.sorted === List(false)
-      Ns.bool.<=(bool0).get.sorted === List(false)
-
-      Ns.bool.>=(true).get.sorted === List(true)
-      Ns.bool.>=(false).get.sorted === List(false, true)
-      Ns.bool.>=(bool0).get.sorted === List(false, true)
+    Ns.long.>=(2L).get.sorted === List(2L)
+    Ns.long.>=(0L).get.sorted === List(0L, 1L, 2L)
+    Ns.long.>=(-2L).get.sorted === List(-2L, -1L, 0L, 1L, 2L)
+    Ns.long.>=(long1).get.sorted === List(1L, 2L)
 
 
-      Ns.date.<(date1).get.sorted === List(date0)
-      Ns.date.<(date2).get.sorted === List(date0, date1)
+    Ns.float.<(-2f).get.sorted === List()
+    Ns.float.<(0f).get.sorted === List(-2f, -1f)
+    Ns.float.<(2f).get.sorted === List(-2f, -1f, 0f, 1f)
+    Ns.float.<(float1).get.sorted === List(-2f, -1f, 0f)
 
-      Ns.date.>(date1).get.sorted === List(date2)
-      Ns.date.>(date0).get.sorted === List(date1, date2)
+    Ns.float.>(2f).get.sorted === List()
+    Ns.float.>(0f).get.sorted === List(1f, 2f)
+    Ns.float.>(-2f).get.sorted === List(-1f, 0f, 1f, 2f)
+    Ns.float.>(float1).get.sorted === List(2f)
 
-      Ns.date.<=(date1).get.sorted === List(date0, date1)
-      Ns.date.<=(date2).get.sorted === List(date0, date1, date2)
+    Ns.float.<=(-2f).get.sorted === List(-2f)
+    Ns.float.<=(0f).get.sorted === List(-2f, -1f, 0f)
+    Ns.float.<=(2f).get.sorted === List(-2f, -1f, 0f, 1f, 2f)
+    Ns.float.<=(float1).get.sorted === List(-2f, -1f, 0f, 1f)
 
-      Ns.date.>=(date1).get.sorted === List(date1, date2)
-      Ns.date.>=(date0).get.sorted === List(date0, date1, date2)
-
-
-      // Comparison of random UUIDs omitted...
-
-
-      // todo when we get a string representation #uri
-      //    Ns.uri.<(uri1).get.sorted === List(uri0)
-      //    Ns.uri.>(uri1).get.sorted === List(uri2)
-      //    Ns.uri.<=(uri1).get.sorted === List(uri0, uri1)
-      //    Ns.uri.>=(uri1).get.sorted === List(uri1, uri2)
+    Ns.float.>=(2f).get.sorted === List(2f)
+    Ns.float.>=(0f).get.sorted === List(0f, 1f, 2f)
+    Ns.float.>=(float1).get.sorted === List(1f, 2f)
 
 
-      Ns.enum.<("enum1").get.sorted === List("enum0")
-      Ns.enum.>("enum1").get.sorted === List("enum2")
-      Ns.enum.<=("enum1").get.sorted === List("enum0", "enum1")
-      Ns.enum.>=("enum1").get.sorted === List("enum1", "enum2")
+    Ns.double.<(-2.0).get.sorted === List()
+    Ns.double.<(0.0).get.sorted === List(-2.0, -1.0)
+    Ns.double.<(2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0)
+    Ns.double.<(double1).get.sorted === List(-2.0, -1.0, 0.0)
 
-      Ns.enum.<(enum1).get.sorted === List("enum0")
-      Ns.enum.>(enum1).get.sorted === List("enum2")
-      Ns.enum.<=(enum1).get.sorted === List("enum0", "enum1")
-      Ns.enum.>=(enum1).get.sorted === List("enum1", "enum2")
-    }
+    Ns.double.>(2.0).get.sorted === List()
+    Ns.double.>(0.0).get.sorted === List(1.0, 2.0)
+    Ns.double.>(-2.0).get.sorted === List(-1.0, 0.0, 1.0, 2.0)
+    Ns.double.>(double1).get.sorted === List(2.0)
+
+    Ns.double.<=(-2.0).get.sorted === List(-2.0)
+    Ns.double.<=(0.0).get.sorted === List(-2.0, -1.0, 0.0)
+    Ns.double.<=(2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0, 2.0)
+    Ns.double.<=(double1).get.sorted === List(-2.0, -1.0, 0.0, 1.0)
+
+    Ns.double.>=(2.0).get.sorted === List(2.0)
+    Ns.double.>=(0.0).get.sorted === List(0.0, 1.0, 2.0)
+    Ns.double.>=(-2.0).get.sorted === List(-2.0, -1.0, 0.0, 1.0, 2.0)
+    Ns.double.>=(double1).get.sorted === List(1.0, 2.0)
+
+
+    Ns.bool.<(true).get.sorted === List(false)
+    Ns.bool.<(false).get.sorted === List()
+    Ns.bool.<(bool0).get.sorted === List()
+
+    Ns.bool.>(true).get.sorted === List()
+    Ns.bool.>(false).get.sorted === List(true)
+    Ns.bool.>(bool0).get.sorted === List(true)
+
+    Ns.bool.<=(true).get.sorted === List(false, true)
+    Ns.bool.<=(false).get.sorted === List(false)
+    Ns.bool.<=(bool0).get.sorted === List(false)
+
+    Ns.bool.>=(true).get.sorted === List(true)
+    Ns.bool.>=(false).get.sorted === List(false, true)
+    Ns.bool.>=(bool0).get.sorted === List(false, true)
+
+
+    Ns.date.<(date1).get.sorted === List(date0)
+    Ns.date.<(date2).get.sorted === List(date0, date1)
+
+    Ns.date.>(date1).get.sorted === List(date2)
+    Ns.date.>(date0).get.sorted === List(date1, date2)
+
+    Ns.date.<=(date1).get.sorted === List(date0, date1)
+    Ns.date.<=(date2).get.sorted === List(date0, date1, date2)
+
+    Ns.date.>=(date1).get.sorted === List(date1, date2)
+    Ns.date.>=(date0).get.sorted === List(date0, date1, date2)
+
+
+    // Comparison of random UUIDs omitted...
+
+
+    // todo when we get a string representation #uri
+    //    Ns.uri.<(uri1).get.sorted === List(uri0)
+    //    Ns.uri.>(uri1).get.sorted === List(uri2)
+    //    Ns.uri.<=(uri1).get.sorted === List(uri0, uri1)
+    //    Ns.uri.>=(uri1).get.sorted === List(uri1, uri2)
+
+
+    Ns.enum.<("enum1").get.sorted === List("enum0")
+    Ns.enum.>("enum1").get.sorted === List("enum2")
+    Ns.enum.<=("enum1").get.sorted === List("enum0", "enum1")
+    Ns.enum.>=("enum1").get.sorted === List("enum1", "enum2")
+
+    Ns.enum.<(enum1).get.sorted === List("enum0")
+    Ns.enum.>(enum1).get.sorted === List("enum2")
+    Ns.enum.<=(enum1).get.sorted === List("enum0", "enum1")
+    Ns.enum.>=(enum1).get.sorted === List("enum1", "enum2")
+
+
+    Ns.bigInt.<(bigInt1).get.sorted === List(bigInt0)
+    Ns.bigInt.<(bigInt2).get.sorted === List(bigInt0, bigInt1)
+
+    Ns.bigInt.>(bigInt1).get.sorted === List(bigInt2)
+    Ns.bigInt.>(bigInt0).get.sorted === List(bigInt1, bigInt2)
+
+    Ns.bigInt.<=(bigInt1).get.sorted === List(bigInt0, bigInt1)
+    Ns.bigInt.<=(bigInt2).get.sorted === List(bigInt0, bigInt1, bigInt2)
+
+    Ns.bigInt.>=(bigInt1).get.sorted === List(bigInt1, bigInt2)
+    Ns.bigInt.>=(bigInt0).get.sorted === List(bigInt0, bigInt1, bigInt2)
+
+
+    Ns.bigDec.<(bigDec1).get.sorted === List(bigDec0)
+    Ns.bigDec.<(bigDec2).get.sorted === List(bigDec0, bigDec1)
+
+    Ns.bigDec.>(bigDec1).get.sorted === List(bigDec2)
+    Ns.bigDec.>(bigDec0).get.sorted === List(bigDec1, bigDec2)
+
+    Ns.bigDec.<=(bigDec1).get.sorted === List(bigDec0, bigDec1)
+    Ns.bigDec.<=(bigDec2).get.sorted === List(bigDec0, bigDec1, bigDec2)
+
+    Ns.bigDec.>=(bigDec1).get.sorted === List(bigDec1, bigDec2)
+    Ns.bigDec.>=(bigDec0).get.sorted === List(bigDec0, bigDec1, bigDec2)
+  }
 
 
   "Card many" in new ManySetup {
@@ -315,5 +341,51 @@ class Comparison extends Base {
     Ns.uuid.uuids_.>=(uuid2).get.sorted === List(uuid1, uuid2, uuid3)
     Ns.uuid.uuids_.<=(uuid2).get.sorted === List(uuid1, uuid2, uuid3)
     Ns.uuid.uuids_.<(uuid2).get.sorted === List(uuid1)
+
+
+    Ns.bigInt.bigInts.>(bigInt2).get === List(
+      (bigInt2, Set(bigInt3)),
+      (bigInt3, Set(bigInt4))
+    )
+    Ns.bigInt.bigInts.>=(bigInt2).get === List(
+      (bigInt1, Set(bigInt2)),
+      (bigInt2, Set(bigInt2, bigInt3)),
+      (bigInt3, Set(bigInt4, bigInt2))
+    )
+    Ns.bigInt.bigInts.<=(bigInt2).get === List(
+      (bigInt1, Set(bigInt1, bigInt2)),
+      (bigInt2, Set(bigInt2)),
+      (bigInt3, Set(bigInt2))
+    )
+    Ns.bigInt.bigInts.<(bigInt2).get === List(
+      (bigInt1, Set(bigInt1))
+    )
+    Ns.bigInt.bigInts_.>(bigInt2).get.sorted === List(bigInt2, bigInt3)
+    Ns.bigInt.bigInts_.>=(bigInt2).get.sorted === List(bigInt1, bigInt2, bigInt3)
+    Ns.bigInt.bigInts_.<=(bigInt2).get.sorted === List(bigInt1, bigInt2, bigInt3)
+    Ns.bigInt.bigInts_.<(bigInt2).get.sorted === List(bigInt1)
+
+
+    Ns.bigDec.bigDecs.>(bigDec2).get === List(
+      (bigDec2, Set(bigDec3)),
+      (bigDec3, Set(bigDec4))
+    )
+    Ns.bigDec.bigDecs.>=(bigDec2).get === List(
+      (bigDec1, Set(bigDec2)),
+      (bigDec2, Set(bigDec2, bigDec3)),
+      (bigDec3, Set(bigDec4, bigDec2))
+    )
+    Ns.bigDec.bigDecs.<=(bigDec2).get === List(
+      (bigDec1, Set(bigDec1, bigDec2)),
+      (bigDec2, Set(bigDec2)),
+      (bigDec3, Set(bigDec2))
+    )
+    Ns.bigDec.bigDecs.<(bigDec2).get === List(
+      (bigDec1, Set(bigDec1))
+    )
+    Ns.bigDec.bigDecs_.>(bigDec2).get.sorted === List(bigDec2, bigDec3)
+    Ns.bigDec.bigDecs_.>=(bigDec2).get.sorted === List(bigDec1, bigDec2, bigDec3)
+    Ns.bigDec.bigDecs_.<=(bigDec2).get.sorted === List(bigDec1, bigDec2, bigDec3)
+    Ns.bigDec.bigDecs_.<(bigDec2).get.sorted === List(bigDec1)
   }
 }

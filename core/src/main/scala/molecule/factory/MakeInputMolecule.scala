@@ -18,9 +18,9 @@ private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with
       q"""
       ..${basics(inputDsl)._2}
       new $InputMoleculeTpe[..$InTypes](r.model, r.query) {
-        def apply(args: $InputTypes)(implicit conn: Conn): Molecule0 = {
+        def apply(args: $InputTypes)(implicit conn: Conn): Molecule00 = {
           val query1  = bindValues1(_query, args)
-          new Molecule0(_model, query1) with Util
+          new Molecule00(_model, query1) with Util
         }
       }
     """)
@@ -75,8 +75,9 @@ private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with
                   override def iterator = new Iterator[$A] {
                     private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
                     override def hasNext = jIter.hasNext
+                    private var row: jList[AnyRef] = null
                     override def next() = {
-                      val row = jIter.next()
+                      row = jIter.next()
                       ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
                     }
                   }
@@ -142,8 +143,9 @@ private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with
                 override def iterator = new Iterator[$A] {
                   private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
                   override def hasNext = jIter.hasNext
+                  private var row: jList[AnyRef] = null
                   override def next() = {
-                    val row = jIter.next()
+                    row = jIter.next()
                     ${cast(q"_query", q"row", A, q"0")}.asInstanceOf[$A]
                   }
                 }
@@ -205,8 +207,9 @@ private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with
                   override def iterator = new Iterator[(..$OutTypes)] {
                     private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
                     override def hasNext = jIter.hasNext
+                    private var row: jList[AnyRef] = null
                     override def next() = {
-                      val row = jIter.next()
+                      row = jIter.next()
                       (..${tuple(q"_query", q"row", OutTypes)})
                     }
                   }
@@ -271,8 +274,9 @@ private[molecule] trait MakeInputMolecule[Ctx <: Context] extends Base[Ctx] with
                 override def iterator = new Iterator[(..$OutTypes)] {
                   private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
                   override def hasNext = jIter.hasNext
+                  private var row: jList[AnyRef] = null
                   override def next() = {
-                    val row = jIter.next()
+                    row = jIter.next()
                     (..${tuple(q"_query", q"row", OutTypes)})
                   }
                 }

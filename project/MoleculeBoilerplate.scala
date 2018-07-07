@@ -904,7 +904,7 @@ object MoleculeBoilerplate {
 
         a match {
           case a: Val if a.baseTpe == "K" => None
-          case a                          => Some(s"/** @inheritdoc */ override def $attrClean$$$p2 : $nextNS with $clazz$p8[$nextNS, $nextIn]${exts(a, nextNSShort, nextInShort)} = ???")
+          case a                          => Some(s"/** @inheritdoc */ override def $attrClean$$$p2 : $nextNS with $clazz$$$p8[$nextNS]${exts(a, nextNSShort, nextInShort)} = ???")
         }
       }
     }

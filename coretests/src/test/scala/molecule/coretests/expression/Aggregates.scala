@@ -95,47 +95,47 @@ class Aggregates extends CoreSpec {
     Ns.int(4).save
 
 
-    Ns.str.int.get.toList.sortBy(r => (r._1, r._2)) === List(
+    Ns.str.int.get.sortBy(r => (r._1, r._2)) === List(
       ("a", 1),
       ("b", 2),
       ("b", 3)
     )
 
-    Ns.e.str.int.get.toList.map(r => (r._2, r._3)).sortBy(r => (r._1, r._2)) === List(
+    Ns.e.str.int.get.map(r => (r._2, r._3)).sortBy(r => (r._1, r._2)) === List(
       ("a", 1),
       ("b", 2),
       ("b", 2),
       ("b", 3)
     )
 
-    Ns.str.int(distinct).get.toList.sortBy(_._1) === List(
+    Ns.str.int(distinct).get.sortBy(_._1) === List(
       ("a", Vector(1)),
       ("b", Vector(3, 2)),
     )
 
-    Ns.int.str(distinct).get.toList.sortBy(_._1) === List(
+    Ns.int.str(distinct).get.sortBy(_._1) === List(
       (1, Vector("a")),
       (2, Vector("b")),
       (3, Vector("b")),
     )
 
-    Ns.str.int(count).get.toList.sortBy(_._1) === List(
+    Ns.str.int(count).get.sortBy(_._1) === List(
       ("a", 1),
       ("b", 2),
     )
 
-    Ns.int.str(count).get.toList.sortBy(_._1) === List(
+    Ns.int.str(count).get.sortBy(_._1) === List(
       (1, 1),
       (2, 1),
       (3, 1),
     )
 
-    Ns.str.int(countDistinct).get.toList.sortBy(_._1) === List(
+    Ns.str.int(countDistinct).get.sortBy(_._1) === List(
       ("a", 1),
       ("b", 2),
     )
 
-    Ns.int.str(countDistinct).get.toList.sortBy(_._1) === List(
+    Ns.int.str(countDistinct).get.sortBy(_._1) === List(
       (1, 1),
       (2, 1),
       (3, 1),

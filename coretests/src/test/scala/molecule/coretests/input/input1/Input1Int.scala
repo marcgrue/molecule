@@ -8,11 +8,11 @@ import molecule.imports._
 class Input1Int extends CoreSpec {
 
   class OneSetup extends CoreSetup {
-    Ns.int.str insert List((1, "a"), (2, "b"), (3, "c"))
+    Ns.long.int insert List((1L, 1), (2L, 2), (3L, 3))
   }
 
   class ManySetup extends CoreSetup {
-    Ns.int.strs insert List((1, Set("a", "b")), (2, Set("b", "c")), (3, Set("c", "d")))
+    Ns.long.ints insert List((1L, Set(1, 2)), (2L, Set(2, 3)), (3L, Set(3, 4)))
   }
 
   "Cardinality one" >> {
@@ -55,8 +55,25 @@ class Input1Int extends CoreSpec {
   "Cardinality many" >> {
 
     "Expressions" in new ManySetup {
+
+      // Varargs of Sets of values
       m(Ns.long.ints_(?)).apply(Set(1)).get.sorted === List(1L)
-      m(Ns.long.ints_(?)).apply(Seq(1)).get.sorted === List(1L)
+      m(Ns.long.ints_(?)).apply(Set(1), Set(2)).get.sorted === List(1L, 2L)
+
+      // Seq of Sets of values
+      m(Ns.long.ints_(?)).apply(Seq(Set(1))).get.sorted === List(1L)
+      m(Ns.long.ints_(?)).apply(Seq(Set(1), Set(2))).get.sorted === List(1L, 2L)
+
+      // Set of Sets of values
+      m(Ns.long.ints_(?)).apply(Set(Set(1))).get.sorted === List(1L)
+      m(Ns.long.ints_(?)).apply(Set(Set(1), Set(2))).get.sorted === List(1L, 2L)
+
+      // OR expressions with Sets of values
+      m(Ns.long.ints_(?)).apply(Set(1) or Set(2)).get.sorted === List(1L, 2L)
+
+      // Can't resolve Seq of individual values to card-many attribute
+      // m(Ns.long.ints_(?)).apply(Seq(1)).get.sorted === List(1L)
+
       m(Ns.long.ints_(?))(Set(2)).get.sorted === List(1L, 2L)
       m(Ns.long.ints_(?))(Set(3)).get.sorted === List(2L, 3L)
       m(Ns.long.ints_(?))(Set(4)).get.sorted === List(3L)

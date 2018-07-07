@@ -709,8 +709,7 @@ private[molecule] trait GetJson[Ctx <: Context] extends Base[Ctx] {
 
         def getFieldNames(es: Seq[Element], tx: Boolean = false): Seq[String] = es.collect {
           case Composite(subElements)                 => getFieldNames(subElements)
-          case TxMetaData(txElements)                 => getFieldNames(Meta("", "tx", "tx", NoValue, EntValue) +: txElements, true)
-          case TxMetaData_(txElements)                => getFieldNames(txElements, true)
+          case TxMetaData(txElements)                 => getFieldNames(txElements, true)
           case Meta(_, _, _, _, _) if tx              => Seq("tx")
           case Meta(_, _, kind, _, _)                 => Seq(kind)
           case Atom(ns, attr, _, _, _, _, _, _) if tx => Seq("tx." + ns + "." + attr)

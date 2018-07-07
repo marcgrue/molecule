@@ -78,7 +78,14 @@ private[molecule] case class NestedJson(modelE: Model, queryE: Query) {
     tpe match {
       case r"Map\[String,(.*)$t\]" if optional => jsonOptionMap(buf, value, t)
       case r"Set\[(.*)$t\]" if optional        => jsonOptionSet(buf, value, t)
-      case t if optional                       => jsonOptionValue(buf, value, t)
+      case t if optional                       =>
+//        println("---------------------------")
+//        println("field: " + field0)
+//        println("type : " + t)
+//        println("value: " + value)
+//        println("card : " + card)
+//        println("other: " + jsonOptionSet(buf, value, t))
+        jsonOptionValue(buf, value, t)
       case t if card >= 3                      => jsonMap(buf, value, t)
       case t if card == 2                      => jsonSet(buf, value, t)
       case t                                   => jsonValue(buf, value, t)
@@ -615,7 +622,7 @@ private[molecule] case class NestedJson(modelE: Model, queryE: Query) {
 
     val buf0 = new StringBuilder("[")
     val buffers = buf0 :: fieldIndexes.keys.toList.sorted.tail.map(_ => new StringBuilder(""))
-    val descendingLevels = fieldIndexes.keys.toSeq.sorted.reverse
+    val descendingLevels = fieldIndexes.keys.toList.sorted.reverse
 
     def addPairs(buf: StringBuilder, level: Int, fields: Seq[(Int, Int, String, String, Int, Boolean)], row: Seq[Any]) {
       buf.append("\n" + "   " * level + "{")

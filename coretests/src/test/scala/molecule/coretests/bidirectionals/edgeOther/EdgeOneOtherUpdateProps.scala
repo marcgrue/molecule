@@ -1,11 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.imports._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.coretests.bidirectionals.schema.BidirectionalSchema
+import molecule.imports._
 import molecule.util._
-import org.specs2.specification.Scope
 
 class EdgeOneOtherUpdateProps extends MoleculeSpec {
 

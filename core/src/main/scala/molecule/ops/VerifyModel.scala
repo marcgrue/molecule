@@ -24,6 +24,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   private def verifyInsert() {
     unexpectedAppliedId
     noGenericsInTail
+    onlyTacitTxAttrs
     noTacitAttrs
     noTransitiveAttrs
     missingAttrInStartEnd
@@ -47,6 +48,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   private def iae(method: String, msg: String) = {
     throw new IllegalArgumentException(s"[molecule.ops.VerifyModel.$method]  $msg")
+//    throw new IllegalArgumentException(s"[molecule.ops.VerifyModel.$method]  $msg\nMODEL: $model\nOP: $op")
   }
 
   private def extractNs(fullAttr: String) = {
@@ -58,13 +60,13 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   // Avoid mixing insert/update style
   private def unexpectedAppliedId = model.elements.head match {
-    case Meta(ns, _, "e", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
+    case Meta(ns, _, "e", NoValue, Eq(List(eid)))  => iae("unexpectedAppliedId",
       s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
         s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
     case Meta(ns, _, "ns", NoValue, Eq(List(eid))) => iae("unexpectedAppliedId",
       s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
         s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
-    case ok                                       => ok
+    case ok                                        => ok
   }
   private def missingAppliedId = model.elements.head match {
     case Meta(_, _, "e", BiEdge, Eq(List(eid))) => true
@@ -76,6 +78,15 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case Meta(_, _, "e", _, Eq(List(eid))) => iae("noGenerics",
       s"Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in $op molecules. Found `e($eid)`")
+  }
+
+  private def onlyTacitTxAttrs = model.elements.collect {
+    case TxMetaData(es) => es.collectFirst {
+      case Atom(ns, attr, _, _, _, _, _, _) if !attr.endsWith("_") =>
+        val attrClean = if (attr.endsWith("$")) attr.init else attr
+        iae("noTacitTxAttrs",
+          s"For inserts, tx meta data can only be applied to tacit attributes, like: `${ns.capitalize}.${attrClean}_(<metadata>)`")
+    }
   }
 
   private def noTacitAttrs {

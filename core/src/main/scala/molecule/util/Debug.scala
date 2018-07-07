@@ -7,7 +7,7 @@ import molecule.ast.transaction._
 //import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99) {
+private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99) {
 
   // Helpers ..........................................
 
@@ -54,7 +54,6 @@ case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace:
           case l: Map[_, _]           => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Nested(bond, nested)   => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case TxMetaData(elements)   => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case TxMetaData_(elements)  => indent + "TxMetaData_(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Composite(elements)    => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case m: Model               => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case m: java.util.Map[_, _] => {

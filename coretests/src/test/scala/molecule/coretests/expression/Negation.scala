@@ -164,6 +164,24 @@ class Negation extends Base {
     Ns.enum.not(Seq(enum0, enum1)).get.sorted === List(enum2)
     val enums = Seq(enum0, enum1)
     Ns.enum.not(enums).get.sorted === List(enum2)
+
+
+    val bigInt3 = BigInt(42)
+    Ns.bigInt.not(bigInt3).get.sortBy(_.toString) === List(bigInt0, bigInt1, bigInt2)
+    Ns.bigInt.not(bigInt0).get.sortBy(_.toString) === List(bigInt1, bigInt2)
+    Ns.bigInt.not(bigInt0, bigInt1).get.sortBy(_.toString) === List(bigInt2)
+    Ns.bigInt.not(Seq(bigInt0, bigInt1)).get.sortBy(_.toString) === List(bigInt2)
+    val bigInts = Seq(bigInt0, bigInt1)
+    Ns.bigInt.not(bigInts).get.sortBy(_.toString) === List(bigInt2)
+
+
+    val bigDec3 = BigDecimal(42.0)
+    Ns.bigDec.not(bigDec3).get.sortBy(_.toString) === List(bigDec0, bigDec1, bigDec2)
+    Ns.bigDec.not(bigDec0).get.sortBy(_.toString) === List(bigDec1, bigDec2)
+    Ns.bigDec.not(bigDec0, bigDec1).get.sortBy(_.toString) === List(bigDec2)
+    Ns.bigDec.not(Seq(bigDec0, bigDec1)).get.sortBy(_.toString) === List(bigDec2)
+    val bigDecs = Seq(bigDec0, bigDec1)
+    Ns.bigDec.not(bigDecs).get.sortBy(_.toString) === List(bigDec2)
   }
 
 

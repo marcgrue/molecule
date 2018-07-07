@@ -161,17 +161,6 @@ class Equality extends Base {
     Ns.uuids(uuid4).get === List(Set(uuid4, uuid2))
 
 
-//    println(Peer.q("""[:find  (distinct ?b)
-//             | :where [?a :ns/bigInts (biginteger 1)]
-//             |        [?a :ns/bigInts ?b]]""".stripMargin, conn.db))
-//
-//    println(Peer.q("""[:find  (distinct ?b)
-//             | :where [?a :ns/bigInts 1N]
-//             |        [?a :ns/bigInts ?b]]""".stripMargin, conn.db))
-//
-//    Ns.ints(int1).getD
-//    Ns.bigInts(bigInt1).getD
-//    Ns.bigInts(bigInt1, bigInt2).getD
     Ns.bigInts(bigInt1).get === List(Set(bigInt1, bigInt2))
     Ns.bigInts(bigInt2).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
     Ns.bigInts(bigInt3).get === List(Set(bigInt3, bigInt2))

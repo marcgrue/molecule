@@ -1,4 +1,4 @@
-package molecule.entity
+package molecule.composition
 
 trait MapOps {
 

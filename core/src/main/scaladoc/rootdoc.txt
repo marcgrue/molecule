@@ -1,12 +1,54 @@
-Documentation for the Molecule library - a meta DSL for the [[https://www.datomic.com Datomic]] database.
+<img src="http://www.scalamolecule.org/img/logo/MoleculeLogo200.png">
 
-== Package structure ==
+Documentation/API for the Molecule library - a meta DSL for the [[https://www.datomic.com Datomic]] database.
 
-@docRoot hej
+[[http://www.scalamolecule.org Manual]] |
+[[http://www.scalamolecule.org scalamolecule.org]] |
+[[https://github.com/scalamolecule/molecule Github]] |
+[[https://groups.google.com/forum/#!forum/molecule-dsl Forum]]
 
-<img src="{@docRoot}/doc-files/MoleculeLogo150.png">
-<img src="http://www.scalamolecule.org/front/">
+
+== Quick jump to packages ==
+
+ - [[molecule.schema Define schema]]
+ - [[molecule.facade Connect to Datomic]]
+ - [[molecule.imports Imports]]
+ - [[molecule.composition Compose molecules]]
+ - [[molecule.action Execute actions on molecule]]
+ - [[molecule.entity Traverse entity graph]]
+ - [[molecule.exceptions Exceptions]]
+
 
 <img src="http://www.scalamolecule.org/img/logo/MoleculeLogo200.png">
 
-@img
+
+Documentation is
+
+== 1. Define schema ==
+
+ - [[molecule.schema Define schema]]
+
+
+== 2. Setup ==
+
+ - [[molecule.imports Imports]]
+ - [[molecule.facade Connect to Datomic]]
+
+
+== 3. Compose molecules ==
+
+ - [[molecule.composition Compose molecules]]
+   - [[molecule.composition Compose molecules]]
+   - [[molecule.composition Compose molecules]]
+ - [[molecule.entity Traverse entity graph]]
+
+
+== 4. Execute molecules ==
+
+ - [[molecule.action Execute actions on molecule]]
+
+
+== 5. Misc ==
+ - [[molecule.exceptions Exceptions]]
+
+

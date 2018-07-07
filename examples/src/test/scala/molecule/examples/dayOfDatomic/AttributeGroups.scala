@@ -18,6 +18,6 @@ class AttributeGroups extends MoleculeSpec {
     attrInNs("story").get === List(":story/url", ":story/title")
 
     // Find all entities possessing *any* story attribute (the 3 stories)
-    Db.e.ns_("story").get.toSeq.sorted === List(s1, s2, s3)
+    Db.e.ns_("story").get.sorted === List(s1, s2, s3)
   }
 }

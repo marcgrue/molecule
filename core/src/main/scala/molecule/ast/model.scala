@@ -15,9 +15,6 @@ private[molecule] object model {
           case TxMetaData(nestedElements)   =>
             s"""|TxMetaData(List(
                 |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
-          case TxMetaData_(nestedElements)  =>
-            s"""|TxMetaData_(List(
-                |$s  ${draw(nestedElements, indent + 2).mkString(s",\n$s  ")}))""".stripMargin
           case Composite(elements)          =>
             s"""|Composite(List(
                 |$s  ${draw(elements, indent + 2).mkString(s",\n$s    ")}))""".stripMargin
@@ -73,7 +70,6 @@ private[molecule] object model {
     value: Value) extends Element
 
   case class TxMetaData(elements: Seq[Element]) extends Element
-  case class TxMetaData_(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
   case object Self extends Element
   case object EmptyElement extends Element
@@ -127,8 +123,8 @@ private[molecule] object model {
   case class NsValue(values: Seq[String]) extends Generic
   case class AttrVar(v: String) extends Generic
 
-  case object TxValue extends Generic
-  case object TxValue_ extends Generic
+  case class TxValue(t: Option[Any] = None) extends Generic
+  case class TxValue_(t: Option[Any] = None) extends Generic
 
   case class TxTValue(t: Option[Any] = None) extends Generic
   case class TxTValue_(t: Option[Any] = None) extends Generic

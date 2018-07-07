@@ -54,7 +54,6 @@ private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
       case Nested(_, nestedElements)                              => mapIdentifiers(nestedElements, identifiers0)
       case Composite(compositeElements)                           => mapIdentifiers(compositeElements, identifiers0)
       case TxMetaData(txElements)                                 => mapIdentifiers(txElements, identifiers0)
-      case TxMetaData_(txElements)                                => mapIdentifiers(txElements, identifiers0)
     }).flatten
     (identifiers0 ++ newIdentifiers).distinct
   }
@@ -179,7 +178,6 @@ private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
           case Nested(ns, nestedElements)                                   => Nested(ns, resolveIdentifiers(nestedElements))
           case Composite(compositeElements)                                 => Composite(resolveIdentifiers(compositeElements))
           case TxMetaData(txElements)                                       => TxMetaData(resolveIdentifiers(txElements))
-          case TxMetaData_(txElements)                                      => TxMetaData_(resolveIdentifiers(txElements))
           case other                                                        => other
         }
         val model: Model = Model(resolveIdentifiers($model.elements))
@@ -208,9 +206,6 @@ private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
         private val q = _query
 
         def date(s: String): Date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s)
-
-        // Raw API
-        //override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
 
         // Print transitions of a `get` call to console
         protected def getD_(implicit conn: Conn) {

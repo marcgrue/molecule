@@ -36,6 +36,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
       case (e, Atom(_, _, _, _, Fn("not", _), _, _, _))                   => (e, stmts)
       case (e, Atom(_, _, _, _, Eq(Seq(None)), _, _, _))                  => (e, stmts)
 
+      // First
       case ('_, Meta(ns, _, "e", _, EntValue))              => ('arg, stmts)
       case ('_, Meta(ns, _, "e", _, Eq(Seq(id: Long))))     => (Eid(id), stmts)
       case ('_, Meta(ns, _, "e", _, Eq(ids: Seq[_])))       => (Eids(ids), stmts)
@@ -71,15 +72,14 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
       // Transaction annotations
       case ('_, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
       case ('e, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
-      case ('_, TxMetaData_(elements))      => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxMetaData_(elements))      => ('e, stmts ++ resolveTx(elements))
       case (Eid(id), TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
-      case (Eid(id), TxMetaData_(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
-      case ('tx, Atom(ns, name, _, c, VarValue, _, _, _))                                           => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, Card(c)))
       case ('tx, Atom(ns, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ('tx, stmts :+ Add('tx, s":$ns/${name.init}", Values(value, prefix), Card(c)))
       case ('tx, Atom(ns, name, _, c, value, prefix, _, _))                                         => ('tx, stmts :+ Add('tx, s":$ns/$name", Values(value, prefix), Card(c)))
+      case ('tx, Bond(ns, refAttr, refNs, c, gs))                                                   => ('tx, stmts :+ Add('tx, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
+      case ('tx, other)                                                                             =>
+        iae("stmtsModel", s"Transaction data can only have references and attributes with applied value:\nMODEL: $model \nFOUND: $other\nSTMTS: $stmts")
 
       // Next namespace
       case ('v, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('v, s":$ns/$name", 'arg, bi(gs, c)))
@@ -682,13 +682,11 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
     stmts ++ newStmts
   }
 
-  def splitStmts(): (Seq[Statement], Seq[Statement]) = {
-    val (genericStmtsOpt, genericTxStmtsOpt) = stmtsModel.map {
-      case tx@Add('tx, _, Values(vs, prefix), _) => (None, Some(tx))
-      case other                                 => (Some(other), None)
-    }.unzip
-    (genericStmtsOpt.flatten, genericTxStmtsOpt.flatten)
+  def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {
+    case ((stmts, txStmts), txStmt@Add('tx, _, _, _)) => (stmts, txStmts :+ txStmt)
+    case ((stmts, txStmts), stmt)                     => (stmts :+ stmt, txStmts)
   }
+
 
   def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: Generic) = {
     bi match {
@@ -703,7 +701,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
           nestedE
         else if (stmts.isEmpty)
           tempId(attr)
-        else if (stmts.last.e == -1)
+        else if (stmts.last.e == -1 || stmts.last.e.toString.startsWith("#db/id[:db.part/tx") && stmts.last.v.toString.startsWith("#db/id[:db.part/"))
           stmts.last.v
         else
           stmts.last.e
@@ -854,7 +852,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
       (next, edgeB, stmts ++ nestedInsertStmts)
     }
 
-    case unexpected => iae("matchDataStmt", "Unexpected insert statement: " + unexpected)
+    case unexpected => iae("matchDataStmt", s"Unexpected insert statement: $unexpected\nGenericStmt: $genericStmt\nStmts:\n" + stmts.mkString("\n"))
   }
 
 
@@ -896,14 +894,18 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
     }._3.filterNot(_.e == -1)
   }
 
+  def txRefAttr(stmts: Seq[Statement]) = stmts.nonEmpty && stmts.last.v.toString.startsWith("#db/id[:db.part/")
 
   def insertStmts(dataRows: Seq[Seq[Any]]): Seq[Seq[Statement]] = {
     val (genericStmts, genericTxStmts) = splitStmts()
     val dataStmtss: Seq[Seq[Statement]] = dataRows.map(resolveStmts(genericStmts, _))
     val txId = tempId("tx")
     val txStmtss: Seq[Seq[Statement]] = Seq(genericTxStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add('tx, a, Values(vs, prefix), bi)) => valueStmts(stmts, txId, a, vs, prefix, bi, None)
-      case (stmts, unexpected)                          => iae("insertStmts", "Unexpected insert statement: " + unexpected)
+      case (stmts, Add('tx, a, Values(vs, prefix), bi)) if txRefAttr(stmts) => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add('tx, a, Values(vs, prefix), bi))                     => valueStmts(stmts, txId, a, vs, prefix, bi, None)
+      case (stmts, Add('tx, a, refNs: String, bi))                          => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
+      case (stmts, Add('v, a, Values(vs, prefix), bi))                      => valueStmts(stmts, txId, a, vs, prefix, bi, None)
+      case (stmts, unexpected)                                              => iae("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
@@ -913,21 +915,23 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
     val txId = tempId("tx")
     stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
       genericStmt match {
-        case Add('tempId, a, Values(vs, pf), bi@BiEdgePropAttr(_)) => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
-        case Add('tempId, a, Values(vs, pf), bi)                   => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
-        case Add('e, a, 'tempId, bi)                               => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
-        case Add(e, a, 'tempId, bi)                                => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
-        case Add('e, a, Values(vs, prefix), bi)                    => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB))
-        case Add('e, a, refNs: String, bi@BiEdgeRef(_, _))         => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB1))
-        case Add('e, a, refNs: String, bi@BiTargetRef(_, _))       => (None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add('e, a, refNs: String, bi)                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add('v, a, Values(vs, prefix), bi)                    => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add('tx, a, Values(vs, prefix), bi)                   => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
-        case Add('ns, a, _, _)                                     => (edgeB, stmts)
-        case Retract(_, _, _, _)                                   => (edgeB, stmts)
-        case Add(id: Long, a, Values(_, _), _)                     => iae("saveStmts", s"With a given id `$id` please use `update` instead.")
-        case Add(_, a, 'arg, _)                                    => iae("saveStmts", s"Attribute `$a` needs a value applied")
-        case unexpected                                            => iae("saveStmts", "Unexpected save statement: " + unexpected)
+        case Add('tempId, a, Values(vs, pf), bi@BiEdgePropAttr(_))   => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
+        case Add('tempId, a, Values(vs, pf), bi)                     => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
+        case Add('e, a, 'tempId, bi)                                 => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
+        case Add(e, a, 'tempId, bi)                                  => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
+        case Add('e, a, Values(vs, prefix), bi)                      => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB))
+        case Add('e, a, refNs: String, bi@BiEdgeRef(_, _))           => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB1))
+        case Add('e, a, refNs: String, bi@BiTargetRef(_, _))         => (None, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add('e, a, refNs: String, bi)                           => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add('v, a, Values(vs, prefix), bi)                      => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add('tx, a, Values(vs, prefix), bi) if txRefAttr(stmts) => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add('tx, a, Values(vs, prefix), bi)                     => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
+        case Add('tx, a, refNs: String, bi)                          => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add('ns, a, _, _)                                       => (edgeB, stmts)
+        case Retract(_, _, _, _)                                     => (edgeB, stmts)
+        case Add(id: Long, a, Values(_, _), _)                       => iae("saveStmts", s"With a given id `$id` please use `update` instead.")
+        case Add(_, a, 'arg, _)                                      => iae("saveStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                                              => iae("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
       }
     }._2
   }

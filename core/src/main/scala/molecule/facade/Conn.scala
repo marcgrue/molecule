@@ -127,8 +127,8 @@ class Conn(datConn: datomic.Connection) {
 
   // Convenience function for querying directly against Datomic (untyped)
   // Note how we can still use a test db!
-  def q(query: String, inputs: String*): jCollection[jList[AnyRef]] = q(query, db, inputs: _*)
-  def q(query: String, db: Database, inputs: String*): jCollection[jList[AnyRef]] = Peer.q(query, db +: inputs.toSeq: _*)
+  def q(query: String, inputs: AnyRef*): jCollection[jList[AnyRef]] = q(query, db, inputs: _*)
+  def q(query: String, db: Database, inputs: AnyRef*): jCollection[jList[AnyRef]] = Peer.q(query, db +: inputs.toSeq: _*)
 
   def query(m: Model, q: Query): jCollection[jList[AnyRef]] = {
     val p = (expr: QueryExpr) => Query2String(q).p(expr)

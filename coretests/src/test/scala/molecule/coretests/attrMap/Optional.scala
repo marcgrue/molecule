@@ -1,9 +1,9 @@
 package molecule.coretests.attrMap
 
+import molecule.composition.MapOps
 import molecule.imports._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
-import molecule.ops.MapOps
 
 class Optional extends Base with MapOps {
 
@@ -28,7 +28,7 @@ class Optional extends Base with MapOps {
     )
 
     // Values with "en" key
-    // We can't apply values to optional values (like `Ns.int.strMap$("en")`)
+    // We can't apply values to optional map values (like `Ns.int.strMap$("en")`)
     // Instead we process the results:
     Ns.int.strMap$.get.map { case (i, s) => (i, s.flatMap(_.get("en"))) } === List(
       (1, Some("Hi there")),

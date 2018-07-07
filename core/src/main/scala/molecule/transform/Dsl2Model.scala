@@ -16,41 +16,11 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     tree, (t: Tree) => abort(s"[Dsl2Model:resolve] Unexpected tree: $t\nRAW: ${showRaw(t)}"))
 
   def traverse(prev: Tree, element: Element): Seq[Element] = {
-    //            x(25,
-    //              prev,
-    //              element,
-    //              prev.isAttr,
-    //              prev.symbol.isModule,
-    //              prev.symbol.isMethod,
-    //              prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS,
-    //              prev.isAttr || prev.isNS && !q"$prev".isFirstNS,
-    //              prev.isNS,
-    //              prev.isNS && !q"$prev".isFirstNS
-    //            )
-    //    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) :+ element else Seq(element)
-    //    if (prev.isAttr || prev.symbol.isModule) resolve(prev) :+ element else Seq(element)
-    //    if (prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS) resolve(prev) :+ element else Seq(element)
     if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) :+ element else Seq(element)
-    //    if(q"$prev".isFirstNS) Seq(element) else resolve(prev) :+ element
   }
 
   def traverse(prev: Tree, elements: Seq[Element]): Seq[Element] = {
-    //        x(2, prev, elements)
-    //    x(26,
-    //      prev,
-    //      elements,
-    //      prev.isAttr,
-    //      prev.symbol.isModule,
-    //      prev.symbol.isMethod,
-    //      prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS,
-    //      prev.isAttr || prev.isNS && !q"$prev".isFirstNS,
-    //      prev.isNS,
-    //      prev.isNS && !q"$prev".isFirstNS
-    //    )
-    //    if (prev.isAttr || prev.symbol.isMethod) resolve(prev) ++ elements else elements
-    //    if (prev.isAttr || prev.symbol.isModule && !q"$prev".isFirstNS) resolve(prev) ++ elements else elements
     if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) ++ elements else elements
-    //    if(q"$prev".isFirstNS) elements else resolve(prev) ++ elements
   }
 
   def kw(kwTree: Tree): (String, String) = (kwTree.toString(): String) match {
@@ -98,10 +68,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
     // Transaction meta data
-    case q"$prev.tx_.apply($txMolecule)"       => traverse(q"$prev", TxMetaData_(resolve(q"$txMolecule")))
-    case q"$prev.tx_.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData_(resolve(q"$txMolecule")))
-    case q"$prev.tx.apply($txMolecule)"        => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
-    case q"$prev.tx.apply[..$t]($txMolecule)"  => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
+    case q"$prev.Tx.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
 
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
@@ -117,7 +84,9 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.op" if prev.toString.endsWith("$")        => abort(s"[Dsl2Model:dslStructure] Optional attributes (`" + q"$prev".name + "`) can't be followed by generic attributes (`op`).")
 
     // ns.attr.txInstant etc.. (transaction related to previous attribute)
-    case q"$prev.tx"                      => traverse(q"$prev", Meta("db", "tx", "tx", TxValue, NoValue))
+    case q"$prev.tx_.apply($t)"           => traverse(q"$prev", Meta("db", "tx", "tx", TxValue_(Some(extract(q"$t"))), NoValue))
+    case q"$prev.tx.apply($t)"            => traverse(q"$prev", Meta("db", "tx", "tx", TxValue(Some(extract(q"$t"))), NoValue))
+    case q"$prev.tx"                      => traverse(q"$prev", Meta("db", "tx", "tx", TxValue(None), NoValue))
     case q"$prev.t_.apply($t)"            => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue_(Some(extract(q"$t"))), NoValue))
     case q"$prev.t.apply($t)"             => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(Some(extract(q"$t"))), NoValue))
     case q"$prev.t"                       => traverse(q"$prev", Meta("db", "txT", "tx", TxTValue(None), NoValue))
@@ -157,14 +126,6 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     case r@q"$prev.$backRefAttr" if backRefAttr.toString.head == '_' =>
       val backRef = c.typecheck(q"$prev.$backRefAttr").tpe.typeSymbol.name.toString // "partition_Ns_<arity>"
-//      x(28
-//        ,prev
-//        ,backRefAttr
-//        ,backRef
-//        ,firstLow(backRef.tail)
-//        ,firstLow(backRef.replaceFirst("_[0-9]+$", ""))
-//      )
-//      traverse(q"$prev", ReBond(firstLow(backRef.replaceFirst("_[0-9]+$", "")), "")) // "partition_Ns"
       traverse(q"$prev", ReBond(firstLow(backRef.tail), "")) // "partition_Ns"
 
     case a@q"$prev.$ref" if a.isRef         => traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard, bi(a)))
@@ -182,37 +143,26 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
     // Keyed attribute map operation
-    case t@q"$prev.$cur.apply($key).$op(..$values)" if q"$prev.$cur.apply($key)".isMapAttrK =>
-      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
-      val attrTpe = funcLitTpe.typeArgs(1)
-      val ns = new nsp(attrTpe.typeSymbol.owner).toString
-      val tpe0 = funcLitTpe.typeArgs.last
-      val tpe = tpe0 match {
-        case t1 if t1 <:< weakTypeOf[One[_, _, _]]        => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
-        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_, _]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_, _]].typeSymbol).typeArgs.head
-      }
+    case t@q"$prev.$cur($key).$op(..$values)" if q"$prev.$cur($key)".isMapAttrK =>
       val value: Value = modelValue(op.toString(), t, q"Seq(..$values)")
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+      val tpe0 = c.typecheck(q"$prev.$cur($key)").tpe
+      val ns = new nsp(tpe0.typeSymbol.owner).toString
+      val tpe = tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, value, None, Nil, Seq(extract(q"$key").toString))
+      walk(q"$prev", ns, q"$cur", element)
 
     // Keyed attribute map
-    case t@q"$prev.$cur.apply($key)" if t.isMapAttrK =>
-      val funcLitTpe = c.typecheck(q"$prev.$cur").tpe
-      val attrTpe = funcLitTpe.typeArgs(1)
-      val ns = new nsp(attrTpe.typeSymbol.owner).toString
-      val tpe0 = funcLitTpe.typeArgs.last
-      val tpe = tpe0 match {
-        case t1 if t1 <:< weakTypeOf[One[_, _, _]]        => tpe0.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
-        case t1 if t1 <:< weakTypeOf[OneValueAttr$[_, _]] => tpe0.baseType(weakTypeOf[OneValueAttr$[_, _]].typeSymbol).typeArgs.head
-      }
-      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, bi(q"$prev.$cur"), Seq(extract(q"$key").toString))
-      walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
+    case t@q"$prev.$cur($key)" if t.isMapAttrK =>
+      val ns = new nsp(t.tpe.typeSymbol.owner).toString
+      val tpe = t.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last
+      val element = Atom(ns, cur.toString, cast(tpe.toString), 4, VarValue, None, Nil, Seq(extract(q"$key").toString))
+      walk(q"$prev", ns, q"$cur", element)
 
 
     // Attribute operations -----------------------------
 
     case q"$prev.$ref.apply(..$values)" if q"$prev.$ref".isRef => abort(s"[Dsl2Model:dslStructure] Can't apply value to a reference (`$ref`)")
-    case t@q"$prev.$cur.$op(..$values)" =>
+    case t@q"$prev.$cur.$op(..$values)"                        =>
       val element = resolveOp(q"$prev", q"$cur", q"$prev.$cur", q"$op", q"Seq(..$values)")
       walk(q"$prev", q"$prev.$cur".ns, q"$cur", element)
 
@@ -246,7 +196,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
 
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
-//    val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
+    //    val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
     val prevElements = if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
     val curIsVarValue = thisElement match {
@@ -254,18 +204,8 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case _                                   => false
     }
     if (prevElements.isEmpty) {
-      //      x(22,
-      //        prev,
-      //        thisElement,
-      //        traverse(q"$prev", thisElement)
-      //      )
       traverse(q"$prev", thisElement)
     } else {
-      //      x(23,
-      //        prev,
-      //        thisElement,
-      //        prevElements
-      //      )
       prevElements.last match {
         case Atom(`curNs`, prevAttr0, _, _, _, _, _, _) if clean(prevAttr0) == clean(attr) && curIsVarValue =>
           //          x(30, prevElements, thisElement)
@@ -307,14 +247,14 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case k@q"$p.apply($value)" if k.isMapAttrK   => new nsp(c.typecheck(k).tpe.typeSymbol.owner)
       case q"$p.apply($value)" if q"$p".isAttr     => q"$p".ns
       case q"$p.apply($value)"                     => q"$p".name
-      case p if p.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""))
+      case p if p.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.tail)
       case p if p.isAttr                           => p.ns
       case p if p.isRef                            => p.refNext
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, bi(q"$prev.$manyRef")), nestedElems)
-    //        x(28, prev, parentNs, nestedElems, nested, refNext, q"$prev.$manyRef", q"$prev.$manyRef".card)
+    //            x(28, prev, parentNs, nestedElems, nested, refNext, q"$prev.$manyRef", q"$prev.$manyRef".card)
     nested
   }
 
@@ -323,17 +263,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val nestedNs = curNs(nestedElements.head)
     if (refNext != nestedNs) {
       // Find refs in `manyRef` namespace and match the target type with the first namespace of the first nested element
-//      val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
       val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isModule && e.typeSignature <:< weakTypeOf[Ref[_, _]])
-
-//      val manyRefs = c.typecheck(manyRef)
-//      x(20,
-//        manyRefs,
-//        manyRefs.tpe.members.filter(_.isModule).last,
-//        manyRefs.tpe.members.filter(_.isModule).last.typeSignature ,
-//        manyRefs.tpe.members.filter(_.isModule).last.typeSignature <:< weakTypeOf[Ref[_, _]],
-//      )
-
       val refPairs = refs.map(r => r.name -> r.typeSignature.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name)
       val refPairsFiltered = refPairs.filter(_._2.toString == nestedNs.capitalize)
       if (refPairsFiltered.isEmpty) {
@@ -394,23 +324,20 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     val value: Value = modelValue(op.toString(), attr, values0)
     val enumPrefix = if (attr.isAnyEnum) Some(attr.at.enumPrefix) else None
     val cur = curTree.toString()
-    //        x(35, value, enumPrefix, attr.name)
     previous match {
       case prev if cur.head.isUpper          => Atom(attr.name, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
       case prev if cur == "e" && prev.isRef  => Meta(prev.name, prev.refNext, "e", NoValue, value)
       case prev if cur == "e_" && prev.isRef => Meta(prev.name, prev.refNext, "e", NoValue, value)
-      //      case prev if cur == "e_" && prev.isAttr => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      //      case prev if cur == "e" && prev.isAttr  => Atom(prev.ns, cur, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if cur == "e"     => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "e_"    => Meta(prev.name, cur, "e", NoValue, value)
-      case prev if cur == "a"     => Atom("?", "attr", "a", 1, value, gs = bi(attr))
-      case prev if cur == "a_"    => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
-      case prev if cur == "ns"    => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
-      case prev if cur == "ns_"   => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
-      case prev if attr.isMapAttr => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
-      case prev if attr.isAttr    => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev if prev.isAttr    => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
-      case prev                   => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
+      case prev if cur == "e"                => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "e_"               => Meta(prev.name, cur, "e", NoValue, value)
+      case prev if cur == "a"                => Atom("?", "attr", "a", 1, value, gs = bi(attr))
+      case prev if cur == "a_"               => Atom("?", "attr_", "a", 1, value, gs = bi(attr))
+      case prev if cur == "ns"               => Atom("ns", "?", "ns", 1, value, gs = bi(attr))
+      case prev if cur == "ns_"              => Atom("ns_", "?", "ns", 1, value, gs = bi(attr))
+      case prev if attr.isMapAttr            => Atom(attr.ns, attr.name, cast(attr), 3, value, None, bi(attr))
+      case prev if attr.isAttr               => Atom(attr.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev if prev.isAttr               => Atom(prev.ns, attr.name, cast(attr), attr.card, value, enumPrefix, bi(attr))
+      case prev                              => Atom(attr.name, cur, "Int", attr.card, value, enumPrefix, bi(attr))
     }
   }
 
@@ -493,7 +420,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq($a.and[$t]($b).and[$u]($c))"                      => And(resolveValues(q"Seq($a, $b, $c)"))
       case q"Seq($a.and[$t]($b))"                                  => And(resolveValues(q"Seq($a, $b)"))
       case q"Seq(scala.None)"                                      => Fn("not")
-      case q"Seq(scala.Some.apply[$t]($v))"                        => x(3, v);
+      case q"Seq(scala.Some.apply[$t]($v))"                        => x(3, v)
         v match {
           case vm if vm.tpe <:< weakTypeOf[Map[_, _]]     => vm match {
             case Apply(_, pairs) =>
@@ -594,10 +521,10 @@ private[molecule] object Dsl2Model {
       case _       => "ok"
     }
 
-    // No attributes after TxMetaData
+    // No non-tx meta attributes after TxMetaData
     def txError(s: String) = abort(2, s"Molecule not allowed to have any attributes after transaction annotation. Found" + s)
     elements0.foldLeft(0) {
-      case (0, e: TxMetaData)                     => 1
+      case (_, e: TxMetaData)                     => 1
       case (1, Atom(_, "attr", _, _, _, _, _, _)) => txError(s" attribute `a`")
       case (1, Meta(_, _, "e", _, _))             => txError(s" attribute `e`")
       case (1, Meta(_, _, "v", _, _))             => txError(s" attribute `v`")
@@ -704,38 +631,29 @@ private[molecule] object Dsl2Model {
         case a: Atom                                                                      => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
         case m@Meta(_, _, "e", g, v1)                                                     => (m +: es, g +: gs, v1)
         case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
-        case txmd@TxMetaData(txElems)                                                     => (txmd +: es, TxValue +: gs, NoValue)
-        case txmd@TxMetaData_(txElems)                                                    => (txmd +: es, TxValue_ +: gs, NoValue)
+        case txmd@TxMetaData(txElems)                                                     => (txmd +: es, TxValue_(None) +: gs, NoValue)
+        case tx: TxValue                                                                  => (es, tx +: gs, NoValue)
+        case tx: TxValue_                                                                 => (es, tx +: gs, NoValue)
         case com@Composite(compositeElems)                                                => compositeElems.last match {
-          case txmd: TxMetaData  => {
+          case txmd: TxMetaData => {
             // Add TxValue internally to previous Atom
             val baseElems = compositeElems.init
             val atomWithTxValue = baseElems.last match {
-              case a: Atom    => a.copy(gs = a.gs :+ TxValue)
+              case a: Atom    => a.copy(gs = a.gs :+ TxValue_(None))
               case unexpected => abort(8, "Expected attribute before `tx`. Found: " + unexpected)
             }
             val compositeWithTx = Composite(baseElems.init :+ atomWithTxValue :+ txmd)
             (compositeWithTx +: es, gs, v)
           }
-          case txmd: TxMetaData_ => {
-            // Add TxValue internally to previous Atom
-            val baseElems = compositeElems.init
-            val atomWithTxValue = baseElems.last match {
-              case a: Atom    => a.copy(gs = a.gs :+ TxValue_)
-              case unexpected => abort(9, "Expected attribute before `tx_`. Found: " + unexpected)
-            }
-            val compositeWithTx = Composite(baseElems.init :+ atomWithTxValue :+ txmd)
-            (compositeWithTx +: es, gs, v)
-          }
-          case other             => (com +: es, gs, v)
+          case other            => (com +: es, gs, v)
         }
         case other                                                                        => (other +: es, gs, v)
       }
     }._1
 
-//     inst(c).x(30, dsl, elements0, elements1, Model(elements1))
-//         inst(c).x(30, elements0, elements1)
-//        inst(c).x(30, elements1)
+    //     inst(c).x(30, dsl, elements0, elements1, Model(elements1))
+    //         inst(c).x(30, elements0, elements1)
+    //        inst(c).x(30, elements1)
 
     // Can't use generics on multiple attributes - why not?
     //    if (elements1.foldLeft(Seq[Boolean]()) {

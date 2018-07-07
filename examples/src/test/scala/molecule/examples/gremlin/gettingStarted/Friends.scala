@@ -143,7 +143,7 @@ class Friends extends MoleculeSpec {
     )
 
     // Who has most friends
-    Person.name.friends(count).get.toSeq.sortBy(_._2).reverse === List(
+    Person.name.friends(count).get.sortBy(_._2).reverse === List(
       ("vadas", 2),
       ("marko", 2),
       ("peter", 1),

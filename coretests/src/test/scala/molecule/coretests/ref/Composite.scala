@@ -187,7 +187,7 @@ class Composite extends CoreSpec {
           ((2, "b"), ("bb", 22))
         )
       )(
-        Ns.str_("Tx meta data")
+        Ns.str("Tx meta data")
       ).eids
 
       // Three (!) entities created
@@ -217,7 +217,7 @@ class Composite extends CoreSpec {
       )
       // .. including transaction meta data
       // Note how transaction meta data is fetched for all entities ("rows") saved in the same transaction
-      Ref2.int2.str2.tx_(Ns.str).get.sorted === List(
+      Ref2.int2.str2.Tx(Ns.str).get.sorted === List(
         (1, "a", "Tx meta data"),
         (2, "b", "Tx meta data")
       )
@@ -228,14 +228,14 @@ class Composite extends CoreSpec {
         ("bb", 22)
       )
       // .. including transaction meta data
-      Ref1.str1.int1.tx_(Ns.str).get.sorted === List(
+      Ref1.str1.int1.Tx(Ns.str).get.sorted === List(
         ("aa", 11, "Tx meta data"),
         ("bb", 22, "Tx meta data")
       )
 
       // Transaction meta data alone can be accessed through tacit attributes of namespaces
-      Ref2.int2_.tx_(Ns.str).get === List("Tx meta data")
-      Ref1.int1_.tx_(Ns.str).get === List("Tx meta data")
+      Ref2.int2_.Tx(Ns.str).get === List("Tx meta data")
+      Ref1.int1_.Tx(Ns.str).get === List("Tx meta data")
 
 
       // Composite query
@@ -244,7 +244,7 @@ class Composite extends CoreSpec {
         ((2, "b"), ("bb", 22))
       )
       // .. including transaction meta data
-      m(Ref2.int2.str2 ~ Ref1.str1.int1.tx_(Ns.str)).get.sorted === List(
+      m(Ref2.int2.str2 ~ Ref1.str1.int1.Tx(Ns.str)).get.sorted === List(
         ((1, "a"), ("aa", 11, "Tx meta data")),
         ((2, "b"), ("bb", 22, "Tx meta data"))
       )
@@ -337,13 +337,14 @@ class Composite extends CoreSpec {
 
     "Split into 3" in new CoreSetup {
 
+
       val List(e1, e2) = insert(
         // 3 sub-molecules
         Ns.bool.bools.date.dates.double.doubles.enum.enums,
         Ns.float.floats.int.ints.long.longs.ref1,
         Ns.refSub1.str.strs.uri.uris.uuid.uuids
       )(
-        // Two rows with tuples of 3 tuples that type-safely match the 3 molecules above!
+        // Two rows with tuples of 3 sub-tuples that type-safely match the 3 molecules above
         Seq(
           (
             (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),

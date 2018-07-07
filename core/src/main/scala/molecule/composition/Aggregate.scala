@@ -66,13 +66,13 @@ object Aggregate {
     def apply(v: max)     : Ns3[A, B, C] = ???
     def apply(v: rand)    : Ns3[A, B, C] = ???
     def apply(v: sample)  : Ns3[A, B, C] = ???
-  
+
     def apply(v: mins)    : Ns3[A, B, Vector[C]] = ???
     def apply(v: maxs)    : Ns3[A, B, Vector[C]] = ???
     def apply(v: distinct): Ns3[A, B, Vector[C]] = ???
     def apply(v: rands)   : Ns3[A, B, Stream[C]] = ???
     def apply(v: samples) : Ns3[A, B, Vector[C]] = ???
-  
+
     def apply(v: count)        : Ns3[A, B, Int   ] = ???
     def apply(v: countDistinct): Ns3[A, B, Int   ] = ???
     def apply(v: sum)          : Ns3[A, B, C     ] = ???

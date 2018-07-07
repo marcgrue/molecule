@@ -125,7 +125,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Funct(name, ins, outs)          => q"Funct($name, Seq(..$ins), $outs)"
   }
 
-  implicit val liftRule = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
+  implicit val liftRule  = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
   implicit val liftIn    = Liftable[In] { in => q"In(Seq(..${in.inputs}), Seq(..${in.rules}), Seq(..${in.ds}))" }
   implicit val liftWhere = Liftable[Where] { where => q"Where(Seq(..${where.clauses}))" }
   implicit val liftQuery = Liftable[Query] { q => q"import molecule.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
@@ -152,8 +152,8 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   implicit val liftGeneric = Liftable[Generic] {
     case NsValue(values)             => q"NsValue(Seq(..$values))"
     case AttrVar(v)                  => q"AttrVar($v)"
-    case TxValue                     => q"TxValue"
-    case TxValue_                    => q"TxValue_"
+    case TxValue(t)                  => q"TxValue($t)"
+    case TxValue_(t)                 => q"TxValue_($t)"
     case TxTValue(t)                 => q"TxTValue($t)"
     case TxTValue_(t)                => q"TxTValue_($t)"
     case TxInstantValue(tx)          => q"TxInstantValue($tx)"
@@ -183,8 +183,8 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case NsValue(values)             => q"NsValue(Seq(..$values))"
     case VarValue                    => q"VarValue"
     case AttrVar(v)                  => q"AttrVar($v)"
-    case TxValue                     => q"TxValue"
-    case TxValue_                    => q"TxValue_"
+    case TxValue(t)                  => q"TxValue($t)"
+    case TxValue_(t)                 => q"TxValue_($t)"
     case TxTValue(t)                 => q"TxTValue($t)"
     case TxTValue_(t)                => q"TxTValue_($t)"
     case TxInstantValue(tx)          => q"TxInstantValue($tx)"
@@ -272,18 +272,6 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     }
     q"TxMetaData(Seq(..$es))"
   }
-  implicit val liftTxMetaData_ = Liftable[TxMetaData_] { tm =>
-    val es = tm.elements map {
-      case a: Atom       => q"$a"
-      case b: Bond       => q"$b"
-      case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
-      case Self          => q"Self"
-      case m: Meta       => q"$m"
-      case q"$e"         => e
-    }
-    q"TxMetaData_(Seq(..$es))"
-  }
 
   implicit val liftComposite = Liftable[Composite] { fm =>
     val es = fm.elements map {
@@ -308,7 +296,6 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case g: Nested      => q"$g"
       case m: Meta        => q"$m"
       case t: TxMetaData  => q"$t"
-      case t: TxMetaData_ => q"$t"
       case c: Composite   => q"$c"
     }
     q"Seq(..$es)"
@@ -323,7 +310,6 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Nested(ref, elements)                                   => q"Nested($ref, $elements)"
     case Meta(ns, attr, kind, generic, value)                    => q"Meta($ns, $attr, $kind, $generic, $value)"
     case TxMetaData(elements)                                    => q"TxMetaData($elements)"
-    case TxMetaData_(elements)                                   => q"TxMetaData_($elements)"
     case Composite(elements)                                     => q"Composite($elements)"
     case EmptyElement                                            => q"EmptyElement"
   }

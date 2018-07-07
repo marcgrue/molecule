@@ -57,7 +57,7 @@ class GetWith extends Specification with Scope {
     "n with 1" >> {
       Ns.str$.int.getWith(
         Ns.int(2).saveTx
-      ).toSeq.sortBy(_._2) === List(
+      ).sortBy(_._2) === List(
         (Some("a"), 1),
         (None, 2)
       )
@@ -66,7 +66,7 @@ class GetWith extends Specification with Scope {
     "n with n" >> {
       Ns.str.int.getWith(
         Ns.str("b").int(2).saveTx
-      ).toSeq.sortBy(_._2) === List(
+      ).sortBy(_._2) === List(
         ("a", 1),
         ("b", 2)
       )
@@ -108,7 +108,7 @@ class GetWith extends Specification with Scope {
           2,
           3
         )
-      ).toSeq.sortBy(_._2) === List(
+      ).sortBy(_._2) === List(
         (Some("a"), 1),
         (None, 2),
         (None, 3)
@@ -121,7 +121,7 @@ class GetWith extends Specification with Scope {
           (Some("b"), 2),
           (None, 3)
         ))
-      ).toSeq.sortBy(_._2) === List(
+      ).sortBy(_._2) === List(
         (Some("a"), 1),
         (Some("b"), 2),
         (None, 3)
@@ -196,7 +196,7 @@ class GetWith extends Specification with Scope {
 
     Ns.str.int.getWith(
       Ns.str("John").int(44).saveTx
-    ).toSeq.sorted === List(
+    ).sorted === List(
       ("Fred", 42), // production value
       ("John", 44) // insertion worked
     )
@@ -212,7 +212,7 @@ class GetWith extends Specification with Scope {
         ("Pete", 24)
       ),
       Ns(fred).int(43).updateTx
-    ).toSeq.sorted === List(
+    ).sorted === List(
       ("Fred", 43), // Updated
       ("John", 44), // Saved
       ("Lisa", 23), // Inserted
@@ -227,7 +227,7 @@ class GetWith extends Specification with Scope {
       saveJohn,
       insertMembers,
       updateFred
-    ).toSeq.sorted === List(
+    ).sorted === List(
       ("Fred", 43), // Updated
       ("John", 44), // Saved
       ("Lisa", 23), // Inserted

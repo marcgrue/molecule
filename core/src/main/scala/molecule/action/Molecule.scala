@@ -58,7 +58,6 @@ trait Molecule extends MoleculeBase {
   def getHistoryD                 (implicit conn: Conn): Unit = getD(conn.usingTempDb(History))
 
   protected def _insertD(conn: Conn, data: Iterable[Seq[Any]]) {
-    VerifyModel(_model, "insert")
     val transformer = Model2Transaction(conn, _model)
     val stmtss = try {
       transformer.insertStmts(data.toSeq)
@@ -103,7 +102,6 @@ trait Molecule extends MoleculeBase {
   // Transaction data ....................................................................
 
   protected def _insertTx(conn: Conn, data: Iterable[Seq[Any]]): Seq[Seq[Statement]] = {
-    VerifyModel(_model, "insert")
     val transformer = Model2Transaction(conn, _model)
     val stmtss: Seq[Seq[Statement]] = try {
       transformer.insertStmts(data.toSeq)

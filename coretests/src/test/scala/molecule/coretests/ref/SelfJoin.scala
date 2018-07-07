@@ -258,7 +258,7 @@ class SelfJoin extends CoreSpec {
     // shouldn't be unified. Say for instance that we want to know the names
     // of 23-/25-year-olds sharing a beverage preference:
 
-    Ns.int_(23).str("h").Refs1.str1._Ns.Self
+    Ns.int_(23).str.Refs1.str1._Ns.Self
       .int_(25).str.Refs1.str1_(unify).get.sorted === List(
       ("Joe", "Coffee", "Ben"),
       ("Liz", "Coffee", "Ben"),
@@ -320,9 +320,6 @@ class SelfJoin extends CoreSpec {
     Ns.int_(23).str.Refs1.str1_("Tea")._Ns.Self
       .int_(25).str.Refs1.str1_("Tea").get === List(("Liz", "Ben"))
 
-    // todo - other?
-    Ns.int_(23 or 25).str.Refs1.str1_("Tea") === List(("Liz", "BenX"))
-
     // Any 23-year old Tea drinker and a 25-year-old Coffee drinker?
     Ns.int_(23).str.Refs1.str1_("Tea")._Ns.Self
       .int_(25).str.Refs1.str1_("Coffee").get === List(("Liz", "Ben"))
@@ -332,11 +329,6 @@ class SelfJoin extends CoreSpec {
       .int_.<(24).str.Refs1.str1_("Coffee").get === List(
       ("Liz", "Joe"),
       ("Liz", "Liz")
-    )
-    // todo - another example, if this gives the same result!
-    Ns.int_.<(24).str.Refs1.str1_("Tea" or "Coffee").get === List(
-      ("Liz", "Joe"),
-      ("Liz", "LizX")
     )
 
     // Since Liz is under 24 and drinks both Tea and Coffee she

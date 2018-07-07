@@ -10,7 +10,7 @@ class InputKeyed extends Base {
   "Equality" in new Setup {
 
     // Input molecule waiting for a key/value pair
-    val inputMolecule = m(Ns.int.strMapK("en")(?))
+    val inputMolecule = m(Ns.int.strMapK("en").apply(?))
 
     // We then apply a Map with a value
     inputMolecule.apply("Hello").get === List(

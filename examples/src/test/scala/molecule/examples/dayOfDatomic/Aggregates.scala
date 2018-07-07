@@ -15,7 +15,7 @@ class Aggregates extends MoleculeSpec {
   val url      = "http://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size"
 
   // Insert data with tx meta data
-  Obj.name.meanRadius.tx_(Data.source_(url)) insert (planets zip radiuses)
+  Obj.name.meanRadius.Tx(Data.source_(url)) insert (planets zip radiuses)
 
 
   "Aggregated Attributes" >> {

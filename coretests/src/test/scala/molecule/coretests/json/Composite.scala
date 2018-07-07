@@ -96,7 +96,7 @@ class Composite extends CoreSpec {
         |]""".stripMargin
 
     // .. including transaction meta data
-    m(Ref2.int2.str2 ~ Ref1.int1.str1.tx_(Ns.str)).getJson ===
+    m(Ref2.int2.str2 ~ Ref1.int1.str1.Tx(Ns.str)).getJson ===
       """[
         |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa", "tx.ns.str": "Tx meta data"}],
         |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb", "tx.ns.str": "Tx meta data"}]

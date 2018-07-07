@@ -15,7 +15,7 @@ private[molecule] trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
     expr(
       q"""
       ..${basics(dsl)._2}
-      new Molecule0(r.model, r.query) with Util
+      new Molecule00(r.model, r.query) with Util
     """)
   }
 
@@ -57,8 +57,9 @@ private[molecule] trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
               override def iterator = new Iterator[(..$OutTypes)] {
                 private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
                 override def hasNext = jIter.hasNext
+                private var row: jList[AnyRef] = null
                 override def next() = {
-                  val row = jIter.next()
+                  row = jIter.next()
                   (..${tuple(q"_query", q"row", OutTypes)})
                 }
               }
@@ -89,8 +90,9 @@ private[molecule] trait MakeMolecule[Ctx <: Context] extends GetTuples[Ctx] {
             override def iterator = new Iterator[(..$OutTypes)] {
               private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
               override def hasNext = jIter.hasNext
+              private var row: jList[AnyRef] = null
               override def next() = {
-                val row = jIter.next()
+                row = jIter.next()
                 (..${compositeTuple(q"_query", q"row", OutTypes)})
               }
             }

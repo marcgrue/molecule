@@ -28,10 +28,10 @@ class QueryTour extends MoleculeSpec {
 
 
     // 5. Finding a User's Comments
-    Comment.e.Author.email_("editor@example.com").get.toSeq.sorted === List(c2, c4, c5, c7, c11)
-    Comment.e.Author.email_("stuarthalloway@datomic.com").get.toSeq.sorted === List(c1, c3, c6, c8, c9, c10, c12)
+    Comment.e.Author.email_("editor@example.com").get.sorted === List(c2, c4, c5, c7, c11)
+    Comment.e.Author.email_("stuarthalloway@datomic.com").get.sorted === List(c1, c3, c6, c8, c9, c10, c12)
 
-    Comment.e.text.Author.email_("editor@example.com").firstName.get.toSeq.sorted === List(
+    Comment.e.text.Author.email_("editor@example.com").firstName.get.sorted === List(
       (c2, "blah 2", "Ed"),
       (c4, "blah 4", "Ed"),
       (c5, "blah 5", "Ed"),
@@ -47,11 +47,13 @@ class QueryTour extends MoleculeSpec {
     Comment.e.Author.email("editor@example.com").get.size === 5
 
 
-    // 7. Have people commented on other people? (Multiple joins)
-    Parent(User.email_).Comment.author.get.size === 0
+    // 7. Have people commented on other people?
+    // Composite molecule with a User.email (a User) sharing entity id with Parent that points to a Comment author
+    m(User.email_ ~ Parent.Comment.author).get.size === 0
 
     // Sanity check: 2 people are commenting on stories
-    Parent(Story.title_).Comment.author.get.size === 2
+    // Composite molecule with a Story.title (a Story) sharing entity id with Parent that points to a Comment author
+    m(Story.title_ ~ Parent.Comment.author).get.size === 2
   }
 
 
@@ -60,7 +62,7 @@ class QueryTour extends MoleculeSpec {
     // 8. A Schema Query
 
     // Attributes of all entities having comments
-    Parent.a.comment_.get.toSeq.sorted === List(
+    Parent.a.comment_.get.sorted === List(
       ":comment/author",
       ":comment/text",
       ":parent/comment",
@@ -69,14 +71,14 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Attributes of stories having comments
-    Parent(Story.a.title_).comment_.get.toSeq.sorted === List(
+    m(Story.a.title_ ~ Parent.comment_).get.sorted === List(
       ":parent/comment",
       ":story/title",
       ":story/url"
     )
 
     // Attributes of comments having a sub-comment
-    Parent(Comment.a.text_).comment_.get.toSeq.sorted === List(
+    m(Comment.a.text_ ~ Parent.comment_).get.sorted === List(
       ":comment/author",
       ":comment/text",
       ":parent/comment"
@@ -115,7 +117,7 @@ class QueryTour extends MoleculeSpec {
 
     // .. almost same as: (here, only matching data is returned)
     // Comments of editor
-    Comment.e.author_(editor).get.toSeq.sorted === List(c2, c4, c5, c7, c11)
+    Comment.e.author_(editor).get.sorted === List(c2, c4, c5, c7, c11)
 
 
     // 15. Navigating Deeper with entity api
@@ -140,10 +142,10 @@ class QueryTour extends MoleculeSpec {
 //    } yield subComments._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)
-    m(Comment.author_(editor) ~ Parent.comment).get.toSeq.sorted === List(c3, c6, c8, c12)
+    m(Comment.author_(editor) ~ Parent.comment).get.sorted === List(c3, c6, c8, c12)
 
     // Editors comments and responses (note that c4 wasn't commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment).get.toSeq.sorted === List(
+    m(Comment.author_(editor) ~ Parent.e.comment).get.sorted === List(
       (c2, c3),
       (c5, c6),
       (c7, c8),
@@ -151,7 +153,7 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Editors comments having responses (c4 not commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment_).get.toSeq.sorted === List(c2, c5, c7, c11)
+    m(Comment.author_(editor) ~ Parent.e.comment_).get.sorted === List(c2, c5, c7, c11)
   }
 
 
@@ -193,7 +195,7 @@ class QueryTour extends MoleculeSpec {
     // Auditing ................................................................
 
     // 20. Querying Across All time (sort by transactions)
-    User(ed).firstName.tx.op.getHistory.toSeq.sortBy(_._2) === List(
+    User(ed).firstName.tx.op.getHistory.sortBy(_._2) === List(
       ("Ed", 13194139534318L, true),
       ("Ed", 13194139534345L, false),
       ("Edward", 13194139534345L, true)

@@ -15,7 +15,7 @@ object Crud {
   }
 
   def read(implicit conn: Conn): List[Int] = {
-    Ns.int.get.toList.sorted
+    Ns.int.get.sorted
   }
 
   def update(pair: (Int, Int))(implicit conn: Conn): Unit = {

@@ -1,9 +1,7 @@
 package molecule.coretests.expression
 
-import datomic.Peer
-import molecule.imports._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.factory.MacroImplicits
+import molecule.imports._
 import molecule.util.expectCompileError
 
 class Logic extends Base {

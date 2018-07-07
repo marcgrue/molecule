@@ -25,7 +25,7 @@ case class EntityFacade(entity: datomic.Entity, conn: Conn, id: Object) {
 
   // Retract entity with tx meta data .............................................................
 
-  def tx(metaMolecule: MoleculeOutBase) = RetractMolecule(metaMolecule)
+  def Tx(metaMolecule: MoleculeOutBase) = RetractMolecule(metaMolecule)
 
   case class RetractMolecule(txMeta: MoleculeOutBase) {
     val retractStmts = Seq(RetractEntity(id))

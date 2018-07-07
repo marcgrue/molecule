@@ -6,7 +6,7 @@ import scala.reflect.macros.TypecheckException
 
 // Modified `illTyped` macro by Stefan Zeiger (@StefanZeiger)
 
-object expectCompileError {
+private[molecule] object expectCompileError {
   def apply(code: String): Unit = macro applyImplNoExp
 
   def apply(code: String, expected: String): Unit = macro applyImpl

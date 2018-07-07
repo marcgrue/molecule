@@ -151,7 +151,7 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get ................................
 
     // Get adjacent facts
-    m(Order.orderid.LineItems.quantity.price.Product.e.description).get.toSeq.sortBy(_._1) === List(
+    m(Order.orderid.LineItems.quantity.price.Product.e.description).get.sortBy(_._1) === List(
       (23, 2, 77.0, licoriceId, "Licorice"),
       // whisky for order 23 is _not_ fetched since it has no quantity asserted!
       (23, 1, 48.0, chocolateId, "Expensive Chocolate"),
@@ -161,7 +161,7 @@ class ProductsAndOrders extends MoleculeSpec {
 
     // Make `quantity` optional (by appending `$`) and get all facts wether quantity is asserted or not.
     // Quantities are then returned as Option[Int]
-    m(Order.orderid.LineItems.quantity$.price.Product.e.description).get.toSeq.sortBy(_._1) === List(
+    m(Order.orderid.LineItems.quantity$.price.Product.e.description).get.sortBy(_._1) === List(
       (23, Some(2), 77.0, licoriceId, "Licorice"),
       (23, Some(1), 48.0, chocolateId, "Expensive Chocolate"),
       (23, None, 38.0, whiskyId, "Cheap Whisky"),
@@ -214,7 +214,7 @@ class ProductsAndOrders extends MoleculeSpec {
         (38.00, Some(3), "Cheap Whisky"),
         (77.00, Some(4), "Licorice")))) eids
 
-    val List(order23, order24) = Order.e.orderid.get.toSeq.sortBy(_._2).map(_._1)
+    val List(order23, order24) = Order.e.orderid.get.sortBy(_._2).map(_._1)
 
     // Find id of orders containing various products
     Order.e.LineItems.Product.description_("Expensive Chocolate").get === List(order23)

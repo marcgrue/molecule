@@ -45,8 +45,8 @@ private[molecule] object QueryOps extends Helpers {
 
         gs.flatMap {
           case AttrVar(v)         => Some(Var(attrV))
-          case TxValue            => Some(Var(gV("tx")))
-          case TxValue_           => None
+          case TxValue(_)            => Some(Var(gV("tx")))
+          case TxValue_(_)           => None
           case TxTValue(_)        => Some(Var(gV("txT")))
           case TxTValue_(_)       => None
           case TxInstantValue(_)  => Some(Var(gV("txInst")))
@@ -124,8 +124,8 @@ private[molecule] object QueryOps extends Helpers {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Var(op))
         } else if (
           gs.collectFirst {
-            case TxValue            => true
-            case TxValue_           => true
+            case TxValue(_)            => true
+            case TxValue_(_)           => true
             case TxTValue(_)        => true
             case TxTValue_(_)       => true
             case TxInstantValue(_)  => true
@@ -247,8 +247,9 @@ private[molecule] object QueryOps extends Helpers {
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = if (i > 0) v + "_" + i else v + 2
       val q1 = a.tpeS match {
-        case "BigInt" => q.func(".compareTo", Seq(Var(v), qv), ScalarBinding(Var(w)))
-        case _        => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(Var(w)))
+        case "BigInt"     => q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(Var(w)))
+        case "BigDecimal" => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(Var(w)))
+        case _            => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(Var(w)))
       }
       q1.func(op, Seq(Var(w), Val(0)))
     }
@@ -416,10 +417,12 @@ private[molecule] object QueryOps extends Helpers {
 
     // Java conversions ...........................................................
 
-    private def cast(a: Any) = a match {
-      case i: Int   => i.toLong.asInstanceOf[Object]
-      case f: Float => f.toDouble.asInstanceOf[Object]
-      case other    => other.asInstanceOf[Object]
+    private def cast(a: Any): AnyRef = a match {
+      case i: Int           => i.toLong.asInstanceOf[Object]
+      case f: Float         => f.toDouble.asInstanceOf[Object]
+      case bigI: BigInt     => bigI.bigInteger
+      case bigD: BigDecimal => bigD.bigDecimal
+      case other            => other.asInstanceOf[Object]
     }
 
     def inputs: Seq[Object] = q.i.inputs.map {

@@ -16,13 +16,12 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     Resolver.sonatypeRepo("snapshots")
   ),
 //  autoAPIMappings := true,
+  apiURL := Some(url("https://example.org/api/")),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.datomic" % "datomic-free" % "0.9.5697",
     "org.specs2" %% "specs2-core" % "4.2.0" % "test"
   ),
-  // Remove Java directories
-  excludeFilter in unmanagedSources := HiddenFileFilter || "*.java",
   incOptions := incOptions.value.withLogRecompileOnMacro(false)
 )
 
@@ -36,20 +35,30 @@ lazy val molecule = project.in(file("."))
 lazy val moleculeCore = project.in(file("core"))
   .settings(moduleName := "molecule")
   .settings(commonSettings ++ publishSettings)
+  .settings(scalacOptions in Compile in doc ++= Seq(
+//    "-doc-footer", "epfl",
+    "-diagrams",
+    "-implicits",
+    "-groups",
+    "-doc-version", version.value,
+    "-doc-title", description.value,
+    "-sourcepath", (baseDirectory in ThisBuild).value.toString
+//    "-doc-source-url", s"https://github.com/scala/scala/tree/${versionProperties.value.githubTree}€{FILE_PATH}.scala#L1"
+  ))
 
 
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-coretests",
-    moleculeSchemas := Seq(
-      "molecule/coretests/bidirectionals",
-      "molecule/coretests/schemaDef",
-      "molecule/coretests/util"
-    )
-  )
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-coretests",
+//    moleculeSchemas := Seq(
+//      "molecule/coretests/bidirectionals",
+//      "molecule/coretests/schemaDef",
+//      "molecule/coretests/util"
+//    )
+//  )
 //  .settings(Seq(definitionDirsSeparate(
 //  "molecule/coretests/bidirectionals",
 //  "molecule/coretests/schemaDef",
@@ -60,16 +69,16 @@ lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
   .settings(Seq(autoAPIMappings := true))
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-examples",
-    moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/gremlin",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
-    )
-  )
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-examples",
+//    moleculeSchemas := Seq(
+//      "molecule/examples/dayOfDatomic",
+//      "molecule/examples/gremlin",
+//      "molecule/examples/mbrainz",
+//      "molecule/examples/seattle"
+//    )
+//  )
 //  .settings(Seq(definitionDirsSeparate(
 //  "molecule/examples/dayOfDatomic",
 //  "molecule/examples/gremlin",
@@ -88,15 +97,14 @@ def definitionDirs0(separateInFiles: Boolean, domainDirs: String*) = sourceGener
   val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq, separateInFiles)
 
   // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
-//  val cache = FileFunction.cached(
-//    streams.value.cacheDirectory / "moleculeBoilerplateTesting",
-//    inStyle = FilesInfo.lastModified,
-//    outStyle = FilesInfo.hash
-//  ) {
-//    in: Set[File] => sourceFiles.toSet
-//  }
-//  cache(sourceFiles.toSet).toSeq
-  sourceFiles
+  val cache = FileFunction.cached(
+    streams.value.cacheDirectory / "moleculeBoilerplateTesting",
+    inStyle = FilesInfo.lastModified,
+    outStyle = FilesInfo.hash
+  ) {
+    in: Set[File] => sourceFiles.toSet
+  }
+  cache(sourceFiles.toSet).toSeq
 }.taskValue
 
 

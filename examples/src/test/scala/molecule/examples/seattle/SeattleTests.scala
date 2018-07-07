@@ -74,7 +74,7 @@ class SeattleTests extends SeattleSpec {
   "Querying _by_ attribute values" >> {
 
     // Find attributes with a certain applied value
-    Community.name.`type`("twitter").get(3).toSeq.sortBy(_._1) === List(
+    Community.name.`type`("twitter").get(3).sortBy(_._1) === List(
       ("Columbia Citizens", "twitter"),
       ("Discover SLU", "twitter"),
       ("Fremont Universe", "twitter"))
@@ -235,12 +235,12 @@ class SeattleTests extends SeattleSpec {
 
     val beforeC = List("Ballard Blog", "Beach Drive Blog", "Beacon Hill Blog")
 
-    m(Community.name < "C").get(3).toSeq.sorted === beforeC
-    Community.name.<("C").get(3).toSeq.sorted === beforeC
+    m(Community.name < "C").get(3).sorted === beforeC
+    Community.name.<("C").get(3).sorted === beforeC
 
     val communitiesBefore = m(Community.name < ?)
-    communitiesBefore("C").get(3).toSeq.sorted === beforeC
-    communitiesBefore("A").get(3).toSeq.sorted === List("15th Ave Community")
+    communitiesBefore("C").get(3).sorted === beforeC
+    communitiesBefore("A").get(3).sorted === List("15th Ave Community")
   }
 
 
