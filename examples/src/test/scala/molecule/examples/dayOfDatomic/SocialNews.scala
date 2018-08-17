@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.imports._
+import molecule.api._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec
 
@@ -25,7 +25,7 @@ class SocialNews extends MoleculeSpec {
 
     // John regrets upvoting Paul Graham story (`s3`)
     val paulGrahamStory = Story.e.url_("http://www.paulgraham.com/avg.html").get.head
-    User(john).upVotes.remove(paulGrahamStory).update
+    User(john).upVotes.retract(paulGrahamStory).update
 
     // John now has only 2 upvotes
     User(john).upVotes.get.head.size === 2

@@ -1,6 +1,6 @@
 package molecule.examples.seattle
 
-import molecule.imports._
+import molecule.api._
 import java.io.FileReader
 import datomic.{Peer, Util}
 import molecule.examples.seattle.dsl.seattle._
@@ -36,7 +36,7 @@ trait SeattleSpec extends MoleculeSpec {
   class SeattleSetup extends Scope {
     implicit val conn = recreateDbFrom(SeattleSchema)
     // Insert data
-//    Community.name.url.Neighborhood.name.getD
+//    Community.name.url.Neighborhood.name.debugGet
 
 //        Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData

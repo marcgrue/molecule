@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.imports._
+import molecule.api._
 import java.util.Date
 import java.util.UUID._
 import java.net.URI
@@ -9,32 +9,6 @@ import molecule.coretests.util.dsl.coreTest._
 import molecule.util.expectCompileError
 
 class Negation extends Base {
-
-  "Include entities with non-asserted datoms (null values)" in new OneSetup {
-    Ns.str.int.long$ insert List(
-      ("foo", 1, Some(1L)),
-      ("bar", 2, Some(2L)),
-      ("baz", 3, None)
-    )
-
-    // "baz" not returned since that entity has no long datom asserted
-    Ns.str.int_.long_.not(1L).get === List("bar")
-
-    // Entities where long is not asserted (is null)
-    Ns.str.int_.long_(nil).get === List("baz")
-
-    // Entities with no ref1
-    Ns.str.int_.ref1_(nil).get === List("bar", "foo", "baz")
-
-    // Makes no sense to return null, so only tacit attributes are allowed
-    expectCompileError(
-      "m(Ns.str.int_.long(nil))",
-      "[Dsl2Model:getValues] Please add underscore to attribute: `long_(nil)`")
-
-    expectCompileError(
-      "m(Ns.str.int_.ref1(nil))",
-      "[Dsl2Model:getValues] Please add underscore to attribute: `ref1_(nil)`")
-  }
 
 
   "Exclude 1 or more card one values" in new OneSetup {
@@ -134,8 +108,7 @@ class Negation extends Base {
     Ns.bool.not(false, true).get === List()
 
 
-    val now = new Date()
-    Ns.date.not(now).get.sorted === List(date0, date1, date2)
+    Ns.date.not(date3).get.sorted === List(date0, date1, date2)
     Ns.date.not(date0).get.sorted === List(date1, date2)
     Ns.date.not(date0, date1).get.sorted === List(date2)
     Ns.date.not(Seq(date0, date1)).get.sorted === List(date2)
@@ -143,7 +116,6 @@ class Negation extends Base {
     Ns.date.not(dates).get.sorted === List(date2)
 
 
-    val uuid3 = randomUUID()
     Ns.uuid.not(uuid3).get.sortBy(_.toString) === List(uuid0, uuid1, uuid2)
     Ns.uuid.not(uuid0).get.sortBy(_.toString) === List(uuid1, uuid2)
     Ns.uuid.not(uuid0, uuid1).get.sortBy(_.toString) === List(uuid2)
@@ -151,10 +123,14 @@ class Negation extends Base {
     val uuids = Seq(uuid0, uuid1)
     Ns.uuid.not(uuids).get.sortBy(_.toString) === List(uuid2)
 
-    // todo: when Datomic gets a string representation #uri
-    //    val uri = new URI("other")
-    //    Ns.uri.not(uri).get.sortBy(_.toString) === List(uri0, uri1, uri2)
-    //    Ns.uri.not(uri1).get.sortBy(_.toString) === List(uri0, uri2)
+
+    Ns.uri.not(uri3).get.sortBy(_.toString) === List(uri0, uri1, uri2)
+    Ns.uri.not(uri0).get.sortBy(_.toString) === List(uri1, uri2)
+    Ns.uri.not(uri0, uri1).get.sortBy(_.toString) === List(uri2)
+    Ns.uri.not(Seq(uri0, uri1)).get.sortBy(_.toString) === List(uri2)
+    val uris = Seq(uri0, uri1)
+    Ns.uri.not(uris).get.sortBy(_.toString) === List(uri2)
+
 
     Ns.enum.not("enum0").get.sorted === List(enum1, enum2)
     Ns.enum.not("enum0", "enum1").get.sorted === List(enum2)
@@ -166,7 +142,6 @@ class Negation extends Base {
     Ns.enum.not(enums).get.sorted === List(enum2)
 
 
-    val bigInt3 = BigInt(42)
     Ns.bigInt.not(bigInt3).get.sortBy(_.toString) === List(bigInt0, bigInt1, bigInt2)
     Ns.bigInt.not(bigInt0).get.sortBy(_.toString) === List(bigInt1, bigInt2)
     Ns.bigInt.not(bigInt0, bigInt1).get.sortBy(_.toString) === List(bigInt2)
@@ -175,7 +150,6 @@ class Negation extends Base {
     Ns.bigInt.not(bigInts).get.sortBy(_.toString) === List(bigInt2)
 
 
-    val bigDec3 = BigDecimal(42.0)
     Ns.bigDec.not(bigDec3).get.sortBy(_.toString) === List(bigDec0, bigDec1, bigDec2)
     Ns.bigDec.not(bigDec0).get.sortBy(_.toString) === List(bigDec1, bigDec2)
     Ns.bigDec.not(bigDec0, bigDec1).get.sortBy(_.toString) === List(bigDec2)

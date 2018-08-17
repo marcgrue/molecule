@@ -38,14 +38,13 @@ lazy val moleculeCore = project.in(file("core"))
   .settings(scalacOptions in Compile in doc ++= Seq(
 //    "-doc-footer", "epfl",
     "-diagrams",
-    "-implicits",
+//    "-implicits",
     "-groups",
     "-doc-version", version.value,
-    "-doc-title", description.value,
-    "-sourcepath", (baseDirectory in ThisBuild).value.toString
-//    "-doc-source-url", s"https://github.com/scala/scala/tree/${versionProperties.value.githubTree}€{FILE_PATH}.scala#L1"
+    "-doc-title", "Molecule",
+    "-sourcepath", (baseDirectory in ThisBuild).value.toString,
+    "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
   ))
-
 
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
@@ -60,8 +59,8 @@ lazy val moleculeCoretests = project.in(file("coretests"))
 //    )
 //  )
 //  .settings(Seq(definitionDirsSeparate(
-//  "molecule/coretests/bidirectionals",
-//  "molecule/coretests/schemaDef",
+////  "molecule/coretests/bidirectionals",
+////  "molecule/coretests/schemaDef",
 //  "molecule/coretests/util"
 //)))
 

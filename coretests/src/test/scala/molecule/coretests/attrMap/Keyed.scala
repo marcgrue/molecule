@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.imports._
+import molecule.api._
 
 import molecule.coretests.util.dsl.coreTest._
 
@@ -29,7 +29,7 @@ class Keyed extends Base {
 
     // Whereas attribute maps return Maps
     Ns.int.strMap("en" -> "Hi there").get === List((1, Map("en" -> "Hi there")))
-    Ns.int.strMap.k("en")("Hi there").get === List((1, Map("en" -> "Hi there")))
+    Ns.int.strMap.k("en").apply("Hi there").get === List((1, Map("en" -> "Hi there")))
 
     // ..the special "K"-appended (for Keyed) attribute returns the value only:
     Ns.int.strMapK("en")("Hi there").get === List((1, "Hi there"))

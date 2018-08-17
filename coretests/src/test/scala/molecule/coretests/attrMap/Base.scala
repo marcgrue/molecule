@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.imports._
+import molecule.api._
 import java.net.URI
 import java.util.{Date, UUID}
 

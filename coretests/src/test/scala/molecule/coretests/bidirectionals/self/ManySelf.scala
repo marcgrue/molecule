@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.self
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 
@@ -38,9 +39,9 @@ class ManySelf extends MoleculeSpec {
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
       // values (arities) - how many related entities should be created then?
-      (Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+      (Person.name("Ann").Friends.name("Ben", "Joe").save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        "[noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
         "\n  Person ... name(Ben, Joe)"
 
       // We can save a single value though...
@@ -56,9 +57,9 @@ class ManySelf extends MoleculeSpec {
       friendsOf("Joe").get === List("Ann")
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
-      (Person.name("Ann").Friends.*(Person.name("Ben")).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
+      (Person.name("Ann").Friends.*(Person.name("Ben")).save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[noNested]  Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
@@ -82,9 +83,9 @@ class ManySelf extends MoleculeSpec {
 
       // Saveing reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
-      (Person.name("Ann").Friends.e(ben).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
+      (Person.name("Ann").Friends.e(ben).save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($ben)`"
     }
 
@@ -207,20 +208,20 @@ class ManySelf extends MoleculeSpec {
 
   "Update" >> {
 
-    "add" in new setup {
+    "assert" in new setup {
 
       val List(ann, ben, joe, liz, tom) = Person.name.insert("Ann", "Ben", "Joe", "Liz", "Tom").eids
 
       // Add friendships in various ways
 
       // Single reference
-      Person(ann).friends.add(ben).update
+      Person(ann).friends.assert(ben).update
 
       // Multiple references (vararg)
-      Person(ann).friends.add(joe, liz).update
+      Person(ann).friends.assert(joe, liz).update
 
       // Set of references
-      Person(ann).friends.add(Seq(tom)).update
+      Person(ann).friends.assert(Seq(tom)).update
 
       // Friendships have been added in both directions
       friendsOf("Ann").get.sorted === List("Ben", "Joe", "Liz", "Tom")
@@ -231,7 +232,7 @@ class ManySelf extends MoleculeSpec {
     }
 
 
-    "remove" in new setup {
+    "retract" in new setup {
 
       // Insert Ann and friends
       val List(ann, ben, joe, liz, tom, ulf) = Person.name.Friends.*(Person.name) insert List(
@@ -249,13 +250,13 @@ class ManySelf extends MoleculeSpec {
       // Remove some friendships in various ways
 
       // Single reference
-      Person(ann).friends.remove(ben).update
+      Person(ann).friends.retract(ben).update
 
       // Multiple references (vararg)
-      Person(ann).friends.remove(joe, liz).update
+      Person(ann).friends.retract(joe, liz).update
 
       // Set of references
-      Person(ann).friends.remove(Seq(tom)).update
+      Person(ann).friends.retract(Seq(tom)).update
 
       // Correct friendships have been removed in both directions
       friendsOf("Ann").get === List("Ulf")

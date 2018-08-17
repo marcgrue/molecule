@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 
 class Comparison extends Base {
@@ -169,13 +169,7 @@ class Comparison extends Base {
 
 
     // Comparison of random UUIDs omitted...
-
-
-    // todo when we get a string representation #uri
-    //    Ns.uri.<(uri1).get.sorted === List(uri0)
-    //    Ns.uri.>(uri1).get.sorted === List(uri2)
-    //    Ns.uri.<=(uri1).get.sorted === List(uri0, uri1)
-    //    Ns.uri.>=(uri1).get.sorted === List(uri1, uri2)
+    // Comparison of URIs not implemented
 
 
     Ns.enum.<("enum1").get.sorted === List("enum0")
@@ -213,6 +207,22 @@ class Comparison extends Base {
 
     Ns.bigDec.>=(bigDec1).get.sorted === List(bigDec1, bigDec2)
     Ns.bigDec.>=(bigDec0).get.sorted === List(bigDec0, bigDec1, bigDec2)
+  }
+
+
+  "Range" in new OneSetup {
+    Ns.int.insert(1, 2, 3, 4)
+
+    Ns.int_.>(1).int.<(4).get === List(2, 3)
+    Ns.int_.>(1).int.<=(4).get === List(2, 3, 4)
+    Ns.int_.>=(1).int.<(4).get === List(1, 2, 3)
+    Ns.int_.>=(1).int.<=(4).get === List(1, 2, 3, 4)
+
+
+    Ns.int_.<(4).int.>(1).get === List(2, 3)
+    Ns.int_.<=(4).int.>(1).get === List(2, 3, 4)
+    Ns.int_.<(4).int.>=(1).get === List(1, 2, 3)
+    Ns.int_.<=(4).int.>=(1).get === List(1, 2, 3, 4)
   }
 
 
@@ -318,7 +328,7 @@ class Comparison extends Base {
     Ns.date.dates_.<(date2).get.sorted === List(date1)
 
 
-    // UUID (comparisons not of much relevance though...)
+    // UUID (comparisons not of much relevance - only works here because we sorted the values)
 
     Ns.uuid.uuids.>(uuid2).get === List(
       (uuid2, Set(uuid3)),

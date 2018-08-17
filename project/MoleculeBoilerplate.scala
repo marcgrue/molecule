@@ -6,6 +6,8 @@ import sbt._
 
 object MoleculeBoilerplate {
 
+  class SchemaDefinitionException(message: String) extends RuntimeException(message)
+
   // Definition AST .......................................
 
   case class Definition(pkg: String, in: Int, out: Int, domain: String, curPart: String, curPartDescr: String, nss: Seq[Namespace]) {
@@ -52,7 +54,7 @@ object MoleculeBoilerplate {
   case class Ref(attr: String, attrClean: String, clazz: String, clazz2: String, tpe: String, baseTpe: String, refNs: String,
                  options: Seq[Optional] = Seq(), bi: Option[String] = None, revRef: String = "", attrGroup: Option[String] = None) extends DefAttr
 
-  case class BackRef(attr: String, attrClean: String, clazz: String, clazz2: String, tpe: String, baseTpe: String, backRef: String,
+  case class BackRef(attr: String, attrClean: String, clazz: String, clazz2: String, tpe: String, baseTpe: String, backRefNs: String,
                      options: Seq[Optional] = Seq(), attrGroup: Option[String] = None) extends DefAttr
 
   case class Optional(datomicKeyValue: String, clazz: String)
@@ -80,22 +82,22 @@ object MoleculeBoilerplate {
     raw.collectFirst {
       case r"package (.*)$p\..*" => p
     }.getOrElse {
-      sys.error("Found no package statement in definition file")
+      throw new SchemaDefinitionException("Found no package statement in definition file")
     }
 
     // Check input/output arities
     raw collect {
       case r"@InOut\((\d+)$in, (\d+)$out\)" => (in.toString.toInt, out.toString.toInt) match {
-        case (i: Int, _) if i < 0 || i > 3  => sys.error(s"Input arity in '${defFile.getName}' was $in. It should be in the range 0-3")
-        case (_, o: Int) if o < 1 || o > 22 => sys.error(s"Output arity of '${defFile.getName}' was $out. It should be in the range 1-22")
+        case (i: Int, _) if i < 0 || i > 3  => throw new SchemaDefinitionException(s"Input arity in '${defFile.getName}' was $in. It should be in the range 0-3")
+        case (_, o: Int) if o < 1 || o > 22 => throw new SchemaDefinitionException(s"Output arity of '${defFile.getName}' was $out. It should be in the range 1-22")
         case (i: Int, o: Int)               => (i, o)
       }
     } match {
-      case Nil           => sys.error(
+      case Nil           => throw new SchemaDefinitionException(
         """Please annotate the first namespace definition with '@InOut(inArity, outArity)' where:
           |inArity is a number between 1-3 for how many inputs molecules of this schema can await
           |outArity is a number between 1-22 for how many output attributes molecules of this schema can have""".stripMargin)
-      case h :: t :: Nil => sys.error(
+      case h :: t :: Nil => throw new SchemaDefinitionException(
         """
           |Only the first namespace should be annotated with @InOut since all namespaces in a schema will need
           |to share the same arities to be able to carry over type information uniformly across namespaces.""".stripMargin)
@@ -104,12 +106,12 @@ object MoleculeBoilerplate {
 
     // Check domain name
     raw.collectFirst {
-      case r"class (.*)${dmn}Definition"        => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
-      case r"class (.*)${dmn}Definition \{"     => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
-      case r"class (.*)${dmn}Definition \{ *\}" => sys.error(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
-      case r"trait (.*)${dmn}Definition"        => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
-      case r"trait (.*)${dmn}Definition \{"     => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
-      case r"trait (.*)${dmn}Definition \{ *\}" => sys.error(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"class (.*)${dmn}Definition"        => throw new SchemaDefinitionException(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"class (.*)${dmn}Definition \{"     => throw new SchemaDefinitionException(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"class (.*)${dmn}Definition \{ *\}" => throw new SchemaDefinitionException(s"Can't use class as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition"        => throw new SchemaDefinitionException(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition \{"     => throw new SchemaDefinitionException(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
+      case r"trait (.*)${dmn}Definition \{ *\}" => throw new SchemaDefinitionException(s"Can't use trait as definition container in ${defFile.getName}. Please use an object:\nobject ${dmn}Definiton { ...")
     }
 
     raw.collect {
@@ -117,8 +119,8 @@ object MoleculeBoilerplate {
       case r"object (.*)${name}Definition \{"   => name
       case r"object (.*)${name}Definition \{\}" => name
     } match {
-      case Nil                      => sys.error("Couldn't find definition object <domain>Definition in " + defFile.getName)
-      case l: List[_] if l.size > 1 => sys.error(s"Only one definition object per definition file allowed. Found ${l.size}:" + l.mkString("\n - ", "Definition\n - ", "Definition"))
+      case Nil                      => throw new SchemaDefinitionException("Couldn't find definition object <domain>Definition in " + defFile.getName)
+      case l: List[_] if l.size > 1 => throw new SchemaDefinitionException(s"Only one definition object per definition file allowed. Found ${l.size}:" + l.mkString("\n - ", "Definition\n - ", "Definition"))
       case domainNameList           => firstLow(domainNameList.head)
     }
 
@@ -136,7 +138,7 @@ object MoleculeBoilerplate {
         case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional("""":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"), attr, curFullNs)
         case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ indexed, attr, curFullNs)
         case ""                           => acc
-        case unexpected                   => sys.error(s"Unexpected options code for attribute `$attr` in namespace `$curFullNs` in ${defFile.getName}:\n" + unexpected)
+        case unexpected                   => throw new SchemaDefinitionException(s"Unexpected options code for attribute `$attr` in namespace `$curFullNs` in ${defFile.getName}:\n" + unexpected)
       }
       if (allIndexed) (options :+ indexed).distinct else options
     }
@@ -262,36 +264,36 @@ object MoleculeBoilerplate {
 
         // Missing ref type args
 
-        case r"oneBi(.*)$str" => sys.error(
+        case r"oneBi(.*)$str" => throw new SchemaDefinitionException(
           s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
              |Please add something like:
              |  val $attr = oneBi[$curNs] // for bidirectional self-reference, or:
              |  val $attr = oneBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
 
-        case r"manyBi(.*)$str" => sys.error(
+        case r"manyBi(.*)$str" => throw new SchemaDefinitionException(
           s"""Type arg missing for bidirectional ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
              |Please add something like:
              |  val $attr = manyBi[$curNs] // for bidirectional self-reference, or:
              |  val $attr = manyBi[<otherNamespace>.<revRefAttr>.type] // for "outgoing" bidirectional reference to other namespace""".stripMargin)
 
-        case r"rev(.*)$str" => sys.error(
+        case r"rev(.*)$str" => throw new SchemaDefinitionException(
           s"""Type arg missing for bidirectional reverse ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
              |Please add the namespace where the bidirectional ref pointing to this attribute was defined:
              |  val $attr = rev[<definingNamespace>]""".stripMargin)
 
-        case r"one(.*)$str" => sys.error(
+        case r"one(.*)$str" => throw new SchemaDefinitionException(
           s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
              |Please add something like:
              |  val $attr = one[$curNs] // for self-reference, or
              |  val $attr = one[<otherNamespace>] // for ref towards other namespace""".stripMargin)
 
-        case r"many(.*)$str" => sys.error(
+        case r"many(.*)$str" => throw new SchemaDefinitionException(
           s"""Type arg missing for ref definition `$attr` in `$curPartDotNs` of ${defFile.getName}.
              |Please add something like:
              |  val $attr = many[$curNs] // for self-reference, or
              |  val $attr = many[<otherNamespace>] // for ref towards other namespace""".stripMargin)
 
-        case unexpected => sys.error(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
+        case unexpected => throw new SchemaDefinitionException(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
       }
     }
 
@@ -312,14 +314,14 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" if s"${part}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outRefAttr = oneBi[MyDomainDefinition.ThisPartition.OtherNamespace.revRefAttr.type]  // or manyBi
         // should be only
         // val outRefAttr = oneBi[OtherNamespace.revRefAttr.type]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" if part == basePart =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have " +
             s"only the namespace prefix in the type argument:\n  val $baseAttr = ${card}Bi[$edgeNs.$targetAttr.type]")
 
         // val outRefAttr = oneBi[MyDomainDefinition.SomePartition.OtherNamespace.toRefAttr.type]
@@ -332,14 +334,14 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"([a-z]\w*)$part\.(.*)$edgeNs\.(.*)$targetAttr\.type" if s"${part}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and can't have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val selfRef = oneBi[ThisNamespace.selfRef.type]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" if basePart.nonEmpty && s"${basePart}_$edgeNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outgoingRef = oneBi[SomePartition.OtherNamespace.toRefAttr.type]
@@ -352,7 +354,7 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$edgeNs\.(.*)$targetAttr\.type" if edgeNs == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$edgeNs]")
 
         // val outRefAttr = oneBi[OtherNamespace.toRefAttr.type]
@@ -367,7 +369,7 @@ object MoleculeBoilerplate {
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$a\.type" if a == baseAttr =>
           val ns = if (basePart.nonEmpty) baseFullNs.split("_").last else baseFullNs
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and only needs the current namespace as type argument:\n  val $baseAttr = ${card}Bi[$ns]")
       }
     }
@@ -382,7 +384,7 @@ object MoleculeBoilerplate {
         case r"(.*)$targetNs\.(.*)$targetAttr\.type" => (targetNs, targetAttr)
 
         case other =>
-          sys.error(
+          throw new SchemaDefinitionException(
             s"""Target reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} should have a type arg pointing to
                |the attribute that points to this. Something like:
                |  val $baseAttr: AnyRef = target[<baseNs>.<biAttr>.type]
@@ -399,21 +401,21 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$otherNs\.(.*)$targetAttr\.type" if s"${part}_$otherNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$otherNs]")
 
         // val selfRef = oneBi[ThisPartition.ThisNamespace.selfRef.type]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"([a-z]\w*)$part\.(.*)$otherNs\.(.*)$targetAttr\.type" if s"${part}_$otherNs" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$otherNs]")
 
         // val selfRef = oneBi[ThisNamespace.selfRef.type]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"(.*)$otherNs\.(.*)$targetAttr\.type" if otherNs == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$otherNs]")
 
 
@@ -434,14 +436,14 @@ object MoleculeBoilerplate {
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"\w*Definition\.([a-z]\w*)$part\.(.*)$selfRef" if s"${part}_$selfRef" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have the attribute name specified. This is enough:\n  val $baseAttr = ${card}Bi[$selfRef]")
 
         // val selfRef = oneBi[ThisPartition.ThisNamespace]
         // should be only
         // val selfRef = oneBi[ThisNamespace]
         case r"([a-z]\w*)$part\.(.*)$selfRef" if s"${part}_$selfRef" == baseFullNs =>
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is a self-reference " +
             s"and doesn't need to have partition prefix specified. This is enough:\n  val $baseAttr = ${card}Bi[$selfRef]")
 
         // val selfRef = oneBi[ThisNamespace]
@@ -453,7 +455,7 @@ object MoleculeBoilerplate {
         // val selfRef = oneBi[OtherNamespace]
         case dodgyNs =>
           val part = if (basePart.nonEmpty) s"$basePart." else ""
-          sys.error(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is ambiguous. " +
+          throw new SchemaDefinitionException(s"Bidirectional reference `$baseAttr` in `$baseFullNs` of ${defFile.getName} is ambiguous. " +
             s"\nPlease choose from one of those 2 options:" +
             s"\n1. Self-reference : val $baseAttr = ${card}Bi[${baseFullNs.replace("_", ".")}]" +
             s"\n2. Other-reference: val $baseAttr = ${card}Bi[$part$dodgyNs.<reverseRefAttr>.type]" +
@@ -479,16 +481,16 @@ object MoleculeBoilerplate {
         case r"@InOut\((\d+)$inS, (\d+)$outS\)"                            => (0, "", d.copy(in = inS.toString.toInt, out = outS.toString.toInt))
         case r"object\s+([A-Z][a-zA-Z0-9]*)${dmn}Definition \{"            => (0, "", d.copy(domain = dmn))
         case r"object\s+([a-z]\w*)$part\s*\{"                              => (0, "", d.copy(curPart = part, curPartDescr = cmt))
-        case r"object\s+(\w*)$part\s*\{"                                   => sys.error(s"Partition name '$part' in ${defFile.getName} should start with a lowercase letter")
+        case r"object\s+(\w*)$part\s*\{"                                   => throw new SchemaDefinitionException(s"Partition name '$part' in ${defFile.getName} should start with a lowercase letter")
         case r"trait\s+([A-Z]\w*)$ns\s*\{" if d.curPart.nonEmpty           => (0, "", d.copy(nss = d.nss :+ Namespace(d.curPart, someDescr(d.curPartDescr), d.curPart + "_" + ns, someDescr(cmt))))
         case r"trait\s+([A-Z]\w*)$ns\s*\{"                                 => (0, "", d.copy(nss = d.nss :+ Namespace("", None, ns, someDescr(cmt))))
-        case r"trait\s+(\w*)$ns\s*\{"                                      => sys.error(s"Unexpected namespace name '$ns' in ${defFile.getName}. Namespaces have to start with a capital letter [A-Z].")
+        case r"trait\s+(\w*)$ns\s*\{"                                      => throw new SchemaDefinitionException(s"Unexpected namespace name '$ns' in ${defFile.getName}. Namespaces have to start with a capital letter [A-Z].")
         case r"val\s+(\`?)$q1(\w*)$a(\`?)$q2\s*:\s*AnyRef\s*\=\s*(.*)$str" => (0, "", d.addAttr(parseAttr(q1.nonEmpty, a, str, d.curPart, d.nss.last.ns, attrCmt(s, cmt))))
         case r"val\s+(\`?)$q1(\w*)$a(\`?)$q2\s*\=\s*(.*)$str"              => (0, "", d.addAttr(parseAttr(q1.nonEmpty, a, str, d.curPart, d.nss.last.ns, attrCmt(s, cmt))))
         case "}"                                                           => (0, "", d)
         case ""                                                            => (1, cmt, d)
         case r"object .* extends .*"                                       => (0, "", d)
-        case unexpected                                                    => sys.error(s"Unexpected definition code in ${defFile.getName}:\n" + unexpected)
+        case unexpected                                                    => throw new SchemaDefinitionException(s"Unexpected definition code in ${defFile.getName}:\n" + unexpected)
       }
     }._3
 
@@ -525,12 +527,12 @@ object MoleculeBoilerplate {
                   biEdgeRefAttr.copy(revRef = attr3)
               } getOrElse {
                 val baseNs = ns.ns.replace("_", ".")
-                sys.error(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
+                throw new SchemaDefinitionException(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
                   s"Expecting something like:\nval ${firstLow(baseNs.split('.').last)} = target[${baseNs.split('.').last}.$attr1.type]")
               }
           } getOrElse {
             val baseNs = ns.ns.replace("_", ".")
-            sys.error(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
+            throw new SchemaDefinitionException(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
               s"Expecting something like:\nval ${firstLow(baseNs.split('.').last)} = target[${baseNs.split('.').last}.$attr1.type]")
           }
         case other                                                                               => other
@@ -553,7 +555,7 @@ object MoleculeBoilerplate {
 
         case biTargetRef@Ref(_, _, _, _, _, _, _, _, Some("BiTargetRef_"), _, _) => biTargetRef
 
-        case Ref(attr, _, _, _, _, _, _, _, Some(bi), _, _) if bi.substring(6, 10) != "Prop" => sys.error(
+        case Ref(attr, _, _, _, _, _, _, _, Some(bi), _, _) if bi.substring(6, 10) != "Prop" => throw new SchemaDefinitionException(
           s"""Namespace `${ns.ns}` is already defined as a "property edge" and can't also define a bidirectional reference `$attr`.""")
 
         case ref: Ref   => ref.copy(bi = Some("BiEdgePropRef_"))
@@ -580,7 +582,7 @@ object MoleculeBoilerplate {
           // todo: check not to backreference same-named namespaces in different partitions
           curNs.ns match {
             case ns1 if ns1 == ns2.ns => attrs
-            case other                => attrs :+ BackRef(s"_$cleanNs", s"_$cleanNs", "BackRefAttr", "BackRef", tpe, "", curNs.ns)
+            case other                => attrs :+ BackRef(s"_$cleanNs", "", "", "", "", "", curNs.ns)
           }
         }.distinct
         ns2.copy(attrs = attrs2)
@@ -603,7 +605,7 @@ object MoleculeBoilerplate {
         case Val(_, _, _, _, _, t, options, _, _, _)                               => Seq(tpe(t), card("many")) ++ options.map(_.datomicKeyValue)
         case a: DefAttr if a.clazz.take(3) == "One"                                => Seq(tpe("ref"), card("one")) ++ a.options.map(_.datomicKeyValue)
         case a: DefAttr                                                            => Seq(tpe("ref"), card("many")) ++ a.options.map(_.datomicKeyValue)
-        case unexpected                                                            => sys.error(s"Unexpected attribute statement:\n" + unexpected)
+        case unexpected                                                            => throw new SchemaDefinitionException(s"Unexpected attribute statement:\n" + unexpected)
       }
       s"Util.map(${(ident +: stmts).mkString(",\n             ")})"
     }
@@ -618,7 +620,7 @@ object MoleculeBoilerplate {
     val (partitions, nss) = {
       val parts = d.nss.map(_.part).filter(_.nonEmpty).distinct
       if (parts.contains("molecule"))
-        throw new IllegalArgumentException("Partition name `molecule` is reserved by Molecule. Please choose another partition name.")
+        throw new SchemaDefinitionException("Partition name `molecule` is reserved by Molecule. Please choose another partition name.")
       d.nss.collectFirst {
         case ns if ns.attrs.collectFirst {
           case Ref(_, _, _, _, _, _, _, _, Some("BiTargetRef_"), _, _) => true
@@ -673,10 +675,10 @@ object MoleculeBoilerplate {
         |* 3. Refresh and re-compile project in IDE
         |*/
         |package ${d.pkg}.schema
-        |import molecule.schema.Transaction
+        |import molecule.schema.SchemaTransaction
         |import datomic.{Util, Peer}
         |
-        |object ${d.domain}Schema extends Transaction {
+        |object ${d.domain}Schema extends SchemaTransaction {
         |  $partitionsList
         |  lazy val namespaces = Util.list(
         |    ${stmts.mkString(",\n    ")}
@@ -839,16 +841,16 @@ object MoleculeBoilerplate {
 
         val (attrVal, attrValK) = a match {
           case _ if a.baseTpe == "K" =>
-            (None, Some(s"""/** @inheritdoc */ override def $attr$p5(key: String): $nextNSK with $clazz$p8[$nextNSK, $nextInK]${exts(a, nextNSShort, nextInShort)} = ???"""))
+            (None, Some(s"""override def $attr$p5(key: String): $nextNSK with $clazz$p8[$nextNSK, $nextInK]${exts(a, nextNSShort, nextInShort)} = ???"""))
           case _                     =>
-            (Some(s"""/** @inheritdoc */ override def $attr $p1 : $nextNS with $clazz$p8[$nextNS, $nextIn]${exts(a, nextNSShort, nextInShort)} = ???"""), None)
+            (Some(s"""override def $attr $p1 : $nextNS with $clazz$p8[$nextNS, $nextIn]${exts(a, nextNSShort, nextInShort)} = ???"""), None)
         }
 
         val (attrVal_, attrValK_) = a match {
           case _: Val if a.baseTpe == "K" =>
-            (None, Some(s"/** @inheritdoc */ override def ${attrClean}_$p5(key: String): $thisNS with $clazz$p8[$thisNS, $thisInK]${exts(a, thisNS, thisInShort)} = ???"))
+            (None, Some(s"override def ${attrClean}_$p5(key: String): $thisNS with $clazz$p8[$thisNS, $thisInK]${exts(a, thisNS, thisInShort)} = ???"))
           case _                          =>
-            (Some(s"/** @inheritdoc */ override def ${attrClean}_$p2 : $thisNS with $clazz$p8[$thisNS, $thisIn]${exts(a, thisNS, thisInShort)} = ???"), None)
+            (Some(s"override def ${attrClean}_$p2 : $thisNS with $clazz$p8[$thisNS, $thisIn]${exts(a, thisNS, thisInShort)} = ???"), None)
         }
 
         Some(List(attrVal, attrVal_, attrValK, attrValK_))
@@ -904,15 +906,15 @@ object MoleculeBoilerplate {
 
         a match {
           case a: Val if a.baseTpe == "K" => None
-          case a                          => Some(s"/** @inheritdoc */ override def $attrClean$$$p2 : $nextNS with $clazz$$$p8[$nextNS]${exts(a, nextNSShort, nextInShort)} = ???")
+          case a                          => Some(s"override def $attrClean$$$p2 : $nextNS with $clazz$$$p8[$nextNS]${exts(a, nextNSShort, nextInShort)} = ???")
         }
       }
     }
 
     val (maxClazz2, maxRefNs, maxNs) = attrs.map {
-      case Ref(_, ns, _, clazz2, _, _, refNs, _, _, _, _) => (clazz2.length, refNs.length, ns.length)
-      case BackRef(_, clazz2, _, _, _, _, backRef, _, _)  => (clazz2.length, backRef.length, 0)
-      case other                                          => (0, 0, 0)
+      case Ref(_, ns, _, clazz2, _, _, refNs, _, _, _, _)   => (clazz2.length, refNs.length, ns.length)
+      case BackRef(backRef, _, _, _, _, _, backRefNs, _, _) => (backRef.length, backRefNs.length, 0)
+      case other                                            => (0, 0, 0)
     }.unzip3
 
     val maxAttr0 = attrs.map(_.attrClean.length).max
@@ -940,25 +942,48 @@ object MoleculeBoilerplate {
 
         val ref = (in, out) match {
           case (0, 0) if baseTpe.isEmpty                => s"${refNs}_0$p3$bidirectional"
-          case (0, 0)                                   => s"${refNs}_0$p3$bidirectional with Nested00[${refNs}_1$p3]"
+          case (0, 0) if maxIn == 3                     => s"${refNs}_0$p3$bidirectional with Nested00[${refNs}_1$p3, ${refNs}_In_1_1$p3, ${refNs}_In_2_1$p3, ${refNs}_In_3_1$p3]"
+          case (0, 0) if maxIn == 2                     => s"${refNs}_0$p3$bidirectional with Nested00[${refNs}_1$p3, ${refNs}_In_1_1$p3, ${refNs}_In_2_1$p3, P4]"
+          case (0, 0) if maxIn == 1                     => s"${refNs}_0$p3$bidirectional with Nested00[${refNs}_1$p3, ${refNs}_In_1_1$p3, P3, P4]"
+          case (0, 0) /* maxIn == 0 */                  => s"${refNs}_0$p3$bidirectional with Nested00[${refNs}_1$p3, P2, P3, P4]"
           case (0, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional"
-          case (0, o)                                   => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested${padI(o)}[${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
-          case (i, 0) if baseTpe.isEmpty                => s"${refNs}_In_${i}_0$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
-          case (i, 0)                                   => s"${refNs}_In_${i}_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_${i}_00[${refNs}_In_${i}_1$p3, ${InTypes mkString ", "}]"
-          case (i, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
-          case (i, o)                                   => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_${i}_${padI(o)}[${refNs}_In_${i}_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
+          case (0, o) if maxIn == 3                     => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested${padI(o)}[${refNs}_${o + 1}$p3, ${refNs}_In_1_${o + 1}$p3, ${refNs}_In_2_${o + 1}$p3, ${refNs}_In_3_${o + 1}$p3, ${OutTypes mkString ", "}]"
+          case (0, o) if maxIn == 2                     => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested${padI(o)}[${refNs}_${o + 1}$p3, ${refNs}_In_1_${o + 1}$p3, ${refNs}_In_2_${o + 1}$p3, P${o + 4}, ${OutTypes mkString ", "}]"
+          case (0, o) if maxIn == 1                     => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested${padI(o)}[${refNs}_${o + 1}$p3, ${refNs}_In_1_${o + 1}$p3, P${o + 3}, P${o + 4}, ${OutTypes mkString ", "}]"
+          case (0, o) /* maxIn == 0 */                  => s"${refNs}_$o$p3[${OutTypes mkString ", "}]$bidirectional with Nested${padI(o)}[${refNs}_${o + 1}$p3, P${o + 2}, P${o + 3}, P${o + 4}, ${OutTypes mkString ", "}]"
+
+          case (1, 0) if baseTpe.isEmpty                => s"${refNs}_In_1_0$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (1, 0) if maxIn == 3                     => s"${refNs}_In_1_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_1_00[${refNs}_In_1_1$p3, ${refNs}_In_2_1$p3, ${refNs}_In_3_1$p3, ${InTypes mkString ", "}]"
+          case (1, 0) if maxIn == 2                     => s"${refNs}_In_1_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_1_00[${refNs}_In_1_1$p3, ${refNs}_In_2_1$p3, P4, ${InTypes mkString ", "}]"
+          case (1, 0) /* maxIn == 1 */                  => s"${refNs}_In_1_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_1_00[${refNs}_In_1_1$p3, P3, P4, ${InTypes mkString ", "}]"
+          case (1, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_In_1_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (1, o) if maxIn == 3                     => s"${refNs}_In_1_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_1_${padI(o)}[${refNs}_In_1_${o + 1}$p3, ${refNs}_In_2_${o + 1}$p3, ${refNs}_In_3_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
+          case (1, o) if maxIn == 2                     => s"${refNs}_In_1_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_1_${padI(o)}[${refNs}_In_1_${o + 1}$p3, ${refNs}_In_2_${o + 1}$p3, P${o + 4}, ${(InTypes ++ OutTypes) mkString ", "}]"
+          case (1, o) /* maxIn == 1 */                  => s"${refNs}_In_1_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_1_${padI(o)}[${refNs}_In_1_${o + 1}$p3, P${o + 3}, P${o + 4}, ${(InTypes ++ OutTypes) mkString ", "}]"
+
+          case (2, 0) if baseTpe.isEmpty                => s"${refNs}_In_2_0$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (2, 0) if maxIn == 3                     => s"${refNs}_In_2_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_2_00[${refNs}_In_2_1$p3, ${refNs}_In_3_1$p3, ${InTypes mkString ", "}]"
+          case (2, 0) /* maxIn == 2 */                  => s"${refNs}_In_2_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_2_00[${refNs}_In_2_1$p3, P4, ${InTypes mkString ", "}]"
+          case (2, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_In_2_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (2, o) if maxIn == 3                     => s"${refNs}_In_2_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_2_${padI(o)}[${refNs}_In_2_${o + 1}$p3, ${refNs}_In_3_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
+          case (2, o) /* maxIn == 2 */                  => s"${refNs}_In_2_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_2_${padI(o)}[${refNs}_In_2_${o + 1}$p3, P${o + 4}, ${(InTypes ++ OutTypes) mkString ", "}]"
+
+          case (3, 0) if baseTpe.isEmpty                => s"${refNs}_In_3_0$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (3, 0) /* maxIn == 3 */                  => s"${refNs}_In_3_0$p3[${InTypes mkString ", "}]$bidirectional with Nested_In_3_00[${refNs}_In_3_1$p3, ${InTypes mkString ", "}]"
+          case (3, o) if baseTpe.isEmpty || o == maxOut => s"${refNs}_In_3_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional"
+          case (3, o) /* maxIn == 3 */                  => s"${refNs}_In_3_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]$bidirectional with Nested_In_3_${padI(o)}[${refNs}_In_3_${o + 1}$p3, ${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        acc :+ s"/** @inheritdoc */ object ${attrClean.capitalize} $p4 extends ${attrClean.capitalize}__$p4[$ns, $refNs$p3] with $ref"
+        acc :+ s"object ${attrClean.capitalize} $p4 extends ${attrClean.capitalize}__$p4[$ns, $refNs$p3] with $ref"
       }
-      case (acc, BackRef(backAttr, _, _, _, _, _, backRef, opts, _))                =>
-        val p1 = padS(maxAttr0, backAttr)
-        val p2 = padS(maxClazz2.max, backRef)
-        val ref = (in, out) match {
-          case (0, 0) => s"${backRef}_0$p2"
-          case (0, o) => s"${backRef}_$o$p2[${OutTypes mkString ", "}]"
-          case (i, o) => s"${backRef}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
+      case (acc, BackRef(backRef, _, _, _, _, _, backRefNs, _, _))               =>
+        val p1 = padS(maxAttr0, backRef)
+        val p2 = padS(maxClazz2.max, backRefNs)
+        val backRefNsTyped = (in, out) match {
+          case (0, 0) => s"${backRefNs}_0$p2"
+          case (0, o) => s"${backRefNs}_$o$p2[${OutTypes mkString ", "}]"
+          case (i, o) => s"${backRefNs}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
         }
-        acc :+ s"/** @inheritdoc */ object $backAttr$p1 extends $backAttr$p1 with $ref"
+        acc :+ s"object $backRef$p1 extends $backRef$p1 with $backRefNsTyped"
       case (acc, _)                                                                 => acc
     }.distinct
 
@@ -986,7 +1011,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_$o[$types] extends $ns with Out_$o[${ns}_$o, ${ns}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-           |  /** @inheritdoc */ object Self extends Self with ${ns}_$o[$types]
+           |  object Self extends Self with ${ns}_$o[$types]
            |}
          """.stripMargin
 
@@ -1028,7 +1053,7 @@ object MoleculeBoilerplate {
         s"""trait ${ns}_In_${i}_$o[$types] extends $ns with In_${i}_$o[${ns}_In_${i}_$o, ${ns}_In_${i}_${o + 1}, $thisIn, $nextIn, $types] {
            |  ${(attrVals ++ Seq("") ++ attrValsOpt ++ Seq("") ++ attrVals_ ++ refCode).mkString("\n  ").trim}
            |
-           |  /** @inheritdoc */ object Self extends Self with ${ns}_In_${i}_$o[$types]
+           |  object Self extends Self with ${ns}_In_${i}_$o[$types]
            |}
          """.stripMargin
     }
@@ -1301,17 +1326,17 @@ object MoleculeBoilerplate {
            |  """.stripMargin
 
 
-      case BackRef(backAttr, _, _, _, _, _, backRef, opts, _) =>
+      case BackRef(backRef, _, _, _, _, _, backRefNs, _, _) =>
         s"""
-           |  // BACKREF $backAttr -----------------------------------------------------------------------------------
+           |  // BACKREF $backRef -----------------------------------------------------------------------------------
            |
-           |  /** ${doc(opts)}Adds back reference '''`$backAttr`''' pointing back to namespace `$backRef` to the molecule.
+           |  /** Adds back reference '''`$backRef`''' pointing back to namespace `$backRefNs` to the molecule.
            |    * <br>A back reference allow us to continue adding attributes from the previous namespace to the molecule:
            |    * {{{
            |    *   Order.date.LineItems.qty.item.price._Order.orderComment.get === ...
            |    * }}}
            |    */
-           |  protected trait $backAttr
+           |  protected trait $backRef
            |  """.stripMargin
     }
 
@@ -1323,7 +1348,7 @@ object MoleculeBoilerplate {
          |    * <br><br>
          |    * Attributes before '''`Self`''' are joined with attributes added after '''`Self`''' by values that can unify:
          |    * <br><br>
-         |    * Example of
+         |    * Find 23-year olds liking the same beverage as 25-year olds (unifying by beverage):
          |    * {{{
          |    *   Person.name.age(23).Drinks.beverage._Person.Self // create self join
          |    *         .name.age(25).Drinks.beverage_(unify)      // unify by beverage
@@ -1347,7 +1372,7 @@ object MoleculeBoilerplate {
         case Ref(_, _, _, _, _, baseTpe, _, _, _, _, _) if baseTpe.nonEmpty => true
         case _                                                              => false
       }
-    ) List("Nested", "Nested_In_1", "Nested_In_2", "Nested_In_3").map("molecule.composition.nested." + _ + "._").take(inArity + 1) else Nil
+    ) List("Nested", "Nested_In_1", "Nested_In_2", "Nested_In_3").map("molecule.composition." + _ + "._").take(inArity + 1) else Nil
 
     val extraImports0 = attrs.collect {
       case Val(_, _, _, "Date", _, _, _, _, _, _) => "java.util.Date"
@@ -1366,7 +1391,7 @@ object MoleculeBoilerplate {
     val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace, crossAttrs)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  /** @inheritdoc */ override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
+      (s"\n  override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
@@ -1383,15 +1408,20 @@ object MoleculeBoilerplate {
          |*/
          |package ${d.pkg}.dsl
          |package ${firstLow(d.domain)}$extraImports
-         |import molecule.boilerplate._
          |import molecule.boilerplate.attributes._
-         |import molecule.imports._
+         |import molecule.boilerplate.base._
+         |import molecule.boilerplate.dummyTypes._
+         |import molecule.boilerplate.in1._
+         |import molecule.boilerplate.in2._
+         |import molecule.boilerplate.in3._
+         |import molecule.boilerplate.out._
+         |import molecule.api._
          |
          |
          |/** == Namespace `$ns` == */
          |object $ns extends ${ns}_0 with FirstNS {
-         |  /** @inheritdoc */ override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-         |  /** @inheritdoc */ override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
+         |  override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+         |  override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
          |}
          |
          |trait $ns {
@@ -1417,9 +1447,14 @@ object MoleculeBoilerplate {
            |*/
            |package ${d.pkg}.dsl
            |package ${firstLow(d.domain)}$extraImports
-           |import molecule.boilerplate._
            |import molecule.boilerplate.attributes._
-           |import molecule.imports._
+           |import molecule.boilerplate.base._
+           |import molecule.boilerplate.dummyTypes._
+           |import molecule.boilerplate.in1._
+           |import molecule.boilerplate.in2._
+           |import molecule.boilerplate.in3._
+           |import molecule.boilerplate.out._
+           |import molecule.api._
            |
            |$inTraits""".stripMargin
 
@@ -1434,7 +1469,7 @@ object MoleculeBoilerplate {
     val (inArity, outArity, ns, attrs, ext, attrClasses, nsArities, extraImports) = resolveNs(d, namespace, crossAttrs)
 
     val (inputEids, inputSpace) = if (inArity > 0)
-      (s"\n  /** @inheritdoc */ override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
+      (s"\n  override def apply(eids: ?)               : ${ns}_In_1_0[Long] = ???", "           ")
     else
       ("", "")
 
@@ -1453,15 +1488,20 @@ object MoleculeBoilerplate {
        |*/
        |package ${d.pkg}.dsl
        |package ${firstLow(d.domain)}$extraImports
-       |import molecule.boilerplate._
        |import molecule.boilerplate.attributes._
-       |import molecule.imports._
+       |import molecule.boilerplate.base._
+       |import molecule.boilerplate.dummyTypes._
+       |import molecule.boilerplate.in1._
+       |import molecule.boilerplate.in2._
+       |import molecule.boilerplate.in3._
+       |import molecule.boilerplate.out._
+       |import molecule.api._
        |
        |
        |/** == Namespace `$ns` == */
        |object $ns extends ${ns}_0 with FirstNS {
-       |  /** @inheritdoc */ override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
-       |  /** @inheritdoc */ override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
+       |  override def apply(eid: Long, eids: Long*): ${ns}_0 $inputSpace= ???
+       |  override def apply(eids: Iterable[Long])  : ${ns}_0 $inputSpace= ???$inputEids
        |}
        |
        |trait $ns $ext{

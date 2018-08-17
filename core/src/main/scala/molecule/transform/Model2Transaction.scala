@@ -1,19 +1,24 @@
 package molecule.transform
 import java.util.Date
 import datomic._
+import molecule.action.Entity
 import molecule.ast.model._
-import molecule.ast.transaction.{RetractEntity, _}
-import molecule.entity.EntityFacade
+import molecule.ast.transaction._
 import molecule.facade.Conn
+import molecule.transform.exception.Model2TransactionException
 import molecule.util.{Debug, Helpers}
 import scala.collection.JavaConverters._
 
 
-private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
+/** Model to transaction transformation.
+  *
+  * @see [[http://www.scalamolecule.org/dev/transformation/]]
+  * */
+case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
   private def iae(method: String, msg: String) = {
-    throw new IllegalArgumentException(s"[molecule.transform.Model2Transaction.$method]  $msg")
+    throw new Model2TransactionException(s"[$method]  $msg")
   }
 
   val stmtsModel: Seq[Statement] = {
@@ -53,26 +58,26 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
         ('e, stmts :+ Add(parentId, s":$ns/$refAttr", nested, bi(gs, c)))
 
       // Entity ids applied to initial namespace
-      case (eids@Eids(ids), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
-      case (eids@Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))           => (eids, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
-      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                           => ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
+      case (eids@Eids(ids), Atom(ns, name, _, c, value@RetractValue(_), prefix, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      case (eids@Eids(ids), Atom(ns, name, _, c, value, prefix, gs, _))                 => (eids, stmts ++ ids.map(Add(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
+      case (Eids(ids), Bond(ns, refAttr, refNs, c, gs))                                 => ('v, stmts ++ ids.map(Add(_, s":$ns/$refAttr", 'tempId, bi(gs, c))))
 
       // Entity id applied to initial namespace
-      case (eid@Eid(id), Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => (eid, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case (eid@Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))           => (eid, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                          => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
+      case (eid@Eid(id), Atom(ns, name, _, c, value@RetractValue(_), prefix, gs, _)) => (eid, stmts :+ Retract(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case (eid@Eid(id), Atom(ns, name, _, c, value, prefix, gs, _))                 => (eid, stmts :+ Add(id, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case (Eid(id), Bond(ns, refAttr, refNs, c, gs))                                => ('v, stmts :+ Add(id, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
 
       // Same namespace
-      case ('e, Atom(ns, name, _, c, value@Remove(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case ('e, Atom(ns, name, _, c, VarValue, _, gs, _))             => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, bi(gs, c)))
-      case ('e, Atom(ns, name, _, c, value, prefix, gs, _))           => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case ('e, Bond(ns, refAttr, refNs, c, gs))                      => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
+      case ('e, Atom(ns, name, _, c, value@RetractValue(_), prefix, gs, _)) => ('e, stmts :+ Retract('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('e, Atom(ns, name, _, c, VarValue, _, gs, _))                   => ('e, stmts :+ Add('e, s":$ns/$name", 'arg, bi(gs, c)))
+      case ('e, Atom(ns, name, _, c, value, prefix, gs, _))                 => ('e, stmts :+ Add('e, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('e, Bond(ns, refAttr, refNs, c, gs))                            => ('v, stmts :+ Add('e, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
 
       // Transaction annotations
-      case ('_, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
-      case ('e, TxMetaData(elements))       => ('e, stmts ++ resolveTx(elements))
-      case (Eid(id), TxMetaData(elements))  => ('e, stmts ++ resolveTx(elements))
+      case ('_, TxMetaData(elements))      => ('e, stmts ++ resolveTx(elements))
+      case ('e, TxMetaData(elements))      => ('e, stmts ++ resolveTx(elements))
+      case (Eid(id), TxMetaData(elements)) => ('e, stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
       case ('tx, Atom(ns, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ('tx, stmts :+ Add('tx, s":$ns/${name.init}", Values(value, prefix), Card(c)))
@@ -201,9 +206,9 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
       result match {
         case Seq(edgeB) => edgeB
         case Nil        =>
-          val otherId = EntityFacade(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
+          val otherId = Entity(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
           iae("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
-            s"Could it be another entity?:\n" + otherId.touchQ(2) +
+            s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
             s"\nSpooky id: $otherId" +
             "\n" + stmts.size + " statements so far:\n" + stmts.mkString("\n")
           )
@@ -244,13 +249,13 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
     def biSelf(card: Int) = arg match {
 
-      case Add_(refs) => refs.flatMap { case ref: Long =>
+      case AssertValue(refs) => refs.flatMap { case ref: Long =>
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
         if (ref == e) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
         reverseRetracts ++ Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card)))
       }
 
-      case Replace(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+      case ReplaceValue(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
         oldNew.flatMap {
           case (oldRef, newRef) if oldRef == revRef => Seq(
             // This entity e now has ref to newRef instead of oldRef
@@ -263,20 +268,20 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
         }
       }
 
-      case Remove(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref)) }
+      case RetractValue(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, a, e), Retract(e, a, ref)) }
 
       case Eq(newRefs) => {
         if (newRefs.contains(e)) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
         val oldRefs = attrValues(e, a).toSeq
-        val obsoleteRetracts = oldRefs.flatMap {
+        val retracts = oldRefs.flatMap {
           case oldRef if newRefs.contains(oldRef) => Nil
           case obsoleteRef                        => Seq(Retract(obsoleteRef, a, e), Retract(e, a, obsoleteRef))
         }
-        val newAdds = newRefs.flatMap {
+        val adds = newRefs.flatMap {
           case newRef if oldRefs.contains(newRef) => Nil
           case newRef                             => Seq(Add(newRef, a, e, Card(card)), Add(e, a, newRef, Card(card)))
         }
-        obsoleteRetracts ++ newAdds
+        retracts ++ adds
       }
 
       case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card))) }
@@ -291,13 +296,13 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
     def biOther(card: Int, revRefAttr: String) = arg match {
 
-      case Add_(refs) => refs.flatMap { case ref: Long =>
+      case AssertValue(refs) => refs.flatMap { case ref: Long =>
         if (ref == e) iae("valueStmts:biOther", "Current entity and referenced entity ids can't be the same")
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
       }
 
-      case Replace(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+      case ReplaceValue(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
         oldNew.flatMap {
           case (oldRef, newRef) if oldRef == revRef => Seq(
             // This entity e now has ref to newRef instead of oldRef
@@ -310,20 +315,20 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
         }
       }
 
-      case Remove(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, revRefAttr, e), Retract(e, a, ref)) }
+      case RetractValue(removeRefs) => removeRefs.flatMap { case ref: Long => Seq(Retract(ref, revRefAttr, e), Retract(e, a, ref)) }
 
       case Eq(newRefs) => {
         if (newRefs.contains(e)) iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
         val oldRefs = attrValues(e, a).toSeq
-        val obsoleteRetracts = oldRefs.flatMap {
+        val retracts = oldRefs.flatMap {
           case oldRef if newRefs.contains(oldRef) => Nil
           case obsoleteRef                        => Seq(Retract(obsoleteRef, revRefAttr, e), Retract(e, a, obsoleteRef))
         }
-        val newAdds = newRefs.flatMap {
+        val adds = newRefs.flatMap {
           case newRef if oldRefs.contains(newRef) => Nil
           case newRef                             => Seq(Add(newRef, revRefAttr, e, Card(card)), Add(e, a, newRef, Card(card)))
         }
-        obsoleteRetracts ++ newAdds
+        retracts ++ adds
       }
 
       case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card))) }
@@ -338,16 +343,16 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
     def biEdgeRefAttr(card: Int, targetAttr: String) = arg match {
 
-      case Add_(edges) =>
+      case AssertValue(edges) =>
         if (edges.contains(e))
           iae("valueStmts:biEdgeRefAttr", "Current entity and referenced entity ids can't be the same.")
-        checkDupValues(edges, "biEdgeRefAttr", "add")
+        checkDupValues(edges, "biEdgeRefAttr", "assert")
         edges.flatMap { edge =>
           val (edgeA, edgeB) = edgeAB(edge, targetAttr)
           Seq(Add(edgeB, targetAttr, e, Card(card)), Add(e, a, edgeA, Card(card)))
         }
 
-      case Replace(oldNewEdges) =>
+      case ReplaceValue(oldNewEdges) =>
         checkDupValuesOfPairs(oldNewEdges, "biEdgeRefAttr", "replace")
         oldNewEdges.flatMap { case (oldEdge, newEdge) =>
           val (edgeA, edgeB) = edgeAB(newEdge, targetAttr)
@@ -358,7 +363,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
           )
         }
 
-      case Remove(edges) => edges map RetractEntity
+      case RetractValue(edges) => edges map RetractEntity
 
       case Eq(newEdges) =>
         if (newEdges.contains(e))
@@ -394,7 +399,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
     def biEdgeRef(card: Int, targetAttr: String) = arg match {
 
-      case Remove(edges) => edges map RetractEntity
+      case RetractValue(edges) => edges map RetractEntity
 
       case Eq(newEdges) =>
         if (newEdges.contains(e))
@@ -443,8 +448,8 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
       val stmt = arg match {
 
-        case MapAdd(newPairs) =>
-          checkDupKeys(newPairs, "biEdgeProp", "add")
+        case AssertMapPairs(newPairs) =>
+          checkDupKeys(newPairs, "biEdgeProp", "assert")
           //          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
           val curPairs = getPairs(edgeA, a)
           val curKeys = curPairs.keys
@@ -460,7 +465,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
             )
           }
 
-        case MapReplace(newPairs) =>
+        case ReplaceMapPairs(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "replace")
           val curPairs = getPairs(edgeA, a)
           val curKeys = curPairs.keys
@@ -477,7 +482,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
             )
           }
 
-        case MapRemove(removeKeys0) =>
+        case RetractMapKeys(removeKeys0) =>
           val removeKeys = removeKeys0.distinct
           val oldPairs = getPairs(edgeA, a)
           oldPairs.flatMap {
@@ -491,16 +496,16 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
             case updateE: Long => {
               val oldPairs = getPairs(edgeA, a)
               val newPairs1 = newPairs.map { case (k, v) => (k, d(v).toString) }
-              val obsoleteRetracts = oldPairs.flatMap {
+              val retracts = oldPairs.flatMap {
                 case (oldK, oldV) if newPairs1.contains((oldK, oldV)) => Nil
                 case (oldK, oldV)                                     => Seq(Retract(edgeB, a, oldK + "@" + oldV), Retract(edgeA, a, oldK + "@" + oldV))
               }
-              val newAdds = newPairs.flatMap { case (k, v) => Seq(
+              val adds = newPairs.flatMap { case (k, v) => Seq(
                 Add(edgeB, a, k + "@" + d(v), Card(card)),
                 Add(edgeA, a, k + "@" + d(v), Card(card))
               )
               }
-              obsoleteRetracts ++ newAdds
+              retracts ++ adds
             }
             case newE          =>
               newPairs.flatMap { case (k, v) => Seq(
@@ -510,37 +515,40 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
               }
           }
 
-        case Add_(values) =>
-          checkDupValues(values, "biEdgeProp", "add")
-          values.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
+        case AssertValue(values) =>
+          //          checkDupValues(values, "biEdgeProp", "assert")
+          //          values.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
+          values.distinct.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
 
-        case Replace(oldNew) =>
+        case ReplaceValue(oldNew) =>
           checkDupValuesOfPairs(oldNew, "biEdgeProp", "replace")
           oldNew.flatMap { case (oldValue, newValue) => Seq(
             Retract(edgeB, a, p(oldValue)), Add(edgeB, a, p(newValue), Card(card)),
             Retract(edgeA, a, p(oldValue)), Add(edgeA, a, p(newValue), Card(card)))
           }
 
-        case Remove(removeValues) =>
+        case RetractValue(removeValues) =>
           removeValues.distinct.flatMap(v => Seq(Retract(edgeB, a, p(v)), Retract(edgeA, a, p(v))))
 
         case Eq(newValues) =>
           if (newValues.contains(e))
             iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-          checkDupValues(newValues, "biEdgeProp", "apply")
+          //          checkDupValues(newValues, "biEdgeProp", "apply")
           val curValues = attrValues(edgeA, a).toSeq
-          val obsoleteRetracts = curValues.flatMap {
-            case curValue if newValues.contains(curValue) => Nil
-            case obsoleteValue                            => Seq(Retract(edgeB, a, p(obsoleteValue)), Retract(edgeA, a, p(obsoleteValue)))
+          val newValueStrings = newValues.map(_.toString)
+          val curValueStrings = curValues.map(_.toString)
+          val retracts = curValues.flatMap {
+            case curValue if newValueStrings.contains(curValue.toString) => Nil
+            case obsoleteValue                                           => Seq(Retract(edgeB, a, p(obsoleteValue)), Retract(edgeA, a, p(obsoleteValue)))
           }
-          val newAdds = newValues.flatMap {
-            case newValue if curValues.contains(newValue) => Nil
-            case newValue                                 => Seq(
+          val adds = newValues.flatMap {
+            case newValue if curValueStrings.contains(newValue.toString) => Nil
+            case newValue                                                => Seq(
               Add(edgeB, a, p(newValue), Card(card)),
               Add(edgeA, a, p(newValue), Card(card))
             )
           }
-          obsoleteRetracts ++ newAdds
+          retracts ++ adds
 
         case m: Map[_, _] => m.flatMap { case (k, v) => Seq(Add(edgeB, a, k + "@" + d(v), Card(card)), Add(edgeA, a, k + "@" + d(v), Card(card))) }
         case vs: Set[_]   => vs.toSeq.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
@@ -578,8 +586,8 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
 
     def default(card: Int) = arg match {
 
-      case MapAdd(newPairs) =>
-        checkDupKeys(newPairs, "default", "add")
+      case AssertMapPairs(newPairs) =>
+        checkDupKeys(newPairs, "default", "assert")
         val curPairs = getPairs(e, a)
         val curKeys = curPairs.keys
         newPairs.flatMap {
@@ -588,7 +596,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
           case (k, v)                                                           => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
-      case MapReplace(newPairs) =>
+      case ReplaceMapPairs(newPairs) =>
         checkDupKeys(newPairs, "default", "replace")
         val curPairs = getPairs(e, a)
         val curKeys = curPairs.keys.toSeq
@@ -599,7 +607,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
           case (k, v)                                                           => Seq(Add(e, a, k + "@" + d(v), Card(card)))
         }
 
-      case MapRemove(removeKeys0) =>
+      case RetractMapKeys(removeKeys0) =>
         val removeKeys = removeKeys0.distinct
         val oldPairs = getPairs(e, a)
         oldPairs.flatMap {
@@ -613,43 +621,48 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
           case updateE: Long => {
             val oldPairs = getPairs(e, a)
             val newPairs1 = newPairs.map { case (k, v) => (k, d(v).toString) }
-            val obsoleteRetracts = oldPairs.flatMap {
+            val retracts = oldPairs.flatMap {
               case (oldK, oldV) if newPairs1.contains((oldK, oldV)) => Nil
               case (oldK, oldV)                                     => Seq(Retract(e, a, oldK + "@" + oldV))
             }
-            val newAdds = newPairs.map { case (k, v) => Add(e, a, k + "@" + d(v), Card(card)) }
-            obsoleteRetracts ++ newAdds
+            val adds = newPairs.map { case (k, v) => Add(e, a, k + "@" + d(v), Card(card)) }
+            retracts ++ adds
           }
           case newE          =>
             newPairs.map { case (k, v) => Add(e, a, k + "@" + d(v), Card(card)) }
         }
 
-      case Add_(values) =>
-        checkDupValues(values, "default", "add")
-        values.map(v => Add(e, a, p(v), Card(card)))
+      case AssertValue(values0) =>
+        val values = flatten(values0)
+        //        checkDupValues(values, "default", "assert")
+        //        values.map(v => Add(e, a, p(v), Card(card)))
+        values.distinct.map(v => Add(e, a, p(v), Card(card)))
 
-      case Replace(oldNew) =>
+      case ReplaceValue(oldNew) =>
         checkDupValuesOfPairs(oldNew, "default", "replace")
         oldNew.flatMap { case (oldValue, newValue) => Seq(Retract(e, a, p(oldValue)), Add(e, a, p(newValue), Card(card))) }
 
-      case Remove(removeValues) =>
-        removeValues.distinct.map(v => Retract(e, a, p(v)))
+      case RetractValue(removeValues0) =>
+        flatten(removeValues0).distinct.map(v => Retract(e, a, p(v)))
 
-      case Eq(newValues) =>
-        checkDupValues(newValues, "default", "apply")
+      case Eq(newValues0) =>
+        //        checkDupValues(newValues, "default", "apply")
+        val newValues = flatten(newValues0).distinct
         val curValues = attrValues(e, a).toSeq
-        val obsoleteRetracts = if (card == 2 ||
-          // Retract obsolete card-one value
-          (newValues.isEmpty && curValues.nonEmpty)
-        ) curValues.flatMap {
-            case curValue if newValues.contains(curValue) => Nil
-            case obsoleteValue                            => Seq(Retract(e, a, p(obsoleteValue)))
-          } else Nil
-        val newAdds = newValues.flatMap {
-          case newValue if curValues.contains(newValue) => Nil
-          case newValue                                 => Seq(Add(e, a, p(newValue), Card(card)))
+        val newValueStrings = newValues.map(_.toString)
+        val curValueStrings = curValues.map(_.toString)
+        val retracts = if (card == 2 || (newValues.isEmpty && curValues.nonEmpty))
+          curValues.flatMap {
+            case curValue if newValueStrings.contains(curValue.toString) => Nil
+            case obsoleteValue                                           => Seq(Retract(e, a, p(obsoleteValue)))
+          }
+        else
+          Nil
+        val adds = newValues.flatMap {
+          case newValue if curValueStrings.contains(newValue.toString) => Nil
+          case newValue                                                => Seq(Add(e, a, p(newValue), Card(card)))
         }
-        obsoleteRetracts ++ newAdds
+        retracts ++ adds
 
       case m: Map[_, _] => m.map { case (k, v) => Add(e, a, k + "@" + d(v), Card(card)) }
       case vs: Set[_]   => vs.map(v => Add(e, a, p(v), Card(card)))
@@ -671,7 +684,7 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
       case BiTargetRef(card, attr)     => biTarget(card, attr)
       case BiTargetRefAttr(card, attr) => biTarget(card, attr)
       case Card(card)                  => default(card)
-      case other                       => sys.error(
+      case other                       => throw new Model2TransactionException(
         s"""Unexpected or missing Generic `$other`:
            |e  : $e
            |a  : $a
@@ -680,6 +693,11 @@ private[molecule] case class Model2Transaction(conn: Conn, model: Model) extends
     }
 
     stmts ++ newStmts
+  }
+
+  def flatten(vs: Seq[Any]): Seq[Any] = vs match {
+    case (set: Set[_]) :: Nil => set.toSeq
+    case list                 => list
   }
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {

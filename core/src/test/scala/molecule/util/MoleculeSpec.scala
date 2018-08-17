@@ -1,10 +1,11 @@
 package molecule.util
-import molecule.action.Molecule
+import molecule.ast.MoleculeBase
 import molecule.ast.model.Model
 import molecule.ast.query._
 import molecule.ast.transaction._
-import molecule.composition.input.InputMolecule
+import molecule.exceptions.MoleculeException
 import molecule.facade.Conn
+import molecule.input.InputMolecule
 import molecule.ops.QueryOps._
 import molecule.transform.{Model2Transaction, Query2String}
 import org.specs2.mutable._
@@ -40,7 +41,7 @@ trait MoleculeSpec extends Specification {
       }
     }
     val tx2 = tx.map { stmt =>
-      val newId = ids.getOrElse(stmt.e.toString, sys.error("missing stmt id"))
+      val newId = ids.getOrElse(stmt.e.toString, throw new MoleculeSpecException("missing stmt id"))
       val newValue = ids.getOrElse(stmt.v.toString, stmt.v.toString)
       List(
         stmt.action + " " * (longestAction - stmt.action.toString.length),
@@ -67,13 +68,13 @@ trait MoleculeSpec extends Specification {
       "\n\nINPUTS:" + allInputs.zipWithIndex.map(e => (e._2 + 1) + " " + e._1).mkString("\nList(\n  ", "\n  ", "\n)")
   }
 
-  implicit class dsl2model2query2string(molecule: Molecule)(implicit conn: Conn) {
+  implicit class dsl2model2query2string(molecule: MoleculeBase)(implicit conn: Conn) {
     def -->(model: Model) = new {
       molecule._model === model
 
       // Molecule -> query
       def -->(query: Query) = new {
-        molecule._query === query
+        molecule._query.toString === query.toString
         def -->(queryString: String) = {
           query.datalog(30) + formatInputs(query) === queryString
         }
@@ -124,7 +125,7 @@ trait MoleculeSpec extends Specification {
     }
   }
 
-  def testUpdateMolecule(molecule: Molecule)(implicit conn: Conn) = new {
+  def testUpdateMolecule(molecule: MoleculeBase)(implicit conn: Conn) = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {
@@ -139,7 +140,7 @@ trait MoleculeSpec extends Specification {
     }
   }
 
-  def testInsertMolecule(molecule: Molecule, ids: Seq[Long] = Seq())(implicit conn: Conn) = new {
+  def testInsertMolecule(molecule: MoleculeBase, ids: Seq[Long] = Seq())(implicit conn: Conn) = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {

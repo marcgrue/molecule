@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeManySelfUpdate extends MoleculeSpec {
@@ -35,13 +36,13 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "add edges" in new setup {
 
     // vararg
-    Person(ann).knows.add(knowsBen, knowsDon).update
+    Person(ann).knows.assert(knowsBen, knowsDon).update
 
     // Seq
-    Person(ann).knows.add(Seq(knowsGil)).update
+    Person(ann).knows.assert(Seq(knowsGil)).update
 
     // Empty list of edges has no effect
-    Person(ann).knows.add(Seq()).update
+    Person(ann).knows.assert(Seq()).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don"), (4, "Gil")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -53,7 +54,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "replace edges" in new setup {
 
     // current friends
-    Person(ann).knows.add(knowsBen, knowsDon, knowsGil, knowsTom).update
+    Person(ann).knows.assert(knowsBen, knowsDon, knowsGil, knowsTom).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don"), (4, "Gil"), (8, "Tom")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -81,7 +82,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "remove edges" in new setup {
 
     // current friends
-    Person(ann).knows.add(knowsBen, knowsDon, knowsGil, knowsTom).update
+    Person(ann).knows.assert(knowsBen, knowsDon, knowsGil, knowsTom).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don"), (4, "Gil"), (8, "Tom")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -91,7 +92,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
 
 
     // Remove who Ann knows
-    Person(ann).knows.remove(knowsBen, knowsDon).update
+    Person(ann).knows.retract(knowsBen, knowsDon).update
 
     // All friends have been replaced
     knownBy("Ann").get === List(List((4, "Gil"), (8, "Tom")))
@@ -101,7 +102,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
     knownBy("Tom").get === List(List((8, "Ann")))
 
     // Remove Seq of edges
-    Person(ann).knows.remove(Seq(knowsGil)).update
+    Person(ann).knows.retract(Seq(knowsGil)).update
 
     // All friends have been replaced
     knownBy("Ann").get === List(List((8, "Tom")))
@@ -111,7 +112,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
     knownBy("Tom").get === List(List((8, "Ann")))
 
     // Remove empty Seq of edges has no effect
-    Person(ann).knows.remove(Seq()).update
+    Person(ann).knows.retract(Seq()).update
 
     // All friends have been replaced
     knownBy("Ann").get === List(List((8, "Tom")))
@@ -121,7 +122,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "apply edges" in new setup {
 
     // current friends
-    Person(ann).knows.add(knowsBen, knowsDon, knowsGil).update
+    Person(ann).knows.assert(knowsBen, knowsDon, knowsGil).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don"), (4, "Gil")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -170,7 +171,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "retract edge" in new setup {
 
     // current friends
-    Person(ann).knows.add(knowsBen, knowsDon).update
+    Person(ann).knows.assert(knowsBen, knowsDon).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -188,7 +189,7 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "retract base/target entity" in new setup {
 
     // current friends
-    Person(ann).knows.add(knowsBen, knowsDon).update
+    Person(ann).knows.assert(knowsBen, knowsDon).update
 
     knownBy("Ann").get === List(List((2, "Ben"), (3, "Don")))
     knownBy("Ben").get === List(List((2, "Ann")))
@@ -207,27 +208,27 @@ class EdgeManySelfUpdate extends MoleculeSpec {
   "no nested in update molecules" in new setup {
 
     // Can't update multiple values of cardinality-one attribute `name`
-    (Person(ann).Knows.weight(7).Person.name("Joe", "Liz").update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+    (Person(ann).Knows.weight(7).Person.name("Joe", "Liz").update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
       "\n  Person ... name(Joe, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
-    (Person(ann).Knows.*(Knows.weight(4)).Person.name("Joe").update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+    (Person(ann).Knows.*(Knows.weight(4)).Person.name("Joe").update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
-    (Person(ann).Knows.*(Knows.weight(4)).person(42L).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+    (Person(ann).Knows.*(Knows.weight(4)).person(42L).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
-    (Person(ann).Knows.*(Knows.weight(4).Person.name("Joe")).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+    (Person(ann).Knows.*(Knows.weight(4).Person.name("Joe")).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
-    (Person(ann).Knows.*(Knows.weight(4).person(42L)).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
+    (Person(ann).Knows.*(Knows.weight(4).person(42L)).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
     // Note that an edge always have only one target entity.
     // So we can't add multiple (won't compile)

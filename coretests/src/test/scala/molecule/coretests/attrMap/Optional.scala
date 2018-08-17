@@ -1,11 +1,10 @@
 package molecule.coretests.attrMap
 
-import molecule.composition.MapOps
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
 
-class Optional extends Base with MapOps {
+class Optional extends Base {
 
 
   "Post-process keys (String)" in new CoreSetup {

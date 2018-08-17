@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 
 class Pairs extends Base {

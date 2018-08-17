@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 
@@ -64,9 +65,9 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
     "value" in new setup {
 
       // Updating edge properties from the base entity is not allowed
-      (Person(ann).Loves.howWeMet("inSchool").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_edgeComplete]  Can't update edge `Loves` " +
+      (Person(ann).Loves.howWeMet("inSchool").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_edgeComplete]  Can't update edge `Loves` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Loves(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -121,9 +122,9 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       )
 
       // We can't update across namespaces
-      (Loves(annBen).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
+      (Loves(annBen).CoreQuality.name("Compassion").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity
 
@@ -176,14 +177,14 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       )
 
       // Remove
-      Loves(annBen).commonInterests.remove("Travelling").update
+      Loves(annBen).commonInterests.retract("Travelling").update
       commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking")),
         ("Ben", Set("Cuisine", "Walking"))
       )
 
       // Add
-      Loves(annBen).commonInterests.add("Meditating").update
+      Loves(annBen).commonInterests.assert("Meditating").update
       commonInterestsOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("Cuisine", "Walking", "Meditating")),
         ("Ben", Set("Cuisine", "Walking", "Meditating"))
@@ -220,14 +221,14 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       )
 
       // Remove
-      Loves(annBen).commonLicences.remove("climbing").update
+      Loves(annBen).commonLicences.retract("climbing").update
       commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving")),
         ("Ben", Set("diving"))
       )
 
       // Add
-      Loves(annBen).commonLicences.add("parachuting").update
+      Loves(annBen).commonLicences.assert("parachuting").update
       commonLicencesOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", Set("diving", "parachuting")),
         ("Ben", Set("diving", "parachuting"))
@@ -282,14 +283,14 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
       )
 
       // remove
-      Loves(annBen).inCommon.remove(patience).update
+      Loves(annBen).inCommon.retract(patience).update
       inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Sporty")),
         ("Ben", List("Sporty"))
       )
 
       // add
-      Loves(annBen).inCommon.add(patience).update
+      Loves(annBen).inCommon.assert(patience).update
       inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
         ("Ann", List("Waiting ability", "Sporty")),
         ("Ben", List("Waiting ability", "Sporty"))
@@ -327,14 +328,14 @@ class EdgeOneSelfUpdateProps extends MoleculeSpec {
     )
 
     // Remove by key
-    Loves(annBen).commonScores.remove("golf").update
+    Loves(annBen).commonScores.retract("golf").update
     commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8)),
       ("Ben", Map("baseball" -> 8))
     )
 
     // Add
-    Loves(annBen).commonScores.add("parachuting" -> 4).update
+    Loves(annBen).commonScores.assert("parachuting" -> 4).update
     commonScoresOf("Ann" or "Ben").get.sortBy(_._1) === List(
       ("Ann", Map("baseball" -> 8, "parachuting" -> 4)),
       ("Ben", Map("baseball" -> 8, "parachuting" -> 4))

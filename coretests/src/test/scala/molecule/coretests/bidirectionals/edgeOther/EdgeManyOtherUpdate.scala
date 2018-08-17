@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeManyOtherUpdate extends MoleculeSpec {
@@ -37,13 +38,13 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "add edges" in new setup {
 
     // vararg
-    Person(ann).closeTo.add(closeToBob, closeToDot).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot).update
 
     // Seq
-    Person(ann).closeTo.add(Seq(closeToGus)).update
+    Person(ann).closeTo.assert(Seq(closeToGus)).update
 
     // Empty list of edges has no effect
-    Person(ann).closeTo.add(Seq()).update
+    Person(ann).closeTo.assert(Seq()).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -55,7 +56,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "replace edges" in new setup {
 
     // current friends
-    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus, closeToZoe).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus, closeToZoe).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus"), (8, "Zoe")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -83,7 +84,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "remove edges" in new setup {
 
     // current friends
-    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus, closeToZoe).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus, closeToZoe).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus"), (8, "Zoe")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -93,7 +94,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
 
 
     // Remove who Ann closeTo
-    Person(ann).closeTo.remove(closeToBob, closeToDot).update
+    Person(ann).closeTo.retract(closeToBob, closeToDot).update
 
     // All friends have been replaced
     animalsCloseTo("Ann").get === List(List((4, "Gus"), (8, "Zoe")))
@@ -103,7 +104,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
     personsCloseTo("Zoe").get === List(List((8, "Ann")))
 
     // Remove Seq of edges
-    Person(ann).closeTo.remove(Seq(closeToGus)).update
+    Person(ann).closeTo.retract(Seq(closeToGus)).update
 
     // All friends have been replaced
     animalsCloseTo("Ann").get === List(List((8, "Zoe")))
@@ -113,7 +114,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
     personsCloseTo("Zoe").get === List(List((8, "Ann")))
 
     // Remove empty Seq of edges has no effect
-    Person(ann).closeTo.remove(Seq()).update
+    Person(ann).closeTo.retract(Seq()).update
 
     // All friends have been replaced
     animalsCloseTo("Ann").get === List(List((8, "Zoe")))
@@ -123,7 +124,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "apply edges" in new setup {
 
     // current friends
-    Person(ann).closeTo.add(closeToBob, closeToDot, closeToGus).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot"), (4, "Gus")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -172,7 +173,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "retract edge" in new setup {
 
     // current friends
-    Person(ann).closeTo.add(closeToBob, closeToDot).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -190,7 +191,7 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "retract base/target entity" in new setup {
 
     // current friends
-    Person(ann).closeTo.add(closeToBob, closeToDot).update
+    Person(ann).closeTo.assert(closeToBob, closeToDot).update
 
     animalsCloseTo("Ann").get === List(List((2, "Bob"), (3, "Dot")))
     personsCloseTo("Bob").get === List(List((2, "Ann")))
@@ -209,27 +210,27 @@ class EdgeManyOtherUpdate extends MoleculeSpec {
   "no nested in update molecules" in new setup {
 
     // Can't update multiple values of cardinality-one attribute `name`
-    (Person(ann).CloseTo.weight(7).Animal.name("Max", "Liz").update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
+    (Person(ann).CloseTo.weight(7).Animal.name("Max", "Liz").update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
       "\n  Animal ... name(Max, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
-    (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+    (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+    (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+    (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
-    (Person(ann).CloseTo.*(CloseTo.weight(4).animal(42L)).update must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+    (Person(ann).CloseTo.*(CloseTo.weight(4).animal(42L)).update must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     // Note that an edge always have only one target entity.
     // So we can't add multiple (won't compile)

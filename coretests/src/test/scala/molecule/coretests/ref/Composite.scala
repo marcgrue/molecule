@@ -1,6 +1,7 @@
 package molecule.coretests.ref
 
-import molecule.imports._
+import molecule.action.exception.CompositeException
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -252,7 +253,68 @@ class Composite extends CoreSpec {
   }
 
 
-  "Splitting high-arity data" >> {
+  "tacits" in new CoreSetup {
+
+    insert(
+      Ref2.int2.str2$, Ref1.int1.str1$, Ns.int.str$
+    )(
+      Seq(
+        ((1, Some("a")), (11, Some("aa")), (111, Some("aaa"))),
+        ((2, Some("b")), (22, Some("bb")), (222, None)),
+        ((3, Some("c")), (33, None), (333, None)),
+        ((4, None), (44, None), (444, None)),
+      )
+    )()
+
+    // Same namespace
+
+    m(Ref2.int2.str2).get.sorted === List(
+      (1, "a"),
+      (2, "b"),
+      (3, "c")
+    )
+    // When 1 + 1 attribute, this outcome will be the same
+    m(Ref2.int2 ~ Ref2.str2).get.sorted === List(
+      (1, "a"),
+      (2, "b"),
+      (3, "c")
+    )
+
+    m(Ref2.int2).get.sorted === List(1, 2, 3, 4)
+
+    m(Ref2.int2 ~ Ref2.str2_).get.sorted === List(1, 2, 3)
+    // Order irrelevant
+    m(Ref2.str2_ ~ Ref2.int2).get.sorted === List(1, 2, 3)
+
+    m(Ref1.int1 ~ Ref1.str1_).get.sorted === List(11, 22)
+
+    m(Ns.int ~ Ns.str_).get === List(111)
+
+
+    // 2 namespaces, 1 tacit
+
+    m(Ref2.int2 ~ Ref1.str1_).get.sorted === List(1, 2)
+    m(Ref2.int2 ~ Ns.str_).get === List(1)
+    m(Ref1.int1 ~ Ns.str_).get === List(11)
+
+
+    // 3 namespaces, 2 tacits
+
+    m(Ref2.int2 ~ Ref1.str1_ ~ Ns.str_).get === List(1)
+    m(Ref2.str2_ ~ Ref1.int1 ~ Ns.str_).get === List(11)
+    m(Ref2.str2_ ~ Ref1.str1_ ~ Ns.int).get.sorted === List(111, 222)
+
+
+    // 3 namespaces, 3 tacits, 4 composite parts (to test second `~` method)
+
+    m(Ref2.int2 ~ Ref1.str1_ ~ Ns.int_ ~ Ns.str_).get === List(1)
+    m(Ref2.str2_ ~ Ref1.int1 ~ Ns.int_ ~ Ns.str_).get === List(11)
+    m(Ref2.str2_ ~ Ref1.str1_ ~ Ns.int ~ Ns.str_).get === List(111)
+    m(Ref2.str2_ ~ Ref1.str1_ ~ Ns.int_ ~ Ns.str).get === List("aaa")
+  }
+
+
+  "Splitting high-arity data" in new CoreSetup {
 
     // Compilation times of molecules increase dramatically after about 13-16 attributes length. Hopefully
     // this will get better with faster Scala compilation and hardware over time. We can find ourselves in
@@ -683,8 +745,8 @@ class Composite extends CoreSpec {
       )(Seq(
         (1, 11),
         (2, 22)
-      ))() must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        s"[CompositeInserts:insertMerged] Can't insert same attribute :ns/int twice"
+      ))() must throwA[CompositeException]).message === "Got the exception molecule.action.exception.CompositeException: " +
+        s"Can't insert same attribute :ns/int twice"
 
       /*
       If we didn't catch the duplicate in the model before trying to insert data, Datomic would
@@ -730,8 +792,8 @@ class Composite extends CoreSpec {
       )(Seq(
         ((true, 1), ("aa", 11)),
         ((false, 2), ("bb", 22))
-      ))() must throwA[RuntimeException]).message === "Got the exception java.lang.RuntimeException: " +
-        s"[CompositeInserts:insertMerged] Can't insert with same reference :ns/ref1 twice"
+      ))() must throwA[CompositeException]).message === "Got the exception molecule.action.exception.CompositeException: " +
+        s"Can't insert with same reference :ns/ref1 twice"
     }
   }
 
@@ -774,6 +836,10 @@ class Composite extends CoreSpec {
 
       m(Ref2.int2_.<(2).str2 ~ Ns.int_.<(20)).get.sorted === List(
         "a"
+      )
+
+      m(Ref2.int2_.<(2) ~ Ns.str.int_.<(20)).get.sorted === List(
+        "aa"
       )
     }
 
@@ -824,8 +890,152 @@ class Composite extends CoreSpec {
       )
 
       // Composite data that _doesn't_ have a `Ns.str` value retrieve only the last entity
-      m(Ref2.int2.str2 ~ Ns.str_(nil).int).get.sorted === Seq(
+      m(Ref2.int2.str2 ~ Ns.str_(Nil).int).get.sorted === Seq(
         ((3, "c"), 33)
+      )
+    }
+  }
+
+
+  "Input" >> {
+
+    "1" in new CoreSetup {
+
+      insert(
+        Ref2.int2, Ref1.int1, Ns.int
+      )(
+        Seq(
+          (1, 11, 111),
+          (2, 22, 222)
+        )
+      )()
+
+      m(Ref2.int2 ~ Ref1.int1 ~ Ns.int).get.sorted === List(
+        (1, 11, 111),
+        (2, 22, 222)
+      )
+
+      // 1 + 0 + 0
+      m(Ref2.int2(?) ~ Ref1.int1 ~ Ns.int).apply(1).get === List(
+        (1, 11, 111)
+      )
+      // 0 + 1 + 0
+      m(Ref2.int2 ~ Ref1.int1(?) ~ Ns.int).apply(11).get === List(
+        (1, 11, 111)
+      )
+      // 0 + 0 + 1
+      m(Ref2.int2 ~ Ref1.int1 ~ Ns.int(?)).apply(111).get === List(
+        (1, 11, 111)
+      )
+
+      // 1 + 1 + 0
+      m(Ref2.int2(?) ~ Ref1.int1(?) ~ Ns.int).apply(1, 11).get === List(
+        (1, 11, 111)
+      )
+      // 1 + 0 + 1
+      m(Ref2.int2(?) ~ Ref1.int1 ~ Ns.int(?)).apply(1, 111).get === List(
+        (1, 11, 111)
+      )
+      // 0 + 1 + 1
+      m(Ref2.int2 ~ Ref1.int1(?) ~ Ns.int(?)).apply(11, 111).get === List(
+        (1, 11, 111)
+      )
+
+      // 1 + 1 + 1
+      m(Ref2.int2(?) ~ Ref1.int1(?) ~ Ns.int(?)).apply(1, 11, 111).get === List(
+        (1, 11, 111)
+      )
+    }
+
+
+    "2" in new CoreSetup {
+
+      insert(
+        Ref2.int2.str2, Ref1.int1.str1, Ns.int.str
+      )(
+        Seq(
+          ((1, "a"), (11, "aa"), (111, "aaa")),
+          ((2, "b"), (22, "bb"), (222, "bbb"))
+        )
+      )()
+
+      // 2 + 0 + 0
+      m(Ref2.int2.str2 ~ Ref1.int1.str1 ~ Ns.int.str).get.sorted === List(
+        ((1, "a"), (11, "aa"), (111, "aaa")),
+        ((2, "b"), (22, "bb"), (222, "bbb"))
+      )
+
+      // 2 + 0 + 0
+      m(Ref2.int2(?).str2(?) ~ Ref1.int1.str1 ~ Ns.int.str).apply(1, "a").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+
+      // 0 + 2 + 0
+      m(Ref2.int2.str2 ~ Ref1.int1(?).str1(?) ~ Ns.int.str).apply(11, "aa").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+
+      // 0 + 0 + 2
+      m(Ref2.int2.str2 ~ Ref1.int1.str1 ~ Ns.int(?).str(?)).apply(111, "aaa").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+
+      // 2 + 1 + 0
+      m(Ref2.int2(?).str2(?) ~ Ref1.int1(?).str1 ~ Ns.int.str).apply(1, "a", 11).get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+      // 2 + 0 + 1
+      m(Ref2.int2(?).str2(?) ~ Ref1.int1.str1 ~ Ns.int(?).str).apply(1, "a", 111).get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+
+      // 1 + 2 + 0
+      m(Ref2.int2(?).str2 ~ Ref1.int1(?).str1(?) ~ Ns.int.str).apply(1, 11, "aa").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+      // 0 + 2 + 1
+      m(Ref2.int2.str2 ~ Ref1.int1(?).str1(?) ~ Ns.int(?).str).apply(11, "aa", 111).get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+
+      // 1 + 0 + 2
+      m(Ref2.int2(?).str2 ~ Ref1.int1.str1 ~ Ns.int(?).str(?)).apply(1, 111, "aaa").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+      // 0 + 1 + 2
+      m(Ref2.int2.str2 ~ Ref1.int1(?).str1 ~ Ns.int(?).str(?)).apply(11, 111, "aaa").get === List(
+        ((1, "a"), (11, "aa"), (111, "aaa"))
+      )
+    }
+
+
+    "3" in new CoreSetup {
+
+      insert(
+        Ref2.int2.str2.enum2, Ref1.int1.str1.enum1, Ns.int.str.enum
+      )(
+        Seq(
+          ((1, "a", "enum21"), (11, "aa", "enum11"), (111, "aaa", "enum1")),
+          ((2, "b", "enum22"), (22, "bb", "enum11"), (222, "bbb", "enum2"))
+        )
+      )()
+
+      m(Ref2.int2.str2.enum2 ~ Ref1.int1.str1.enum1 ~ Ns.int.str.enum).get.sorted === List(
+        ((1, "a", "enum21"), (11, "aa", "enum11"), (111, "aaa", "enum1")),
+        ((2, "b", "enum22"), (22, "bb", "enum11"), (222, "bbb", "enum2"))
+      )
+
+      // 3 + 0 + 0
+      m(Ref2.int2(?).str2(?).enum2(?) ~ Ref1.int1.str1.enum1 ~ Ns.int.str.enum).apply(1, "a", "enum21").get === List(
+        ((1, "a", "enum21"), (11, "aa", "enum11"), (111, "aaa", "enum1"))
+      )
+      // 0 + 3 + 0
+      m(Ref2.int2.str2.enum2 ~ Ref1.int1(?).str1(?).enum1(?) ~ Ns.int.str.enum).apply(11, "aa", "enum11").get === List(
+        ((1, "a", "enum21"), (11, "aa", "enum11"), (111, "aaa", "enum1"))
+      )
+      // 0 + 0 + 3
+      m(Ref2.int2.str2.enum2 ~ Ref1.int1.str1.enum1 ~ Ns.int(?).str(?).enum(?)).apply(111, "aaa", "enum1").get === List(
+        ((1, "a", "enum21"), (11, "aa", "enum11"), (111, "aaa", "enum1"))
       )
     }
   }

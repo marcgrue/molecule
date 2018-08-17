@@ -1,12 +1,12 @@
-package molecule
-package ops
+package molecule.ops
+
 import java.net.URI
 import java.util.{Date, UUID}
-
-import molecule.ast.model.{Bidirectional, _}
+import molecule.ast.model._
 import molecule.ast.query._
 import molecule.util.MacroHelpers
-
+import scala.collection.immutable.HashSet
+import scala.collection.immutable.Set.{Set1, Set2, Set3, Set4}
 import scala.reflect.macros.whitebox.Context
 
 private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
@@ -44,7 +44,38 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case maybe: Distinct.type          => q"Distinct"
     case entValue: EntValue.type       => q"EntValue"
     case varValue: VarValue.type       => q"VarValue"
-    case other                         => abort("[Liftables:liftAny] Can't lift unexpected Any type: " + other.getClass)
+    case set: Set[_]                   => set match {
+      case s1: Set1[_]   => q"Set(${any(s1.head)})"
+      case s2: Set2[_]   => q"Set(..${s2 map any})"
+      case s3: Set3[_]   => q"Set(..${s3 map any})"
+      case s4: Set4[_]   => q"Set(..${s4 map any})"
+      case s: HashSet[_] => q"Set(..${s map any})"
+      case emptySet      => q"Set()"
+    }
+    case other                         =>
+      abort("[Liftables:liftAny] Can't lift unexpected Any type: " + other.getClass +
+        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+        "\nTry to assign the expression to a variable and apply the variable instead.")
+  }
+
+  def any(v: Any) = v match {
+    case Literal(Constant(s: String))  => q"$s"
+    case Literal(Constant(i: Int))     => q"$i"
+    case Literal(Constant(l: Long))    => q"$l"
+    case Literal(Constant(f: Float))   => q"$f"
+    case Literal(Constant(d: Double))  => q"$d"
+    case Literal(Constant(b: Boolean)) => q"$b"
+    case s: String                     => q"$s"
+    case i: Int                        => q"$i"
+    case l: Long                       => q"$l"
+    case f: Float                      => q"$f"
+    case d: Double                     => q"$d"
+    case b: Boolean                    => q"$b"
+    case date: Date                    => mkDate(date)
+    case bigInt: BigInt                => mkBigInt(bigInt)
+    case bigDec: BigDecimal            => mkBigDecimal(bigDec)
+    case uuid: UUID                    => mkUUID(uuid)
+    case uri: URI                      => mkURI(uri)
   }
 
   implicit val liftTuple2 = Liftable[Product] {
@@ -110,17 +141,44 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case RelationBinding(names)  => q"RelationBinding(Seq(..$names))"
   }
 
-  implicit val liftDataClause = Liftable[DataClause] { cl => q"DataClause(${cl.ds}, ${cl.e}, ${cl.a}, ${cl.v}, ${cl.tx}, ${cl.op})" }
-
   implicit val liftInput = Liftable[Input] {
     case InDataSource(ds, argss)           => q"InDataSource($ds, Seq(...$argss))"
     case InVar(binding, argss)             => q"InVar($binding, Seq(...$argss))"
-    case Placeholder(v, kw, enumPrefix, e) => q"Placeholder($v, $kw, $enumPrefix, $e)"
+    case Placeholder(e, kw, v, enumPrefix) => q"Placeholder($e, $kw, $v, $enumPrefix)"
+  }
+
+  implicit val liftDataClause     = Liftable[DataClause] { dc => q"DataClause(${dc.ds}, ${dc.e}, ${dc.a}, ${dc.v}, ${dc.tx}, ${dc.op})" }
+  implicit val liftNotClause      = Liftable[NotClause] { nc => q"NotClause(${nc.e}, ${nc.a})" }
+  implicit val liftRuleInvocation = Liftable[RuleInvocation] { ri => q"RuleInvocation(${ri.name}, Seq(..${ri.args}))" }
+  implicit val liftFunct          = Liftable[Funct] { f => q"Funct(${f.name}, Seq(..${f.ins}), ${f.outs})" }
+
+  implicit val liftNotClauses = Liftable[NotClauses] { notClauses =>
+    val clauses = notClauses.clauses map {
+      case cl: DataClause     => q"$cl"
+      case cl: NotClause      => q"$cl"
+      case cl: RuleInvocation => q"$cl"
+      case cl: Funct          => q"$cl"
+      case q"$e"              => e
+    }
+    q"NotClauses(Seq(..$clauses))"
+  }
+
+
+  implicit val liftListOfClauses = Liftable[Seq[Clause]] { clauses =>
+    val cls = clauses map {
+      case cl: DataClause     => q"$cl"
+      case cl: NotClause      => q"$cl"
+      case cl: NotClauses     => q"$cl"
+      case cl: RuleInvocation => q"$cl"
+      case cl: Funct          => q"$cl"
+    }
+    q"Seq(..$cls)"
   }
 
   implicit val liftClause = Liftable[Clause] {
     case DataClause(ds, e, a, v, tx, op) => q"DataClause($ds, $e, $a, $v, $tx, $op)"
-    case NotClause(ds, e, a)             => q"NotClause($ds, $e, $a)"
+    case NotClause(e, a)                 => q"NotClause($e, $a)"
+    case NotClauses(clauses)             => q"NotClauses($clauses)"
     case RuleInvocation(name, args)      => q"RuleInvocation($name, Seq(..$args))"
     case Funct(name, ins, outs)          => q"Funct($name, Seq(..$ins), $outs)"
   }
@@ -179,58 +237,58 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
 
   implicit val liftFn    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
   implicit val liftValue = Liftable[Value] {
-    case EntValue                    => q"EntValue"
-    case NsValue(values)             => q"NsValue(Seq(..$values))"
-    case VarValue                    => q"VarValue"
-    case AttrVar(v)                  => q"AttrVar($v)"
-    case TxValue(t)                  => q"TxValue($t)"
-    case TxValue_(t)                 => q"TxValue_($t)"
-    case TxTValue(t)                 => q"TxTValue($t)"
-    case TxTValue_(t)                => q"TxTValue_($t)"
-    case TxInstantValue(tx)          => q"TxInstantValue($tx)"
-    case TxInstantValue_(tx)         => q"TxInstantValue_($tx)"
-    case OpValue(added)              => q"OpValue($added)"
-    case OpValue_(added)             => q"OpValue_($added)"
-    case NoValue                     => q"NoValue"
-    case Id(eid)                     => q"Id($eid)"
-    case Card(card)                  => q"Card($card)"
-    case BiSelfRef(card)             => q"BiSelfRef($card)"
-    case BiSelfRefAttr(card)         => q"BiSelfRefAttr($card)"
-    case BiOtherRef(card, attr)      => q"BiOtherRef($card, $attr)"
-    case BiOtherRefAttr(card, attr)  => q"BiOtherRefAttr($card, $attr)"
-    case BiEdge                      => q"BiEdge"
-    case BiEdgeRef(card, attr)       => q"BiEdgeRef($card, $attr)"
-    case BiEdgeRefAttr(card, attr)   => q"BiEdgeRefAttr($card, $attr)"
-    case BiEdgePropRef(card)         => q"BiEdgePropRef($card)"
-    case BiEdgePropAttr(card)        => q"BiEdgePropAttr($card)"
-    case BiEdgePropRefAttr(card)     => q"BiEdgePropRefAttr($card)"
-    case BiTargetRef(card, attr)     => q"BiTargetRef($card, $attr)"
-    case BiTargetRefAttr(card, attr) => q"BiTargetRefAttr($card, $attr)"
-    case BackValue(value)            => q"BackValue($value)"
-    case EnumVal                     => q"EnumVal"
-    case IndexVal                    => q"IndexVal"
-    case And(values)                 => q"And(Seq(..$values))"
-    case Eq(values)                  => q"Eq(Seq(..$values))"
-    case Neq(values)                 => q"Neq(Seq(..$values))"
-    case Lt(value)                   => q"Lt($value)"
-    case Gt(value)                   => q"Gt($value)"
-    case Le(value)                   => q"Le($value)"
-    case Ge(value)                   => q"Ge($value)"
-    case Fn(fn, value)               => q"Fn($fn, $value)"
-    case Length(fn)                  => q"Length($fn)"
-    case Qm                          => q"Qm"
-    case Distinct                    => q"Distinct"
-    case Fulltext(search)            => q"Fulltext(Seq(..$search))"
-    case Add_(values)                => q"Add_(Seq(..$values))"
-    case Replace(oldNew)             => q"Replace(Seq(..$oldNew))"
-    case Remove(values)              => q"Remove(Seq(..$values))"
-    case MapEq(pairs)                => q"MapEq(Seq(..$pairs))"
-    case MapAdd(pairs)               => q"MapAdd(Seq(..$pairs))"
-    case MapReplace(pairs)           => q"MapReplace(Seq(..$pairs))"
-    case MapRemove(keys)             => q"MapRemove(Seq(..$keys))"
-    case MapKeys(keys)               => q"MapKeys(Seq(..$keys))"
+    case EntValue                     => q"EntValue"
+    case NsValue(values)              => q"NsValue(Seq(..$values))"
+    case VarValue                     => q"VarValue"
+    case AttrVar(v)                   => q"AttrVar($v)"
+    case TxValue(t)                   => q"TxValue($t)"
+    case TxValue_(t)                  => q"TxValue_($t)"
+    case TxTValue(t)                  => q"TxTValue($t)"
+    case TxTValue_(t)                 => q"TxTValue_($t)"
+    case TxInstantValue(tx)           => q"TxInstantValue($tx)"
+    case TxInstantValue_(tx)          => q"TxInstantValue_($tx)"
+    case OpValue(added)               => q"OpValue($added)"
+    case OpValue_(added)              => q"OpValue_($added)"
+    case NoValue                      => q"NoValue"
+    case Id(eid)                      => q"Id($eid)"
+    case Card(card)                   => q"Card($card)"
+    case BiSelfRef(card)              => q"BiSelfRef($card)"
+    case BiSelfRefAttr(card)          => q"BiSelfRefAttr($card)"
+    case BiOtherRef(card, attr)       => q"BiOtherRef($card, $attr)"
+    case BiOtherRefAttr(card, attr)   => q"BiOtherRefAttr($card, $attr)"
+    case BiEdge                       => q"BiEdge"
+    case BiEdgeRef(card, attr)        => q"BiEdgeRef($card, $attr)"
+    case BiEdgeRefAttr(card, attr)    => q"BiEdgeRefAttr($card, $attr)"
+    case BiEdgePropRef(card)          => q"BiEdgePropRef($card)"
+    case BiEdgePropAttr(card)         => q"BiEdgePropAttr($card)"
+    case BiEdgePropRefAttr(card)      => q"BiEdgePropRefAttr($card)"
+    case BiTargetRef(card, attr)      => q"BiTargetRef($card, $attr)"
+    case BiTargetRefAttr(card, attr)  => q"BiTargetRefAttr($card, $attr)"
+    case BackValue(value)             => q"BackValue($value)"
+    case EnumVal                      => q"EnumVal"
+    case IndexVal                     => q"IndexVal"
+    case And(values)                  => q"And(Seq(..$values))"
+    case Eq(values) if values.isEmpty => q"Eq(Nil)"
+    case Eq(values)                   => q"Eq(Seq(..$values))"
+    case Neq(values)                  => q"Neq(Seq(..$values))"
+    case Lt(value)                    => q"Lt($value)"
+    case Gt(value)                    => q"Gt($value)"
+    case Le(value)                    => q"Le($value)"
+    case Ge(value)                    => q"Ge($value)"
+    case Fn(fn, value)                => q"Fn($fn, $value)"
+    case Length(fn)                   => q"Length($fn)"
+    case Qm                           => q"Qm"
+    case Distinct                     => q"Distinct"
+    case Fulltext(search)             => q"Fulltext(Seq(..$search))"
+    case AssertValue(values)          => q"AssertValue(Seq(..$values))"
+    case ReplaceValue(oldNew)         => q"ReplaceValue(Seq(..$oldNew))"
+    case RetractValue(values)         => q"RetractValue(Seq(..$values))"
+    case AssertMapPairs(pairs)        => q"AssertMapPairs(Seq(..$pairs))"
+    case ReplaceMapPairs(pairs)       => q"ReplaceMapPairs(Seq(..$pairs))"
+    case RetractMapKeys(keys)         => q"RetractMapKeys(Seq(..$keys))"
+    case MapEq(pairs)                 => q"MapEq(Seq(..$pairs))"
+    case MapKeys(keys)                => q"MapKeys(Seq(..$keys))"
   }
-
 
   implicit val liftAtom       = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
   implicit val liftBond       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
@@ -260,7 +318,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Nested(${g0.bond}, Seq(..$es0))"
   }
 
-  implicit val liftTxMetaData  = Liftable[TxMetaData] { tm =>
+  implicit val liftTxMetaData = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -288,15 +346,15 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
 
   implicit val liftListOfElements = Liftable[Seq[Element]] { elements =>
     val es = elements map {
-      case a: Atom        => q"$a"
-      case b: Bond        => q"$b"
-      case r: ReBond      => q"$r"
-      case r: Transitive  => q"$r"
-      case Self           => q"Self"
-      case g: Nested      => q"$g"
-      case m: Meta        => q"$m"
-      case t: TxMetaData  => q"$t"
-      case c: Composite   => q"$c"
+      case a: Atom       => q"$a"
+      case b: Bond       => q"$b"
+      case r: ReBond     => q"$r"
+      case r: Transitive => q"$r"
+      case Self          => q"Self"
+      case g: Nested     => q"$g"
+      case m: Meta       => q"$m"
+      case t: TxMetaData => q"$t"
+      case c: Composite  => q"$c"
     }
     q"Seq(..$es)"
   }

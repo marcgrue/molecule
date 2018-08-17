@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeManyOtherUpdateProps extends MoleculeSpec {
@@ -82,9 +83,9 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
     "value" in new setup {
 
       // Updating edge properties from the base entity is not allowed
-      (Person(ann).CloseTo.howWeMet("inSchool").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_edgeComplete]  Can't update edge `CloseTo` " +
+      (Person(ann).CloseTo.howWeMet("inSchool").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_edgeComplete]  Can't update edge `CloseTo` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `CloseTo(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -131,9 +132,9 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").CloseTo.CoreQuality.name._CloseTo.Person.name.get === List(("Love", "Ann"))
 
       // We can't update across namespaces
-      (CloseTo(annRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
+      (CloseTo(annRex).CoreQuality.name("Compassion").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity
 
@@ -177,12 +178,12 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").CloseTo.commonInterests.Person.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Ann"))
 
       // Remove
-      CloseTo(annRex).commonInterests.remove("Travelling").update
+      CloseTo(annRex).commonInterests.retract("Travelling").update
       Person.name_("Ann").CloseTo.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine"), "Rex"))
       Animal.name_("Rex").CloseTo.commonInterests.Person.name.get === List((Set("Walking", "Cuisine"), "Ann"))
 
       // Add
-      CloseTo(annRex).commonInterests.add("Meditating").update
+      CloseTo(annRex).commonInterests.assert("Meditating").update
       Person.name_("Ann").CloseTo.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Rex"))
       Animal.name_("Rex").CloseTo.commonInterests.Person.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Ann"))
 
@@ -210,12 +211,12 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").CloseTo.commonLicences.Person.name.get === List((Set("climbing", "diving"), "Ann"))
 
       // Remove
-      CloseTo(annRex).commonLicences.remove("climbing").update
+      CloseTo(annRex).commonLicences.retract("climbing").update
       Person.name_("Ann").CloseTo.commonLicences.Animal.name.get === List((Set("diving"), "Rex"))
       Animal.name_("Rex").CloseTo.commonLicences.Person.name.get === List((Set("diving"), "Ann"))
 
       // Add
-      CloseTo(annRex).commonLicences.add("parachuting").update
+      CloseTo(annRex).commonLicences.assert("parachuting").update
       Person.name_("Ann").CloseTo.commonLicences.Animal.name.get === List((Set("diving", "parachuting"), "Rex"))
       Animal.name_("Rex").CloseTo.commonLicences.Person.name.get === List((Set("diving", "parachuting"), "Ann"))
 
@@ -260,12 +261,12 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
       // remove
-      CloseTo(annRex).inCommon.remove(patience).update
+      CloseTo(annRex).inCommon.retract(patience).update
       Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Sporty"), "Rex"))
       Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Sporty"), "Ann"))
 
       // add
-      CloseTo(annRex).inCommon.add(patience).update
+      CloseTo(annRex).inCommon.assert(patience).update
       Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
       Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
@@ -294,12 +295,12 @@ class EdgeManyOtherUpdateProps extends MoleculeSpec {
     Animal.name_("Rex").CloseTo.commonScores.Person.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Ann"))
 
     // Remove by key
-    CloseTo(annRex).commonScores.remove("golf").update
+    CloseTo(annRex).commonScores.retract("golf").update
     Person.name_("Ann").CloseTo.commonScores.Animal.name.get === List((Map("baseball" -> 8), "Rex"))
     Animal.name_("Rex").CloseTo.commonScores.Person.name.get === List((Map("baseball" -> 8), "Ann"))
 
     // Add
-    CloseTo(annRex).commonScores.add("parachuting" -> 4).update
+    CloseTo(annRex).commonScores.assert("parachuting" -> 4).update
     Person.name_("Ann").CloseTo.commonScores.Animal.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Rex"))
     Animal.name_("Rex").CloseTo.commonScores.Person.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Ann"))
 

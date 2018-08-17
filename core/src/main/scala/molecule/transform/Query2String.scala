@@ -1,9 +1,21 @@
 package molecule.transform
 import java.util.{Date, UUID}
+import java.net.URI
 import molecule.ast.query._
+import molecule.transform.exception.Query2StringException
 import molecule.util.Helpers
 
-private[molecule] case class Query2String(q: Query) extends Helpers {
+
+/** Query to Datomic query string transformation.
+  * <br><br>
+  * Third transformation in Molecules series of transformations from
+  * custom boilerplate DSL constructs to Datomic queries:
+  * <br><br>
+  * Custom DSL molecule --> Model --> Query --> Datomic query string
+  *
+  * @see [[http://www.scalamolecule.org/dev/transformation/]]
+  * */
+case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation
   var asN = false
@@ -43,7 +55,7 @@ private[molecule] case class Query2String(q: Query) extends Helpers {
     case ImplDS                                           => ""
     case InDataSource(ds, _)                              => p(ds)
     case InVar(binding, _)                                => p(binding)
-    case Placeholder(v, _, _, _)                          => "?" + v
+    case Placeholder(_, _, Var(v), _)                     => "?" + v
     case NoBinding                                        => ""
     case ScalarBinding(v)                                 => p(v)
     case CollectionBinding(v)                             => "[" + p(v) + " ...]"
@@ -51,11 +63,12 @@ private[molecule] case class Query2String(q: Query) extends Helpers {
     case RelationBinding(vs)                              => "[[ " + (vs map p mkString " ") + " ]]"
     case DataClause(ds, e, a, v@Val(bi: BigInt), tx, op)  => asN = true; val dc = pp(ds, e, a, v, tx, op); asN = false; dc
     case DataClause(ds, e, a, v, tx, op)                  => pp(ds, e, a, v, tx, op)
-    case NotClause(ds, e, a)                              => s"(not [" + p(e) + " " + p(a) + "])"
+    case NotClause(e, a)                                  => s"(not [" + p(e) + " " + p(a) + "])"
+    case NotClauses(cls)                                  => s"(not " + (cls map p mkString " ") + ")"
     case Funct(name, ins, outs)                           => ((s"[($name " + (ins map p mkString " ")).trim + ") " + p(outs)).trim + "]"
     case RuleInvocation(name, args)                       => s"($name " + (args map p mkString " ") + ")"
     case Rule(name, args, clauses)                        => asN = true; val rc = clauses map p mkString " "; asN = false; s"[($name " + (args map p mkString " ") + ") " + rc + "]"
-    case unresolvedQuery                                  => sys.error(s"\n[Query2String] UNRESOLVED query expression: $unresolvedQuery")
+    case unresolvedQuery                                  => throw new Query2StringException(s"\nUNRESOLVED query expression: $unresolvedQuery")
   }
 
   def pp(es: QueryExpr*): String = es.toList.map(p).filter(_.trim.nonEmpty).mkString("[", " ", "]")

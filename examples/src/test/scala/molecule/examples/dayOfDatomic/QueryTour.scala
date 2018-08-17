@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.imports._
+import molecule.api._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec
 import scala.language.postfixOps

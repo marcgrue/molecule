@@ -41,12 +41,6 @@ private[molecule] object expectCompileError {
           |${showRaw(c.typecheck(c.parse("{ " + codeStr + " }")))}
           |--------------------
          """.stripMargin
-//        s"""Type-checking succeeded unexpectedly!!!
-//          |CODE:
-//          |$codeStr
-//          |$expMsg
-//          |--------------------
-//         """.stripMargin
       )
     } catch {
       case e: TypecheckException =>

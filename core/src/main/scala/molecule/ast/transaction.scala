@@ -6,8 +6,10 @@ import molecule.ast.model._
 
 import scala.collection.JavaConverters._
 
-private[molecule] object transaction {
+/** Datomic transaction representation and operations. */
+object transaction {
 
+  /** Transaction statement. */
   sealed trait Statement {
     val action: String
     val e     : Any

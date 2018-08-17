@@ -35,10 +35,10 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
           case Add(e, a, v, bi)             =>
             val biStr = if(bi != NoValue) bi else ""
             indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
-          case Retract(e, a, v, bi)         =>
+          case Retract(e, a, v, bi)    =>
             val biStr = if(bi != NoValue) bi else ""
             indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
-          case RetractEntity(e)         =>
+          case RetractEntity(e)             =>
             indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
 
           case l: java.util.List[_] if l.size() == 4 && l.asScala.head.toString.take(4) == ":db/" => {
@@ -104,6 +104,6 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
   }
 }
 
-case class Trace() {
+private[molecule] case class Trace() {
   def apply(id: Int, msgs: Any*) {print(s"$id -> " + msgs.mkString("  ###  "))}
 }

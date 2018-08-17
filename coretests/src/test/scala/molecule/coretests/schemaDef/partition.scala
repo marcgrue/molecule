@@ -1,12 +1,12 @@
 package molecule.coretests.schemaDef
 
-import molecule.imports._
+import molecule.api._
 import molecule.ast.model.{Atom, Bond, Eq, Model}
 import molecule.coretests.schemaDef.dsl.partitionTest._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
+import molecule.ops.exception.VerifyModelException
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
-
 import scala.language.reflectiveCalls
 
 class PartitionSetup extends Scope {
@@ -65,9 +65,9 @@ class Partition extends MoleculeSpec {
 
   "No transitives in inserts" in new PartitionSetup {
     // Todo: more transitive examples in own file
-    (m(lit_Book.title.Author.name.name).insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      "[molecule.ops.VerifyModel.noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
+    (m(lit_Book.title.Author.name.name).insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      "[noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
   }
 
 

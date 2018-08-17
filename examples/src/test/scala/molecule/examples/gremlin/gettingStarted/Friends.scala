@@ -1,6 +1,6 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule.imports._
+import molecule.api._
 import molecule.examples.gremlin.dsl.modernGraph1._
 import molecule.examples.gremlin.schema.ModernGraph1Schema
 import molecule.util.MoleculeSpec
@@ -56,7 +56,7 @@ class Friends extends MoleculeSpec {
     Person(marko).friends(vadas, josh).update
 
     // Extra friendship not in the tutorial so that we can make fof queries
-    Person(vadas).friends.add(peter).update
+    Person(vadas).friends.assert(peter).update
   }
 
 

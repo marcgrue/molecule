@@ -1,6 +1,6 @@
 package molecule.coretests.json
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 

@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
 
@@ -116,29 +116,27 @@ class Aggregates extends CoreSpec {
     Ns.int.str(distinct).get.sortBy(_._1) === List(
       (1, Vector("a")),
       (2, Vector("b")),
-      (3, Vector("b")),
+      (3, Vector("b"))
     )
 
     Ns.str.int(count).get.sortBy(_._1) === List(
       ("a", 1),
-      ("b", 2),
+      ("b", 3)
+    )
+    Ns.str.int(countDistinct).get.sortBy(_._1) === List(
+      ("a", 1),
+      ("b", 2)
     )
 
     Ns.int.str(count).get.sortBy(_._1) === List(
       (1, 1),
-      (2, 1),
-      (3, 1),
+      (2, 2),
+      (3, 1)
     )
-
-    Ns.str.int(countDistinct).get.sortBy(_._1) === List(
-      ("a", 1),
-      ("b", 2),
-    )
-
     Ns.int.str(countDistinct).get.sortBy(_._1) === List(
       (1, 1),
       (2, 1),
-      (3, 1),
+      (3, 1)
     )
 
     Ns.str(distinct).int(distinct).get === List(
@@ -146,19 +144,18 @@ class Aggregates extends CoreSpec {
     )
 
     Ns.str(count).str(countDistinct).get === List(
-      (2, 2),
+      (4, 2),
     )
 
+    // extra int without a str value was saved
     Ns.int(count).int(countDistinct).get === List(
-      (4, 4),
+      (5, 4),
     )
 
-    Ns.int(count).get === List(4)
-
+    Ns.int(count).get === List(5)
     Ns.int(countDistinct).get === List(4)
 
 
-    Ns.str_(nil).int(4).get === List(4)
+    Ns.str_(Nil).int.get === List(4)
   }
-
 }

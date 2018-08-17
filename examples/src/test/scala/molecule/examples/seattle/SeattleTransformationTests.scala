@@ -1,9 +1,9 @@
 package molecule.examples.seattle
-import molecule.imports._
 import molecule.ast.model._
 import molecule.ast.query._
-import molecule.composition.meta._
+import molecule.generic.Db
 import molecule.examples.seattle.dsl.seattle._
+import molecule.api._
 import scala.language.reflectiveCalls
 
 
@@ -918,6 +918,7 @@ class SeattleTransformationTests extends SeattleSpec {
         |        [?e :district/region ?f]]""".stripMargin
 
 
+
     m(Community.name.type_(?).Neighborhood.District.region_(?)).apply(
       ("twitter" or "facebook_page") and ("sw" or "s" or "se")
       // or
@@ -972,12 +973,62 @@ class SeattleTransformationTests extends SeattleSpec {
         |     [(rule2 ?e) [?e :district/region ":district.region/s"]]
         |     [(rule2 ?e) [?e :district/region ":district.region/se"]]]
         |)""".stripMargin
+
+
+//    m(Community.name.type_(?).Neighborhood.District.region_(?)).apply(
+//      ("twitter" or "facebook_page") and ("sw" or "s" or "se")
+//      // or
+//      // Seq("twitter", "facebook_page"), Seq("sw", "s", "se")
+//    ) -->
+//      Model(List(
+//        Atom("community", "name", "String", 1, VarValue, None),
+//        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
+//        Bond("community", "neighborhood", "neighborhood", 1),
+//        Bond("neighborhood", "district", "district", 1),
+//        Atom("district", "region_", "String", 1, Qm, Some(":district.region/")))
+//      ) -->
+//      Query(
+//        Find(List(
+//          Var("b"))),
+//        In(
+//          List(
+//            InVar(RelationBinding(List(Var("c"), Var("f"))), List(
+//              List(":community.type/twitter", ":district.region/sw"),
+//              List(":community.type/twitter", ":district.region/s"),
+//              List(":community.type/twitter", ":district.region/se"),
+//              List(":community.type/facebook_page", ":district.region/sw"),
+//              List(":community.type/facebook_page", ":district.region/s"),
+//              List(":community.type/facebook_page", ":district.region/se")))),
+//          List(),
+//          List(DS)
+//        ),
+//        Where(List(
+//          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
+//          DataClause(ImplDS, Var("a"), KW("community", "type"), Var("c"), Empty),
+//          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("d"), Empty),
+//          DataClause(ImplDS, Var("d"), KW("neighborhood", "district", "district"), Var("e"), Empty),
+//          DataClause(ImplDS, Var("e"), KW("district", "region"), Var("f"), Empty)
+//        ))
+//      ) -->
+//      """[:find  ?b
+//        | :in    $ [[ ?c ?f ]]
+//        | :where [?a :community/name ?b]
+//        |        [?a :community/type ?c]
+//        |        [?a :community/neighborhood ?d]
+//        |        [?d :neighborhood/district ?e]
+//        |        [?e :district/region ?f]]
+//        |
+//        |INPUTS:
+//        |List(
+//        |  1 datomic.db.Db@xxx
+//        |  2 [[:community.type/twitter, :district.region/sw], [:community.type/twitter, :district.region/s], [:community.type/twitter, :district.region/se], [:community.type/facebook_page, :district.region/sw], [:community.type/facebook_page, :district.region/s], [:community.type/facebook_page, :district.region/se]]
+//        |)""".stripMargin
   }
 
 
   "Working with time" >> {
 
-//    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
+    //    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
 
     m(Db.txInstant) -->
       Model(List(
@@ -1117,7 +1168,7 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, Replace(Seq("news" -> "Cool news")), None))
+        Atom("community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
       ) -->
       """List(
         |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
@@ -1134,7 +1185,7 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, Replace(Seq(
+        Atom("community", "category", "String", 2, ReplaceValue(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
       ) -->
@@ -1148,7 +1199,7 @@ class SeattleTransformationTests extends SeattleSpec {
 
     // Add a category
     testUpdateMolecule(
-      Community(belltownId).category.add("extra category")
+      Community(belltownId).category.assert("extra category")
     ) -->
       Model(List(
         Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
@@ -1161,7 +1212,7 @@ class SeattleTransformationTests extends SeattleSpec {
 
     // Remove a category
     testUpdateMolecule(
-      Community(belltownId).category.remove("Super cool events")
+      Community(belltownId).category.retract("Super cool events")
     ) -->
       Model(List(
         Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),

@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.imports._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeOneOtherUpdateProps extends MoleculeSpec {
@@ -83,9 +84,9 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
     "value" in new setup {
 
       // Updating edge properties from the base entity is not allowed
-      (Person(ann).Favorite.howWeMet("inSchool").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_edgeComplete]  Can't update edge `Favorite` " +
+      (Person(ann).Favorite.howWeMet("inSchool").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_edgeComplete]  Can't update edge `Favorite` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Favorite(<edgeId>).edgeProperty(<new value>).update`."
 
@@ -132,9 +133,9 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").Favorite.CoreQuality.name._Favorite.Person.name.get === List(("Love", "Ann"))
 
       // We can't update across namespaces
-      (Favorite(annRex).CoreQuality.name("Compassion").update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
+      (Favorite(annRex).CoreQuality.name("Compassion").update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity
 
@@ -178,12 +179,12 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Travelling", "Walking", "Cuisine"), "Ann"))
 
       // Remove
-      Favorite(annRex).commonInterests.remove("Travelling").update
+      Favorite(annRex).commonInterests.retract("Travelling").update
       Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine"), "Rex"))
       Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine"), "Ann"))
 
       // Add
-      Favorite(annRex).commonInterests.add("Meditating").update
+      Favorite(annRex).commonInterests.assert("Meditating").update
       Person.name_("Ann").Favorite.commonInterests.Animal.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Rex"))
       Animal.name_("Rex").Favorite.commonInterests.Person.name.get === List((Set("Walking", "Cuisine", "Meditating"), "Ann"))
 
@@ -211,12 +212,12 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("climbing", "diving"), "Ann"))
 
       // Remove
-      Favorite(annRex).commonLicences.remove("climbing").update
+      Favorite(annRex).commonLicences.retract("climbing").update
       Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("diving"), "Rex"))
       Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving"), "Ann"))
 
       // Add
-      Favorite(annRex).commonLicences.add("parachuting").update
+      Favorite(annRex).commonLicences.assert("parachuting").update
       Person.name_("Ann").Favorite.commonLicences.Animal.name.get === List((Set("diving", "parachuting"), "Rex"))
       Animal.name_("Rex").Favorite.commonLicences.Person.name.get === List((Set("diving", "parachuting"), "Ann"))
 
@@ -261,12 +262,12 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
       Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
       // remove
-      Favorite(annRex).inCommon.remove(patience).update
+      Favorite(annRex).inCommon.retract(patience).update
       Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Sporty"), "Rex"))
       Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Sporty"), "Ann"))
 
       // add
-      Favorite(annRex).inCommon.add(patience).update
+      Favorite(annRex).inCommon.assert(patience).update
       Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
       Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
 
@@ -295,12 +296,12 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
     Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "golf" -> 6), "Ann"))
 
     // Remove by key
-    Favorite(annRex).commonScores.remove("golf").update
+    Favorite(annRex).commonScores.retract("golf").update
     Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8), "Rex"))
     Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8), "Ann"))
 
     // Add
-    Favorite(annRex).commonScores.add("parachuting" -> 4).update
+    Favorite(annRex).commonScores.assert("parachuting" -> 4).update
     Person.name_("Ann").Favorite.commonScores.Animal.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Rex"))
     Animal.name_("Rex").Favorite.commonScores.Person.name.get === List((Map("baseball" -> 8, "parachuting" -> 4), "Ann"))
 

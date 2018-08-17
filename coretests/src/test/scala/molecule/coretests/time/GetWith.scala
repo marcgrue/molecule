@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable.Specification
@@ -18,11 +18,11 @@ class GetWith extends Specification with Scope {
   val eid = Ns.str("a").int(1).save.eid
 
 
-  "saveTx" >> {
+  "getSaveTx" >> {
 
     "1 with 1" >> {
       Ns.int.getWith(
-        Ns.int(2).saveTx
+        Ns.int(2).getSaveTx
       ) === List(
         1,
         2
@@ -32,7 +32,7 @@ class GetWith extends Specification with Scope {
       Ns.int.get === List(1)
 
       Ns.int.getWith(
-        Ns.str("b").saveTx
+        Ns.str("b").getSaveTx
       ) === List(
         1
       )
@@ -40,14 +40,14 @@ class GetWith extends Specification with Scope {
 
     "1 with n" >> {
       Ns.int.getWith(
-        Ns.str("b").int(2).saveTx
+        Ns.str("b").int(2).getSaveTx
       ) === List(
         1,
         2
       )
 
       Ns.str.getWith(
-        Ns.str("b").int(2).saveTx
+        Ns.str("b").int(2).getSaveTx
       ) === List(
         "a",
         "b"
@@ -56,7 +56,7 @@ class GetWith extends Specification with Scope {
 
     "n with 1" >> {
       Ns.str$.int.getWith(
-        Ns.int(2).saveTx
+        Ns.int(2).getSaveTx
       ).sortBy(_._2) === List(
         (Some("a"), 1),
         (None, 2)
@@ -65,7 +65,7 @@ class GetWith extends Specification with Scope {
 
     "n with n" >> {
       Ns.str.int.getWith(
-        Ns.str("b").int(2).saveTx
+        Ns.str("b").int(2).getSaveTx
       ).sortBy(_._2) === List(
         ("a", 1),
         ("b", 2)
@@ -74,11 +74,11 @@ class GetWith extends Specification with Scope {
   }
 
 
-  "insertTx" >> {
+  "getInsertTx" >> {
 
     "1 with 1" >> {
       Ns.int.getWith(
-        Ns.int.insertTx(
+        Ns.int.getInsertTx(
           2,
           3
         )
@@ -91,7 +91,7 @@ class GetWith extends Specification with Scope {
 
     "1 with n" >> {
       Ns.str.getWith(
-        Ns.str$.int.insertTx(Seq(
+        Ns.str$.int.getInsertTx(Seq(
           (Some("b"), 2),
           (None, 3)
         ))
@@ -104,7 +104,7 @@ class GetWith extends Specification with Scope {
 
     "n with 1" >> {
       Ns.str$.int.getWith(
-        Ns.int.insertTx(
+        Ns.int.getInsertTx(
           2,
           3
         )
@@ -117,7 +117,7 @@ class GetWith extends Specification with Scope {
 
     "n with n" >> {
       Ns.str$.int.getWith(
-        Ns.str$.int.insertTx(Seq(
+        Ns.str$.int.getInsertTx(Seq(
           (Some("b"), 2),
           (None, 3)
         ))
@@ -130,32 +130,32 @@ class GetWith extends Specification with Scope {
   }
 
 
-  "updateTx" >> {
+  "getUpdateTx" >> {
 
     "1 with 1" >> {
-      Ns.int.getWith(Ns(eid).int(2).updateTx) === List(2)
+      Ns.int.getWith(Ns(eid).int(2).getUpdateTx) === List(2)
 
       // Current state unchanged
       Ns.int.get === List(1)
     }
 
     "1 with n" >> {
-      Ns.int.getWith(Ns(eid).str("b").int(2).updateTx) === List(2)
+      Ns.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(2)
 
-      Ns.str.getWith(Ns(eid).str("b").int(2).updateTx) === List("b")
+      Ns.str.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List("b")
     }
 
     "n with 1" >> {
-      Ns.str.int.getWith(Ns(eid).int(2).updateTx) === List(("a", 2))
+      Ns.str.int.getWith(Ns(eid).int(2).getUpdateTx) === List(("a", 2))
     }
 
     "n with n" >> {
-      Ns.str.int.getWith(Ns(eid).str("b").int(2).updateTx) === List(("b", 2))
+      Ns.str.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(("b", 2))
     }
   }
 
 
-  "retractTx" >> {
+  "getRetractTx" >> {
 
     val eid2: Long = Ns.str("b").int(2).save.eid
 
@@ -166,7 +166,7 @@ class GetWith extends Specification with Scope {
     )
 
     // Test retracting an entity id
-    Ns.str.int.getWith(eid2.retractTx) === List(
+    Ns.str.int.getWith(eid2.getRetractTx) === List(
       ("a", 1)
     )
 
@@ -188,14 +188,14 @@ class GetWith extends Specification with Scope {
     Ns.str.int.get === List(("Fred", 42))
 
     Ns.str.int.getWith(
-      Ns(fred).int(43).updateTx
+      Ns(fred).int(43).getUpdateTx
     ) === List(("Fred", 43))
 
     // Production value intact
     Ns.str.int.get === List(("Fred", 42))
 
     Ns.str.int.getWith(
-      Ns.str("John").int(44).saveTx
+      Ns.str("John").int(44).getSaveTx
     ).sorted === List(
       ("Fred", 42), // production value
       ("John", 44) // insertion worked
@@ -206,12 +206,12 @@ class GetWith extends Specification with Scope {
 
 
     Ns.str.int.getWith(
-      Ns.str("John").int(44).saveTx,
-      Ns.str.int insertTx List(
+      Ns.str("John").int(44).getSaveTx,
+      Ns.str.int getInsertTx List(
         ("Lisa", 23),
         ("Pete", 24)
       ),
-      Ns(fred).int(43).updateTx
+      Ns(fred).int(43).getUpdateTx
     ).sorted === List(
       ("Fred", 43), // Updated
       ("John", 44), // Saved
@@ -219,9 +219,9 @@ class GetWith extends Specification with Scope {
       ("Pete", 24) // Inserted
     )
 
-    val saveJohn = Ns.str("John").int(44).saveTx
-    val insertMembers = Ns.str.int insertTx List(("Lisa", 23), ("Pete", 24))
-    val updateFred = Ns(fred).int(43).updateTx
+    val saveJohn = Ns.str("John").int(44).getSaveTx
+    val insertMembers = Ns.str.int getInsertTx List(("Lisa", 23), ("Pete", 24))
+    val updateFred = Ns(fred).int(43).getUpdateTx
 
     Ns.str.int.getWith(
       saveJohn,

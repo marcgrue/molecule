@@ -1,6 +1,6 @@
 package molecule.coretests.json
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 //import molecule.util.expectCompileError
@@ -86,7 +86,7 @@ class Composite extends CoreSpec {
         ((2, "b"), (22, "bb"))
       )
     )(
-      Ns.str_("Tx meta data")
+      Ns.str("Tx meta data")
     )
 
     m(Ref2.int2.str2 ~ Ref1.int1.str1).getJson ===

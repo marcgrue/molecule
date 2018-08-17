@@ -2,10 +2,13 @@ package molecule.boilerplate
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.composition._
+import molecule.expression.AttrExpressions._
 
-
-private[molecule] object attributes {
+/** Boilerplate interfaces for custom DSL generated from schema definition file.
+  * <br><br>
+  * Encodes attribute cardinality, type and mode (mandatory, tacit, optional).
+  * */
+object attributes {
 
   trait SelfJoin
 
@@ -15,25 +18,18 @@ private[molecule] object attributes {
 
   trait Attr
 
-  trait RefAttr[Ns, T] extends RefAttrOps[Ns, T] with Attr
+  trait RefAttr[Ns, T] extends Attr
 
-  trait OneRefAttr[Ns, In] extends OneRefAttrOps[Ns, In] with RefAttr[Ns,  Long]
+  trait OneRefAttr[Ns, In] extends OneRefAttrExpr[Ns, In] with RefAttr[Ns,  Long]
 
-  trait ManyRefAttr[Ns, In] extends ManyRefAttrOps[Ns, In] with RefAttr[Ns,  Long]
+  trait ManyRefAttr[Ns, In] extends ManyRefAttrExpr[Ns, In] with RefAttr[Ns,  Long]
 
-  trait BackRefAttr[Ns, In] extends BackRefAttrOps[Ns, In] with RefAttr[Ns,  Long]
-
-
-//  /** <p>ValueAttr */
-  /** @inheritdoc <p>ValueAttr */
-  sealed trait ValueAttr[Ns, In, T, U] extends ValueAttrOps[Ns, In, T, U] with Attr
+  sealed trait ValueAttr[Ns, In, T, U] extends Attr
 
   // Cardinality one attributes
 
-  /** @inheritdoc <p>One */
-  trait One[Ns, In, T] extends ValueAttr[Ns, In, T, T] with OneOps[Ns, In, T]
+  trait One[Ns, In, T] extends ValueAttr[Ns, In, T, T] with OneExpr[Ns, In, T]
 
-  /** @inheritdoc <p>OneString */
   trait OneString    [Ns, In] extends One[Ns, In, String    ]
   trait OneInt       [Ns, In] extends One[Ns, In, Int       ]
   trait OneLong      [Ns, In] extends One[Ns, In, Long      ]
@@ -51,7 +47,7 @@ private[molecule] object attributes {
 
   // Cardinality many attributes
 
-  trait Many[Ns, In, S, T] extends ManyOps[Ns, In, S, T] with ValueAttr[Ns, In, T, S]
+  trait Many[Ns, In, S, T] extends ValueAttr[Ns, In, T, S] with ManyExpr[Ns, In, T]
 
   trait ManyString    [Ns, In] extends Many[Ns, In, Set[String    ], String    ]
   trait ManyInt       [Ns, In] extends Many[Ns, In, Set[Int       ], Int       ]
@@ -71,7 +67,7 @@ private[molecule] object attributes {
 
   trait MapAttrK
 
-  trait MapAttr[Ns, In, M, T] extends MapAttrOps[Ns, In, M, T] with ValueAttr[Ns, In, T, M]
+  trait MapAttr[Ns, In, M, T] extends ValueAttr[Ns, In, T, M] with MapAttrExpr[Ns, In, T]
 
   trait MapString    [Ns, In] extends MapAttr[Ns, In, Map[String, String    ], String    ]
   trait MapInt       [Ns, In] extends MapAttr[Ns, In, Map[String, Int       ], Int       ]
@@ -97,13 +93,13 @@ private[molecule] object attributes {
 
   // Optional attributes
 
-  trait RefAttr$[Ns, T] extends OneOptional[Ns, T] with Attr
+  trait RefAttr$[Ns, T] extends Attr with OptionalExpr[Ns, T]
   trait OneRefAttr$ [Ns] extends RefAttr$[Ns, Long]
   trait ManyRefAttr$[Ns] extends RefAttr$[Ns, Set[Long]]
 
   trait ValueAttr$[T] extends Attr
 
-  trait OneValueAttr$[Ns, T] extends OneOptional[Ns, T] with ValueAttr$[T]
+  trait OneValueAttr$[Ns, T] extends ValueAttr$[T] with OptionalExpr[Ns, T]
 
   trait OneString$    [Ns] extends OneValueAttr$[Ns, String    ]
   trait OneInt$       [Ns] extends OneValueAttr$[Ns, Int       ]
@@ -119,7 +115,7 @@ private[molecule] object attributes {
   trait OneByte$      [Ns] extends OneValueAttr$[Ns, Byte      ]
 
 
-  trait ManyValueAttr$[Ns, T] extends OneOptional[Ns, T] with ValueAttr$[T]
+  trait ManyValueAttr$[Ns, T] extends ValueAttr$[T] with OptionalExpr[Ns, T]
 
   trait ManyString$    [Ns] extends ManyValueAttr$[Ns, Set[String    ]]
   trait ManyInt$       [Ns] extends ManyValueAttr$[Ns, Set[Int       ]]
@@ -135,7 +131,7 @@ private[molecule] object attributes {
   trait ManyByte$      [Ns] extends ManyValueAttr$[Ns, Set[Byte      ]]
 
 
-  trait MapAttr$[Ns, T] extends OneOptional[Ns, T] with Attr
+  trait MapAttr$[Ns, T] extends Attr with OptionalExpr[Ns, T]
 
   trait MapString$    [Ns] extends MapAttr$[Ns, Map[String, String    ]]
   trait MapInt$       [Ns] extends MapAttr$[Ns, Map[String, Int       ]]
@@ -151,7 +147,7 @@ private[molecule] object attributes {
   trait MapByte$      [Ns] extends MapAttr$[Ns, Map[String, Byte      ]]
 
 
-  trait Enum$[Ns, T] extends OneOptional[Ns, T] with Attr
+  trait Enum$[Ns, T] extends Attr with OptionalExpr[Ns, T]
 
   trait OneEnum$   [Ns] extends Enum$[Ns, String]
   trait ManyEnums$ [Ns] extends Enum$[Ns, Set[String]]
@@ -163,7 +159,7 @@ private[molecule] object attributes {
   trait UniqueValue
   trait UniqueIdentity
   trait Indexed
-  trait FulltextSearch[Ns, In] extends FulltextSearchOps[Ns, In]
+  trait FulltextSearch[Ns, In] extends FulltextSearchExpr[Ns, In]
   trait IsComponent
   trait NoHistory
 

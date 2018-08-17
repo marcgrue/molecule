@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.transform.exception.Model2TransactionException
 import molecule.util._
 
 class EdgeOneSelfSave extends MoleculeSpec {
@@ -68,7 +69,7 @@ Ann --> annLovesBen (7) -->  Ben
       */
 
       // lovesBen edge points to Ben
-      lovesBen.touch(1) === Map(
+      lovesBen.touchMax(1) === Map(
         ":db/id" -> lovesBen,
         ":loves/person" -> ben,
         ":loves/weight" -> 7,
@@ -76,14 +77,14 @@ Ann --> annLovesBen (7) -->  Ben
       )
 
       // Ben points to edge benLoves
-      ben.touch(1) === Map(
+      ben.touchMax(1) === Map(
         ":db/id" -> ben,
         ":person/loves" -> benLoves,
         ":person/name" -> "Ben"
       )
 
       // benLoves edge is ready to point back to a base entity (Ann)
-      benLoves.touch(1) === Map(
+      benLoves.touchMax(1) === Map(
         ":db/id" -> benLoves,
         ":loves/weight" -> 7,
         ":molecule_Meta/otherEdge" -> lovesBen // To be able to find the other edge later
@@ -97,9 +98,9 @@ Ann --> annLovesBen (7) -->  Ben
       val ann = Person.name("Ann").loves(lovesBen).save.eid
 
       // Narcissistic tendencies not allowed
-      (Person(ann).loves(ann).update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.transform.Model2Transaction.valueStmts:biEdgeRefAttr]  Current entity and referenced entity ids can't be the same."
+      (Person(ann).loves(ann).update must throwA[Model2TransactionException])
+        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        s"[valueStmts:biEdgeRefAttr]  Current entity and referenced entity ids can't be the same."
 
       // Ann and Ben know each other with a weight of 7
       Person.name.Loves.weight.Person.name.get.sorted === List(

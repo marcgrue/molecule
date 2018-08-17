@@ -1,7 +1,7 @@
 package molecule.examples.seattle
-import molecule.imports._
+import molecule.api._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.composition.meta._
+import molecule.generic._
 
 import scala.language.reflectiveCalls
 
@@ -544,7 +544,7 @@ class SeattleQueryTests extends SeattleSpec {
 
     // Add a category
     testUpdateMolecule(
-      Community(belltownId).category.add("extra category")
+      Community(belltownId).category.assert("extra category")
     ) -->
       """List(
         |  List(:db/add,  17592186045886                ,  :community/category,  extra category)
@@ -553,7 +553,7 @@ class SeattleQueryTests extends SeattleSpec {
 
     // Remove a category
     testUpdateMolecule(
-      Community(belltownId).category.remove("Super cool events")
+      Community(belltownId).category.retract("Super cool events")
     ) -->
       """List(
         |  List(:db/retract,  17592186045886                ,  :community/category,  Super cool events)

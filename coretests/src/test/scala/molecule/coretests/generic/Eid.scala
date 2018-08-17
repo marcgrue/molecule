@@ -1,8 +1,9 @@
 package molecule.coretests.generic
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.ops.exception.VerifyModelException
 
 class Eid extends CoreSpec {
 
@@ -109,22 +110,13 @@ class Eid extends CoreSpec {
 
   "Saving generic `e` values not allowed" in new CoreSetup {
 
-    (Ns(42L).str("man").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.unexpectedAppliedId]  " +
+    (Ns(42L).str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[unexpectedAppliedId]  " +
       s"""Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
 
-    (Ns.e(42L).str("man").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.unexpectedAppliedId]  " +
+    (Ns.e(42L).str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[unexpectedAppliedId]  " +
       s"""Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
-
-    //    (Ns.e_(42L).str("man").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"[molecule.ops.VerifyModel.noTacitAttrs]  Tacit attributes like `e_` not allowed in save molecules."
-    //
-    //    (Ns.str("man").Ref1.e(42L).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `e(42)`"
-    //
-    //    (Ns.str("man").Ref1.e_(42L).save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"[molecule.ops.VerifyModel.noTacitAttrs]  Tacit attributes like `e_` not allowed in save molecules."
   }
 
 
@@ -136,14 +128,14 @@ class Eid extends CoreSpec {
     m(Ns.ns.str("a")).get === List(("ns", "a"))
 
     // todo
-    //    (Ns.ns("hi").str("man").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"""[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
+    //    (Ns.ns("hi").str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    //      s"""[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
 
-    //    (Ns.str("man").Ref1.ns("hi").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"""[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
+    //    (Ns.str("man").Ref1.ns("hi").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    //      s"""[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
     //
-    //    (Ns.str("man").Ref1.a("hi").save must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-    //      s"""[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
+    //    (Ns.str("man").Ref1.a("hi").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    //      s"""[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` not allowed in save molecules. Found `a("hej")`"""
 
     //    Ns.str("man").Ref1.a("hej").save
     //    Ns.str("man").Ref1.v("hej").save

@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.imports._
+import molecule.api._
 
 import molecule.coretests.util.dsl.coreTest._
 
@@ -196,6 +196,31 @@ class KeysValues extends Base {
     Ns.int.dateMap_.k("en", "da")(date1, date3).get === List(1, 2, 3, 4)
     Ns.int.dateMap_.k(Seq("en", "da"))(Seq(date1, date3)).get === List(1, 2, 3, 4)
     Ns.int.dateMap_.k(en_da)(date1_date3).get === List(1, 2, 3, 4)
+  }
+
+
+  "Value negation" in new Setup {
+
+    Ns.int.strMap_.k("en").not("Hello").get === List(1, 2)
+    Ns.int.strMap.k("en").not("Hello").get === List(
+      (1, Map("en" -> "Hi there")),
+      (2, Map("en" -> "Oh, Hi"))
+    )
+
+    // Multiple value filters (OR semantics)
+    Ns.int.strMap_.k("en").not("Hello", "Hi there").get === List(2)
+
+
+    // Same as
+
+    Ns.int.strMap_.k("en").!=("Hello").get === List(1, 2)
+    Ns.int.strMap.k("en").!=("Hello").get === List(
+      (1, Map("en" -> "Hi there")),
+      (2, Map("en" -> "Oh, Hi"))
+    )
+
+    // Multiple value filters (OR semantics)
+    Ns.int.strMap_.k("en").!=("Hello", "Hi there").get === List(2)
   }
 
 

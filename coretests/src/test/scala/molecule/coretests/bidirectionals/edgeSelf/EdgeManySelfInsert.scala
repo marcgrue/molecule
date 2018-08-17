@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeManySelfInsert extends MoleculeSpec {
@@ -42,8 +43,8 @@ knownBy("Joe").get.head === List((8, "Ann"))
       // Can't save nested edges without including target entity
       (Person.name.Knows.*(Knows.weight).Person.name insert List(
         ("Ben", List(7, 8), "Joe")
-      ) must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
+      ) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
         s"target ns within the nested group of attributes."
     }
   }
@@ -88,16 +89,16 @@ knownBy("Joe").get.head === List((8, "Ann"))
   "base/edge - <missing target>" in new Setup {
 
     // Can't allow edge without ref to target entity
-    (Person.name.Knows.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Knows`."
+    (Person.name.Knows.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
 
     // Edge always have to have a ref to a target entity
-    (Knows.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
+    (Knows.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
   }
 }

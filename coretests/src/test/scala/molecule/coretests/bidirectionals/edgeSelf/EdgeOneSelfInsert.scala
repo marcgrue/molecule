@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeOneSelfInsert extends MoleculeSpec {
@@ -54,7 +55,7 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       */
 
       // lovesBen edge points to Ben
-      lovesBen.touch(1) === Map(
+      lovesBen.touchMax(1) === Map(
         ":db/id" -> lovesBen,
         ":loves/person" -> ben,
         ":loves/weight" -> 7,
@@ -62,14 +63,14 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       )
 
       // Ben points to edge benLoves
-      ben.touch(1) === Map(
+      ben.touchMax(1) === Map(
         ":db/id" -> ben,
         ":person/loves" -> benLoves,
         ":person/name" -> "Ben"
       )
 
       // benLoves edge is ready to point back to a base entity (Ann)
-      benLoves.touch(1) === Map(
+      benLoves.touchMax(1) === Map(
         ":db/id" -> benLoves,
         ":loves/weight" -> 7,
         ":molecule_Meta/otherEdge" -> lovesBen // To be able to find the other edge later
@@ -110,15 +111,15 @@ class EdgeOneSelfInsert extends MoleculeSpec {
 
   "base/edge - <missing target>" in new Setup {
     // Can't allow edge without ref to target entity
-    (Person.name.Loves.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Loves`."
+    (Person.name.Loves.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace after edge namespace `Loves`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
     // Edge always have to have a ref to a target entity
-    (Loves.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
+    (Loves.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace somewhere after edge property `Loves/weight`."
   }
 }

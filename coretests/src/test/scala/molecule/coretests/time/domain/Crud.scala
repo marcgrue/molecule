@@ -1,6 +1,6 @@
 package molecule.coretests.time.domain
 
-import molecule.imports._
+import molecule.api._
 import molecule.facade.Conn
 import molecule.coretests.util.dsl.coreTest.Ns
 

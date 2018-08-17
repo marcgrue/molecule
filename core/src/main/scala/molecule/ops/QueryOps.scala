@@ -2,13 +2,16 @@ package molecule
 package ops
 import java.net.URI
 import java.util.{Date, UUID}
-
 import datomic.Util
 import molecule.ast.model._
 import molecule.ast.query._
+import molecule.exceptions.MoleculeException
+import molecule.ops.exception.QueryOpsException
 import molecule.util.Helpers
 
-private[molecule] object QueryOps extends Helpers {
+
+/** Query operations. */
+object QueryOps extends Helpers {
   //  type KeepQueryOps = Int
 
   implicit class QueryOps(q: Query) {
@@ -45,8 +48,8 @@ private[molecule] object QueryOps extends Helpers {
 
         gs.flatMap {
           case AttrVar(v)         => Some(Var(attrV))
-          case TxValue(_)            => Some(Var(gV("tx")))
-          case TxValue_(_)           => None
+          case TxValue(_)         => Some(Var(gV("tx")))
+          case TxValue_(_)        => None
           case TxTValue(_)        => Some(Var(gV("txT")))
           case TxTValue_(_)       => None
           case TxInstantValue(_)  => Some(Var(gV("txInst")))
@@ -79,16 +82,16 @@ private[molecule] object QueryOps extends Helpers {
     // In ..........................................
 
     def in(v: String, a: Atom, enumPrefix: Option[String] = None, e: String = ""): Query =
-      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(v, KW(a.ns, a.name), enumPrefix, e)))
+      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(Var(e), KW(a.ns, a.name), Var(v), enumPrefix)))
 
     def in(v: String, ns: String, attr: String, e: String): Query =
-      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(v, KW(ns, attr), None, e)))
+      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(Var(e), KW(ns, attr), Var(v), None)))
 
     def in(eids: Seq[Any], e: String): Query =
       q.copy(i = q.i.copy(inputs = q.i.inputs :+ InVar(CollectionBinding(Var(e)), Seq(eids))))
 
     def in(e: String): Query =
-      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(e, KW("", ""), None, e)))
+      q.copy(i = q.i.copy(inputs = q.i.inputs :+ Placeholder(Var(e), KW("", ""), Var(e), None)))
 
 
     // With ...........................................
@@ -124,8 +127,8 @@ private[molecule] object QueryOps extends Helpers {
           DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Var(op))
         } else if (
           gs.collectFirst {
-            case TxValue(_)            => true
-            case TxValue_(_)           => true
+            case TxValue(_)         => true
+            case TxValue_(_)        => true
             case TxTValue(_)        => true
             case TxTValue_(_)       => true
             case TxInstantValue(_)  => true
@@ -186,10 +189,13 @@ private[molecule] object QueryOps extends Helpers {
 
     def where(e: String, a: Atom, qv: Val, gs: Seq[Generic]): Query =
       where(e, a.ns, a.name, qv, "", gs)
-    //      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(a.ns, a.name), qv, Empty)))
 
-    def whereAnd[T](e: String, a: Atom, v: String, args: Seq[T]): Query =
-      args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(arg), Nil) }.where(e, a, v, Nil)
+    def whereAnd[T](e: String, a: Atom, v: String, args: Seq[T], uriV: String = ""): Query =
+      args.zipWithIndex.foldLeft(q) {
+        case (q1, (arg, i)) if uriV.nonEmpty => q1.where(e, a, v + "_uri" + (i + 1), Nil).func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri" + (i + 1))
+        case (q1, (arg, i))                  => q1.where(e, a, Val(arg), Nil)
+      }.where(e, a, v, Nil)
+
 
     def whereAndEnum[T](e: String, a: Atom, v: String, prefix: String, args: Seq[T]): Query = {
       args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(prefix + arg), Nil) }.enum(e, a, v, Nil)
@@ -199,7 +205,7 @@ private[molecule] object QueryOps extends Helpers {
     // Null ..........................................
 
     def not(e: String, a: Atom, v: String, gs: Seq[Generic]): Query =
-      q.copy(wh = Where(q.wh.clauses :+ NotClause(DS(), Var(e), KW(a.ns, a.name))))
+      q.copy(wh = Where(q.wh.clauses :+ NotClause(Var(e), KW(a.ns, a.name))))
 
 
     // Meta ..........................................
@@ -241,8 +247,15 @@ private[molecule] object QueryOps extends Helpers {
     def cast(v1: String, v2: String) =
       q.func(".toString", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
-    def compareTo(op: String, a: Atom, v: String, qvs: Seq[QueryValue]): Query =
-      qvs.zipWithIndex.foldLeft(q) { case (q1, (qv, i)) => q1.compareTo(op, a, v, qv, i + 1) }
+
+    def compareToMany[T](op: String, a: Atom, v: String, args: Seq[T]): Query =
+      args.zipWithIndex.foldLeft(q) {
+        case (q1, (arg: URI, i)) =>
+          q1.func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
+            .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(Var(v + "_" + (i + 1) + "b")))
+            .func(op, Seq(Var(v + "_" + (i + 1) + "b"), Val(0)))
+        case (q1, (arg, i))      => q1.compareTo(op, a, v, Val(arg), i + 1)
+      }
 
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = if (i > 0) v + "_" + i else v + 2
@@ -425,12 +438,17 @@ private[molecule] object QueryOps extends Helpers {
       case other            => other.asInstanceOf[Object]
     }
 
-    def inputs: Seq[Object] = q.i.inputs.map {
-      case InVar(RelationBinding(_), argss)   => Util.list(argss.map(args => Util.list(args map cast: _*)): _*)
-      case InVar(CollectionBinding(_), argss) => Util.list(argss.head map cast: _*)
-      case InVar(_, argss)                    => cast(argss.head.head)
-      case InDataSource(_, argss)             => cast(argss.head.head)
-      case other                              => sys.error(s"[molecule.ops.QueryOps] UNEXPECTED inputs: $other")
+    def inputs = q.i.inputs.map {
+      case InVar(RelationBinding(_), Nil)         => Util.list()
+      case InVar(RelationBinding(_), argss)       => Util.list(argss.map(args => Util.list(args map cast: _*)): _*)
+      case InVar(CollectionBinding(_), Nil)       => Util.list()
+      case InVar(CollectionBinding(_), argss)     => Util.list(argss.head map cast: _*)
+      case InVar(_, Nil)                          => Util.list()
+      case InVar(_, argss) if argss.head.size > 1 => Nil
+      case InVar(_, argss)                        => cast(argss.head.head)
+      case InDataSource(_, Nil)                   => Util.list()
+      case InDataSource(_, argss)                 => cast(argss.head.head)
+      case other                                  => throw new QueryOpsException(s"UNEXPECTED input: $other\nquery:\n$q")
     }
   }
 }

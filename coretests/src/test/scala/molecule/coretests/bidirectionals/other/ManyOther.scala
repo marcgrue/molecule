@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.other
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 
@@ -44,9 +45,9 @@ class ManyOther extends MoleculeSpec {
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
       // values (arities) - how many related entities should be created then?
-      (Person.name("Ann").Buddies.name("Gus", "Leo").save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.ops.VerifyModel.noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
+      (Person.name("Ann").Buddies.name("Gus", "Leo").save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        "[noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
         "\n  Animal ... name(Gus, Leo)"
 
       // We can save a single value though...
@@ -64,9 +65,9 @@ class ManyOther extends MoleculeSpec {
       personBuddiesOf("Leo").get === List("Ann")
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
-      (Person.name("Ann").Buddies.*(Animal.name("Gus")).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noNested]  Nested data structures not allowed in save molecules"
+      (Person.name("Ann").Buddies.*(Animal.name("Gus")).save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[noNested]  Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities in one go with the `save` command.
       // Use `insert` for this or save existing entity ids (see below).
@@ -90,9 +91,9 @@ class ManyOther extends MoleculeSpec {
 
       // Saving reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
-      (Person.name("Ann").Buddies.e(gus).save must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
+      (Person.name("Ann").Buddies.e(gus).save must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($gus)`"
     }
 
@@ -217,7 +218,7 @@ class ManyOther extends MoleculeSpec {
 
   "Update" >> {
 
-    "add" in new setup {
+    "assert" in new setup {
 
       val ann                      = Person.name("Ann").save.eid
       val List(gus, leo, rex, zip) = Animal.name.insert("Gus", "Leo", "Rex", "Zip").eids
@@ -225,13 +226,13 @@ class ManyOther extends MoleculeSpec {
       // Add buddieships in various ways
 
       // Single reference
-      Person(ann).buddies.add(gus).update
+      Person(ann).buddies.assert(gus).update
 
       // Multiple references (vararg)
-      Person(ann).buddies.add(leo, rex).update
+      Person(ann).buddies.assert(leo, rex).update
 
       // Set of references
-      Person(ann).buddies.add(Seq(zip)).update
+      Person(ann).buddies.assert(Seq(zip)).update
 
       // Buddieships have been added in both directions
       animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo", "Rex", "Zip")
@@ -242,7 +243,7 @@ class ManyOther extends MoleculeSpec {
     }
 
 
-    "remove" in new setup {
+    "retract" in new setup {
 
       // Insert Ann and buddies
       val List(ann, gus, leo, rex, zip, zup) = Person.name.Buddies.*(Animal.name) insert List(
@@ -260,13 +261,13 @@ class ManyOther extends MoleculeSpec {
       // Remove some buddieships in various ways
 
       // Single reference
-      Person(ann).buddies.remove(gus).update
+      Person(ann).buddies.retract(gus).update
 
       // Multiple references (vararg)
-      Person(ann).buddies.remove(leo, rex).update
+      Person(ann).buddies.retract(leo, rex).update
 
       // Set of references
-      Person(ann).buddies.remove(Seq(zip)).update
+      Person(ann).buddies.retract(Seq(zip)).update
 
       // Correct buddieships have been removed in both directions
       animalBuddiesOf("Ann").get === List("Zup")

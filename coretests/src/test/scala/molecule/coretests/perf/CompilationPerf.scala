@@ -1,6 +1,6 @@
 package molecule.coretests.perf
 
-import molecule.imports._
+import molecule.api._
 import molecule.util.MoleculeSpec
 import molecule.coretests.util.schema.CoreTestSchema
 

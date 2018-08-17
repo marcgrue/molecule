@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/** Java functions available in Datomic queries */
 public class JavaFunctions
 {
     public static long bind( long e )

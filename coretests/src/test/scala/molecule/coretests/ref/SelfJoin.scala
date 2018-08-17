@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.imports._
+import molecule.api._
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
@@ -35,7 +35,7 @@ class SelfJoin extends CoreSpec {
     // we "unify" by the beverage attribute value (Refs1.str1) - the values
     // that the two entities have in common.
 
-    // What beverages do 23- AND 25-year-olds like in common?
+    // What beverages do pairs of 23- AND 25-year-olds like in common?
     // (unifying on Refs1.str1)
     Ns.int_(23 and 25).Refs1.str1.get === List("Coffee", "Tea")
 
@@ -264,7 +264,7 @@ class SelfJoin extends CoreSpec {
       ("Liz", "Coffee", "Ben"),
       ("Liz", "Tea", "Ben")
     )
-    // Now we also fetchg the name of beverage (`str`) which is not being unified between the two entities.
+    // Now we also fetch the name of beverage (`str`) which is not being unified between the two entities.
 
     // Let's add the ratings too
     Ns.int_(23).str.Refs1.int1.str1._Ns.Self

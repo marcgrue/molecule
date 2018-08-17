@@ -2,7 +2,7 @@ package molecule.coretests.input.input1
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
-import molecule.imports._
+import molecule.api._
 
 
 class Input1Date extends CoreSpec {

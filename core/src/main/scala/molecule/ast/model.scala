@@ -1,7 +1,25 @@
 package molecule.ast
+import molecule.ast.exception.ModelException
+import molecule.exceptions.MoleculeException
 
-private[molecule] object model {
+/** AST for molecule [[molecule.ast.model.Model Model]] representation.
+  * <br><br>
+  * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
+  * <br><br>
+  * Custom DSL molecule --> Model --> Query --> Datomic query string
+  * */
+object model {
 
+  /** Molecule Model representation.
+    * <br><br>
+    * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
+    * <br><br>
+    * Custom DSL molecule --> Model --> Query --> Datomic query string
+    * <br><br>
+    * Model is thus derived from custom meta-DSL constructs ("molecules").
+    *
+    * @param elements Elements of the model
+    */
   case class Model(elements: Seq[Element]) {
     override def toString = {
       def draw(elements: Seq[Element], indent: Int): Seq[String] = {
@@ -104,17 +122,17 @@ private[molecule] object model {
   case object Qm extends Value
   case object Distinct extends Value
 
-  // Action
-  case class Add_(values: Seq[Any]) extends Value
-  case class Replace(oldNew: Seq[(Any, Any)]) extends Value
-  case class Remove(values: Seq[Any]) extends Value
+  // Card-many attribute operations
+  case class AssertValue(values: Seq[Any]) extends Value
+  case class ReplaceValue(oldNew: Seq[(Any, Any)]) extends Value
+  case class RetractValue(values: Seq[Any]) extends Value
 
-  // Attribute Maps
-  case class MapAdd(pairs: Seq[(String, Any)]) extends Value
-  case class MapReplace(pairs: Seq[(String, Any)]) extends Value
-  case class MapRemove(keys: Seq[String]) extends Value
+  // Map attribute operations
+  case class AssertMapPairs(pairs: Seq[(String, Any)]) extends Value
+  case class ReplaceMapPairs(pairs: Seq[(String, Any)]) extends Value
+  case class RetractMapKeys(keys: Seq[String]) extends Value
   case class MapEq(pairs: Seq[(String, Any)]) extends Value
-  case class MapKeys(ks: Seq[String]) extends Value
+  case class MapKeys(keys: Seq[String]) extends Value
 
 
   sealed trait Generic extends Value
@@ -158,6 +176,17 @@ private[molecule] object model {
   case class BiTargetRef(card: Int, attr: String) extends Bidirectional
   case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional
 
+
+  /** Expression AST for building OR/AND expressions.
+    * {{{
+    *   // `or` method allows OR-logic to be applied to `name` attribute
+    *   Person.name_("Ben" or "Liz").age.get === List(42, 37)
+    *
+    *   // Given an input molecule awaiting 2 inputs, we can apply AND-pairs to OR expression:
+    *   val persons = m(Person.name_(?).age(?))
+    *   persons(("Ben" and 42) or ("Liz" and 37)).get === List(42, 37)
+    * }}}
+    */
   trait Expression
 
   trait Exp1[T1] extends Expression {
@@ -166,11 +195,9 @@ private[molecule] object model {
   }
   case class TermValue[T1](v: T1) extends Exp1[T1]
   case class Not[T1](e: Exp1[T1]) extends Exp1[T1]
-
   case class Or[T1](e1: Exp1[T1], e2: Exp1[T1]) extends Exp1[T1]
 
   trait Exp2[T1, T2] extends Expression
-
   case class And2[T1, T2](e1: Exp1[T1], e2: Exp1[T2]) extends Exp2[T1, T2] {
     def and[T3](e3: Exp1[T3]) = And3(e1, e2, e3)
     def or(that: And2[T1, T2]) = Or2(this, that)
@@ -180,17 +207,20 @@ private[molecule] object model {
   }
 
   trait Exp3[T1, T2, T3] extends Expression
-  case class And3[T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]
-  case class Or3[T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]
+  case class And3[T1, T2, T3](e1: Exp1[T1], e2: Exp1[T2], e3: Exp1[T3]) extends Exp3[T1, T2, T3]{
+    def or(that: And3[T1, T2, T3]) = Or3(this, this, that) // todo: how to nest properly without duplicating?
+  }
+  case class Or3[T1, T2, T3](e1: Exp3[T1, T2, T3], e2: Exp3[T1, T2, T3], e3: Exp3[T1, T2, T3]) extends Exp3[T1, T2, T3] {
+    def or(e4: Exp3[T1, T2, T3]) = Or3(e1, e2, Or3(e3, e3, e4)) // todo: how to nest properly without duplicating?
+  }
 
-  // Convenience methods .........................
 
   def curNs(e: Element) = e match {
     case Atom(ns, _, _, _, _, _, _, _)   => ns
     case Bond(ns, _, _, _, _)            => ns
     case Nested(Bond(ns, _, _, _, _), _) => ns
     case Meta(ns, _, _, _, _)            => ns
-    case unexpected                      => sys.error("[model:curNs] Unexpected element: " + unexpected)
+    case unexpected                      => throw new ModelException("Unexpected element: " + unexpected)
   }
 }
 

@@ -1,9 +1,11 @@
 package molecule.coretests.bidirectionals.self
 
-import molecule.imports._
-import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.util.MoleculeSpec
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
+import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
+import molecule.transform.exception.Model2TransactionException
+import molecule.util.MoleculeSpec
 
 
 class OneSelf extends MoleculeSpec {
@@ -46,9 +48,9 @@ class OneSelf extends MoleculeSpec {
 
     // Saving reference to generic `e` not allowed.
     // (instead apply ref to ref attribute as shown above)
-    (Person.name("Adam").Spouse.e(lisa).save must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
+    (Person.name("Adam").Spouse.e(lisa).save must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
       s"not allowed in save molecules. Found `e($lisa)`"
   }
 
@@ -146,9 +148,9 @@ class OneSelf extends MoleculeSpec {
       )
 
       // Referencing the same id is not allowed
-      (Person(adam).spouse(adam).update must throwA[IllegalArgumentException])
-        .message === "Got the exception java.lang.IllegalArgumentException: " +
-        "[molecule.transform.Model2Transaction.valueStmts:biSelfRef]  Current entity and referenced entity ids can't be the same."
+      (Person(adam).spouse(adam).update must throwA[Model2TransactionException])
+        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        "[valueStmts:biSelfRef]  Current entity and referenced entity ids can't be the same."
     }
 
 

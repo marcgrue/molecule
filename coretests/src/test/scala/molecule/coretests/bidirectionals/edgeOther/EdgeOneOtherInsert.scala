@@ -1,8 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.ops.exception.VerifyModelException
 import molecule.util._
 
 class EdgeOneOtherInsert extends MoleculeSpec {
@@ -71,15 +72,15 @@ class EdgeOneOtherInsert extends MoleculeSpec {
 
   "base/edge - <missing target>" in new Setup {
     // Can't allow edge without ref to target entity
-    (Person.name.Favorite.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace after edge namespace `Favorite`."
+    (Person.name.Favorite.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace after edge namespace `Favorite`."
   }
 
   "<missing base> - edge - <missing target>" in new Setup {
     // Edge always have to have a ref to a target entity
-    (Favorite.weight.insert must throwA[IllegalArgumentException])
-      .message === "Got the exception java.lang.IllegalArgumentException: " +
-      s"[molecule.ops.VerifyModel.edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
+    (Favorite.weight.insert must throwA[VerifyModelException])
+      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      s"[edgeComplete]  Missing target namespace somewhere after edge property `Favorite/weight`."
   }
 }

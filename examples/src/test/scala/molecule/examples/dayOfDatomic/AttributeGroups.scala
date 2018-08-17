@@ -1,6 +1,6 @@
 package molecule.examples.dayOfDatomic
-import molecule.imports._
-import molecule.composition.meta.Db
+import molecule.api._
+import molecule.generic.Db
 import molecule.util.MoleculeSpec
 
 

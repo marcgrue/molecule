@@ -1,6 +1,6 @@
 package molecule.examples.mbrainz
 import datomic.Peer
-import molecule.imports._
+import molecule.api._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec
@@ -117,9 +117,9 @@ class MBrainz extends MoleculeSpec {
 //             | :where [?artist :artist/name "Fire"]
 //             |        [?artist :artist/sortName ?sortName]]""".stripMargin))
 //
-//    Artist.e.name_("Fire").sortName.getD
-//    Artist.name_("Fire").sortName.getD
-//    Artist.name_("Fire").sortName(distinct).getD
+//    Artist.e.name_("Fire").sortName.debugGet
+//    Artist.name_("Fire").sortName.debugGet
+//    Artist.name_("Fire").sortName(distinct).debugGet
 //
 //    ok
 //  }

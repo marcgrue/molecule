@@ -1,5 +1,7 @@
 package molecule.ops
 import molecule.ast.model._
+import molecule.ops.exception.VerifyModelException
+
 
 private[molecule] case class VerifyModel(model: Model, op: String) {
 
@@ -43,12 +45,12 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
 
   // todo - avoid
-  //  living_Person.knows(nil).update
-  //  living_Person.knows(count).updateD
+  //  living_Person.knows(Nil).update
+  //  living_Person.knows(count).debugUpdate
 
   private def iae(method: String, msg: String) = {
-    throw new IllegalArgumentException(s"[molecule.ops.VerifyModel.$method]  $msg")
-//    throw new IllegalArgumentException(s"[molecule.ops.VerifyModel.$method]  $msg\nMODEL: $model\nOP: $op")
+    throw new VerifyModelException(s"[$method]  $msg")
+    //    throw new VerifyModelException(s"[$method]  $msg\nMODEL: $model\nOP: $op")
   }
 
   private def extractNs(fullAttr: String) = {
@@ -84,7 +86,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case TxMetaData(es) => es.collectFirst {
       case Atom(ns, attr, _, _, _, _, _, _) if !attr.endsWith("_") =>
         val attrClean = if (attr.endsWith("$")) attr.init else attr
-        iae("noTacitTxAttrs",
+        iae("onlyTacitTxAttrs",
           s"For inserts, tx meta data can only be applied to tacit attributes, like: `${ns.capitalize}.${attrClean}_(<metadata>)`")
     }
   }

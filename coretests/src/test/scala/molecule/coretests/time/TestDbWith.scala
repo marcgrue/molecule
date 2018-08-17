@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable._
@@ -24,7 +24,7 @@ class TestDbWith extends Specification {
       "Setup test db with single tx" >> {
         // Use current state with extra save tx as a test db "branch"
         conn.testDbWith(
-          Ns.int(4).saveTx
+          Ns.int(4).getSaveTx
         )
 
         // Adjusted test state to work on
@@ -63,16 +63,16 @@ class TestDbWith extends Specification {
       // test db in a certain state
       conn.testDbWith(
         // --> List(1, 2, 3, 4)
-        Ns.int(4).saveTx,
+        Ns.int(4).getSaveTx,
 
         // --> List(1, 2, 3, 4, 5, 6)
-        Ns.int insertTx List(5, 6),
+        Ns.int getInsertTx List(5, 6),
 
         // --> List(0, 2, 3, 4, 5, 6)
-        Ns(e1).int(0).updateTx,
+        Ns(e1).int(0).getUpdateTx,
 
         // --> List(0, 3, 4, 5, 6)
-        e2.retractTx
+        e2.getRetractTx
       )
 
       // Adjusted test state to work on
@@ -122,10 +122,10 @@ class TestDbWith extends Specification {
 
     "Setup test db with multiple modularized transactions" >> {
 
-      val save = Ns.int(4).saveTx
-      val insert = Ns.int insertTx List(5, 6)
-      val update = Ns(e1).int(0).updateTx
-      val retract = e2.retractTx
+      val save = Ns.int(4).getSaveTx
+      val insert = Ns.int getInsertTx List(5, 6)
+      val update = Ns(e1).int(0).getUpdateTx
+      val retract = e2.getRetractTx
 
       // Apply a set of saved modularized transactions to get a
       // test db in a certain state.
@@ -187,7 +187,7 @@ class TestDbWith extends Specification {
       "Setup test db with single tx" >> {
         // Use state with extra save tx as a test db "branch"
         conn.testDbWith(
-          Ns.int(4).saveTx
+          Ns.int(4).getSaveTx
         )
 
         // Adjusted test state to work on
@@ -228,16 +228,16 @@ class TestDbWith extends Specification {
         // test db in a certain state
         conn.testDbWith(
           // --> List(1, 2, 3, 4)
-          Ns.int(4).saveTx,
+          Ns.int(4).getSaveTx,
 
           // --> List(1, 2, 3, 4, 5, 6)
-          Ns.int insertTx List(5, 6),
+          Ns.int getInsertTx List(5, 6),
 
           // --> List(0, 2, 3, 4, 5, 6)
-          Ns(e1).int(0).updateTx,
+          Ns(e1).int(0).getUpdateTx,
 
           // --> List(0, 3, 4, 5, 6)
-          e2.retractTx
+          e2.getRetractTx
         )
 
         // Adjusted test state to work on

@@ -1,8 +1,9 @@
 package molecule.coretests.transaction
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.ops.exception.VerifyModelException
 
 class TransactionMetaData extends CoreSpec {
 
@@ -42,7 +43,7 @@ class TransactionMetaData extends CoreSpec {
       )
 
       // Transactions without tx meta data
-      Ns.int.Tx(Ns.str_(nil)).get === List(6)
+      Ns.int.Tx(Ns.str_(Nil)).get === List(6)
 
       // Transaction meta data expressions
       Ns.int.Tx(Ns.str.contains("mandatory")).get.sortBy(_._1) === List(
@@ -181,16 +182,16 @@ class TransactionMetaData extends CoreSpec {
     "Insert 1 or more" in new CoreSetup {
 
       // Can't add transaction meta data along other data of molecule
-      (Ns.int.Tx(Ns.str).insert(0, "a") must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
+      (Ns.int.Tx(Ns.str).insert(0, "a") must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Can't both apply meta data to tx attribute and insert meta data
-      (Ns.int.Tx(Ns.str("a")).insert(List((0, "b"))) must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
+      (Ns.int.Tx(Ns.str("a")).insert(List((0, "b"))) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Can't both apply meta data to optional tx attribute and insert meta data
-      (Ns.int.Tx(Ns.str$(Some("a"))).insert(List((0, Some("b")))) must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
-        s"[molecule.ops.VerifyModel.noTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
+      (Ns.int.Tx(Ns.str$(Some("a"))).insert(List((0, Some("b")))) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Apply tx meta data to tacit tx attributes:
       Ns.int.Tx(Ns.str_("a")).insert(0)
@@ -272,23 +273,23 @@ class TransactionMetaData extends CoreSpec {
     ))(
       // 2 tx meta data molecules - no limit on the number!
       Ns
-        .bool_(true)
-        .bools_(Set(false))
-        .date_(date7)
-        .dates_(Set(date8, date9))
-        .double_(7.0)
-        .doubles_(Set(8.0, 9.0))
-        .enum_(enum7)
-        .enums_(Set(enum8, enum9))
-        .float_(7f)
-        .floats_(Set(8f, 9f)),
+        .bool(true)
+        .bools(Set(false))
+        .date(date7)
+        .dates(Set(date8, date9))
+        .double(7.0)
+        .doubles(Set(8.0, 9.0))
+        .enum(enum7)
+        .enums(Set(enum8, enum9))
+        .float(7f)
+        .floats(Set(8f, 9f)),
       Ns
-        .long_(7L)
-        .longs_(Set(8L, 9L))
-        .ref1_(701L)
-        .refSub1_(702L)
-        .uuid_(uuid7)
-        .uuids_(Set(uuid8))
+        .long(7L)
+        .longs(Set(8L, 9L))
+        .ref1(701L)
+        .refSub1(702L)
+        .uuid(uuid7)
+        .uuids(Set(uuid8))
     )
 
     Ns.str.int.insert("without tx meta data", 2)
@@ -317,8 +318,8 @@ class TransactionMetaData extends CoreSpec {
     m(Ns.str ~ Ns.int.Tx(Ns.float_(7f).long_(7L))).get === List(("with tx meta data", 1))
 
     // Entities _without_ meta data
-    m(Ns.str.int.Tx(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
-    m(Ns.str ~ Ns.int.Tx(Ns.long_(nil))).get.sorted === List(("without tx meta data", 2))
+    m(Ns.str.int.Tx(Ns.long_(Nil))).get.sorted === List(("without tx meta data", 2))
+    m(Ns.str ~ Ns.int.Tx(Ns.long_(Nil))).get.sorted === List(("without tx meta data", 2))
   }
 
 
@@ -362,7 +363,7 @@ class TransactionMetaData extends CoreSpec {
   }
 
 
-  "Retract" in new CoreSetup {
+  "1 entity" in new CoreSetup {
 
     val e = Ns.int(1).Tx(Ns.str("a")).save.eid
 
@@ -382,6 +383,18 @@ class TransactionMetaData extends CoreSpec {
     )
   }
 
+
+  "Multiple entities without tx meta data" in new CoreSetup {
+
+    val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
+
+    Ns.int.get === List(1, 2, 3)
+
+    // Retract multiple entities (without tx meta data)
+    retract(Seq(e1, e2))
+
+    Ns.int.get === List(3)
+  }
 
   "Multiple entities" in new CoreSetup {
 

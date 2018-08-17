@@ -1,5 +1,5 @@
 package molecule.coretests.transaction
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.util.expectCompileError

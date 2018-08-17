@@ -1,8 +1,9 @@
 package molecule.coretests.json
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.macros.exception.NestedJsonException
 
 
 class NestedJson extends CoreSpec {
@@ -432,7 +433,7 @@ class NestedJson extends CoreSpec {
       (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
     )
 
-    (m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool).getJson must throwA[IllegalArgumentException]).message === "Got the exception java.lang.IllegalArgumentException: " +
+    (m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool).getJson must throwA[NestedJsonException]).message === "Got the exception molecule.macros.exception.NestedJsonException: " +
       "To get nested json Molecule expects the nested attributes to be last in the molecule. Found:\n" +
       "Atom(ns,bool,Boolean,1,VarValue,None,List(),List())"
   }

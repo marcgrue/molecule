@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.imports._
+import molecule.api._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
 
@@ -19,13 +19,13 @@ class Manipulation extends Base {
 
     // When a previous populated key is encountered the old fact is
     // retracted and the new one asserted (like an update).
-    Ns(eid).strMap.add("en" -> "Hi there", "fr" -> "Bonjour").update
+    Ns(eid).strMap.assert("en" -> "Hi there", "fr" -> "Bonjour").update
     Ns.strMap.get.head === Map("en" -> "Hi there", "fr" -> "Bonjour")
 
 
     // Remove pair (by key)
 
-    Ns(eid).strMap.remove("en").update
+    Ns(eid).strMap.retract("en").update
     Ns.strMap.get.head === Map("fr" -> "Bonjour")
 
 

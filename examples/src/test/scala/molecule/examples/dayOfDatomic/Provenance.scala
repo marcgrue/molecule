@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.imports._
+import molecule.api._
 import molecule.ast.model._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.util.MoleculeSpec
@@ -71,7 +71,7 @@ class Provenance extends MoleculeSpec {
     val stuTxInstant = stuTxId[java.util.Date](":db/txInstant").get
 
     // Limit entity traversal 1 level deep
-    stuTxId.touch(1) === Map(
+    stuTxId.touchMax(1) === Map(
       ":db/id" -> stuTxId,
       ":db/txInstant" -> stuTxInstant,
       ":metaData/usecase" -> "AddStories",
@@ -178,7 +178,7 @@ class Provenance extends MoleculeSpec {
     )
 
     // Stories without use case meta data
-    Story.title.Tx(MetaData.usecase_(nil)).get === List(
+    Story.title.Tx(MetaData.usecase_(Nil)).get === List(
       "Clojure Rationale",
       "Beating the Averages",
       "Teach Yourself Programming in Ten Years"

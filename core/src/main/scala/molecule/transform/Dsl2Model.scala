@@ -1,10 +1,8 @@
-package molecule
-package transform
+package molecule.transform
 import molecule.ast.model._
-import molecule.boilerplate.NS
 import molecule.boilerplate.attributes._
+import molecule.boilerplate.base.NS
 import molecule.ops.TreeOps
-
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
@@ -59,7 +57,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.v_"                  => abort( s"""[Dsl2Model:dslStructure] Generic attribute value `v_` can only be used with an applied value i.e. `v_("some value")`""")
 
 
-    // Tx ----------------------------------
+    // Datomic meta ----------------------------------
 
     // Internal predefined db functions
     case q"$prev.Db.tx"        => traverse(q"$prev", Atom("db", "tx", "Long", 1, VarValue))
@@ -67,8 +65,13 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     case q"$prev.Db.txInstant" => traverse(q"$prev", Atom("db", "txInstant", "Long", 1, VarValue))
     case q"$prev.Db.op"        => traverse(q"$prev", Atom("db", "op", "Boolean", 1, VarValue))
 
-    // Transaction meta data
+
+    // Transaction meta data ------------------------------
+
     case q"$prev.Tx.apply[..$t]($txMolecule)" => traverse(q"$prev", TxMetaData(resolve(q"$txMolecule")))
+
+
+    // Datom -------------------------------------------
 
     // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
     case q"$prev.tx" if !q"$prev".isAttr        => abort(s"[Dsl2Model:dslStructure] Please add `tx` after an attribute or another transaction value")
@@ -124,9 +127,9 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
     // Clean references --------------------------------------
 
-    case r@q"$prev.$backRefAttr" if backRefAttr.toString.head == '_' =>
-      val backRef = c.typecheck(q"$prev.$backRefAttr").tpe.typeSymbol.name.toString // "partition_Ns_<arity>"
-      traverse(q"$prev", ReBond(firstLow(backRef.tail), "")) // "partition_Ns"
+    case r@q"$prev.$backRef" if backRef.toString.head == '_' =>
+      val backRefNs = c.typecheck(q"$prev.$backRef").tpe.baseClasses.tail.head.name.toString.split("_").init.mkString("_")
+      traverse(q"$prev", ReBond(firstLow(backRefNs), ""))
 
     case a@q"$prev.$ref" if a.isRef         => traverse(q"$prev", Bond(a.refThis, firstLow(ref.toString), a.refNext, a.refCard, bi(a)))
     case a@q"$prev.$refAttr" if a.isRefAttr => traverse(q"$prev", Atom(a.ns, a.name, "Long", a.card, VarValue, gs = bi(a)))
@@ -196,7 +199,6 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
 
 
   def walk(prev: Tree, curNs: String, cur: Tree, thisElement: Element) = {
-    //    val prevElements = if (q"$prev".isAttr || q"$prev".symbol.isMethod) resolve(prev) else Seq[Element]()
     val prevElements = if (prev.isNS && !q"$prev".isFirstNS) resolve(prev) else Seq[Element]()
     val attr = cur.toString()
     val curIsVarValue = thisElement match {
@@ -208,7 +210,6 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     } else {
       prevElements.last match {
         case Atom(`curNs`, prevAttr0, _, _, _, _, _, _) if clean(prevAttr0) == clean(attr) && curIsVarValue =>
-          //          x(30, prevElements, thisElement)
           val (_, similarAtoms, transitive) = {
             prevElements.foldRight(prevElements, Seq[Atom](), None: Option[Transitive]) {
               case (prevElement, (previous, similarAtoms1, trans)) =>
@@ -247,14 +248,13 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case k@q"$p.apply($value)" if k.isMapAttrK   => new nsp(c.typecheck(k).tpe.typeSymbol.owner)
       case q"$p.apply($value)" if q"$p".isAttr     => q"$p".ns
       case q"$p.apply($value)"                     => q"$p".name
-      case p if p.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.tail)
+      case p if p.symbol.name.toString.head == '_' => firstLow(prev.tpe.baseClasses.tail.head.name.toString.split("_").init.mkString("_"))
       case p if p.isAttr                           => p.ns
       case p if p.isRef                            => p.refNext
       case p                                       => p.name
     }
     val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
     val nested = Nested(Bond(parentNs.toString, firstLow(manyRef), refNext, 2, bi(q"$prev.$manyRef")), nestedElems)
-    //            x(28, prev, parentNs, nestedElems, nested, refNext, q"$prev.$manyRef", q"$prev.$manyRef".card)
     nested
   }
 
@@ -347,7 +347,6 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
-    //        x(10, values0, values, op, attr, attr.tpe)
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
@@ -369,19 +368,19 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case "$less$eq"    => values match {case qm: Qm.type => Le(Qm); case vs: Seq[_] => Le(vs.head)}
       case "$greater$eq" => values match {case qm: Qm.type => Ge(Qm); case vs: Seq[_] => Ge(vs.head)}
       case "contains"    => values match {case qm: Qm.type => Fulltext(Seq(Qm)); case vs: Seq[_] => Fulltext(vs)}
-      case "add"         => values match {
-        case MapEq(pairs)  => MapAdd(pairs)
+      case "assert"      => values match {
+        case MapEq(pairs)  => AssertMapPairs(pairs)
         case mapped: Value => mapped
-        case vs: Seq[_]    => Add_(vs)
+        case vs: Seq[_]    => AssertValue(vs)
       }
-      case "remove"      => values match {
-        case vs: Seq[_] if attr.isMapAttr => MapRemove(vs.map(_.toString))
-        case vs: Seq[_]                   => Remove(vs)
+      case "retract"     => values match {
+        case vs: Seq[_] if attr.isMapAttr => RetractMapKeys(vs.map(_.toString))
+        case vs: Seq[_]                   => RetractValue(vs)
       }
       case "replace"     => values match {
-        case MapEq(keyValues) => MapReplace(keyValues)
+        case MapEq(keyValues) => ReplaceMapPairs(keyValues)
         case resolved: Value  => resolved
-        case Nil              => Replace(Nil)
+        case Nil              => ReplaceValue(Nil)
       }
       case unexpected    => abort(s"[Dsl2Model:modelValue] Unknown operator '$unexpected'\nattr: $attr \nvalue: $values0")
     }
@@ -394,20 +393,19 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     else
       Fn(fn, value)
 
-    x(2, attr, values)
     values match {
       case q"Seq($pkg.?)"                                          => Qm
-      case q"Seq($pkg.nil)" if attr.name.last == '_'               => Fn("not")
-      case q"Seq($pkg.nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute: `${attr.name}_(nil)`")
+      case q"Seq($pkg.Nil)" if attr.name.last == '_'               => Fn("not")
+      case q"Seq($pkg.Nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute `${attr.name}_(Nil)`. For at shorter syntax, apply empty value: `${attr.name}_()`")
       case q"Seq($pkg.unify)" if attr.name.last == '_'             => Fn("unify")
       case q"Seq($pkg.unify)"                                      => abort(s"[Dsl2Model:getValues] Can only unify on tacit attributes. Please add underscore to attribute: `${attr.name}_(unify)`")
+      case q"Seq($pkg.distinct)"                                   => Distinct
       case q"Seq($pkg.min.apply(${Literal(Constant(i: Int))}))"    => aggr("min", Some(i))
       case q"Seq($pkg.max.apply(${Literal(Constant(i: Int))}))"    => aggr("max", Some(i))
       case q"Seq($pkg.rand.apply(${Literal(Constant(i: Int))}))"   => aggr("rand", Some(i))
       case q"Seq($pkg.sample.apply(${Literal(Constant(i: Int))}))" => aggr("sample", Some(i))
-      case q"Seq($pkg.min)"                                        => aggr("min")
-      case q"Seq($pkg.max)"                                        => aggr("max")
-      case q"Seq($pkg.distinct)"                                   => Distinct
+      case q"Seq($pkg.min)"                                        => aggr("min", Some(1))
+      case q"Seq($pkg.max)"                                        => aggr("max", Some(1))
       case q"Seq($pkg.rand)"                                       => aggr("rand", Some(1))
       case q"Seq($pkg.sample)"                                     => aggr("sample", Some(1))
       case q"Seq($pkg.count)"                                      => aggr("count")
@@ -423,8 +421,7 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
       case q"Seq(scala.Some.apply[$t]($v))"                        => x(3, v)
         v match {
           case vm if vm.tpe <:< weakTypeOf[Map[_, _]]     => vm match {
-            case Apply(_, pairs) =>
-              mapPairs(pairs, attr)
+            case Apply(_, pairs) => mapPairs(pairs, attr)
             case ident           => mapPairs(Seq(ident), attr)
           }
           case ident if attr.isMapAttr || attr.isMapAttr$ => mapPairs(Seq(ident), attr)
@@ -432,27 +429,35 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         }
       case q"Seq(..$vs)" if vs.size == 1
         && !(vs.head.tpe <:< weakTypeOf[Seq[Nothing]])
-        && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => x(4, vs);
+        && vs.head.tpe <:< weakTypeOf[Seq[(_, _)]]                 => x(4, vs)
         vs.head match {
-          case Apply(_, pairs) =>
-            mapPairs(pairs, attr)
+          case Apply(_, pairs) => mapPairs(pairs, attr)
+          case ident           => mapPairs(Seq(ident), attr)
+        }
+      case q"Seq(..$vs)" if vs.size == 1
+        && !(vs.head.tpe <:< weakTypeOf[Set[Nothing]])
+        && vs.head.tpe <:< weakTypeOf[Set[_]]
+        && vs.head.tpe.typeArgs.head <:< weakTypeOf[(_, _)]        => x(5, vs)
+        vs.head match {
+          case Apply(_, pairs) => mapPairs(pairs, attr)
           case ident           => mapPairs(Seq(ident), attr)
         }
       case q"Seq(..$vs)" if vs.size == 1
         && !(vs.head.tpe <:< weakTypeOf[Map[Nothing, Nothing]])
-        && vs.head.tpe <:< weakTypeOf[Map[_, _]]                   => x(5, vs);
+        && vs.head.tpe <:< weakTypeOf[Map[_, _]]                   => x(6, vs)
         vs.head match {
           case Apply(_, pairs) =>
             mapPairs(pairs, attr)
           case ident           => mapPairs(Seq(ident), attr)
         }
 
-      case q"Seq(..$vs)" if attr == null                                      => x(6, vs); vs.flatMap(v => resolveValues(q"$v"))
-      case q"Seq(..$vs)" if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)] => x(7, vs); mapPairs(vs, attr)
-      case q"Seq(..$vs)" if vs.size == 1 && attr.isMapAttr$                   => x(8, vs); mapPairs(vs, attr)
-      case q"Seq(..$vs)"                                                      => x(9, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
-      case other if attr == null                                              => x(10, other); resolveValues(other)
-      case other                                                              => x(11, other); resolveValues(other, att(q"$attr"))
+      case q"Seq(..$vs)" if attr == null                                                     => x(7, vs); vs.flatMap(v => resolveValues(q"$v"))
+      case q"Seq(..$vs)" if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]                => x(8, vs); mapPairs(vs, attr)
+      case q"Seq(..$vs)" if vs.size == 1 && attr.isMapAttr$                                  => x(9, vs); mapPairs(vs, attr)
+      case q"Seq(..$vs)" if attr.isMany && vs.nonEmpty && vs.head.tpe <:< weakTypeOf[Set[_]] => x(10, vs); vs.map(v => resolveValues(q"$v", att(q"$attr")).toSet)
+      case q"Seq(..$vs)"                                                                     => x(11, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
+      case other if attr == null                                                             => x(12, other); resolveValues(other)
+      case other                                                                             => x(13, other); resolveValues(other, att(q"$attr"))
     }
   }
 
@@ -465,15 +470,20 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     if (attr.isMapAttr || attr.isMapAttr$)
       MapEq(keyValues.map(kv => (kv._1.asInstanceOf[String], kv._2)))
     else
-      Replace(keyValues)
+      ReplaceValue(keyValues)
   }
 
   def extract(t: Tree) = t match {
     case Constant(v: String)                            => v
-    case Literal(Constant(v: String))                   => v
+    case Literal(Constant(s: String))                   => s
+    case Literal(Constant(i: Int))                      => i
+    case Literal(Constant(l: Long))                     => l
+    case Literal(Constant(f: Float))                    => f
+    case Literal(Constant(d: Double))                   => d
+    case Literal(Constant(b: Boolean))                  => b
     case Ident(TermName(v: String))                     => "__ident__" + v
     case Select(This(TypeName(_)), TermName(v: String)) => "__ident__" + v
-    case v                                              => v
+    case other                                          => other
   }
 
 
@@ -514,10 +524,9 @@ private[molecule] object Dsl2Model {
 
     def abort(i: Int, msg: String) = c.abort(c.enclosingPosition, s"[Dsl2Model:apply ($i)] " + msg)
 
-
     // Avoid ending with a ref
     elements0.last match {
-      case b: Bond => abort(1, s"Molecule not allowed to end with a reference. Please add a one or more attribute to the reference.")
+      case b: Bond => abort(1, s"Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       case _       => "ok"
     }
 
@@ -567,45 +576,20 @@ private[molecule] object Dsl2Model {
       }
     }
 
-    // Why do we need to extract values at this point?!
-    import c.universe._
-    def extract(raw: Any) = raw match {
-      case Literal(Constant(s: String))  => s
-      case Literal(Constant(i: Int))     => i
-      case Literal(Constant(l: Long))    => l
-      case Literal(Constant(f: Float))   => f
-      case Literal(Constant(d: Double))  => d
-      case Literal(Constant(b: Boolean)) => b
-      case other                         => other
-    }
-    def vs(values: Seq[Any]) = values map extract
-    def dupS(values: Seq[Any]) = vs(values).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
-    def dupValues(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._2)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
-    def dupKeys(pairs: Seq[(Any, Any)]) = vs(pairs.map(_._1)).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupValues(pairs: Seq[(Any, Any)]) = pairs.map(_._2.toString).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+    def dupKeys(pairs: Seq[(Any, Any)]) = pairs.map(_._1).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
 
-    def clean(attr: String) = attr.last match {
-      case '_' => attr.init
-      case '$' => attr.init
-      case _   => attr
-    }
-
-    // Catch duplicate update values
+    // Checks on level 1 of model
     elements0.collectFirst {
-      case a@Atom(ns, name, _, _, Add_(vs), _, _, _) if dupS(vs).nonEmpty =>
-        abort(11, s"Can't add duplicate values to attribute `:$ns/$name`:\n" + dupS(vs).mkString("\n"))
-
-      case a@Atom(ns, name, _, _, Replace(pairs), _, _, _) if dupValues(pairs).nonEmpty =>
+      case a@Atom(ns, name, _, _, ReplaceValue(pairs), _, _, _) if dupValues(pairs).nonEmpty =>
         abort(12, s"Can't replace with duplicate values of attribute `:$ns/$name`:\n" + dupValues(pairs).mkString("\n"))
 
-      case a@Atom(ns, name, _, _, Eq(vs), _, _, _) if dupS(vs).nonEmpty =>
-        abort(13, s"Can't apply duplicate values to attribute `:$ns/$name`:\n" + dupS(vs).mkString("\n"))
-
-      case a@Atom(ns, name, _, _, MapAdd(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
+      case a@Atom(ns, name, _, _, AssertMapPairs(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
         val dups = dupKeys(pairs)
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         abort(14, s"Can't add multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
 
-      case a@Atom(ns, name, _, _, MapReplace(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
+      case a@Atom(ns, name, _, _, ReplaceMapPairs(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
         val dups = dupKeys(pairs)
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
         abort(15, s"Can't replace multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
@@ -617,6 +601,12 @@ private[molecule] object Dsl2Model {
     }
 
     // Resolve generic elements ............................................................
+
+    def clean(attr: String) = attr.last match {
+      case '_' => attr.init
+      case '$' => attr.init
+      case _   => attr
+    }
 
     // Transfer generic values from Meta elements to Atoms and skip Meta elements
     val elements1: Seq[Element] = elements0.foldRight(Seq[Element](), Seq[Generic](), NoValue: Value) { case (element, (es, gs, v)) =>
@@ -631,7 +621,7 @@ private[molecule] object Dsl2Model {
         case a: Atom                                                                      => (a.copy(gs = a.gs ++ gs) +: es, Nil, NoValue)
         case m@Meta(_, _, "e", g, v1)                                                     => (m +: es, g +: gs, v1)
         case Meta(_, _, _, g, v1)                                                         => (es, g +: gs, v1)
-        case txmd@TxMetaData(txElems)                                                     => (txmd +: es, TxValue_(None) +: gs, NoValue)
+        case txmd@TxMetaData(_)                                                           => (txmd +: es, TxValue_(None) +: gs, NoValue)
         case tx: TxValue                                                                  => (es, tx +: gs, NoValue)
         case tx: TxValue_                                                                 => (es, tx +: gs, NoValue)
         case com@Composite(compositeElems)                                                => compositeElems.last match {
@@ -651,21 +641,21 @@ private[molecule] object Dsl2Model {
       }
     }._1
 
-    //     inst(c).x(30, dsl, elements0, elements1, Model(elements1))
-    //         inst(c).x(30, elements0, elements1)
-    //        inst(c).x(30, elements1)
+    // Recursively remove redundant duplicate values
+    def removeDuplicateValues(elements: Seq[Element]): Seq[Element] = elements.map {
+      case a@Atom(_, _, _, _, AssertValue(vs), _, _, _) => a.copy(value = AssertValue(vs.distinct)) // (only on 1st level in updates)
+      case a@Atom(_, _, _, _, Eq(vs), _, _, _)          => a.copy(value = Eq(vs.distinct))
+      case a@Atom(_, _, _, _, Neq(vs), _, _, _)         => a.copy(value = Neq(vs.distinct))
+      case a@Atom(_, _, _, _, And(vs), _, _, _)         => a.copy(value = And(vs.distinct))
+      case a@Atom(_, _, _, _, Fulltext(vs), _, _, _)    => a.copy(value = Fulltext(vs.distinct))
+      case Nested(bond, nestedElements)                 => Nested(bond, removeDuplicateValues(nestedElements))
+      case other                                        => other
+    }
+    val elements2: Seq[Element] = removeDuplicateValues(elements1)
 
-    // Can't use generics on multiple attributes - why not?
-    //    if (elements1.foldLeft(Seq[Boolean]()) {
-    //      case (gss, Atom(_, _, _, _, _, _, gs, _)) if gs.nonEmpty && gs.flatMap {
-    //        case b: Bidirectional => None // Bidirectional definitions are ok
-    //        case generic          => Some(generic)
-    //      }.nonEmpty    => gss :+ true
-    //      case (gss, _) => gss
-    //    }.length > 1)
-    //      abort(16, "Generics (`v`, `tx`, `t`, `txInstant`, `op`) not allowed on multiple attributes")
+    //        inst(c).x(50, elements0, elements1, elements2)
 
     // Return checked model
-    Model(elements1)
+    Model(elements2)
   }
 }
