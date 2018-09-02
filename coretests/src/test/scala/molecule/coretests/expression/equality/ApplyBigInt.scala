@@ -1,382 +1,297 @@
 package molecule.coretests.expression.equality
 
 import molecule.api._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.exception.Model2QueryException
 
-class ApplyBigInt extends ApplyBase {
+class ApplyBigInt extends CoreSpec {
 
-  val l1 = List(bigInt1)
-  val l2 = List(bigInt2)
-  val l3 = List(bigInt3)
-
-  val s1 = Set(bigInt1)
-  val s2 = Set(bigInt2)
-  val s3 = Set(bigInt3)
-
-  val l11 = List(bigInt1, bigInt1)
-  val l12 = List(bigInt1, bigInt2)
-  val l13 = List(bigInt1, bigInt3)
-  val l23 = List(bigInt2, bigInt3)
-
-  val s12 = Set(bigInt1, bigInt2)
-  val s13 = Set(bigInt1, bigInt3)
-  val s23 = Set(bigInt2, bigInt3)
 
   "Card one" >> {
 
+    class OneSetup extends CoreSetup {
+      Ns.int.bigInt$ insert List(
+        (1, Some(bigInt1)),
+        (2, Some(bigInt2)),
+        (3, Some(bigInt3)),
+        (4, None)
+      )
+    }
+
+    // OR semantics only for card-one attributes
+
     "Mandatory" in new OneSetup {
 
-      // Vararg
+      // Varargs
       Ns.bigInt.apply(bigInt1).get === List(bigInt1)
       Ns.bigInt.apply(bigInt2).get === List(bigInt2)
       Ns.bigInt.apply(bigInt1, bigInt2).get === List(bigInt1, bigInt2)
 
-      // Explicit `or` semantics
+      // `or`
       Ns.bigInt.apply(bigInt1 or bigInt2).get === List(bigInt1, bigInt2)
       Ns.bigInt.apply(bigInt1 or bigInt2 or bigInt3).get === List(bigInt1, bigInt2, bigInt3)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.bigInt.apply().get === Nil
+      Ns.bigInt.apply(Nil).get === Nil
       Ns.bigInt.apply(List(bigInt1)).get === List(bigInt1)
       Ns.bigInt.apply(List(bigInt2)).get === List(bigInt2)
       Ns.bigInt.apply(List(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
       Ns.bigInt.apply(List(bigInt1), List(bigInt2)).get === List(bigInt1, bigInt2)
       Ns.bigInt.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
       Ns.bigInt.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.bigInt.apply(List(bigInt1), Set(bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-
-      // Iterable: Set
-      Ns.bigInt.apply(Set(bigInt1)).get === List(bigInt1)
-      Ns.bigInt.apply(Set(bigInt2)).get === List(bigInt2)
-      Ns.bigInt.apply(Set(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.bigInt.apply(Set(bigInt1), Set(bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.bigInt.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-      Ns.bigInt.apply(Set(bigInt1), Set(bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.bigInt(?))
-
-      inputMolecule.apply(bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt2).get === List(bigInt2)
-
-      inputMolecule.apply(bigInt1, bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt1, bigInt2).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(List(bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(List(bigInt1, bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(List(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(Set(bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(Set(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(bigInt1 or bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt1 or bigInt2).get === List(bigInt1, bigInt2)
-      inputMolecule.apply(bigInt1 or bigInt2 or bigInt3).get === List(bigInt1, bigInt2, bigInt3)
+      Ns.bigInt.apply(List(bigInt1, bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
     }
 
 
     "Tacit" in new OneSetup {
 
-      // Vararg
-      Ns.int.bigInt_.apply(bigInt1).get === List(bigInt1)
-      Ns.int.bigInt_.apply(bigInt2).get === List(bigInt2)
-      Ns.int.bigInt_.apply(bigInt1, bigInt2).get === List(bigInt1, bigInt2)
+      // Varargs
+      Ns.int.bigInt_.apply(bigInt1).get === List(1)
+      Ns.int.bigInt_.apply(bigInt2).get === List(2)
+      Ns.int.bigInt_.apply(bigInt1, bigInt2).get === List(1, 2)
 
-      // Explicit `or` semantics
-      Ns.int.bigInt_.apply(bigInt1 or bigInt2).get === List(bigInt1, bigInt2)
-      Ns.int.bigInt_.apply(bigInt1 or bigInt2 or bigInt3).get === List(bigInt1, bigInt2, bigInt3)
+      // `or`
+      Ns.int.bigInt_.apply(bigInt1 or bigInt2).get === List(1, 2)
+      Ns.int.bigInt_.apply(bigInt1 or bigInt2 or bigInt3).get === List(1, 2, 3)
 
-      // Iterable: List - OR semantics
-      Ns.int.bigInt_.apply(List(bigInt1)).get === List(bigInt1)
-      Ns.int.bigInt_.apply(List(bigInt2)).get === List(bigInt2)
-      Ns.int.bigInt_.apply(List(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.int.bigInt_.apply(List(bigInt1), List(bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.int.bigInt_.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-      Ns.int.bigInt_.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-
-      // Iterable: Set
-      Ns.int.bigInt_.apply(Set(bigInt1)).get === List(bigInt1)
-      Ns.int.bigInt_.apply(Set(bigInt2)).get === List(bigInt2)
-      Ns.int.bigInt_.apply(Set(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.int.bigInt_.apply(Set(bigInt1), Set(bigInt2)).get === List(bigInt1, bigInt2)
-      Ns.int.bigInt_.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-      Ns.int.bigInt_.apply(Set(bigInt1), Set(bigInt2, bigInt3)).get === List(bigInt1, bigInt2, bigInt3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.bigInt_(?))
-
-      inputMolecule.apply(bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt2).get === List(bigInt2)
-
-      inputMolecule.apply(bigInt1, bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt1, bigInt2).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(List(bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(List(bigInt1, bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(List(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(Set(bigInt1)).get === List(bigInt1)
-      inputMolecule.apply(Set(bigInt1, bigInt2)).get === List(bigInt1, bigInt2)
-
-      inputMolecule.apply(bigInt1 or bigInt1).get === List(bigInt1)
-      inputMolecule.apply(bigInt1 or bigInt2).get === List(bigInt1, bigInt2)
-      inputMolecule.apply(bigInt1 or bigInt2 or bigInt3).get === List(bigInt1, bigInt2, bigInt3)
+      // Seq
+      Ns.int.bigInt_.apply().get === List(4)
+      Ns.int.bigInt_.apply(Nil).get === List(4)
+      Ns.int.bigInt_.apply(List(bigInt1)).get === List(1)
+      Ns.int.bigInt_.apply(List(bigInt2)).get === List(2)
+      Ns.int.bigInt_.apply(List(bigInt1, bigInt2)).get === List(1, 2)
+      Ns.int.bigInt_.apply(List(bigInt1), List(bigInt2)).get === List(1, 2)
+      Ns.int.bigInt_.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(1, 2, 3)
+      Ns.int.bigInt_.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(1, 2, 3)
+      Ns.int.bigInt_.apply(List(bigInt1, bigInt2, bigInt3)).get === List(1, 2, 3)
     }
   }
 
 
   "Card many" >> {
 
-    "Mandatory (single attr coalesce)" in new ManySetup {
-
-      // Vararg
-      Ns.bigInts.apply(bigInt1).get === List(Set(bigInt1, bigInt2))
-      Ns.bigInts.apply(bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(bigInt1, bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
-
-      // Explicit `or` semantics
-      Ns.bigInts.apply(bigInt1 or bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(bigInt1 or bigInt2 or bigInt3).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-
-      // Iterable: List - OR semantics
-      Ns.bigInts.apply(List(bigInt1)).get === List(Set(bigInt1, bigInt2))
-      Ns.bigInts.apply(List(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(List(bigInt1, bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(List(bigInt1), Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-      Ns.bigInts.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-
-      // mixing Iterable types and value/variable ok
-      Ns.bigInts.apply(List(bigInt1), Set(bigInt2, bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.bigInts.apply(Set(bigInt1)).get === List(Set(bigInt1, bigInt2))
-      Ns.bigInts.apply(Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      Ns.bigInts.apply(Set(bigInt1, bigInt2)).get === List(Set(bigInt1, bigInt2))
-      Ns.bigInts.apply(Set(bigInt1, bigInt3)).get === Nil
-      Ns.bigInts.apply(Set(bigInt2, bigInt3)).get === List(Set(bigInt2, bigInt3))
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (m(Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3))).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/bigInts"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.bigInts(bigInt1 and bigInt2).get === List(Set(bigInt1, bigInt2))
-      Ns.bigInts(bigInt1 and bigInt3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.bigInts(?))
-
-      // AND semantics when applying bigInt1 Set of values matching attribute values of bigInt1 entity
-
-      inputMolecule.apply(Set(bigInt1)).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-
-      inputMolecule.apply(Set(bigInt1, bigInt2)).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(bigInt1, bigInt3)).get === Nil
-      inputMolecule.apply(Set(bigInt2, bigInt3)).get === List(Set(bigInt2, bigInt3))
-      inputMolecule.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
-
-      inputMolecule.apply(List(Set(bigInt1))).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(List(Set(bigInt2))).get === List(Set(bigInt1, bigInt3, bigInt2))
-      inputMolecule.apply(List(Set(bigInt1, bigInt2))).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(List(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(List(Set(bigInt2, bigInt3))).get === List(Set(bigInt2, bigInt3))
-      inputMolecule.apply(List(Set(bigInt1, bigInt2, bigInt3))).get === Nil
-
-      inputMolecule.apply(Set(Set(bigInt1))).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(Set(bigInt2))).get === List(Set(bigInt1, bigInt3, bigInt2))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2))).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(Set(Set(bigInt2, bigInt3))).get === List(Set(bigInt2, bigInt3))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2, bigInt3))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(bigInt1), Set(bigInt1)).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(bigInt1), Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      inputMolecule.apply(Set(bigInt1), Set(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-      inputMolecule.apply(Set(bigInt2), Set(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-      inputMolecule.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
-
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt1)).get === List(Set(bigInt1, bigInt2))
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2) or Set(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+    class ManySetup extends CoreSetup {
+      Ns.int.bigInts$ insert List(
+        (1, Some(Set(bigInt1, bigInt2))),
+        (2, Some(Set(bigInt2, bigInt3))),
+        (3, Some(Set(bigInt3, bigInt4))),
+        (4, None)
+      )
     }
 
+    "Mandatory" in new ManySetup {
 
-    "Tacit" in new ManySetup {
+      // OR semantics
 
-      // Vararg
-      Ns.int.bigInts_.apply(bigInt1).get === List(1)
-      Ns.int.bigInts_.apply(bigInt2).get === List(1, 2)
-      Ns.int.bigInts_.apply(bigInt1, bigInt2).get === List(1, 2)
-
-      // Explicit `or` semantics
-      Ns.int.bigInts_.apply(bigInt1 or bigInt2).get === List(1, 2)
-      Ns.int.bigInts_.apply(bigInt1 or bigInt2 or bigInt3).get === List(1, 2, 3)
-
-      // Iterable: List - OR semantics
-      Ns.int.bigInts_.apply(List(bigInt1)).get === List(1)
-      Ns.int.bigInts_.apply(List(bigInt2)).get === List(1, 2)
-      Ns.int.bigInts_.apply(List(bigInt1, bigInt2)).get === List(1, 2)
-      Ns.int.bigInts_.apply(List(bigInt1), Set(bigInt2)).get === List(1, 2)
-      Ns.int.bigInts_.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(1, 2, 3)
-      Ns.int.bigInts_.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(1, 2, 3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.int.bigInts_.apply(List(bigInt1), Set(bigInt2, bigInt3)).get === List(1, 2, 3)
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.bigInts_.apply(Set(bigInt1)).get === List(1)
-      Ns.int.bigInts_.apply(Set(bigInt2)).get === List(1, 2)
-      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2)).get === List(1)
-      Ns.int.bigInts_.apply(Set(bigInt1, bigInt3)).get === Nil
-      Ns.int.bigInts_.apply(Set(bigInt2, bigInt3)).get === List(2)
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom_ (tacit)] Can only apply a single Set of values for attribute :ns/bigInts_"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.bigInts_(bigInt1 and bigInt2).get === List(1)
-      Ns.int.bigInts_(bigInt1 and bigInt3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.bigInts_(?))
-
-      // AND semantics when applying bigInt1 Set of values matching attribute values of bigInt1 entity
-
-      inputMolecule.apply(Set(bigInt1)).get === List(1)
-      inputMolecule.apply(Set(bigInt2)).get === List(1, 2)
-
-      inputMolecule.apply(Set(bigInt1, bigInt2)).get === List(1)
-      inputMolecule.apply(Set(bigInt1, bigInt3)).get === Nil
-      inputMolecule.apply(Set(bigInt2, bigInt3)).get === List(2)
-      inputMolecule.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
-
-      inputMolecule.apply(List(Set(bigInt1))).get === List(1)
-      inputMolecule.apply(List(Set(bigInt2))).get === List(1, 2)
-      inputMolecule.apply(List(Set(bigInt1, bigInt2))).get === List(1)
-      inputMolecule.apply(List(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(List(Set(bigInt2, bigInt3))).get === List(2)
-      inputMolecule.apply(List(Set(bigInt1, bigInt2, bigInt3))).get === Nil
-
-      inputMolecule.apply(Set(Set(bigInt1))).get === List(1)
-      inputMolecule.apply(Set(Set(bigInt2))).get === List(1, 2)
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2))).get === List(1)
-      inputMolecule.apply(Set(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(Set(Set(bigInt2, bigInt3))).get === List(2)
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2, bigInt3))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(bigInt1), Set(bigInt1)).get === List(1)
-      inputMolecule.apply(Set(bigInt1), Set(bigInt2)).get === List(1, 2)
-      inputMolecule.apply(Set(bigInt1), Set(bigInt3)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(bigInt2), Set(bigInt3)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(1, 2, 3)
-
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt1)).get === List(1)
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2)).get === List(1, 2)
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2) or Set(bigInt3)).get === List(1, 2, 3)
-    }
-
-
-    "Mandatory unifying by other attribute (avoiding coalesce)" in new ManySetup {
-
-      // Vararg
+      // Varargs
       Ns.int.bigInts.apply(bigInt1).get === List((1, Set(bigInt1, bigInt2)))
       Ns.int.bigInts.apply(bigInt2).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
       Ns.int.bigInts.apply(bigInt1, bigInt2).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.bigInts.apply(bigInt1 or bigInt2).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
       Ns.int.bigInts.apply(bigInt1 or bigInt2 or bigInt3).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.bigInts.apply().get === Nil
+      Ns.int.bigInts.apply(Nil).get === Nil
       Ns.int.bigInts.apply(List(bigInt1)).get === List((1, Set(bigInt1, bigInt2)))
       Ns.int.bigInts.apply(List(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
       Ns.int.bigInts.apply(List(bigInt1, bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-      Ns.int.bigInts.apply(List(bigInt1), Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
+      Ns.int.bigInts.apply(List(bigInt1), List(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
       Ns.int.bigInts.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
       Ns.int.bigInts.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
+      Ns.int.bigInts.apply(List(bigInt1, bigInt2, bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.bigInts.apply(List(bigInt1), Set(bigInt2, bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
-      Ns.int.bigInts.apply(l1, Set(bigInt2, bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
+      // AND semantics
+
+      // Set
+      Ns.int.bigInts.apply(Set[BigInt]()).get === Nil // entities with no card-many values asserted can't also return values
       Ns.int.bigInts.apply(Set(bigInt1)).get === List((1, Set(bigInt1, bigInt2)))
       Ns.int.bigInts.apply(Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
       Ns.int.bigInts.apply(Set(bigInt1, bigInt2)).get === List((1, Set(bigInt1, bigInt2)))
       Ns.int.bigInts.apply(Set(bigInt1, bigInt3)).get === Nil
       Ns.int.bigInts.apply(Set(bigInt2, bigInt3)).get === List((2, Set(bigInt2, bigInt3)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/bigInts"
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set[BigInt]()).get === List((1, Set(bigInt1, bigInt2)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt4)).get === List((1, Set(bigInt1, bigInt2)), (3, Set(bigInt3, bigInt4)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2), Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.bigInts(bigInt1 and bigInt2).get === List((1, Set(bigInt1, bigInt2)))
-      Ns.int.bigInts(bigInt1 and bigInt3).get === Nil
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt4)).get === List((1, Set(bigInt1, bigInt2)))
+      Ns.int.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3, bigInt4)).get === List((1, Set(bigInt1, bigInt2)), (3, Set(bigInt3, bigInt4)))
 
-
-      // Input
-
-      val inputMolecule = m(Ns.int.bigInts(?))
-
-      // AND semantics when applying bigInt1 Set of values matching attribute values of bigInt1 entity
-
-      inputMolecule.apply(Set(bigInt1)).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-
-      inputMolecule.apply(Set(bigInt1, bigInt2)).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(bigInt1, bigInt3)).get === Nil
-      inputMolecule.apply(Set(bigInt2, bigInt3)).get === List((2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
-
-      inputMolecule.apply(List(Set(bigInt1))).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(List(Set(bigInt2))).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(List(Set(bigInt1, bigInt2))).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(List(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(List(Set(bigInt2, bigInt3))).get === List((2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(List(Set(bigInt1, bigInt2, bigInt3))).get === Nil
-
-      inputMolecule.apply(Set(Set(bigInt1))).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(Set(bigInt2))).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2))).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt3))).get === Nil
-      inputMolecule.apply(Set(Set(bigInt2, bigInt3))).get === List((2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(Set(Set(bigInt1, bigInt2, bigInt3))).get === Nil
+      // `and`
+      Ns.int.bigInts.apply(bigInt1 and bigInt2).get === List((1, Set(bigInt1, bigInt2)))
+      Ns.int.bigInts.apply(bigInt1 and bigInt3).get === Nil
+    }
 
 
-      // OR semantics when applying multiple Sets - all values are flattened
+    "Mandatory, single attr coalesce" in new ManySetup {
 
-      inputMolecule.apply(Set(bigInt1), Set(bigInt1)).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(bigInt1), Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(Set(bigInt1), Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
-      inputMolecule.apply(Set(bigInt2), Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
-      inputMolecule.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
+      // OR semantics
 
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt1)).get === List((1, Set(bigInt1, bigInt2)))
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)))
-      inputMolecule.apply(Set(bigInt1) or Set(bigInt2) or Set(bigInt3)).get === List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt2, bigInt3)), (3, Set(bigInt3, bigInt4)))
+      // Varargs
+      Ns.bigInts.apply(bigInt1).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(bigInt1, bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
+
+      // `or`
+      Ns.bigInts.apply(bigInt1 or bigInt2).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(bigInt1 or bigInt2 or bigInt3).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+
+      // Seq
+      Ns.bigInts.apply().get === Nil
+      Ns.bigInts.apply(Nil).get === Nil
+      Ns.bigInts.apply(List(bigInt1)).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(List(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(List(bigInt1, bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(List(bigInt1), List(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+      Ns.bigInts.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+      Ns.bigInts.apply(List(bigInt1, bigInt2, bigInt3)).get === List(Set(bigInt1, bigInt4, bigInt3, bigInt2))
+
+
+      // AND semantics
+
+      // Set
+      Ns.bigInts.apply(Set[BigInt]()).get === Nil // entities with no card-many values asserted can't also return values
+      Ns.bigInts.apply(Set(bigInt1)).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(Set(bigInt2)).get === List(Set(bigInt1, bigInt3, bigInt2))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2)).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(Set(bigInt1, bigInt3)).get === Nil
+      Ns.bigInts.apply(Set(bigInt2, bigInt3)).get === List(Set(bigInt2, bigInt3))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
+
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2)).get === List(Set(bigInt1, bigInt2, bigInt3))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(Set(bigInt1, bigInt2, bigInt3, bigInt4))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt4)).get === List(Set(bigInt1, bigInt2, bigInt3, bigInt4))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2), Set(bigInt3)).get === List(Set(bigInt1, bigInt2, bigInt3, bigInt4))
+
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).get === List(Set(bigInt1, bigInt2, bigInt3))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt4)).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(Set(bigInt1, bigInt2), Set(bigInt3, bigInt4)).get === List(Set(bigInt1, bigInt2, bigInt3, bigInt4))
+
+
+      // Explicit `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.bigInts.apply(bigInt1 and bigInt2).get === List(Set(bigInt1, bigInt2))
+      Ns.bigInts.apply(bigInt1 and bigInt3).get === Nil
+    }
+
+
+    "Tacit" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
+      Ns.int.bigInts_.apply(bigInt1).get === List(1)
+      Ns.int.bigInts_.apply(bigInt2).get === List(1, 2)
+      Ns.int.bigInts_.apply(bigInt1, bigInt2).get === List(1, 2)
+
+      // `or`
+      Ns.int.bigInts_.apply(bigInt1 or bigInt2).get === List(1, 2)
+      Ns.int.bigInts_.apply(bigInt1 or bigInt2 or bigInt3).get === List(1, 2, 3)
+
+      // Seq
+      Ns.int.bigInts_.apply().get === List(4) // entities with no card-many values asserted
+      Ns.int.bigInts_.apply(Nil).get === List(4)
+      Ns.int.bigInts_.apply(List(bigInt1)).get === List(1)
+      Ns.int.bigInts_.apply(List(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(List(bigInt1, bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(List(bigInt1), List(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(List(bigInt1, bigInt2), List(bigInt3)).get === List(1, 2, 3)
+      Ns.int.bigInts_.apply(List(bigInt1), List(bigInt2, bigInt3)).get === List(1, 2, 3)
+      Ns.int.bigInts_.apply(List(bigInt1, bigInt2, bigInt3)).get === List(1, 2, 3)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.bigInts_.apply(Set[BigInt]()).get === List(4)
+      Ns.int.bigInts_.apply(Set(bigInt1)).get === List(1)
+      Ns.int.bigInts_.apply(Set(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2)).get === List(1)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt3)).get === Nil
+      Ns.int.bigInts_.apply(Set(bigInt2, bigInt3)).get === List(2)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2, bigInt3)).get === Nil
+
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt3)).get === List(1, 2, 3)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt4)).get === List(1, 3)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt2), Set(bigInt3)).get === List(1, 2, 3)
+
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).get === List(1, 2)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt4)).get === List(1)
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt3, bigInt4)).get === List(1, 3)
+
+
+      // `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.bigInts_.apply(bigInt1 and bigInt2).get === List(1)
+      Ns.int.bigInts_.apply(bigInt1 and bigInt3).get === Nil
+    }
+
+
+    "Variable resolution" in new ManySetup {
+
+      val seq0 = Nil
+      val set0 = Set[BigInt]()
+
+      val l1 = List(bigInt1)
+      val l2 = List(bigInt2)
+
+      val s1 = Set(bigInt1)
+      val s2 = Set(bigInt2)
+
+      val l12 = List(bigInt1, bigInt2)
+      val l23 = List(bigInt2, bigInt3)
+
+      val s12 = Set(bigInt1, bigInt2)
+      val s23 = Set(bigInt2, bigInt3)
+
+
+      // OR semantics
+
+      // Vararg
+      Ns.int.bigInts_.apply(bigInt1, bigInt2).get === List(1, 2)
+
+      // `or`
+      Ns.int.bigInts_.apply(bigInt1 or bigInt2).get === List(1, 2)
+
+      // Seq
+      Ns.int.bigInts_.apply(seq0).get === List(4)
+      Ns.int.bigInts_.apply(List(bigInt1), List(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(l1, l2).get === List(1, 2)
+      Ns.int.bigInts_.apply(List(bigInt1, bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(l12).get === List(1, 2)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.bigInts_.apply(set0).get === List(4)
+
+      Ns.int.bigInts_.apply(Set(bigInt1)).get === List(1)
+      Ns.int.bigInts_.apply(s1).get === List(1)
+
+      Ns.int.bigInts_.apply(Set(bigInt2)).get === List(1, 2)
+      Ns.int.bigInts_.apply(s2).get === List(1, 2)
+
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2)).get === List(1)
+      Ns.int.bigInts_.apply(s12).get === List(1)
+
+      Ns.int.bigInts_.apply(Set(bigInt2, bigInt3)).get === List(2)
+      Ns.int.bigInts_.apply(s23).get === List(2)
+
+      Ns.int.bigInts_.apply(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).get === List(1, 2)
+      Ns.int.bigInts_.apply(s12, s23).get === List(1, 2)
+
+      // `and`
+      Ns.int.bigInts_.apply(bigInt1 and bigInt2).get === List(1)
     }
   }
 }

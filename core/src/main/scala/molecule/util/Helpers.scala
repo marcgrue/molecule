@@ -1,7 +1,9 @@
 package molecule.util
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZoneId}
-import java.util.Date
+import java.util.{Date, UUID}
+import molecule.ast.query.format
 
 private[molecule] trait Helpers {
 
@@ -35,6 +37,24 @@ private[molecule] trait Helpers {
     case date: Date => format2(date)
     case other      => other
   }
+
+
+  protected def cast(value: Any): String = value match {
+    case (a, b)     => s"(${cast(a)}, ${cast(b)})"
+    case v: Long    => v + "L"
+    case v: Float   => v + "f"
+    case date: Date => "\"" + format(date) + "\""
+    case v: String  => "\"" + v + "\""
+    case v: UUID    => "\"" + v + "\""
+    case v: URI     => "\"" + v + "\""
+    case v          => v.toString
+  }
+  protected def o(opt: Option[Any]): String = if (opt.isDefined) s"""Some(${cast(opt.get)})""" else "None"
+  protected def seq[T](values: Seq[T]) = values.map {
+    case set: Set[_] => set.map(cast).mkString("Set(", ", ", ")")
+    case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
+    case v           => cast(v)
+  }.mkString("Seq(", ", ", ")")
 
 
   protected def tupleToSeq(arg: Any) = arg match {

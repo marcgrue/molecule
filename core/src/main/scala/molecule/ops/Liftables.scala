@@ -105,7 +105,6 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Var(sym)                      => q"Var($sym)"
     case Val(v)                        => q"Val($v)"
     case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
-    case Dummy                         => q"Dummy"
     case NoVal                         => q"NoVal"
   }
 
@@ -163,12 +162,24 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"NotClauses(Seq(..$clauses))"
   }
 
+  implicit val liftNotJoinClauses = Liftable[NotJoinClauses] { notJoinClauses =>
+    val clauses = notJoinClauses.clauses map {
+      case cl: DataClause     => q"$cl"
+      case cl: NotClause      => q"$cl"
+      case cl: RuleInvocation => q"$cl"
+      case cl: Funct          => q"$cl"
+      case q"$e"              => e
+    }
+    q"NotJoinClauses(Seq(..${notJoinClauses.nonUnifyingVars}), Seq(..$clauses))"
+  }
+
 
   implicit val liftListOfClauses = Liftable[Seq[Clause]] { clauses =>
     val cls = clauses map {
       case cl: DataClause     => q"$cl"
       case cl: NotClause      => q"$cl"
       case cl: NotClauses     => q"$cl"
+      case cl: NotJoinClauses => q"$cl"
       case cl: RuleInvocation => q"$cl"
       case cl: Funct          => q"$cl"
     }
@@ -179,6 +190,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case DataClause(ds, e, a, v, tx, op) => q"DataClause($ds, $e, $a, $v, $tx, $op)"
     case NotClause(e, a)                 => q"NotClause($e, $a)"
     case NotClauses(clauses)             => q"NotClauses($clauses)"
+    case NotJoinClauses(vars, clauses)   => q"NotJoinClauses(Seq(..$vars), $clauses)"
     case RuleInvocation(name, args)      => q"RuleInvocation($name, Seq(..$args))"
     case Funct(name, ins, outs)          => q"Funct($name, Seq(..$ins), $outs)"
   }
@@ -190,7 +202,6 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
 
 
   // Liftables for Model --------------------------------------------------------------
-
 
   implicit val liftBidirectional = Liftable[Bidirectional] {
     case BiSelfRef(card)             => q"BiSelfRef($card)"

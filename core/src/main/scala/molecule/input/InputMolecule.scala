@@ -1,9 +1,9 @@
 package molecule.input
+import java.net.URI
 import molecule.ast.MoleculeBase
 import molecule.ast.model._
-import molecule.ast.query.{Placeholder, _}
-import molecule.exceptions.MoleculeException
-import molecule.input.exception.{InputMoleculeException, InputMolecule_1_Exception, InputMolecule_2_Exception}
+import molecule.ast.query.{DataClause, _}
+import molecule.input.exception.InputMoleculeException
 
 /** Shared interface of all input molecules.
   * <br><br>
@@ -59,70 +59,50 @@ trait InputMolecule extends MoleculeBase {
     case Placeholder(_, _, v, enumPrefix) => (v, enumPrefix.getOrElse(""))
   }
 
-  protected def flatValues[T](in: Seq[T], prefix: String = ""): Seq[Seq[Any]] = if (prefix != "") {
-    in.flatMap {
-      case set: Set[_] => Seq(set.toSeq.map(setValue => prefix + setValue.toString))
-      case one         => Seq(Seq(prefix + one.toString))
+  protected def pre[T](enumPrefix: Option[String], arg: T): Any = if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
+
+  protected def isTacit(ns: String, attr: String): Boolean = {
+    val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
+    def isTacit_(elements: Seq[Element], tacit0: Option[Boolean]): Option[Boolean] = elements.foldLeft(tacit0) {
+      case (tacit, Atom(`ns`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
+      case (tacit, Atom(`ns`, `attr` | `attrK`, _, _, _, _, _, _))   => Some(false)
+      case (tacit, Nested(_, elements2))                             => isTacit_(elements2, tacit)
+      case (tacit, Composite(elements2))                             => isTacit_(elements2, tacit)
+      case (tacit, _)                                                => tacit
     }
-  } else {
-    in.flatMap {
-      case map: Map[_, _] => map.toSeq.map { case (k, v) => Seq(k, v) }
-      case set: Set[_]    => Seq(set.toSeq)
-      case one            => Seq(Seq(one))
-    }
-  }
-
-  def pre[T](enumPrefix: Option[String], arg: T) = if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
-
-  def newInputs(query: Query, v: Var): Seq[Input] = query.i.inputs.flatMap {
-    case Placeholder(_, _, `v`, _) => None
-    case other                     => Some(other)
-  }
-
-  def newIn(query: Query, v: Var): In = query.i.copy(inputs = newInputs(query, v))
-
-
-  def isTacit(ns: String, attr: String): Boolean = {
-    val attr_ = attr + "_"
-    def isTacit_(elements: Seq[Element]): Option[Boolean] = elements.foldLeft(Option.empty[Boolean]) {
-      case (result, Atom(`ns`, `attr_`, _, _, _, _, _, _)) => Some(true)
-      case (result, Atom(`ns`, `attr`, _, _, _, _, _, _))  => Some(false)
-      case (result, Nested(_, elements2))                  => isTacit_(elements2)
-      case (result, Composite(elements2))                  => isTacit_(elements2)
-      case (result, _)                                     => result
-    }
-    isTacit_(_model.elements) match {
+    isTacit_(_model.elements, None) match {
       case Some(result) => result
       case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$ns/$attr` in model:\n" + _model)
     }
   }
 
-  def cardinality(ns: String, attr: String): Int = {
-    val attr_ = attr + "_"
-    def isTacit_(elements: Seq[Element]): Option[Int] = elements.foldLeft(Option.empty[Int]) {
-      case (result, Atom(`ns`, `attr` | `attr_`, _, card, _, _, _, _)) => Some(card)
-      case (result, Nested(_, elements2))                              => isTacit_(elements2)
-      case (result, Composite(elements2))                              => isTacit_(elements2)
-      case (result, _)                                                 => result
+  protected def cardinality(ns: String, attr: String): Int = {
+    val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
+    def isTacit_(elements: Seq[Element], cardOpt0: Option[Int]): Option[Int] = elements.foldLeft(cardOpt0) {
+      case (cardOpt, Atom(`ns`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
+      case (cardOpt, Nested(_, elements2))                                                   => isTacit_(elements2, cardOpt)
+      case (cardOpt, Composite(elements2))                                                   => isTacit_(elements2, cardOpt)
+      case (cardOpt, e)                                                                      => cardOpt
     }
-    isTacit_(_model.elements) match {
+    isTacit_(_model.elements, None) match {
       case Some(result) => result
       case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$ns/$attr` in model:\n" + _model)
     }
   }
 
-  def isComparison(ns: String, attr: String): Boolean = {
+  protected def isExpression(ns: String, attr: String): (Boolean, Boolean) = {
     val attr_ = attr + "_"
-    def isComparison_(elements: Seq[Element]): Boolean = elements.foldLeft(false) {
-      case (b, Atom(`ns`, `attr` | `attr_`, _, _, Lt(_) | Gt(_) | Le(_) | Ge(_), _, _, _)) => true
-      case (b, Nested(_, elements2))                                                       => isComparison_(elements2)
-      case (b, Composite(elements2))                                                       => isComparison_(elements2)
-      case (b, _)                                                                          => b
+    def isExpression_(elements: Seq[Element], comparison: Boolean, negation: Boolean): (Boolean, Boolean) = elements.foldLeft(comparison, negation) {
+      case ((comp, neg), Atom(`ns`, `attr` | `attr_`, _, _, Lt(_) | Gt(_) | Le(_) | Ge(_), _, _, _)) => (true, neg)
+      case ((comp, neg), Atom(`ns`, `attr` | `attr_`, _, _, Neq(_), _, _, _))                        => (comp, true)
+      case ((comp, neg), Nested(_, elements2))                                                       => isExpression_(elements2, comp, neg)
+      case ((comp, neg), Composite(elements2))                                                       => isExpression_(elements2, comp, neg)
+      case ((comp, neg), _)                                                                          => (comp, neg)
     }
-    isComparison_(_model.elements)
+    isExpression_(_model.elements, false, false)
   }
 
-  def addNilClause(clauses: Seq[Clause], e: Var, kw: KW, v0: Var) = {
+  protected def addNilClause(clauses: Seq[Clause], e: Var, kw: KW, v0: Var): Seq[Clause] = {
     val (found, _, newClauses) = clauses.foldLeft(false, "", Seq.empty[Clause]) {
       case ((found, v, acc), DataClause(_, `e`, `kw`, `v0`, _, _))   => (true, v, acc :+ NotClause(e, kw))
       case ((found, v, acc), DataClause(_, `e`, `kw`, Var(w), _, _)) => (true, w, acc :+ NotClause(e, kw))
@@ -140,314 +120,331 @@ trait InputMolecule extends MoleculeBase {
     }
   }
 
-  def addValueClause(clauses: Seq[Clause], kw: KW, isTacit: Boolean, v: Var, enumPrefix: Option[String], args: Seq[Any]): Seq[Clause] = {
-    val (done, resolvedClauses) = clauses.reverse.foldLeft(false, Seq.empty[Seq[Clause]]) {
-      case ((done, acc), Funct(name, List(v0, `v`), outs))                                   => (true, acc :+ args.map(arg => Funct(name, List(v0, Val(pre(enumPrefix, arg))), outs)))
-      case ((done, acc), DataClause(ImplDS, Var(e), `kw`, `v`, Empty, NoBinding)) if isTacit => (true, acc :+ args.flatMap(arg => dataClause(e, kw, enumPrefix, arg)))
-      case ((done, acc), cl@DataClause(ImplDS, Var(e), `kw`, `v`, Empty, NoBinding))         => (true, acc :+ (cl +: args.flatMap(arg => dataClause(e, kw, enumPrefix, arg))))
-      case ((done, acc), otherClause)                                                        => (done, acc :+ Seq(otherClause))
-    }
-    if (done) resolvedClauses.flatten.reverse else {
-      val KW(ns, attr, _) = kw
-      throw new InputMoleculeException(s"Couldn't find clause with input attribute `:$ns/$attr` placeholder variable `$v` among clauses:\n" + clauses.mkString("\n"))
-    }
-  }
-
-  def addArgClause(clauses: Seq[Clause], e: Var, kw: KW, v: Var, isComparison: Boolean, isTacit: Boolean, enumPrefix: Option[String], arg0: Any): Seq[Clause] = arg0 match {
-    case set: Set[_] if set.size == 1 => addValueClause(clauses, kw, isTacit, v, enumPrefix, Seq(set.head))
-    case set: Set[_] if set.isEmpty   => addNilClause(clauses, e, kw, v)
-    case set: Set[_] if isComparison  => throw new InputMoleculeException("Can only apply 1 cardinality-many value to a comparison function. Got: Set(" + set.mkString(", ") + ")")
-    case set: Set[_]                  => addValueClause(clauses, kw, isTacit, v, enumPrefix, set.toSeq)
-    case arg                          => addValueClause(clauses, kw, isTacit, v, enumPrefix, Seq(arg))
-  }
-
-  def dataClause(e: String, kw: KW, enumPrefix: Option[String], arg: Any) = arg match {
-    case value: java.net.URI => Seq(
-      Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(e + "_uri"))),
-      DataClause(ImplDS, Var(e), kw, Var(e + "_uri"), Empty, NoBinding)
-    )
+  protected def dataClause(e: String, kw: KW, enumPrefix: Option[String], arg: Any, i: Int): Seq[Clause] = arg match {
+    case value: java.net.URI =>
+      val uriVar = Var(e + "_uri" + i)
+      Seq(
+        Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(uriVar)),
+        DataClause(ImplDS, Var(e), kw, uriVar, Empty, NoBinding)
+      )
     case value               => Seq(
       DataClause(ImplDS, Var(e), kw, Val(pre(enumPrefix, arg)), Empty, NoBinding)
     )
   }
 
-  def valueClauses[TT](e: String, kw: KW, enumPrefix: Option[String], args: TT): Seq[Clause] = args match {
+  protected def valueClauses[TT](e: String, kw: KW, enumPrefix: Option[String], args: TT): Seq[Clause] = args match {
     case set: Set[_] if set.isEmpty => Seq(NotClause(Var(e), kw))
-    case set: Set[_]                => set.toSeq.flatMap(arg => dataClause(e, kw, enumPrefix, arg))
-    case arg                        => dataClause(e, kw, enumPrefix, arg)
+    case set: Set[_]                => set.toSeq.zipWithIndex.flatMap { case (arg, i) => dataClause(e, kw, enumPrefix, arg, i + 1) }
+    case arg                        => dataClause(e, kw, enumPrefix, arg, 1)
   }
 
+  protected def deepNil(args: Seq[Any]) = args match {
+    case Nil                                 => true
+    case (seq: Seq[_]) :: Nil if seq.isEmpty => true
+    case (set: Set[_]) :: Nil if set.isEmpty => true
+    case _                                   => false
+  }
 
-  //  protected def resolveVarsInputs[In](query: Query, v: Var, inputs0: Seq[In], prefix: Option[String]): Query = {
-  //    val Var(w) = v
-  //    val inputs = inputs0.distinct
-  //
-  //    val isApply = query.wh.clauses.collectFirst {
-  //      case DataClause(_, _, _, `v`, _, _) => true
-  //    }.getOrElse(false)
-  //
-  //    val kw0@KW(ns0, attr, _) = query.i.inputs.collectFirst {
-  //      case Placeholder(`w`, kw0@KW(ns0, _, _), _, _) => kw0
-  //    }.getOrElse(KW("", "", ""))
-  //
-  //    val isComparison1 = isComparison(ns0, attr)
-  //
-  //
-  //    inputs match {
-  //
-  //      // Empty input ...........................................
-  //
-  //      case Nil => {
-  //        val mandatory = query.f.outputs.exists {
-  //          case `v`                 => true
-  //          case AggrExpr(_, _, `v`) => true
-  //          case _                   => false
-  //        }
-  //        val newClauses = query.wh.clauses.flatMap {
-  //          case varClause@DataClause(ds, e, a, `v`, _, _) if mandatory => Seq(NotClause(ds, e, a), varClause)
-  //          case DataClause(ds, e, a, `v`, _, _)                        => Seq(NotClause(ds, e, a))
-  //          case otherClause                                            => Seq(otherClause)
-  //        }
-  //        query.copy(i = newIn(query, w), wh = Where(newClauses))
-  //      }
-  //
-  //
-  //      // Single input ...........................................
-  //
-  //      case Seq(set: Set[_]) if isApply && set.isEmpty => {
-  //        val mandatory = query.f.outputs.exists {
-  //          case `v`                 => true
-  //          case AggrExpr(_, _, `v`) => true
-  //          case _                   => false
-  //        }
-  //        val newClauses = query.wh.clauses.flatMap {
-  //          case varClause@DataClause(ds, e, a, `v`, _, _) if mandatory => Seq(NotClause(ds, e, a), varClause)
-  //          case DataClause(ds, e, a, `v`, _, _)                        => Seq(NotClause(ds, e, a))
-  //          case otherClause                                            => Seq(otherClause)
-  //        }
-  //        query.copy(i = newIn(query, w), wh = Where(newClauses))
-  //      }
-  //
-  //      case Seq(set: Set[_]) if isApply => {
-  //        val newClauses = query.wh.clauses.flatMap {
-  //          case varClause@DataClause(ds, e, a, `v`, tx, op) => set.toList.zipWithIndex.flatMap {
-  //            case (value: java.net.URI, i) => List(
-  //              Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(w + "_uri" + (i + 1)))),
-  //              DataClause(ImplDS, e, a, Var(w + "_uri" + (i + 1)), Empty, NoBinding)
-  //            )
-  //            case (value, _)               => List(DataClause(ds, e, a, Val(pre(prefix, value)), tx, op))
-  //          } :+ varClause
-  //          case other                                       => Seq(other)
-  //        }
-  //        query.copy(i = newIn(query, w), wh = Where(newClauses))
-  //      }
-  //
-  //      case Seq(set: Set[_]) if set.size == 1 => {
-  //        val newClauses = query.wh.clauses.flatMap {
-  //          case Funct(fn, List(v1, `v`), v2) => List(Funct(fn, List(v1, Val(set.head)), v2))
-  //          case other                        => Seq(other)
-  //        }
-  //        query.copy(i = newIn(query, w), wh = Where(newClauses))
-  //      }
-  //
-  //      case Seq(set: Set[_]) =>
-  //        throw new InputMoleculeException("Unexpected input molecule:\n" + query + "\ninputs: " + inputs)
-  //
-  //
-  //      case Seq(value) => {
-  //        val newInputs = query.i.inputs.map {
-  //          case Placeholder(`w`, _, _, _) if isComparison1 => InVar(ScalarBinding(v), Seq(Seq(value)))
-  //          case Placeholder(`w`, _, _, _)                  => InVar(ScalarBinding(v), Seq(Seq(pre(prefix, value))))
-  //          case otherPlaceholder                           => otherPlaceholder
-  //        }
-  //        val newIn = query.i.copy(inputs = newInputs)
-  //        query.copy(i = newIn)
-  //      }
-  //
-  //
-  //      // Multiple inputs ...........................................
-  //
-  //      // Card-many
-  //      case ins if ins.head.isInstanceOf[Set[_]] => {
-  //
-  //        val (e, newClauses) = query.wh.clauses.foldLeft("", Seq.empty[Clause]) {
-  //          case ((_, acc), cl@DataClause(_, Var(e), _, `v`, _, _)) => (e, acc :+ cl :+ RuleInvocation("rule1", List(Var(e))))
-  //          case ((e, acc), other)                                  => (e, acc :+ other)
-  //        }
-  //        val values: Seq[Any] = ins.flatMap { case set: Set[_] => set.toSeq }
-  //        val rules = values.map {
-  //          case value: java.net.URI =>
-  //            Rule("rule1", List(Var(e)), List(
-  //              Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(e + "_uri"))),
-  //              DataClause(ImplDS, Var(e), kw0, Var(e + "_uri"), Empty, NoBinding)))
-  //          case value               =>
-  //            Rule("rule1", List(Var(e)), List(
-  //              DataClause(ImplDS, Var(e), kw0, Val(pre(prefix, value)), Empty, NoBinding)))
-  //        }
-  //
-  //        query.copy(i = In(newInputs(query, w), query.i.rules ++ rules, query.i.ds), wh = Where(newClauses))
-  //      }
-  //
-  //      case ins if w == "a" && ns0.isEmpty => {
-  //        query.copy(i = In(query.i.inputs :+ InVar(CollectionBinding(v), Seq(ins)), query.i.rules, query.i.ds))
-  //      }
-  //
-  //      case ins => {
-  //        val (e, newClauses) = query.wh.clauses.foldLeft("", Seq.empty[Clause]) {
-  //          case ((_, acc), cl@DataClause(_, Var(e), _, `v`, _, _)) => (e, acc :+ cl :+ RuleInvocation("rule1", List(Var(e))))
-  //          case ((e, acc), other)                                  => (e, acc :+ other)
-  //        }
-  //        val rules = ins.map {
-  //          case value: java.net.URI => Rule("rule1", List(Var(e)), List(
-  //            Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(e + "_uri"))),
-  //            DataClause(ImplDS, Var(e), kw0, Var(e + "_uri"), Empty, NoBinding)
-  //          ))
-  //          case value               => Rule("rule1", List(Var(e)), List(DataClause(ImplDS, Var(e), kw0, Val(pre(prefix, value)), Empty, NoBinding)))
-  //        }
-  //        query.copy(i = In(newInputs(query, w), query.i.rules ++ rules, query.i.ds), wh = Where(newClauses))
-  //
-  //      }
-  //    }
-  //  }
+  protected def resolveInput[T](query: Query, ph: Placeholder, inputs: Seq[T], ruleName: String = "rule1", unifyRule: Boolean = false): Query = {
+    val Placeholder(e@Var(e_), kw@KW(ns, attr, _), v@Var(w), prefix) = ph
+    val card = cardinality(ns, attr)
 
-  //  // (Tuple1)
-  //  protected def bindOne[I1](query: Query, inputs0: Seq[I1]): Query = {
-  //    val inputs = inputs0.distinct
-  //    val (List(Var(v1)), List(enumPrefix)) = varsAndPrefixes(query).unzip
-  ////    val prefix = prefixes.headOption.getOrElse("")
-  //
-  //    //    println("....................................")
-  //    //    println(query)
-  //    //    println("inVars: " + inVars)
-  //    //    println("inputs: " + inputs)
-  //    //    println("prefix: " + prefix)
-  //
-  //    resolveVarsInputs[I1](query, Var(v1), inputs, enumPrefix)
-  //
-  //
-  //
-  ////    val (inVars, prefixes) = varsAndPrefixes(query).unzip
-  ////    val prefix = prefixes.headOption.getOrElse("")
-  //
-  //    //    println("....................................")
-  //    //    println(query)
-  //    //    println("inVars: " + inVars)
-  //    //    println("inputs: " + inputs)
-  //    //    println("prefix: " + prefix)
-  //
-  //
-  //
-  ////    (inVars, inputs) match {
-  ////
-  ////      case (Seq(inVar), Nil) => {
-  ////        //        println("@@@@@ 1 @@@@@ retrieve with non-asserted")
-  ////        val mandatory = query.f.outputs.exists {
-  ////          case `inVar`                 => true
-  ////          case AggrExpr(_, _, `inVar`) => true
-  ////          case _                       => false
-  ////        }
-  ////        val newClauses = query.wh.clauses.flatMap {
-  ////          case varClause@DataClause(ds, e, a, `inVar`, _, _) if mandatory => Seq(NotClause(ds, e, a), varClause)
-  ////          case DataClause(ds, e, a, `inVar`, _, _)                        => Seq(NotClause(ds, e, a))
-  ////          case otherClause                                                => Seq(otherClause)
-  ////        }
-  ////        query.copy(i = In(Nil, Nil, Nil), wh = Where(newClauses))
-  ////      }
-  ////
-  ////      case (Seq(inVar), Seq(in)) => in match {
-  ////        case set: Set[_] =>
-  ////          val Var(v1) = inVar
-  ////          val isApply = query.wh.clauses.collectFirst {
-  ////            case DataClause(_, _, _, `inVar`, _, _) => true
-  ////          }.getOrElse(false)
-  ////
-  ////          if (isApply) {
-  ////
-  ////            //            println("@@@@@ 2 a @@@@@  apply AND semantics from Set of input values")
-  ////            val newClauses = query.wh.clauses.flatMap {
-  ////              case varClause@DataClause(ds, e, a, `inVar`, tx, op) => set.toList.zipWithIndex.flatMap {
-  ////                case (value, _) if prefix.nonEmpty => List(DataClause(ds, e, a, Val(prefix + value), tx, op))
-  ////                case (value: java.net.URI, i)      => List(
-  ////                  Funct(s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(v1 + "_uri" + (i + 1)))),
-  ////                  DataClause(ImplDS, e, a, Var(v1 + "_uri" + (i + 1)), Empty, NoBinding)
-  ////                )
-  ////                case (value, _)                    => List(DataClause(ds, e, a, Val(value), tx, op))
-  ////              } :+ varClause
-  ////              case other                                           => Seq(other)
-  ////            }
-  ////            query.copy(i = In(Nil, Nil, Nil), wh = Where(newClauses))
-  ////
-  ////          } else if (set.size == 1) {
-  ////
-  ////            //            println("@@@@@ 2 b @@@@@ compare to etc...")
-  ////            val newClauses = query.wh.clauses.flatMap {
-  ////              case Funct(fn, List(v, `inVar`), v2) => List(Funct(fn, List(v, Val(set.head)), v2))
-  ////              case other                           => Seq(other)
-  ////            }
-  ////            query.copy(i = In(Nil, Nil, Nil), wh = Where(newClauses))
-  ////
-  ////
-  ////          } else {
-  ////            throw new InputMoleculeException("Unexpected input molecule:\n" + query + "\ninputs0: " + inputs0)
-  ////          }
-  ////
-  ////
-  ////        case value0 =>
-  ////          //          println("@@@@@ 2 c @@@@@")
-  ////          val value = if (prefix.nonEmpty) prefix + value0 else value0
-  ////          query.copy(i = In(Seq(InVar(ScalarBinding(inVars.head), Seq(Seq(value)))), query.i.rules, query.i.ds))
-  ////      }
-  ////
-  ////      case (Seq(inVar), ins) => {
-  ////        val In(List(Placeholder(e0, kw@KW(ns, attr, _), _, _)), _, _) = query.i
-  ////        ins.head match {
-  ////          case _: Set[_] =>
-  ////            //            println("@@@@@ 3 a @@@@@  OR semantics from Set of input values")
-  ////            val (e, newClauses) = query.wh.clauses.foldLeft("", Seq.empty[Clause]) {
-  ////              case ((_, acc), cl@DataClause(_, Var(e), _, `inVar`, _, _)) => (e, acc :+ cl :+ RuleInvocation("rule1", List(Var(e))))
-  ////              case ((e, acc), other)                                      => (e, acc :+ other)
-  ////            }
-  ////            val values: Seq[Any] = ins.flatMap {
-  ////              case set: Set[_] => set.toSeq
-  ////            }
-  ////            val rules = values.map {
-  ////              case value if prefix.nonEmpty => Rule("rule1", List(Var(e)), List(DataClause(ImplDS, Var(e), kw, Val(prefix + value), Empty, NoBinding)))
-  ////              case value: java.net.URI      => Rule("rule1", List(Var(e)), List(
-  ////                Funct(s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(e + "_uri"))),
-  ////                DataClause(ImplDS, Var(e), kw, Var(e + "_uri"), Empty, NoBinding)
-  ////              ))
-  ////              case value                    => Rule("rule1", List(Var(e)), List(DataClause(ImplDS, Var(e), kw, Val(value), Empty, NoBinding)))
-  ////            }
-  ////            query.copy(i = In(Nil, rules, query.i.ds), wh = Where(newClauses))
-  ////
-  ////          // Ns(e1).int.get
-  ////          case _ if e0 == "a" && ns.isEmpty =>
-  ////            //            println("@@@@@ 3 b @@@@@")
-  ////            query.copy(i = In(Seq(InVar(CollectionBinding(inVars.head), Seq(ins))), query.i.rules, query.i.ds))
-  ////
-  ////
-  ////          case _ =>
-  ////            //            println("@@@@@ 3 c @@@@@")
-  ////            val (e, newClauses) = query.wh.clauses.foldLeft("", Seq.empty[Clause]) {
-  ////              case ((_, acc), cl@DataClause(_, Var(e), _, `inVar`, _, _)) => (e, acc :+ cl :+ RuleInvocation("rule1", List(Var(e))))
-  ////              case ((e, acc), other)                                      => (e, acc :+ other)
-  ////            }
-  ////            val rules = ins.map {
-  ////              case value if prefix.nonEmpty => Rule("rule1", List(Var(e)), List(DataClause(ImplDS, Var(e), kw, Val(prefix + value), Empty, NoBinding)))
-  ////              case value: java.net.URI      => Rule("rule1", List(Var(e)), List(
-  ////                Funct(s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(Var(e + "_uri"))),
-  ////                DataClause(ImplDS, Var(e), kw, Var(e + "_uri"), Empty, NoBinding)
-  ////              ))
-  ////              case value                    => Rule("rule1", List(Var(e)), List(DataClause(ImplDS, Var(e), kw, Val(value), Empty, NoBinding)))
-  ////            }
-  ////            query.copy(i = In(Nil, rules, query.i.ds), wh = Where(newClauses))
-  ////        }
-  ////      }
-  ////
-  ////      case (_, ins) =>
-  ////        println("@@@@@ 4 a @@@@@")
-  ////        query
-  ////    }
-  //  }
+    // Mapped key attributes
+    if (card == 4) {
 
+      val values = inputs.map(Seq(_))
+      if (inputs.size > 1) {
+        query.copy(i = In(Seq(InVar(CollectionBinding(v), Seq(values.flatten))), query.i.rules, query.i.ds))
+      } else if (values.nonEmpty && values.head.size > 1) {
+        val In(List(Placeholder(_, kw, v, _)), _, _) = query.i
+        val (e, newClauses) = query.wh.clauses.foldLeft(null: Var, Seq.empty[Clause]) {
+          case ((_, acc), DataClause(_, e, _, `v`, _, _)) => (e, acc :+ RuleInvocation(ruleName, List(e)))
+          case ((e, acc), other)                          => (e, acc :+ other)
+        }
+        val rules = values.head.map(value =>
+          Rule(ruleName, List(e), List(DataClause(ImplDS, e, kw, Val(value), Empty, NoBinding)))
+        )
+        query.copy(i = In(Nil, rules, query.i.ds), wh = Where(newClauses))
+      } else {
+        query.copy(i = In(Seq(InVar(ScalarBinding(v), values)), query.i.rules, query.i.ds))
+      }
+
+    } else {
+
+      // Card-one/many
+
+      val v_ = w.filter(_.isLetter)
+      def inGroup(v: String) = v.filter(_.isLetter) == v_
+      val tacit = isTacit(ns, attr)
+
+      val (before, clauses, after) = query.wh.clauses.foldLeft(Seq.empty[Clause], Seq.empty[Clause], Seq.empty[Clause]) {
+        case ((bef, cur, aft), cl@DataClause(_, `e`, `kw`, `v`, _, _))                  => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@DataClause(_, `e`, `kw`, Var(v), _, _)) if inGroup(v) => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@DataClause(_, Var(`v_`), _, _, _, _))                 => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@Funct(_, List(_, `v`), _))                            => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@Funct(_, List(_, _, `v`), _))                         => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@Funct(_, List(Var(v), _), _)) if inGroup(v)           => (bef, cur :+ cl, aft)
+        case ((bef, cur, aft), cl@Funct(_, List(Var(v)), _)) if inGroup(v)              => (bef, cur :+ cl, aft)
+        case ((bef, Nil, aft), cl)                                                      => (bef :+ cl, Nil, aft)
+        case ((bef, cur, aft), cl)                                                      => (bef, cur, aft :+ cl)
+      }
+
+      val argss: Seq[Seq[_]] = inputs.flatMap {
+        case map: Map[_, _]             => throw new InputMoleculeException("Unexpected Map input: " + map)
+        case set: Set[_] if set.isEmpty => Nil
+        case set: Set[_]                => Seq(set.toSeq)
+        case arg                        => Seq(Seq(arg))
+      }
+      val args: Seq[Any] = inputs.flatMap {
+        case map: Map[_, _] => throw new InputMoleculeException("Unexpected Map input: " + map)
+        case set: Set[_]    => set.toSeq
+        case arg            => Seq(arg)
+      }
+      //      val nil = args.isEmpty || args.head.isEmpty
+      val nil = deepNil(args)
+      val one = args.size == 1
+      val uri = if (nil) false else args.head.isInstanceOf[URI]
+
+      val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) = card match {
+
+
+        // Card-many enum attribute ...................................................................
+
+        case 2 if prefix.isDefined => clauses match {
+
+          // Neq(Seq(Qm))
+          case Seq(enum, _, _, _, Funct("!=", _, _)) if nil && tacit  => (Nil, Nil, Seq(enum))
+          case Seq(enum, ident, getName, _, Funct("!=", _, _)) if nil => (Nil, Nil, Seq(enum, ident, getName))
+          case Seq(enum, ident, getName, _, Funct("!=", _, _))        => (Nil, Nil,
+            Seq(enum, ident, getName) ++ argss.map(args =>
+              NotClauses(
+                args.map(arg => DataClause(ImplDS, e, kw, Val(prefix.get + arg), Empty, NoBinding))
+              )
+            )
+          )
+
+          // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
+          case Seq(enum, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil && tacit  => (Nil, Nil, Seq(enum))
+          case Seq(enum, ident, getName, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil => (Nil, Nil, Seq(enum, ident, getName))
+          case cls@Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one          => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _))                     => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+
+          // Qm
+          case _ if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case cls if nil        => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
+          //          case Seq(enum, ident, fn) if one =>
+          //            val (inVar, cls) = if (tacit) (Var(v_), Seq(enum)) else (v, Seq(enum, ident, fn))
+          //            (Seq(InVar(ScalarBinding(inVar), Seq(Seq(prefix.get + args.head)))), Nil, cls)
+          //
+          //          case Seq(enum, ident, fn)        => (Nil, Nil,
+          //            args.map(arg =>
+          //              DataClause(ImplDS, e, kw, Val(prefix.get + arg), Empty, NoBinding)
+          //            ) ++ (if (tacit) Seq(enum) else Seq(enum, ident, fn))
+          //          )
+          case Seq(enum, ident, fn) => (
+            Nil,
+            argss.map(args =>
+              Rule(ruleName, Seq(e), args.map(arg =>
+                DataClause(ImplDS, e, kw, Val(prefix.get + arg), Empty, NoBinding)
+              ))),
+            //            Seq(enum, ident, fn, RuleInvocation(ruleName, Seq(e)))
+            if (tacit) Seq(enum, RuleInvocation(ruleName, Seq(e))) else Seq(enum, ident, fn, RuleInvocation(ruleName, Seq(e)))
+          )
+        }
+
+
+        // Card-many attribute ...................................................................
+
+        case 2 => clauses match {
+
+          // Neq(Seq(Qm))
+          case Seq(dc, _, Funct("!=", _, _)) if nil                        =>
+            (Nil, Nil, Seq(dc))
+          case Seq(dc, _, Funct("!=", _, _)) if uri                        => (Nil, Nil,
+            dc +: argss.map { args =>
+              val clauses = args.zipWithIndex.flatMap { case (arg, i) =>
+                val uriVar = Var(w + "_uri" + (i + 1))
+                Seq(
+                  DataClause(ImplDS, e, kw, uriVar, Empty, NoBinding),
+                  Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(uriVar))
+                )
+              }
+              NotJoinClauses(Seq(e), clauses)
+            }
+          )
+          case Seq(dc, Funct(name, _, _), Funct("!=", Seq(Var(v2), _), _)) => (Nil, Nil,
+            dc +: argss.map(args =>
+              NotClauses(args.map(arg =>
+                DataClause(ImplDS, e, kw, Val(arg), Empty, NoBinding))
+              )
+            )
+          )
+
+          // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
+          case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))
+          case cls@Seq(_, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _))           => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+
+          // Fulltext(Seq(Qm))
+          case Seq(f@Funct("fulltext", _, _)) if nil => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(f))
+          case Seq(f@Funct("fulltext", _, _))        => (
+            Nil,
+            argss.map(args =>
+              Rule(ruleName, Seq(e), args.zipWithIndex.map { case (arg, i) =>
+                Funct("fulltext", Seq(DS(), kw, Val(arg)), RelationBinding(List(e, Var(w + "_" + (i + 1)))))
+              })),
+            Seq(
+              DataClause(ImplDS, e, kw, Var(v_), Empty, NoBinding),
+              RuleInvocation(ruleName, Seq(e))
+            )
+          )
+
+          // Qm
+          case Seq(dc: DataClause) if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case Seq(dc: DataClause) if nil          => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(dc))
+          //          case Seq(dc: DataClause) if one && uri   => (Nil, Nil,
+          //          case Seq(dc: DataClause) if uri => (Nil, Nil,
+          //            args.zipWithIndex.flatMap { case (arg, i) =>
+          //              val uriVar = Var(w + "_uri" + (i + 1))
+          //              Seq(
+          //                Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(uriVar)),
+          //                DataClause(ImplDS, e, kw, uriVar, dc.tx, dc.op)
+          //              )
+          //            }
+          //          )
+          case Seq(dc: DataClause) if uri => (
+            Nil,
+            argss.map(args =>
+              Rule(ruleName, Seq(e), args.zipWithIndex.flatMap { case (arg, i) =>
+                val uriVar = Var(w + "_uri" + (i + 1))
+                Seq(
+                  Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(uriVar)),
+                  DataClause(ImplDS, e, kw, uriVar, dc.tx, dc.op)
+                )
+              })),
+            Seq(dc, RuleInvocation(ruleName, Seq(e)))
+          )
+          //          case Seq(dc: DataClause) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, Seq(dc))
+          //          case Seq(dc: DataClause)  => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(dc))
+          case Seq(dc: DataClause) => (
+            Nil,
+            argss.map(args =>
+              Rule(ruleName, Seq(e), args.map(arg =>
+                DataClause(ImplDS, e, kw, Val(arg), dc.tx, dc.op)))),
+            Seq(dc, RuleInvocation(ruleName, Seq(e)))
+          )
+        }
+
+
+        // Card-one enum attribute ...................................................................
+
+        case 1 if prefix.isDefined => clauses match {
+
+          // Neq(Seq(Qm))
+          case Seq(enum, _, _, _, Funct("!=", _, _)) if nil && tacit                            => (Nil, Nil, Seq(enum))
+          case Seq(enum, ident, getName, _, Funct("!=", _, _)) if nil                           => (Nil, Nil, Seq(enum, ident, getName))
+          case cls@Seq(_, _, _, _, Funct("!=", _, _)) if one                                    => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(enum, ident, getName, Funct(n, Seq(Var(v2), `v`), _), not@Funct("!=", _, _)) => (Nil, Nil,
+            Seq(enum, ident, getName) ++ args.zipWithIndex.flatMap { case (arg, i) =>
+              Seq(
+                Funct(n, Seq(Var(v2), Val(arg)), ScalarBinding(Var(v2 + "_" + (i + 1)))),
+                Funct("!=", Seq(Var(v2 + "_" + (i + 1)), Val(0)), NoBinding)
+              )
+            })
+
+          // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
+          case Seq(enum, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil && tacit  => (Nil, Nil, Seq(enum))
+          case Seq(enum, ident, getName, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil => (Nil, Nil, Seq(enum, ident, getName))
+          case cls@Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one          => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _))                     => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+
+          // Fulltext(Seq(Qm))
+          case Seq(f@Funct("fulltext", _, _)) if nil => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(f))
+          case Seq(f@Funct("fulltext", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, Seq(f))
+          case Seq(f@Funct("fulltext", _, _))        => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(f))
+
+          // Qm
+          case _ if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case cls if nil        => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
+          case cls if one        => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case cls               => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, cls)
+        }
+
+
+        // Card-one attribute ...................................................................
+
+        case 1 => clauses match {
+
+          // Neq(Seq(Qm))
+          case Seq(dc, _, Funct("!=", _, _)) if nil                                       => (Nil, Nil, Seq(dc))
+          case cls@Seq(_, _, Funct("!=", _, _)) if one                                    => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(dc, Funct(n, Seq(v1, `v`), _), Funct("!=", _, _)) if uri               => (Nil, Nil,
+            dc +: args.zipWithIndex.flatMap { case (arg, i) =>
+              val (x, y) = (Var(v_ + "_" + (i + 1) + "a"), Var(v_ + "_" + (i + 1) + "b"))
+              Seq(
+                Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(x)),
+                Funct(n, Seq(v1, x), ScalarBinding(y)),
+                Funct("!=", Seq(y, Val(0)), NoBinding)
+              )
+            }
+          )
+          case Seq(dc, Funct(n, Seq(v1, `v`), ScalarBinding(Var(v2))), Funct("!=", _, _)) => (Nil, Nil,
+            dc +: args.zipWithIndex.flatMap { case (arg, i) =>
+              val vx = Var(v2 + "_" + (i + 1))
+              Seq(
+                Funct(n, Seq(v1, Val(arg)), ScalarBinding(vx)),
+                Funct("!=", Seq(vx, Val(0)), NoBinding)
+              )
+            }
+          )
+
+          // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
+          case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))
+          case cls@Seq(_, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(_, _, Funct(">" | ">=" | "<" | "<=", _, _))            => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+
+          // Fulltext(Seq(Qm))
+          case Seq(f@Funct("fulltext", _, _)) if nil => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(f))
+          case Seq(f@Funct("fulltext", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, Seq(f))
+          case Seq(f@Funct("fulltext", _, _))        => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(f))
+
+          // Qm
+          case _ if nil && tacit          => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case Seq(dc: DataClause) if nil => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(dc))
+          case Seq(dc: DataClause) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, Seq(dc))
+          case Seq(dc: DataClause)        => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(dc))
+        }
+      }
+
+      val (newRules2, newClauses2): (Seq[Rule], Seq[Clause]) = if (unifyRule && newRules.size == 1 && argss.size == 1) {
+        val curRules = query.i.rules.collect {
+          case r@Rule(`ruleName`, _, _) => r
+        }
+        val newClauses0 = before ++ newClauses ++ after
+        curRules.size match {
+          case 0          => (newRules, newClauses0)
+          case 1          => {
+            // Collect rule clauses to be unified
+            val (ruleVars, unifiedRules) = query.i.rules.foldLeft(Seq.empty[QueryValue], Seq.empty[Rule]) {
+              case ((_, rules), r@Rule(`ruleName`, vars, cls)) =>
+                ((vars ++ newRules.head.args).distinct, rules :+ Rule(ruleName, (vars ++ newRules.head.args).distinct, cls ++ newRules.head.clauses))
+              case ((vs, rules), other)                        => (vs, rules)
+            }
+            // Unify rule invocations
+            val newClauses1: Seq[Clause] = newClauses0.foldRight(0, Seq.empty[Clause]) {
+              case (RuleInvocation(`ruleName`, vars), (0, cls)) => (1, RuleInvocation(ruleName, (vars ++ ruleVars).distinct) +: cls)
+              case (RuleInvocation(`ruleName`, _), (1, cls))    => (1, cls)
+              case (cl, (done, cls))                            => (done, cl +: cls)
+            }._2
+            (unifiedRules, newClauses1)
+          }
+          case unexpected => throw new InputMoleculeException(s"Didn't expect $unexpected rules to be unified in query:\n" + query)
+        }
+      } else {
+        (query.i.rules ++ newRules, before ++ newClauses ++ after)
+      }
+
+      query.copy(i = In(query.i.inputs ++ newIns, newRules2, query.i.ds), wh = Where(newClauses2))
+    }
+  }
 }

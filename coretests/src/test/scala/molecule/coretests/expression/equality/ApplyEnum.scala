@@ -2,83 +2,46 @@ package molecule.coretests.expression.equality
 
 import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.exception.Model2QueryException
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
 
-class ApplyEnum extends ApplyBase {
+class ApplyEnum extends CoreSpec {
 
-  val l1 = List("enum1")
-  val l2 = List("enum2")
-  val l3 = List("enum3")
-
-  val s1 = Set("enum1")
-  val s2 = Set("enum2")
-  val s3 = Set("enum3")
-
-  val l11 = List("enum1", "enum1")
-  val l12 = List("enum1", "enum2")
-  val l13 = List("enum1", "enum3")
-  val l23 = List("enum2", "enum3")
-
-  val s12 = Set("enum1", "enum2")
-  val s13 = Set("enum1", "enum3")
-  val s23 = Set("enum2", "enum3")
 
   "Card one" >> {
 
+    class OneSetup extends CoreSetup {
+      Ns.int.enum$ insert List(
+        (1, Some("enum1")),
+        (2, Some("enum2")),
+        (3, Some("enum3")),
+        (4, None)
+      )
+    }
+
+    // OR semantics only for card-one attributes
+
     "Mandatory" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.enum.apply("enum1").get === List("enum1")
       Ns.enum.apply("enum2").get === List("enum2")
       Ns.enum.apply("enum1", "enum2").get === List("enum2", "enum1")
 
-      // Explicit `or` semantics
+      // `or`
       Ns.enum.apply("enum1" or "enum2").get === List("enum2", "enum1")
       Ns.enum.apply("enum1" or "enum2" or "enum3").get === List("enum3", "enum2", "enum1")
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.enum.apply().get === Nil
+      Ns.enum.apply(Nil).get === Nil
       Ns.enum.apply(List("enum1")).get === List("enum1")
       Ns.enum.apply(List("enum2")).get === List("enum2")
       Ns.enum.apply(List("enum1", "enum2")).get === List("enum2", "enum1")
       Ns.enum.apply(List("enum1"), List("enum2")).get === List("enum2", "enum1")
       Ns.enum.apply(List("enum1", "enum2"), List("enum3")).get === List("enum3", "enum2", "enum1")
       Ns.enum.apply(List("enum1"), List("enum2", "enum3")).get === List("enum3", "enum2", "enum1")
-
-      // mixing Iterable types and value/variable ok
-      Ns.enum.apply(List(enum1), Set("enum2", enum3)).get === List("enum3", "enum2", "enum1")
-
-      // Iterable: Set
-      Ns.enum.apply(Set("enum1")).get === List("enum1")
-      Ns.enum.apply(Set("enum2")).get === List("enum2")
-      Ns.enum.apply(Set("enum1", "enum2")).get === List("enum2", "enum1")
-      Ns.enum.apply(Set("enum1"), Set("enum2")).get === List("enum2", "enum1")
-      Ns.enum.apply(Set("enum1", "enum2"), Set("enum3")).get === List("enum3", "enum2", "enum1")
-      Ns.enum.apply(Set("enum1"), Set("enum2", "enum3")).get === List("enum3", "enum2", "enum1")
-
-
-      // Input
-
-      val inputMolecule = m(Ns.enum(?))
-
-      inputMolecule.apply("enum1").get === List("enum1")
-      inputMolecule.apply("enum2").get === List("enum2")
-
-      // Only distinct values applied
-      inputMolecule.apply("enum1", "enum1").get === List("enum1")
-      inputMolecule.apply("enum1", "enum2").get === List("enum2", "enum1")
-
-      inputMolecule.apply(List("enum1")).get === List("enum1")
-      inputMolecule.apply(List("enum1", "enum1")).get === List("enum1")
-      inputMolecule.apply(List("enum1", "enum2")).get === List("enum2", "enum1")
-
-      inputMolecule.apply(Set("enum1")).get === List("enum1")
-      inputMolecule.apply(Set("enum1", "enum2")).get === List("enum2", "enum1")
-
-      inputMolecule.apply("enum1" or "enum1").get === List("enum1")
-      inputMolecule.apply("enum1" or "enum2").get === List("enum2", "enum1")
-      inputMolecule.apply("enum1" or "enum2" or "enum3").get === List("enum3", "enum2", "enum1")
-
+      Ns.enum.apply(List("enum1", "enum2", "enum3")).get === List("enum3", "enum2", "enum1")
 
       // Applying a non-existing enum value ("zzz") won't compile!
       expectCompileError(
@@ -101,314 +64,252 @@ class ApplyEnum extends ApplyBase {
 
     "Tacit" in new OneSetup {
 
-      // Vararg
+      // Varargs
       Ns.int.enum_.apply("enum1").get === List(1)
       Ns.int.enum_.apply("enum2").get === List(2)
       Ns.int.enum_.apply("enum1", "enum2").get === List(1, 2)
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.enum_.apply("enum1" or "enum2").get === List(1, 2)
       Ns.int.enum_.apply("enum1" or "enum2" or "enum3").get === List(1, 2, 3)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.enum_.apply().get === List(4)
+      Ns.int.enum_.apply(Nil).get === List(4)
       Ns.int.enum_.apply(List("enum1")).get === List(1)
       Ns.int.enum_.apply(List("enum2")).get === List(2)
       Ns.int.enum_.apply(List("enum1", "enum2")).get === List(1, 2)
       Ns.int.enum_.apply(List("enum1"), List("enum2")).get === List(1, 2)
       Ns.int.enum_.apply(List("enum1", "enum2"), List("enum3")).get === List(1, 2, 3)
       Ns.int.enum_.apply(List("enum1"), List("enum2", "enum3")).get === List(1, 2, 3)
-
-      // Iterable: Set
-      Ns.int.enum_.apply(Set("enum1")).get === List(1)
-      Ns.int.enum_.apply(Set("enum2")).get === List(2)
-      Ns.int.enum_.apply(Set("enum1", "enum2")).get === List(1, 2)
-      Ns.int.enum_.apply(Set("enum1"), Set("enum2")).get === List(1, 2)
-      Ns.int.enum_.apply(Set("enum1", "enum2"), Set("enum3")).get === List(1, 2, 3)
-      Ns.int.enum_.apply(Set("enum1"), Set("enum2", "enum3")).get === List(1, 2, 3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.enum_(?))
-
-      inputMolecule.apply("enum1").get === List(1)
-      inputMolecule.apply("enum2").get === List(2)
-
-      inputMolecule.apply("enum1", "enum1").get === List(1)
-      inputMolecule.apply("enum1", "enum2").get === List(1, 2)
-
-      inputMolecule.apply(List("enum1")).get === List(1)
-      inputMolecule.apply(List("enum1", "enum1")).get === List(1)
-      inputMolecule.apply(List("enum1", "enum2")).get === List(1, 2)
-
-      inputMolecule.apply(Set("enum1")).get === List(1)
-      inputMolecule.apply(Set("enum1", "enum2")).get === List(1, 2)
-
-      inputMolecule.apply("enum1" or "enum1").get === List(1)
-      inputMolecule.apply("enum1" or "enum2").get === List(1, 2)
-      inputMolecule.apply("enum1" or "enum2" or "enum3").get === List(1, 2, 3)
+      Ns.int.enum_.apply(List("enum1", "enum2", "enum3")).get === List(1, 2, 3)
     }
   }
 
 
   "Card many" >> {
 
-    "Mandatory (single attr coalesce)" in new ManySetup {
-
-      // Vararg
-      Ns.enums.apply("enum1").get === List(Set("enum1", "enum2"))
-      Ns.enums.apply("enum2").get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply("enum1", "enum2").get === List(Set("enum1", "enum3", "enum2"))
-
-      // Explicit `or` semantics
-      Ns.enums.apply("enum1" or "enum2").get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply("enum1" or "enum2" or "enum3").get === List(Set("enum1", "enum4", "enum3", "enum2"))
-
-      // Iterable: List - OR semantics
-      Ns.enums.apply(List("enum1")).get === List(Set("enum1", "enum2"))
-      Ns.enums.apply(List("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply(List("enum1", "enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply(List("enum1"), List("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply(List("enum1", "enum2"), List("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-      Ns.enums.apply(List("enum1"), List("enum2", "enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-
-      // mixing Iterable types and value/variable ok
-      Ns.enums.apply(List(enum1), Set("enum2", enum3)).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.enums.apply(Set("enum1")).get === List(Set("enum1", "enum2"))
-      Ns.enums.apply(Set("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      Ns.enums.apply(Set("enum1", "enum2")).get === List(Set("enum1", "enum2"))
-      Ns.enums.apply(Set("enum1", "enum3")).get === Nil
-      Ns.enums.apply(Set("enum2", "enum3")).get === List(Set("enum2", "enum3"))
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (m(Ns.enums.apply(Set("enum1", "enum2"), Set("enum3"))).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Enum Atom (mandatory)] Can only apply a single Set of values for enum attribute :ns.enums"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.enums(enum1 and enum2).get === List(Set(enum1, enum2))
-      Ns.enums(enum1 and enum3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.enums(?))
-
-      // AND semantics when applying "enum1" Set of values matching attribute values of "enum1" entity
-
-      inputMolecule.apply(Set("enum1")).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-
-      inputMolecule.apply(Set("enum1", "enum2")).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set("enum1", "enum3")).get === Nil
-      inputMolecule.apply(Set("enum2", "enum3")).get === List(Set("enum2", "enum3"))
-      inputMolecule.apply(Set("enum1", "enum2", "enum3")).get === Nil
-
-      inputMolecule.apply(List(Set("enum1"))).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(List(Set("enum2"))).get === List(Set("enum1", "enum3", "enum2"))
-      inputMolecule.apply(List(Set("enum1", "enum2"))).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(List(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(List(Set("enum2", "enum3"))).get === List(Set("enum2", "enum3"))
-      inputMolecule.apply(List(Set("enum1", "enum2", "enum3"))).get === Nil
-
-      inputMolecule.apply(Set(Set("enum1"))).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set(Set("enum2"))).get === List(Set("enum1", "enum3", "enum2"))
-      inputMolecule.apply(Set(Set("enum1", "enum2"))).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(Set(Set("enum2", "enum3"))).get === List(Set("enum2", "enum3"))
-      inputMolecule.apply(Set(Set("enum1", "enum2", "enum3"))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set("enum1"), Set("enum1")).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set("enum1"), Set("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      inputMolecule.apply(Set("enum1"), Set("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-      inputMolecule.apply(Set("enum2"), Set("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-      inputMolecule.apply(Set("enum1", "enum2"), Set("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
-
-      inputMolecule.apply(Set("enum1") or Set("enum1")).get === List(Set("enum1", "enum2"))
-      inputMolecule.apply(Set("enum1") or Set("enum2")).get === List(Set("enum1", "enum3", "enum2"))
-      inputMolecule.apply(Set("enum1") or Set("enum2") or Set("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
+    class ManySetup extends CoreSetup {
+      Ns.int.enums$ insert List(
+        (1, Some(Set("enum1", "enum2"))),
+        (2, Some(Set("enum2", "enum3"))),
+        (3, Some(Set("enum3", "enum4"))),
+        (4, None)
+      )
     }
 
+    "Mandatory" in new ManySetup {
 
-    "Tacit" in new ManySetup {
+      // OR semantics
 
-      // Vararg
-      Ns.int.enums_.apply("enum1").get === List(1)
-      Ns.int.enums_.apply("enum2").get === List(1, 2)
-      Ns.int.enums_.apply("enum1", "enum2").get === List(1, 2)
-
-      // Explicit `or` semantics
-      Ns.int.enums_.apply("enum1" or "enum2").get === List(1, 2)
-      Ns.int.enums_.apply("enum1" or "enum2" or "enum3").get === List(1, 2, 3)
-
-      // Iterable: List - OR semantics
-      Ns.int.enums_.apply(List("enum1")).get === List(1)
-      Ns.int.enums_.apply(List("enum2")).get === List(1, 2)
-      Ns.int.enums_.apply(List("enum1", "enum2")).get === List(1, 2)
-      Ns.int.enums_.apply(List("enum1"), List("enum2")).get === List(1, 2)
-      Ns.int.enums_.apply(List("enum1", "enum2"), List("enum3")).get === List(1, 2, 3)
-      Ns.int.enums_.apply(List("enum1"), List("enum2", "enum3")).get === List(1, 2, 3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.int.enums_.apply(List(enum1), Set("enum2", enum3)).get === List(1, 2, 3)
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.enums_.apply(Set("enum1")).get === List(1)
-      Ns.int.enums_.apply(Set("enum2")).get === List(1, 2)
-      Ns.int.enums_.apply(Set("enum1", "enum2")).get === List(1)
-      Ns.int.enums_.apply(Set("enum1", "enum3")).get === Nil
-      Ns.int.enums_.apply(Set("enum2", "enum3")).get === List(2)
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum3")).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Enum Atom_ (tacit)] Can only apply a single Set of values for enum attribute :ns.enums_"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.enums_(enum1 and enum2).get === List(1)
-      Ns.int.enums_(enum1 and enum3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.enums_(?))
-
-      // AND semantics when applying "enum1" Set of values matching attribute values of "enum1" entity
-
-      inputMolecule.apply(Set("enum1")).get === List(1)
-      inputMolecule.apply(Set("enum2")).get === List(1, 2)
-
-      inputMolecule.apply(Set("enum1", "enum2")).get === List(1)
-      inputMolecule.apply(Set("enum1", "enum3")).get === Nil
-      inputMolecule.apply(Set("enum2", "enum3")).get === List(2)
-      inputMolecule.apply(Set("enum1", "enum2", "enum3")).get === Nil
-
-      inputMolecule.apply(List(Set("enum1"))).get === List(1)
-      inputMolecule.apply(List(Set("enum2"))).get === List(1, 2)
-      inputMolecule.apply(List(Set("enum1", "enum2"))).get === List(1)
-      inputMolecule.apply(List(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(List(Set("enum2", "enum3"))).get === List(2)
-      inputMolecule.apply(List(Set("enum1", "enum2", "enum3"))).get === Nil
-
-      inputMolecule.apply(Set(Set("enum1"))).get === List(1)
-      inputMolecule.apply(Set(Set("enum2"))).get === List(1, 2)
-      inputMolecule.apply(Set(Set("enum1", "enum2"))).get === List(1)
-      inputMolecule.apply(Set(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(Set(Set("enum2", "enum3"))).get === List(2)
-      inputMolecule.apply(Set(Set("enum1", "enum2", "enum3"))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set("enum1"), Set("enum1")).get === List(1)
-      inputMolecule.apply(Set("enum1"), Set("enum2")).get === List(1, 2)
-      inputMolecule.apply(Set("enum1"), Set("enum3")).get === List(1, 2, 3)
-      inputMolecule.apply(Set("enum2"), Set("enum3")).get === List(1, 2, 3)
-      inputMolecule.apply(Set("enum1", "enum2"), Set("enum3")).get === List(1, 2, 3)
-
-      inputMolecule.apply(Set("enum1") or Set("enum1")).get === List(1)
-      inputMolecule.apply(Set("enum1") or Set("enum2")).get === List(1, 2)
-      inputMolecule.apply(Set("enum1") or Set("enum2") or Set("enum3")).get === List(1, 2, 3)
-    }
-
-
-    "Mandatory unifying by other attribute (avoiding coalesce)" in new ManySetup {
-
-      // Vararg
+      // Varargs
       Ns.int.enums.apply("enum1").get === List((1, Set("enum1", "enum2")))
       Ns.int.enums.apply("enum2").get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply("enum1", "enum2").get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.enums.apply("enum1" or "enum2").get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply("enum1" or "enum2" or "enum3").get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.enums.apply().get === Nil
+      Ns.int.enums.apply(Nil).get === Nil
       Ns.int.enums.apply(List("enum1")).get === List((1, Set("enum1", "enum2")))
       Ns.int.enums.apply(List("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply(List("enum1", "enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply(List("enum1"), List("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply(List("enum1", "enum2"), List("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
       Ns.int.enums.apply(List("enum1"), List("enum2", "enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
+      Ns.int.enums.apply(List("enum1", "enum2", "enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.enums.apply(List(enum1), Set("enum2", enum3)).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
-      Ns.int.enums.apply(l1, Set("enum2", enum3)).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
+      // AND semantics
+
+      // Set
+      Ns.int.enums.apply(Set[String]()).get === Nil // entities with no card-many values asserted can't also return values
       Ns.int.enums.apply(Set("enum1")).get === List((1, Set("enum1", "enum2")))
       Ns.int.enums.apply(Set("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
       Ns.int.enums.apply(Set("enum1", "enum2")).get === List((1, Set("enum1", "enum2")))
       Ns.int.enums.apply(Set("enum1", "enum3")).get === Nil
       Ns.int.enums.apply(Set("enum2", "enum3")).get === List((2, Set("enum2", "enum3")))
+      Ns.int.enums.apply(Set("enum1", "enum2", "enum3")).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum3")).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Enum Atom (mandatory)] Can only apply a single Set of values for enum attribute :ns.enums"
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set[String]()).get === List((1, Set("enum1", "enum2")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum4")).get === List((1, Set("enum1", "enum2")), (3, Set("enum3", "enum4")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum2"), Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.enums(enum1 and enum2).get === List((1, Set(enum1, enum2)))
-      Ns.int.enums(enum1 and enum3).get === Nil
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum2", "enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum2", "enum4")).get === List((1, Set("enum1", "enum2")))
+      Ns.int.enums.apply(Set("enum1", "enum2"), Set("enum3", "enum4")).get === List((1, Set("enum1", "enum2")), (3, Set("enum3", "enum4")))
 
-
-      // Input
-
-      val inputMolecule = m(Ns.int.enums(?))
-
-      // AND semantics when applying "enum1" Set of values matching attribute values of "enum1" entity
-
-      inputMolecule.apply(Set("enum1")).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
-
-      inputMolecule.apply(Set("enum1", "enum2")).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set("enum1", "enum3")).get === Nil
-      inputMolecule.apply(Set("enum2", "enum3")).get === List((2, Set("enum2", "enum3")))
-      inputMolecule.apply(Set("enum1", "enum2", "enum3")).get === Nil
-
-      inputMolecule.apply(List(Set("enum1"))).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(List(Set("enum2"))).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
-      inputMolecule.apply(List(Set("enum1", "enum2"))).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(List(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(List(Set("enum2", "enum3"))).get === List((2, Set("enum2", "enum3")))
-      inputMolecule.apply(List(Set("enum1", "enum2", "enum3"))).get === Nil
-
-      inputMolecule.apply(Set(Set("enum1"))).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set(Set("enum2"))).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
-      inputMolecule.apply(Set(Set("enum1", "enum2"))).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set(Set("enum1", "enum3"))).get === Nil
-      inputMolecule.apply(Set(Set("enum2", "enum3"))).get === List((2, Set("enum2", "enum3")))
-      inputMolecule.apply(Set(Set("enum1", "enum2", "enum3"))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set("enum1"), Set("enum1")).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set("enum1"), Set("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
-      inputMolecule.apply(Set("enum1"), Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
-      inputMolecule.apply(Set("enum2"), Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
-      inputMolecule.apply(Set("enum1", "enum2"), Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
-
-      inputMolecule.apply(Set("enum1") or Set("enum1")).get === List((1, Set("enum1", "enum2")))
-      inputMolecule.apply(Set("enum1") or Set("enum2")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")))
-      inputMolecule.apply(Set("enum1") or Set("enum2") or Set("enum3")).get === List((1, Set("enum1", "enum2")), (2, Set("enum2", "enum3")), (3, Set("enum3", "enum4")))
+      // `and`
+      Ns.int.enums.apply("enum1" and "enum2").get === List((1, Set("enum1", "enum2")))
+      Ns.int.enums.apply("enum1" and "enum3").get === Nil
     }
-  }
 
 
-  "Variable resolution" in new OneSetup {
+    "Mandatory, single attr coalesce" in new ManySetup {
 
-    Ns.enum.apply(enum1, enum2).get === List("enum2", "enum1")
+      // OR semantics
 
-    Ns.enum.apply(List(enum1, enum2), List(enum3)).get === List("enum3", "enum2", "enum1")
-    Ns.enum.apply(l12, l3).get === List("enum3", "enum2", "enum1")
+      // Varargs
+      Ns.enums.apply("enum1").get === List(Set("enum1", "enum2"))
+      Ns.enums.apply("enum2").get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply("enum1", "enum2").get === List(Set("enum1", "enum3", "enum2"))
 
-    Ns.enum.apply(Set(enum1, enum2), Set(enum3)).get === List("enum3", "enum2", "enum1")
-    Ns.enum.apply(s12, s3).get === List("enum3", "enum2", "enum1")
+      // `or`
+      Ns.enums.apply("enum1" or "enum2").get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply("enum1" or "enum2" or "enum3").get === List(Set("enum1", "enum4", "enum3", "enum2"))
+
+      // Seq
+      Ns.enums.apply().get === Nil
+      Ns.enums.apply(Nil).get === Nil
+      Ns.enums.apply(List("enum1")).get === List(Set("enum1", "enum2"))
+      Ns.enums.apply(List("enum2")).get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply(List("enum1", "enum2")).get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply(List("enum1"), List("enum2")).get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply(List("enum1", "enum2"), List("enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
+      Ns.enums.apply(List("enum1"), List("enum2", "enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
+      Ns.enums.apply(List("enum1", "enum2", "enum3")).get === List(Set("enum1", "enum4", "enum3", "enum2"))
+
+
+      // AND semantics
+
+      // Set
+      Ns.enums.apply(Set[String]()).get === Nil // entities with no card-many values asserted can't also return values
+      Ns.enums.apply(Set("enum1")).get === List(Set("enum1", "enum2"))
+      Ns.enums.apply(Set("enum2")).get === List(Set("enum1", "enum3", "enum2"))
+      Ns.enums.apply(Set("enum1", "enum2")).get === List(Set("enum1", "enum2"))
+      Ns.enums.apply(Set("enum1", "enum3")).get === Nil
+      Ns.enums.apply(Set("enum2", "enum3")).get === List(Set("enum2", "enum3"))
+      Ns.enums.apply(Set("enum1", "enum2", "enum3")).get === Nil
+
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum2")).get === List(Set("enum1", "enum2", "enum3"))
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum3")).get === List(Set("enum1", "enum2", "enum3", "enum4"))
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum4")).get === List(Set("enum1", "enum2", "enum3", "enum4"))
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum2"), Set("enum3")).get === List(Set("enum1", "enum2", "enum3", "enum4"))
+
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum2", "enum3")).get === List(Set("enum1", "enum2", "enum3"))
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum2", "enum4")).get === List(Set("enum1", "enum2"))
+      Ns.enums.apply(Set("enum1", "enum2"), Set("enum3", "enum4")).get === List(Set("enum1", "enum2", "enum3", "enum4"))
+
+
+      // Explicit `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.enums.apply("enum1" and "enum2").get === List(Set("enum1", "enum2"))
+      Ns.enums.apply("enum1" and "enum3").get === Nil
+    }
+
+
+    "Tacit" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
+      Ns.int.enums_.apply("enum1").get === List(1)
+      Ns.int.enums_.apply("enum2").get === List(1, 2)
+      Ns.int.enums_.apply("enum1", "enum2").get === List(1, 2)
+
+      // `or`
+      Ns.int.enums_.apply("enum1" or "enum2").get === List(1, 2)
+      Ns.int.enums_.apply("enum1" or "enum2" or "enum3").get === List(1, 2, 3)
+
+      // Seq
+      Ns.int.enums_.apply().get === List(4) // entities with no card-many values asserted
+      Ns.int.enums_.apply(Nil).get === List(4)
+      Ns.int.enums_.apply(List("enum1")).get === List(1)
+      Ns.int.enums_.apply(List("enum2")).get === List(1, 2)
+      Ns.int.enums_.apply(List("enum1", "enum2")).get === List(1, 2)
+      Ns.int.enums_.apply(List("enum1"), List("enum2")).get === List(1, 2)
+      Ns.int.enums_.apply(List("enum1", "enum2"), List("enum3")).get === List(1, 2, 3)
+      Ns.int.enums_.apply(List("enum1"), List("enum2", "enum3")).get === List(1, 2, 3)
+      Ns.int.enums_.apply(List("enum1", "enum2", "enum3")).get === List(1, 2, 3)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.enums_.apply(Set[String]()).get === List(4)
+      Ns.int.enums_.apply(Set("enum1")).get === List(1)
+      Ns.int.enums_.apply(Set("enum2")).get === List(1, 2)
+      Ns.int.enums_.apply(Set("enum1", "enum2")).get === List(1)
+      Ns.int.enums_.apply(Set("enum1", "enum3")).get === Nil
+      Ns.int.enums_.apply(Set("enum2", "enum3")).get === List(2)
+      Ns.int.enums_.apply(Set("enum1", "enum2", "enum3")).get === Nil
+
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum2")).get === List(1, 2)
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum3")).get === List(1, 2, 3)
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum4")).get === List(1, 3)
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum2"), Set("enum3")).get === List(1, 2, 3)
+
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum2", "enum3")).get === List(1, 2)
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum2", "enum4")).get === List(1)
+      Ns.int.enums_.apply(Set("enum1", "enum2"), Set("enum3", "enum4")).get === List(1, 3)
+
+
+      // `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.enums_.apply("enum1" and "enum2").get === List(1)
+      Ns.int.enums_.apply("enum1" and "enum3").get === Nil
+    }
+
+
+    "Variable resolution" in new ManySetup {
+
+      val seq0 = Nil
+      val set0 = Set[String]()
+
+      val l1 = List(enum1)
+      val l2 = List(enum2)
+
+      val s1 = Set(enum1)
+      val s2 = Set(enum2)
+
+      val l12 = List(enum1, enum2)
+      val l23 = List(enum2, enum3)
+
+      val s12 = Set(enum1, enum2)
+      val s23 = Set(enum2, enum3)
+
+
+      // OR semantics
+
+      // Vararg
+      Ns.int.enums_.apply(enum1, enum2).get === List(1, 2)
+
+      // `or`
+      Ns.int.enums_.apply(enum1 or enum2).get === List(1, 2)
+
+      // Seq
+      Ns.int.enums_.apply(seq0).get === List(4)
+      Ns.int.enums_.apply(List(enum1), List(enum2)).get === List(1, 2)
+      Ns.int.enums_.apply(l1, l2).get === List(1, 2)
+      Ns.int.enums_.apply(List(enum1, enum2)).get === List(1, 2)
+      Ns.int.enums_.apply(l12).get === List(1, 2)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.enums_.apply(set0).get === List(4)
+
+      Ns.int.enums_.apply(Set(enum1)).get === List(1)
+      Ns.int.enums_.apply(s1).get === List(1)
+
+      Ns.int.enums_.apply(Set(enum2)).get === List(1, 2)
+      Ns.int.enums_.apply(s2).get === List(1, 2)
+
+      Ns.int.enums_.apply(Set(enum1, enum2)).get === List(1)
+      Ns.int.enums_.apply(s12).get === List(1)
+
+      Ns.int.enums_.apply(Set(enum2, enum3)).get === List(2)
+      Ns.int.enums_.apply(s23).get === List(2)
+
+      Ns.int.enums_.apply(Set(enum1, enum2), Set(enum2, enum3)).get === List(1, 2)
+      Ns.int.enums_.apply(s12, s23).get === List(1, 2)
+
+      // `and`
+      Ns.int.enums_.apply(enum1 and enum2).get === List(1)
+    }
   }
 }

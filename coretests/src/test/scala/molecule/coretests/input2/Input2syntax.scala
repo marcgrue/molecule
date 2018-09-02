@@ -1,14 +1,12 @@
-package molecule.coretests.input
+package molecule.coretests.input2
 
-import datomic.Peer
 import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.{InputMoleculeException, InputMolecule_2_Exception}
-import molecule.transform.exception.Model2QueryException
 
 
-class Input2 extends CoreSpec {
+class Input2syntax extends CoreSpec {
 
 
   "Card one + one" >> {
@@ -58,7 +56,7 @@ class Input2 extends CoreSpec {
       // Match any combination of first and second values
 
 
-      // Explicit `and` semantics between 2 logical groups, respectively matching each input attribute
+      // Explicit `and` semantics between 2 logical groups, respectively matching each input attribute independently
       // Each group matches value1 `or` value2 `or` etc..
 
       personOfAgeAndStatus.apply(28 and 5L).get === List("Ben")
@@ -178,7 +176,7 @@ class Input2 extends CoreSpec {
       // Compare functions expects only one argument, so multiple input pairs are not allowed
       (inputExpression.apply((1, 2L), (1, 3L)).get must throwA[InputMolecule_2_Exception])
         .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
-        "Can't apply multiple pairs to input molecule with one or more comparison functions (each expecting a single comparison value)."
+        "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
     }
   }
 
@@ -256,44 +254,37 @@ class Input2 extends CoreSpec {
     }
 
 
-    "2 groups" in new OneManySetup {
+    "Groups" in new OneManySetup {
 
       // Explicit `and` semantics between 2 logical groups, respectively matching each input attribute
       // Each group matches value1 `or` value2 `or` etc..
 
-      //      inputMolecule.apply(1L and Set[Int]()).get === List("e")
-
       inputMolecule.apply(1L and Set(1)).get === List("a")
 
-      inputMolecule.apply(1L and Set(1, 2)).get === List("a", "b")
+      inputMolecule.apply(1L and Set(1, 2)).get === List("a")
       inputMolecule.apply(1L and (Set(1) or Set(2))).get === List("a", "b")
 
-      inputMolecule.apply(1L and Set(1, 2, 3)).get === List("a", "b", "c", "d")
+      inputMolecule.apply(1L and Set(1, 2, 3)).get === Nil
       inputMolecule.apply(1L and (Set(1, 2) or Set(3))).get === List("a", "b", "c", "d")
-      inputMolecule.apply(1L and (Set(1) or Set(2, 3))).get === List("a", "b", "c", "d")
+      inputMolecule.apply(1L and (Set(1) or Set(2, 3))).get === List("a", "b")
       inputMolecule.apply(1L and (Set(1) or Set(2) or Set(3))).get === List("a", "b", "c", "d")
 
 
-      //      inputMolecule.apply((1L or 2L) and Set[Int]()).get === List("e", "j")
-
       inputMolecule.apply((1L or 2L) and Set(1)).get === List("a", "f")
 
-      inputMolecule.apply((1L or 2L) and Set(1, 2)).get === List("a", "b", "f", "g")
+      inputMolecule.apply((1L or 2L) and Set(1, 2)).get === List("a", "f")
       inputMolecule.apply((1L or 2L) and (Set(1) or Set(2))).get === List("a", "b", "f", "g")
 
-      inputMolecule.apply((1L or 2L) and Set(1, 2, 3)).get === List("a", "b", "c", "d", "f", "g", "h", "i")
+      inputMolecule.apply((1L or 2L) and Set(1, 2, 3)).get === Nil
       inputMolecule.apply((1L or 2L) and (Set(1, 2) or Set(3))).get === List("a", "b", "c", "d", "f", "g", "h", "i")
-      inputMolecule.apply((1L or 2L) and (Set(1) or Set(2, 3))).get === List("a", "b", "c", "d", "f", "g", "h", "i")
+      inputMolecule.apply((1L or 2L) and (Set(1) or Set(2, 3))).get === List("a", "b", "f", "g")
       inputMolecule.apply((1L or 2L) and (Set(1) or Set(2) or Set(3))).get === List("a", "b", "c", "d", "f", "g", "h", "i")
 
 
       // 2 lists of values, respectively matching each input attribute
 
-      //      inputMolecule.apply(Seq(1L), Seq(Set[Int]())).get === List("a")
-
       inputMolecule.apply(Seq(1L), Seq(Set(1))).get === List("a")
-      inputMolecule.apply(Seq(1L), Seq(Set(1, 2))).get === List("a", "b")
-
+      inputMolecule.apply(Seq(1L), Seq(Set(1, 2))).get === List("a")
 
       // Nil matches non-asserted attributes
       inputMolecule.apply(Seq(1L), Nil).get === List("e")
@@ -316,11 +307,11 @@ class Input2 extends CoreSpec {
 
       (inputExpression.apply(2L, Set(1, 2)).get must throwA[InputMoleculeException])
         .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
-        "Can only apply 1 cardinality-many value to a comparison function. Got: Set(1, 2)"
+        "Can't apply multiple values to comparison function."
 
       (inputExpression.apply((1L, Set(1)), (2L, Set(2))).get must throwA[InputMolecule_2_Exception])
         .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
-        "Can't apply multiple pairs to input molecule with one or more comparison functions (each expecting a single comparison value)."
+        "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
 
       // Mixing comparison/equality
@@ -330,63 +321,4 @@ class Input2 extends CoreSpec {
       inputExpression2.apply(1L, Set(1, 2)).get === List("a", "f")
     }
   }
-
-  //  "Card-many" >> {
-  //
-  //    class ManySetup extends CoreSetup {
-  //
-  //      Ns.str.ints$.longs$ insert List(
-  //        ("a", Some(Set(1, 2)), Some(Set(1L, 2L))),
-  //        ("b", Some(Set(2, 3)), Some(Set(2L, 3L))),
-  //        ("c", Some(Set(3, 4)), Some(Set(3L, 4L))),
-  //        ("d", Some(Set(4, 5)), Some(Set(4L, 5L))),
-  //        ("e", Some(Set(5, 6)), None),
-  //        ("f", None, Some(Set(5, 6L))),
-  //        ("g", None, None)
-  //      )
-  //
-  //      val inputMolecule = m(Ns.str.ints_(?).longs_(?))
-  //    }
-  //
-  //    "Pairs" in new ManySetup {
-  //
-  //      // Match specific pairs of input
-  //
-  //      // 0 pairs match nothing
-  //      inputMolecule.apply(Nil).get === List("g")
-  //
-  //      // 1 Pair
-  //
-  //      inputMolecule.apply(Set(1), Set(1L)).get === List("a")
-  //      inputMolecule.apply(Set(1), Set(2L)).get === List("a", "b")
-  //      inputMolecule.apply(Set(2), Set(1L)).get === List("a")
-  //      inputMolecule.apply(Set(2), Set(2L)).get === List("a", "b")
-  //
-  //      inputMolecule.apply(Set(1), Set(1L, 2L)).get === List("a")
-  //      inputMolecule.apply(Set(2), Set(1L, 2L)).get === List("a", "b")
-  //      inputMolecule.apply(Set(1, 2), Set(1L)).get === List("a")
-  //      inputMolecule.apply(Set(1, 2), Set(2L)).get === List("a", "b")
-  //      inputMolecule.apply(Set(1, 2), Set(1L, 2L)).get === List("a", "b")
-  //
-  ////      inputMolecule.apply(Set(1), Set(2L)).get === List("a")
-  ////      inputMolecule.apply(Set(2), Set(2L)).get === List("a", "b")
-  ////
-  ////      inputMolecule.apply((37, 5L)).get === List("Ann")
-  ////      inputMolecule.apply(Seq((37, 5L))).get === List("Ann")
-  ////
-  ////      // 2 pairs
-  ////      inputMolecule.apply((37, 5L), (28, 5L)).get.sorted === List("Ann", "Ben")
-  ////      inputMolecule.apply(Seq((37, 5L), (28, 5L))).get.sorted === List("Ann", "Ben")
-  ////      inputMolecule.apply((37 and 5L) or (28 and 5L)).get.sorted === List("Ann", "Ben")
-  ////
-  ////      // 3 pairs
-  ////      inputMolecule.apply((37, 5L), (28, 5L), (28, 4L)).get.sorted === List("Ann", "Ben", "Joe")
-  ////      inputMolecule.apply(Seq((37, 5L), (28, 5L), (28, 4L))).get.sorted === List("Ann", "Ben", "Joe")
-  ////      inputMolecule.apply((37 and 5L) or (28 and 5L) or (28 and 4L)).get.sorted === List("Ann", "Ben", "Joe")
-  //
-  //      // etc..
-  //
-  //      ok
-  //    }
-  //  }
 }

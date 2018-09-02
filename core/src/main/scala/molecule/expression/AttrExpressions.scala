@@ -229,7 +229,7 @@ object AttrExpressions {
       * @param moreValues Optional additional Iterables of attribute values to be matched
       * @return Filtered molecule
       */
-    def apply(values: Iterable[T], moreValues: Iterable[T]*): Ns with Attr = ???
+    def apply(values: Seq[T], moreValues: Seq[T]*): Ns with Attr = ???
 
 
     /** Mark tacit attribute to be unified in self-join.
@@ -289,7 +289,7 @@ object AttrExpressions {
       * @param values Iterable of negated attribute values
       * @return Filtered molecule
       */
-    def not(values: Iterable[T]): Ns with Attr = ???
+    def not(values: Seq[T]): Ns with Attr = ???
 
 
     /** Match attribute values different from one or more applied values.
@@ -310,7 +310,7 @@ object AttrExpressions {
       * @param moreValues Optional additional negated attribute values
       * @return Filtered molecule
       */
-    def !=(value: T, moreValues: T*): Ns with Attr = ???
+    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
 
     /** Match attribute values different from applied value.
       * {{{
@@ -343,7 +343,7 @@ object AttrExpressions {
       * @param values Iterable of negated attribute values
       * @return Filtered molecule
       */
-    def !=(values: Iterable[T]): Ns with Attr = ???
+    def !=(values: Seq[T]): Ns with Attr = ???
   }
 
 
@@ -709,11 +709,25 @@ object AttrExpressions {
     def apply(expr3: Exp3[T, T, T]): Ns with Attr = ???
   }
 
+
   /** Expression methods of card-one attributes. */
   trait OneExpr[Ns, In, T] extends ValueAttrExpr[Ns, In, T]
 
+
   /** Expression methods of card-many attributes. */
-  trait ManyExpr[Ns, In, T] extends ValueAttrExpr[Ns, In, T] with ManyAttrExpr[Ns, T, (T, T), T]
+  trait ManyExpr[Ns, In, T] extends ValueAttrExpr[Ns, In, T] with ManyAttrExpr[Ns, T, (T, T), T] {
+
+    def apply(set: Set[T], moreSets: Set[T]*): Ns with Attr = ???
+
+    def not(set: Set[T]): Ns with Attr = ???
+    def not(set: Set[T], set2: Set[T], moreSets: Set[T]*): Ns with Attr = ???
+    def not(sets: Seq[Set[T]])             : Ns with Attr = ???
+
+    def !=(set: Set[T]): Ns with Attr = ???
+    def !=(set: Set[T], set2: Set[T], moreSets: Set[T]*): Ns with Attr = ???
+    def !=(sets: Seq[Set[T]])             : Ns with Attr = ???
+  }
+
 
   /** Expression methods of map attributes. */
   trait MapAttrExpr[Ns, In, T] extends ValueAttrExpr[Ns, In, T] with ManyAttrExpr[Ns, (String, T), (String, T), String] {

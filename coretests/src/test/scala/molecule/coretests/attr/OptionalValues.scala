@@ -320,15 +320,6 @@ class OptionalValues extends CoreSpec {
   }
 
 
-//  "No attributes at all" in new CoreSetup {
-//    expectCompileError(
-//      "m(Ns)",
-//      """
-//        |[Dsl2Model:dslStructure] Unexpected DSL structure: molecule.coretests.util.dsl.coreTest.Ns
-//        |Select(Select(Select(Select(Select(Ident(molecule), molecule.coretests), molecule.coretests.util), molecule.coretests.util.dsl), molecule.coretests.util.dsl.coreTest), molecule.coretests.util.dsl.coreTest.Ns)
-//      """)
-//  }
-
   "Ns without attribute" in new CoreSetup {
     Ns.str.Ref1.int1 insert List(
       ("a", 1),
@@ -374,19 +365,6 @@ class OptionalValues extends CoreSpec {
       "m(Ns.str$.int$)",
       "[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
   }
-
-
-//  "Only tacit attributes" in new CoreSetup {
-//
-//    // Queries with only tacit attributes not allowed
-//    expectCompileError(
-//      "m(Ns.str_).get",
-//      "value get is not a member of molecule.action.MoleculeOut.Molecule00 with Util")
-//
-//    expectCompileError(
-//      "m(Ns.str_.Ref1.int1_).get",
-//      "value get is not a member of molecule.action.MoleculeOut.Molecule00 with Util")
-//  }
 
 
   "Apply optional value" in new CoreSetup {

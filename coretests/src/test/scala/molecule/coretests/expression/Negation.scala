@@ -5,13 +5,14 @@ import java.util.Date
 import java.util.UUID._
 import java.net.URI
 import datomic.Peer
+import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
 import molecule.util.expectCompileError
 
 class Negation extends Base {
 
 
-  "Exclude 1 or more card one values" in new OneSetup {
+  "Card one" in new OneSetup {
 
     Ns.str.not("").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
     Ns.str.not(" ").get.sorted === List("", ",", ".", "?", "A", "B", "a", "b")
@@ -55,7 +56,7 @@ class Negation extends Base {
     Ns.int.not(int1).get.sorted === List(-2, -1, 0, 2)
     Ns.int.not(int1, int2).get.sorted === List(-2, -1, 0)
     Ns.int.not(Seq(int1, int2)).get.sorted === List(-2, -1, 0)
-    val ints = Seq(int1, int2)
+    val enums = Seq(int1, int2)
     Ns.int.not(ints).get.sorted === List(-2, -1, 0)
 
     // Same as
@@ -159,10 +160,10 @@ class Negation extends Base {
   }
 
 
-  "Exclude 1 or more card many values" in new ManySetup {
+  "Card many - coalesce 1 attr" in new ManySetup {
 
-    // Negation of a cardinality-many attribute value is rather useless since it
-    // will just return the coalesced set minus the excluded value
+    // Negation of a single cardinality-many attribute value is rather useless since it
+    // will just return the coalesced set of values minus the excluded value
     Ns.strs.not("b").get === List(Set("d", "a", "ba", "c"))
 
     // We could group by another attribute but that still leave us with filtered sets
@@ -176,5 +177,426 @@ class Negation extends Base {
     Ns.str.strs.get.filterNot(_._2.contains("b")) === List(("str3", Set("d", "ba")))
     Ns.str.strs.get.filterNot(_._2.contains("c")) === List(("str1", Set("a", "b")), ("str3", Set("d", "ba")))
     Ns.str.strs.get.filterNot(_._2.contains("d")) === List(("str1", Set("a", "b")), ("str2", Set("b", "c")))
+  }
+
+
+  "Card many" in new CoreSetup {
+
+    val all = List(
+      (1, Set(1, 2, 3)),
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+    Ns.int.ints insert all
+
+    Ns.int.ints.not(Nil).get === all
+    Ns.int.ints.not(Set[Int]()).get === all
+
+    Ns.int.ints.not(1).get === List(
+      (1, Set(2, 3)),
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+    // Same as
+    Ns.int.ints.not(List(1)).get === List(
+      (1, Set(2, 3)),
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+    // Set semantics omit the whole set with one or more matching values
+    Ns.int.ints.not(Set(1)).get === List(
+      // (1, Set(1, 2, 3)),  // 1 match
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+    // Same as
+    Ns.int.ints.not(List(Set(1))).get === List(
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+    Ns.int.ints.not(2).get === List(
+      (1, Set(1, 3)),
+      (2, Set(3, 4)),
+      (3, Set(3, 4, 5))
+    )
+    Ns.int.ints.not(Set(2)).get === List(
+      // (1, Set(1, 2, 3)),  // 2 match
+      // (2, Set(2, 3, 4)),  // 2 match
+      (3, Set(3, 4, 5))
+    )
+
+    Ns.int.ints.not(3).get === List(
+      (1, Set(1, 2)),
+      (2, Set(4, 2)),
+      (3, Set(4, 5))
+    )
+    Ns.int.ints.not(Set(3)).get === Nil // 3 match all
+
+
+    Ns.int.ints.not(1, 2).get === List(
+      (1, Set(3)),
+      (2, Set(3, 4)),
+      (3, Set(3, 4, 5))
+    )
+    // Same as
+    Ns.int.ints.not(List(1, 2)).get === List(
+      (1, Set(3)),
+      (2, Set(3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+    Ns.int.ints.not(Set(1), Set(2)).get === List(
+      // (1, Set(1, 2, 3)),  // 1 match, 2 match
+      // (2, Set(2, 3, 4)),  // 2 match
+      (3, Set(3, 4, 5))
+    )
+    // Multiple values in a Set matches matches set-wise
+    Ns.int.ints.not(Set(1, 2)).get === List(
+      // (1, Set(1, 2, 3)),  // 1 AND 2 match
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+
+    Ns.int.ints.not(1, 3).get === List(
+      (1, Set(2)),
+      (2, Set(2, 4)),
+      (3, Set(4, 5))
+    )
+    Ns.int.ints.not(Set(1), Set(3)).get === Nil // 3 match all
+    Ns.int.ints.not(Set(1, 3)).get === List(
+      // (1, Set(1, 2, 3)),  // 1 AND 3 match
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+
+    Ns.int.ints.not(1, 2, 3).get === List(
+      // (1, Set(1, 2, 3)),  // 1 match, 2 match, 3 match
+      (2, Set(4)),
+      (3, Set(4, 5))
+    )
+    Ns.int.ints.not(Set(1), Set(2), Set(3)).get === Nil // 3 match all
+    Ns.int.ints.not(Set(1, 2, 3)).get === List(
+      // (1, Set(1, 2, 3)),  // 1 AND 2 AND 3 match
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+
+
+    Ns.int.ints.not(Set(1, 2), Set(1)).get === List(
+      (2, Set(2, 3, 4)),
+      (3, Set(3, 4, 5))
+    )
+    Ns.int.ints.not(Set(1, 2), Set(2)).get === List(
+      (3, Set(3, 4, 5))
+    )
+    Ns.int.ints.not(Set(1, 2), Set(3)).get === Nil
+    Ns.int.ints.not(Set(1, 2), Set(4)).get === Nil
+    Ns.int.ints.not(Set(1, 2), Set(5)).get === List(
+      (2, Set(2, 3, 4)),
+    )
+
+    Ns.int.ints.not(Set(1, 2), Set(2, 3)).get === List(
+      (3, Set(3, 4, 5))
+    )
+    Ns.int.ints.not(Set(1, 2), Set(4, 5)).get === List(
+      (2, Set(2, 3, 4))
+    )
+
+
+    // Variables/values can be mixed
+
+    val l2 = List((2, Set(2, 3, 4)))
+
+    Ns.int.ints.not(Set(1, 2), Set(4, 5)).get === l2
+    Ns.int.ints.not(Set(1, int2), Set(int4, 5)).get === l2
+
+    val set45 = Set(4, 5)
+    Ns.int.ints.not(Set(1, int2), set45).get === l2
+
+    // Seq of Sets
+    Ns.int.ints.not(List(Set(1, int2), set45)).get === l2
+
+    val sets = List(Set(1, int2), set45)
+    Ns.int.ints.not(sets).get === l2
+  }
+
+
+  "Card many, enum" in new CoreSetup {
+
+    val all = List(
+      (1, Set("enum1", "enum2", "enum3")),
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+    Ns.int.enums insert all
+
+    Ns.int.enums.not(Nil).get === all
+    Ns.int.enums.not(Set[String]()).get === all
+
+    Ns.int.enums.not("enum1").get === List(
+      (1, Set("enum2", "enum3")),
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    // Same as
+    Ns.int.enums.not(List("enum1")).get === List(
+      (1, Set("enum2", "enum3")),
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+    // Set semantics omit the whole set with one or more matching values
+    Ns.int.enums.not(Set("enum1")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" match
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    // Same as
+    Ns.int.enums.not(List(Set("enum1"))).get === List(
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+    Ns.int.enums.not("enum2").get === List(
+      (1, Set("enum1", "enum3")),
+      (2, Set("enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum2")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum2" match
+      // (2, Set("enum2", "enum3", "enum4")),  // "enum2" match
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+    Ns.int.enums.not("enum3").get === List(
+      (1, Set("enum1", "enum2")),
+      (2, Set("enum4", "enum2")),
+      (3, Set("enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum3")).get === Nil // "enum3" match all
+
+
+    Ns.int.enums.not("enum1", "enum2").get === List(
+      (1, Set("enum3")),
+      (2, Set("enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    // Same as
+    Ns.int.enums.not(List("enum1", "enum2")).get === List(
+      (1, Set("enum3")),
+      (2, Set("enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+    Ns.int.enums.not(Set("enum1"), Set("enum2")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" match, "enum2" match
+      // (2, Set("enum2", "enum3", "enum4")),  // "enum2" match
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    // Multiple values in a Set matches matches set-wise
+    Ns.int.enums.not(Set("enum1", "enum2")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" AND "enum2" match
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+
+    Ns.int.enums.not("enum1", "enum3").get === List(
+      (1, Set("enum2")),
+      (2, Set("enum2", "enum4")),
+      (3, Set("enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum1"), Set("enum3")).get === Nil // "enum3" match all
+    Ns.int.enums.not(Set("enum1", "enum3")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" AND "enum3" match
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+
+    Ns.int.enums.not("enum1", "enum2", "enum3").get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" match, "enum2" match, "enum3" match
+      (2, Set("enum4")),
+      (3, Set("enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum1"), Set("enum2"), Set("enum3")).get === Nil // "enum3" match all
+    Ns.int.enums.not(Set("enum1", "enum2", "enum3")).get === List(
+      // (1, Set("enum1", "enum2", "enum3")),  // "enum1" AND "enum2" AND "enum3" match
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+
+
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum1")).get === List(
+      (2, Set("enum2", "enum3", "enum4")),
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum2")).get === List(
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum3")).get === Nil
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum4")).get === Nil
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum5")).get === List(
+      (2, Set("enum2", "enum3", "enum4")),
+    )
+
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum2", "enum3")).get === List(
+      (3, Set("enum3", "enum4", "enum5"))
+    )
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum4", "enum5")).get === List(
+      (2, Set("enum2", "enum3", "enum4"))
+    )
+
+
+    // Variables/values can be mixed
+
+    val l2 = List((2, Set("enum2", "enum3", "enum4")))
+
+    Ns.int.enums.not(Set("enum1", "enum2"), Set("enum4", "enum5")).get === l2
+    Ns.int.enums.not(Set("enum1", enum2), Set(enum4, "enum5")).get === l2
+
+    val set45 = Set("enum4", "enum5")
+    Ns.int.enums.not(Set("enum1", enum2), set45).get === l2
+
+    // Seq of Sets
+    Ns.int.enums.not(List(Set("enum1", enum2), set45)).get === l2
+
+    val sets = List(Set("enum1", enum2), set45)
+    Ns.int.enums.not(sets).get === l2
+  }
+
+
+  "Card many, uri" in new CoreSetup {
+
+    val all = List(
+      (1, Set(uri1, uri2, uri3)),
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+    Ns.int.uris insert all
+
+    Ns.int.uris.not(Nil).get === all
+    Ns.int.uris.not(Set[URI]()).get === all
+
+    Ns.int.uris.not(uri1).get === List(
+      (1, Set(uri2, uri3)),
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+    // Same as
+    Ns.int.uris.not(List(uri1)).get === List(
+      (1, Set(uri2, uri3)),
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+    // Set semantics omit the whole set with one or more matching values
+    Ns.int.uris.not(Set(uri1)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 match
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+    // Same as
+    Ns.int.uris.not(List(Set(uri1))).get === List(
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+    Ns.int.uris.not(uri2).get === List(
+      (1, Set(uri1, uri3)),
+      (2, Set(uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri2)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri2 match
+      // (2, Set(uri2, uri3, uri4)),  // uri2 match
+      (3, Set(uri3, uri4, uri5))
+    )
+
+    Ns.int.uris.not(uri3).get === List(
+      (1, Set(uri1, uri2)),
+      (2, Set(uri4, uri2)),
+      (3, Set(uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri3)).get === Nil // uri3 match all
+
+
+    Ns.int.uris.not(uri1, uri2).get === List(
+      (1, Set(uri3)),
+      (2, Set(uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+    // Same as
+    Ns.int.uris.not(List(uri1, uri2)).get === List(
+      (1, Set(uri3)),
+      (2, Set(uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+    Ns.int.uris.not(Set(uri1), Set(uri2)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 match, uri2 match
+      // (2, Set(uri2, uri3, uri4)),  // uri2 match
+      (3, Set(uri3, uri4, uri5))
+    )
+    // Multiple values in a Set matches matches set-wise
+    Ns.int.uris.not(Set(uri1, uri2)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 AND uri2 match
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+
+    Ns.int.uris.not(uri1, uri3).get === List(
+      (1, Set(uri2)),
+      (2, Set(uri2, uri4)),
+      (3, Set(uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri1), Set(uri3)).get === Nil // uri3 match all
+    Ns.int.uris.not(Set(uri1, uri3)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 AND uri3 match
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+
+    Ns.int.uris.not(uri1, uri2, uri3).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 match, uri2 match, uri3 match
+      (2, Set(uri4)),
+      (3, Set(uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri1), Set(uri2), Set(uri3)).get === Nil // uri3 match all
+    Ns.int.uris.not(Set(uri1, uri2, uri3)).get === List(
+      // (1, Set(uri1, uri2, uri3)),  // uri1 AND uri2 AND uri3 match
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+
+
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri1)).get === List(
+      (2, Set(uri2, uri3, uri4)),
+      (3, Set(uri3, uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri2)).get === List(
+      (3, Set(uri3, uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri3)).get === Nil
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri4)).get === Nil
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri5)).get === List(
+      (2, Set(uri2, uri3, uri4)),
+    )
+
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri2, uri3)).get === List(
+      (3, Set(uri3, uri4, uri5))
+    )
+    Ns.int.uris.not(Set(uri1, uri2), Set(uri4, uri5)).get === List(
+      (2, Set(uri2, uri3, uri4))
+    )
   }
 }

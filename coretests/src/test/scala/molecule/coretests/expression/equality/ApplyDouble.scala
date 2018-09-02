@@ -1,395 +1,297 @@
 package molecule.coretests.expression.equality
 
 import molecule.api._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.exception.Model2QueryException
 
-class ApplyDouble extends ApplyBase {
+class ApplyDouble extends CoreSpec {
 
-  val l1 = List(1.0)
-  val l2 = List(2.0)
-  val l3 = List(3.0)
-
-  val s1 = Set(1.0)
-  val s2 = Set(2.0)
-  val s3 = Set(3.0)
-
-  val l11 = List(1.0, 1.0)
-  val l12 = List(1.0, 2.0)
-  val l13 = List(1.0, 3.0)
-  val l23 = List(2.0, 3.0)
-
-  val s12 = Set(1.0, 2.0)
-  val s13 = Set(1.0, 3.0)
-  val s23 = Set(2.0, 3.0)
 
   "Card one" >> {
 
+    class OneSetup extends CoreSetup {
+      Ns.int.double$ insert List(
+        (1, Some(1.0)),
+        (2, Some(2.0)),
+        (3, Some(3.0)),
+        (4, None)
+      )
+    }
+
+    // OR semantics only for card-one attributes
+
     "Mandatory" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.double.apply(1.0).get === List(1.0)
       Ns.double.apply(2.0).get === List(2.0)
-      Ns.double.apply(1.0, 2.0).get === List(2.0, 1.0)
+      Ns.double.apply(1.0, 2.0).get === List(1.0, 2.0)
 
-      // Explicit `or` semantics
-      Ns.double.apply(1.0 or 2.0).get === List(2.0, 1.0)
+      // `or`
+      Ns.double.apply(1.0 or 2.0).get === List(1.0, 2.0)
       Ns.double.apply(1.0 or 2.0 or 3.0).get === List(3.0, 1.0, 2.0)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.double.apply().get === Nil
+      Ns.double.apply(Nil).get === Nil
       Ns.double.apply(List(1.0)).get === List(1.0)
       Ns.double.apply(List(2.0)).get === List(2.0)
-      Ns.double.apply(List(1.0, 2.0)).get === List(2.0, 1.0)
-      Ns.double.apply(List(1.0), List(2.0)).get === List(2.0, 1.0)
+      Ns.double.apply(List(1.0, 2.0)).get === List(1.0, 2.0)
+      Ns.double.apply(List(1.0), List(2.0)).get === List(1.0, 2.0)
       Ns.double.apply(List(1.0, 2.0), List(3.0)).get === List(3.0, 1.0, 2.0)
       Ns.double.apply(List(1.0), List(2.0, 3.0)).get === List(3.0, 1.0, 2.0)
-
-      // mixing Iterable types and value/variable ok
-      Ns.double.apply(List(double1), Set(2.0, double3)).get === List(3.0, 1.0, 2.0)
-
-      // Iterable: Set (OR semantics)
-      Ns.double.apply(Set(1.0)).get === List(1.0)
-      Ns.double.apply(Set(2.0)).get === List(2.0)
-      Ns.double.apply(Set(1.0, 2.0)).get === List(2.0, 1.0)
-      Ns.double.apply(Set(1.0), Set(2.0)).get === List(2.0, 1.0)
-      Ns.double.apply(Set(1.0, 2.0), Set(3.0)).get === List(3.0, 1.0, 2.0)
-      Ns.double.apply(Set(1.0), Set(2.0, 3.0)).get === List(3.0, 1.0, 2.0)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.double(?))
-
-      inputMolecule.apply(1.0).get === List(1.0)
-      inputMolecule.apply(2.0).get === List(2.0)
-
-      inputMolecule.apply(1.0, 1.0).get === List(1.0)
-      inputMolecule.apply(1.0, 2.0).get === List(2.0, 1.0)
-
-      inputMolecule.apply(List(1.0)).get === List(1.0)
-      inputMolecule.apply(List(1.0, 1.0)).get === List(1.0)
-      inputMolecule.apply(List(1.0, 2.0)).get === List(2.0, 1.0)
-
-      inputMolecule.apply(Set(1.0)).get === List(1.0)
-      inputMolecule.apply(Set(1.0, 2.0)).get === List(2.0, 1.0)
-
-      inputMolecule.apply(1.0 or 1.0).get === List(1.0)
-      inputMolecule.apply(1.0 or 2.0).get === List(2.0, 1.0)
-      inputMolecule.apply(1.0 or 2.0 or 3.0).get === List(3.0, 1.0, 2.0)
+      Ns.double.apply(List(1.0, 2.0, 3.0)).get === List(3.0, 1.0, 2.0)
     }
 
 
     "Tacit" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.int.double_.apply(1.0).get === List(1)
       Ns.int.double_.apply(2.0).get === List(2)
       Ns.int.double_.apply(1.0, 2.0).get === List(1, 2)
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.double_.apply(1.0 or 2.0).get === List(1, 2)
       Ns.int.double_.apply(1.0 or 2.0 or 3.0).get === List(1, 2, 3)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.double_.apply().get === List(4)
+      Ns.int.double_.apply(Nil).get === List(4)
       Ns.int.double_.apply(List(1.0)).get === List(1)
       Ns.int.double_.apply(List(2.0)).get === List(2)
-      Ns.int.double_.apply(List(1.0, 2.0)).get === List(2, 1)
-      Ns.int.double_.apply(List(1.0), List(2.0)).get === List(2, 1)
+      Ns.int.double_.apply(List(1.0, 2.0)).get === List(1, 2)
+      Ns.int.double_.apply(List(1.0), List(2.0)).get === List(1, 2)
       Ns.int.double_.apply(List(1.0, 2.0), List(3.0)).get === List(1, 2, 3)
       Ns.int.double_.apply(List(1.0), List(2.0, 3.0)).get === List(1, 2, 3)
-
-      // Iterable: Set (OR semantics)
-      Ns.int.double_.apply(Set(1.0)).get === List(1)
-      Ns.int.double_.apply(Set(2.0)).get === List(2)
-      Ns.int.double_.apply(Set(1.0, 2.0)).get === List(2, 1)
-      Ns.int.double_.apply(Set(1.0), Set(2.0)).get === List(2, 1)
-      Ns.int.double_.apply(Set(1.0, 2.0), Set(3.0)).get === List(1, 2, 3)
-      Ns.int.double_.apply(Set(1.0), Set(2.0, 3.0)).get === List(1, 2, 3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.double_(?))
-
-      inputMolecule.apply(1.0).get === List(1)
-      inputMolecule.apply(2.0).get === List(2)
-
-      inputMolecule.apply(1.0, 1.0).get === List(1)
-      inputMolecule.apply(1.0, 2.0).get === List(2, 1)
-
-      inputMolecule.apply(List(1.0)).get === List(1)
-      inputMolecule.apply(List(1.0, 1.0)).get === List(1)
-      inputMolecule.apply(List(1.0, 2.0)).get === List(2, 1)
-
-      inputMolecule.apply(Set(1.0)).get === List(1)
-      inputMolecule.apply(Set(1.0, 2.0)).get === List(2, 1)
-
-      inputMolecule.apply(1.0 or 1.0).get === List(1)
-      inputMolecule.apply(1.0 or 2.0).get === List(2, 1)
-      inputMolecule.apply(1.0 or 2.0 or 3.0).get === List(1, 2, 3)
+      Ns.int.double_.apply(List(1.0, 2.0, 3.0)).get === List(1, 2, 3)
     }
   }
 
 
   "Card many" >> {
 
-    "Mandatory (single attr coalesce)" in new ManySetup {
-
-      // Vararg (OR semantics)
-      Ns.doubles.apply(1.0).get === List(Set(1.0, 2.0))
-      Ns.doubles.apply(2.0).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(1.0, 2.0).get === List(Set(1.0, 3.0, 2.0))
-
-      // Explicit `or` semantics
-      Ns.doubles.apply(1.0 or 2.0).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(1.0 or 2.0 or 3.0).get === List(Set(1.0, 4.0, 3.0, 2.0))
-
-      // Iterable: List - OR semantics
-      Ns.doubles.apply(List(1.0)).get === List(Set(1.0, 2.0))
-      Ns.doubles.apply(List(2.0)).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(List(1.0, 2.0)).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(List(1.0), List(2.0)).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(List(1.0, 2.0), List(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-      Ns.doubles.apply(List(1.0), List(2.0, 3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-
-      // mixing Iterable types and value/variable ok
-      Ns.doubles.apply(List(double1), Set(2.0, double3)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.doubles.apply(Set(1.0)).get === List(Set(1.0, 2.0))
-      Ns.doubles.apply(Set(2.0)).get === List(Set(1.0, 3.0, 2.0))
-      Ns.doubles.apply(Set(1.0, 2.0)).get === List(Set(1.0, 2.0))
-      Ns.doubles.apply(Set(1.0, 3.0)).get === Nil
-      Ns.doubles.apply(Set(2.0, 3.0)).get === List(Set(2.0, 3.0))
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (m(Ns.doubles.apply(Set(1.0, 2.0), Set(3.0))).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/doubles"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.doubles(1.0 and 2.0).get === List(Set(1.0, 2.0))
-      Ns.doubles(1.0 and 3.0).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.doubles(?))
-
-      // AND semantics when applying 1.0 Set of values matching attribute values of 1.0 entity
-
-      inputMolecule.apply(Set(1.0)).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(2.0)).get === List(Set(1.0, 3.0, 2.0))
-
-      inputMolecule.apply(Set(1.0, 2.0)).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(1.0, 3.0)).get === Nil
-      inputMolecule.apply(Set(2.0, 3.0)).get === List(Set(2.0, 3.0))
-      inputMolecule.apply(Set(1.0, 2.0, 3.0)).get === Nil
-
-      inputMolecule.apply(List(Set(1.0))).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(List(Set(2.0))).get === List(Set(1.0, 3.0, 2.0))
-      inputMolecule.apply(List(Set(1.0, 2.0))).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(List(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(List(Set(2.0, 3.0))).get === List(Set(2.0, 3.0))
-      inputMolecule.apply(List(Set(1.0, 2.0, 3.0))).get === Nil
-
-      inputMolecule.apply(Set(Set(1.0))).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(Set(2.0))).get === List(Set(1.0, 3.0, 2.0))
-      inputMolecule.apply(Set(Set(1.0, 2.0))).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(Set(Set(2.0, 3.0))).get === List(Set(2.0, 3.0))
-      inputMolecule.apply(Set(Set(1.0, 2.0, 3.0))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(1.0), Set(1.0)).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(1.0), Set(2.0)).get === List(Set(1.0, 3.0, 2.0))
-      inputMolecule.apply(Set(1.0), Set(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-      inputMolecule.apply(Set(2.0), Set(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-      inputMolecule.apply(Set(1.0, 2.0), Set(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
-
-      inputMolecule.apply(Set(1.0) or Set(1.0)).get === List(Set(1.0, 2.0))
-      inputMolecule.apply(Set(1.0) or Set(2.0)).get === List(Set(1.0, 3.0, 2.0))
-      inputMolecule.apply(Set(1.0) or Set(2.0) or Set(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
+    class ManySetup extends CoreSetup {
+      Ns.int.doubles$ insert List(
+        (1, Some(Set(1.0, 2.0))),
+        (2, Some(Set(2.0, 3.0))),
+        (3, Some(Set(3.0, 4.0))),
+        (4, None)
+      )
     }
 
+    "Mandatory" in new ManySetup {
 
-    "Tacit" in new ManySetup {
+      // OR semantics
 
-      // Vararg (OR semantics)
-      Ns.int.doubles_.apply(1.0).get === List(1)
-      Ns.int.doubles_.apply(2.0).get === List(1, 2)
-      Ns.int.doubles_.apply(1.0, 2.0).get === List(1, 2)
-
-      // Explicit `or` semantics
-      Ns.int.doubles_.apply(1.0 or 2.0).get === List(1, 2)
-      Ns.int.doubles_.apply(1.0 or 2.0 or 3.0).get === List(1, 2, 3)
-
-      // Iterable: List - OR semantics
-      Ns.int.doubles_.apply(List(1.0)).get === List(1)
-      Ns.int.doubles_.apply(List(2.0)).get === List(1, 2)
-      Ns.int.doubles_.apply(List(1.0, 2.0)).get === List(1, 2)
-      Ns.int.doubles_.apply(List(1.0), List(2.0)).get === List(1, 2)
-      Ns.int.doubles_.apply(List(1.0, 2.0), List(3.0)).get === List(1, 2, 3)
-      Ns.int.doubles_.apply(List(1.0), List(2.0, 3.0)).get === List(1, 2, 3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.int.doubles_.apply(List(double1), Set(2.0, double3)).get === List(1, 2, 3)
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.doubles_.apply(Set(1.0)).get === List(1)
-      Ns.int.doubles_.apply(Set(2.0)).get === List(1, 2)
-      Ns.int.doubles_.apply(Set(1.0, 2.0)).get === List(1)
-      Ns.int.doubles_.apply(Set(1.0, 3.0)).get === Nil
-      Ns.int.doubles_.apply(Set(2.0, 3.0)).get === List(2)
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.doubles_.apply(Set(1.0, 2.0), Set(3.0)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom_ (tacit)] Can only apply a single Set of values for attribute :ns/doubles_"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.doubles_(1.0 and 2.0).get === List(10)
-      Ns.int.doubles_(1.0 and 3.0).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.doubles_(?))
-
-      // AND semantics when applying 1.0 Set of values matching attribute values of 1.0 entity
-
-      inputMolecule.apply(Set(1.0)).get === List(1)
-      inputMolecule.apply(Set(2.0)).get === List(1, 2)
-
-      inputMolecule.apply(Set(1.0, 2.0)).get === List(1)
-      inputMolecule.apply(Set(1.0, 3.0)).get === Nil
-      inputMolecule.apply(Set(2.0, 3.0)).get === List(2)
-      inputMolecule.apply(Set(1.0, 2.0, 3.0)).get === Nil
-
-      inputMolecule.apply(List(Set(1.0))).get === List(1)
-      inputMolecule.apply(List(Set(2.0))).get === List(1, 2)
-      inputMolecule.apply(List(Set(1.0, 2.0))).get === List(1)
-      inputMolecule.apply(List(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(List(Set(2.0, 3.0))).get === List(2)
-      inputMolecule.apply(List(Set(1.0, 2.0, 3.0))).get === Nil
-
-      inputMolecule.apply(Set(Set(1.0))).get === List(1)
-      inputMolecule.apply(Set(Set(2.0))).get === List(1, 2)
-      inputMolecule.apply(Set(Set(1.0, 2.0))).get === List(1)
-      inputMolecule.apply(Set(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(Set(Set(2.0, 3.0))).get === List(2)
-      inputMolecule.apply(Set(Set(1.0, 2.0, 3.0))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(1.0), Set(1.0)).get === List(1)
-      inputMolecule.apply(Set(1.0), Set(2.0)).get === List(1, 2)
-      inputMolecule.apply(Set(1.0), Set(3.0)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(2.0), Set(3.0)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(1.0, 2.0), Set(3.0)).get === List(1, 2, 3)
-
-      inputMolecule.apply(Set(1.0) or Set(1.0)).get === List(1)
-      inputMolecule.apply(Set(1.0) or Set(2.0)).get === List(1, 2)
-      inputMolecule.apply(Set(1.0) or Set(2.0) or Set(3.0)).get === List(1, 2, 3)
-    }
-
-
-    "Mandatory unifying by other attribute (avoiding coalesce)" in new ManySetup {
-
-      // Vararg (OR semantics)
+      // Varargs
       Ns.int.doubles.apply(1.0).get === List((1, Set(1.0, 2.0)))
       Ns.int.doubles.apply(2.0).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(1.0, 2.0).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.doubles.apply(1.0 or 2.0).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(1.0 or 2.0 or 3.0).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.doubles.apply().get === Nil
+      Ns.int.doubles.apply(Nil).get === Nil
       Ns.int.doubles.apply(List(1.0)).get === List((1, Set(1.0, 2.0)))
       Ns.int.doubles.apply(List(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(List(1.0, 2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(List(1.0), List(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(List(1.0, 2.0), List(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
       Ns.int.doubles.apply(List(1.0), List(2.0, 3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
+      Ns.int.doubles.apply(List(1.0, 2.0, 3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.doubles.apply(List(double1), Set(2.0, double3)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
-      Ns.int.doubles.apply(l1, Set(2.0, double3)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
+      // AND semantics
+
+      // Set
+      Ns.int.doubles.apply(Set[Double]()).get === Nil // entities with no card-many values asserted can't also return values
       Ns.int.doubles.apply(Set(1.0)).get === List((1, Set(1.0, 2.0)))
       Ns.int.doubles.apply(Set(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
       Ns.int.doubles.apply(Set(1.0, 2.0)).get === List((1, Set(1.0, 2.0)))
       Ns.int.doubles.apply(Set(1.0, 3.0)).get === Nil
       Ns.int.doubles.apply(Set(2.0, 3.0)).get === List((2, Set(2.0, 3.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0, 3.0)).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.doubles.apply(Set(1.0, 2.0), Set(3.0)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/doubles"
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set[Double]()).get === List((1, Set(1.0, 2.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(4.0)).get === List((1, Set(1.0, 2.0)), (3, Set(3.0, 4.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(2.0), Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(2.0, 3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(2.0, 4.0)).get === List((1, Set(1.0, 2.0)))
+      Ns.int.doubles.apply(Set(1.0, 2.0), Set(3.0, 4.0)).get === List((1, Set(1.0, 2.0)), (3, Set(3.0, 4.0)))
 
-      Ns.int.doubles(1.0 and 2.0).get === List((1, Set(2.0, 1.0)))
-      Ns.int.doubles(1.0 and 3.0).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.doubles(?))
-
-      // AND semantics when applying 1.0 Set of values matching attribute values of 1.0 entity
-
-      inputMolecule.apply(Set(1.0)).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
-
-      inputMolecule.apply(Set(1.0, 2.0)).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(1.0, 3.0)).get === Nil
-      inputMolecule.apply(Set(2.0, 3.0)).get === List((2, Set(2.0, 3.0)))
-      inputMolecule.apply(Set(1.0, 2.0, 3.0)).get === Nil
-
-      inputMolecule.apply(List(Set(1.0))).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(List(Set(2.0))).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
-      inputMolecule.apply(List(Set(1.0, 2.0))).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(List(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(List(Set(2.0, 3.0))).get === List((2, Set(2.0, 3.0)))
-      inputMolecule.apply(List(Set(1.0, 2.0, 3.0))).get === Nil
-
-      inputMolecule.apply(Set(Set(1.0))).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(Set(2.0))).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
-      inputMolecule.apply(Set(Set(1.0, 2.0))).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(Set(1.0, 3.0))).get === Nil
-      inputMolecule.apply(Set(Set(2.0, 3.0))).get === List((2, Set(2.0, 3.0)))
-      inputMolecule.apply(Set(Set(1.0, 2.0, 3.0))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(1.0), Set(1.0)).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(1.0), Set(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
-      inputMolecule.apply(Set(1.0), Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
-      inputMolecule.apply(Set(2.0), Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
-      inputMolecule.apply(Set(1.0, 2.0), Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
-
-      inputMolecule.apply(Set(1.0) or Set(1.0)).get === List((1, Set(1.0, 2.0)))
-      inputMolecule.apply(Set(1.0) or Set(2.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)))
-      inputMolecule.apply(Set(1.0) or Set(2.0) or Set(3.0)).get === List((1, Set(1.0, 2.0)), (2, Set(2.0, 3.0)), (3, Set(3.0, 4.0)))
+      // `and`
+      Ns.int.doubles.apply(1.0 and 2.0).get === List((1, Set(1.0, 2.0)))
+      Ns.int.doubles.apply(1.0 and 3.0).get === Nil
     }
-  }
 
 
-  "Variable resolution" in new OneSetup {
+    "Mandatory, single attr coalesce" in new ManySetup {
 
-    Ns.double.apply(double1, double2).get === List(2.0, 1.0)
+      // OR semantics
 
-    Ns.double.apply(List(double1, double2), List(double3)).get === List(3.0, 1.0, 2.0)
-    Ns.double.apply(l12, l3).get === List(3.0, 1.0, 2.0)
+      // Varargs
+      Ns.doubles.apply(1.0).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(2.0).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(1.0, 2.0).get === List(Set(1.0, 3.0, 2.0))
 
-    Ns.double.apply(Set(double1, double2), Set(double3)).get === List(3.0, 1.0, 2.0)
-    Ns.double.apply(s12, s3).get === List(3.0, 1.0, 2.0)
+      // `or`
+      Ns.doubles.apply(1.0 or 2.0).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(1.0 or 2.0 or 3.0).get === List(Set(1.0, 4.0, 3.0, 2.0))
+
+      // Seq
+      Ns.doubles.apply().get === Nil
+      Ns.doubles.apply(Nil).get === Nil
+      Ns.doubles.apply(List(1.0)).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(List(2.0)).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(List(1.0, 2.0)).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(List(1.0), List(2.0)).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(List(1.0, 2.0), List(3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
+      Ns.doubles.apply(List(1.0), List(2.0, 3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
+      Ns.doubles.apply(List(1.0, 2.0, 3.0)).get === List(Set(1.0, 4.0, 3.0, 2.0))
+
+
+      // AND semantics
+
+      // Set
+      Ns.doubles.apply(Set[Double]()).get === Nil // entities with no card-many values asserted can't also return values
+      Ns.doubles.apply(Set(1.0)).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(Set(2.0)).get === List(Set(1.0, 3.0, 2.0))
+      Ns.doubles.apply(Set(1.0, 2.0)).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(Set(1.0, 3.0)).get === Nil
+      Ns.doubles.apply(Set(2.0, 3.0)).get === List(Set(2.0, 3.0))
+      Ns.doubles.apply(Set(1.0, 2.0, 3.0)).get === Nil
+
+      Ns.doubles.apply(Set(1.0, 2.0), Set(2.0)).get === List(Set(1.0, 2.0, 3.0))
+      Ns.doubles.apply(Set(1.0, 2.0), Set(3.0)).get === List(Set(1.0, 2.0, 3.0, 4.0))
+      Ns.doubles.apply(Set(1.0, 2.0), Set(4.0)).get === List(Set(1.0, 2.0, 3.0, 4.0))
+      Ns.doubles.apply(Set(1.0, 2.0), Set(2.0), Set(3.0)).get === List(Set(1.0, 2.0, 3.0, 4.0))
+
+      Ns.doubles.apply(Set(1.0, 2.0), Set(2.0, 3.0)).get === List(Set(1.0, 2.0, 3.0))
+      Ns.doubles.apply(Set(1.0, 2.0), Set(2.0, 4.0)).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(Set(1.0, 2.0), Set(3.0, 4.0)).get === List(Set(1.0, 2.0, 3.0, 4.0))
+
+
+      // Explicit `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.doubles.apply(1.0 and 2.0).get === List(Set(1.0, 2.0))
+      Ns.doubles.apply(1.0 and 3.0).get === Nil
+    }
+
+
+    "Tacit" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
+      Ns.int.doubles_.apply(1.0).get === List(1)
+      Ns.int.doubles_.apply(2.0).get === List(1, 2)
+      Ns.int.doubles_.apply(1.0, 2.0).get === List(1, 2)
+
+      // `or`
+      Ns.int.doubles_.apply(1.0 or 2.0).get === List(1, 2)
+      Ns.int.doubles_.apply(1.0 or 2.0 or 3.0).get === List(1, 2, 3)
+
+      // Seq
+      Ns.int.doubles_.apply().get === List(4) // entities with no card-many values asserted
+      Ns.int.doubles_.apply(Nil).get === List(4)
+      Ns.int.doubles_.apply(List(1.0)).get === List(1)
+      Ns.int.doubles_.apply(List(2.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(List(1.0, 2.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(List(1.0), List(2.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(List(1.0, 2.0), List(3.0)).get === List(1, 2, 3)
+      Ns.int.doubles_.apply(List(1.0), List(2.0, 3.0)).get === List(1, 2, 3)
+      Ns.int.doubles_.apply(List(1.0, 2.0, 3.0)).get === List(1, 2, 3)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.doubles_.apply(Set[Double]()).get === List(4)
+      Ns.int.doubles_.apply(Set(1.0)).get === List(1)
+      Ns.int.doubles_.apply(Set(2.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(Set(1.0, 2.0)).get === List(1)
+      Ns.int.doubles_.apply(Set(1.0, 3.0)).get === Nil
+      Ns.int.doubles_.apply(Set(2.0, 3.0)).get === List(2)
+      Ns.int.doubles_.apply(Set(1.0, 2.0, 3.0)).get === Nil
+
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(2.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(3.0)).get === List(1, 2, 3)
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(4.0)).get === List(1, 3)
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(2.0), Set(3.0)).get === List(1, 2, 3)
+
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(2.0, 3.0)).get === List(1, 2)
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(2.0, 4.0)).get === List(1)
+      Ns.int.doubles_.apply(Set(1.0, 2.0), Set(3.0, 4.0)).get === List(1, 3)
+
+
+      // `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.doubles_.apply(1.0 and 2.0).get === List(1)
+      Ns.int.doubles_.apply(1.0 and 3.0).get === Nil
+    }
+
+
+    "Variable resolution" in new ManySetup {
+
+      val seq0 = Nil
+      val set0 = Set[Double]()
+
+      val l1 = List(double1)
+      val l2 = List(double2)
+
+      val s1 = Set(double1)
+      val s2 = Set(double2)
+
+      val l12 = List(double1, double2)
+      val l23 = List(double2, double3)
+
+      val s12 = Set(double1, double2)
+      val s23 = Set(double2, double3)
+
+
+      // OR semantics
+
+      // Vararg
+      Ns.int.doubles_.apply(double1, double2).get === List(1, 2)
+
+      // `or`
+      Ns.int.doubles_.apply(double1 or double2).get === List(1, 2)
+
+      // Seq
+      Ns.int.doubles_.apply(seq0).get === List(4)
+      Ns.int.doubles_.apply(List(double1), List(double2)).get === List(1, 2)
+      Ns.int.doubles_.apply(l1, l2).get === List(1, 2)
+      Ns.int.doubles_.apply(List(double1, double2)).get === List(1, 2)
+      Ns.int.doubles_.apply(l12).get === List(1, 2)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.doubles_.apply(set0).get === List(4)
+
+      Ns.int.doubles_.apply(Set(double1)).get === List(1)
+      Ns.int.doubles_.apply(s1).get === List(1)
+
+      Ns.int.doubles_.apply(Set(double2)).get === List(1, 2)
+      Ns.int.doubles_.apply(s2).get === List(1, 2)
+
+      Ns.int.doubles_.apply(Set(double1, double2)).get === List(1)
+      Ns.int.doubles_.apply(s12).get === List(1)
+
+      Ns.int.doubles_.apply(Set(double2, double3)).get === List(2)
+      Ns.int.doubles_.apply(s23).get === List(2)
+
+      Ns.int.doubles_.apply(Set(double1, double2), Set(double2, double3)).get === List(1, 2)
+      Ns.int.doubles_.apply(s12, s23).get === List(1, 2)
+
+      // `and`
+      Ns.int.doubles_.apply(double1 and double2).get === List(1)
+    }
   }
 }

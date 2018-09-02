@@ -34,7 +34,7 @@ object query extends Helpers {
     def datalog(maxLength: Int = 30): String = print.multiLine(maxLength)
     def datalog: String = datalog(30)
 
-    override def toString = {
+    override def toString: String = {
       val sep = ",\n    "
       val widh = if (wi.variables.isEmpty) "" else wi.variables.mkString("\n  With(List(\n    ", sep, ")),")
       val in = if (i.inputs.isEmpty && i.rules.isEmpty) "" else "\n  In(" +
@@ -49,21 +49,6 @@ object query extends Helpers {
     }
   }
 
-  def cast(value: Any): String = value match {
-    case v: Long    => v + "L"
-    case v: Float   => v + "f"
-    case date: Date => "\"" + format(date) + "\""
-    case v: String  => "\"" + v + "\""
-    case v: UUID    => "\"" + v + "\""
-    case v: URI     => "\"" + v + "\""
-    case v          => v.toString
-  }
-  def o(opt: Option[String]): String = if (opt.isDefined) s"""Some("$opt")""" else "None"
-  def seq[T](values: Seq[T]) = values.map {
-    case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
-    case v           => cast(v)
-  }.mkString("Seq(", ", ", ")")
-
   case class Find(outputs: Seq[Output]) extends QueryExpr
   case class With(variables: Seq[String]) extends QueryExpr
   case class In(inputs: Seq[Input], rules: Seq[Rule] = Seq(), ds: Seq[DataSource] = Seq(DS)) extends QueryExpr
@@ -74,26 +59,25 @@ object query extends Helpers {
 
   trait Output extends QueryExpr
   case class AggrExpr(fn: String, args: Seq[Any], v: Var) extends Output {
-    override def toString = s"""AggrExpr("$fn", ${seq(args)}, $v)"""
+    override def toString: String = s"""AggrExpr("$fn", ${seq(args)}, $v)"""
   }
 
   case class KW(ns: String, attr: String, refNs: String = "") extends QueryTerm {
-    override def toString = s"""KW("$ns", "$attr", "$refNs")"""
+    override def toString: String = s"""KW("$ns", "$attr", "$refNs")"""
   }
 
   sealed trait QueryValue extends QueryTerm
 
   case class Var(v: String) extends QueryValue with Output {
-    override def toString = s"""Var("$v")"""
+    override def toString: String = s"""Var("$v")"""
   }
   case class Val(v: Any) extends QueryValue with Output {
-    override def toString = s"""Val(${cast(v)})"""
+    override def toString: String = s"""Val(${cast(v)})"""
   }
   case class Pull(e: String, ns: String, attr: String, enumPrefix: Option[String] = None) extends QueryValue with Output {
-    override def toString = s"""Pull("$e", "$ns", "$attr", ${o(enumPrefix)})"""
+    override def toString: String = s"""Pull("$e", "$ns", "$attr", ${o(enumPrefix)})"""
   }
   case object NoVal extends QueryValue with Output
-  case object Dummy extends QueryValue
 
 
   sealed trait DataSource extends QueryTerm
@@ -102,18 +86,18 @@ object query extends Helpers {
   case object ImplDS extends DataSource
 
   case class Rule(name: String, args: Seq[QueryValue], clauses: Seq[Clause]) extends QueryTerm {
-    override def toString = s"""Rule("$name", ${seq(args)}, Seq(""" + clauses.mkString("\n        ", ",\n        ", "))")
+    override def toString: String = s"""Rule("$name", ${seq(args)}, Seq(""" + clauses.mkString("\n        ", ",\n        ", "))")
   }
 
   trait Input extends QueryTerm
   case class InDataSource(ds: DataSource, argss: Seq[Seq[Any]] = Seq(Seq())) extends Input {
-    override def toString = s"""InDataSource($ds, ${seq(argss)})"""
+    override def toString: String = s"""InDataSource($ds, ${seq(argss)})"""
   }
   case class InVar(binding: Binding, argss: Seq[Seq[Any]] = Seq(Seq())) extends Input {
-    override def toString = s"""InVar($binding, ${seq(argss)})"""
+    override def toString: String = s"""InVar($binding, ${seq(argss)})"""
   }
   case class Placeholder(e: Var, kw: KW, v: Var, enumPrefix: Option[String] = None) extends Input {
-    override def toString = s"""Placeholder($e, $kw, $v, ${o(enumPrefix)})"""
+    override def toString: String = s"""Placeholder($e, $kw, $v, ${o(enumPrefix)})"""
   }
 
 
@@ -127,35 +111,41 @@ object query extends Helpers {
   sealed trait Clause extends QueryExpr
 
   case class DataClause(ds: DataSource, e: Var, a: KW, v: QueryValue, tx: QueryTerm, op: QueryTerm = NoBinding) extends Clause {
-    override def toString = s"""DataClause($ds, $e, $a, $v, $tx, $op)"""
+    override def toString: String = s"""DataClause($ds, $e, $a, $v, $tx, $op)"""
   }
   case class NotClause(e: Var, a: KW) extends Clause {
-    override def toString = s"""NotClause($e, $a)"""
+    override def toString: String = s"""NotClause($e, $a)"""
   }
   case class NotClauses(clauses: Seq[Clause]) extends Clause {
-    override def toString = "NotClauses(Seq(\n      " + clauses.mkString(",\n      ") + "))"
-
+    override def toString: String = "NotClauses(Seq(\n      " + clauses.mkString(",\n      ") + "))"
+  }
+  case class NotJoinClauses(nonUnifyingVars: Seq[Var], clauses: Seq[Clause]) extends Clause {
+    override def toString: String = "NotJoinClauses(Seq(" + nonUnifyingVars.mkString(", ") + "), Seq(\n      " + clauses.mkString(",\n      ") + "))"
   }
   case class RuleInvocation(name: String, args: Seq[QueryTerm]) extends Clause {
-    override def toString = s"""RuleInvocation("$name", ${seq(args)})"""
+    override def toString: String = s"""RuleInvocation("$name", ${seq(args)})"""
   }
 
   sealed trait ExpressionClause extends Clause
   case class Funct(name: String, ins: Seq[QueryTerm], outs: Binding) extends ExpressionClause {
-    override def toString = s"""Funct("$name", ${seq(ins)}, $outs)"""
+    override def toString: String =
+      if(name.contains("\""))
+      s"""Funct(\"\"\"$name\"\"\", ${seq(ins)}, $outs)"""
+    else
+      s"""Funct("$name", ${seq(ins)}, $outs)"""
   }
 
 
   // Convenience constructors (for tests mainly) ........................................
 
   object Query {
-    def apply(find: Find, where: Where) = new Query(find, With(Seq()), In(Seq()), where)
-    def apply(find: Find, in: In, where: Where) = new Query(find, With(Seq()), in, where)
-    def apply(find: Find) = new Query(find, With(Seq()), In(Seq()), Where(List()))
-    def apply() = new Query(Find(Seq()), With(Seq()), In(Seq()), Where(List()))
+    def apply(find: Find, where: Where): Query = new Query(find, With(Seq()), In(Seq()), where)
+    def apply(find: Find, in: In, where: Where): Query = new Query(find, With(Seq()), in, where)
+    def apply(find: Find): Query = new Query(find, With(Seq()), In(Seq()), Where(List()))
+    def apply(): Query = new Query(Find(Seq()), With(Seq()), In(Seq()), Where(List()))
   }
   object DataClause {
-    def apply(e: String, attr: KW, v: String) = new DataClause(ImplDS, Var(e), attr, Var(v), Empty)
-    def apply(e: String, attr: KW, value: Val) = new DataClause(ImplDS, Var(e), attr, value, Empty)
+    def apply(e: String, attr: KW, v: String): DataClause = new DataClause(ImplDS, Var(e), attr, Var(v), Empty)
+    def apply(e: String, attr: KW, value: Val): DataClause = new DataClause(ImplDS, Var(e), attr, value, Empty)
   }
 }

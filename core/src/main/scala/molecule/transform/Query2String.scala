@@ -14,7 +14,7 @@ import molecule.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation
@@ -31,6 +31,7 @@ case class Query2String(q: Query) extends Helpers {
     case KW(ns, attr, _)                                  => s":$ns/$attr"
     case AggrExpr(fn, args, v)                            => s"($fn " + ((args :+ p(v)) mkString " ") + ")"
     case Var("?")                                         => "?"
+    case Var("_")                                         => "_"
     case Var(eid) if eid matches """\d+"""                => eid
     case Var(v)                                           => "?" + v
     case Val(v: Int)                                      => v.toString
@@ -47,7 +48,6 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v)                                           => "\"" + v + "\""
     case Pull(e, ns, attr, Some(prefix))                  => s"(pull ?$e [{:$ns/$attr [:db/ident]}])"
     case Pull(e, ns, attr, _)                             => s"(pull ?$e [:$ns/$attr])"
-    case Dummy                                            => "_"
     case NoVal                                            => ""
     case DS(name)                                         => "$" + name
     case DS                                               => "$"
@@ -65,8 +65,10 @@ case class Query2String(q: Query) extends Helpers {
     case DataClause(ds, e, a, v, tx, op)                  => pp(ds, e, a, v, tx, op)
     case NotClause(e, a)                                  => s"(not [" + p(e) + " " + p(a) + "])"
     case NotClauses(cls)                                  => s"(not " + (cls map p mkString " ") + ")"
+    case NotJoinClauses(vars, cls)                        => s"(not-join [" + (vars map p mkString " ") + "]\n          " + (cls map p mkString "\n          ") + ")"
     case Funct(name, ins, outs)                           => ((s"[($name " + (ins map p mkString " ")).trim + ") " + p(outs)).trim + "]"
     case RuleInvocation(name, args)                       => s"($name " + (args map p mkString " ") + ")"
+    case Rule(name, args, clauses) if clauses.size > 1    => asN = true; val rc = clauses map p mkString "\n   "; asN = false; s"[($name " + (args map p mkString " ") + ")\n   " + rc + "]"
     case Rule(name, args, clauses)                        => asN = true; val rc = clauses map p mkString " "; asN = false; s"[($name " + (args map p mkString " ") + ") " + rc + "]"
     case unresolvedQuery                                  => throw new Query2StringException(s"\nUNRESOLVED query expression: $unresolvedQuery")
   }

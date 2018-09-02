@@ -8,7 +8,7 @@ import scala.reflect.macros.whitebox.Context
 
 private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 20)
+  val x = DebugMacro("Dsl2Model", 100)
 
   def resolve(tree: Tree): Seq[Element] = dslStructure.applyOrElse(
     tree, (t: Tree) => abort(s"[Dsl2Model:resolve] Unexpected tree: $t\nRAW: ${showRaw(t)}"))
@@ -347,6 +347,8 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
   def modelValue(op: String, attr: Tree, values0: Tree) = {
     def errValue(i: Int, v: Any) = abort(s"[Dsl2Model:modelValue $i] Unexpected resolved model value for `${attr.name}.$op`: $v")
     val values = getValues(values0, attr)
+
+    x(21, op, attr, values0, values)
     op match {
       case "applyKey"    => NoValue
       case "apply"       => values match {
@@ -360,14 +362,42 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
         case vs: Seq[_] => MapKeys(vs.map(_.asInstanceOf[String]))
         case other      => errValue(2, other)
       }
-      case "count"       => values match {case Fn("avg", i) => Length(Some(Fn("avg", i))); case other => errValue(3, other)}
-      case "not"         => values match {case qm: Qm.type => Neq(Seq(Qm)); case vs: Seq[_] => Neq(vs)}
-      case "$bang$eq"    => values match {case qm: Qm.type => Neq(Seq(Qm)); case vs: Seq[_] => Neq(vs)}
-      case "$less"       => values match {case qm: Qm.type => Lt(Qm); case vs: Seq[_] => Lt(vs.head)}
-      case "$greater"    => values match {case qm: Qm.type => Gt(Qm); case vs: Seq[_] => Gt(vs.head)}
-      case "$less$eq"    => values match {case qm: Qm.type => Le(Qm); case vs: Seq[_] => Le(vs.head)}
-      case "$greater$eq" => values match {case qm: Qm.type => Ge(Qm); case vs: Seq[_] => Ge(vs.head)}
-      case "contains"    => values match {case qm: Qm.type => Fulltext(Seq(Qm)); case vs: Seq[_] => Fulltext(vs)}
+      case "count"       => values match {
+        case Fn("avg", i) => Length(Some(Fn("avg", i)))
+        case other        => errValue(3, other)
+      }
+      case "not"         => values match {
+        case qm: Qm.type                         => Neq(Seq(Qm))
+        case Fn("not", None)                     => Neq(Nil)
+        case (set: Set[_]) :: Nil if set.isEmpty => Neq(Nil)
+        case vs: Seq[_] if vs.isEmpty            => Neq(Nil)
+        //                case vs: Seq[_] if vs.head.isInstanceOf[Set[_]] => Neq(Nil)
+        case vs: Seq[_] => Neq(vs)
+      }
+      case "$bang$eq"    => values match {
+        case qm: Qm.type => Neq(Seq(Qm))
+        case vs: Seq[_]  => Neq(vs)
+      }
+      case "$less"       => values match {
+        case qm: Qm.type => Lt(Qm)
+        case vs: Seq[_]  => Lt(vs.head)
+      }
+      case "$greater"    => values match {
+        case qm: Qm.type => Gt(Qm)
+        case vs: Seq[_]  => Gt(vs.head)
+      }
+      case "$less$eq"    => values match {
+        case qm: Qm.type => Le(Qm)
+        case vs: Seq[_]  => Le(vs.head)
+      }
+      case "$greater$eq" => values match {
+        case qm: Qm.type => Ge(Qm)
+        case vs: Seq[_]  => Ge(vs.head)
+      }
+      case "contains"    => values match {
+        case qm: Qm.type => Fulltext(Seq(Qm))
+        case vs: Seq[_]  => Fulltext(vs)
+      }
       case "assert"      => values match {
         case MapEq(pairs)  => AssertMapPairs(pairs)
         case mapped: Value => mapped
@@ -393,11 +423,13 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     else
       Fn(fn, value)
 
+    val (isTacit, isCardMany) = (attr.name.last == '_', attr.card == 2)
     values match {
-      case q"Seq($pkg.?)"                                          => Qm
-      case q"Seq($pkg.Nil)" if attr.name.last == '_'               => Fn("not")
-      case q"Seq($pkg.Nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute `${attr.name}_(Nil)`. For at shorter syntax, apply empty value: `${attr.name}_()`")
-      case q"Seq($pkg.unify)" if attr.name.last == '_'             => Fn("unify")
+      case q"Seq($pkg.?)" => Qm
+      //      case q"Seq($pkg.Nil)" if isTacit || isCardMany               => Fn("not")
+      //      case q"Seq($pkg.Nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute `${attr.name}_(Nil)`. For at shorter syntax, apply empty value: `${attr.name}_()`")
+      case q"Seq($pkg.Nil)"                                        => Fn("not")
+      case q"Seq($pkg.unify)" if isTacit                           => Fn("unify")
       case q"Seq($pkg.unify)"                                      => abort(s"[Dsl2Model:getValues] Can only unify on tacit attributes. Please add underscore to attribute: `${attr.name}_(unify)`")
       case q"Seq($pkg.distinct)"                                   => Distinct
       case q"Seq($pkg.min.apply(${Literal(Constant(i: Int))}))"    => aggr("min", Some(i))
@@ -451,13 +483,18 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
           case ident           => mapPairs(Seq(ident), attr)
         }
 
-      case q"Seq(..$vs)" if attr == null                                                     => x(7, vs); vs.flatMap(v => resolveValues(q"$v"))
-      case q"Seq(..$vs)" if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]                => x(8, vs); mapPairs(vs, attr)
-      case q"Seq(..$vs)" if vs.size == 1 && attr.isMapAttr$                                  => x(9, vs); mapPairs(vs, attr)
-      case q"Seq(..$vs)" if attr.isMany && vs.nonEmpty && vs.head.tpe <:< weakTypeOf[Set[_]] => x(10, vs); vs.map(v => resolveValues(q"$v", att(q"$attr")).toSet)
-      case q"Seq(..$vs)"                                                                     => x(11, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
-      case other if attr == null                                                             => x(12, other); resolveValues(other)
-      case other                                                                             => x(13, other); resolveValues(other, att(q"$attr"))
+      case q"Seq(..$vs)" if attr == null                                                           => x(7, vs); vs.flatMap(v => resolveValues(q"$v"))
+      case q"Seq(..$vs)" if vs.nonEmpty && vs.head.tpe <:< weakTypeOf[(_, _)]                      => x(8, vs); mapPairs(vs, attr)
+      case q"Seq(..$vs)" if vs.size == 1 && attr.isMapAttr$                                        => x(9, vs); mapPairs(vs, attr)
+      case q"Seq(..$sets)" if attr.isMany && sets.nonEmpty && sets.head.tpe <:< weakTypeOf[Set[_]] => x(10, sets); sets.map(set => resolveValues(q"$set", att(q"$attr")).toSet)
+      case q"Seq(..$vs)" if attr.isMany && vs.nonEmpty                                             => vs.head match {
+        case q"$pkg.Seq.apply[$t](..$sets)" if t.tpe <:< weakTypeOf[Set[_]]  => x(11, vs, sets); sets.map(set => resolveValues(q"$set", att(q"$attr")).toSet)
+        case q"$pkg.List.apply[$t](..$sets)" if t.tpe <:< weakTypeOf[Set[_]] => x(12, vs, sets); sets.map(set => resolveValues(q"$set", att(q"$attr")).toSet)
+        case _                                                               => x(13, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
+      }
+      case q"Seq(..$vs)"                                                                           => x(17, vs); vs.flatMap(v => resolveValues(q"$v", att(q"$attr")))
+      case other if attr == null                                                                   => x(18, other); resolveValues(other)
+      case other                                                                                   => x(19, other); resolveValues(other, att(q"$attr"))
     }
   }
 

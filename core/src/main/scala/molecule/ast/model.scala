@@ -1,6 +1,7 @@
 package molecule.ast
 import molecule.ast.exception.ModelException
 import molecule.exceptions.MoleculeException
+import molecule.util.Helpers
 
 /** AST for molecule [[molecule.ast.model.Model Model]] representation.
   * <br><br>
@@ -8,7 +9,7 @@ import molecule.exceptions.MoleculeException
   * <br><br>
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   * */
-object model {
+object model extends Helpers {
 
   /** Molecule Model representation.
     * <br><br>
@@ -53,28 +54,36 @@ object model {
     value: Value,
     enumPrefix: Option[String] = None,
     gs: Seq[Generic] = Nil,
-    keys: Seq[String] = Nil) extends Element
+    keys: Seq[String] = Nil) extends Element {
+    override def toString = s"""Atom("$ns", "$name", "$tpeS", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
+  }
 
   case class Bond(
     ns: String,
     refAttr: String,
     refNs: String = "",
     card: Int,
-    gs: Seq[Generic] = Nil) extends Element
+    gs: Seq[Generic] = Nil) extends Element{
+    override def toString = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gs)})"""
+  }
 
   case class ReBond(
     backRef: String,
     refAttr: String,
     refNs: String = "",
     distinct: Boolean = false,
-    prevVar: String = "") extends Element
+    prevVar: String = "") extends Element{
+    override def toString = s"""ReBond("$backRef", "$refAttr", "$refNs", $distinct, "$prevVar")"""
+  }
 
   case class Transitive(
     backRef: String,
     refAttr: String,
     refNs: String,
     depth: Int = 1,
-    prevVar: String = "") extends Element
+    prevVar: String = "") extends Element{
+    override def toString = s"""Transitive("$backRef", "$refAttr", "$refNs", $depth, "$prevVar")"""
+  }
 
   case class Nested(
     bond: Bond,
@@ -85,7 +94,9 @@ object model {
     attr: String,
     kind: String,
     generic: Generic,
-    value: Value) extends Element
+    value: Value) extends Element{
+    override def toString = s"""Meta("$ns", "$attr", "$kind", $generic, $value)"""
+  }
 
   case class TxMetaData(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
@@ -98,83 +109,83 @@ object model {
   // Value
   case object EntValue extends Value
   case object VarValue extends Value
-  case class BackValue(backNs: String) extends Value
+  case class BackValue(backNs: String) extends Value { override def toString = s"""BackValue("$backNs")"""}
   case object EnumVal extends Value
   case object IndexVal extends Value
 
   // Function
   case class Fulltext(search: Seq[Any]) extends Value
-  case class Fn(name: String, value: Option[Int] = None) extends Value
-  case class Length(fn: Option[Fn] = None) extends Value
+  case class Fn(name: String, value: Option[Int] = None) extends Value { override def toString = s"""Fn("$name", ${o(value)})"""}
+  case class Length(fn: Option[Fn] = None) extends Value { override def toString = s"Length(${o(fn)})" }
 
   // Logic
-  case class And(values: Seq[Any]) extends Value
+  case class And(values: Seq[Any]) extends Value { override def toString = s"And(${seq(values)})" }
 
   // Comparison (== != < > <= >=)
-  case class Eq(values: Seq[Any]) extends Value
-  case class Neq(values: Seq[Any]) extends Value
-  case class Lt(value: Any) extends Value
-  case class Gt(value: Any) extends Value
-  case class Le(value: Any) extends Value
-  case class Ge(value: Any) extends Value
+  case class Eq(values: Seq[Any]) extends Value { override def toString = s"Eq(${seq(values)})" }
+  case class Neq(values: Seq[Any]) extends Value { override def toString = s"Neq(${seq(values)})" }
+  case class Lt(value: Any) extends Value { override def toString = s"Lt(${cast(value)})" }
+  case class Gt(value: Any) extends Value { override def toString = s"Gt(${cast(value)})" }
+  case class Le(value: Any) extends Value { override def toString = s"Le(${cast(value)})" }
+  case class Ge(value: Any) extends Value { override def toString = s"Ge(${cast(value)})" }
 
   // Question mark placeholder for input molecules
   case object Qm extends Value
   case object Distinct extends Value
 
   // Card-many attribute operations
-  case class AssertValue(values: Seq[Any]) extends Value
-  case class ReplaceValue(oldNew: Seq[(Any, Any)]) extends Value
-  case class RetractValue(values: Seq[Any]) extends Value
+  case class AssertValue(values: Seq[Any]) extends Value { override def toString = s"AssertValue(${seq(values)})" }
+  case class ReplaceValue(oldNew: Seq[(Any, Any)]) extends Value { override def toString = s"ReplaceValue(${seq(oldNew)})" }
+  case class RetractValue(values: Seq[Any]) extends Value { override def toString = s"RetractValue(${seq(values)})" }
 
   // Map attribute operations
-  case class AssertMapPairs(pairs: Seq[(String, Any)]) extends Value
-  case class ReplaceMapPairs(pairs: Seq[(String, Any)]) extends Value
-  case class RetractMapKeys(keys: Seq[String]) extends Value
-  case class MapEq(pairs: Seq[(String, Any)]) extends Value
-  case class MapKeys(keys: Seq[String]) extends Value
+  case class AssertMapPairs(pairs: Seq[(String, Any)]) extends Value { override def toString = s"AssertMapPairs(${seq(pairs)})" }
+  case class ReplaceMapPairs(pairs: Seq[(String, Any)]) extends Value { override def toString = s"ReplaceMapPairs(${seq(pairs)})" }
+  case class RetractMapKeys(keys: Seq[String]) extends Value { override def toString = s"RetractMapKeys(${seq(keys)})" }
+  case class MapEq(pairs: Seq[(String, Any)]) extends Value { override def toString = s"MapEq(${seq(pairs)})" }
+  case class MapKeys(keys: Seq[String]) extends Value { override def toString = s"MapKeys(${seq(keys)})" }
 
 
   sealed trait Generic extends Value
 
   case class Id(eid: Any) extends Generic
-  case class NsValue(values: Seq[String]) extends Generic
-  case class AttrVar(v: String) extends Generic
+  case class NsValue(values: Seq[String]) extends Generic { override def toString = s"NsValue(${seq(values)})" }
+  case class AttrVar(v: String) extends Generic { override def toString = s"""AttrVar("$v")"""}
 
-  case class TxValue(t: Option[Any] = None) extends Generic
-  case class TxValue_(t: Option[Any] = None) extends Generic
+  case class TxValue(t: Option[Any] = None) extends Generic { override def toString = s"TxValue(${o(t)})" }
+  case class TxValue_(t: Option[Any] = None) extends Generic { override def toString = s"TxValue_(${o(t)})" }
 
-  case class TxTValue(t: Option[Any] = None) extends Generic
-  case class TxTValue_(t: Option[Any] = None) extends Generic
+  case class TxTValue(t: Option[Any] = None) extends Generic { override def toString = s"TxTValue(${o(t)})" }
+  case class TxTValue_(t: Option[Any] = None) extends Generic { override def toString = s"TxTValue_(${o(t)})" }
 
-  case class TxInstantValue(date: Option[Any] = None) extends Generic
-  case class TxInstantValue_(date: Option[Any] = None) extends Generic
+  case class TxInstantValue(date: Option[Any] = None) extends Generic { override def toString = s"TxInstantValue(${o(date)})" }
+  case class TxInstantValue_(date: Option[Any] = None) extends Generic { override def toString = s"TxInstantValue_(${o(date)})" }
 
-  case class OpValue(added: Option[Any] = None) extends Generic
-  case class OpValue_(added: Option[Any] = None) extends Generic
+  case class OpValue(added: Option[Any] = None) extends Generic { override def toString = s"OpValue(${o(added)})" }
+  case class OpValue_(added: Option[Any] = None) extends Generic { override def toString = s"OpValue_(${o(added)})" }
 
   case object NoValue extends Generic
-  case class Card(card: Int) extends Generic
+  case class Card(card: Int) extends Generic { override def toString = s"Card($card)" }
 
 
   sealed trait Bidirectional extends Generic
 
-  case class BiSelfRef(card: Int) extends Bidirectional
-  case class BiSelfRefAttr(card: Int) extends Bidirectional
+  case class BiSelfRef(card: Int) extends Bidirectional { override def toString = s"BiSelfRef($card)" }
+  case class BiSelfRefAttr(card: Int) extends Bidirectional { override def toString = s"BiSelfRefAttr($card)" }
 
-  case class BiOtherRef(card: Int, attr: String) extends Bidirectional
-  case class BiOtherRefAttr(card: Int, attr: String) extends Bidirectional
+  case class BiOtherRef(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiOtherRef($card, "$attr")"""}
+  case class BiOtherRefAttr(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiOtherRefAttr($card, "$attr")"""}
 
   case object BiEdge extends Bidirectional
-  case class BiEdgeRef(card: Int, attr: String) extends Bidirectional
-  case class BiEdgeRefAttr(card: Int, attr: String) extends Bidirectional
+  case class BiEdgeRef(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiEdgeRef($card, "$attr")"""}
+  case class BiEdgeRefAttr(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiEdgeRefAttr($card, "$attr")"""}
 
-  case class BiEdgePropAttr(card: Int) extends Bidirectional
-  case class BiEdgePropRefAttr(card: Int) extends Bidirectional
-  case class BiEdgePropRef(card: Int) extends Bidirectional
+  case class BiEdgePropAttr(card: Int) extends Bidirectional { override def toString = s"BiEdgePropAttr($card)" }
+  case class BiEdgePropRefAttr(card: Int) extends Bidirectional { override def toString = s"BiEdgePropRefAttr($card)" }
+  case class BiEdgePropRef(card: Int) extends Bidirectional { override def toString = s"BiEdgePropRef($card)" }
 
-  case class BiTargetRef(card: Int, attr: String) extends Bidirectional
-  case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional
+  case class BiTargetRef(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiTargetRef($card, "$attr")"""}
+  case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional { override def toString = s"""BiTargetRefAttr($card, "$attr")"""}
 
 
   /** Expression AST for building OR/AND expressions.

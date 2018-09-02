@@ -1,11 +1,11 @@
-package molecule.coretests.input
+package molecule.coretests.input3
 
 import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 
-class Input3 extends CoreSpec {
+class Input3examples extends CoreSpec {
 
 
   "6 ways to apply input to arity-3 input molecule" in new CoreSetup {
@@ -19,20 +19,27 @@ class Input3 extends CoreSpec {
 
     val inputMolecule = m(Ns.str.int_(?).long_(?).double_(?))
 
-    // 6 ways of querying
 
-    // 1. Individual args matching input attributes
+    // Triples of input ..............................................................
+
+    // Varargs (single triple)
     inputMolecule.apply(37, 5L, 1.0).get === List("Ann")
 
-    // 2. Seq of values matching input attributes
-    inputMolecule.apply(Seq((37, 5L, 1.0))).get === List("Ann")
-    inputMolecule.apply(Seq((37, 5L, 1.0), (28, 5L, 1.0))).get.sorted === List("Ann", "Ben")
-
-    // 3. One or more tuples matching input attributes
+    // One or more triples
     inputMolecule.apply((37, 5L, 1.0)).get === List("Ann")
     inputMolecule.apply((37, 5L, 1.0), (28, 5L, 1.0)).get.sorted === List("Ann", "Ben")
 
-    // 4. Two sequences, each matching corresponding input attribute
+    // One or more logical triples
+    inputMolecule.apply((37 and 5L and 1.0) or (28 and 4L and 1.0)).get.sorted === List("Ann", "Joe")
+    inputMolecule.apply((37 and 5L and 1.0) or (28 and 4L and 1.0) or (28 and 3L and 2.0)).get.sorted === List("Ann", "Joe", "Liz")
+
+    // List of triples
+    inputMolecule.apply(Seq((37, 5L, 1.0))).get === List("Ann")
+    inputMolecule.apply(Seq((37, 5L, 1.0), (28, 5L, 1.0))).get.sorted === List("Ann", "Ben")
+
+
+    // 3 groups of input, each group matches an input attribute ......................
+
     inputMolecule.apply(Seq(37), Seq(5L), Seq(1.0)).get === List("Ann")
 
     inputMolecule.apply(Seq(37, 28), Seq(5L), Seq(1.0)).get.sorted === List("Ann", "Ben")
@@ -51,28 +58,21 @@ class Input3 extends CoreSpec {
     inputMolecule.apply(Nil, Seq(5L), Seq(1.0)).get === Nil
 
 
-    // Expressions
-
-    // 5. <expression1> and <expression2> and <expression3>
+    // 3 groups all with 1 value
     inputMolecule.apply(37 and 5L and 1.0).get === List("Ann")
 
-    // 1 or
+    // 1 group with 2 values
     inputMolecule.apply((37 or 28) and 5L and 1.0).get.sorted === List("Ann", "Ben")
     inputMolecule.apply(37 and (5L or 4L) and 1.0).get.sorted === List("Ann")
     inputMolecule.apply(37 and 5L and (1.0 or 2.0)).get.sorted === List("Ann")
 
-    // 2 or
+    // 2 groups with 2 values
     inputMolecule.apply((37 or 28) and (5L or 4L) and 1.0).get.sorted === List("Ann", "Ben", "Joe")
     inputMolecule.apply((37 or 28) and 5L and (1.0 or 2.0)).get.sorted === List("Ann", "Ben")
     inputMolecule.apply(37 and (5L or 4L) and (1.0 or 2.0)).get.sorted === List("Ann")
 
-    // 3 or
+    // 3 groups with 2 values
     inputMolecule.apply((37 or 28) and (5L or 4L) and (1.0 or 2.0)).get.sorted === List("Ann", "Ben", "Joe")
-
-
-    // 6. <triple-expression> or <triple-expression> or ...
-    inputMolecule.apply((37 and 5L and 1.0) or (28 and 4L and 1.0)).get.sorted === List("Ann", "Joe")
-    inputMolecule.apply((37 and 5L and 1.0) or (28 and 4L and 1.0) or (28 and 3L and 2.0)).get.sorted === List("Ann", "Joe", "Liz")
   }
 
 
@@ -88,34 +88,25 @@ class Input3 extends CoreSpec {
 
     val inputExpression = m(Ns.str.int_.not(?).long_.>(?).double_.<=(?))
 
-    // 1. Individual args matching input attributes
+    // Individual args matching input attributes
     inputExpression.apply(1, 0L, 1.0).get === List("c", "d")
     inputExpression.apply(1, 1L, 2.0).get === List("d", "e")
 
-    // 2. Seq of values matching input attributes
-    inputExpression.apply(Seq((1, 0L, 1.0))).get === List("c", "d")
-    inputExpression.apply(Seq((1, 1L, 2.0))).get === List("d", "e")
-    inputExpression.apply(Seq((1, 0L, 1.0), (1, 1L, 2.0))).get === List("c", "d", "e")
-
-    // 3. One or more tuples matching input attributes
+    // Triple matching input attributes
     inputExpression.apply((1, 0L, 1.0)).get === List("c", "d")
     inputExpression.apply((1, 1L, 2.0)).get === List("d", "e")
-    inputExpression.apply((1, 0L, 1.0), (1, 1L, 2.0)).get === List("c", "d", "e")
 
-    // 4. Two sequences, each matching corresponding input attribute
-    inputExpression.apply(Seq(1), Seq(0L), Seq(1.0)).get === List("c", "d")
-    inputExpression.apply(Seq(1), Seq(1L), Seq(2.0)).get === List("d", "e")
-    inputExpression.apply(Seq(1), Seq(0L, 1L), Seq(1.0, 2.0)).get === List("c", "d", "e")
+    // Seq of values matching input attributes
+    inputExpression.apply(Seq((1, 0L, 1.0))).get === List("c", "d")
+    inputExpression.apply(Seq((1, 1L, 2.0))).get === List("d", "e")
 
-    // 5. <expression1> and <expression2> and <expression3>
+
+    // <expression1> and <expression2> and <expression3>
     inputExpression.apply(1 and 0L and 1.0).get === List("c", "d")
     inputExpression.apply(1 and 1L and 2.0).get === List("d", "e")
-    inputExpression.apply(1 and (0L or 1L) and (1.0 or 2.0)).get === List("c", "d", "e")
 
-    // 6. <triple-expression> or <triple-expression> or ...
-    inputExpression.apply((1 and 0L and 1.0) or (1 and 1L and 2.0)).get === List("c", "d", "e")
-
-    // etc with other expressins ...
+    // Two sequences, each matching corresponding input attribute
+    inputExpression.apply(Seq(1), Seq(0L), Seq(1.0)).get === List("c", "d")
+    inputExpression.apply(Seq(1), Seq(1L), Seq(2.0)).get === List("d", "e")
   }
-
 }

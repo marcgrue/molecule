@@ -18,6 +18,51 @@ trait MakeComposite_In[Ctx <: Context] extends GetTuples[Ctx] {
     val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
     val MoleculeTpe = molecule_o(OutTypes.size)
 
+    val applySeqs = InTypes match {
+      case Seq(it0, it1, it2) =>
+        val (i0, i1, i2) = (TermName(s"in0"), TermName(s"in1"), TermName(s"in2"))
+        val (t0, t1, t2) = (tq"Seq[$it0]", tq"Seq[$it1]", tq"Seq[$it2]")
+        val (inParams, inTerm1, inTerm2, inTerm3) = (Seq(q"$i0: $t0", q"$i1: $t1", q"$i2: $t2"), i0, i1, i2)
+        q""
+
+      case Seq(it0, it1) =>
+        val (i0, i1) = (TermName(s"in0"), TermName(s"in1"))
+        val (t0, t1) = (tq"Seq[$it0]", tq"Seq[$it1]")
+        val (inParams, inTerm1, inTerm2) = (Seq(q"$i0: $t0", q"$i1: $t1"), i0, i1)
+        q"""
+          // Apply separate lists of input
+          def apply(..$inParams)(implicit conn: Conn): $MoleculeTpe[..$OutTypes] = {
+            def query2 = bindSeqs(_query, $inTerm1, $inTerm2)
+
+            new $MoleculeTpe[..$OutTypes](_model, query2) with Util {
+
+              override def getIterable(implicit conn: Conn): Iterable[(..$OutTypes)] = new Iterable[(..$OutTypes)] {
+                private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+                override def isEmpty = jColl.isEmpty
+                override def size = jColl.size
+                override def iterator = new Iterator[(..$OutTypes)] {
+                  private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+                  override def hasNext = jIter.hasNext
+                  private var row: jList[AnyRef] = null
+                  override def next() = {
+                    row = jIter.next()
+                    (..${compositeTuple(q"_query", q"row", OutTypes)})
+                  }
+                }
+              }
+              override def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+
+              override def getJson        (implicit conn: Conn): String = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query).asScala", OutTypes)}
+              override def getJson(n: Int)(implicit conn: Conn): String = ${compositeJson(q"_model", q"_query", q"conn.query(_model, _query).asScala.take(n)", OutTypes)}
+
+              override def debugGet(implicit conn: Conn) = debugGet_(conn)
+            }
+          }
+        """
+
+      case _             => q""
+    }
+
     expr(
       q"""
         ..${basics(inputDsl)._2}
@@ -52,6 +97,8 @@ trait MakeComposite_In[Ctx <: Context] extends GetTuples[Ctx] {
               override def debugGet(implicit conn: Conn) = debugGet_(conn)
             }
           }
+
+          $applySeqs
         }
       """)
   }

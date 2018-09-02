@@ -1,382 +1,298 @@
 package molecule.coretests.expression.equality
 
+import java.net.URI
 import molecule.api._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.exception.Model2QueryException
 
-class ApplyURI extends ApplyBase {
+class ApplyURI extends CoreSpec {
 
-  val l1 = List(uri1)
-  val l2 = List(uri2)
-  val l3 = List(uri3)
-
-  val s1 = Set(uri1)
-  val s2 = Set(uri2)
-  val s3 = Set(uri3)
-
-  val l11 = List(uri1, uri1)
-  val l12 = List(uri1, uri2)
-  val l13 = List(uri1, uri3)
-  val l23 = List(uri2, uri3)
-
-  val s12 = Set(uri1, uri2)
-  val s13 = Set(uri1, uri3)
-  val s23 = Set(uri2, uri3)
 
   "Card one" >> {
 
+    class OneSetup extends CoreSetup {
+      Ns.int.uri$ insert List(
+        (1, Some(uri1)),
+        (2, Some(uri2)),
+        (3, Some(uri3)),
+        (4, None)
+      )
+    }
+
+    // OR semantics only for card-one attributes
+
     "Mandatory" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.uri.apply(uri1).get === List(uri1)
       Ns.uri.apply(uri2).get === List(uri2)
       Ns.uri.apply(uri1, uri2).get === List(uri1, uri2)
 
-      // Explicit `or` semantics
-      Ns.uri.apply(uri1 or uri2).get.sortBy(_.toString) === List(uri1, uri2).sortBy(_.toString)
-      Ns.uri.apply(uri1 or uri2 or uri3).get.sortBy(_.toString) === List(uri1, uri2, uri3).sortBy(_.toString)
+      // `or`
+      Ns.uri.apply(uri1 or uri2).get === List(uri1, uri2)
+      Ns.uri.apply(uri1 or uri2 or uri3).get === List(uri3, uri1, uri2)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.uri.apply().get === Nil
+      Ns.uri.apply(Nil).get === Nil
       Ns.uri.apply(List(uri1)).get === List(uri1)
       Ns.uri.apply(List(uri2)).get === List(uri2)
       Ns.uri.apply(List(uri1, uri2)).get === List(uri1, uri2)
       Ns.uri.apply(List(uri1), List(uri2)).get === List(uri1, uri2)
       Ns.uri.apply(List(uri1, uri2), List(uri3)).get === List(uri3, uri1, uri2)
       Ns.uri.apply(List(uri1), List(uri2, uri3)).get === List(uri3, uri1, uri2)
-
-      // mixing Iterable types and value/variable ok
-      Ns.uri.apply(List(uri1), Set(uri2, uri3)).get === List(uri3, uri1, uri2)
-
-      // Iterable: Set (OR semantics)
-      Ns.uri.apply(Set(uri1)).get === List(uri1)
-      Ns.uri.apply(Set(uri2)).get === List(uri2)
-      Ns.uri.apply(Set(uri1, uri2)).get === List(uri1, uri2)
-      Ns.uri.apply(Set(uri1), Set(uri2)).get === List(uri1, uri2)
-      Ns.uri.apply(Set(uri1, uri2), Set(uri3)).get === List(uri3, uri1, uri2)
-      Ns.uri.apply(Set(uri1), Set(uri2, uri3)).get === List(uri3, uri1, uri2)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.uri(?))
-
-      inputMolecule.apply(uri1).get === List(uri1)
-      inputMolecule.apply(uri2).get === List(uri2)
-
-      inputMolecule.apply(uri1, uri1).get === List(uri1)
-      inputMolecule.apply(uri1, uri2).get === List(uri1, uri2)
-
-      inputMolecule.apply(List(uri1)).get === List(uri1)
-      inputMolecule.apply(List(uri1, uri1)).get === List(uri1)
-      inputMolecule.apply(List(uri1, uri2)).get === List(uri1, uri2)
-
-      inputMolecule.apply(Set(uri1)).get === List(uri1)
-      inputMolecule.apply(Set(uri1, uri2)).get === List(uri1, uri2)
-
-      inputMolecule.apply(uri1 or uri1).get === List(uri1)
-      inputMolecule.apply(uri1 or uri2).get === List(uri1, uri2)
-      inputMolecule.apply(uri1 or uri2 or uri3).get === List(uri3, uri1, uri2)
+      Ns.uri.apply(List(uri1, uri2, uri3)).get === List(uri3, uri1, uri2)
     }
 
 
     "Tacit" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.int.uri_.apply(uri1).get === List(1)
       Ns.int.uri_.apply(uri2).get === List(2)
       Ns.int.uri_.apply(uri1, uri2).get === List(1, 2)
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.uri_.apply(uri1 or uri2).get === List(1, 2)
       Ns.int.uri_.apply(uri1 or uri2 or uri3).get === List(1, 2, 3)
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.uri_.apply().get === List(4)
+      Ns.int.uri_.apply(Nil).get === List(4)
       Ns.int.uri_.apply(List(uri1)).get === List(1)
       Ns.int.uri_.apply(List(uri2)).get === List(2)
       Ns.int.uri_.apply(List(uri1, uri2)).get === List(1, 2)
       Ns.int.uri_.apply(List(uri1), List(uri2)).get === List(1, 2)
       Ns.int.uri_.apply(List(uri1, uri2), List(uri3)).get === List(1, 2, 3)
       Ns.int.uri_.apply(List(uri1), List(uri2, uri3)).get === List(1, 2, 3)
-
-      // Iterable: Set (OR semantics)
-      Ns.int.uri_.apply(Set(uri1)).get === List(1)
-      Ns.int.uri_.apply(Set(uri2)).get === List(2)
-      Ns.int.uri_.apply(Set(uri1, uri2)).get === List(1, 2)
-      Ns.int.uri_.apply(Set(uri1), Set(uri2)).get === List(1, 2)
-      Ns.int.uri_.apply(Set(uri1, uri2), Set(uri3)).get === List(1, 2, 3)
-      Ns.int.uri_.apply(Set(uri1), Set(uri2, uri3)).get === List(1, 2, 3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.uri_(?))
-
-      inputMolecule.apply(uri1).get === List(1)
-      inputMolecule.apply(uri2).get === List(2)
-
-      inputMolecule.apply(uri1, uri1).get === List(1)
-      inputMolecule.apply(uri1, uri2).get === List(1, 2)
-
-      inputMolecule.apply(List(uri1)).get === List(1)
-      inputMolecule.apply(List(uri1, uri1)).get === List(1)
-      inputMolecule.apply(List(uri1, uri2)).get === List(1, 2)
-
-      inputMolecule.apply(Set(uri1)).get === List(1)
-      inputMolecule.apply(Set(uri1, uri2)).get === List(1, 2)
-
-      inputMolecule.apply(uri1 or uri1).get === List(1)
-      inputMolecule.apply(uri1 or uri2).get === List(1, 2)
-      inputMolecule.apply(uri1 or uri2 or uri3).get === List(1, 2, 3)
+      Ns.int.uri_.apply(List(uri1, uri2, uri3)).get === List(1, 2, 3)
     }
   }
 
 
   "Card many" >> {
 
-    "Mandatory (single attr coalesce)" in new ManySetup {
-
-      // Vararg (OR semantics)
-      Ns.uris.apply(uri1).get === List(Set(uri1, uri2))
-      Ns.uris.apply(uri2).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(uri1, uri2).get === List(Set(uri1, uri3, uri2))
-
-      // Explicit `or` semantics
-      Ns.uris.apply(uri1 or uri2).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(uri1 or uri2 or uri3).get === List(Set(uri1, uri4, uri3, uri2))
-
-      // Iterable: List - OR semantics
-      Ns.uris.apply(List(uri1)).get === List(Set(uri1, uri2))
-      Ns.uris.apply(List(uri2)).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(List(uri1, uri2)).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(List(uri1), Set(uri2)).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(List(uri1, uri2), List(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-      Ns.uris.apply(List(uri1), List(uri2, uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-
-      // mixing Iterable types and value/variable ok
-      Ns.uris.apply(List(uri1), Set(uri2, uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.uris.apply(Set(uri1)).get === List(Set(uri1, uri2))
-      Ns.uris.apply(Set(uri2)).get === List(Set(uri1, uri3, uri2))
-      Ns.uris.apply(Set(uri1, uri2)).get === List(Set(uri1, uri2))
-      Ns.uris.apply(Set(uri1, uri3)).get === Nil
-      Ns.uris.apply(Set(uri2, uri3)).get === List(Set(uri2, uri3))
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (m(Ns.uris.apply(Set(uri1, uri2), Set(uri3))).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/uris"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.uris(uri1 and uri2).get === List(Set(uri1, uri2))
-      Ns.uris(uri1 and uri3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.uris(?))
-
-      // AND semantics when applying uri1 Set of values matching attribute values of uri1 entity
-
-      inputMolecule.apply(Set(uri1)).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(uri2)).get === List(Set(uri1, uri3, uri2))
-
-      inputMolecule.apply(Set(uri1, uri2)).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(uri1, uri3)).get === Nil
-      inputMolecule.apply(Set(uri2, uri3)).get === List(Set(uri2, uri3))
-      inputMolecule.apply(Set(uri3, uri1, uri2)).get === Nil
-
-      inputMolecule.apply(List(Set(uri1))).get === List(Set(uri1, uri2))
-      inputMolecule.apply(List(Set(uri2))).get === List(Set(uri1, uri3, uri2))
-      inputMolecule.apply(List(Set(uri1, uri2))).get === List(Set(uri1, uri2))
-      inputMolecule.apply(List(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(List(Set(uri2, uri3))).get === List(Set(uri2, uri3))
-      inputMolecule.apply(List(Set(uri3, uri1, uri2))).get === Nil
-
-      inputMolecule.apply(Set(Set(uri1))).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(Set(uri2))).get === List(Set(uri1, uri3, uri2))
-      inputMolecule.apply(Set(Set(uri1, uri2))).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(Set(Set(uri2, uri3))).get === List(Set(uri2, uri3))
-      inputMolecule.apply(Set(Set(uri3, uri1, uri2))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(uri1), Set(uri1)).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(uri1), Set(uri2)).get === List(Set(uri1, uri3, uri2))
-      inputMolecule.apply(Set(uri1), Set(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-      inputMolecule.apply(Set(uri2), Set(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-      inputMolecule.apply(Set(uri1, uri2), Set(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
-
-      inputMolecule.apply(Set(uri1) or Set(uri1)).get === List(Set(uri1, uri2))
-      inputMolecule.apply(Set(uri1) or Set(uri2)).get === List(Set(uri1, uri3, uri2))
-      inputMolecule.apply(Set(uri1) or Set(uri2) or Set(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
+    class ManySetup extends CoreSetup {
+      Ns.int.uris$ insert List(
+        (1, Some(Set(uri1, uri2))),
+        (2, Some(Set(uri2, uri3))),
+        (3, Some(Set(uri3, uri4))),
+        (4, None)
+      )
     }
 
+    "Mandatory" in new ManySetup {
 
-    "Tacit" in new ManySetup {
+      // OR semantics
 
-      // Vararg (OR semantics)
-      Ns.int.uris_.apply(uri1).get === List(1)
-      Ns.int.uris_.apply(uri2).get === List(1, 2)
-      Ns.int.uris_.apply(uri1, uri2).get === List(1, 2)
-
-      // Explicit `or` semantics
-      Ns.int.uris_.apply(uri1 or uri2).get === List(1, 2)
-      Ns.int.uris_.apply(uri1 or uri2 or uri3).get === List(1, 2, 3)
-
-      // Iterable: List - OR semantics
-      Ns.int.uris_.apply(List(uri1)).get === List(1)
-      Ns.int.uris_.apply(List(uri2)).get === List(1, 2)
-      Ns.int.uris_.apply(List(uri1, uri2)).get === List(1, 2)
-      Ns.int.uris_.apply(List(uri1), Set(uri2)).get === List(1, 2)
-      Ns.int.uris_.apply(List(uri1, uri2), List(uri3)).get === List(1, 2, 3)
-      Ns.int.uris_.apply(List(uri1), List(uri2, uri3)).get === List(1, 2, 3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.int.uris_.apply(List(uri1), Set(uri2, uri3)).get === List(1, 2, 3)
-
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.uris_.apply(Set(uri1)).get === List(1)
-      Ns.int.uris_.apply(Set(uri2)).get === List(1, 2)
-      Ns.int.uris_.apply(Set(uri1, uri2)).get === List(1)
-      Ns.int.uris_.apply(Set(uri1, uri3)).get === Nil
-      Ns.int.uris_.apply(Set(uri2, uri3)).get === List(2)
-
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.uris_.apply(Set(uri1, uri2), Set(uri3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom_ (tacit)] Can only apply a single Set of values for attribute :ns/uris_"
-
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.uris_(uri1 and uri2).get === List(1)
-      Ns.int.uris_(uri1 and uri3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.uris_(?))
-
-      // AND semantics when applying uri1 Set of values matching attribute values of uri1 entity
-
-      inputMolecule.apply(Set(uri1)).get === List(1)
-      inputMolecule.apply(Set(uri2)).get === List(1, 2)
-
-      inputMolecule.apply(Set(uri1, uri2)).get === List(1)
-      inputMolecule.apply(Set(uri1, uri3)).get === Nil
-      inputMolecule.apply(Set(uri2, uri3)).get === List(2)
-      inputMolecule.apply(Set(uri3, uri1, uri2)).get === Nil
-
-      inputMolecule.apply(List(Set(uri1))).get === List(1)
-      inputMolecule.apply(List(Set(uri2))).get === List(1, 2)
-      inputMolecule.apply(List(Set(uri1, uri2))).get === List(1)
-      inputMolecule.apply(List(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(List(Set(uri2, uri3))).get === List(2)
-      inputMolecule.apply(List(Set(uri3, uri1, uri2))).get === Nil
-
-      inputMolecule.apply(Set(Set(uri1))).get === List(1)
-      inputMolecule.apply(Set(Set(uri2))).get === List(1, 2)
-      inputMolecule.apply(Set(Set(uri1, uri2))).get === List(1)
-      inputMolecule.apply(Set(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(Set(Set(uri2, uri3))).get === List(2)
-      inputMolecule.apply(Set(Set(uri3, uri1, uri2))).get === Nil
-
-
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(uri1), Set(uri1)).get === List(1)
-      inputMolecule.apply(Set(uri1), Set(uri2)).get === List(1, 2)
-      inputMolecule.apply(Set(uri1), Set(uri3)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(uri2), Set(uri3)).get === List(1, 2, 3)
-      inputMolecule.apply(Set(uri1, uri2), Set(uri3)).get === List(1, 2, 3)
-
-      inputMolecule.apply(Set(uri1) or Set(uri1)).get === List(1)
-      inputMolecule.apply(Set(uri1) or Set(uri2)).get === List(1, 2)
-      inputMolecule.apply(Set(uri1) or Set(uri2) or Set(uri3)).get === List(1, 2, 3)
-    }
-
-
-    "Mandatory unifying by other attribute (avoiding coalesce)" in new ManySetup {
-
-      // Vararg (OR semantics)
+      // Varargs
       Ns.int.uris.apply(uri1).get === List((1, Set(uri1, uri2)))
       Ns.int.uris.apply(uri2).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
       Ns.int.uris.apply(uri1, uri2).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.uris.apply(uri1 or uri2).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
       Ns.int.uris.apply(uri1 or uri2 or uri3).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.int.uris.apply().get === Nil
+      Ns.int.uris.apply(Nil).get === Nil
       Ns.int.uris.apply(List(uri1)).get === List((1, Set(uri1, uri2)))
       Ns.int.uris.apply(List(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
       Ns.int.uris.apply(List(uri1, uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-      Ns.int.uris.apply(List(uri1), Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
+      Ns.int.uris.apply(List(uri1), List(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
       Ns.int.uris.apply(List(uri1, uri2), List(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
       Ns.int.uris.apply(List(uri1), List(uri2, uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
+      Ns.int.uris.apply(List(uri1, uri2, uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.uris.apply(List(uri1), Set(uri2, uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
-      Ns.int.uris.apply(l1, Set(uri2, uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
+      // AND semantics
+
+      // Set
+      Ns.int.uris.apply(Set[URI]()).get === Nil // entities with no card-many values asserted can't also return values
       Ns.int.uris.apply(Set(uri1)).get === List((1, Set(uri1, uri2)))
       Ns.int.uris.apply(Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
       Ns.int.uris.apply(Set(uri1, uri2)).get === List((1, Set(uri1, uri2)))
       Ns.int.uris.apply(Set(uri1, uri3)).get === Nil
       Ns.int.uris.apply(Set(uri2, uri3)).get === List((2, Set(uri2, uri3)))
+      Ns.int.uris.apply(Set(uri1, uri2, uri3)).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.uris.apply(Set(uri1, uri2), Set(uri3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/uris"
+      Ns.int.uris.apply(Set(uri1, uri2), Set[URI]()).get === List((1, Set(uri1, uri2)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri4)).get === List((1, Set(uri1, uri2)), (3, Set(uri3, uri4)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri2), Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.uris(uri1 and uri2).get === List((1, Set(uri1, uri2)))
-      Ns.int.uris(uri1 and uri3).get === Nil
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri2, uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri2, uri4)).get === List((1, Set(uri1, uri2)))
+      Ns.int.uris.apply(Set(uri1, uri2), Set(uri3, uri4)).get === List((1, Set(uri1, uri2)), (3, Set(uri3, uri4)))
 
-
-      // Input
-
-      val inputMolecule = m(Ns.int.uris(?))
-
-      // AND semantics when applying uri1 Set of values matching attribute values of uri1 entity
-
-      inputMolecule.apply(Set(uri1)).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-
-      inputMolecule.apply(Set(uri1, uri2)).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(uri1, uri3)).get === Nil
-      inputMolecule.apply(Set(uri2, uri3)).get === List((2, Set(uri2, uri3)))
-      inputMolecule.apply(Set(uri3, uri1, uri2)).get === Nil
-
-      inputMolecule.apply(List(Set(uri1))).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(List(Set(uri2))).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-      inputMolecule.apply(List(Set(uri1, uri2))).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(List(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(List(Set(uri2, uri3))).get === List((2, Set(uri2, uri3)))
-      inputMolecule.apply(List(Set(uri3, uri1, uri2))).get === Nil
-
-      inputMolecule.apply(Set(Set(uri1))).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(Set(uri2))).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-      inputMolecule.apply(Set(Set(uri1, uri2))).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(Set(uri1, uri3))).get === Nil
-      inputMolecule.apply(Set(Set(uri2, uri3))).get === List((2, Set(uri2, uri3)))
-      inputMolecule.apply(Set(Set(uri3, uri1, uri2))).get === Nil
+      // `and`
+      Ns.int.uris.apply(uri1 and uri2).get === List((1, Set(uri1, uri2)))
+      Ns.int.uris.apply(uri1 and uri3).get === Nil
+    }
 
 
-      // OR semantics when applying multiple Sets - all values are flattened
+    "Mandatory, single attr coalesce" in new ManySetup {
 
-      inputMolecule.apply(Set(uri1), Set(uri1)).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(uri1), Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-      inputMolecule.apply(Set(uri1), Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
-      inputMolecule.apply(Set(uri2), Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
-      inputMolecule.apply(Set(uri1, uri2), Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
+      // OR semantics
 
-      inputMolecule.apply(Set(uri1) or Set(uri1)).get === List((1, Set(uri1, uri2)))
-      inputMolecule.apply(Set(uri1) or Set(uri2)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)))
-      inputMolecule.apply(Set(uri1) or Set(uri2) or Set(uri3)).get === List((1, Set(uri1, uri2)), (2, Set(uri2, uri3)), (3, Set(uri3, uri4)))
+      // Varargs
+      Ns.uris.apply(uri1).get === List(Set(uri1, uri2))
+      Ns.uris.apply(uri2).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(uri1, uri2).get === List(Set(uri1, uri3, uri2))
+
+      // `or`
+      Ns.uris.apply(uri1 or uri2).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(uri1 or uri2 or uri3).get === List(Set(uri1, uri4, uri3, uri2))
+
+      // Seq
+      Ns.uris.apply().get === Nil
+      Ns.uris.apply(Nil).get === Nil
+      Ns.uris.apply(List(uri1)).get === List(Set(uri1, uri2))
+      Ns.uris.apply(List(uri2)).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(List(uri1, uri2)).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(List(uri1), List(uri2)).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(List(uri1, uri2), List(uri3)).get === List(Set(uri1, uri4, uri3, uri2))
+      Ns.uris.apply(List(uri1), List(uri2, uri3)).get === List(Set(uri1, uri4, uri3, uri2))
+      Ns.uris.apply(List(uri1, uri2, uri3)).get === List(Set(uri1, uri4, uri3, uri2))
+
+
+      // AND semantics
+
+      // Set
+      Ns.uris.apply(Set[URI]()).get === Nil // entities with no card-many values asserted can't also return values
+      Ns.uris.apply(Set(uri1)).get === List(Set(uri1, uri2))
+      Ns.uris.apply(Set(uri2)).get === List(Set(uri1, uri3, uri2))
+      Ns.uris.apply(Set(uri1, uri2)).get === List(Set(uri1, uri2))
+      Ns.uris.apply(Set(uri1, uri3)).get === Nil
+      Ns.uris.apply(Set(uri2, uri3)).get === List(Set(uri2, uri3))
+      Ns.uris.apply(Set(uri1, uri2, uri3)).get === Nil
+
+      Ns.uris.apply(Set(uri1, uri2), Set(uri2)).get === List(Set(uri1, uri2, uri3))
+      Ns.uris.apply(Set(uri1, uri2), Set(uri3)).get === List(Set(uri1, uri2, uri3, uri4))
+      Ns.uris.apply(Set(uri1, uri2), Set(uri4)).get === List(Set(uri1, uri2, uri3, uri4))
+      Ns.uris.apply(Set(uri1, uri2), Set(uri2), Set(uri3)).get === List(Set(uri1, uri2, uri3, uri4))
+
+      Ns.uris.apply(Set(uri1, uri2), Set(uri2, uri3)).get === List(Set(uri1, uri2, uri3))
+      Ns.uris.apply(Set(uri1, uri2), Set(uri2, uri4)).get === List(Set(uri1, uri2))
+      Ns.uris.apply(Set(uri1, uri2), Set(uri3, uri4)).get === List(Set(uri1, uri2, uri3, uri4))
+
+
+      // Explicit `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.uris.apply(uri1 and uri2).get === List(Set(uri1, uri2))
+      Ns.uris.apply(uri1 and uri3).get === Nil
+    }
+
+
+    "Tacit" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
+      Ns.int.uris_.apply(uri1).get === List(1)
+      Ns.int.uris_.apply(uri2).get === List(1, 2)
+      Ns.int.uris_.apply(uri1, uri2).get === List(1, 2)
+
+      // `or`
+      Ns.int.uris_.apply(uri1 or uri2).get === List(1, 2)
+      Ns.int.uris_.apply(uri1 or uri2 or uri3).get === List(1, 2, 3)
+
+      // Seq
+      Ns.int.uris_.apply().get === List(4) // entities with no card-many values asserted
+      Ns.int.uris_.apply(Nil).get === List(4)
+      Ns.int.uris_.apply(List(uri1)).get === List(1)
+      Ns.int.uris_.apply(List(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(List(uri1, uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(List(uri1), List(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(List(uri1, uri2), List(uri3)).get === List(1, 2, 3)
+      Ns.int.uris_.apply(List(uri1), List(uri2, uri3)).get === List(1, 2, 3)
+      Ns.int.uris_.apply(List(uri1, uri2, uri3)).get === List(1, 2, 3)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.uris_.apply(Set[URI]()).get === List(4)
+      Ns.int.uris_.apply(Set(uri1)).get === List(1)
+      Ns.int.uris_.apply(Set(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(Set(uri1, uri2)).get === List(1)
+      Ns.int.uris_.apply(Set(uri1, uri3)).get === Nil
+      Ns.int.uris_.apply(Set(uri2, uri3)).get === List(2)
+      Ns.int.uris_.apply(Set(uri1, uri2, uri3)).get === Nil
+
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri3)).get === List(1, 2, 3)
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri4)).get === List(1, 3)
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri2), Set(uri3)).get === List(1, 2, 3)
+
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri2, uri3)).get === List(1, 2)
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri2, uri4)).get === List(1)
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri3, uri4)).get === List(1, 3)
+
+
+      // `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.uris_.apply(uri1 and uri2).get === List(1)
+      Ns.int.uris_.apply(uri1 and uri3).get === Nil
+    }
+
+
+    "Variable resolution" in new ManySetup {
+
+      val seq0 = Nil
+      val set0 = Set[URI]()
+
+      val l1 = List(uri1)
+      val l2 = List(uri2)
+
+      val s1 = Set(uri1)
+      val s2 = Set(uri2)
+
+      val l12 = List(uri1, uri2)
+      val l23 = List(uri2, uri3)
+
+      val s12 = Set(uri1, uri2)
+      val s23 = Set(uri2, uri3)
+
+
+      // OR semantics
+
+      // Vararg
+      Ns.int.uris_.apply(uri1, uri2).get === List(1, 2)
+
+      // `or`
+      Ns.int.uris_.apply(uri1 or uri2).get === List(1, 2)
+
+      // Seq
+      Ns.int.uris_.apply(seq0).get === List(4)
+      Ns.int.uris_.apply(List(uri1), List(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(l1, l2).get === List(1, 2)
+      Ns.int.uris_.apply(List(uri1, uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(l12).get === List(1, 2)
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.uris_.apply(set0).get === List(4)
+
+      Ns.int.uris_.apply(Set(uri1)).get === List(1)
+      Ns.int.uris_.apply(s1).get === List(1)
+
+      Ns.int.uris_.apply(Set(uri2)).get === List(1, 2)
+      Ns.int.uris_.apply(s2).get === List(1, 2)
+
+      Ns.int.uris_.apply(Set(uri1, uri2)).get === List(1)
+      Ns.int.uris_.apply(s12).get === List(1)
+
+      Ns.int.uris_.apply(Set(uri2, uri3)).get === List(2)
+      Ns.int.uris_.apply(s23).get === List(2)
+
+      Ns.int.uris_.apply(Set(uri1, uri2), Set(uri2, uri3)).get === List(1, 2)
+      Ns.int.uris_.apply(s12, s23).get === List(1, 2)
+
+      // `and`
+      Ns.int.uris_.apply(uri1 and uri2).get === List(1)
     }
   }
 }

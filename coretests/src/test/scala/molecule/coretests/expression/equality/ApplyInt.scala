@@ -1,397 +1,297 @@
 package molecule.coretests.expression.equality
 
 import molecule.api._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.exception.Model2QueryException
 
-class ApplyInt extends ApplyBase {
+class ApplyInt extends CoreSpec {
 
-  val l1 = List(1)
-  val l2 = List(2)
-  val l3 = List(3)
-
-  val s1 = Set(1)
-  val s2 = Set(2)
-  val s3 = Set(3)
-
-  val l11 = List(1, 1)
-  val l12 = List(1, 2)
-  val l13 = List(1, 3)
-  val l23 = List(2, 3)
-
-  val s12 = Set(1, 2)
-  val s13 = Set(1, 3)
-  val s23 = Set(2, 3)
 
   "Card one" >> {
 
+    class OneSetup extends CoreSetup {
+      Ns.str.int$ insert List(
+        ("a", Some(1)),
+        ("b", Some(2)),
+        ("c", Some(3)),
+        ("d", None)
+      )
+    }
+
+    // OR semantics only for card-one attributes
+
     "Mandatory" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.int.apply(1).get === List(1)
       Ns.int.apply(2).get === List(2)
       Ns.int.apply(1, 2).get === List(1, 2)
 
-      // Explicit `or` semantics
+      // `or`
       Ns.int.apply(1 or 2).get === List(1, 2)
       Ns.int.apply(1 or 2 or 3).get === List(1, 2, 3)
 
-      // Iterable: List (OR semantics)
+      // Seq
+      Ns.int.apply().get === Nil
+      Ns.int.apply(Nil).get === Nil
       Ns.int.apply(List(1)).get === List(1)
       Ns.int.apply(List(2)).get === List(2)
       Ns.int.apply(List(1, 2)).get === List(1, 2)
       Ns.int.apply(List(1), List(2)).get === List(1, 2)
       Ns.int.apply(List(1, 2), List(3)).get === List(1, 2, 3)
       Ns.int.apply(List(1), List(2, 3)).get === List(1, 2, 3)
-
-      // mixing Iterable types and value/variable ok
-      Ns.int.apply(List(int1), Set(2, int3)).get === List(1, 2, 3)
-
-      // Iterable: Set (OR semantics)
-      Ns.int.apply(Set(1)).get === List(1)
-      Ns.int.apply(Set(2)).get === List(2)
-      Ns.int.apply(Set(1, 2)).get === List(1, 2)
-      Ns.int.apply(Set(1), Set(2)).get === List(1, 2)
-      Ns.int.apply(Set(1, 2), Set(3)).get === List(1, 2, 3)
-      Ns.int.apply(Set(1), Set(2, 3)).get === List(1, 2, 3)
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int(?))
-
-      inputMolecule.apply(1).get === List(1)
-      inputMolecule.apply(2).get === List(2)
-
-      inputMolecule.apply(1, 1).get === List(1)
-      inputMolecule.apply(1, 2).get === List(1, 2)
-
-      inputMolecule.apply(List(1)).get === List(1)
-      inputMolecule.apply(List(1, 1)).get === List(1)
-      inputMolecule.apply(List(1, 2)).get === List(1, 2)
-
-      inputMolecule.apply(Set(1)).get === List(1)
-      inputMolecule.apply(Set(1, 2)).get === List(1, 2)
-
-      inputMolecule.apply(1 or 1).get === List(1)
-      inputMolecule.apply(1 or 2).get === List(1, 2)
-      inputMolecule.apply(1 or 2 or 3).get === List(1, 2, 3)
+      Ns.int.apply(List(1, 2, 3)).get === List(1, 2, 3)
     }
 
 
     "Tacit" in new OneSetup {
 
-      // Vararg (OR semantics)
+      // Varargs
       Ns.str.int_.apply(1).get === List("a")
       Ns.str.int_.apply(2).get === List("b")
       Ns.str.int_.apply(1, 2).get === List("a", "b")
 
-      // Explicit `or` semantics
+      // `or`
       Ns.str.int_.apply(1 or 2).get === List("a", "b")
       Ns.str.int_.apply(1 or 2 or 3).get === List("a", "b", "c")
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.str.int_.apply().get === List("d")
+      Ns.str.int_.apply(Nil).get === List("d")
       Ns.str.int_.apply(List(1)).get === List("a")
       Ns.str.int_.apply(List(2)).get === List("b")
       Ns.str.int_.apply(List(1, 2)).get === List("a", "b")
       Ns.str.int_.apply(List(1), List(2)).get === List("a", "b")
       Ns.str.int_.apply(List(1, 2), List(3)).get === List("a", "b", "c")
       Ns.str.int_.apply(List(1), List(2, 3)).get === List("a", "b", "c")
-
-      // Iterable: Set (OR semantics)
-      Ns.str.int_.apply(Set(1)).get === List("a")
-      Ns.str.int_.apply(Set(2)).get === List("b")
-      Ns.str.int_.apply(Set(1, 2)).get === List("a", "b")
-      Ns.str.int_.apply(Set(1), Set(2)).get === List("a", "b")
-      Ns.str.int_.apply(Set(1, 2), Set(3)).get === List("a", "b", "c")
-      Ns.str.int_.apply(Set(1), Set(2, 3)).get === List("a", "b", "c")
-
-
-      // Input
-
-      val inputMolecule = m(Ns.str.int_(?))
-
-      inputMolecule.apply(1).get === List("a")
-      inputMolecule.apply(2).get === List("b")
-
-      inputMolecule.apply(1, 2).get === List("a", "b")
-
-      inputMolecule.apply(List(1)).get === List("a")
-      inputMolecule.apply(List(1, 2)).get === List("a", "b")
-
-      inputMolecule.apply(Set(1)).get === List("a")
-      inputMolecule.apply(Set(1, 2)).get === List("a", "b")
-
-      inputMolecule.apply(1 or 2).get === List("a", "b")
-      inputMolecule.apply(1 or 2 or 3).get === List("a", "b", "c")
-
-      // Redundant duplicate values are omitted
-      inputMolecule.apply(1, 1).get === List("a")
-      inputMolecule.apply(List(1, 1)).get === List("a")
-      inputMolecule.apply(1 or 1).get === List("a")
+      Ns.str.int_.apply(List(1, 2, 3)).get === List("a", "b", "c")
     }
   }
 
 
   "Card many" >> {
 
-    "Mandatory (single attr coalesce)" in new ManySetup {
+    class ManySetup extends CoreSetup {
+      Ns.int.ints$ insert List(
+        (1, Some(Set(1, 2))),
+        (2, Some(Set(2, 3))),
+        (3, Some(Set(3, 4))),
+        (4, None)
+      )
+    }
 
-      // Vararg (OR semantics)
+    "Mandatory" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
+      Ns.int.ints.apply(1).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(2).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(1, 2).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+
+      // `or`
+      Ns.int.ints.apply(1 or 2).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(1 or 2 or 3).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+
+      // Seq
+      Ns.int.ints.apply().get === Nil
+      Ns.int.ints.apply(Nil).get === Nil
+      Ns.int.ints.apply(List(1)).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(List(2)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(List(1, 2)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(List(1), List(2)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(List(1, 2), List(3)).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+      Ns.int.ints.apply(List(1), List(2, 3)).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+      Ns.int.ints.apply(List(1, 2, 3)).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+
+
+      // AND semantics
+
+      // Set
+      Ns.int.ints.apply(Set[Int]()).get === Nil // entities with no card-many values asserted can't also return values
+      Ns.int.ints.apply(Set(1)).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(Set(2)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(Set(1, 2)).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(Set(1, 3)).get === Nil
+      Ns.int.ints.apply(Set(2, 3)).get === List((2, Set(2, 3)))
+      Ns.int.ints.apply(Set(1, 2, 3)).get === Nil
+
+      Ns.int.ints.apply(Set(1, 2), Set[Int]()).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(Set(1, 2), Set(2)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(Set(1, 2), Set(3)).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+      Ns.int.ints.apply(Set(1, 2), Set(4)).get === List((1, Set(1, 2)), (3, Set(3, 4)))
+      Ns.int.ints.apply(Set(1, 2), Set(2), Set(3)).get === List((1, Set(1, 2)), (2, Set(2, 3)), (3, Set(3, 4)))
+
+      Ns.int.ints.apply(Set(1, 2), Set(2, 3)).get === List((1, Set(1, 2)), (2, Set(2, 3)))
+      Ns.int.ints.apply(Set(1, 2), Set(2, 4)).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(Set(1, 2), Set(3, 4)).get === List((1, Set(1, 2)), (3, Set(3, 4)))
+
+      // `and`
+      Ns.int.ints.apply(1 and 2).get === List((1, Set(1, 2)))
+      Ns.int.ints.apply(1 and 3).get === Nil
+    }
+
+
+    "Mandatory, single attr coalesce" in new ManySetup {
+
+      // OR semantics
+
+      // Varargs
       Ns.ints.apply(1).get === List(Set(1, 2))
       Ns.ints.apply(2).get === List(Set(1, 3, 2))
       Ns.ints.apply(1, 2).get === List(Set(1, 3, 2))
 
-      // Explicit `or` semantics
-      Ns.ints.apply(1, 2).get === List(Set(1, 3, 2))
-      Ns.ints.apply(1, 2, 3).get === List(Set(1, 4, 3, 2))
+      // `or`
+      Ns.ints.apply(1 or 2).get === List(Set(1, 3, 2))
+      Ns.ints.apply(1 or 2 or 3).get === List(Set(1, 4, 3, 2))
 
-      // Iterable: List - OR semantics
+      // Seq
+      Ns.ints.apply().get === Nil
+      Ns.ints.apply(Nil).get === Nil
       Ns.ints.apply(List(1)).get === List(Set(1, 2))
       Ns.ints.apply(List(2)).get === List(Set(1, 3, 2))
       Ns.ints.apply(List(1, 2)).get === List(Set(1, 3, 2))
       Ns.ints.apply(List(1), List(2)).get === List(Set(1, 3, 2))
       Ns.ints.apply(List(1, 2), List(3)).get === List(Set(1, 4, 3, 2))
       Ns.ints.apply(List(1), List(2, 3)).get === List(Set(1, 4, 3, 2))
+      Ns.ints.apply(List(1, 2, 3)).get === List(Set(1, 4, 3, 2))
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
+
+      // AND semantics
+
+      // Set
+      Ns.ints.apply(Set[Int]()).get === Nil // entities with no card-many values asserted can't also return values
       Ns.ints.apply(Set(1)).get === List(Set(1, 2))
       Ns.ints.apply(Set(2)).get === List(Set(1, 3, 2))
       Ns.ints.apply(Set(1, 2)).get === List(Set(1, 2))
       Ns.ints.apply(Set(1, 3)).get === Nil
       Ns.ints.apply(Set(2, 3)).get === List(Set(2, 3))
+      Ns.ints.apply(Set(1, 2, 3)).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (m(Ns.ints.apply(Set(1, 2), Set(3))).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/ints"
+      Ns.ints.apply(Set(1, 2), Set(2)).get === List(Set(1, 2, 3))
+      Ns.ints.apply(Set(1, 2), Set(3)).get === List(Set(1, 2, 3, 4))
+      Ns.ints.apply(Set(1, 2), Set(4)).get === List(Set(1, 2, 3, 4))
+      Ns.ints.apply(Set(1, 2), Set(2), Set(3)).get === List(Set(1, 2, 3, 4))
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.ints(1 and 2).get === List(Set(1, 2))
-      Ns.ints(1 and 3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.ints(?))
-
-      // AND semantics when applying 1 Set of values matching attribute values of 1 entity
-
-      inputMolecule.apply(Set(1)).get === List(Set(1, 2))
-      inputMolecule.apply(Set(2)).get === List(Set(1, 3, 2))
-
-      inputMolecule.apply(Set(1, 2)).get === List(Set(1, 2))
-      inputMolecule.apply(Set(1, 3)).get === Nil
-      inputMolecule.apply(Set(2, 3)).get === List(Set(2, 3))
-      inputMolecule.apply(Set(1, 2, 3)).get === Nil
-
-      inputMolecule.apply(List(Set(1))).get === List(Set(1, 2))
-      inputMolecule.apply(List(Set(2))).get === List(Set(1, 3, 2))
-      inputMolecule.apply(List(Set(1, 2))).get === List(Set(1, 2))
-      inputMolecule.apply(List(Set(1, 3))).get === Nil
-      inputMolecule.apply(List(Set(2, 3))).get === List(Set(2, 3))
-      inputMolecule.apply(List(Set(1, 2, 3))).get === Nil
-
-      inputMolecule.apply(Set(Set(1))).get === List(Set(1, 2))
-      inputMolecule.apply(Set(Set(2))).get === List(Set(1, 3, 2))
-      inputMolecule.apply(Set(Set(1, 2))).get === List(Set(1, 2))
-      inputMolecule.apply(Set(Set(1, 3))).get === Nil
-      inputMolecule.apply(Set(Set(2, 3))).get === List(Set(2, 3))
-      inputMolecule.apply(Set(Set(1, 2, 3))).get === Nil
+      Ns.ints.apply(Set(1, 2), Set(2, 3)).get === List(Set(1, 2, 3))
+      Ns.ints.apply(Set(1, 2), Set(2, 4)).get === List(Set(1, 2))
+      Ns.ints.apply(Set(1, 2), Set(3, 4)).get === List(Set(1, 2, 3, 4))
 
 
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(1), Set(1)).get === List(Set(1, 2))
-      inputMolecule.apply(Set(1), Set(2)).get === List(Set(1, 3, 2))
-      inputMolecule.apply(Set(1), Set(3)).get === List(Set(1, 4, 3, 2))
-      inputMolecule.apply(Set(2), Set(3)).get === List(Set(1, 4, 3, 2))
-      inputMolecule.apply(Set(1, 2), Set(3)).get === List(Set(1, 4, 3, 2))
-
-      inputMolecule.apply(Set(1) or Set(1)).get === List(Set(1, 2))
-      inputMolecule.apply(Set(1) or Set(2)).get === List(Set(1, 3, 2))
-      inputMolecule.apply(Set(1) or Set(2) or Set(3)).get === List(Set(1, 4, 3, 2))
+      // Explicit `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.ints.apply(1 and 2).get === List(Set(1, 2))
+      Ns.ints.apply(1 and 3).get === Nil
     }
 
 
     "Tacit" in new ManySetup {
 
-      // Vararg (OR semantics)
-      Ns.int.ints_.apply(1).get === List(10)
-      Ns.int.ints_.apply(2).get === List(20, 10)
-      Ns.int.ints_.apply(1, 2).get === List(20, 10)
+      // OR semantics
 
-      // Explicit `or` semantics
-      Ns.int.ints_.apply(1, 2).get === List(20, 10)
-      Ns.int.ints_.apply(1, 2, 3).get === List(20, 10, 30)
+      // Varargs
+      Ns.int.ints_.apply(1).get === List(1)
+      Ns.int.ints_.apply(2).get === List(1, 2)
+      Ns.int.ints_.apply(1, 2).get === List(1, 2)
 
-      // Iterable: List - OR semantics
-      Ns.int.ints_.apply(List(1)).get === List(10)
-      Ns.int.ints_.apply(List(2)).get === List(20, 10)
-      Ns.int.ints_.apply(List(1, 2)).get === List(20, 10)
-      Ns.int.ints_.apply(List(1), List(2)).get === List(20, 10)
-      Ns.int.ints_.apply(List(1, 2), List(3)).get === List(20, 10, 30)
-      Ns.int.ints_.apply(List(1), List(2, 3)).get === List(20, 10, 30)
+      // `or`
+      Ns.int.ints_.apply(1 or 2).get === List(1, 2)
+      Ns.int.ints_.apply(1 or 2 or 3).get === List(1, 2, 3)
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.ints_.apply(List(int1), Set(2, int3)).get === List(20, 10, 30)
+      // Seq
+      Ns.int.ints_.apply().get === List(4) // entities with no card-many values asserted
+      Ns.int.ints_.apply(Nil).get === List(4)
+      Ns.int.ints_.apply(List(1)).get === List(1)
+      Ns.int.ints_.apply(List(2)).get === List(1, 2)
+      Ns.int.ints_.apply(List(1, 2)).get === List(1, 2)
+      Ns.int.ints_.apply(List(1), List(2)).get === List(1, 2)
+      Ns.int.ints_.apply(List(1, 2), List(3)).get === List(1, 2, 3)
+      Ns.int.ints_.apply(List(1), List(2, 3)).get === List(1, 2, 3)
+      Ns.int.ints_.apply(List(1, 2, 3)).get === List(1, 2, 3)
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.ints_.apply(Set(1)).get === List(10)
-      Ns.int.ints_.apply(Set(2)).get === List(20, 10)
-      Ns.int.ints_.apply(Set(1, 2)).get === List(10)
+
+      // AND semantics
+
+      // Set
+      Ns.int.ints_.apply(Set[Int]()).get === List(4)
+      Ns.int.ints_.apply(Set(1)).get === List(1)
+      Ns.int.ints_.apply(Set(2)).get === List(1, 2)
+      Ns.int.ints_.apply(Set(1, 2)).get === List(1)
       Ns.int.ints_.apply(Set(1, 3)).get === Nil
-      Ns.int.ints_.apply(Set(2, 3)).get === List(20)
+      Ns.int.ints_.apply(Set(2, 3)).get === List(2)
+      Ns.int.ints_.apply(Set(1, 2, 3)).get === Nil
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.ints_.apply(Set(1, 2), Set(3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom_ (tacit)] Can only apply a single Set of values for attribute :ns/ints_"
+      Ns.int.ints_.apply(Set(1, 2), Set(2)).get === List(1, 2)
+      Ns.int.ints_.apply(Set(1, 2), Set(3)).get === List(1, 2, 3)
+      Ns.int.ints_.apply(Set(1, 2), Set(4)).get === List(1, 3)
+      Ns.int.ints_.apply(Set(1, 2), Set(2), Set(3)).get === List(1, 2, 3)
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.ints_(1 and 2).get === List(10)
-      Ns.int.ints_(1 and 3).get === Nil
-
-
-      // Input
-
-      val inputMolecule = m(Ns.int.ints_(?))
-
-      // AND semantics when applying 1 Set of values matching attribute values of 1 entity
-
-      inputMolecule.apply(Set(1)).get === List(10)
-      inputMolecule.apply(Set(2)).get === List(20, 10)
-
-      inputMolecule.apply(Set(1, 2)).get === List(10)
-      inputMolecule.apply(Set(1, 3)).get === Nil
-      inputMolecule.apply(Set(2, 3)).get === List(20)
-      inputMolecule.apply(Set(1, 2, 3)).get === Nil
-
-      inputMolecule.apply(List(Set(1))).get === List(10)
-      inputMolecule.apply(List(Set(2))).get === List(20, 10)
-      inputMolecule.apply(List(Set(1, 2))).get === List(10)
-      inputMolecule.apply(List(Set(1, 3))).get === Nil
-      inputMolecule.apply(List(Set(2, 3))).get === List(20)
-      inputMolecule.apply(List(Set(1, 2, 3))).get === Nil
-
-      inputMolecule.apply(Set(Set(1))).get === List(10)
-      inputMolecule.apply(Set(Set(2))).get === List(20, 10)
-      inputMolecule.apply(Set(Set(1, 2))).get === List(10)
-      inputMolecule.apply(Set(Set(1, 3))).get === Nil
-      inputMolecule.apply(Set(Set(2, 3))).get === List(20)
-      inputMolecule.apply(Set(Set(1, 2, 3))).get === Nil
+      Ns.int.ints_.apply(Set(1, 2), Set(2, 3)).get === List(1, 2)
+      Ns.int.ints_.apply(Set(1, 2), Set(2, 4)).get === List(1)
+      Ns.int.ints_.apply(Set(1, 2), Set(3, 4)).get === List(1, 3)
 
 
-      // OR semantics when applying multiple Sets - all values are flattened
-
-      inputMolecule.apply(Set(1), Set(1)).get === List(10)
-      inputMolecule.apply(Set(1), Set(2)).get === List(20, 10)
-      inputMolecule.apply(Set(1), Set(3)).get === List(20, 10, 30)
-      inputMolecule.apply(Set(2), Set(3)).get === List(20, 10, 30)
-      inputMolecule.apply(Set(1, 2), Set(3)).get === List(20, 10, 30)
-
-      inputMolecule.apply(Set(1) or Set(1)).get === List(10)
-      inputMolecule.apply(Set(1) or Set(2)).get === List(20, 10)
-      inputMolecule.apply(Set(1) or Set(2) or Set(3)).get === List(20, 10, 30)
+      // `and` (maximum 2 `and` implemented: `v1 and v2 and v3`)
+      Ns.int.ints_.apply(1 and 2).get === List(1)
+      Ns.int.ints_.apply(1 and 3).get === Nil
     }
 
 
-    "Mandatory unifying by other attribute (avoiding coalesce)" in new ManySetup {
+    "Variable resolution" in new ManySetup {
 
-      // Vararg (OR semantics)
-      Ns.int.ints.apply(1).get === List((10, Set(1, 2)))
-      Ns.int.ints.apply(2).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(1, 2).get === List((10, Set(1, 2)), (20, Set(2, 3)))
+      val seq0 = Nil
+      val set0 = Set[Int]()
 
-      // Explicit `or` semantics
-      Ns.int.ints.apply(1, 2).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(1, 2, 3).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
+      val l1 = List(1)
+      val l2 = List(2)
 
-      // Iterable: List - OR semantics
-      Ns.int.ints.apply(List(1)).get === List((10, Set(1, 2)))
-      Ns.int.ints.apply(List(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(List(1, 2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(List(1), List(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(List(1, 2), List(3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
-      Ns.int.ints.apply(List(1), List(2, 3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
+      val s1 = Set(1)
+      val s2 = Set(2)
 
-      // mixing Iterable types and value/variable ok
-      Ns.int.ints.apply(List(int1), Set(2, int3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
-      Ns.int.ints.apply(l1, Set(2, int3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
+      val l12 = List(1, 2)
+      val l23 = List(2, 3)
+
+      val s12 = Set(1, 2)
+      val s23 = Set(2, 3)
 
 
-      // Iterable: Set - AND semantics matching all values of card-many attribute per entity
-      Ns.int.ints.apply(Set(1)).get === List((10, Set(1, 2)))
-      Ns.int.ints.apply(Set(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      Ns.int.ints.apply(Set(1, 2)).get === List((10, Set(1, 2)))
-      Ns.int.ints.apply(Set(1, 3)).get === Nil
-      Ns.int.ints.apply(Set(2, 3)).get === List((20, Set(2, 3)))
+      // OR semantics
 
-      // Can't match multiple Sets (if needed, do multiple queries)
-      (Ns.int.ints.apply(Set(1, 2), Set(3)).get must throwA[Model2QueryException])
-        .message === "Got the exception molecule.transform.exception.Model2QueryException: " +
-        "[Atom (mandatory)] Can only apply a single Set of values for attribute :ns/ints"
+      // Vararg
+      Ns.int.ints_.apply(int1, int2).get === List(1, 2)
 
-      // Explicit `and` semantics (maximum 2 `and` implemented: `v1 and v2 and v3`)
-      Ns.int.ints(1 and 2).get === List((10, Set(1, 2)))
-      Ns.int.ints(1 and 3).get === Nil
+      // `or`
+      Ns.int.ints_.apply(int1 or int2).get === List(1, 2)
 
-
-      // Input
-
-      val inputMolecule = m(Ns.int.ints(?))
-
-      // AND semantics when applying 1 Set of values matching attribute values of 1 entity
-
-      inputMolecule.apply(Set(1)).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-
-      inputMolecule.apply(Set(1, 2)).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(1, 3)).get === Nil
-      inputMolecule.apply(Set(2, 3)).get === List((20, Set(2, 3)))
-      inputMolecule.apply(Set(1, 2, 3)).get === Nil
-
-      inputMolecule.apply(List(Set(1))).get === List((10, Set(1, 2)))
-      inputMolecule.apply(List(Set(2))).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      inputMolecule.apply(List(Set(1, 2))).get === List((10, Set(1, 2)))
-      inputMolecule.apply(List(Set(1, 3))).get === Nil
-      inputMolecule.apply(List(Set(2, 3))).get === List((20, Set(2, 3)))
-      inputMolecule.apply(List(Set(1, 2, 3))).get === Nil
-
-      inputMolecule.apply(Set(Set(1))).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(Set(2))).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      inputMolecule.apply(Set(Set(1, 2))).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(Set(1, 3))).get === Nil
-      inputMolecule.apply(Set(Set(2, 3))).get === List((20, Set(2, 3)))
-      inputMolecule.apply(Set(Set(1, 2, 3))).get === Nil
+      // Seq
+      Ns.int.ints_.apply(seq0).get === List(4)
+      Ns.int.ints_.apply(List(int1), List(int2)).get === List(1, 2)
+      Ns.int.ints_.apply(l1, l2).get === List(1, 2)
+      Ns.int.ints_.apply(List(int1, int2)).get === List(1, 2)
+      Ns.int.ints_.apply(l12).get === List(1, 2)
 
 
-      // OR semantics when applying multiple Sets - all values are flattened
+      // AND semantics
 
-      inputMolecule.apply(Set(1), Set(1)).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(1), Set(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      inputMolecule.apply(Set(1), Set(3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
-      inputMolecule.apply(Set(2), Set(3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
-      inputMolecule.apply(Set(1, 2), Set(3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
+      // Set
+      Ns.int.ints_.apply(set0).get === List(4)
 
-      inputMolecule.apply(Set(1) or Set(1)).get === List((10, Set(1, 2)))
-      inputMolecule.apply(Set(1) or Set(2)).get === List((10, Set(1, 2)), (20, Set(2, 3)))
-      inputMolecule.apply(Set(1) or Set(2) or Set(3)).get === List((10, Set(1, 2)), (20, Set(2, 3)), (30, Set(3, 4)))
+      Ns.int.ints_.apply(Set(int1)).get === List(1)
+      Ns.int.ints_.apply(s1).get === List(1)
+
+      Ns.int.ints_.apply(Set(int2)).get === List(1, 2)
+      Ns.int.ints_.apply(s2).get === List(1, 2)
+
+      Ns.int.ints_.apply(Set(int1, int2)).get === List(1)
+      Ns.int.ints_.apply(s12).get === List(1)
+
+      Ns.int.ints_.apply(Set(int2, int3)).get === List(2)
+      Ns.int.ints_.apply(s23).get === List(2)
+
+      Ns.int.ints_.apply(Set(int1, int2), Set(int2, int3)).get === List(1, 2)
+      Ns.int.ints_.apply(s12, s23).get === List(1, 2)
+
+      // `and`
+      Ns.int.ints_.apply(int1 and int2).get === List(1)
     }
-  }
-
-
-  "Variable resolution" in new OneSetup {
-
-    Ns.int.apply(int1, int2).get === List(1, 2)
-
-    Ns.int.apply(List(int1, int2), List(int3)).get === List(1, 2, 3)
-    Ns.int.apply(l12, l3).get === List(1, 2, 3)
-
-    Ns.int.apply(Set(int1, int2), Set(int3)).get === List(1, 2, 3)
-    Ns.int.apply(s12, s3).get === List(1, 2, 3)
-
-    // mixing ok
-    Ns.int.apply(List(int1), Set(2, int3)).get === List(1, 2, 3)
   }
 }

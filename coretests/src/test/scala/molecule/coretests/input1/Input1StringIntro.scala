@@ -1,13 +1,13 @@
-package molecule.coretests.input
+package molecule.coretests.input1
 
+import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
-import molecule.api._
 
 
-class Input1String extends CoreSpec {
+class Input1StringIntro extends CoreSpec {
 
-sequential
+  sequential
 
   // Parameterized molecules have a `?` placeholder for an expected input value
   // and we call them "Input molecules".
@@ -58,11 +58,19 @@ sequential
   }
 
   class OneSetup extends CoreSetup {
-    Ns.int.str insert List((1, "a"), (2, "b"), (3, "c"))
+    Ns.int.str insert List(
+      (1, "a"),
+      (2, "b"),
+      (3, "c")
+    )
   }
 
   class ManySetup extends CoreSetup {
-    Ns.int.strs insert List((1, Set("a", "b")), (2, Set("b", "c")), (3, Set("c", "d")))
+    Ns.int.strs insert List(
+      (1, Set("a", "b")),
+      (2, Set("b", "c")),
+      (3, Set("c", "d"))
+    )
   }
 
   "Cardinality one" >> {
@@ -98,9 +106,6 @@ sequential
       // Comma-separated values
       m(Ns.int.str_(?)).apply("a", "b").get.sorted === List(1, 2)
 
-      // Set of values
-      m(Ns.int.str_(?)).apply(Set("a", "b")).get.sorted === List(1, 2)
-
       // Seq of values
       m(Ns.int.str_(?)).apply(Seq("a", "b")).get.sorted === List(1, 2)
 
@@ -114,14 +119,10 @@ sequential
       // Values assigned to variables
       m(Ns.int.str_(?))(str1 or str2).get.sorted === List(1, 2)
       m(Ns.int.str_(?))(str1, str2).get.sorted === List(1, 2)
-      m(Ns.int.str_(?))(Set(str1, str2)).get.sorted === List(1, 2)
       m(Ns.int.str_(?))(Seq(str1, str2)).get.sorted === List(1, 2)
 
       val seq = Seq(str1, str2)
       m(Ns.int.str_(?))(seq).get.sorted === List(1, 2)
-
-      val set = Set(str1, str2)
-      m(Ns.int.str_(?))(set).get.sorted === List(1, 2)
 
       // Order of input of no importance
       m(Ns.int.str_(?))("b", "a").get.sorted === List(1, 2)
@@ -136,11 +137,22 @@ sequential
 
     // Only for String attributes having fulltext option defined in schema.
     "Fulltext search" in new CoreSetup {
+
+      // https://groups.google.com/forum/#!searchin/datomic/fulltext$20rule|sort:date/datomic/tOm__ftT27c/uTfU_ZsnJiIJ
+
       Ns.str insert List("The quick fox jumps", "Ten slow monkeys")
-      m(Ns.str.contains(?))("jumps").get === List("The quick fox jumps")
+      val inputMolecule = m(Ns.str.contains(?))
+
+      inputMolecule(Nil).get === Nil
+
+      inputMolecule("jumps").get === List("The quick fox jumps")
+
+      inputMolecule("jumps", "fox").get === List("The quick fox jumps")
+      inputMolecule("jumps" or "fox").get === List("The quick fox jumps")
+      inputMolecule(Seq("jumps", "fox")).get === List("The quick fox jumps")
 
       // Obs: only whole words are matched
-      m(Ns.str.contains(?))("jump").get === Nil
+      inputMolecule("jump").get === Nil
     }
   }
 
@@ -167,9 +179,49 @@ sequential
       m(Ns.int.strs_.>(?))(Set("b")).get.sorted === List(2, 3)
       m(Ns.int.strs_.<=(?))(Set("b")).get.sorted === List(1, 2)
       m(Ns.int.strs_.>=(?))(Set("b")).get.sorted === List(1, 2, 3)
-      // All sets have some value not being "b"
-      m(Ns.int.strs_.!=(?))(Set("b")).get.sorted === List(1, 2, 3)
-      m(Ns.int.strs_.not(?))(Set("b")).get.sorted === List(1, 2, 3)
+      m(Ns.int.strs_.!=(?))(Set("b")).get.sorted === List(3)
+      m(Ns.int.strs_.not(?))(Set("b")).get.sorted === List(3)
+    }
+
+
+    // Only for String attributes having fulltext option defined in schema.
+    "Fulltext search" in new CoreSetup {
+      Ns.int.strs insert List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys")),
+        (2, Set("lorem ipsum", "Going slow"))
+      )
+      val inputMolecule = m(Ns.int.strs.contains(?))
+
+      inputMolecule(Nil).get === Nil
+
+      inputMolecule(Set("slow")).get === List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys")),
+        (2, Set("lorem ipsum", "Going slow"))
+      )
+
+      inputMolecule(Set("ipsum")).get === List(
+        (2, Set("lorem ipsum", "Going slow"))
+      )
+
+      // Only 1 entity has a `strs` attribute with both values
+      inputMolecule(Set("fox", "slow")).get === List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys"))
+      )
+
+      inputMolecule(Set("fox"), Set("slow")).get === List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys")),
+        (2, Set("lorem ipsum", "Going slow"))
+      )
+
+      inputMolecule(Set("fox") or Set("slow")).get === List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys")),
+        (2, Set("lorem ipsum", "Going slow"))
+      )
+
+      inputMolecule(List(Set("fox"), Set("slow"))).get === List(
+        (1, Set("The quick fox jumps", "Ten slow monkeys")),
+        (2, Set("lorem ipsum", "Going slow"))
+      )
     }
   }
 }
