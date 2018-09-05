@@ -289,14 +289,12 @@ class EnumCard1 extends CoreSpec {
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c2")), Seq(Seq("enum1")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq(":ns.enum/enum1")))),
           List(),
           List(DS)),
         Where(List(
           DataClause(ImplDS, Var("a"), KW("ns", "str", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enum", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))))))
+          DataClause(ImplDS, Var("a"), KW("ns", "enum", ""), Var("c"), Empty, NoBinding))))
 
       inputMolecule(List(enum1, enum1)).get === List(str1)
 
@@ -307,14 +305,12 @@ class EnumCard1 extends CoreSpec {
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c2")), Seq(Seq("enum1", "enum2")))),
+            InVar(CollectionBinding(Var("c")), Seq(Seq(":ns.enum/enum1", ":ns.enum/enum2")))),
           List(),
           List(DS)),
         Where(List(
           DataClause(ImplDS, Var("a"), KW("ns", "str", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enum", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))))))
+          DataClause(ImplDS, Var("a"), KW("ns", "enum", ""), Var("c"), Empty, NoBinding))))
     }
 
 

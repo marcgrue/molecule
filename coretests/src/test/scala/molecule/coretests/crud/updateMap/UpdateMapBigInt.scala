@@ -41,14 +41,14 @@ class UpdateMapBigInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
@@ -58,7 +58,7 @@ class UpdateMapBigInt extends CoreSpec {
       // vararg
       (Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1x -> bigInt2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
 
@@ -66,7 +66,7 @@ class UpdateMapBigInt extends CoreSpec {
       // Seq
       (Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1x -> bigInt2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
     }

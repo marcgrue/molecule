@@ -76,6 +76,29 @@ class GetAsOf extends CoreSpec {
   }
 
 
+  "tx entity" in new CoreSetup {
+
+    val eid = Ns.int(1).save.eid
+
+    // Get tx entity of last transaction involving Ns.int
+    val tx1 = Ns.int_.tx.get.head
+
+    Ns(eid).int(2).update
+
+    // Get tx entity of last transaction involving Ns.int
+    val tx2 = Ns.int_.tx.get.head
+
+    // Value as of tx1
+    Ns(eid).int.getAsOf(tx1) === List(1)
+
+    // Current value
+    Ns(eid).int.get === List(2)
+
+    // Value as of tx2 (current value)
+    Ns(eid).int.getAsOf(tx2) === List(2)
+  }
+
+
   "tx report" in new CoreSetup {
 
     // Insert (tx report 1)
@@ -117,18 +140,19 @@ class GetAsOf extends CoreSpec {
       ("Liz", 37),
     )
     val ben = tx1.eid
-    Thread.sleep(100)
     val afterInsert = new java.util.Date
+    // We slow down to allow new Date times to catch up (avoid using Date for precision times!)
+    Thread.sleep(500)
 
     // Update
     val tx2 = Ns(ben).int(43).update
-    Thread.sleep(100)
     val afterUpdate = new java.util.Date
+    Thread.sleep(500)
 
     // Retract
     val tx3 = ben.retract
-    Thread.sleep(100)
     val afterRetract = new java.util.Date
+    Thread.sleep(500)
 
     // No data yet before insert
     Ns.str.int.getAsOf(beforeInsert) === Nil

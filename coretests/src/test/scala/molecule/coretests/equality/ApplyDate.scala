@@ -1,4 +1,4 @@
-package molecule.coretests.expression.equality
+package molecule.coretests.equality
 
 import java.util.Date
 import molecule.api._

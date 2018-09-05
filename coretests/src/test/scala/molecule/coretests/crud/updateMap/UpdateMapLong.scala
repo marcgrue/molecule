@@ -41,16 +41,16 @@ class UpdateMapLong extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).longMap.assert("str1" -> 1L, "str1" -> 2L).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+          "\nstr1 -> 1" +
+          "\nstr1 -> 2")
 
       // Seq
       expectCompileError(
         """Ns(eid).longMap.assert(Seq("str1" -> 1L, "str1" -> 2L)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+          "\nstr1 -> 1" +
+          "\nstr1 -> 2")
     }
 
 
@@ -88,14 +88,14 @@ class UpdateMapLong extends CoreSpec {
       expectCompileError(
         """Ns(eid).longMap.replace("str1" -> 1L, "str1" -> 2L).update""",
         "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+          "\nstr1 -> 1" +
+          "\nstr1 -> 2")
 
       expectCompileError(
         """Ns(eid).longMap.replace(Seq("str1" -> 1L, "str1" -> 2L)).update""",
         "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
-          "\nstr1 -> 1L" +
-          "\nstr1 -> 2L")
+          "\nstr1 -> 1" +
+          "\nstr1 -> 2")
     }
 
 
@@ -206,14 +206,14 @@ class UpdateMapLong extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).longMap.assert(str1 -> long1, str1 -> long2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
           "\n__ident__str1 -> __ident__long1" +
           "\n__ident__str1 -> __ident__long2")
 
       // Seq
       expectCompileError(
         """Ns(eid).longMap.assert(Seq(str1 -> long1, str1 -> long2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
           "\n__ident__str1 -> __ident__long1" +
           "\n__ident__str1 -> __ident__long2")
 
@@ -223,14 +223,14 @@ class UpdateMapLong extends CoreSpec {
       // vararg
       (Ns(eid).longMap.assert(str1 -> long1, str1x -> long2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
 
       // Seq
       (Ns(eid).longMap.assert(Seq(str1 -> long1, str1x -> long2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
     }

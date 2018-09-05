@@ -232,7 +232,6 @@ class UpdateBigInt extends CoreSpec {
       Ns.bigInts.get.head === Set(bigInt1, bigInt2)
 
       // Equal values are coalesced (at runtime)
-      val other3 = bigInt3
       Ns(eid).bigInts(bigInt2, bigInt3, other3).update
       Ns.bigInts.get.head === Set(bigInt2, bigInt3)
     }

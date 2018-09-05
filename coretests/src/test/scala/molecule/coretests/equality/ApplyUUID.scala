@@ -1,4 +1,4 @@
-package molecule.coretests.expression.equality
+package molecule.coretests.equality
 
 import java.util.UUID
 import molecule.api._
@@ -26,22 +26,22 @@ class ApplyUUID extends CoreSpec {
       // Varargs
       Ns.uuid.apply(uuid1).get === List(uuid1)
       Ns.uuid.apply(uuid2).get === List(uuid2)
-      Ns.uuid.apply(uuid1, uuid2).get === List(uuid1, uuid2)
+      Ns.uuid.apply(uuid1, uuid2).get.sorted === List(uuid1, uuid2)
 
       // `or`
-      Ns.uuid.apply(uuid1 or uuid2).get === List(uuid1, uuid2)
-      Ns.uuid.apply(uuid1 or uuid2 or uuid3).get === List(uuid1, uuid2, uuid3)
+      Ns.uuid.apply(uuid1 or uuid2).get.sorted === List(uuid1, uuid2)
+      Ns.uuid.apply(uuid1 or uuid2 or uuid3).get.sorted === List(uuid1, uuid2, uuid3)
 
       // Seq
       Ns.uuid.apply().get === Nil
       Ns.uuid.apply(Nil).get === Nil
       Ns.uuid.apply(List(uuid1)).get === List(uuid1)
       Ns.uuid.apply(List(uuid2)).get === List(uuid2)
-      Ns.uuid.apply(List(uuid1, uuid2)).get === List(uuid1, uuid2)
-      Ns.uuid.apply(List(uuid1), List(uuid2)).get === List(uuid1, uuid2)
-      Ns.uuid.apply(List(uuid1, uuid2), List(uuid3)).get === List(uuid1, uuid2, uuid3)
-      Ns.uuid.apply(List(uuid1), List(uuid2, uuid3)).get === List(uuid1, uuid2, uuid3)
-      Ns.uuid.apply(List(uuid1, uuid2, uuid3)).get === List(uuid1, uuid2, uuid3)
+      Ns.uuid.apply(List(uuid1, uuid2)).get.sorted === List(uuid1, uuid2)
+      Ns.uuid.apply(List(uuid1), List(uuid2)).get.sorted === List(uuid1, uuid2)
+      Ns.uuid.apply(List(uuid1, uuid2), List(uuid3)).get.sorted === List(uuid1, uuid2, uuid3)
+      Ns.uuid.apply(List(uuid1), List(uuid2, uuid3)).get.sorted === List(uuid1, uuid2, uuid3)
+      Ns.uuid.apply(List(uuid1, uuid2, uuid3)).get.sorted === List(uuid1, uuid2, uuid3)
     }
 
 

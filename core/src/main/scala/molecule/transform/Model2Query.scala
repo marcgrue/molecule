@@ -15,7 +15,7 @@ import molecule.util.{Debug, Helpers}
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 object Model2Query extends Helpers {
   val x = Debug("Model2Query", 1, 19, false)
   def uri(t: String) = t.contains("java.net.URI")
@@ -316,7 +316,7 @@ object Model2Query extends Helpers {
           value match {
             case EnumVal      => q.pullEnum(e, a)
             case Fn("not", _) => q.not(e, a) // None
-            case Eq(args)     => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args.map(prefix + _))
+            case Eq(args)     => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
             case other        => throw new Model2QueryException("Unresolved optional cardinality-many enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
           }
         }
@@ -327,7 +327,7 @@ object Model2Query extends Helpers {
             case EnumVal        => q.pullEnum(e, a)
             case Fn("not", _)   => q.not(e, a) // None
             case Eq(arg :: Nil) => q.find(v2, gs).enum(e, a, v, gs).where(e, a, Val(prefix + arg), gs)
-            case Eq(args)       => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, args.map(prefix + _))
+            case Eq(args)       => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
             case other          => throw new Model2QueryException("Unresolved optional cardinality-one enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
           }
         }
@@ -364,19 +364,18 @@ object Model2Query extends Helpers {
         // Enum Atom (mandatory)
 
         case a@Atom(_, _, t, 2, value, Some(prefix), gs, _) => value match {
-          case Qm                                      => q.findD(v2, gs).enum(e, a, v, gs).in(e, a, Some(prefix), v2)
-          case Neq(Seq(Qm))                            => q.findD(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-          case Gt(Qm)                                  => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-          case Ge(Qm)                                  => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-          case Lt(Qm)                                  => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-          case Le(Qm)                                  => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-          case EnumVal                                 => q.findD(v2, gs).enum(e, a, v, gs)
-          case Fn("not", _)                            => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-          case Eq(Nil)                                 => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-          case Eq((set: Set[_]) :: Nil) if set.isEmpty => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-          case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-          case Eq((set: Set[_]) :: Nil)                => q.findD(v2, gs).enum(e, a, v, gs).whereAnd(e, a, v, set.toSeq.map(prefix + _))
-          //          case Eq(args)                                => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args.map(prefix + _))
+          case Qm                                          => q.findD(v2, gs).enum(e, a, v, gs).in(e, a, Some(prefix), v2)
+          case Neq(Seq(Qm))                                => q.findD(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+          case Gt(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+          case Ge(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+          case Lt(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+          case Le(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+          case EnumVal                                     => q.findD(v2, gs).enum(e, a, v, gs)
+          case Fn("not", _)                                => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
+          case Eq(Nil)                                     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
+          case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
+          case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
+          case Eq((set: Set[_]) :: Nil)                    => q.findD(v2, gs).enum(e, a, v, gs).whereAnd(e, a, v, set.toSeq.map(prefix + _))
           case Eq(args)                                    => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
           case And(args)                                   => q.findD(v2, gs).whereAndEnum(e, a, v, prefix, args)
           case Neq(Nil)                                    => q.findD(v2, gs).enum(e, a, v, gs)
@@ -471,8 +470,8 @@ object Model2Query extends Helpers {
             case And(args) if card == 2                  => q.whereAnd(e, a, v, args, u(t, v))
             case And(args)                               => q.where(e, a, Val(args.head), gs)
             case Fn("unify", _)                          => q.where(e, a, v, gs)
-            case Fulltext(qv :: Nil)                     => q.fulltext(e, a, v, Val(qv))
-            case Fulltext(qvs)                           => q.orRules(v1, a, qvs).fulltext(e, a, v, Var(v1))
+            case Fulltext(arg :: Nil)                    => q.fulltext(e, a, v, Val(arg))
+            case Fulltext(args)                          => q.where(e, a, v, gs).orRules(e, a, args, "", true)
             case other                                   => throw new Model2QueryException(s"Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
           }
         }
@@ -507,7 +506,7 @@ object Model2Query extends Helpers {
           case Le(arg)                                     => q.findD(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
           case And(args)                                   => q.findD(v, gs).whereAnd(e, a, v, args, u(t, v))
           case Fn(fn, _)                                   => q.find(fn, Nil, v, gs).where(e, a, v, gs)
-          case Fulltext(arg :: Nil)                        => q.findD(v, gs).fulltext(e, a, v, Val(arg))
+          case Fulltext(args)                              => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, "", true)
           case other                                       => throw new Model2QueryException(s"Unresolved cardinality-many Atom:\nAtom   : $a\nElement: $other")
         }
 
@@ -540,7 +539,7 @@ object Model2Query extends Helpers {
           case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v, gs).where(e, a, v, gs).widh(e)
           case Fn(fn, _)                               => q.find(fn, Nil, v, gs).where(e, a, v, gs)
           case Fulltext(arg :: Nil)                    => q.find(v, gs).fulltext(e, a, v, Val(arg))
-          case Fulltext(args)                          => q.find(v, gs).fulltext(e, a, v, Var(v1)).orRules(v1, a, args)
+          case Fulltext(args)                          => q.find(v, gs).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
           case Length(Some(Fn(fn, Some(i))))           => q.find(v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
           case Length(Some(Fn(fn, _)))                 => q.find(fn, Nil, v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
           case Length(_)                               => q.find(v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
@@ -559,19 +558,19 @@ object Model2Query extends Helpers {
 
         // Meta ===================================================================================
 
-        case Meta(_, _, "e", _, Fn("count", Some(i)))                 => q.find("count", Seq(i), e, Nil)
-        case Meta(_, _, "e", _, Fn("count", _))                       => q.find("count", Nil, e, Nil)
-        case Meta(_, _, "e", _, Length(Some(Fn(_, _))))               => q.find(e, Nil)
-        case Meta(_, attr, "e", _, Eq(Seq(Qm))) if attr.endsWith("_") => q.in(e)
-        case Meta(_, _, "e", _, Eq(Seq(Qm)))                          => q.find(e, Nil).in(e)
-        case Meta(_, attr, "e", _, Eq(eids)) if attr.endsWith("_")    => q.in(eids, e)
-        case Meta(_, _, "e", _, Eq(eids))                             => q.find(e, Nil).in(eids, e)
-        case Meta(_, _, "r", _, IndexVal)                             => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, Id(eid), IndexVal)                         => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-        case Meta(_, _, _, _, IndexVal)                               => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-        case Meta(_, attr, _, _, EntValue) if attr.endsWith("_")      => q
-        case Meta(_, _, _, _, EntValue)                               => q.find(e, Nil)
-        case Meta(_, _, _, _, _)                                      => q
+        case Meta(_, _, "e", _, Fn("count", Some(i)))                  => q.find("count", Seq(i), e, Nil)
+        case Meta(_, _, "e", _, Fn("count", _))                        => q.find("count", Nil, e, Nil)
+        case Meta(_, _, "e", _, Length(Some(Fn(_, _))))                => q.find(e, Nil)
+        case Meta(ns, attr, "e", _, Eq(Seq(Qm))) if attr.endsWith("_") => q.in(e, ns, attr, e)
+        case Meta(_, _, "e", _, Eq(Seq(Qm)))                           => q.find(e, Nil).in(e)
+        case Meta(_, attr, "e", _, Eq(eids)) if attr.endsWith("_")     => q.in(eids, e)
+        case Meta(_, _, "e", _, Eq(eids))                              => q.find(e, Nil).in(eids, e)
+        case Meta(_, _, "r", _, IndexVal)                              => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, Id(eid), IndexVal)                          => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+        case Meta(_, _, _, _, IndexVal)                                => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+        case Meta(_, attr, _, _, EntValue) if attr.endsWith("_")       => q
+        case Meta(_, _, _, _, EntValue)                                => q.find(e, Nil)
+        case Meta(_, _, _, _, _)                                       => q
 
         case unresolved => throw new Model2QueryException("Unresolved model: " + unresolved)
       }

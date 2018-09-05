@@ -43,14 +43,14 @@ class UpdateMapURI extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uriMap.assert(str1 -> uri1, str1 -> uri2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
@@ -60,7 +60,7 @@ class UpdateMapURI extends CoreSpec {
       // vararg
       (Ns(eid).uriMap.assert(str1 -> uri1, str1x -> uri2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
 
@@ -68,7 +68,7 @@ class UpdateMapURI extends CoreSpec {
       // Seq
       (Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1x -> uri2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
     }

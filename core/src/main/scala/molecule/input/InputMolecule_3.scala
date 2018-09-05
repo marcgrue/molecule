@@ -18,34 +18,40 @@ import molecule.input.exception.InputMolecule_3_Exception
   *     ("Liz", "teacher", 28, 2.0)
   *   )
   *
+  *   // Input molecule awaiting 3 inputs for `profession`, `age` and `score`
   *   val profAgeScore = m(Person.name.profession_(?).age_(?).score_(?))
   *
-  *   // 6 ways of querying
   *
-  *   // 1. Individual args matching input attributes
+  *   // A. Triples of input .................................
+  *
+  *   // One triple as params
   *   profAgeScore.apply("doctor", 37, 1.0).get === List("Ann")
   *
-  *   // 2. Seq of pair of values matching input attributes
-  *   profAgeScore.apply(Seq(("doctor", 37, 1.0))).get === List("Ann")
-  *   profAgeScore.apply(Seq(("doctor", 37, 1.0), ("teacher", 37, 1.0))).get.sorted === List("Ann", "Ben")
-  *
-  *   // 3. One or more triples matching input attributes
+  *   // One or more triples
   *   profAgeScore.apply(("doctor", 37, 1.0)).get === List("Ann")
   *   profAgeScore.apply(("doctor", 37, 1.0), ("teacher", 37, 1.0)).get.sorted === List("Ann", "Ben")
   *
-  *   // 4. Two sequences, each matching corresponding input attribute
-  *   profAgeScore.apply(Seq("doctor"), Seq(37), Seq(1.0)).get === List("Ann")
-  *   profAgeScore.apply(Seq("doctor", "teacher"), Seq(37), Seq(1.0)).get.sorted === List("Ann", "Ben")
+  *   // One or more logical triples
+  *   // [triple-expression] or [triple-expression] or ...
+  *   profAgeScore.apply(("doctor" and 37 and 1.0) or ("teacher" and 32 and 1.0)).get.sorted === List("Ann", "Joe")
   *
-  *   // 5. Three expressions, one for each input attribute
+  *   // List of triples
+  *   profAgeScore.apply(Seq(("doctor", 37, 1.0))).get === List("Ann")
+  *   profAgeScore.apply(Seq(("doctor", 37, 1.0), ("teacher", 37, 1.0))).get.sorted === List("Ann", "Ben")
+  *
+  *
+  *   // B. 3 groups of input, one for each input attribute .................................
+  *
+  *   // Three expressions
   *   // [profession-expression] and [age-expression] and [score-expression]
   *   profAgeScore.apply("doctor" and 37 and 1.0).get === List("Ann")
   *   profAgeScore.apply(("doctor" or "teacher") and 37 and 1.0).get.sorted === List("Ann", "Ben")
   *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and 1.0).get.sorted === List("Ann", "Ben", "Joe")
   *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and (1.0 or 2.0)).get.sorted === List("Ann", "Ben", "Joe")
   *
-  *   // 6. [triple-expression] or [triple-expression] or ...
-  *   profAgeScore.apply(("doctor" and 37 and 1.0) or ("teacher" and 32 and 1.0)).get.sorted === List("Ann", "Joe")
+  *   // Three lists
+  *   profAgeScore.apply(Seq("doctor"), Seq(37), Seq(1.0)).get === List("Ann")
+  *   profAgeScore.apply(Seq("doctor", "teacher"), Seq(37), Seq(1.0)).get.sorted === List("Ann", "Ben")
   * }}}
   *
   * @see [[molecule.input.InputMolecule]]
@@ -92,12 +98,8 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     val ph3@Placeholder(e3@Var(ex3), kw3@KW(ns3, attr3, _), v3@Var(w3), enumPrefix3) = query.i.inputs(2)
     val (v1_, v2_, v3_) = (w1.filter(_.isLetter), w2.filter(_.isLetter), w3.filter(_.isLetter))
     val (isTacit1, isTacit2, isTacit3) = (isTacit(ns1, attr1), isTacit(ns2, attr2), isTacit(ns3, attr3))
-    val ((isComparison1, isNeq1), (isComparison2, isNeq2), (isComparison3, isNeq3)) = (isExpression(ns1, attr1), isExpression(ns2, attr2), isExpression(ns3, attr3))
-    val hasComparison = isComparison1 || isComparison2 || isComparison3
-    val hasExpression = isComparison1 || isNeq1 || isComparison2 || isNeq2 || isComparison3 || isNeq3
-    val isExpr1 = isComparison1 || isNeq1
-    val isExpr2 = isComparison2 || isNeq2
-    val isExpr3 = isComparison3 || isNeq3
+    val (isExpr1, isExpr2, isExpr3) = (isExpression(ns1, attr1), isExpression(ns2, attr2), isExpression(ns3, attr3))
+    val hasExpression = isExpr1 || isExpr2 || isExpr3
     val es = List(e1, e2, e3).distinct // same or different namespaces
 
     // Discard placeholders
@@ -118,7 +120,6 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
 
       case triples if triples.size > 1 && hasExpression => throw new InputMolecule_3_Exception(
         "Can't apply multiple triples to input attributes with one or more expressions (<, >, <=, >=, !=)")
-
 
       // 1 triple possibly with expressions
       case Seq((arg1, arg2, arg3)) => {
@@ -266,10 +267,6 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     ph2@Placeholder(_, KW(ns2, attr2, _), _, _),
     ph3@Placeholder(_, KW(ns3, attr3, _), _, _)
     ) = query.i.inputs
-    val ((isComparison1, isNeq1), (isComparison2, isNeq2), (isComparison3, isNeq3)) = (isExpression(ns1, attr1), isExpression(ns2, attr2), isExpression(ns3, attr3))
-    val hasExpression1 = isComparison1 || isNeq1
-    val hasExpression2 = isComparison2 || isNeq2
-    val hasExpression3 = isComparison3 || isNeq3
 
     def resolve[T](query: Query, ph: Placeholder, input: Seq[T], ruleName: String, tacit: Boolean, expr: Boolean): Query = {
       val Placeholder(_, KW(ns, attr, _), _, _) = ph
@@ -289,9 +286,9 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     val q0 = query.copy(i = In(Seq(), query.i.rules, query.i.ds))
 
     // Resolve inputs
-    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(ns1, attr1), hasExpression1)
-    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(ns2, attr2), hasExpression2)
-    val q3 = resolve(q2, ph3, input3, "rule3", isTacit(ns3, attr3), hasExpression3)
+    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(ns1, attr1), isExpression(ns1, attr1))
+    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(ns2, attr2), isExpression(ns2, attr2))
+    val q3 = resolve(q2, ph3, input3, "rule3", isTacit(ns3, attr3), isExpression(ns3, attr3))
     q3
   }
 
@@ -309,7 +306,7 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     *   // Input molecule awaiting 3 inputs for `profession`, `age` and `score`
     *   val profAgeScore = m(Person.name.profession_(?).age_(?).score_(?))
     *
-    *   // Apply 3 input values
+    *   // Apply 3 input values (1 triple)
     *   profAgeScore.apply("doctor", 37, 1.0).get === List("Ann")
     * }}}
     *
@@ -363,7 +360,7 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     *   // Input molecule awaiting 3 inputs for `profession`, `age` and `score`
     *   val profAgeScore = m(Person.name.profession_(?).age_(?).score_(?))
     *
-    *   // Apply two or more tripple expressions, each matchin all 3 input attributes
+    *   // Apply two or more triple expressions, each matching all 3 input attributes
     *   // [profession/age/score-expression] or [profession/age/score-expression] or ...
     *   profAgeScore.apply(("doctor" and 37 and 1.0) or ("teacher" and 32 and 1.0)).get.sorted === List("Ann", "Joe")
     * }}}
@@ -400,6 +397,35 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
   def apply(ins: Seq[(I1, I2, I3)])(implicit conn: Conn): MoleculeBase
 
 
+  /** Resolve input molecule by applying 3 groups of expressions, one for each of the 3 input attributes
+    *
+    * {{{
+    *   // Sample data set
+    *   Person.name.profession.age.score insert List(
+    *     ("Ann", "doctor", 37, 1.0),
+    *     ("Ben", "teacher", 37, 1.0),
+    *     ("Joe", "teacher", 32, 1.0),
+    *     ("Liz", "teacher", 28, 2.0)
+    *   )
+    *
+    *   // Input molecule awaiting 3 inputs for `profession`, `age` and `score`
+    *   val profAgeScore = m(Person.name.profession_(?).age_(?).score_(?))
+    *
+    *   // Apply 3 expressions, one for each input attribute
+    *   // [profession-expression] and [age-expression] and [score-expression]
+    *   profAgeScore.apply("doctor" and 37 and 1.0).get === List("Ann")
+    *   profAgeScore.apply(("doctor" or "teacher") and 37 and 1.0).get.sorted === List("Ann", "Ben")
+    *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and 1.0).get.sorted === List("Ann", "Ben", "Joe")
+    *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and (1.0 or 2.0)).get.sorted === List("Ann", "Ben", "Joe")
+    * }}}
+    *
+    * @param and  First input expr `and` second input expr `and` third input expr
+    * @param conn Implicit [[molecule.facade.Conn Conn]] in scope
+    * @return Resolved molecule that can be queried
+    */
+  def apply(and: And3[I1, I2, I3])(implicit conn: Conn): MoleculeBase
+
+
   /** Resolve input molecule by applying 3 groups of values, one for each of the 3 input attributes
     *
     * {{{
@@ -430,35 +456,6 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     * @return Resolved molecule that can be queried
     */
   def apply(in1: Seq[I1], in2: Seq[I2], in3: Seq[I3])(implicit conn: Conn): MoleculeBase
-
-
-  /** Resolve input molecule by applying 3 groups of expressions, one for each of the 3 input attributes
-    *
-    * {{{
-    *   // Sample data set
-    *   Person.name.profession.age.score insert List(
-    *     ("Ann", "doctor", 37, 1.0),
-    *     ("Ben", "teacher", 37, 1.0),
-    *     ("Joe", "teacher", 32, 1.0),
-    *     ("Liz", "teacher", 28, 2.0)
-    *   )
-    *
-    *   // Input molecule awaiting 3 inputs for `profession`, `age` and `score`
-    *   val profAgeScore = m(Person.name.profession_(?).age_(?).score_(?))
-    *
-    *   // Apply 3 expressions, one for each input attribute
-    *   // [profession-expression] and [age-expression] and [score-expression]
-    *   profAgeScore.apply("doctor" and 37 and 1.0).get === List("Ann")
-    *   profAgeScore.apply(("doctor" or "teacher") and 37 and 1.0).get.sorted === List("Ann", "Ben")
-    *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and 1.0).get.sorted === List("Ann", "Ben", "Joe")
-    *   profAgeScore.apply(("doctor" or "teacher") and (37 or 32) and (1.0 or 2.0)).get.sorted === List("Ann", "Ben", "Joe")
-    * }}}
-    *
-    * @param and  First input expr `and` second input expr `and` third input expr
-    * @param conn Implicit [[molecule.facade.Conn Conn]] in scope
-    * @return Resolved molecule that can be queried
-    */
-  def apply(and: And3[I1, I2, I3])(implicit conn: Conn): MoleculeBase
 }
 
 

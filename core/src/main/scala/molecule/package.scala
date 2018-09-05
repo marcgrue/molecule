@@ -30,7 +30,7 @@ import molecule.factory._
   *     <td>Builder methods to compose molecules.</td>
   *   </tr>
   *   <tr>
-  *     <td><a href="exception/index.html">exception</a><td>
+  *     <td><a href="exception/index.html">exceptions</a><td>
   *     <td>Exceptions thrown by Molecule.</td>
   *   </tr>
   *   <tr>

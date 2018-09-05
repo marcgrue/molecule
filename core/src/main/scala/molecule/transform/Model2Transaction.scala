@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 /** Model to transaction transformation.
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
@@ -695,16 +695,15 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     stmts ++ newStmts
   }
 
-  def flatten(vs: Seq[Any]): Seq[Any] = vs match {
-    case (set: Set[_]) :: Nil => set.toSeq
-    case list                 => list
+  def flatten(vs: Seq[Any]): Seq[Any] = vs.flatMap {
+    case set: Set[_] => set.toSeq
+    case v           => List(v)
   }
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {
     case ((stmts, txStmts), txStmt@Add('tx, _, _, _)) => (stmts, txStmts :+ txStmt)
     case ((stmts, txStmts), stmt)                     => (stmts :+ stmt, txStmts)
   }
-
 
   def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: Generic) = {
     bi match {

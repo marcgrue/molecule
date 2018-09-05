@@ -42,14 +42,14 @@ class UpdateMapDate extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).dateMap.assert(str1 -> date1, str1 -> date2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
 
       // Seq
       expectCompileError(
         """Ns(eid).dateMap.assert(Seq(str1 -> date1, str1 -> date2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
 
@@ -59,7 +59,7 @@ class UpdateMapDate extends CoreSpec {
       // vararg
       (Ns(eid).dateMap.assert(str1 -> date1, str1x -> date2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
         "\na -> Thu Jan 01 01:00:01 CET 1970" +
         "\na -> Thu Jan 01 01:00:02 CET 1970"
 
@@ -67,7 +67,7 @@ class UpdateMapDate extends CoreSpec {
       // Seq
       (Ns(eid).dateMap.assert(Seq(str1 -> date1, str1x -> date2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/dateMap`:" +
         "\na -> Thu Jan 01 01:00:01 CET 1970" +
         "\na -> Thu Jan 01 01:00:02 CET 1970"
     }

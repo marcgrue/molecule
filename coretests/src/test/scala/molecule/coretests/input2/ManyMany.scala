@@ -67,7 +67,7 @@ class ManyMany extends CoreSpec {
       } yield {
         try {
           i += 1
-          //            println(s"($in1a, $in2a), ($in1b, $in2b)")
+          //          im((in1a, in2a), (in1b, in2b)).debugGet
           im((in1a, in2a), (in1b, in2b)).get.sorted === (out1a.intersect(out2a) ++ out1b.intersect(out2b)).distinct.sorted
         } catch {
           case e: Throwable =>

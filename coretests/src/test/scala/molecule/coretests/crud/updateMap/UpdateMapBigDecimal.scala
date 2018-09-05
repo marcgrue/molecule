@@ -41,14 +41,14 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
@@ -58,7 +58,7 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       (Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1x -> bigDec2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
 
@@ -66,7 +66,7 @@ class UpdateMapBigDecimal extends CoreSpec {
       // Seq
       (Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1x -> bigDec2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
     }

@@ -41,14 +41,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert("str1" -> 1f, "str1" -> 2f).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -208,14 +208,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert(str1 -> float1, str1 -> float2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq(str1 -> float1, str1 -> float2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
@@ -225,7 +225,7 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       (Ns(eid).floatMap.assert(str1 -> float1, str1x -> float2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"
 
@@ -233,7 +233,7 @@ class UpdateMapFloat extends CoreSpec {
       // Seq
       (Ns(eid).floatMap.assert(Seq(str1 -> float1, str1x -> float2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"
     }

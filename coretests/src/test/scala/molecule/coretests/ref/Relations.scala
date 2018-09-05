@@ -202,34 +202,16 @@ class Relations extends CoreSpec {
   "Molecule has to end with attribute" >> {
 
     "Ending with ref" in new CoreSetup {
-
-//      expectCompileError(
-//        "m(Ns.Ref1)",
-//        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
-
       expectCompileError(
         "m(Ns.str.Ref1)",
         "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
-
-//      expectCompileError(
-//        "m(Ns.str_.Ref1)",
-//        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
 
     "Ending with refs" in new CoreSetup {
-
-//      expectCompileError(
-//        "m(Ns.Refs1)",
-//        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
-
       expectCompileError(
         "m(Ns.str.Refs1)",
         "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
-
-//      expectCompileError(
-//        "m(Ns.str_.Refs1)",
-//        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
   }

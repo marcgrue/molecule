@@ -6,25 +6,6 @@ import molecule.coretests.util.dsl.coreTest._
 
 class Aggregates extends CoreSpec {
 
-  class OneSetup extends CoreSetup {
-//    Ns.str insert List(" ", "a", "b", "c", "c")
-//    Ns.int insert List(0, 1, 2, 3, 3)
-//    Ns.long insert List(0L, 1L, 2L, 3L, 3L)
-//    Ns.float insert List(0f, 1f, 2f, 3f, 3f)
-//    Ns.double insert List(0.0, 1.0, 2.0, 3.0, 3.0)
-//    Ns.bool insert List(false, true, true)
-//    Ns.date insert List(date0, date1, date2, date3, date3)
-//    Ns.uuid insert List(uuid0, uuid1, uuid2, uuid3, uuid3)
-//    Ns.uri insert List(uri0, uri1, uri2, uri3, uri3)
-//    Ns.enum insert List("enum0", "enum1", "enum2", "enum3", "enum3")
-
-//    Ns.str.int insert List(
-//      ("a", 1),
-//      ("b", 2),
-//      ("b", 3)
-//    )
-  }
-
   class ManySetup extends CoreSetup {
 
     val (a, b, c, d) = ("a", "b", "c", "d")
@@ -84,7 +65,7 @@ class Aggregates extends CoreSpec {
   }
 
 
-  "Distinct" in new OneSetup {
+  "Distinct" in new CoreSetup {
 
     Ns.str.int insert List(
       ("a", 1),

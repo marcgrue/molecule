@@ -43,14 +43,14 @@ class UpdateMapUUID extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uuidMap.assert(str1 -> uuid1, str1 -> uuid2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
@@ -60,7 +60,7 @@ class UpdateMapUUID extends CoreSpec {
       // vararg
       (Ns(eid).uuidMap.assert(str1 -> uuid1, str1x -> uuid2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
 
@@ -68,7 +68,7 @@ class UpdateMapUUID extends CoreSpec {
       // Seq
       (Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1x -> uuid2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
     }
@@ -196,13 +196,13 @@ class UpdateMapUUID extends CoreSpec {
 
 //      expectCompileError(
 //        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
-//        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//        "[Dsl2Model:apply (16)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
 //
 //      expectCompileError(
 //        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-//        "[Dsl2Model:apply (16)] Can't apply multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//        "[Dsl2Model:apply (16)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
     }

@@ -1,4 +1,4 @@
-package molecule.coretests.expression.equality
+package molecule.coretests.equality
 
 import molecule.api._
 import molecule.ast.model._
@@ -272,14 +272,12 @@ class Duplicates extends CoreSpec {
         Find(List(
           Var("b"))),
         In(
-          List(),
           List(
-            Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Val(1), Empty, NoBinding))),
-            Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Val(2), Empty, NoBinding)))),
+            InVar(CollectionBinding(Var("b")), Seq(Seq(1, 2)))),
+          List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Var("b"), Empty, NoBinding),
-          RuleInvocation("rule1", List(Var("a"))))))
+          DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Var("b"), Empty, NoBinding))))
 
 
       // Query transformed: redundant duplicate values discarded at runtime and Query representation transformed
@@ -299,14 +297,12 @@ class Duplicates extends CoreSpec {
         Find(List(
           Var("b"))),
         In(
-          List(),
           List(
-            Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Val(1), Empty, NoBinding))),
-            Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Val(2), Empty, NoBinding)))),
+            InVar(CollectionBinding(Var("b")), Seq(Seq(1, 2)))),
+          List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Var("b"), Empty, NoBinding),
-          RuleInvocation("rule1", List(Var("a"))))))
+          DataClause(ImplDS, Var("a"), KW("ns", "int", ""), Var("b"), Empty, NoBinding))))
     }
   }
 
@@ -421,19 +417,16 @@ class Duplicates extends CoreSpec {
 
   "Input molecules" >> {
 
-
     "Card-one" in new OneSetup {
       Ns.int.apply(1, 1).get === List(1)
-      Ns.int.apply(List(1, 1)).get === List(1, 2)
-      Ns.int.apply(List(1), List(1)).get === List(1, 2)
+      Ns.int.apply(List(1, 1)).get === List(1)
+      Ns.int.apply(List(1), List(1)).get === List(1)
     }
 
-
     "Card-many" in new ManySetup {
-
-      Ns.ints.apply(1, 1).get === List(1)
-      Ns.ints.apply(List(1, 1)).get === List(1, 2)
-      Ns.ints.apply(List(1), List(1)).get === List(1, 2)
+      Ns.ints.apply(1, 1).get === List(Set(1, 2))
+      Ns.ints.apply(List(1, 1)).get === List(Set(1, 2))
+      Ns.ints.apply(List(1), List(1)).get === List(Set(1, 2))
     }
   }
 
@@ -450,8 +443,7 @@ class Duplicates extends CoreSpec {
     ))
 
     Ns.int.apply(1, 1).get === List(1)
-    Ns.int.apply(List(1, 1)).get === List(1, 2)
-    Ns.int.apply(List(1), List(1)).get === List(1, 2)
+    Ns.int.apply(List(1, 1)).get === List(1)
+    Ns.int.apply(List(1), List(1)).get === List(1)
   }
-
 }

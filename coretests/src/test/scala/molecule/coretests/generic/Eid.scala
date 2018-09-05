@@ -56,9 +56,6 @@ class Eid extends CoreSpec {
 
     val e23 = Seq(e2, e3)
     ints.apply(e23).get === List(2, 3)
-
-    val e23s = Set(e2, e3)
-    ints.apply(e23s).get === List(2, 3)
   }
 
 

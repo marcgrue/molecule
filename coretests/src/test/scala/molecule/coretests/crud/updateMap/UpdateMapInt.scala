@@ -41,14 +41,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert("str1" -> 1, "str1" -> 2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq("str1" -> 1, "str1" -> 2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
     }
@@ -215,14 +215,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert(str1 -> int1, str1 -> int2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq(str1 -> int1, str1 -> int2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
@@ -232,7 +232,7 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       (Ns(eid).intMap.assert(str1 -> int1, str1x -> int2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
         "\na -> 1" +
         "\na -> 2"
 
@@ -240,7 +240,7 @@ class UpdateMapInt extends CoreSpec {
       // Seq
       (Ns(eid).intMap.assert(Seq(str1 -> int1, str1x -> int2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
         "\na -> 1" +
         "\na -> 2"
     }

@@ -14,10 +14,9 @@ class TransactionMetaData extends CoreSpec {
     "Basic" in new CoreSetup {
 
       // `tx` being tacit or mandatory has same effect
-      val tx1 = Ns.int(1).Tx(Ns.str("tx tacit")).save.tx
-      val tx2 = Ns.int(2).Tx(Ns.str("tx mandatory")).save.tx
-
       // tx meta attributes can be in any mode
+      val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
+      val tx2 = Ns.int(2).Tx(Ns.str("str mandatory")).save.tx
       val tx3 = Ns.int(3).Tx(Ns.str("attr mandatory")).save.tx
       val tx4 = Ns.int(4).Tx(Ns.str_("attr tacit")).save.tx
       val tx5 = Ns.int(5).Tx(Ns.str$(Some("attr optional with value"))).save.tx
@@ -25,8 +24,8 @@ class TransactionMetaData extends CoreSpec {
 
       // Optional tx meta data
       Ns.int.Tx(Ns.str$).get.sortBy(_._1) === List(
-        (1, Some("tx tacit")),
-        (2, Some("tx mandatory")),
+        (1, Some("str tacit")),
+        (2, Some("str mandatory")),
         (3, Some("attr mandatory")),
         (4, Some("attr tacit")),
         (5, Some("attr optional with value")),
@@ -35,8 +34,8 @@ class TransactionMetaData extends CoreSpec {
 
       // Mandatory tx meta data
       Ns.int.Tx(Ns.str).get.sortBy(_._1) === List(
-        (1, "tx tacit"),
-        (2, "tx mandatory"),
+        (1, "str tacit"),
+        (2, "str mandatory"),
         (3, "attr mandatory"),
         (4, "attr tacit"),
         (5, "attr optional with value")
@@ -47,17 +46,17 @@ class TransactionMetaData extends CoreSpec {
 
       // Transaction meta data expressions
       Ns.int.Tx(Ns.str.contains("mandatory")).get.sortBy(_._1) === List(
-        (2, "tx mandatory"),
+        (2, "str mandatory"),
         (3, "attr mandatory")
       )
       Ns.int.<(3).Tx(Ns.str.contains("mandatory")).get === List(
-        (2, "tx mandatory")
+        (2, "str mandatory")
       )
 
       // tx entity id can be returned too
       Ns.int.tx.Tx(Ns.str$).get.sortBy(_._1) === List(
-        (1, tx1, Some("tx tacit")),
-        (2, tx2, Some("tx mandatory")),
+        (1, tx1, Some("str tacit")),
+        (2, tx2, Some("str mandatory")),
         (3, tx3, Some("attr mandatory")),
         (4, tx4, Some("attr tacit")),
         (5, tx5, Some("attr optional with value")),

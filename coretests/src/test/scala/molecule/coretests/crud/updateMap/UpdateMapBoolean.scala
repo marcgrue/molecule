@@ -41,14 +41,14 @@ class UpdateMapBoolean extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).boolMap.assert(str1 -> bool1, str1 -> bool2).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
 
       // Seq
       expectCompileError(
         """Ns(eid).boolMap.assert(Seq(str1 -> bool1, str1 -> bool2)).update""",
-        "[Dsl2Model:apply (14)] Can't add multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
+        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
 
@@ -58,7 +58,7 @@ class UpdateMapBoolean extends CoreSpec {
       // vararg
       (Ns(eid).boolMap.assert(str1 -> bool1, str1x -> bool2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
         "\na -> true" +
         "\na -> false"
 
@@ -66,7 +66,7 @@ class UpdateMapBoolean extends CoreSpec {
       // Seq
       (Ns(eid).boolMap.assert(Seq(str1 -> bool1, str1x -> bool2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't add multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/boolMap`:" +
         "\na -> true" +
         "\na -> false"
     }

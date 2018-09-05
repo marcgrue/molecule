@@ -10,6 +10,7 @@ import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 class FulltextSearch extends Base {
 
+
   "Card one" in new CoreSetup {
 
     Ns.str insert List("The quick fox jumps", "Ten slow monkeys")
@@ -39,15 +40,30 @@ class FulltextSearch extends Base {
     Ns.str.contains("quick monkeys").get === List("Ten slow monkeys", "The quick fox jumps")
   }
 
-  "Card many" in new ManySetup {
+  "Card many" in new CoreSetup {
 
-    // Searching for text strings of a single cardinality-many attribute values is rather useless since the
-    // coalesced set of values is searched and not the original sets of values
-    Ns.strs.contains("c").get === List(Set("c"))
+    Ns.int.strs insert List(
+      (1, Set("The quick fox jumps", "Ten slow monkeys")),
+      (2, Set("lorem ipsum", "Going slow"))
+    )
 
-    // What we want is probably rather to group by another attribute to
-    // find the cardinality-many sets of values matching the search string:
-    Ns.str.strs.get.filter(_._2.contains("c")) === List(("str2", Set("b", "c")))
-    // etc...
+    Ns.int.strs.contains("fox").get === List(
+      (1, Set("The quick fox jumps", "Ten slow monkeys"))
+    )
+    Ns.int.strs.contains("slow").get === List(
+      (1, Set("The quick fox jumps", "Ten slow monkeys")),
+      (2, Set("lorem ipsum", "Going slow"))
+    )
+    Ns.int.strs.contains("fox", "slow").get === List(
+      (1, Set("The quick fox jumps", "Ten slow monkeys"))
+    )
+
+    Ns.strs.contains("fox").get === List(Set("The quick fox jumps", "Ten slow monkeys"))
+    Ns.strs.contains("slow").get === List(Set("The quick fox jumps", "Ten slow monkeys", "lorem ipsum", "Going slow"))
+    Ns.strs.contains("fox", "slow").get === List(Set("The quick fox jumps", "Ten slow monkeys"))
+
+    Ns.int.strs_.contains("fox").get ===        List(1)
+    Ns.int.strs_.contains("slow").get ===        List(1, 2)
+    Ns.int.strs_.contains("fox", "slow").get === List(1)
   }
 }

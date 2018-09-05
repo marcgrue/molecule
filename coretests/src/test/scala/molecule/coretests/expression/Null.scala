@@ -22,8 +22,6 @@ class Null extends CoreSpec {
     // Same as applying empty Iterables
     Ns.str.int_(Nil).get === List("d")
     Ns.str.int_(List()).get === List("d")
-    Ns.str.int_(Set()).get === List("d")
-
 
     // Applying empty value to mandatory attribute is contradictive and matches no entities.
     Ns.str.int().get === Nil
@@ -33,22 +31,12 @@ class Null extends CoreSpec {
     Ns.int(emptyList).get === Nil
 
 
-    // Explicitly applying Nil to mandatory attribute not allowed
-    expectCompileError(
-      "m(Ns.str.int(Nil))",
-      "[Dsl2Model:getValues] Please add underscore to attribute and apply empty value instead: `int_()`. For at shorter syntax, apply empty value: `int_()`")
-
-    expectCompileError(
-      "m(Ns.str.int(List()))",
-      "[Dsl2Model:getValues] Please add underscore to attribute and apply empty value instead: `int_()`. For at shorter syntax, apply empty value: `int_()`")
-
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
       "[Liftables:liftAny] Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
         "Maybe you are applying some Scala expression to a molecule attribute?\n" +
         "Try to assign the expression to a variable and apply the variable instead.")
-
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.str.int_(?)).apply(Nil).get === List("d")
@@ -73,8 +61,6 @@ class Null extends CoreSpec {
     // Same as applying empty Iterables
     Ns.int.ints_(Nil).get === List(40)
     Ns.int.ints_(List()).get === List(40)
-    Ns.int.ints_(Set()).get === List(40)
-
 
     // Applying empty value to mandatory attribute is contradictive and never matches entities.
     Ns.int.ints().get === Nil
@@ -84,22 +70,12 @@ class Null extends CoreSpec {
     Ns.ints(emptyList).get === Nil
 
 
-    // Explicitly applying Nil to mandatory attribute not allowed
-    expectCompileError(
-      "m(Ns.int.ints(Nil))",
-      "[Dsl2Model:getValues] Please add underscore to attribute and apply empty value instead: `ints_()`. For at shorter syntax, apply empty value: `ints_()`")
-
-    expectCompileError(
-      "m(Ns.int.ints(List()))",
-      "[Dsl2Model:getValues] Please add underscore to attribute and apply empty value instead: `ints_()`. For at shorter syntax, apply empty value: `ints_()`")
-
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.int.ints_(Seq.empty[Int]))",
       "[Liftables:liftAny] Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
         "Maybe you are applying some Scala expression to a molecule attribute?\n" +
         "Try to assign the expression to a variable and apply the variable instead.")
-
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.int.ints_(?)).apply(Nil).get === List(40)

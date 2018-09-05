@@ -1,4 +1,4 @@
-package molecule.coretests.expression.equality
+package molecule.coretests.equality
 
 import molecule.api._
 import molecule.coretests.util.dsl.coreTest._

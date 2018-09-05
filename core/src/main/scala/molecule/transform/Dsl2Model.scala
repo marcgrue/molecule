@@ -423,13 +423,12 @@ private[molecule] trait Dsl2Model[Ctx <: Context] extends TreeOps[Ctx] {
     else
       Fn(fn, value)
 
-    val (isTacit, isCardMany) = (attr.name.last == '_', attr.card == 2)
     values match {
       case q"Seq($pkg.?)" => Qm
       //      case q"Seq($pkg.Nil)" if isTacit || isCardMany               => Fn("not")
       //      case q"Seq($pkg.Nil)"                                        => abort(s"[Dsl2Model:getValues] Please add underscore to attribute `${attr.name}_(Nil)`. For at shorter syntax, apply empty value: `${attr.name}_()`")
       case q"Seq($pkg.Nil)"                                        => Fn("not")
-      case q"Seq($pkg.unify)" if isTacit                           => Fn("unify")
+      case q"Seq($pkg.unify)" if attr.name.last == '_'             => Fn("unify")
       case q"Seq($pkg.unify)"                                      => abort(s"[Dsl2Model:getValues] Can only unify on tacit attributes. Please add underscore to attribute: `${attr.name}_(unify)`")
       case q"Seq($pkg.distinct)"                                   => Distinct
       case q"Seq($pkg.min.apply(${Literal(Constant(i: Int))}))"    => aggr("min", Some(i))
@@ -624,7 +623,7 @@ private[molecule] object Dsl2Model {
       case a@Atom(ns, name, _, _, AssertMapPairs(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
         val dups = dupKeys(pairs)
         val dupPairs = pairs.filter(p => dups.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
-        abort(14, s"Can't add multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
+        abort(14, s"Can't assert multiple key/value pairs with the same key for attribute `:$ns/$name`:\n" + dupPairs.mkString("\n"))
 
       case a@Atom(ns, name, _, _, ReplaceMapPairs(pairs), _, _, _) if dupKeys(pairs).nonEmpty =>
         val dups = dupKeys(pairs)

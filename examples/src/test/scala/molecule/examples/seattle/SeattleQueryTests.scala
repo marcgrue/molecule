@@ -8,6 +8,7 @@ import scala.language.reflectiveCalls
 
 class SeattleQueryTests extends SeattleSpec {
 
+
   "A first query" >> {
 
     // Query of molecule
@@ -64,7 +65,7 @@ class SeattleQueryTests extends SeattleSpec {
   "Querying across references" >> {
 
     // Communities in north eastern region
-    // Ref's are modelelled as "Bond"'s (between Atoms)
+    // Ref's are modelled as "Bond"'s (between Atoms)
     m(Community.name.Neighborhood.District.region_("ne")) -->
       """[:find  ?b
         | :where [?a :community/name ?b]
@@ -92,9 +93,11 @@ class SeattleQueryTests extends SeattleSpec {
     // Community input molecule awaiting some type value
     m(Community.name.type_.apply(?)) -->
       """[:find  ?b
-        | :in    $ ?c
+        | :in    $ ?c2
         | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]]""".stripMargin
+        |        [?a :community/type ?c]
+        |        [?c :db/ident ?c1]
+        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]""".stripMargin
 
     // Applying a value completes the query
     m(Community.name.type_(?))("twitter") -->
@@ -113,7 +116,7 @@ class SeattleQueryTests extends SeattleSpec {
     // Skip underscore to return the input value too
     m(Community.name.`type`(?)) -->
       """[:find  ?b ?c2
-        | :in    $ ?c
+        | :in    $ ?c2
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
@@ -122,7 +125,7 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name.`type`(?)).apply("twitter") -->
       """[:find  ?b ?c2
-        | :in    $ ?c
+        | :in    $ ?c2
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
@@ -131,7 +134,7 @@ class SeattleQueryTests extends SeattleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 :community.type/twitter
+        |  2 twitter
         |)""".stripMargin
 
 
@@ -139,7 +142,7 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name.`type`(?)).apply("facebook_page" or "twitter") -->
       """[:find  ?b ?c2
-        | :in    $ [?c ...]
+        | :in    $ [?c2 ...]
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
@@ -148,7 +151,7 @@ class SeattleQueryTests extends SeattleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [:community.type/facebook_page, :community.type/twitter]
+        |  2 [facebook_page, twitter]
         |)""".stripMargin
 
 
@@ -158,7 +161,7 @@ class SeattleQueryTests extends SeattleSpec {
       //    m(Community.name.`type`(?))("facebook_page", "twitter") -->
       //    m(Community.name.`type`(?))(List("facebook_page", "twitter")) -->
       """[:find  ?b ?c2
-        | :in    $ [?c ...]
+        | :in    $ [?c2 ...]
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
@@ -167,7 +170,7 @@ class SeattleQueryTests extends SeattleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [:community.type/facebook_page, :community.type/twitter]
+        |  2 [facebook_page, twitter]
         |)""".stripMargin
 
 
@@ -177,10 +180,14 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name.type_(?).orgtype_(?)) -->
       """[:find  ?b
-        | :in    $ ?c ?d
+        | :in    $ ?c2 ?d2
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
-        |        [?a :community/orgtype ?d]]""".stripMargin
+        |        [?c :db/ident ?c1]
+        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
+        |        [?a :community/orgtype ?d]
+        |        [?d :db/ident ?d1]
+        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]""".stripMargin
 
 
     // The following 3 notation variations transform in the same way
@@ -189,7 +196,7 @@ class SeattleQueryTests extends SeattleSpec {
       //    m(Community.name.type_(?).orgtype_(?)).apply("email_list", "community") -->
       //    m(Community.name.type_(?).orgtype_(?)).apply(List(("email_list", "community"))) -->
       """[:find  ?b
-        | :in    $ [[ ?c ?d ]]
+        | :in    $ ?c ?d
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?a :community/orgtype ?d]]
@@ -197,7 +204,8 @@ class SeattleQueryTests extends SeattleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[:community.type/email_list, :community.orgtype/community]]
+        |  2 :community.type/email_list
+        |  3 :community.orgtype/community
         |)""".stripMargin
 
 
@@ -206,7 +214,7 @@ class SeattleQueryTests extends SeattleSpec {
     // Communities of some `type` AND some `orgtype` (include input values!)
     m(Community.name.`type`(?).orgtype(?)) -->
       """[:find  ?b ?c2 ?d2
-        | :in    $ ?c ?d
+        | :in    $ ?c2 ?d2
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
@@ -222,11 +230,12 @@ class SeattleQueryTests extends SeattleSpec {
     //    m(Community.name.`type`(?!).orgtype(?!)).apply(("email_list", "community"), ("website", "commercial")) -->
     m(Community.name.`type`(?).orgtype(?)).apply(Seq(("email_list", "community"), ("website", "commercial"))) -->
       """[:find  ?b ?c2 ?d2
-        | :in    $ [[ ?c ?d ]]
+        | :in    $ %
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?c :db/ident ?c1]
         |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
+        |        (rule1 ?a)
         |        [?a :community/orgtype ?d]
         |        [?d :db/ident ?d1]
         |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]
@@ -234,7 +243,12 @@ class SeattleQueryTests extends SeattleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[:community.type/email_list, :community.orgtype/community], [:community.type/website, :community.orgtype/commercial]]
+        |  2 [[(rule1 ?a)
+        |   [?a :community/type ":community.type/email_list"]
+        |   [?a :community/orgtype ":community.orgtype/community"]]
+        |     [(rule1 ?a)
+        |   [?a :community/type ":community.type/website"]
+        |   [?a :community/orgtype ":community.orgtype/commercial"]]]
         |)""".stripMargin
   }
 
@@ -298,30 +312,42 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name.type_("website").category contains "food") -->
       """[:find  ?b (distinct ?d)
+        | :in    $ %
         | :where [?a :community/name ?b]
         |        [?a :community/type ":community.type/website"]
-        |        [(fulltext $ :community/category "food") [[ ?a ?d ]]]]""".stripMargin
+        |        [?a :community/category ?d]
+        |        (rule1 ?a)]
+        |
+        |INPUTS:
+        |List(
+        |  1 datomic.db.Db@xxx
+        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?a_1 ]]]]]
+        |)""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?) -->
       """[:find  ?b (distinct ?d)
-        | :in    $ ?c ?d1
+        | :in    $ ?c2 ?d1
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
+        |        [?c :db/ident ?c1]
+        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
         |        [(fulltext $ :community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?).apply("website", Set("food")) -->
       """[:find  ?b (distinct ?d)
-        | :in    $ [[ ?c ?d1 ]]
+        | :in    $ % ?c
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
-        |        [(fulltext $ :community/category ?d1) [[ ?a ?d ]]]]
+        |        [?a :community/category ?d]
+        |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[:community.type/website, Set(food)]]
+        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?d1_1 ]]]]]
+        |  3 :community.type/website
         |)""".stripMargin
   }
 
@@ -381,12 +407,16 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)) -->
       """[:find  ?b
-        | :in    $ ?c ?f
+        | :in    $ ?c2 ?f2
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
+        |        [?c :db/ident ?c1]
+        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
         |        [?a :community/neighborhood ?d]
         |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]]""".stripMargin
+        |        [?e :district/region ?f]
+        |        [?f :db/ident ?f1]
+        |        [(.getName ^clojure.lang.Keyword ?f1) ?f2]]""".stripMargin
 
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)).apply(
@@ -395,23 +425,18 @@ class SeattleQueryTests extends SeattleSpec {
       // Seq("twitter", "facebook_page"), Seq("sw", "s", "se")
     ) -->
       """[:find  ?b
-        | :in    $ %
+        | :in    $ [?c ...] [?f ...]
         | :where [?a :community/name ?b]
         |        [?a :community/type ?c]
         |        [?a :community/neighborhood ?d]
         |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]
-        |        (rule1 ?a)
-        |        (rule2 ?e)]
+        |        [?e :district/region ?f]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/type ":community.type/twitter"]]
-        |     [(rule1 ?a) [?a :community/type ":community.type/facebook_page"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/sw"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/s"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/se"]]]
+        |  2 [:community.type/twitter, :community.type/facebook_page]
+        |  3 [:district.region/sw, :district.region/s, :district.region/se]
         |)""".stripMargin
   }
 

@@ -56,7 +56,7 @@ class Negation extends Base {
     Ns.int.not(int1).get.sorted === List(-2, -1, 0, 2)
     Ns.int.not(int1, int2).get.sorted === List(-2, -1, 0)
     Ns.int.not(Seq(int1, int2)).get.sorted === List(-2, -1, 0)
-    val enums = Seq(int1, int2)
+    val ints = Seq(int1, int2)
     Ns.int.not(ints).get.sorted === List(-2, -1, 0)
 
     // Same as

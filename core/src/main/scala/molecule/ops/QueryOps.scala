@@ -209,8 +209,8 @@ object QueryOps extends Helpers {
 
     def nots(e: String, a: Atom, v: String, argss: Seq[Any]): Query = {
       argss.zipWithIndex.foldLeft(q) {
-//        case (q1, (set: Set[_], i)) if set.size == 1            =>
-//          q1.compareTo("!=", a, v, Val(set.head), i + 1)
+        //        case (q1, (set: Set[_], i)) if set.size == 1            =>
+        //          q1.compareTo("!=", a, v, Val(set.head), i + 1)
         case (q1, (set: Set[_], i)) if a.tpeS == "java.net.URI" =>
           val notClauses = set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
             val x = Var(v + "_" + (j + 1))
@@ -293,7 +293,7 @@ object QueryOps extends Helpers {
           case other    =>
             q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(w))
         }
-        case _ => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(w))
+        case _              => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(w))
       }
       q1.func(op, Seq(w, Val(0)))
     }
@@ -413,35 +413,42 @@ object QueryOps extends Helpers {
       case other     => other
     }
 
-    //    def missing(e: String, a: Atom) =
-    //      q.copy(wh = Where(q.wh.clauses :+ Funct("missing?", Seq(DS(), Var(e), KW(a.ns, a.name)), NoBinding)))
-
-    def orRules(e: String, a: Atom, args: Seq[Any], uriV: String = ""): Query = {
+    def orRules(e: String, a: Atom, args: Seq[Any], uriV: String = "", fulltext: Boolean = false): Query = {
       val ruleName = "rule" + (q.i.rules.map(_.name).distinct.size + 1)
-      val orRules = args.distinct.flatMap { arg =>
-        val ruleClauses = arg match {
-          case set: Set[_] if uriV.nonEmpty => set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
-            val x = Var(uriV + "_" + (j + 1))
-            Seq(
-              DataClause(ImplDS, Var(e), KW(a.ns, a.name), x, Empty),
-              Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(x))
+      val orRules = if (fulltext && a.card == 2) {
+        val ruleClauses = args.zipWithIndex.map { case (arg, i) =>
+          Funct("fulltext", Seq(DS(""), KW(a.ns, a.name), Val(arg)), RelationBinding(List(Var(e), Var(e + "_" + (i + 1)))))
+        }
+        Seq(Rule(ruleName, Seq(Var(e)), ruleClauses))
+      } else {
+        args.zipWithIndex.distinct.flatMap { case (arg, i) =>
+          val ruleClauses = arg match {
+            case set: Set[_] if uriV.nonEmpty => set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
+              val x = Var(uriV + "_" + (j + 1))
+              Seq(
+                DataClause(ImplDS, Var(e), KW(a.ns, a.name), x, Empty),
+                Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(x))
+              )
+            }
+            case set: Set[_]                  => set.toSeq.map(arg =>
+              DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, arg)), Empty)
+            )
+            case mapArg if a.card == 3        => Seq(
+              Funct(".matches ^String", Seq(Var(e), Val(".+@" + esc(mapArg))), NoBinding)
+            )
+            case uri if uriV.nonEmpty         => Seq(
+              DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(uriV), Empty),
+              Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(Var(uriV)))
+            )
+            case _ if fulltext                => Seq(
+              Funct("fulltext", Seq(DS(""), KW(a.ns, a.name), Val(arg)), RelationBinding(List(Var(e), Var(e + "_" + (i + 1)))))
+            )
+            case _                            => Seq(
+              DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, esc(arg))), Empty)
             )
           }
-          case set: Set[_]                  => set.toSeq.map(arg =>
-            DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, arg)), Empty)
-          )
-          case mapArg if a.card == 3        => Seq(
-            Funct(".matches ^String", Seq(Var(e), Val(".+@" + esc(mapArg))), NoBinding)
-          )
-          case uri if uriV.nonEmpty         => Seq(
-            DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(uriV), Empty),
-            Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(Var(uriV)))
-          )
-          case _                            => Seq(
-            DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, esc(arg))), Empty)
-          )
+          if (ruleClauses.isEmpty) None else Some(Rule(ruleName, Seq(Var(e)), ruleClauses))
         }
-        if (ruleClauses.isEmpty) None else Some(Rule(ruleName, Seq(Var(e)), ruleClauses))
       }
       val newIn = q.i.copy(ds = (q.i.ds :+ DS).distinct, rules = q.i.rules ++ orRules)
       val newWhere = Where(q.wh.clauses :+ RuleInvocation(ruleName, Seq(Var(e))))

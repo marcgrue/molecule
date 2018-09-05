@@ -21,34 +21,38 @@ import molecule.input.exception.InputMolecule_2_Exception
   *   // Input molecule awaiting 2 inputs for `profession` and `age`
   *   val profAge = m(Person.name.profession_(?).age_(?))
   *
-  *   // 6 ways of resolving input molecule:
   *
-  *   // 1. Two input values
+  *   // A. Pairs of input .................................
+  *
+  *   // One pair as params
   *   profAge("doctor", 37).get === List("Ann")
   *
-  *   // 2. Seq of one or more value pairs matching input attributes
-  *   profAge(Seq(("doctor", 37))).get === List("Ann")
-  *   profAge(Seq(("doctor", 37), ("teacher", 37))).get.sorted === List("Ann", "Ben")
-  *
-  *   // 3. One or more value pairs matching input attributes
+  *   // One or more pairs
   *   profAge(("doctor", 37)).get === List("Ann")
   *   profAge(("doctor", 37), ("teacher", 37)).get.sorted === List("Ann", "Ben")
   *
-  *   // 4. Two Seq of values, one for each input attribute
-  *   profAge(Seq("doctor"), Seq(37)).get === List("Ann")
-  *   profAge(Seq("doctor", "teacher"), Seq(37)).get.sorted === List("Ann", "Ben")
-  *   profAge(Seq("teacher"), Seq(37, 32)).get.sorted === List("Ben", "Joe")
-  *   profAge(Seq("doctor", "teacher"), Seq(37, 32)).get.sorted === List("Ann", "Ben", "Joe")
+  *   // One or more logical pairs
+  *   // [pair-expression] or [pair-expression] or ...
+  *   profAge(("doctor" and 37) or ("teacher" and 32)).get.sorted === List("Ann", "Joe")
+  *   profAge(Seq(("doctor", 37), ("teacher", 37))).get.sorted === List("Ann", "Ben")
   *
-  *   // 5. Two expressions, one for each input attribute
+  *   // List of pairs
+  *   profAge(Seq(("doctor", 37))).get === List("Ann")
+  *
+  *
+  *   // B. 2 groups of input, one for each input attribute .................................
+  *
+  *   // Two expressions
   *   // [profession-expression] and [age-expression]
   *   profAge("doctor" and 37).get === List("Ann")
   *   profAge(("doctor" or "teacher") and 37).get.sorted === List("Ann", "Ben")
   *   profAge(("doctor" or "teacher") and (32 or 28)).get.sorted === List("Joe", "Liz")
   *
-  *   // 6. Two or more pair-wise expressions, each matching both attributes
-  *   // [pair-expression] or [pair-expression] or ...
-  *   profAge(("doctor" and 37) or ("teacher" and 32)).get.sorted === List("Ann", "Joe")
+  *   // Two Lists
+  *   profAge(Seq("doctor"), Seq(37)).get === List("Ann")
+  *   profAge(Seq("doctor", "teacher"), Seq(37)).get.sorted === List("Ann", "Ben")
+  *   profAge(Seq("teacher"), Seq(37, 32)).get.sorted === List("Ben", "Joe")
+  *   profAge(Seq("doctor", "teacher"), Seq(37, 32)).get.sorted === List("Ann", "Ben", "Joe")
   * }}}
   *
   * @see [[molecule.input.InputMolecule]]
@@ -84,9 +88,8 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     val ph2@Placeholder(e2@Var(ex2), kw2@KW(ns2, attr2, _), v2@Var(w2), enumPrefix2) = query.i.inputs(1)
     val (v1_, v2_) = (w1.filter(_.isLetter), w2.filter(_.isLetter))
     val (isTacit1, isTacit2) = (isTacit(ns1, attr1), isTacit(ns2, attr2))
-    val ((isComparison1, isNeq1), (isComparison2, isNeq2)) = (isExpression(ns1, attr1), isExpression(ns2, attr2))
-    val hasComparison = isComparison1 || isComparison2
-    val hasExpression = isComparison1 || isNeq1 || isComparison2 || isNeq2
+    val (isExpr1, isExpr2) = (isExpression(ns1, attr1), isExpression(ns2, attr2))
+    val hasExpression = isExpr1 || isExpr2
     val es = List(e1, e2).distinct // same or different namespaces
 
     // Discard placeholders
@@ -109,22 +112,14 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
       case pairs if pairs.size > 1 && hasExpression => throw new InputMolecule_2_Exception(
         "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)")
 
-      case Seq((arg1: Set[_], arg2)) if arg1.isEmpty => {
-        val q1 = resolveInput(q0, ph1, Seq(arg1))
-        val q2 = resolveInput(q1, ph2, Seq(arg2))
-        q2
-      }
-      case Seq((arg1, arg2: Set[_])) if arg2.isEmpty => {
-        val q1 = resolveInput(q0, ph1, Seq(arg1))
-        val q2 = resolveInput(q1, ph2, Seq(arg2))
-        q2
-      }
-      case Seq((arg1, arg2)) if hasExpression                         => {
-        val q1 = resolveInput(q0, ph1, Seq(arg1))
-        val q2 = resolveInput(q1, ph2, Seq(arg2))
+      // 1 pair, possibly with expressions
+      case Seq((arg1, arg2)) => {
+        val q1 = resolveInput(q0, ph1, Seq(arg1), "rule1", true)
+        val q2 = resolveInput(q1, ph2, Seq(arg2), "rule1", true)
         q2
       }
 
+      // Multiple pairs without expressions
       case pairs => {
 
         // Add rule invocation clause to first input attribute clause (only 1 rule invocation needed)
@@ -175,9 +170,6 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     ph1@Placeholder(_, KW(ns1, attr1, _), _, _),
     ph2@Placeholder(_, KW(ns2, attr2, _), _, _)
     ) = query.i.inputs
-    val ((isComparison1, isNeg1), (isComparison2, isNeq2)) = (isExpression(ns1, attr1), isExpression(ns2, attr2))
-    val hasExpression1 = isComparison1 || isNeg1
-    val hasExpression2 = isComparison2 || isNeq2
 
     def resolve[T](query: Query, ph: Placeholder, input: Seq[T], ruleName: String, tacit: Boolean, expr: Boolean): Query = {
       val Placeholder(_, KW(ns, attr, _), _, _) = ph
@@ -197,8 +189,8 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     val q0 = query.copy(i = In(Seq(), query.i.rules, query.i.ds))
 
     // Resolve inputs
-    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(ns1, attr1), hasExpression1)
-    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(ns2, attr2), hasExpression2)
+    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(ns1, attr1), isExpression(ns1, attr1))
+    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(ns2, attr2), isExpression(ns2, attr2))
     q2
   }
 

@@ -164,18 +164,10 @@ class Save extends CoreSpec {
       Ns.int(1).ints(Set(1, 2)).save
       Ns.int_(1).ints.get.head === Set(1, 2)
 
-      // Seq
-      Ns.int(2).ints(Seq(1, 2)).save
-      // Output is always a Set for card-many attribute values
-      Ns.int_(2).ints.get.head === Set(1, 2)
-
       // List
       Ns.int(2).ints(List(1, 2)).save
       Ns.int_(2).ints.get.head === Set(1, 2)
 
-      // Iterable
-      Ns.int(4).ints(Iterable(1, 2)).save
-      Ns.int_(4).ints.get.head === Set(1, 2)
 
       // Redundant duplicate values are discarded
       Ns.int(5).ints(List(1, 2, 2)).save
@@ -199,10 +191,10 @@ class Save extends CoreSpec {
       Ns.int(1).ints(set12).save
       Ns.int_(1).ints.get.head === Set(1, 2)
 
-      // Multiple Iterables
+      // Multiple Sets
       // - mixing static/variable data
       // - empty sets ignored
-      Ns.int(2).ints(Seq(1, 2), set0, set45).save
+      Ns.int(2).ints(Set(1, 2), set0, set45).save
       Ns.int_(2).ints.get.head === Set(1, 2, 4, 5)
 
       // Redundant duplicate values (as variables) are discarded

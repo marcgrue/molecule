@@ -1,4 +1,4 @@
-package molecule.coretests.expression.equality
+package molecule.coretests.equality
 
 import molecule.api._
 import molecule.coretests.util.dsl.coreTest._
@@ -29,7 +29,7 @@ class ApplyBigDecimal extends CoreSpec {
 
       // `or`
       Ns.bigDec.apply(bigDec1 or bigDec2).get === List(bigDec1, bigDec2)
-      Ns.bigDec.apply(bigDec1 or bigDec2 or bigDec3).get === List(bigDec1, bigDec2, bigDec3)
+      Ns.bigDec.apply(bigDec1 or bigDec2 or bigDec3).get === List(bigDec3, bigDec1, bigDec2)
 
       // Seq
       Ns.bigDec.apply().get === Nil
@@ -38,9 +38,9 @@ class ApplyBigDecimal extends CoreSpec {
       Ns.bigDec.apply(List(bigDec2)).get === List(bigDec2)
       Ns.bigDec.apply(List(bigDec1, bigDec2)).get === List(bigDec1, bigDec2)
       Ns.bigDec.apply(List(bigDec1), List(bigDec2)).get === List(bigDec1, bigDec2)
-      Ns.bigDec.apply(List(bigDec1, bigDec2), List(bigDec3)).get === List(bigDec1, bigDec2, bigDec3)
-      Ns.bigDec.apply(List(bigDec1), List(bigDec2, bigDec3)).get === List(bigDec1, bigDec2, bigDec3)
-      Ns.bigDec.apply(List(bigDec1, bigDec2, bigDec3)).get === List(bigDec1, bigDec2, bigDec3)
+      Ns.bigDec.apply(List(bigDec1, bigDec2), List(bigDec3)).get === List(bigDec3, bigDec1, bigDec2)
+      Ns.bigDec.apply(List(bigDec1), List(bigDec2, bigDec3)).get === List(bigDec3, bigDec1, bigDec2)
+      Ns.bigDec.apply(List(bigDec1, bigDec2, bigDec3)).get === List(bigDec3, bigDec1, bigDec2)
     }
 
 

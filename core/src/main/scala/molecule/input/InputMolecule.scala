@@ -62,13 +62,16 @@ trait InputMolecule extends MoleculeBase {
   protected def pre[T](enumPrefix: Option[String], arg: T): Any = if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
 
   protected def isTacit(ns: String, attr: String): Boolean = {
+    val ns_ = ns + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], tacit0: Option[Boolean]): Option[Boolean] = elements.foldLeft(tacit0) {
-      case (tacit, Atom(`ns`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
-      case (tacit, Atom(`ns`, `attr` | `attrK`, _, _, _, _, _, _))   => Some(false)
-      case (tacit, Nested(_, elements2))                             => isTacit_(elements2, tacit)
-      case (tacit, Composite(elements2))                             => isTacit_(elements2, tacit)
-      case (tacit, _)                                                => tacit
+      case (tacit, Meta(`ns`, `attr`, "e", _, _))                            => Some(true)
+      case (tacit, Atom(`ns` | `ns_`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
+      case (tacit, Atom(`ns_`, `attr` | `attrK`, _, _, _, _, _, _))          => Some(true)
+      case (tacit, Atom(`ns`, `attr` | `attrK`, _, _, _, _, _, _))           => Some(false)
+      case (tacit, Nested(_, elements2))                                     => isTacit_(elements2, tacit)
+      case (tacit, Composite(elements2))                                     => isTacit_(elements2, tacit)
+      case (tacit, _)                                                        => tacit
     }
     isTacit_(_model.elements, None) match {
       case Some(result) => result
@@ -77,12 +80,14 @@ trait InputMolecule extends MoleculeBase {
   }
 
   protected def cardinality(ns: String, attr: String): Int = {
+    val ns_ = ns + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], cardOpt0: Option[Int]): Option[Int] = elements.foldLeft(cardOpt0) {
-      case (cardOpt, Atom(`ns`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
-      case (cardOpt, Nested(_, elements2))                                                   => isTacit_(elements2, cardOpt)
-      case (cardOpt, Composite(elements2))                                                   => isTacit_(elements2, cardOpt)
-      case (cardOpt, e)                                                                      => cardOpt
+      case (cardOpt, Meta(`ns`, `attr`, "e", _, _))                                                  => Some(2)
+      case (cardOpt, Atom(`ns` | `ns_`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
+      case (cardOpt, Nested(_, elements2))                                                           => isTacit_(elements2, cardOpt)
+      case (cardOpt, Composite(elements2))                                                           => isTacit_(elements2, cardOpt)
+      case (cardOpt, e)                                                                              => cardOpt
     }
     isTacit_(_model.elements, None) match {
       case Some(result) => result
@@ -90,16 +95,15 @@ trait InputMolecule extends MoleculeBase {
     }
   }
 
-  protected def isExpression(ns: String, attr: String): (Boolean, Boolean) = {
+  protected def isExpression(ns: String, attr: String): Boolean = {
     val attr_ = attr + "_"
-    def isExpression_(elements: Seq[Element], comparison: Boolean, negation: Boolean): (Boolean, Boolean) = elements.foldLeft(comparison, negation) {
-      case ((comp, neg), Atom(`ns`, `attr` | `attr_`, _, _, Lt(_) | Gt(_) | Le(_) | Ge(_), _, _, _)) => (true, neg)
-      case ((comp, neg), Atom(`ns`, `attr` | `attr_`, _, _, Neq(_), _, _, _))                        => (comp, true)
-      case ((comp, neg), Nested(_, elements2))                                                       => isExpression_(elements2, comp, neg)
-      case ((comp, neg), Composite(elements2))                                                       => isExpression_(elements2, comp, neg)
-      case ((comp, neg), _)                                                                          => (comp, neg)
+    def isExpression_(elements: Seq[Element], isExpression: Boolean): Boolean = elements.foldLeft(isExpression) {
+      case (expr, Atom(`ns`, `attr` | `attr_`, _, _, Neq(_) | Lt(_) | Gt(_) | Le(_) | Ge(_) | Fulltext(_), _, _, _)) => true
+      case (expr, Nested(_, elements2))                                                                              => isExpression_(elements2, expr)
+      case (expr, Composite(elements2))                                                                              => isExpression_(elements2, expr)
+      case (expr, _)                                                                                                 => expr
     }
-    isExpression_(_model.elements, false, false)
+    isExpression_(_model.elements, false)
   }
 
   protected def addNilClause(clauses: Seq[Clause], e: Var, kw: KW, v0: Var): Seq[Clause] = {
@@ -200,12 +204,14 @@ trait InputMolecule extends MoleculeBase {
         case set: Set[_]    => set.toSeq
         case arg            => Seq(arg)
       }
-      //      val nil = args.isEmpty || args.head.isEmpty
       val nil = deepNil(args)
       val one = args.size == 1
       val uri = if (nil) false else args.head.isInstanceOf[URI]
 
       val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) = card match {
+
+          // Applying entity ids to Namespace: `m(Ns(?).int).apply(42L)`
+        case 2 if attr == "eid_" => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, clauses)
 
 
         // Card-many enum attribute ...................................................................
@@ -230,24 +236,14 @@ trait InputMolecule extends MoleculeBase {
           case Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _))                     => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
 
           // Qm
-          case _ if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
-          case cls if nil        => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
-          //          case Seq(enum, ident, fn) if one =>
-          //            val (inVar, cls) = if (tacit) (Var(v_), Seq(enum)) else (v, Seq(enum, ident, fn))
-          //            (Seq(InVar(ScalarBinding(inVar), Seq(Seq(prefix.get + args.head)))), Nil, cls)
-          //
-          //          case Seq(enum, ident, fn)        => (Nil, Nil,
-          //            args.map(arg =>
-          //              DataClause(ImplDS, e, kw, Val(prefix.get + arg), Empty, NoBinding)
-          //            ) ++ (if (tacit) Seq(enum) else Seq(enum, ident, fn))
-          //          )
+          case _ if nil && tacit    => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case cls if nil           => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
           case Seq(enum, ident, fn) => (
             Nil,
             argss.map(args =>
               Rule(ruleName, Seq(e), args.map(arg =>
                 DataClause(ImplDS, e, kw, Val(prefix.get + arg), Empty, NoBinding)
               ))),
-            //            Seq(enum, ident, fn, RuleInvocation(ruleName, Seq(e)))
             if (tacit) Seq(enum, RuleInvocation(ruleName, Seq(e))) else Seq(enum, ident, fn, RuleInvocation(ruleName, Seq(e)))
           )
         }
@@ -257,9 +253,9 @@ trait InputMolecule extends MoleculeBase {
 
         case 2 => clauses match {
 
+
           // Neq(Seq(Qm))
-          case Seq(dc, _, Funct("!=", _, _)) if nil                        =>
-            (Nil, Nil, Seq(dc))
+          case Seq(dc, _, Funct("!=", _, _)) if nil                        => (Nil, Nil, Seq(dc))
           case Seq(dc, _, Funct("!=", _, _)) if uri                        => (Nil, Nil,
             dc +: argss.map { args =>
               val clauses = args.zipWithIndex.flatMap { case (arg, i) =>
@@ -292,6 +288,7 @@ trait InputMolecule extends MoleculeBase {
             argss.map(args =>
               Rule(ruleName, Seq(e), args.zipWithIndex.map { case (arg, i) =>
                 Funct("fulltext", Seq(DS(), kw, Val(arg)), RelationBinding(List(e, Var(w + "_" + (i + 1)))))
+//                Funct("fulltext", Seq(DS(), kw, Val(arg)), RelationBinding(List(e, Var("_"))))
               })),
             Seq(
               DataClause(ImplDS, e, kw, Var(v_), Empty, NoBinding),
@@ -302,17 +299,7 @@ trait InputMolecule extends MoleculeBase {
           // Qm
           case Seq(dc: DataClause) if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
           case Seq(dc: DataClause) if nil          => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(dc))
-          //          case Seq(dc: DataClause) if one && uri   => (Nil, Nil,
-          //          case Seq(dc: DataClause) if uri => (Nil, Nil,
-          //            args.zipWithIndex.flatMap { case (arg, i) =>
-          //              val uriVar = Var(w + "_uri" + (i + 1))
-          //              Seq(
-          //                Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(uriVar)),
-          //                DataClause(ImplDS, e, kw, uriVar, dc.tx, dc.op)
-          //              )
-          //            }
-          //          )
-          case Seq(dc: DataClause) if uri => (
+          case Seq(dc: DataClause) if uri          => (
             Nil,
             argss.map(args =>
               Rule(ruleName, Seq(e), args.zipWithIndex.flatMap { case (arg, i) =>
@@ -324,9 +311,7 @@ trait InputMolecule extends MoleculeBase {
               })),
             Seq(dc, RuleInvocation(ruleName, Seq(e)))
           )
-          //          case Seq(dc: DataClause) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, Seq(dc))
-          //          case Seq(dc: DataClause)  => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(dc))
-          case Seq(dc: DataClause) => (
+          case Seq(dc: DataClause)                 => (
             Nil,
             argss.map(args =>
               Rule(ruleName, Seq(e), args.map(arg =>
@@ -341,8 +326,9 @@ trait InputMolecule extends MoleculeBase {
         case 1 if prefix.isDefined => clauses match {
 
           // Neq(Seq(Qm))
-          case Seq(enum, _, _, _, Funct("!=", _, _)) if nil && tacit                            => (Nil, Nil, Seq(enum))
+          case Seq(enum, ident, getName, _, Funct("!=", _, _)) if nil && tacit                  => (Nil, Nil, Seq(enum))
           case Seq(enum, ident, getName, _, Funct("!=", _, _)) if nil                           => (Nil, Nil, Seq(enum, ident, getName))
+//          case cls@Seq(enum, _, _, _, Funct("!=", _, _)) if one && tacit                        => (Seq(InVar(ScalarBinding(Var(v_)), Seq(Seq(prefix.get + args.head)))), Nil, Seq(enum))
           case cls@Seq(_, _, _, _, Funct("!=", _, _)) if one                                    => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
           case Seq(enum, ident, getName, Funct(n, Seq(Var(v2), `v`), _), not@Funct("!=", _, _)) => (Nil, Nil,
             Seq(enum, ident, getName) ++ args.zipWithIndex.flatMap { case (arg, i) =>
@@ -364,16 +350,20 @@ trait InputMolecule extends MoleculeBase {
           case Seq(f@Funct("fulltext", _, _))        => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, Seq(f))
 
           // Qm
-          case _ if nil && tacit => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
-          case cls if nil        => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
-          case cls if one        => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
-          case cls               => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, cls)
+          case cls if nil && tacit             => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
+          case cls if nil                      => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
+          case Seq(enum, _, _) if one && tacit => (Seq(InVar(ScalarBinding(Var(v_)), Seq(Seq(prefix.get + args.head)))), Nil, Seq(enum))
+          case cls if one                      => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+          case Seq(enum, _, _) if tacit        => (Seq(InVar(CollectionBinding(Var(v_)), Seq(args.map(arg => prefix.get + arg)))), Nil, Seq(enum))
+          case cls                             => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, cls)
         }
 
 
         // Card-one attribute ...................................................................
 
         case 1 => clauses match {
+
+          case Nil if ns == "ns" && attr == "?" => (Nil, Nil, Seq(Funct("=", Seq(v, Val(args.head)), NoBinding)))
 
           // Neq(Seq(Qm))
           case Seq(dc, _, Funct("!=", _, _)) if nil                                       => (Nil, Nil, Seq(dc))
