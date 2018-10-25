@@ -1,6 +1,6 @@
 package molecule.coretests.crud.update
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -126,12 +126,12 @@ class UpdateBigInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigInts.replace(bigInt7 -> bigInt8, bigInt8 -> bigInt8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/bigInts`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/bigInts`:" +
           "\n__ident__bigInt8")
 
       expectCompileError(
         """Ns(eid).bigInts.replace(Seq(bigInt7 -> bigInt8, bigInt8 -> bigInt8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/bigInts`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/bigInts`:" +
           "\n__ident__bigInt8")
 
 

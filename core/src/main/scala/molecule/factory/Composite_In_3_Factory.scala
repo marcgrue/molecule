@@ -2,7 +2,7 @@ package molecule.factory
 
 import molecule.composition.Composite_In_3._
 import molecule.input.InputMolecule_3._
-import molecule.macros.MakeComposite_In._
+import molecule.macros.MakeComposite_In
 import scala.language.experimental.macros
 import scala.language.{higherKinds, implicitConversions}
 
@@ -36,7 +36,7 @@ import scala.language.{higherKinds, implicitConversions}
   * @groupname composite3 Factory methods to create composite input molecule awaiting 3 inputs.
   * @groupprio composite3 63
   */
-trait Composite_In_3_Factory {
+trait Composite_In_3_Factory2 {
 
   /** Macro creation of composite input molecule awaiting 3 inputs from user-defined DSL with 1 output group (arity 1).
     * <br><br>
@@ -82,14 +82,14 @@ trait Composite_In_3_Factory {
     * }}}
     *
     * @group composite3
-    * @param inputDsl User-defined DSL structure modelling the composite input molecule awaiting 2 inputs
+    * @param dsl User-defined DSL structure modelling the composite input molecule awaiting 2 inputs
     * @tparam I1 Type of input attribute 1 (`age`: Int)
     * @tparam I2 Type of input attribute 2 (`score`: Int)
     * @tparam I3 Type of input attribute 3 (`flags`: Int)
     * @tparam T1 Type of output group
     * @return Composite input molecule awaiting 3 inputs
     */
-  def m[I1, I2, I3, T1](inputDsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
 
 
   /** Macro creation of composite input molecule awaiting 3 inputs from user-defined DSL with 2 output groups (arity 2).
@@ -139,7 +139,7 @@ trait Composite_In_3_Factory {
     * }}}
     *
     * @group composite3
-    * @param inputDsl User-defined DSL structure modelling the composite input molecule awaiting 3 inputs
+    * @param dsl User-defined DSL structure modelling the composite input molecule awaiting 3 inputs
     * @tparam I1 Type of input attribute 1 (`age`: Int)
     * @tparam I2 Type of input attribute 2 (`score`: Int)
     * @tparam I3 Type of input attribute 3 (`flags`: Int)
@@ -147,27 +147,341 @@ trait Composite_In_3_Factory {
     * @tparam T2 Type of output group 2
     * @return Composite input molecule awaiting 3 inputs
     */
-  def m[I1, I2, I3, T1, T2](inputDsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+}
+object Composite_In_3_Factory2 extends Composite_In_3_Factory2
 
+object Composite_In_3_Factory1 extends Composite_In_3_Factory1
+trait Composite_In_3_Factory1 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+}
 
-  def m[I1, I2, I3, T1, T2, T3](inputDsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro await_3_3[I1, I2, I3, T1, T2, T3]
-  def m[I1, I2, I3, T1, T2, T3, T4](inputDsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro await_3_4[I1, I2, I3, T1, T2, T3, T4]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5](inputDsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](inputDsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](inputDsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](inputDsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](inputDsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](inputDsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](inputDsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](inputDsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](inputDsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](inputDsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](inputDsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](inputDsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](inputDsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](inputDsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](inputDsl: Composite_In_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): InputMolecule_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro await_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](inputDsl: Composite_In_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): InputMolecule_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = macro await_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](inputDsl: Composite_In_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]): InputMolecule_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21] = macro await_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]
-  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](inputDsl: Composite_In_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]): InputMolecule_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22] = macro await_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]
+object Composite_In_3_Factory3 extends Composite_In_3_Factory3
+trait Composite_In_3_Factory3 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+}
+
+object Composite_In_3_Factory4 extends Composite_In_3_Factory4
+trait Composite_In_3_Factory4 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+}
+
+object Composite_In_3_Factory5 extends Composite_In_3_Factory5
+trait Composite_In_3_Factory5 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+}
+
+object Composite_In_3_Factory6 extends Composite_In_3_Factory6
+trait Composite_In_3_Factory6 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+}
+
+object Composite_In_3_Factory7 extends Composite_In_3_Factory7
+trait Composite_In_3_Factory7 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+}
+
+object Composite_In_3_Factory8 extends Composite_In_3_Factory8
+trait Composite_In_3_Factory8 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+}
+
+object Composite_In_3_Factory9 extends Composite_In_3_Factory9
+trait Composite_In_3_Factory9 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+}
+
+object Composite_In_3_Factory10 extends Composite_In_3_Factory10
+trait Composite_In_3_Factory10 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+}
+
+object Composite_In_3_Factory11 extends Composite_In_3_Factory11
+trait Composite_In_3_Factory11 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+}
+
+object Composite_In_3_Factory12 extends Composite_In_3_Factory12
+trait Composite_In_3_Factory12 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+}
+
+object Composite_In_3_Factory13 extends Composite_In_3_Factory13
+trait Composite_In_3_Factory13 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+}
+
+object Composite_In_3_Factory14 extends Composite_In_3_Factory14
+trait Composite_In_3_Factory14 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+}
+
+object Composite_In_3_Factory15 extends Composite_In_3_Factory15
+trait Composite_In_3_Factory15 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+}
+
+object Composite_In_3_Factory16 extends Composite_In_3_Factory16
+trait Composite_In_3_Factory16 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+}
+
+object Composite_In_3_Factory17 extends Composite_In_3_Factory17
+trait Composite_In_3_Factory17 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+}
+
+object Composite_In_3_Factory18 extends Composite_In_3_Factory18
+trait Composite_In_3_Factory18 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeComposite_In.await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+}
+
+object Composite_In_3_Factory19 extends Composite_In_3_Factory19
+trait Composite_In_3_Factory19 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeComposite_In.await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](dsl: Composite_In_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): InputMolecule_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro MakeComposite_In.await_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
+}
+
+object Composite_In_3_Factory20 extends Composite_In_3_Factory20
+trait Composite_In_3_Factory20 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeComposite_In.await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](dsl: Composite_In_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): InputMolecule_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro MakeComposite_In.await_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](dsl: Composite_In_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): InputMolecule_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = macro MakeComposite_In.await_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]
+}
+
+object Composite_In_3_Factory21 extends Composite_In_3_Factory21
+trait Composite_In_3_Factory21 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeComposite_In.await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](dsl: Composite_In_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): InputMolecule_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro MakeComposite_In.await_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](dsl: Composite_In_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): InputMolecule_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = macro MakeComposite_In.await_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](dsl: Composite_In_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]): InputMolecule_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21] = macro MakeComposite_In.await_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]
+}
+
+object Composite_In_3_Factory22 extends Composite_In_3_Factory22
+trait Composite_In_3_Factory22 {
+  def m[I1, I2, I3, T1](dsl: Composite_In_3_01[I1, I2, I3, T1]): InputMolecule_3_01[I1, I2, I3, T1] = macro MakeComposite_In.await_3_1[I1, I2, I3, T1]
+  def m[I1, I2, I3, T1, T2](dsl: Composite_In_3_02[I1, I2, I3, T1, T2]): InputMolecule_3_02[I1, I2, I3, T1, T2] = macro MakeComposite_In.await_3_2[I1, I2, I3, T1, T2]
+  def m[I1, I2, I3, T1, T2, T3](dsl: Composite_In_3_03[I1, I2, I3, T1, T2, T3]): InputMolecule_3_03[I1, I2, I3, T1, T2, T3] = macro MakeComposite_In.await_3_3[I1, I2, I3, T1, T2, T3]
+  def m[I1, I2, I3, T1, T2, T3, T4](dsl: Composite_In_3_04[I1, I2, I3, T1, T2, T3, T4]): InputMolecule_3_04[I1, I2, I3, T1, T2, T3, T4] = macro MakeComposite_In.await_3_4[I1, I2, I3, T1, T2, T3, T4]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5](dsl: Composite_In_3_05[I1, I2, I3, T1, T2, T3, T4, T5]): InputMolecule_3_05[I1, I2, I3, T1, T2, T3, T4, T5] = macro MakeComposite_In.await_3_5[I1, I2, I3, T1, T2, T3, T4, T5]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6](dsl: Composite_In_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6]): InputMolecule_3_06[I1, I2, I3, T1, T2, T3, T4, T5, T6] = macro MakeComposite_In.await_3_6[I1, I2, I3, T1, T2, T3, T4, T5, T6]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7](dsl: Composite_In_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]): InputMolecule_3_07[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7] = macro MakeComposite_In.await_3_7[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8](dsl: Composite_In_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]): InputMolecule_3_08[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8] = macro MakeComposite_In.await_3_8[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9](dsl: Composite_In_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]): InputMolecule_3_09[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9] = macro MakeComposite_In.await_3_9[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](dsl: Composite_In_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): InputMolecule_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = macro MakeComposite_In.await_3_10[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](dsl: Composite_In_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): InputMolecule_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = macro MakeComposite_In.await_3_11[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](dsl: Composite_In_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): InputMolecule_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = macro MakeComposite_In.await_3_12[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](dsl: Composite_In_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): InputMolecule_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = macro MakeComposite_In.await_3_13[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](dsl: Composite_In_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): InputMolecule_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = macro MakeComposite_In.await_3_14[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](dsl: Composite_In_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): InputMolecule_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = macro MakeComposite_In.await_3_15[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](dsl: Composite_In_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): InputMolecule_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = macro MakeComposite_In.await_3_16[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](dsl: Composite_In_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): InputMolecule_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = macro MakeComposite_In.await_3_17[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](dsl: Composite_In_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): InputMolecule_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = macro MakeComposite_In.await_3_18[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](dsl: Composite_In_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): InputMolecule_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = macro MakeComposite_In.await_3_19[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](dsl: Composite_In_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): InputMolecule_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = macro MakeComposite_In.await_3_20[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](dsl: Composite_In_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]): InputMolecule_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21] = macro MakeComposite_In.await_3_21[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]
+  def m[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](dsl: Composite_In_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]): InputMolecule_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22] = macro MakeComposite_In.await_3_22[I1, I2, I3, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]
 }

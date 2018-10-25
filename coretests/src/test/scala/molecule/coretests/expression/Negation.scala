@@ -1,13 +1,9 @@
 package molecule.coretests.expression
 
-import molecule.api._
-import java.util.Date
-import java.util.UUID._
 import java.net.URI
-import datomic.Peer
+import molecule.api.out4._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
 
 class Negation extends Base {
 

@@ -1,8 +1,8 @@
 package molecule.coretests.expression
 
-import molecule.api._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.api.out3._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 class Aggregates extends CoreSpec {
 
@@ -90,14 +90,14 @@ class Aggregates extends CoreSpec {
     )
 
     Ns.str.int(distinct).get.sortBy(_._1) === List(
-      ("a", Vector(1)),
-      ("b", Vector(3, 2)),
+      ("a", List(1)),
+      ("b", List(3, 2)),
     )
 
     Ns.int.str(distinct).get.sortBy(_._1) === List(
-      (1, Vector("a")),
-      (2, Vector("b")),
-      (3, Vector("b"))
+      (1, List("a")),
+      (2, List("b")),
+      (3, List("b"))
     )
 
     Ns.str.int(count).get.sortBy(_._1) === List(
@@ -121,7 +121,7 @@ class Aggregates extends CoreSpec {
     )
 
     Ns.str(distinct).int(distinct).get === List(
-      (Vector("a", "b"), Vector(1, 3, 2)),
+      (List("a", "b"), List(1, 3, 2)),
     )
 
     Ns.str(count).str(countDistinct).get === List(

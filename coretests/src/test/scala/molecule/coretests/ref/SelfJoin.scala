@@ -1,7 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.api._
-
+import molecule.api.out6._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -107,11 +106,10 @@ class SelfJoin extends CoreSpec {
 
     // We can't apply AND semantics to card-one attribute returning a value
     // since a card-one attribute naturally can't have multiple values.
+
     expectCompileError(
       """Ns.str("str1" and "str2").get""",
-      "[Dsl2Model:apply (4)] Card-one attribute `str` cannot return multiple values.\n"
-        + "A tacit attribute can though have AND expressions to make a self-join.\n"
-        + "If you want this, please make the attribute tacit by appending an underscore: `str_`")
+      "molecule.transform.exception.Dsl2ModelException: Card-one attribute `str` cannot return multiple values.")
   }
 
 
@@ -342,9 +340,10 @@ class SelfJoin extends CoreSpec {
 
     // Unifying attributes should be tacit
     // Grab the value from the first attribute that it unifies with (if needed)
+
     expectCompileError(
       "m(Ns.int_(23).Refs1.str1._Ns.Self.int_(25).Refs1.str1(unify))",
-      "[Dsl2Model:getValues] Can only unify on tacit attributes. Please add underscore to attribute: `str1_(unify)`")
+      "molecule.transform.exception.Dsl2ModelException: Can only unify on tacit attributes. Please add underscore to attribute: `str1_(unify)`")
   }
 
 

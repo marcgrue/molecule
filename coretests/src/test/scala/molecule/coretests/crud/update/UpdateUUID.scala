@@ -1,8 +1,7 @@
 package molecule.coretests.crud.update
 
 import java.util.UUID
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -123,12 +122,12 @@ class UpdateUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuids.replace(uuid7 -> uuid8, uuid8 -> uuid8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/uuids`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uuids`:" +
           "\n__ident__uuid8")
 
       expectCompileError(
         """Ns(eid).uuids.replace(Seq(uuid7 -> uuid8, uuid8 -> uuid8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/uuids`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uuids`:" +
           "\n__ident__uuid8")
 
 

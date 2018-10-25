@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.api._
+import molecule.api.in1_out2._
 import molecule.coretests.util.dsl.coreTest._
 
 class Input extends Base {

@@ -4,18 +4,19 @@ import molecule.expression.{AggregateKeywords, AttrExpressions}
 import molecule.facade.Datomic
 import molecule.factory._
 
-/** [[http://www.scalamolecule.org Molecule]] library - a Scala meta DSL for the [[https://www.datomic.com Datomic]] database.
-  * <br><br>
-  * This base package includes a single [[molecule.api api object]] that is used to bring Molecule functionality into a project:
-  * {{{
-  *   import molecule.api._
-  * }}}
+/** [[http://www.scalamolecule.org Molecule]] library - a Scala meta-DSL for the [[https://www.datomic.com Datomic]] database.
+  *
+  * See [[molecule.api api]] package for various api imports to start using Molecule.
   *
   * == Sub-packages ==
   * <table>
   *   <tr>
   *     <td><a href="action/index.html">action</a><td>
   *     <td>Actions on molecules and entities.</td>
+  *   </tr>
+  *   <tr>
+  *     <td><a href="api/index.html">api</a><td>
+  *     <td>Molecule import interfaces of various arities.</td>
   *   </tr>
   *   <tr>
   *     <td><a href="ast/index.html">ast</a><td>
@@ -75,46 +76,6 @@ import molecule.factory._
   *   </tr>
   * </table>
   */
-package object molecule {
-
-  /** Molecule API to be imported into your project to use Molecule.
-    * <br><br>
-    * To start using Molecule involves 2 initial steps:
-    *
-    *  - Define your schema: [[molecule.schema.definition Docs]] | [[http://www.scalamolecule.org/manual/schema/ Manual]]
-    *  - `sbt compile` your project to let the sbt-molecule plugin generate your custom molecule DSL.
-    *
-    * Then you can start using your DSL and create molecules by importing the api, your DSL
-    * and assign a Datomic connection to an implicit val:
-    * {{{
-    *   import molecule.api._                  // import Molecule API
-    *   import path.to.dsl.yourDomain._        // auto-generated custom DSL
-    *   import path.to.schema.YourDomainSchema // auto-generated custom Schema Transaction data
-    *
-    *   implicit val conn = recreateDbFrom(YourDomainDefiniton) // Only once
-    *
-    *   // Create molecules
-    *   Person.name("Ben").age(42).save
-    *   val benAge = Person.name_("Ben").age.get.head // 42
-    *   // etc..
-    * }}}
-    * For brevity, arity 3-22 interfaces and empty companion traits are left ungrouped.
-    * */
-  object api
-    extends Datomic
-      with AttrExpressions
-      with AggregateKeywords
-      with CompositeInserts
-      with EntityOps
-      with OptionalMapOps
-      with Molecule_Factory
-      with Molecule_In_1_Factory
-      with Molecule_In_2_Factory
-      with Molecule_In_3_Factory
-      with Composite_Factory
-      with Composite_In_1_Factory
-      with Composite_In_2_Factory
-      with Composite_In_3_Factory
-}
+package object molecule
 
 

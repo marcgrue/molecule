@@ -1,9 +1,7 @@
 package molecule.expression
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.ast.model._
 import molecule.boilerplate.attributes.Attr
-import molecule.api._
+
 
 /** Attribute expression markers and methods.
   * {{{
@@ -11,7 +9,6 @@ import molecule.api._
   *   Person.name.contains("John")             // fulltext search
   *   Person.age.!=(42)                        // negation (or `not`)
   *   Person.age.<(42)                         // comparison (< > <= >=)
-  *   Person.name("John" or "Jonas")           // OR-logic
   *   Person.age().get                         // match non-asserted datoms (null) in query
   *   Person(benId).age().update               // apply empty value to retract value(s) in updates
   *   Person.hobbies.assert("golf")            // assert card-many value(s)
@@ -38,8 +35,6 @@ import molecule.api._
   */
 trait AttrExpressions {
 
-  // Attribute markers ---------------------------------------------------------------------------------------------------
-
   /** Turn molecule into input molecule awaiting input.
     * <br><br>
     * Apply input marker `?` to attribute to turn molecule into an 'input molecule'.
@@ -57,9 +52,10 @@ trait AttrExpressions {
     *       Input molecule queries are cached and optimized by Datomic.
     * @group attrMarker
     **/
-  object ? extends ?
   trait ?
 
+  // Avoiding overload via core.? import
+  type ?? = molecule.expression.AttrExpressions.?
 
   /** Unify attribute value in self-join.
     * <br><br>
@@ -82,64 +78,8 @@ trait AttrExpressions {
     *
     * @group attrMarker
     **/
-  object unify extends unify
   trait unify
 
-
-  // Attribute expression implicits -------------------------------------------------------------------------------------
-
-  /** @group attrExprImplicits */
-  implicit def string2Model(v: String): TermValue[String] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def int2Model(v: Int): TermValue[Int] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def long2Model(v: Long): TermValue[Long] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def float2Model(v: Float): TermValue[Float] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def double2Model(v: Double): TermValue[Double] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def bigInt2Model(v: BigInt): TermValue[BigInt] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def bigDec2Model(v: BigDecimal): TermValue[BigDecimal] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def boolean2Model(v: Boolean): TermValue[Boolean] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def date2Model(v: Date): TermValue[Date] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def uuid2Model(v: UUID): TermValue[UUID] = TermValue(v)
-  /** @group attrExprImplicits */
-  implicit def uri2Model(v: URI): TermValue[URI] = TermValue(v)
-
-  /** @group attrExprImplicits */
-  implicit def stringSet2Model(set: Set[String]): TermValue[Set[String]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def intSet2Model(set: Set[Int]): TermValue[Set[Int]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def longSet2Model(set: Set[Long]): TermValue[Set[Long]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def floatSet2Model(set: Set[Float]): TermValue[Set[Float]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def doubleSet2Model(set: Set[Double]): TermValue[Set[Double]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def bigIntSet2Model(set: Set[BigInt]): TermValue[Set[BigInt]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def bigDecSet2Model(set: Set[BigDecimal]): TermValue[Set[BigDecimal]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def booleanSet2Model(set: Set[Boolean]): TermValue[Set[Boolean]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def dateSet2Model(set: Set[Date]): TermValue[Set[Date]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def uuidSet2Model(set: Set[UUID]): TermValue[Set[UUID]] = TermValue(set)
-  /** @group attrExprImplicits */
-  implicit def uriSet2Model(set: Set[URI]): TermValue[Set[URI]] = TermValue(set)
-
-  /** @group attrExprImplicits */
-  implicit def tuple2Model[A, B](tpl: (A, B)): TermValue[(A, B)] = TermValue(tpl)
-}
-
-/** Attribute expression methods. */
-object AttrExpressions {
 
   /** Expression methods common for all attributes. */
   trait AttrExpr[Ns, T] {
@@ -534,7 +474,8 @@ object AttrExpressions {
       * @param value Input marker `?` for equality match
       * @return Input molecule
       */
-    def apply(value: ?): In with Attr = ???
+//    def apply(value: molecule.api.core.?): In with Attr = ???
+    def apply(value: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute negation value(s).
@@ -551,7 +492,7 @@ object AttrExpressions {
       * @param value Input marker `?` for negation value
       * @return Input molecule
       */
-    def not(value: ?): In with Attr = ???
+    def not(value: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute negation value(s).
@@ -568,7 +509,7 @@ object AttrExpressions {
       * @param value Input marker `?` for negation value
       * @return Input molecule
       */
-    def !=(value: ?): In with Attr = ???
+    def !=(value: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute upper value.
@@ -585,7 +526,7 @@ object AttrExpressions {
       * @param upper Input marker `?` for upper value
       * @return Input molecule
       */
-    def <(upper: ?): In with Attr = ???
+    def <(upper: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute upper value.
@@ -602,7 +543,7 @@ object AttrExpressions {
       * @param upper Input marker `?` for upper value
       * @return Input molecule
       */
-    def <=(upper: ?): In with Attr = ???
+    def <=(upper: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute lower value.
@@ -619,7 +560,7 @@ object AttrExpressions {
       * @param lower Input marker `?` for lower value
       * @return Input molecule
       */
-    def >(lower: ?): In with Attr = ???
+    def >(lower: ??): In with Attr = ???
 
 
     /** Mark molecule as input molecule awaiting attribute lower value.
@@ -636,7 +577,7 @@ object AttrExpressions {
       * @param lower Input marker `?` for lower value
       * @return Input molecule
       */
-    def >=(lower: ?): In with Attr = ???
+    def >=(lower: ??): In with Attr = ???
 
 
     /** Filter attribute values with logical expression.
@@ -1308,6 +1249,8 @@ object AttrExpressions {
       * @param words Search words
       * @return Input molecule awaiting search word(s)
       */
-    def contains(words: ?): In with Attr = ???
+    def contains(words: ??): In with Attr = ???
   }
 }
+
+object AttrExpressions extends AttrExpressions

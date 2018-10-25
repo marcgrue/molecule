@@ -57,7 +57,7 @@ object query extends Helpers {
   trait QueryTerm extends QueryExpr
   case object Empty extends QueryTerm
 
-  trait Output extends QueryExpr
+  sealed trait Output extends QueryExpr
   case class AggrExpr(fn: String, args: Seq[Any], v: Var) extends Output {
     override def toString: String = s"""AggrExpr("$fn", ${seq(args)}, $v)"""
   }

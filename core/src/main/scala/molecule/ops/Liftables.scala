@@ -4,25 +4,29 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.ast.model._
 import molecule.ast.query._
+import molecule.ops.exception.LiftablesException
+import molecule.transform.exception.Dsl2ModelException
 import molecule.util.MacroHelpers
 import scala.collection.immutable.HashSet
 import scala.collection.immutable.Set.{Set1, Set2, Set3, Set4}
-import scala.reflect.macros.whitebox.Context
+import scala.reflect.api.Trees
+import scala.reflect.macros.blackbox
 
-private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
+private[molecule] trait Liftables extends MacroHelpers {
+  val c: blackbox.Context
   import c.universe._
-  val z = DebugMacro("Liftables", 1, 10, true)
 
+  def abort(msg: String) = throw new LiftablesException(msg)
 
   // General liftables --------------------------------------------------------------
 
-  def mkDate(date: Date) = q"new Date(${date.getTime})"
-  def mkBigInt(bigInt: BigInt) = q"BigInt.apply(${bigInt.toString()})"
-  def mkBigDecimal(bigDec: BigDecimal) = q"BigDecimal.apply(${bigDec.toString()})"
-  def mkUUID(uuid: UUID) = q"java.util.UUID.fromString(${uuid.toString})"
-  def mkURI(uri: URI) = q"new java.net.URI(${uri.getScheme}, ${uri.getUserInfo}, ${uri.getHost}, ${uri.getPort}, ${uri.getPath}, ${uri.getQuery}, ${uri.getFragment})"
+  def mkDate(date: Date): c.universe.Tree = q"new Date(${date.getTime})"
+  def mkBigInt(bigInt: BigInt): c.universe.Tree = q"BigInt.apply(${bigInt.toString()})"
+  def mkBigDecimal(bigDec: BigDecimal): c.universe.Tree = q"BigDecimal.apply(${bigDec.toString()})"
+  def mkUUID(uuid: UUID): c.universe.Tree = q"java.util.UUID.fromString(${uuid.toString})"
+  def mkURI(uri: URI): c.universe.Tree = q"new java.net.URI(${uri.getScheme}, ${uri.getUserInfo}, ${uri.getHost}, ${uri.getPort}, ${uri.getPath}, ${uri.getQuery}, ${uri.getFragment})"
 
-  implicit val liftAny = Liftable[Any] {
+  implicit val liftAny: c.universe.Liftable[Any] = Liftable[Any] {
     case Literal(Constant(s: String))  => q"$s"
     case Literal(Constant(i: Int))     => q"$i"
     case Literal(Constant(l: Long))    => q"$l"
@@ -52,13 +56,14 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case s: HashSet[_] => q"Set(..${s map any})"
       case emptySet      => q"Set()"
     }
+    case null                          => q"null"
     case other                         =>
-      abort("[Liftables:liftAny] Can't lift unexpected Any type: " + other.getClass +
+      abort("Can't lift unexpected Any type: " + other.getClass +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +
         "\nTry to assign the expression to a variable and apply the variable instead.")
   }
 
-  def any(v: Any) = v match {
+  def any(v: Any): c.universe.Tree = v match {
     case Literal(Constant(s: String))  => q"$s"
     case Literal(Constant(i: Int))     => q"$i"
     case Literal(Constant(l: Long))    => q"$l"
@@ -78,7 +83,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case uri: URI                      => mkURI(uri)
   }
 
-  implicit val liftTuple2 = Liftable[Product] {
+  implicit val liftTuple2: c.universe.Liftable[Product] = Liftable[Product] {
     case (k: String, v: String)         => q"($k, $v)"
     case (k: Int, v: Int)               => q"($k, $v)"
     case (k: Long, v: Long)             => q"($k, $v)"
@@ -89,32 +94,32 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case (k: BigDecimal, v: BigDecimal) => q"(${mkBigDecimal(k)}, ${mkBigDecimal(v)})"
     case (k: UUID, v: UUID)             => q"(${mkUUID(k)}, ${mkUUID(v)})"
     case (k: URI, v: URI)               => q"(${mkURI(k)}, ${mkURI(v)})"
-    case (a, b)                         => abort(s"[Liftables:liftTuple2] Can't lift unexpected Tuple2: ($a, $b)")
-    case other                          => abort(s"[Liftables:Product] Can't lift unexpected product type: $other")
+    case (a, b)                         => abort(s"Can't lift unexpected Tuple2: ($a, $b)")
+    case other                          => abort(s"Can't lift unexpected product type: $other")
   }
 
 
   // Liftables for Query --------------------------------------------------------------
 
-  implicit val liftVar    = Liftable[Var] { v => q"Var(${v.v})" }
-  implicit val liftVal    = Liftable[Val] { value => q"Val(${value.v})" }
-  implicit val liftAttrKW = Liftable[KW] { kw => q"KW(${kw.ns}, ${kw.attr}, ${kw.refNs})" }
-  implicit val liftWith   = Liftable[With] { widh => q"With(Seq(..${widh.variables}))" }
+  implicit val liftVar   : c.universe.Liftable[Var]  = Liftable[Var] { v => q"Var(${v.v})" }
+  implicit val liftVal   : c.universe.Liftable[Val]  = Liftable[Val] { value => q"Val(${value.v})" }
+  implicit val liftAttrKW: c.universe.Liftable[KW]   = Liftable[KW] { kw => q"KW(${kw.ns}, ${kw.attr}, ${kw.refNs})" }
+  implicit val liftWith  : c.universe.Liftable[With] = Liftable[With] { widh => q"With(Seq(..${widh.variables}))" }
 
-  implicit val liftQueryValue = Liftable[QueryValue] {
+  implicit val liftQueryValue: c.universe.Liftable[QueryValue] = Liftable[QueryValue] {
     case Var(sym)                      => q"Var($sym)"
     case Val(v)                        => q"Val($v)"
     case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
     case NoVal                         => q"NoVal"
   }
 
-  implicit val liftDataSource = Liftable[DataSource] {
+  implicit val liftDataSource: c.universe.Liftable[DataSource] = Liftable[DataSource] {
     case DS(name) => q"DS($name)"
     case DS       => q"DS"
     case ImplDS   => q"ImplDS"
   }
 
-  implicit val liftQueryTerm = Liftable[QueryTerm] {
+  implicit val liftQueryTerm: c.universe.Liftable[QueryTerm] = Liftable[QueryTerm] {
     case KW(ns, attr, refNs) => q"KW($ns, $attr, $refNs)"
     case Empty               => q"Empty"
     case NoBinding           => q"NoBinding"
@@ -123,16 +128,19 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case DS(name)            => q"DS($name)"
     case DS                  => q"DS"
     case ImplDS              => q"ImplDS"
-    case t                   => abort("[Liftables:liftQueryTerm] Can't lift query term: " + t)
+    case t                   => abort("Can't lift query term: " + t)
   }
 
-  implicit val liftOutput = Liftable[Output] {
-    case AggrExpr(fn, args, v) => q"AggrExpr($fn, Seq(..$args), $v)"
-    case Var(sym)              => q"Var($sym)"
+  implicit val liftOutput: c.universe.Liftable[Output] = Liftable[Output] {
+    case Var(sym)                      => q"Var($sym)"
+    case Val(v)                        => q"Val($v)"
+    case AggrExpr(fn, args, v)         => q"AggrExpr($fn, Seq(..$args), $v)"
+    case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
+    case NoVal                         => q"NoVal"
   }
-  implicit val liftFind   = Liftable[Find] { find => q"Find(Seq(..${find.outputs}))" }
+  implicit val liftFind  : c.universe.Liftable[Find]   = Liftable[Find] { find => q"Find(Seq(..${find.outputs}))" }
 
-  implicit val liftBinding = Liftable[Binding] {
+  implicit val liftBinding: c.universe.Liftable[Binding] = Liftable[Binding] {
     case NoBinding               => q"NoBinding"
     case ScalarBinding(name)     => q"ScalarBinding($name)"
     case CollectionBinding(name) => q"CollectionBinding($name)"
@@ -140,18 +148,18 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case RelationBinding(names)  => q"RelationBinding(Seq(..$names))"
   }
 
-  implicit val liftInput = Liftable[Input] {
-    case InDataSource(ds, argss)           => q"InDataSource($ds, Seq(...$argss))"
-    case InVar(binding, argss)             => q"InVar($binding, Seq(...$argss))"
+  implicit val liftInput: c.universe.Liftable[Input] = Liftable[Input] {
+    case InDataSource(ds, argss)           => q"InDataSource($ds, Seq(..${argss.map(args => q"Seq(..$args)")}))"
+    case InVar(binding, argss)             => q"InVar($binding, Seq(..${argss.map(args => q"Seq(..$args)")}))"
     case Placeholder(e, kw, v, enumPrefix) => q"Placeholder($e, $kw, $v, $enumPrefix)"
   }
 
-  implicit val liftDataClause     = Liftable[DataClause] { dc => q"DataClause(${dc.ds}, ${dc.e}, ${dc.a}, ${dc.v}, ${dc.tx}, ${dc.op})" }
-  implicit val liftNotClause      = Liftable[NotClause] { nc => q"NotClause(${nc.e}, ${nc.a})" }
-  implicit val liftRuleInvocation = Liftable[RuleInvocation] { ri => q"RuleInvocation(${ri.name}, Seq(..${ri.args}))" }
-  implicit val liftFunct          = Liftable[Funct] { f => q"Funct(${f.name}, Seq(..${f.ins}), ${f.outs})" }
+  implicit val liftDataClause    : c.universe.Liftable[DataClause]     = Liftable[DataClause] { dc => q"DataClause(${dc.ds}, ${dc.e}, ${dc.a}, ${dc.v}, ${dc.tx}, ${dc.op})" }
+  implicit val liftNotClause     : c.universe.Liftable[NotClause]      = Liftable[NotClause] { nc => q"NotClause(${nc.e}, ${nc.a})" }
+  implicit val liftRuleInvocation: c.universe.Liftable[RuleInvocation] = Liftable[RuleInvocation] { ri => q"RuleInvocation(${ri.name}, Seq(..${ri.args}))" }
+  implicit val liftFunct         : c.universe.Liftable[Funct]          = Liftable[Funct] { f => q"Funct(${f.name}, Seq(..${f.ins}), ${f.outs})" }
 
-  implicit val liftNotClauses = Liftable[NotClauses] { notClauses =>
+  implicit val liftNotClauses: c.universe.Liftable[NotClauses] = Liftable[NotClauses] { notClauses =>
     val clauses = notClauses.clauses map {
       case cl: DataClause     => q"$cl"
       case cl: NotClause      => q"$cl"
@@ -162,7 +170,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"NotClauses(Seq(..$clauses))"
   }
 
-  implicit val liftNotJoinClauses = Liftable[NotJoinClauses] { notJoinClauses =>
+  implicit val liftNotJoinClauses: c.universe.Liftable[NotJoinClauses] = Liftable[NotJoinClauses] { notJoinClauses =>
     val clauses = notJoinClauses.clauses map {
       case cl: DataClause     => q"$cl"
       case cl: NotClause      => q"$cl"
@@ -174,7 +182,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
   }
 
 
-  implicit val liftListOfClauses = Liftable[Seq[Clause]] { clauses =>
+  implicit val liftListOfClauses: c.universe.Liftable[Seq[Clause]] = Liftable[Seq[Clause]] { clauses =>
     val cls = clauses map {
       case cl: DataClause     => q"$cl"
       case cl: NotClause      => q"$cl"
@@ -186,7 +194,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Seq(..$cls)"
   }
 
-  implicit val liftClause = Liftable[Clause] {
+  implicit val liftClause: c.universe.Liftable[Clause] = Liftable[Clause] {
     case DataClause(ds, e, a, v, tx, op) => q"DataClause($ds, $e, $a, $v, $tx, $op)"
     case NotClause(e, a)                 => q"NotClause($e, $a)"
     case NotClauses(clauses)             => q"NotClauses($clauses)"
@@ -195,15 +203,15 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case Funct(name, ins, outs)          => q"Funct($name, Seq(..$ins), $outs)"
   }
 
-  implicit val liftRule  = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
-  implicit val liftIn    = Liftable[In] { in => q"In(Seq(..${in.inputs}), Seq(..${in.rules}), Seq(..${in.ds}))" }
-  implicit val liftWhere = Liftable[Where] { where => q"Where(Seq(..${where.clauses}))" }
-  implicit val liftQuery = Liftable[Query] { q => q"import molecule.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
+  implicit val liftRule : c.universe.Liftable[Rule]  = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
+  implicit val liftIn   : c.universe.Liftable[In]    = Liftable[In] { in => q"In(Seq(..${in.inputs}), Seq(..${in.rules}), Seq(..${in.ds}))" }
+  implicit val liftWhere: c.universe.Liftable[Where] = Liftable[Where] { where => q"Where(Seq(..${where.clauses}))" }
+  implicit val liftQuery: c.universe.Liftable[Query] = Liftable[Query] { q => q"import molecule.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
 
 
   // Liftables for Model --------------------------------------------------------------
 
-  implicit val liftBidirectional = Liftable[Bidirectional] {
+  implicit val liftBidirectional: c.universe.Liftable[Bidirectional] = Liftable[Bidirectional] {
     case BiSelfRef(card)             => q"BiSelfRef($card)"
     case BiSelfRefAttr(card)         => q"BiSelfRefAttr($card)"
     case BiOtherRef(card, attr)      => q"BiOtherRef($card, $attr)"
@@ -218,7 +226,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case BiTargetRefAttr(card, attr) => q"BiTargetRefAttr($card, $attr)"
   }
 
-  implicit val liftGeneric = Liftable[Generic] {
+  implicit val liftGeneric: c.universe.Liftable[Generic] = Liftable[Generic] {
     case NsValue(values)             => q"NsValue(Seq(..$values))"
     case AttrVar(v)                  => q"AttrVar($v)"
     case TxValue(t)                  => q"TxValue($t)"
@@ -246,8 +254,8 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case BiTargetRefAttr(card, attr) => q"BiTargetRefAttr($card, $attr)"
   }
 
-  implicit val liftFn    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
-  implicit val liftValue = Liftable[Value] {
+  implicit val liftFn   : c.universe.Liftable[Fn]    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
+  implicit val liftValue: c.universe.Liftable[Value] = Liftable[Value] {
     case EntValue                     => q"EntValue"
     case NsValue(values)              => q"NsValue(Seq(..$values))"
     case VarValue                     => q"VarValue"
@@ -301,13 +309,13 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case MapKeys(keys)                => q"MapKeys(Seq(..$keys))"
   }
 
-  implicit val liftAtom       = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
-  implicit val liftBond       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
-  implicit val liftReBond     = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
-  implicit val liftTransitive = Liftable[Transitive] { r => q"Transitive(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.depth}, ${r.prevVar})" }
-  implicit val liftMeta       = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
-  implicit val liftGroup      = Liftable[Nested] { g0 =>
-    val es0 = g0.elements map {
+  implicit val liftAtom      : c.universe.Liftable[Atom]       = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
+  implicit val liftBond      : c.universe.Liftable[Bond]       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
+  implicit val liftReBond    : c.universe.Liftable[ReBond]     = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
+  implicit val liftTransitive: c.universe.Liftable[Transitive] = Liftable[Transitive] { r => q"Transitive(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.depth}, ${r.prevVar})" }
+  implicit val liftMeta      : c.universe.Liftable[Meta]       = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
+  implicit val liftGroup     : c.universe.Liftable[Nested]     = Liftable[Nested] { g0 =>
+    val es0: Seq[c.universe.Tree] = g0.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
       case r: ReBond     => q"$r"
@@ -315,13 +323,57 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
       case Self          => q"Self"
       case m: Meta       => q"$m"
       case g1: Nested    => {
-        val es1 = g1.elements map {
+        val es1: Seq[c.universe.Tree] = g1.elements map {
           case a: Atom       => q"$a"
           case b: Bond       => q"$b"
           case r: ReBond     => q"$r"
           case r: Transitive => q"$r"
           case Self          => q"Self"
           case m: Meta       => q"$m"
+          case g1: Nested    => {
+            val es1: Seq[c.universe.Tree] = g1.elements map {
+              case a: Atom       => q"$a"
+              case b: Bond       => q"$b"
+              case r: ReBond     => q"$r"
+              case r: Transitive => q"$r"
+              case Self          => q"Self"
+              case m: Meta       => q"$m"
+              case g1: Nested    => {
+                val es1: Seq[c.universe.Tree] = g1.elements map {
+                  case a: Atom       => q"$a"
+                  case b: Bond       => q"$b"
+                  case r: ReBond     => q"$r"
+                  case r: Transitive => q"$r"
+                  case Self          => q"Self"
+                  case m: Meta       => q"$m"
+                  case g1: Nested    => {
+                    val es1: Seq[c.universe.Tree] = g1.elements map {
+                      case a: Atom       => q"$a"
+                      case b: Bond       => q"$b"
+                      case r: ReBond     => q"$r"
+                      case r: Transitive => q"$r"
+                      case Self          => q"Self"
+                      case m: Meta       => q"$m"
+                      case g1: Nested    => {
+                        val es1: Seq[c.universe.Tree] = g1.elements map {
+                          case a: Atom       => q"$a"
+                          case b: Bond       => q"$b"
+                          case r: ReBond     => q"$r"
+                          case r: Transitive => q"$r"
+                          case Self          => q"Self"
+                          case m: Meta       => q"$m"
+                        }
+                        q"Nested(${g1.bond}, Seq(..$es1))"
+                      }
+                    }
+                    q"Nested(${g1.bond}, Seq(..$es1))"
+                  }
+                }
+                q"Nested(${g1.bond}, Seq(..$es1))"
+              }
+            }
+            q"Nested(${g1.bond}, Seq(..$es1))"
+          }
         }
         q"Nested(${g1.bond}, Seq(..$es1))"
       }
@@ -329,7 +381,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Nested(${g0.bond}, Seq(..$es0))"
   }
 
-  implicit val liftTxMetaData = Liftable[TxMetaData] { tm =>
+  implicit val liftTxMetaData: c.universe.Liftable[TxMetaData] = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -342,7 +394,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"TxMetaData(Seq(..$es))"
   }
 
-  implicit val liftComposite = Liftable[Composite] { fm =>
+  implicit val liftComposite: c.universe.Liftable[Composite] = Liftable[Composite] { fm =>
     val es = fm.elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
@@ -355,8 +407,8 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Composite(Seq(..$es))"
   }
 
-  implicit val liftListOfElements = Liftable[Seq[Element]] { elements =>
-    val es = elements map {
+  implicit val liftListOfElements: c.universe.Liftable[Seq[Element]] = Liftable[Seq[Element]] { elements =>
+    val es: Seq[c.universe.Tree] = elements map {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
       case r: ReBond     => q"$r"
@@ -370,7 +422,7 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     q"Seq(..$es)"
   }
 
-  implicit val liftElement = Liftable[Element] {
+  implicit val liftElement: c.universe.Liftable[Element] = Liftable[Element] {
     case Atom(ns, name, tpeS, card, value, enumPrefix, gs, keys) => q"Atom($ns, $name, $tpeS, $card, $value, $enumPrefix, Seq(..$gs), Seq(..$keys))"
     case Bond(ns, refAttr, refNs, card, gs)                      => q"Bond($ns, $refAttr, $refNs, $card, Seq(..$gs))"
     case ReBond(backRef, refAttr, refNs, distinct, prevVar)      => q"ReBond($backRef, $refAttr, $refNs, $distinct, $prevVar)"
@@ -383,5 +435,5 @@ private[molecule] trait Liftables[Ctx <: Context] extends MacroHelpers[Ctx] {
     case EmptyElement                                            => q"EmptyElement"
   }
 
-  implicit val liftModel = Liftable[Model] { model => q"Model(Seq(..${model.elements}))" }
+  implicit val liftModel: c.universe.Liftable[Model] = Liftable[Model] { model => q"Model(Seq(..${model.elements}))" }
 }

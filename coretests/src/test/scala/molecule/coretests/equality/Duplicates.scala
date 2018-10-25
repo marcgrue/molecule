@@ -1,6 +1,6 @@
 package molecule.coretests.equality
 
-import molecule.api._
+import molecule.api.in1_out4._
 import molecule.ast.model._
 import molecule.ast.query._
 import molecule.coretests.util.dsl.coreTest._
@@ -182,41 +182,41 @@ class Duplicates extends CoreSpec {
       // Distinct values (no transformation)
 
       m(Ns.int(1, 2))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1, 2)), None, List(), List())
       ))
 
       m(Ns.int(List(1, 2)))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1, 2)), None, List(), List())
       ))
 
       m(Ns.int(List(1), List(2)))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1, 2)), None, List(), List())
       ))
 
 
       // Single value (no transformation)
 
       m(Ns.int(1))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.int(List(1)))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
       ))
 
 
       // Transformation: redundant duplicate values discarded at compile time
 
       m(Ns.int(1, 1))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.int(List(1, 1)))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.int(List(1), List(1)))._model === Model(List(
-        Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+        Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
       ))
     }
 
@@ -226,41 +226,41 @@ class Duplicates extends CoreSpec {
       // Distinct values (no transformation)
 
       m(Ns.ints(1, 2))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1, 2)), None, List(), List())
       ))
 
       m(Ns.ints(List(1, 2)))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1, 2)), None, List(), List())
       ))
 
       m(Ns.ints(List(1), List(2)))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1, 2)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1, 2)), None, List(), List())
       ))
 
 
       // Single value (no transformation)
 
       m(Ns.ints(1))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.ints(List(1)))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1)), None, List(), List())
       ))
 
 
       // Transformation: redundant duplicate values discarded at compile time
 
       m(Ns.ints(1, 1))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.ints(List(1, 1)))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1)), None, List(), List())
       ))
 
       m(Ns.ints(List(1), List(1)))._model === Model(List(
-        Atom("ns", "ints", "Long", 2, Eq(List(1)), None, List(), List())
+        Atom("ns", "ints", "Int", 2, Eq(List(1)), None, List(), List())
       ))
     }
 
@@ -435,11 +435,11 @@ class Duplicates extends CoreSpec {
 
     // Redundant duplicate values are discarded at compile time
     m(Ns.int(1, 1))._model === Model(List(
-      Atom("ns", "int", "Long", 1, Eq(List(1)), None, List(), List())
+      Atom("ns", "int", "Int", 1, Eq(List(1)), None, List(), List())
     ))
 
     m(Ns.int(1, 2))._model === Model(List(
-      Atom("ns", "int", "Long", 1, Eq(List(1, 2)), None, List(), List())
+      Atom("ns", "int", "Int", 1, Eq(List(1, 2)), None, List(), List())
     ))
 
     Ns.int.apply(1, 1).get === List(1)

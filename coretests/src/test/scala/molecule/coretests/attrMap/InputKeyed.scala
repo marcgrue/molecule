@@ -1,7 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.api._
-
+import molecule.api.in1_out2._
 import molecule.coretests.util.dsl.coreTest._
 
 class InputKeyed extends Base {
@@ -176,23 +175,23 @@ class InputKeyed extends Base {
       (4, date3),
       (3, date3),
       (2, date3),
-      (1, date3)
+      (1, date3),
     )
     m(Ns.int.dateMapK(".*").>=(?))(date2).get === List(
       (4, date3),
       (3, date3),
       (2, date3),
       (1, date3),
-      (2, date2)
+      (2, date2),
     )
     m(Ns.int.dateMapK(".*").<=(?))(date2).get === List(
       (1, date1),
       (2, date1),
-      (2, date2)
+      (2, date2),
     )
     m(Ns.int.dateMapK(".*").<(?))(date2).get === List(
       (1, date1),
-      (2, date1)
+      (2, date1),
     )
 
     m(Ns.int.dateMapK_(".*").>(?))(date2).get === List(1, 2, 3, 4)

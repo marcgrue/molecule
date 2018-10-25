@@ -1,9 +1,8 @@
 package molecule.coretests.json
 
-import molecule.api._
+import molecule.api.out3._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
-//import molecule.util.expectCompileError
 
 class Composite extends CoreSpec {
 
@@ -77,7 +76,7 @@ class Composite extends CoreSpec {
   }
 
 
-  "2 + 3 (2+1tx)" in new CoreSetup {
+  "2 + 3 (2 + 1tx)" in new CoreSetup {
     insert(
       Ref2.int2.str2, Ref1.int1.str1
     )(
@@ -104,6 +103,27 @@ class Composite extends CoreSpec {
   }
 
 
+  "2 + 3 (2 + 2tx with ref)" in new CoreSetup {
+    insert(
+      Ref2.int2.str2, Ref1.int1.str1
+    )(
+      Seq(
+        ((1, "a"), (11, "aa")),
+        ((2, "b"), (22, "bb"))
+      )
+    )(
+      Ns.str("Tx meta data").Ref1.int1(42)
+    )
+
+    // Note how ref attr in tx meta data has both a `tx` and `ref1` prefix
+    m(Ref2.int2.str2 ~ Ref1.int1.str1.Tx(Ns.str.Ref1.int1)).getJson ===
+      """[
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa", "tx.ns.str": "Tx meta data", "tx.ref1.ref1.int1": 42}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb", "tx.ns.str": "Tx meta data", "tx.ref1.ref1.int1": 42}]
+        |]""".stripMargin
+  }
+
+
   "Card-one ref" in new CoreSetup {
     insert(
       Ref2.int2.str2, Ns.int.Ref1.str1
@@ -116,8 +136,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int.Ref1.str1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.str1": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.str1": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.ref1.str1": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -134,8 +154,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.int.Refs1.str1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.str1": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.str1": "bb"}]
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "refs1.ref1.str1": "aa"}],
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "refs1.ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -152,8 +172,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 ~ Ns.Refs1.int1).getJson ===
       """[
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22}],
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11}]
+        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"refs1.ref1.int1": 22}],
+        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"refs1.ref1.int1": 11}]
         |]""".stripMargin
 
     m(Ref2.int2.str2 ~ Ns.refs1).getJson ===

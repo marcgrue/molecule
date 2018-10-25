@@ -1,11 +1,10 @@
 package molecule.coretests.util
 
-import molecule.api._
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID._
-
+import molecule.api.core._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
@@ -30,6 +29,7 @@ class CoreSpec extends MoleculeSpec {
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9, date10, date11, date12, date13, date14, date15, date16, date17, date18) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9), da(10), da(11), da(12), da(13), da(14), da(15), da(16), da(17), da(18))
 
+
   lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7, uuid8, uuid9, uuid10, uuid11, uuid12, uuid13, uuid14, uuid15, uuid16, uuid17, uuid18) =
     List(uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu).sortBy(_.toString)
 
@@ -46,6 +46,10 @@ class CoreSpec extends MoleculeSpec {
   lazy val (str7, int7, long7, float7, double7, bigInt7, bigDec7, bool7, enum7) = ("g", 7, 7L, 7.0f, 7.0, BigInt(7), BigDecimal(7.0), true, "enum7")
   lazy val (str8, int8, long8, float8, double8, bigInt8, bigDec8, bool8, enum8) = ("h", 8, 8L, 8.0f, 8.0, BigInt(8), BigDecimal(8.0), false, "enum8")
   lazy val (str9, int9, long9, float9, double9, bigInt9, bigDec9, bool9, enum9) = ("i", 9, 9L, 9.0f, 9.0, BigInt(9), BigDecimal(9.0), true, "enum9")
+
+  lazy val (enum10, enum11, enum12) = ("enum10", "enum11", "enum12")
+  lazy val (enum20, enum21, enum22) = ("enum20", "enum21", "enum22")
+
 
   lazy val (strs0, ints0, longs0, floats0, doubles0, bools0, dates0, uuids0, uris0, enums0) = (
     Set(str0),

@@ -1,11 +1,9 @@
 package molecule.coretests.crud
 
-import molecule.api._
+import molecule.api.out14._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
 
 class Save extends CoreSpec {
 
@@ -72,12 +70,27 @@ class Save extends CoreSpec {
 
   "Card one attrs" in new CoreSetup {
 
-    // Construct a "Data-Molecule" with multiple attributes populated with data and add it to the database
+    Ns.str("a").save
+    Ns.int(1).save
+    Ns.long(1L).save
+    Ns.float(1.0f).save
+    Ns.double(1.0).save
+    Ns.bool(true).save
+    Ns.date(date1).save
+    Ns.uuid(uuid1).save
+    Ns.uri(uri1).save
+    Ns.enum("enum1").save
 
-    Ns.str("a").int(1).long(1L).float(1.0f).double(1.0).bool(true).date(date1).uuid(uuid1).uri(uri1).enum("enum1").save
-
-    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.get.head === (
-      "a", 1, 1L, 1.0f, 1.0, true, date1, uuid1, uri1, "enum1")
+    Ns.str.get.head === "a"
+    Ns.int.get.head === 1
+    Ns.long.get.head === 1L
+    Ns.float.get.head === 1.0f
+    Ns.double.get.head === 1.0
+    Ns.bool.get.head === true
+    Ns.date.get.head === date1
+    Ns.uuid.get.head === uuid1
+    Ns.uri.get.head === uri1
+    Ns.enum.get.head === "enum1"
   }
 
 
@@ -287,80 +300,6 @@ class Save extends CoreSpec {
       Ns.ints(13).ref1$(Some(1L)).get.head === (Set(13), Some(1L))
     }
 
-
-    "attributes multiple" in new CoreSetup {
-      Ns.ints(1)
-        .str$(Some("a"))
-        .int$(Some(1))
-        .long$(Some(1L))
-        .float$(Some(1f))
-        .double$(Some(1.0))
-        .bool$(Some(true))
-        .bigInt$(Some(bigInt1))
-        .bigDec$(Some(bigDec1))
-        .date$(Some(date1))
-        .uuid$(Some(uuid1))
-        .uri$(Some(uri1))
-        .enum$(Some(enum1))
-        .ref1$(Some(1L))
-        .save
-
-      Ns.ints(1).str.int.long.float.double.bool.bigInt.bigDec.date.uuid.uri.enum.ref1.get.head === (
-        Set(1), "a", 1, 1L, 1f, 1.0, true, bigInt1, bigDec1, date1, uuid1, uri1, enum1, 1L
-      )
-
-      Ns.ints(1)
-        .str$(Some("a"))
-        .int$(Some(1))
-        .long$(Some(1L))
-        .float$(Some(1f))
-        .double$(Some(1.0))
-        .bool$(Some(true))
-        .bigInt$(Some(bigInt1))
-        .bigDec$(Some(bigDec1))
-        .date$(Some(date1))
-        .uuid$(Some(uuid1))
-        .uri$(Some(uri1))
-        .enum$(Some(enum1))
-        .ref1$(Some(1L))
-        .get.head === (
-        Set(1),
-        Some("a"),
-        Some(1),
-        Some(1L),
-        Some(1f),
-        Some(1.0),
-        Some(true),
-        Some(bigInt1),
-        Some(bigDec1),
-        Some(date1),
-        Some(uuid1),
-        Some(uri1),
-        Some(enum1),
-        Some(1L)
-      )
-
-      Ns.ints(2)
-        .str$(None)
-        .int$(None)
-        .long$(None)
-        .float$(None)
-        .double$(None)
-        .bool$(None)
-        .bigInt$(None)
-        .bigDec$(None)
-        .date$(None)
-        .uuid$(None)
-        .uri$(None)
-        .enum$(None)
-        .ref1$(None)
-        .save
-
-      Ns.ints(2).str$.int$.long$.float$.double$.bool$.bigInt$.bigDec$.date$.uuid$.uri$.enum$.ref1$.get.head === (
-        Set(2), None, None, None, None, None, None, None, None, None, None, None, None, None
-      )
-    }
-
     "ref" in new CoreSetup {
 
       Ns.int(1).Ref1.str1("a").int1$.apply(Some(10)).save
@@ -434,63 +373,6 @@ class Save extends CoreSpec {
       Ns.int(21).uris$(Some(Set(uri1, uri2))).get.head === (21, Some(Set(uri1, uri2)))
       Ns.int(22).enums$(Some(Set(enum1, enum2))).get.head === (22, Some(Set(enum1, enum2)))
       Ns.int(23).refs1$(Some(Set(1L, 2L))).get.head === (23, Some(Set(1L, 2L)))
-    }
-
-
-    "attributes, multiple" in new CoreSetup {
-
-      Ns.int(1)
-        .strs$(Some(Set("a", "b")))
-        .ints$(Some(Set(1, 2)))
-        .longs$(Some(Set(1L, 2L)))
-        .floats$(Some(Set(1f, 2f)))
-        .doubles$(Some(Set(1.0, 2.0)))
-        .bools$(Some(Set(true, false)))
-        .bigInts$(Some(Set(bigInt1, bigInt2)))
-        .bigDecs$(Some(Set(bigDec1, bigDec2)))
-        .dates$(Some(Set(date1, date2)))
-        .uuids$(Some(Set(uuid1, uuid2)))
-        .uris$(Some(Set(uri1, uri2)))
-        .enums$(Some(Set(enum1, enum2)))
-        .refs1$(Some(Set(1L, 2L)))
-        .save
-
-      Ns.int(1).strs.ints.longs.floats.doubles.bools.bigInts.bigDecs.dates.uuids.uris.enums.refs1.get.head === (
-        1,
-        Set("a", "b"),
-        Set(1, 2),
-        Set(1L, 2L),
-        Set(2f, 1f),
-        Set(2.0, 1.0),
-        Set(true, false),
-        Set(bigInt1, bigInt2),
-        Set(bigDec2, bigDec1),
-        Set(date1, date2),
-        Set(uuid1, uuid2),
-        Set(uri1, uri2),
-        Set(enum1, enum2),
-        Set(1, 2)
-      )
-
-      Ns.int(2)
-        .strs$(None)
-        .ints$(None)
-        .longs$(None)
-        .floats$(None)
-        .doubles$(None)
-        .bools$(None)
-        .bigInts$(None)
-        .bigDecs$(None)
-        .dates$(None)
-        .uuids$(None)
-        .uris$(None)
-        .enums$(None)
-        .refs1$(None)
-        .save
-
-      Ns.int(2).strs$.ints$.longs$.floats$.doubles$.bools$.bigInts$.bigDecs$.dates$.uuids$.uris$.enums$.refs1$.get.head === (
-        2, None, None, None, None, None, None, None, None, None, None, None, None, None
-      )
     }
   }
 

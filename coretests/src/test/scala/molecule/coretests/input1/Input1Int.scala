@@ -1,12 +1,9 @@
 package molecule.coretests.input1
 
-//import molecule.api._
-//import molecule.coretests.util.dsl.coreTest._
-import molecule.api._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.api.in1_out2._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.InputMoleculeException
-import molecule.transform.exception.Model2QueryException
 
 
 class Input1Int extends CoreSpec {

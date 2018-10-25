@@ -1,11 +1,12 @@
 package molecule.coretests.input3
 
 import java.net.URI
-import molecule.api._
+import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.InputMolecule_3_Exception
 import molecule.input.{InputMolecule_1, InputMolecule_3}
+import scala.reflect.ClassTag
 
 
 class Input3 extends CoreSpec {
@@ -21,7 +22,7 @@ class Input3 extends CoreSpec {
                                     inOut1: Seq[(I1, List[A])],
                                     inOut2: Seq[(I2, List[A])],
                                     inOut3: Seq[(I3, List[A])]
-                                   ) = {
+                                   )(implicit ev: ClassTag[A]) = {
       println("------------------------")
       println(s"""$test   pairs tacit""")
       var i = 0

@@ -1,12 +1,8 @@
 package molecule.coretests.expression
 
-import molecule.api._
-import java.util.Date
-import java.util.UUID._
-import java.net.URI
-import datomic.Peer
+import molecule.api.out4._
+import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 class FulltextSearch extends Base {
 
@@ -39,6 +35,7 @@ class FulltextSearch extends Base {
     Ns.str.contains("monkeys quick").get === List("Ten slow monkeys", "The quick fox jumps")
     Ns.str.contains("quick monkeys").get === List("Ten slow monkeys", "The quick fox jumps")
   }
+
 
   "Card many" in new CoreSetup {
 

@@ -1,5 +1,5 @@
 package molecule.boilerplate
-import molecule.api.?
+
 
 /** Base namespace markers to carry attribute types from one arity to the next. */
 object base {
@@ -29,7 +29,7 @@ object base {
       * @param eids Iterable of entity ids, typically List, Seq or Set of ids.
       * @return molecule to be further expanded with more attributes.
       */
-    def apply(eids: ?): AnyRef = ???
+    def apply(eids: molecule.expression.AttrExpressions.?): AnyRef = ???
   }
 
   // Using dummy type parameter to simplify parsing DSL

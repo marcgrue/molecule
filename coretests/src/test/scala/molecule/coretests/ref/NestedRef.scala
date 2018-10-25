@@ -1,8 +1,9 @@
 package molecule.coretests.ref
 
-import molecule.api._
+import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.util.expectCompileError
 
 // (`Nested` is a model class..)
 class NestedRef extends CoreSpec {
@@ -176,10 +177,10 @@ class NestedRef extends CoreSpec {
     // Semi-nested A
     Ns.str.Refs1.*(Ref1.int1.Refs2.int2).get === List(
       ("a", List(
-        (1, 11),
         (1, 12),
-        (2, 21),
-        (2, 22)
+        (1, 11),
+        (2, 22),
+        (2, 21)
       )),
       ("b", List(
         (3, 32),
@@ -191,8 +192,8 @@ class NestedRef extends CoreSpec {
 
     // Semi-nested A without intermediary attr `int1`
     Ns.str.Refs1.*(Ref1.Refs2.int2).get === List(
-      ("a", List(12, 11, 22, 21)),
-      ("b", List(32, 31, 41, 42))
+      ("a", List(12, 11, 21, 22)),
+      ("b", List(31, 32, 42, 41))
     )
 
 
@@ -263,6 +264,16 @@ class NestedRef extends CoreSpec {
   }
 
 
+  "Post attributes after nested" in new CoreSetup {
+
+    Ns.float.str.Refs1.*(Ref1.int1).insert(1f, "a", Seq(11, 12))
+
+    Ns.float.str.Refs1.*(Ref1.int1).get.head === (1f, "a", Seq(11, 12))
+
+    Ns.float.Refs1.*(Ref1.int1)._Ns.str.get.head === (1f, Seq(11, 12), "a")
+  }
+
+
   "Back ref" >> {
 
     "Nested" in new CoreSetup {
@@ -285,18 +296,6 @@ class NestedRef extends CoreSpec {
       m(Ns.str.Ref1.str1._Ns.Refs1 * (Ref1.str1.Refs2 * Ref2.str2)).get === List(("book", "John", List(("Marc", List("Musician")))))
       m(Ns.str.Ref1.str1._Ns.Refs1.str1.Refs2.str2).get === List(("book", "John", "Marc", "Musician"))
     }
-  }
-
-
-  "Attributes after nested group" in new CoreSetup {
-    m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool) insert List(
-      (100L, 200.0, List(("aaa", 300), ("bbb", 400)), true),
-      (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
-    )
-    m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool).get === List(
-      (100L, 200.0, List(("aaa", 300), ("bbb", 400)), true),
-      (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
-    )
   }
 
 

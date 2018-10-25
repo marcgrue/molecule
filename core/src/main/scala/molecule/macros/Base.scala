@@ -1,25 +1,24 @@
-package molecule.macros
+package molecule
+package macros
 import molecule.ast.model._
-import molecule.boilerplate.base.NS
-import molecule.ops.TreeOps
 import molecule.transform._
-import scala.language.experimental.macros
+import scala.collection.mutable.ListBuffer
 import scala.language.higherKinds
-import scala.reflect.macros.whitebox.Context
+import scala.reflect.macros.blackbox
 
 
-private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
+private[molecule] trait Base extends Dsl2Model {
+  val c: blackbox.Context
   import c.universe._
-  val x = DebugMacro("Base", 1, 20, false)
-
+  val w = DebugMacro("Base", 1)
 
   def mapIdents(idents: Seq[Any]): Seq[(String, Tree)] = idents.flatMap {
-    case (key: String, v: String) if key.startsWith("__ident__") && v.startsWith("__ident__") => Seq(key -> q"convert(${TermName(key.substring(9))})", v -> q"convert(${TermName(v.substring(9))})")
-    case (key: String, v: Any) if key.startsWith("__ident__")                                 => Seq(key -> q"convert(${TermName(key.substring(9))})")
-    case (key: Any, v: String) if v.startsWith("__ident__")                                   => Seq(v -> q"convert(${TermName(v.substring(9))})")
-    case ident: String if ident.startsWith("__ident__")                                       => Seq(ident -> q"convert(${TermName(ident.substring(9))})")
+    case (key: String, v: String) if key.startsWith("__ident__") && v.startsWith("__ident__") => Seq(ArrowAssoc(key) -> q"convert(${TermName(key.substring(9))})", ArrowAssoc(v) -> q"convert(${TermName(v.substring(9))})")
+    case (key: String, v: Any) if key.startsWith("__ident__")                                 => Seq(ArrowAssoc(key) -> q"convert(${TermName(key.substring(9))})")
+    case (key: Any, v: String) if v.startsWith("__ident__")                                   => Seq(ArrowAssoc(v) -> q"convert(${TermName(v.substring(9))})")
+    case ident: String if ident.startsWith("__ident__")                                       => Seq(ArrowAssoc(ident) -> q"convert(${TermName(ident.substring(9))})")
     case set: Set[_] if set.nonEmpty                                                          => set.flatMap {
-      case ident if ident.toString.startsWith("__ident__") => Seq(ident.toString -> q"convert(${TermName(ident.toString.substring(9))})")
+      case ident if ident.toString.startsWith("__ident__") => Seq(ArrowAssoc(ident.toString) -> q"convert(${TermName(ident.toString.substring(9))})")
       case value                                           => Nil
     }
     case other                                                                                => Nil
@@ -62,191 +61,243 @@ private[molecule] trait Base[Ctx <: Context] extends TreeOps[Ctx] {
     (identifiers0 ++ newIdentifiers).distinct
   }
 
-  def makeModelE(model: Model): Model = {
-
-    def recurse(elements: Seq[Element], newGroup0: Boolean): Seq[Element] = elements.foldLeft(false, false, newGroup0, Seq.empty[Element]) {
-      case ((_, _, _, acc), nested: Nested)                      => (false, false, false, acc :+ Nested(nested.bond, Meta("", "", "e", NoValue, IndexVal) +: recurse(nested.elements, false)))
-      case ((prevAttr, _, newGroup, acc), b@Bond(_, _, _, 2, _)) => (prevAttr, true, newGroup, acc :+ b)
-      case ((true, true, true, acc), a: Atom)                    => (false, false, false, acc :+ Meta("", "many-ref", "e", NoValue, IndexVal) :+ a)
-      case ((_, manyRefAttr, newGroup, acc), a: Atom)            => (true, manyRefAttr, newGroup, acc :+ a)
-      case ((_, manyRefAttr, newGroup, acc), e)                  => (false, manyRefAttr, newGroup, acc :+ e)
-    }._4
-
-    val firstMeta = model.elements.head match {
-      case Meta(_, _, "e", NoValue, Eq(List(eid))) => Meta("", "", "e", Id(eid), IndexVal)
-      case Bond(ns, refAttr, refNs, _, _)          => Meta("", "", "r", NoValue, IndexVal)
-      case _                                       => Meta("", "", "e", NoValue, IndexVal)
+  def compositeCasts(castss: List[List[Int => Tree]]): Seq[Tree] = {
+    var i = -1
+    var subTupleFields = Seq.empty[Tree]
+    val subTuples = castss.flatMap {
+      case Nil   => None
+      case casts =>
+        subTupleFields = casts.map { c =>
+          i += 1
+          c(i)
+        }
+        Some(q"(..$subTupleFields)")
     }
-    Model(firstMeta +: recurse(model.elements, true))
+    subTuples
   }
 
-  val imports =
-    q"""
-        import molecule.action.Molecule._
-        import molecule.action.exception._
-        import molecule.ast.exception._
-        import molecule.ast.model._
-        import molecule.ast.query._
-        import molecule.exceptions._
-        import molecule.facade.Conn
-        import molecule.input.InputMolecule_1._
-        import molecule.input.InputMolecule_2._
-        import molecule.input.InputMolecule_3._
-        import molecule.macros.exception._
-        import molecule.ops.QueryOps._
-        import molecule.transform.{Model2Query, Model2Transaction, Query2String}
-        import java.lang.{Long => jLong, Double => jDouble, Float => jFloat, Boolean => jBoolean}
-        import java.util.{Date, UUID, Map => jMap, List => jList, Collection => jCollection, Iterator => jIterator}
-        import java.net.URI
-        import java.math.{BigInteger => jBigInt, BigDecimal => jBigDec}
-        import clojure.lang.{PersistentHashSet, PersistentVector, LazySeq, Keyword}
-        import scala.collection.JavaConverters._
-     """
-
-  def valueResolver(identMap: Map[String, Tree]) = {
-    q"""
-      private def convert(v: Any): Any = v match {
-        case set: Set[_]   => set map convert
-        case seq: Seq[_]   => seq map convert
-        case m: Map[_, _]  => m.toSeq map convert
-        case (k, v)        => (convert(k), convert(v))
-        case Some(v)       => convert(v)
-        case f: Float      => f.toDouble
-        case unchanged     => unchanged
+  def compositeJsons(jsons: List[List[Int => Tree]]): ListBuffer[Tree] = {
+    var fieldIndex = -1
+    var firstGroup = true
+    var firstPair = true
+    val buf = new ListBuffer[Tree]
+    jsons.foreach { groupLambdas =>
+      if (firstGroup) firstGroup = false else buf.append(q"""sb.append(", ")""")
+      buf.append(q"""sb.append("{")""")
+      firstPair = true
+      groupLambdas.foreach { jsonLambda =>
+        fieldIndex += 1
+        if (firstPair) firstPair = false else buf.append(q"""sb.append(", ")""")
+        buf.append(jsonLambda(fieldIndex))
       }
-
-      private def flatSeq(a: Any): Seq[Any] = (a match {
-        case seq: Seq[_] => seq
-        case set: Set[_] => set.toSeq
-        case v           => Seq(v)
-      }) map convert
-
-      private def getValues(idents: Seq[Any]) = idents.flatMap {
-        case set: Set[_] if set.nonEmpty           => Seq(set.flatMap{
-          case ident if ident.toString.startsWith("__ident__") => flatSeq($identMap.get(ident.toString).get)
-          case value                                           => Seq(convert(value))
-        })
-        case v: String               if v.startsWith("__ident__")                              => flatSeq($identMap.get(v).get)
-        case (k: String, "__pair__") if k.startsWith("__ident__")                              => flatSeq($identMap.get(k).get)
-        case (k: String, v: String)  if k.startsWith("__ident__") && v.startsWith("__ident__") => Seq(($identMap.get(k).get, $identMap.get(v).get))
-        case (k: String, v: Any)     if k.startsWith("__ident__")                              => Seq(($identMap.get(k).get, convert(v)))
-        case (k: Any, v: String)     if v.startsWith("__ident__")                              => Seq((convert(k), $identMap.get(v).get))
-        case (k, v)                                                                            => Seq((convert(k), convert(v)))
-        case seq: Seq[_]                                                                       => seq map convert
-        case v                                                                                 => Seq(convert(v))
-      }
-     """
+      buf.append(q"""sb.append("}")""")
+    }
+    buf
   }
 
-  def modelResolver(model: Model, modelE: Model, valueResolver: Tree) = {
-    q"""
-      private object r {
-        ..$valueResolver
+  def topLevel(fns: List[List[Int => Tree]]): List[Tree] = fns.head.zipWithIndex.map {
+    case (fn, i) => fn(i)
+  }
 
-        private def getKeys(keyIdents: Seq[String]): Seq[String] = getValues(keyIdents).flatMap {
-          case keys: Seq[_] => keys
-          case key          => Seq(key)
-        }.asInstanceOf[Seq[String]]
+  def topLevelJson(fns: List[List[Int => Tree]]): List[Tree] = fns.head.zipWithIndex.flatMap {
+    case (fn, 0) => Seq(fn(0))
+    case (fn, i) => Seq(q"""sb.append(", ")""", fn(i))
+  }
 
-        private def getGenerics(gs: Seq[Generic]): Seq[Generic] = gs map {
-          case TxTValue(Some(ident))        => TxTValue(Some(getValues(Seq(ident)).head))
-          case TxTValue_(Some(ident))       => TxTValue_(Some(getValues(Seq(ident)).head))
-          case TxInstantValue(Some(ident))  => TxInstantValue(Some(getValues(Seq(ident)).head))
-          case TxInstantValue_(Some(ident)) => TxInstantValue_(Some(getValues(Seq(ident)).head))
-          case OpValue(Some(ident))         => OpValue(Some(getValues(Seq(ident)).head))
-          case OpValue_(Some(ident))        => OpValue_(Some(getValues(Seq(ident)).head))
-          case otherGeneric                 => otherGeneric
+  case class resolveNestedJsonMethods(jsons: List[List[Int => Tree]], nestedRefAttrs: List[String], postJsons: List[Int => Tree]) {
+    val levels = jsons.size
+
+    var fieldIndex = jsons.size - 1
+    def jsonLevel(level: Int): List[Tree] = {
+      var first = true
+      jsons(level) match {
+        case Nil         => List(q"sb")
+        case jsonLambdas => jsonLambdas.flatMap { jsonLambda =>
+          fieldIndex += 1
+          if (first) {
+            first = false
+            List(jsonLambda(fieldIndex))
+          } else {
+            List(q"""sb.append(", ")""", jsonLambda(fieldIndex))
+          }
         }
-
-        private def resolveIdentifiers(elements: Seq[Element]): Seq[Element] = elements map {
-          case atom@Atom(_, _, _, _, MapEq(idents), _, gs2, keyIdents)      => idents match {
-            case List((ident, "__pair__"))
-              if ident.startsWith("__ident__") && getValues(Seq(ident)) == Seq(None) => atom.copy(value = Fn("not", None),                                           gs = getGenerics(gs2), keys = getKeys(keyIdents))
-            case idents                                                              => atom.copy(value = MapEq(getValues(idents).asInstanceOf[Seq[(String, Any)]]), gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          }
-          case atom@Atom(_, _, _, 2, Eq(idents), _, gs2, keyIdents)         => getValues(idents) match {
-            case Seq(None) => atom.copy(value = Fn("not", None), gs = getGenerics(gs2))
-            case values    => atom.copy(value = Eq(values)     , gs = getGenerics(gs2))
-          }
-          case atom@Atom(_, _, _, _, Eq(idents), _, gs2, keyIdents)         => getValues(idents) match {
-            case Seq(None) => atom.copy(value = Fn("not", None), gs = getGenerics(gs2), keys = getKeys(keyIdents))
-            case values    => atom.copy(value = Eq(values)     , gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          }
-          case atom@Atom(_, _, _, _, Neq(idents), _, gs2, keyIdents)             => atom.copy(value = Neq(getValues(idents)),          gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, And(idents), _, gs2, keyIdents)             => atom.copy(value = And(getValues(idents)),          gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, Lt(ident), _, gs2, keyIdents)               => atom.copy(value = Lt(getValues(Seq(ident)).head),  gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, Gt(ident), _, gs2, keyIdents)               => atom.copy(value = Gt(getValues(Seq(ident)).head),  gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, Le(ident), _, gs2, keyIdents)               => atom.copy(value = Le(getValues(Seq(ident)).head),  gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, Ge(ident), _, gs2, keyIdents)               => atom.copy(value = Ge(getValues(Seq(ident)).head),  gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, AssertValue(idents), _, gs2, _)             => atom.copy(value = AssertValue(getValues(idents)),  gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, RetractValue(idents), _, gs2, _)            => atom.copy(value = RetractValue(getValues(idents)), gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, ReplaceValue(oldNew), _, gs2, _)            => atom.copy(value = ReplaceValue(getValues(oldNew).asInstanceOf[Seq[(Any, Any)]]),       gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, AssertMapPairs(idents), _, gs2, keyIdents)  => atom.copy(value = AssertMapPairs(getValues(idents).asInstanceOf[Seq[(String, Any)]]),  gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, ReplaceMapPairs(idents), _, gs2, keyIdents) => atom.copy(value = ReplaceMapPairs(getValues(idents).asInstanceOf[Seq[(String, Any)]]), gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, RetractMapKeys(idents), _, gs2, keyIdents)  => atom.copy(value = RetractMapKeys(getValues(idents).map(_.toString)),                   gs = getGenerics(gs2), keys = getKeys(keyIdents))
-          case atom@Atom(_, _, _, _, MapKeys(idents), _, gs2, _)                 => atom.copy(value = MapKeys(getValues(idents).asInstanceOf[Seq[String]]),                gs = getGenerics(gs2))
-          case atom@Atom(_, _, _, _, _, _, gs2, _)                               => atom.copy(gs = getGenerics(gs2))
-          case meta@Meta(_, _, _, _, Eq(idents))                                 => meta.copy(value = Eq(getValues(idents)))
-          case meta@Meta(_, _, _, Id(eid), _)                                    => meta.copy(generic = Id(getValues(Seq(eid)).head))
-          case Nested(ns, nestedElements)                                        => Nested(ns, resolveIdentifiers(nestedElements))
-          case Composite(compositeElements)                                      => Composite(resolveIdentifiers(compositeElements))
-          case TxMetaData(txElements)                                            => TxMetaData(resolveIdentifiers(txElements))
-          case other                                                             => other
-        }
-        val model: Model = Model(resolveIdentifiers($model.elements))
-        val query: Query = Model2Query(model)
-
-        val modelE: Model = Model(resolveIdentifiers($modelE.elements))
-        val queryE: Query = Model2Query(modelE)
       }
-    """
-  }
+    }
 
-  def basics(dsl: c.Expr[NS]) = {
-    val model = Dsl2Model(c)(dsl)
-    val modelE = makeModelE(model)
-    val identMap = mapIdentifiers(model.elements).toMap
-    val resolverTree = modelResolver(model, modelE, valueResolver(identMap))
-
-    val tree =
+    def branch0until(subLevels: () => Tree): Tree = if (postJsons.isEmpty) {
       q"""
-      ..$imports
-      ..$resolverTree
-
-      private trait Util { self: molecule.ast.MoleculeBase =>
-        import java.text.SimpleDateFormat
-
-        private val m = _model
-        private val q = _query
-
-        def date(s: String): Date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s)
-
-        // Print transformations of a `get` call to console
-        protected def debugGet_(implicit conn: Conn) {
-          val p = (expr: QueryExpr) => Query2String(q).p(expr)
-          val rules = "[" + (q.i.rules map p mkString " ") + "]"
-          val first = if (q.i.rules.isEmpty) Seq(conn.db) else Seq(conn.db, rules)
-          val allInputs: Seq[AnyRef] = first ++ q.inputs
-          val rows = try {
-            conn.query(m, q).asScala.take(500)
-          } catch {
-            case ex: Throwable => throw new QueryException(ex, m, q, allInputs, p)
-          }
-          val ins = q.inputs
-          println(
-            "\n--------------------------------------------------------------------------\n" +
-            ${show(dsl.tree)} + "\n\n" +
-            m + "\n\n" +
-            q + "\n\n" +
-            q.datalog + "\n\n" +
-            "RULES: " + (if (q.i.rules.isEmpty) "none\n\n" else q.i.rules.map(Query2String(q).p(_)).mkString("[\n ", "\n ", "\n]\n\n")) +
-            "INPUTS: " + (if (ins.isEmpty) "none\n\n" else ins.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1).mkString("\n", "\n", "\n\n")) +
-            "OUTPUTS:\n" + rows.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1).mkString("\n") + "\n(showing up to 500 rows...)" +
-            "\n--------------------------------------------------------------------------\n"
-          )
-        }
+         final override def jsonBranch0(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(0, sb, {..${jsonLevel(0)}}, ${nestedRefAttrs.head}, leaf)
+         ..${subLevels()}
+       """
+    } else {
+      // Ensuring that post fields are last
+      val pre = jsonLevel(0)
+      val subJsones = subLevels()
+      val postFields = postJsons.flatMap { portJsonLambda =>
+        fieldIndex += 1
+        List(q"""sb.append(", ")""", portJsonLambda(fieldIndex))
       }
-    """
-    (model, tree)
+      q"""
+         final override def jsonBranch0(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(0, sb, {..$pre}, ${nestedRefAttrs.head}, leaf, {..$postFields})
+         ..$subJsones
+       """
+    }
+
+    lazy val level1: () => Tree = () =>
+      q"""
+         final override def jsonLeaf1(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(1, sb, {..${jsonLevel(1)}})
+       """
+    lazy val level2: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonLeaf2(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(2, sb, {..${jsonLevel(2)}})
+       """
+    lazy val level3: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonBranch2(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(2, sb, {..${jsonLevel(2)}}, ${nestedRefAttrs(2)}, leaf)
+         final override def jsonLeaf3(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(3, sb, {..${jsonLevel(3)}})
+       """
+    lazy val level4: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonBranch2(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(2, sb, {..${jsonLevel(2)}}, ${nestedRefAttrs(2)}, leaf)
+         final override def jsonBranch3(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(3, sb, {..${jsonLevel(3)}}, ${nestedRefAttrs(3)}, leaf)
+         final override def jsonLeaf4(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(4, sb, {..${jsonLevel(4)}})
+       """
+    lazy val level5: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonBranch2(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(2, sb, {..${jsonLevel(2)}}, ${nestedRefAttrs(2)}, leaf)
+         final override def jsonBranch3(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(3, sb, {..${jsonLevel(3)}}, ${nestedRefAttrs(3)}, leaf)
+         final override def jsonBranch4(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(4, sb, {..${jsonLevel(4)}}, ${nestedRefAttrs(4)}, leaf)
+         final override def jsonLeaf5(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(5, sb, {..${jsonLevel(5)}})
+       """
+    lazy val level6: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonBranch2(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(2, sb, {..${jsonLevel(2)}}, ${nestedRefAttrs(2)}, leaf)
+         final override def jsonBranch3(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(3, sb, {..${jsonLevel(3)}}, ${nestedRefAttrs(3)}, leaf)
+         final override def jsonBranch4(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(4, sb, {..${jsonLevel(4)}}, ${nestedRefAttrs(4)}, leaf)
+         final override def jsonBranch5(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(5, sb, {..${jsonLevel(5)}}, ${nestedRefAttrs(5)}, leaf)
+         final override def jsonLeaf6(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(6, sb, {..${jsonLevel(6)}})
+       """
+    lazy val level7: () => Tree = () =>
+      q"""
+         final override def jsonBranch1(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(1, sb, {..${jsonLevel(1)}}, ${nestedRefAttrs(1)}, leaf)
+         final override def jsonBranch2(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(2, sb, {..${jsonLevel(2)}}, ${nestedRefAttrs(2)}, leaf)
+         final override def jsonBranch3(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(3, sb, {..${jsonLevel(3)}}, ${nestedRefAttrs(3)}, leaf)
+         final override def jsonBranch4(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(4, sb, {..${jsonLevel(4)}}, ${nestedRefAttrs(4)}, leaf)
+         final override def jsonBranch5(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(5, sb, {..${jsonLevel(5)}}, ${nestedRefAttrs(5)}, leaf)
+         final override def jsonBranch6(sb: StringBuilder, row: java.util.List[AnyRef], leaf: StringBuilder): StringBuilder = branch(6, sb, {..${jsonLevel(6)}}, ${nestedRefAttrs(6)}, leaf)
+         final override def jsonLeaf7(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = leaf(7, sb, {..${jsonLevel(7)}})
+       """
+
+    def get: Tree = levels match {
+      case 2 => branch0until(level1)
+      case 3 => branch0until(level2)
+      case 4 => branch0until(level3)
+      case 5 => branch0until(level4)
+      case 6 => branch0until(level5)
+      case 7 => branch0until(level6)
+      case 8 => branch0until(level7)
+    }
+  }
+
+
+  case class resolveNestedTupleMethods(casts: List[List[Int => Tree]], types: List[List[Tree]], OutTypes: Seq[Type], postTypes: List[Tree], postCasts: List[Int => Tree]) {
+    val levels = casts.size
+    lazy val t1: Tree = tq"List[(..${if (levels == 2) types(1) else types(1) :+ t2})]"
+    lazy val t2: Tree = tq"List[(..${if (levels == 3) types(2) else types(2) :+ t3})]"
+    lazy val t3: Tree = tq"List[(..${if (levels == 4) types(3) else types(3) :+ t4})]"
+    lazy val t4: Tree = tq"List[(..${if (levels == 5) types(4) else types(4) :+ t5})]"
+    lazy val t5: Tree = tq"List[(..${if (levels == 6) types(5) else types(5) :+ t6})]"
+    lazy val t6: Tree = tq"List[(..${if (levels == 7) types(6) else types(6) :+ t7})]"
+    lazy val t7: Tree = tq"List[(..${types(7)})]"
+
+    var fieldIndex = levels - 1
+    def castLevel(level: Int): List[Tree] = casts(level).map { castLambda =>
+      fieldIndex += 1
+      castLambda(fieldIndex)
+    }
+
+    def branch0until(subLevels: () => Tree) = if (postCasts.isEmpty) {
+      q"""
+         final override def castBranch0(row: java.util.List[AnyRef], leafs: List[Any]): (..$OutTypes) = (..${castLevel(0)}, leafs.asInstanceOf[$t1])
+         ..${subLevels()}
+       """
+    } else {
+      // Ensuring that post fields are last
+      val pre = castLevel(0)
+      val subCastes = subLevels()
+      val postFields = postCasts.map { postCastLambda =>
+        fieldIndex += 1
+        postCastLambda(fieldIndex)
+      }
+      q"""
+         final override def castBranch0(row: java.util.List[AnyRef], leafs: List[Any]): (..$OutTypes) = (..$pre, leafs.asInstanceOf[$t1], ..$postFields)
+         ..$subCastes
+       """
+    }
+
+    lazy val level1: () => Tree = () =>
+      q"final override def castLeaf1(row: java.util.List[AnyRef]): Any = (..${castLevel(1)})"
+
+    lazy val level2: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castLeaf2(row: java.util.List[AnyRef]): Any = (..${castLevel(2)})
+        """
+
+    lazy val level3: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castBranch2(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(2)}, leafs.asInstanceOf[$t3])
+         final override def castLeaf3(row: java.util.List[AnyRef]): Any = (..${castLevel(3)})
+       """
+    lazy val level4: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castBranch2(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(2)}, leafs.asInstanceOf[$t3])
+         final override def castBranch3(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(3)}, leafs.asInstanceOf[$t4])
+         final override def castLeaf4(row: java.util.List[AnyRef]): Any = (..${castLevel(4)})
+       """
+    lazy val level5: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castBranch2(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(2)}, leafs.asInstanceOf[$t3])
+         final override def castBranch3(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(3)}, leafs.asInstanceOf[$t4])
+         final override def castBranch4(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(4)}, leafs.asInstanceOf[$t5])
+         final override def castLeaf5(row: java.util.List[AnyRef]): Any = (..${castLevel(5)})
+       """
+    lazy val level6: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castBranch2(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(2)}, leafs.asInstanceOf[$t3])
+         final override def castBranch3(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(3)}, leafs.asInstanceOf[$t4])
+         final override def castBranch4(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(4)}, leafs.asInstanceOf[$t5])
+         final override def castBranch5(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(5)}, leafs.asInstanceOf[$t6])
+         final override def castLeaf6(row: java.util.List[AnyRef]): Any = (..${castLevel(6)})
+       """
+    lazy val level7: () => Tree = () =>
+      q"""
+         final override def castBranch1(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(1)}, leafs.asInstanceOf[$t2])
+         final override def castBranch2(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(2)}, leafs.asInstanceOf[$t3])
+         final override def castBranch3(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(3)}, leafs.asInstanceOf[$t4])
+         final override def castBranch4(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(4)}, leafs.asInstanceOf[$t5])
+         final override def castBranch5(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(5)}, leafs.asInstanceOf[$t6])
+         final override def castBranch6(row: java.util.List[AnyRef], leafs: List[Any]): Any = (..${castLevel(6)}, leafs.asInstanceOf[$t7])
+         final override def castLeaf7(row: java.util.List[AnyRef]): Any = (..${castLevel(7)})
+       """
+
+    def get: Tree = levels match {
+      case 2 => branch0until(level1)
+      case 3 => branch0until(level2)
+      case 4 => branch0until(level3)
+      case 5 => branch0until(level4)
+      case 6 => branch0until(level5)
+      case 7 => branch0until(level6)
+      case 8 => branch0until(level7)
+    }
   }
 }

@@ -1,6 +1,6 @@
 package molecule.coretests.attr
 
-import molecule.api._
+import molecule.api.out5._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -359,11 +359,11 @@ class OptionalValues extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str$)",
-      "[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
+      "molecule.transform.exception.Dsl2ModelException: Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
 
     expectCompileError(
       "m(Ns.str$.int$)",
-      "[Dsl2Model:apply (3)] Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
+      "molecule.transform.exception.Dsl2ModelException: Molecule is empty or has only meta/optional attributes. Please add one or more attributes.")
   }
 
 

@@ -183,7 +183,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       Peer.q(query, conn.db, id.asInstanceOf[Object]).asScala.map(_.get(0))
     }
 
-    def edgeAB(edge1: Any, targetAttr: String) = {
+    def edgeAB(edge1: Any, targetAttr: String): (Any, Any) = {
       val edge2 = otherEdge(edge1)
 
       // Edges to other ns already has one ref extra in one direction
@@ -217,7 +217,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       }
     }
 
-    def checkDupKeys(pairs: Seq[(String, Any)], host: String, op: String) {
+    def checkDupKeys(pairs: Seq[(String, Any)], host: String, op: String): Unit = {
       val dupKeys: Seq[String] = pairs.map(_._1).groupBy(identity).collect { case (key, keys) if keys.size > 1 => key }.toSeq
       if (dupKeys.nonEmpty) {
         val dupPairs = pairs.filter(p => dupKeys.contains(p._1)).sortBy(_._1).map { case (k, v) => s"$k -> $v" }
@@ -225,19 +225,19 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       }
     }
 
-    def checkDupValuesOfPairs(pairs: Seq[(Any, Any)], host: String, op: String) {
+    def checkDupValuesOfPairs(pairs: Seq[(Any, Any)], host: String, op: String): Unit = {
       val dups = pairs.map(_._2).groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
       if (dups.nonEmpty)
         iae(s"valueStmts:$host", s"Can't replace with duplicate new values of attribute `$a`:\n" + dups.mkString("\n"))
     }
 
-    def checkDupValues(values: Seq[Any], host: String, op: String) {
+    def checkDupValues(values: Seq[Any], host: String, op: String): Unit = {
       val dups = values.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }
       if (dups.nonEmpty)
         iae(s"valueStmts:$host", s"Can't $op duplicate new values to attribute `$a`:\n" + dups.mkString("\n"))
     }
 
-    def checkUnknownKeys(newPairs: Seq[(String, Any)], curKeys: Seq[String], host: String) {
+    def checkUnknownKeys(newPairs: Seq[(String, Any)], curKeys: Seq[String], host: String): Unit = {
       val unknownKeys = newPairs.map(_._1).diff(curKeys)
       if (unknownKeys.nonEmpty)
         iae(s"valueStmts:$host", s"Can't replace non-existing keys of map attribute `$a`:\n" + unknownKeys.mkString("\n") +
@@ -247,7 +247,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     // Bidirectional self-ref operations ------------------------------------------------------------------
 
-    def biSelf(card: Int) = arg match {
+    def biSelf(card: Int): Iterable[Statement] = arg match {
 
       case AssertValue(refs) => refs.flatMap { case ref: Long =>
         val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
@@ -294,7 +294,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     // Bidirectional other-ref operations ------------------------------------------------------------------
 
-    def biOther(card: Int, revRefAttr: String) = arg match {
+    def biOther(card: Int, revRefAttr: String): Iterable[Statement] = arg match {
 
       case AssertValue(refs) => refs.flatMap { case ref: Long =>
         if (ref == e) iae("valueStmts:biOther", "Current entity and referenced entity ids can't be the same")
@@ -341,7 +341,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     // Bidirectional edge operations -------------------------------------------------------------------
 
-    def biEdgeRefAttr(card: Int, targetAttr: String) = arg match {
+    def biEdgeRefAttr(card: Int, targetAttr: String): Iterable[Statement] = arg match {
 
       case AssertValue(edges) =>
         if (edges.contains(e))
@@ -397,7 +397,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     }
 
 
-    def biEdgeRef(card: Int, targetAttr: String) = arg match {
+    def biEdgeRef(card: Int, targetAttr: String): Seq[Statement] = arg match {
 
       case RetractValue(edges) => edges map RetractEntity
 
@@ -437,7 +437,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     }
 
 
-    def biEdgeProp(card: Int) = {
+    def biEdgeProp(card: Int): Seq[Statement] = {
 
       val edgeA = e
       val edgeB = otherEdgeId match {
@@ -516,8 +516,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
           }
 
         case AssertValue(values) =>
-          //          checkDupValues(values, "biEdgeProp", "assert")
-          //          values.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
           values.distinct.flatMap(v => Seq(Add(edgeB, a, p(v), Card(card)), Add(edgeA, a, p(v), Card(card))))
 
         case ReplaceValue(oldNew) =>
@@ -533,7 +531,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case Eq(newValues) =>
           if (newValues.contains(e))
             iae("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-          //          checkDupValues(newValues, "biEdgeProp", "apply")
           val curValues = attrValues(edgeA, a).toSeq
           val newValueStrings = newValues.map(_.toString)
           val curValueStrings = curValues.map(_.toString)
@@ -567,7 +564,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       edgeConnectors ++ stmt
     }
 
-    def biTarget(card: Int, biEdgeRefAttr: String) = {
+    def biTarget(card: Int, biEdgeRefAttr: String): Seq[Add] = {
       val edgeA = e
       val edgeB = otherEdgeId getOrElse iae("valueStmts:biTargetRef", "Missing id of other edge.")
       arg match {
@@ -584,7 +581,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     // Default operations -------------------------------------------------------------------
 
-    def default(card: Int) = arg match {
+    def default(card: Int): Iterable[Statement] = arg match {
 
       case AssertMapPairs(newPairs) =>
         checkDupKeys(newPairs, "default", "assert")
@@ -634,8 +631,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case AssertValue(values0) =>
         val values = flatten(values0)
-        //        checkDupValues(values, "default", "assert")
-        //        values.map(v => Add(e, a, p(v), Card(card)))
         values.distinct.map(v => Add(e, a, p(v), Card(card)))
 
       case ReplaceValue(oldNew) =>
@@ -646,7 +641,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         flatten(removeValues0).distinct.map(v => Retract(e, a, p(v)))
 
       case Eq(newValues0) =>
-        //        checkDupValues(newValues, "default", "apply")
         val newValues = flatten(newValues0).distinct
         val curValues = attrValues(e, a).toSeq
         val newValueStrings = newValues.map(_.toString)
@@ -705,7 +699,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     case ((stmts, txStmts), stmt)                     => (stmts :+ stmt, txStmts)
   }
 
-  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: Generic) = {
+  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: Generic): Any = {
     bi match {
       case BiTargetRef(_, _) => {
         val lastEdgeNs = attr.split("/").head
@@ -726,7 +720,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     }
   }
 
-  def lastV(stmts: Seq[Statement], attr: String, nestedE: Any = 0) = {
+  def lastV(stmts: Seq[Statement], attr: String, nestedE: Any = 0): Any = {
     if (nestedE != 0)
       nestedE
     else if (stmts.isEmpty)
@@ -737,7 +731,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def eidV(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId]
 
-  def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any, edgeB: Option[AnyRef]) = genericStmt match {
+  def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, nestedE: Any, edgeB: Option[AnyRef])
+  : (Int, Option[AnyRef], Seq[Statement]) = genericStmt match {
 
     // Keep current cursor (add no new data in this iteration)
     case Add('tempId, a, refNs: String, bi)              => (cur, edgeB, valueStmts(stmts, tempId(a), a, tempId(refNs), None, bi, edgeB))
@@ -804,7 +799,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
             Add(parentE, ref, nestedE, Card(2))
           )
           val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
-          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE, edgeB) // todo edgeB necessary?
           bondStmts ++ nestedStmts
         }
 
@@ -819,7 +813,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
             Add(parentE, ref, nestedE, Card(2))
           )
           val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE)
-          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, nestedE, edgeB) // todo edgeB necessary?
           bondStmts ++ nestedStmts
         }
 
@@ -850,7 +843,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
             Add(parentE, ref, edgeA, Card(2))
           )
           val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA)
-          //            val nestedStmts = resolveStmts(nestedGenStmts, nestedRow, edgeA, edgeB) // todo edgeB necessary?
           bondStmts ++ nestedStmts
         }
 
@@ -911,7 +903,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     }._3.filterNot(_.e == -1)
   }
 
-  def txRefAttr(stmts: Seq[Statement]) = stmts.nonEmpty && stmts.last.v.toString.startsWith("#db/id[:db.part/")
+  def txRefAttr(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.toString.startsWith("#db/id[:db.part/")
 
   def insertStmts(dataRows: Seq[Seq[Any]]): Seq[Seq[Statement]] = {
     val (genericStmts, genericTxStmts) = splitStmts()

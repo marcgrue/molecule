@@ -1,8 +1,6 @@
 package molecule.coretests.input1
 
-//import molecule.api._
-//import molecule.coretests.util.dsl.coreTest._
-import molecule.api._
+import molecule.api.in1_out2._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.InputMoleculeException
@@ -24,7 +22,7 @@ class Input1BigDecimal extends CoreSpec {
     "Mandatory" >> {
 
       "Eq" in new OneSetup {
-        val inputMolecule = m(Ns.bigDec(?))
+        val inputMolecule = m(Ns.bigDec.apply(?))
 
         inputMolecule(Nil).get === Nil
 

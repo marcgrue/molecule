@@ -1,5 +1,5 @@
 package molecule.coretests.expression
-import molecule.api._
+import molecule.api.in1_out4._
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -34,7 +34,7 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
-      "[Liftables:liftAny] Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
+      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
         "Maybe you are applying some Scala expression to a molecule attribute?\n" +
         "Try to assign the expression to a variable and apply the variable instead.")
 
@@ -73,7 +73,7 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.int.ints_(Seq.empty[Int]))",
-      "[Liftables:liftAny] Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
+      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
         "Maybe you are applying some Scala expression to a molecule attribute?\n" +
         "Try to assign the expression to a variable and apply the variable instead.")
 

@@ -1,8 +1,8 @@
 package molecule.coretests.time.domain
 
-import molecule.api._
-import molecule.facade.Conn
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest.Ns
+import molecule.facade.Conn
 
 
 // Example domain class doing CRUD operations on the database

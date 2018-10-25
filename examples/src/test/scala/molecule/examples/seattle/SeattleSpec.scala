@@ -1,20 +1,20 @@
 package molecule.examples.seattle
 
-import molecule.api._
 import java.io.FileReader
-import datomic.{Peer, Util}
+import datomic.{Connection, Peer, Util}
+//import molecule.api.all._
+import molecule.factory.Molecule_Factory8._
+import molecule.api.core._
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.seattle.schema.SeattleSchema
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
-//import org.specs2.control.NoLanguageFeatures
-
 
 trait SeattleSpec extends MoleculeSpec {
 
-  def loadFromFiles(schemaFile: String, dataFile: String, version: Int) = {
+  def loadFromFiles(schemaFile: String, dataFile: String, version: Int): Connection = {
     val uri = "datomic:mem://seattle" + version
     Peer.deleteDatabase(uri)
     Peer.createDatabase(uri)
@@ -32,21 +32,17 @@ trait SeattleSpec extends MoleculeSpec {
     conn
   }
 
-//  class SeattleSetup extends Scope with NoLanguageFeatures {
   class SeattleSetup extends Scope {
-    implicit val conn = recreateDbFrom(SeattleSchema)
+    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
     // Insert data
-//    Community.name.url.Neighborhood.name.debugGet
-
-//        Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData0
+    m(Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$)
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
   def loadSeattle(version: Int): Conn = {
-    implicit val conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
+    implicit val conn: Conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
 
     // Insert data
-//    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insertD seattleData0
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
 
     conn
@@ -56,9 +52,7 @@ trait SeattleSpec extends MoleculeSpec {
   implicit val conn = loadSeattle(1)
 
   lazy val seattleData0 = List(
-    ("15th Ave Community", "http://groups.yahoo.com/group/15thAve_Community/", "email_list", Some("community"), Some(Set("15th avenue residents", "xx")), "Capitol Hill", "East", Some("e")),
-//    ("BikeWorks!", "http://www.bikeworks.org/", "website", None, None, "Columbia City", "Southeast", Some("se")),
-//    ("belltown", "http://www.belltownpeople.com/", "blog", Some("commercial"), Some(Set("news", "events")), "Belltown", "Downtown", Some("w"))
+    ("15th Ave Community", "http://groups.yahoo.com/group/15thAve_Community/", "email_list", Some("community"), Some(Set("15th avenue residents", "xx")), "Capitol Hill", "East", Some("e"))
   )
 
   lazy val seattleData = List(

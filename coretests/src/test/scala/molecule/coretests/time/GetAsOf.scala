@@ -1,11 +1,8 @@
 package molecule.coretests.time
 
-import molecule.api._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
-import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 
 class GetAsOf extends CoreSpec {

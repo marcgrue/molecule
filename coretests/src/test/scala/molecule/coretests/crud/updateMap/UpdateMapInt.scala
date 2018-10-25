@@ -1,6 +1,6 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -41,14 +41,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert("str1" -> 1, "str1" -> 2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq("str1" -> 1, "str1" -> 2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
     }
@@ -87,13 +87,13 @@ class UpdateMapInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).intMap.replace("str1" -> 1, "str1" -> 2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
       expectCompileError(
         """Ns(eid).intMap.replace(Seq("str1" -> 1, "str1" -> 2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
@@ -215,14 +215,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert(str1 -> int1, str1 -> int2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq(str1 -> int1, str1 -> int2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
@@ -279,13 +279,13 @@ class UpdateMapInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).intMap.replace(str1 -> int1, str1 -> int2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
       expectCompileError(
         """Ns(eid).intMap.replace(Seq(str1 -> int1, str1 -> int2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
     }

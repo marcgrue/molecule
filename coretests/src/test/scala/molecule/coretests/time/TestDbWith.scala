@@ -1,10 +1,9 @@
 package molecule.coretests.time
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable._
-import org.specs2.specification.Scope
 
 
 class TestDbWith extends Specification {

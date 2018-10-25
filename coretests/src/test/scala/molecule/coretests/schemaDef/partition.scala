@@ -1,6 +1,6 @@
 package molecule.coretests.schemaDef
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.ast.model.{Atom, Bond, Eq, Model}
 import molecule.coretests.schemaDef.dsl.partitionTest._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
@@ -48,7 +48,7 @@ class Partition extends MoleculeSpec {
   "Nested 2 levels without intermediary attribute values" in new PartitionSetup {
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name) insert List(("book", List("Hacker", "Magician")))
 
-    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Magician", "Hacker")))
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
     // Same as
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
   }
@@ -60,14 +60,6 @@ class Partition extends MoleculeSpec {
     m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
     // Same as
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
-  }
-
-
-  "No transitives in inserts" in new PartitionSetup {
-    // Todo: more transitive examples in own file
-    (m(lit_Book.title.Author.name.name).insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
-      "[noTransitiveAttrs]  Can't insert transitive attribute values (repeated attributes)."
   }
 
 

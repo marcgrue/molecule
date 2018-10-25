@@ -1,8 +1,7 @@
 package molecule.coretests.crud.update
 
 import java.util.concurrent.ExecutionException
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -144,12 +143,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace("enum7" -> "enum8", "enum8" -> "enum8").update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
           "\nenum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq("enum7" -> "enum8", "enum8" -> "enum8")).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
           "\nenum8")
     }
 
@@ -301,12 +300,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace(enum7 -> enum8, enum8 -> enum8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
           "\n__ident__enum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> enum8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
           "\n__ident__enum8")
 
 

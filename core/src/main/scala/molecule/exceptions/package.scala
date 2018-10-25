@@ -6,13 +6,17 @@ import molecule.ast.query.{Query, QueryExpr}
 package object exceptions {
 
 
-
   class MoleculeException(message: String, cause: Throwable) extends RuntimeException(message, cause) {
     def this(message: String) {
       this(message, null)
     }
   }
 
+  class MoleculeCompileException(message: String, cause: Throwable) extends MoleculeException(message, cause) {
+    def this(message: String) {
+      this(message, null)
+    }
+  }
 
 
   /** Query exception */

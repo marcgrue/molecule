@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.api._
+import molecule.api.out3._
 import molecule.examples.dayOfDatomic.dsl.aggregates._
 import molecule.examples.dayOfDatomic.schema.AggregatesSchema
 import molecule.util.MoleculeSpec
@@ -85,10 +85,13 @@ class Aggregates extends MoleculeSpec {
 
 
   "Schema aggregations" >> {
+
+    // Using the generic interface to the database itself
     import molecule.generic.Db
 
     // What is the average length of a schema name?
-    Db.a.length(avg).get.head === 12.9
+    val attrs = Db.a.get
+    attrs.map(_.length).sum / attrs.size === 13
 
     // How many attributes and value types does this schema use?
     // Todo: original datomic query returns count of ident

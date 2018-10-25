@@ -1,6 +1,6 @@
 package molecule.coretests.crud.update
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -137,12 +137,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace("g" -> "h", "h" -> "h").update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
           "\nh")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq("g" -> "h", "h" -> "h")).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
           "\nh")
     }
 
@@ -297,12 +297,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace(str7 -> str8, str8 -> str8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
           "\n__ident__str8")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq(str7 -> str8, str8 -> str8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
           "\n__ident__str8")
 
 

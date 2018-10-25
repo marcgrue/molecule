@@ -1,12 +1,9 @@
 package molecule.coretests.crud.update
 
-import java.util.concurrent.ExecutionException
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
 
 class UpdateBoolean extends CoreSpec {
 

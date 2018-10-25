@@ -1,10 +1,10 @@
 package molecule.coretests.attrMap
 
-import molecule.api._
-
+import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
 
 class KeysValues extends Base {
+  sequential
 
   val en_da       = Seq("en", "da")
   val hi_he       = Seq("Hi there", "Hello")
@@ -143,6 +143,12 @@ class KeysValues extends Base {
     Ns.int.dateMap_.k(en_da)(date3).get === List(1, 3, 4)
   }
 
+//  List(
+//    (1,Map(en -> Thu Jan 01 01:00:05 CET 1970)),
+//  (2,Map(da -> Thu Jan 01 01:00:05 CET 1970, en -> Thu Jan 01 01:00:05 CET 1970))) != List(
+//    (1,Map(da -> Thu Jan 01 01:00:15 CET 1970)),
+//  (3,Map(en -> Thu Jan 01 01:00:15 CET 1970, da -> Thu Jan 01 01:00:15 CET 1970)),
+//  (4,Map(da -> Thu Jan 01 01:00:15 CET 1970)))
 
   "Multiple keys, multiple values" in new Setup {
 
@@ -191,6 +197,7 @@ class KeysValues extends Base {
     Ns.int.dateMap.k("en", "da")(date1, date3).get === en_da_date1_date3
     Ns.int.dateMap.k(Seq("en", "da"))(Seq(date1, date3)).get === en_da_date1_date3
     Ns.int.dateMap.k(en_da)(date1_date3).get === en_da_date1_date3
+
 
     Ns.int.dateMap_.k("en" or "da")(date1 or date3).get === List(1, 2, 3, 4)
     Ns.int.dateMap_.k("en", "da")(date1, date3).get === List(1, 2, 3, 4)

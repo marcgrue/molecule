@@ -1,12 +1,12 @@
 package molecule.coretests.json
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
-import molecule.macros.exception.NestedJsonException
 
 
 class NestedJson extends CoreSpec {
+
 
   "1 nested attr" in new CoreSetup {
     (Ns.int.str.Refs1 * Ref1.int1) insert List(
@@ -44,18 +44,18 @@ class NestedJson extends CoreSpec {
     m(Ns.str.Refs1 * Ref1.int1_.Ref2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref2.int2": 12}]},
+        |   {"ref2.ref2.int2": 12}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref2.int2": 22}]}
+        |   {"ref2.ref2.int2": 22}]}
         |]""".stripMargin
 
     // We can omit tacit attribute between Ref1 and Ref2
     m(Ns.str.Refs1 * Ref1.Ref2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref2.int2": 12}]},
+        |   {"ref2.ref2.int2": 12}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref2.int2": 22}]}
+        |   {"ref2.ref2.int2": 22}]}
         |]""".stripMargin
   }
 
@@ -69,10 +69,10 @@ class NestedJson extends CoreSpec {
     m(Ns.str.Refs1 * Ref1.Ref2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref2.int2": 10},
-        |   {"ref2.int2": 20}]},
+        |   {"ref2.ref2.int2": 10},
+        |   {"ref2.ref2.int2": 20}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref2.int2": 30}]}
+        |   {"ref2.ref2.int2": 30}]}
         |]""".stripMargin
   }
 
@@ -87,10 +87,10 @@ class NestedJson extends CoreSpec {
     m(Ns.str.Refs1 * Ref1.int1$.Ref2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref1.int1": 1, "ref2.int2": 10},
-        |   {"ref1.int1": null, "ref2.int2": 20}]},
+        |   {"ref1.int1": 1, "ref2.ref2.int2": 10},
+        |   {"ref1.int1": null, "ref2.ref2.int2": 20}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref1.int1": 3, "ref2.int2": 30}]}
+        |   {"ref1.int1": 3, "ref2.ref2.int2": 30}]}
         |]""".stripMargin
   }
 
@@ -104,9 +104,9 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Refs1.int1$.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 2, "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 2, "ref1.refs2": [
         |   {"ref2.int2": 20}]},
-        |{"ns.str": "b", "ref1.int1": null, "ref1.refs2": [
+        |{"ns.str": "b", "refs1.ref1.int1": null, "ref1.refs2": [
         |   {"ref2.int2": 10},
         |   {"ref2.int2": 11}]}
         |]""".stripMargin
@@ -127,7 +127,7 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Ref1.int1.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.refs2": [
+        |{"ns.str": "a", "ref1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 2}]}
         |]""".stripMargin
 
@@ -144,7 +144,7 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Ref1.int1.Refs2 * Ref2.ints2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.refs2": [
+        |{"ns.str": "a", "ref1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.ints2": [3, 2]}]}
         |]""".stripMargin
   }
@@ -155,7 +155,7 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Refs1.int1.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 2}]}
         |]""".stripMargin
 
@@ -177,13 +177,13 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Refs1.int1.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 2}]}
         |]""".stripMargin
 
     m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ref1.int1": 1, "ref1.refs2": [
+        |{"refs1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 2}]}
         |]""".stripMargin
 
@@ -211,10 +211,10 @@ class NestedJson extends CoreSpec {
 
     m(Ns.str.Refs1.int1.str1.Refs2 * Ref2.int2.str2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.str1": "x", "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 1, "refs1.ref1.str1": "x", "ref1.refs2": [
         |   {"ref2.int2": 11, "ref2.str2": "xx"},
         |   {"ref2.int2": 12, "ref2.str2": "xxx"}]},
-        |{"ns.str": "a", "ref1.int1": 2, "ref1.str1": "y", "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 2, "refs1.ref1.str1": "y", "ref1.refs2": [
         |   {"ref2.int2": 21, "ref2.str2": "yy"},
         |   {"ref2.int2": 22, "ref2.str2": "yyy"}]}
         |]""".stripMargin
@@ -266,15 +266,15 @@ class NestedJson extends CoreSpec {
     Ns.str.Refs1.*(Ref1.int1.Refs2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref1.int1": 1, "ref2.int2": 11},
-        |   {"ref1.int1": 1, "ref2.int2": 12},
-        |   {"ref1.int1": 2, "ref2.int2": 21},
-        |   {"ref1.int1": 2, "ref2.int2": 22}]},
+        |   {"ref1.int1": 1, "refs2.ref2.int2": 11},
+        |   {"ref1.int1": 1, "refs2.ref2.int2": 12},
+        |   {"ref1.int1": 2, "refs2.ref2.int2": 21},
+        |   {"ref1.int1": 2, "refs2.ref2.int2": 22}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref1.int1": 3, "ref2.int2": 32},
-        |   {"ref1.int1": 3, "ref2.int2": 31},
-        |   {"ref1.int1": 4, "ref2.int2": 42},
-        |   {"ref1.int1": 4, "ref2.int2": 41}]}
+        |   {"ref1.int1": 3, "refs2.ref2.int2": 31},
+        |   {"ref1.int1": 3, "refs2.ref2.int2": 32},
+        |   {"ref1.int1": 4, "refs2.ref2.int2": 41},
+        |   {"ref1.int1": 4, "refs2.ref2.int2": 42}]}
         |]""".stripMargin
 
 
@@ -282,31 +282,31 @@ class NestedJson extends CoreSpec {
     Ns.str.Refs1.*(Ref1.Refs2.int2).getJson ===
       """[
         |{"ns.str": "a", "ns.refs1": [
-        |   {"ref2.int2": 12},
-        |   {"ref2.int2": 11},
-        |   {"ref2.int2": 22},
-        |   {"ref2.int2": 21}]},
+        |   {"refs2.ref2.int2": 11},
+        |   {"refs2.ref2.int2": 12},
+        |   {"refs2.ref2.int2": 22},
+        |   {"refs2.ref2.int2": 21}]},
         |{"ns.str": "b", "ns.refs1": [
-        |   {"ref2.int2": 32},
-        |   {"ref2.int2": 31},
-        |   {"ref2.int2": 41},
-        |   {"ref2.int2": 42}]}
+        |   {"refs2.ref2.int2": 32},
+        |   {"refs2.ref2.int2": 31},
+        |   {"refs2.ref2.int2": 41},
+        |   {"refs2.ref2.int2": 42}]}
         |]""".stripMargin
 
 
     // Semi-nested B
     Ns.str.Refs1.int1.Refs2.*(Ref2.int2).getJson ===
       """[
-        |{"ns.str": "a", "ref1.int1": 1, "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 11},
         |   {"ref2.int2": 12}]},
-        |{"ns.str": "a", "ref1.int1": 2, "ref1.refs2": [
+        |{"ns.str": "a", "refs1.ref1.int1": 2, "ref1.refs2": [
         |   {"ref2.int2": 21},
         |   {"ref2.int2": 22}]},
-        |{"ns.str": "b", "ref1.int1": 3, "ref1.refs2": [
+        |{"ns.str": "b", "refs1.ref1.int1": 3, "ref1.refs2": [
         |   {"ref2.int2": 31},
         |   {"ref2.int2": 32}]},
-        |{"ns.str": "b", "ref1.int1": 4, "ref1.refs2": [
+        |{"ns.str": "b", "refs1.ref1.int1": 4, "ref1.refs2": [
         |   {"ref2.int2": 41},
         |   {"ref2.int2": 42}]}
         |]""".stripMargin
@@ -331,10 +331,10 @@ class NestedJson extends CoreSpec {
     // Tacit filter
     m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).getJson ===
       """[
-        |{"ref1.int1": 1, "ref1.refs2": [
+        |{"refs1.ref1.int1": 1, "ref1.refs2": [
         |   {"ref2.int2": 11},
         |   {"ref2.int2": 12}]},
-        |{"ref1.int1": 2, "ref1.refs2": [
+        |{"refs1.ref1.int1": 2, "ref1.refs2": [
         |   {"ref2.int2": 21},
         |   {"ref2.int2": 22}]}
         |]""".stripMargin
@@ -384,7 +384,7 @@ class NestedJson extends CoreSpec {
 
       m(Ns.str.Ref1.str1._Ns.Refs1 * Ref1.str1).getJson ===
         """[
-          |{"ns.str": "book", "ref1.str1": "John", "ns.refs1": [
+          |{"ns.str": "book", "ref1.ref1.str1": "John", "ns.refs1": [
           |   {"ref1.str1": "Marc"}]}
           |]""".stripMargin
 
@@ -399,8 +399,8 @@ class NestedJson extends CoreSpec {
 
       m(Ns.str.Ref1.str1._Ns.Refs1 * Ref1.str1.Refs2.str2).getJson ===
         """[
-          |{"ns.str": "book", "ref1.str1": "John", "ns.refs1": [
-          |   {"ref1.str1": "Marc", "ref2.str2": "Musician"}]}
+          |{"ns.str": "book", "ref1.ref1.str1": "John", "ns.refs1": [
+          |   {"ref1.str1": "Marc", "refs2.ref2.str2": "Musician"}]}
           |]""".stripMargin
 
       m(Ns.str.Ref1.str1._Ns.Refs1.str1.Refs2.str2).getJson ===
@@ -414,7 +414,7 @@ class NestedJson extends CoreSpec {
 
       m(Ns.str.Ref1.str1._Ns.Refs1 * (Ref1.str1.Refs2 * Ref2.str2)).getJson ===
         """[
-          |{"ns.str": "book", "ref1.str1": "John", "ns.refs1": [
+          |{"ns.str": "book", "ref1.ref1.str1": "John", "ns.refs1": [
           |   {"ref1.str1": "Marc", "ref1.refs2": [
           |      {"ref2.str2": "Musician"}]}]}
           |]""".stripMargin
@@ -427,19 +427,6 @@ class NestedJson extends CoreSpec {
   }
 
 
-  "Attributes after nested group" in new CoreSetup {
-    m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool) insert List(
-      (100L, 200.0, List(("aaa", 300), ("bbb", 400)), true),
-      (111L, 222.0, List(("xxx", 333), ("yyy", 444)), false)
-    )
-
-    (m(Ns.long.double.Refs1.*(Ref1.str1.int1)._Ns.bool).getJson must throwA[NestedJsonException])
-      .message === "Got the exception molecule.macros.exception.NestedJsonException: " +
-      "To get nested json Molecule expects the nested attributes to be last in the molecule. Found:\n" +
-      """Atom("ns", "bool", "Boolean", 1, VarValue, None, Seq(), Seq())"""
-  }
-
-
   "Applied eid" in new CoreSetup {
     val eid = Ns.str.Refs1.*(Ref1.int1).insert("a", List(1, 2)).eid
     Ns(eid).Refs1.*(Ref1.int1).getJson ===
@@ -447,6 +434,25 @@ class NestedJson extends CoreSpec {
         |{"ns.refs1": [
         |   {"ref1.int1": 1},
         |   {"ref1.int1": 2}]}
+        |]""".stripMargin
+  }
+
+
+  "Post attributes after nested" in new CoreSetup {
+    Ns.float.str.Refs1.*(Ref1.int1).insert(1f, "a", Seq(11, 12))
+
+    Ns.float.str.Refs1.*(Ref1.int1).getJson ===
+      """[
+        |{"ns.float": 1.0, "ns.str": "a", "ns.refs1": [
+        |   {"ref1.int1": 11},
+        |   {"ref1.int1": 12}]}
+        |]""".stripMargin
+
+    Ns.float.Refs1.*(Ref1.int1)._Ns.str.getJson ===
+      """[
+        |{"ns.float": 1.0, "ns.refs1": [
+        |   {"ref1.int1": 11},
+        |   {"ref1.int1": 12}], "ns.str": "a"}
         |]""".stripMargin
   }
 
@@ -481,7 +487,7 @@ class NestedJson extends CoreSpec {
     // This excludes "r1b" since no Ns entities reference it.
     Ns.Refs1.str1.Refs2.*(Ref2.str2).getJson ===
       """[
-        |{"ref1.str1": "r1a", "ref1.refs2": [
+        |{"refs1.ref1.str1": "r1a", "ref1.refs2": [
         |   {"ref2.str2": "r2a"},
         |   {"ref2.str2": "r2b"}]}
         |]""".stripMargin

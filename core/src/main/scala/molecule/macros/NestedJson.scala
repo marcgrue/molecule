@@ -1,823 +1,587 @@
 package molecule.macros
+import java.lang.{Long => jLong}
+import java.util.{Comparator => jComparator, List => jList}
+import molecule.action.Molecule
+import molecule.facade.Conn
+import molecule.macros.NestedTuples._
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Long => jLong}
-import java.math.{BigDecimal => jBigDec, BigInteger => jBigInt}
-import java.net.URI
-import java.util.{Date, UUID, List => jList, Map => jMap}
-import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
-import molecule.ast.model._
-import molecule.ast.query._
-import molecule.macros.exception.NestedJsonException
-import scala.collection.JavaConverters._
+/** Builder classes of various arity of nested JSON. */
+private[molecule] trait NestedJson[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-/** Builder for nested JSON output. */
-case class NestedJson(modelE: Model, queryE: Query) {
+  protected def jsonBranch0(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch1(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch2(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch3(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch4(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch5(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
+  protected def jsonBranch6(sb: StringBuilder, row: jList[AnyRef], leaf: StringBuilder): StringBuilder = ???
 
-  val jsEscapeChars: Set[Char] =
-    List(('\u00ad', '\u00ad'),
-      ('\u0600', '\u0604'),
-      ('\u070f', '\u070f'),
-      ('\u17b4', '\u17b5'),
-      ('\u200c', '\u200f'),
-      ('\u2028', '\u202f'),
-      ('\u2060', '\u206f'),
-      ('\ufeff', '\ufeff'),
-      ('\ufff0', '\uffff'))
-      .foldLeft(Set[Char]()) {
-        case (set, (start, end)) =>
-          set ++ (start to end).toSet
-      }
+  protected def jsonLeaf1(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf2(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf3(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf4(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf5(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf6(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
+  protected def jsonLeaf7(sb: StringBuilder, row: jList[AnyRef]): StringBuilder = ???
 
-  def appendEscapedString(buf: StringBuilder, s: String): Unit = {
-    s.foreach { c =>
-      val strReplacement = c match {
-        case '"'  => "\\\""
-        case '\\' => "\\\\"
-        case '\b' => "\\b"
-        case '\f' => "\\f"
-        case '\n' => "\\n"
-        case '\r' => "\\r"
-        case '\t' => "\\t"
-        // Set.contains will cause boxing of c to Character, try and avoid this
-        case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
-          "\\u%04x".format(c: Int)
+  protected val sb0: StringBuilder = new StringBuilder("")
+  protected val sb1: StringBuilder = new StringBuilder("")
+  protected val sb2: StringBuilder = new StringBuilder("")
+  protected val sb3: StringBuilder = new StringBuilder("")
+  protected val sb4: StringBuilder = new StringBuilder("")
+  protected val sb5: StringBuilder = new StringBuilder("")
+  protected val sb6: StringBuilder = new StringBuilder("")
+  protected val sb7: StringBuilder = new StringBuilder("")
 
-        case _ => ""
-      }
+  protected var firstLevel0      = true
+  protected val firstJsonObjects = new Array[Boolean](7)
 
-      // Use Char version of append if we can, as it's cheaper.
-      if (strReplacement.isEmpty) {
-        buf.append(c)
-      } else {
-        buf.append(strReplacement)
-      }
-    }
+  protected def resetJsonVars: Unit = {
+    resetCastVars
+    // Traverse forward through rows (tuples require traversing backwards)
+    descending = false
+    firstLevel0 = true
+
+    sb0.clear
+    sb0.append("[\n")
+    sb1.clear
+    sb2.clear
+    sb3.clear
+    sb4.clear
+    sb5.clear
+    sb6.clear
+    sb7.clear
+
+    for (lvl <- 0 to 6) {firstJsonObjects(lvl) = true}
   }
 
-  def quote(buf: StringBuilder, s: String): Unit = {
-    buf.append('"') //open quote
-    appendEscapedString(buf, s)
-    buf.append('"') //close quote
-  }
-
-  implicit class Regex(sc: StringContext) {
-    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
-  }
-
-  val df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
-  def fieldValue(buf: StringBuilder, field0: String, tpe: String, card: Int, value: Any) = {
-    val optional = field0.endsWith("$")
-    val field = if (optional) field0.init else field0
-
-    quote(buf, field)
-    buf.append(": ")
-
-    // Add value to buffer
-    tpe match {
-      case r"Map\[String,(.*)$t\]" if optional => jsonOptionMap(buf, value, t)
-      case r"Set\[(.*)$t\]" if optional        => jsonOptionSet(buf, value, t)
-      case t if optional                       =>
-//        println("---------------------------")
-//        println("field: " + field0)
-//        println("type : " + t)
-//        println("value: " + value)
-//        println("card : " + card)
-//        println("other: " + jsonOptionSet(buf, value, t))
-        jsonOptionValue(buf, value, t)
-      case t if card >= 3                      => jsonMap(buf, value, t)
-      case t if card == 2                      => jsonSet(buf, value, t)
-      case t                                   => jsonValue(buf, value, t)
-    }
-  }
-
-
-  def jsonValue(buf: StringBuilder, value: Any, tpe: String) = tpe match {
-    case "String"         => quote(buf, value.toString)
-    case "Int"            => buf.append(value)
-    case "Float"          => buf.append(value)
-    case "java.util.Date" => quote(buf, df.format(value.asInstanceOf[Date]))
-    case "java.util.UUID" => quote(buf, value.toString)
-    case "java.net.URI"   => quote(buf, value.toString)
-    case "Boolean"        => buf.append(value.toString)
-    case number           => buf.append(value.toString)
-  }
-
-  def renderArray(buf: StringBuilder, values: Iterable[Any], quoting: Boolean) = {
-    var firstInArray = true
-    buf.append("[")
-    values.foreach { value =>
-      if (firstInArray) {
-        firstInArray = false
-      } else {
-        buf.append(", ")
-      }
-      if (quoting)
-        quote(buf, value.toString)
-      else
-        buf.append(value.toString)
-    }
-    buf.append("]")
-  }
-
-  def jsonSet(buf: StringBuilder, value: Any, tpe: String) = {
-    val values = value.asInstanceOf[PersistentHashSet].asScala.toSeq
-    tpe match {
-      case "String"         => renderArray(buf, values, true)
-      case "java.util.Date" => renderArray(buf, values.map(v => df.format(v.asInstanceOf[Date])), true)
-      case "java.util.UUID" => renderArray(buf, values, true)
-      case "java.net.URI"   => renderArray(buf, values, true)
-      case "Boolean"        => renderArray(buf, values, false)
-      case _                => renderArray(buf, values, false)
-    }
-  }
-
-  def jsonStream(buf: StringBuilder, value: Any, tpe: String) = {
-    val values = value.asInstanceOf[LazySeq].asScala
-    tpe match {
-      case "String"         => renderArray(buf, values, true)
-      case "java.util.Date" => renderArray(buf, values.map(v => df.format(v.asInstanceOf[Date])), true)
-      case "java.util.UUID" => renderArray(buf, values, true)
-      case "java.net.URI"   => renderArray(buf, values, true)
-      case "Boolean"        => renderArray(buf, values, false)
-      case _                => renderArray(buf, values, false)
-    }
-  }
-
-  def jsonVector(buf: StringBuilder, value: Any, tpe: String) = {
-    val values = value.asInstanceOf[PersistentVector].asScala
-    tpe match {
-      case "String"         => renderArray(buf, values, true)
-      case "java.util.Date" => renderArray(buf, values.map(v => df.format(v.asInstanceOf[Date])), true)
-      case "java.util.UUID" => renderArray(buf, values, true)
-      case "java.net.URI"   => renderArray(buf, values, true)
-      case "Boolean"        => renderArray(buf, values, false)
-      case _                => renderArray(buf, values, false)
-    }
-  }
-
-
-  def renderObj(buf: StringBuilder, values: Iterable[Any], quoting: Boolean) = {
-    var firstInObj = true
-    buf.append("{")
-    values.foreach { case s: String =>
-      val p = s.split("@", 2)
-      val (k, v) = (p(0), p(1))
-
-      if (firstInObj) {
-        firstInObj = false
-      } else {
-        buf.append(", ")
-      }
-
-      buf.append('"')
-      buf.append(k)
-      buf.append('"')
-      buf.append(':')
-
-      if (quoting)
-        quote(buf, v)
-      else
-        buf.append(v)
-    }
-    buf.append("}")
-  }
-
-  def jsonMap(buf: StringBuilder, value: Any, tpe: String) = {
-    val values = value.asInstanceOf[PersistentHashSet].asScala.toSeq
-    tpe match {
-      case "String"         => renderObj(buf, values, true)
-      case "java.util.Date" =>
-        var firstInObj = true
-        buf.append("{")
-        values.foreach { case s: String =>
-          val p = s.split("@", 2)
-          val (k, date) = (p(0), df.parse(p(1)))
-
-          if (firstInObj) {
-            firstInObj = false
-          } else {
-            buf.append(", ")
-          }
-
-          buf.append('"')
-          buf.append(k)
-          buf.append('"')
-          buf.append(':')
-          quote(buf, df.format(date))
-        }
-        buf.append("}")
-      case "java.util.UUID" => renderObj(buf, values, true)
-      case "java.net.URI"   => renderObj(buf, values, true)
-      case "Boolean"        => renderObj(buf, values, false)
-      case _                => renderObj(buf, values, false)
-    }
-  }
-
-
-  // Optionals ...................
-
-  def jsonOptionValue(buf: StringBuilder, value: Any, tpe: String) = tpe match {
-    case "String" => value match {
-      case null                                  => buf.append("null")
-      case v: String                             => quote(buf, v)
-      case v if v.toString.contains(":db/ident") => val s = v.toString; quote(buf, s.substring(s.lastIndexOf("/") + 1).init.init)
-      case v                                     => quote(buf, v.asInstanceOf[jMap[String, String]].asScala.toMap.values.head) // pull result map: {:ns/str "abc"}
-    }
-
-    case "Int" => value match {
-      case null => buf.append("null")
-      case v    => buf.append(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toString) // pull result map: {:ns/int 42}
-    }
-
-    case "Float" => value match {
-      case null       => buf.append("null")
-      case v: jDouble => buf.append(v)
-      case v          => buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
-    }
-
-    case "Long" => value match {
-      case null                               => buf.append("null")
-      case v: jLong                           => buf.append(v)
-      case v if v.toString.contains(":db/id") => val s = v.toString; buf.append(s.substring(s.lastIndexOf("/") + 1).init.init)
-      case v                                  => buf.append(v.asInstanceOf[jMap[String, jLong]].asScala.toMap.values.head.toString)
-    }
-
-    case "Double" => value match {
-      case null       => buf.append("null")
-      case v: jDouble => buf.append(v)
-      case v          => buf.append(v.asInstanceOf[jMap[String, jDouble]].asScala.toMap.values.head.toString)
-    }
-
-    case "Boolean" => value match {
-      case null        => buf.append("null")
-      case v: jBoolean => buf.append(v)
-      case v           => buf.append(v.asInstanceOf[jMap[String, jBoolean]].asScala.toMap.values.head.toString)
-    }
-
-    case "BigInt" => value match {
-      case null       => buf.append("null")
-      case v: jBigInt => buf.append(v)
-      case v          => buf.append(v.asInstanceOf[jMap[String, jBigInt]].asScala.toMap.values.head.toString)
-    }
-
-    case "BigDecimal" => value match {
-      case null       => buf.append("null")
-      case v: jBigDec => buf.append(v)
-      case v          => buf.append(v.asInstanceOf[jMap[String, jBigDec]].asScala.toMap.values.head.toString)
-    }
-
-    case "java.util.Date" => value match {
-      case null    => buf.append("null")
-      case v: Date => quote(buf, df.format(v.asInstanceOf[Date]))
-      case v       => quote(buf, df.format(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head))
-    }
-
-    case "java.util.UUID" => value match {
-      case null    => buf.append("null")
-      case v: UUID => quote(buf, v.toString)
-      case v       => quote(buf, v.asInstanceOf[jMap[String, UUID]].asScala.toMap.values.head.toString)
-    }
-
-    case "java.net.URI" => value match {
-      case null   => buf.append("null")
-      case v: URI => quote(buf, v.toString)
-      case v      => quote(buf, v.asInstanceOf[jMap[String, URI]].asScala.toMap.values.head.toString)
-    }
-  }
-
-
-  def jsonOptionSet(buf: StringBuilder, values: Any, tpe: String) = tpe match {
-    case "String" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, true)
-
-      // {:ns/enums [{:db/ident :ns.enums/enum1} {:db/ident :ns.enums/enum2}]}
-      case vs if vs.toString.contains(":db/ident") =>
-        val identMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        val enums = identMaps.map(_.asInstanceOf[jMap[String, Keyword]].asScala.toMap.values.head.getName)
-        renderArray(buf, enums, true)
-
-      // {:ns/strs ["a" "b" "c"]}
-      case vs => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-
-    case "Int" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Float" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Long" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-
-      // {:ns/ref1 [{:db/id 3} {:db/id 4}]}
-      case vs if vs.toString.contains(":db/id") =>
-        val idMaps = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        //        Some(idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head).toSet)
-        renderArray(buf, idMaps.map(_.asInstanceOf[jMap[String, Long]].asScala.toMap.values.head), false)
-
-      // {:ns/longs [3 4 5]}
-      case vs => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Double" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Boolean" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "BigInt" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-
-    case "BigDecimal" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala, false)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "java.util.Date" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet =>
-        val values = vs.asScala.map(_.asInstanceOf[Date])
-        renderArray(buf, values.map(v => df.format(v)), true)
-      case vs                    =>
-        val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        renderArray(buf, values.map(v => df.format(v.asInstanceOf[Date])), true)
-    }
-
-    case "java.util.UUID" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala.map(_.toString), true)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-
-    case "java.net.URI" => values match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderArray(buf, vs.asScala.map(_.toString), true)
-      case vs                    => renderArray(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-  }
-
-
-  def jsonOptionMap(buf: StringBuilder, value: Any, tpe: String) = tpe match {
-    case "String" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, true)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-
-    case "Int" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Long" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Float" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Double" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "Boolean" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "BigInt" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "BigDecimal" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala, false)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, false)
-    }
-
-    case "java.util.Date" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet =>
-        val values = vs.asScala
-        var firstInObj = true
-        buf.append("{")
-        values.foreach { case s: String =>
-          val p = s.split("@", 2)
-          val (k, d) = (p(0), df.parse(p(1)))
-
-          if (firstInObj) {
-            firstInObj = false
-          } else {
-            buf.append(", ")
-          }
-
-          buf.append('"')
-          buf.append(k)
-          buf.append('"')
-          buf.append(':')
-          quote(buf, df.format(d))
-        }
-        buf.append("}")
-
-      case vs =>
-        val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        var firstInObj = true
-        buf.append("{")
-        values.foreach { case s: String =>
-          val p = s.split("@", 2)
-          val (k, d) = (p(0), df.parse(p(1)))
-
-          if (firstInObj) {
-            firstInObj = false
-          } else {
-            buf.append(", ")
-          }
-
-          buf.append('"')
-          buf.append(k)
-          buf.append('"')
-          buf.append(':')
-          quote(buf, df.format(d))
-        }
-        buf.append("}")
-    }
-
-    case "java.util.UUID" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala.map(_.toString), true)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-
-    case "java.net.URI" => value match {
-      case null                  => buf.append("null")
-      case vs: PersistentHashSet => renderObj(buf, vs.asScala.map(_.toString), true)
-      case vs                    => renderObj(buf, vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala, true)
-    }
-  }
-
-
-  lazy val flatModel: Seq[Element] = {
-    def recurse(element: Element): Seq[Element] = element match {
-      case n: Nested                                             => n.elements flatMap recurse
-      case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '_' => Seq()
-      case a: Atom                                               => Seq(a)
-      case Meta(_, _, "e", NoValue, Eq(List(eid)))               => Seq()
-      case m: Meta                                               => Seq(m)
-      case other                                                 => Seq()
-    }
-
-    modelE.elements.last match {
-      case _: Nested => "Nested attributes are expected to be last in the molecule"
-      case other     => throw new NestedJsonException(
-        "To get nested json Molecule expects the nested attributes to be last in the molecule. Found:\n" + other)
-    }
-
-    val elements = modelE.elements flatMap recurse
-    if (elements.size != queryE.f.outputs.size)
-      throw new NestedJsonException("Flattened model elements (" + elements.size + ") don't match query outputs (" + queryE.f.outputs.size + "):\n" +
-        modelE + "\n----------------\n" + elements.mkString("\n") + "\n----------------\n" + queryE + "\n----------------\n")
-
-    elements
-  }
-
-  // Field/Row mapping model
-  lazy val fieldIndexes: Map[Int, Seq[(Int, Int, String, String, Int, Boolean)]] = {
-
-    def recurse(level: Int, i0: Int, j0: Int, elements: Seq[Element]): Seq[(Int, Seq[(Int, Int, String, String, Int, Boolean)])] =
-      elements.foldLeft(i0, j0, false, Seq.empty[(Int, Seq[(Int, Int, String, String, Int, Boolean)])]) {
-
-        case ((i, j, manyAttr, acc), Atom(ns, attr, tpeS, card, _, _, _, _)) if i == -1 && attr.last != '_' =>
-          (i + 1, j + 1, manyAttr, Seq(level -> Seq((i + 1, j + 1, ns + "." + attr, tpeS, card, manyAttr))))
-
-        case ((i, j, manyAttr, acc), Atom(ns, attr, tpeS, card, _, _, _, _)) if attr.last != '_' =>
-          (i + 1, j + 1, manyAttr, acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, ns + "." + attr, tpeS, card, manyAttr)))
-
-        case ((i, j, _, acc), Nested(Bond(ns, refAttr, _, _, _), es)) if acc.isEmpty =>
-          (i, j, false, Seq(level -> Seq((i + 1, j + 1, ns + "." + refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
-
-        case ((i, j, _, acc), Nested(Bond(ns, refAttr, _, _, _), es)) =>
-          (i, j, false, (acc.init :+ level -> (acc.last._2 :+ (i + 1, j + 1, ns + "." + refAttr, "Nested", 2, false))) ++ recurse(level + 1, -1, j + 1, es))
-
-        case ((i, j, _, acc), Bond(_, _, _, 2, _)) =>
-          (i, j, true, acc)
-
-        case ((i, j, _, acc), Meta(_, "many-ref", _, _, IndexVal)) =>
-          (i, j + 1, false, acc)
-
-        case ((i, j, _, acc), other) =>
-          (i, j, false, acc)
-      }._4
-
-    /*
-      m(Ns.int.str * Refs1.int1) becomes:
-
-      Map(
-        0 -> Seq((0, 1, "int", "Int", false), (1, 2, "str", "String", false), (2, 3, "refs1", "Ref", false)),
-        1 -> Seq((0, 4, "int1", "Int", false))
-      )
-     */
-    recurse(0, -1, 0, modelE.elements).toMap
-  }
-
-
-  lazy val entityIndexes: List[Int] = flatModel.zipWithIndex.collect {
-    //    case (Meta(_, "many-ref", _, _, IndexVal), _) => None
-    case (Meta(_, _, _, _, IndexVal), i) => Some(i)
-  }.flatten.toList
-
-  lazy val manyRefIndexes: Seq[Int] = flatModel.zipWithIndex.collect {
-    case (Meta(_, "many-ref", _, _, IndexVal), i) => i
-  }
-
-  lazy val indexMap: Map[Int, Int] = flatModel.zipWithIndex.foldLeft(0, Seq.empty[(Int, Int)]) {
-    case ((rawIndex, indexMap), (meta, i)) => meta match {
-      case Meta(_, "many-ref", _, _, IndexVal) => (rawIndex, indexMap :+ (rawIndex, i))
-      case Meta(_, _, _, _, IndexVal)          => (rawIndex + 1, indexMap :+ (rawIndex, i))
-      case _                                   => (rawIndex + 1, indexMap :+ (rawIndex, i))
-    }
-  }._2.toMap
-
-  lazy val indexMapSwapped = indexMap.map(_.swap)
-
-  def sortRows(rowSeq: Seq[jList[AnyRef]], entityIndexes: Seq[Int]): Seq[jList[AnyRef]] = entityIndexes match {
-    case List(a)                               => rowSeq.sortBy(row => row.get(a).asInstanceOf[Long])
-    case List(a, b)                            => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long]))
-    case List(a, b, c)                         => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long]))
-    case List(a, b, c, d)                      => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long]))
-    case List(a, b, c, d, e)                   => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long]))
-    case List(a, b, c, d, e, f)                => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long]))
-    case List(a, b, c, d, e, f, g)             => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long]))
-    case List(a, b, c, d, e, f, g, h)          => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long]))
-    case List(a, b, c, d, e, f, g, h, i)       => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long]))
-    case List(a, b, c, d, e, f, g, h, i, j)    => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => row.get(j).asInstanceOf[Long])
-    case List(a, b, c, d, e, f, g, h, i, j, k) => rowSeq.sortBy(row => (row.get(a).asInstanceOf[Long], row.get(b).asInstanceOf[Long], row.get(c).asInstanceOf[Long], row.get(d).asInstanceOf[Long], row.get(e).asInstanceOf[Long], row.get(f).asInstanceOf[Long], row.get(g).asInstanceOf[Long], row.get(h).asInstanceOf[Long], row.get(i).asInstanceOf[Long])).sortBy(row => (row.get(j).asInstanceOf[Long], row.get(k).asInstanceOf[Long]))
-  }
-
-  val doDebug = false
-  def debug(s: String): Unit = {
-    if (doDebug)
-      println(s)
-  }
-
-  def nestedJson(rows: Iterable[jList[AnyRef]]) = {
-    if (rows.isEmpty) {
-      ""
+  def branch(level: Int, sb: StringBuilder, branchPairs: => StringBuilder, refAttr: String, leaf: StringBuilder, post: => StringBuilder = StringBuilder.newBuilder): StringBuilder = {
+    // Reset sub levels
+    for (lvl <- (level + 1) to 6) {firstJsonObjects(lvl) = true}
+    if (firstJsonObjects(level)) {
+      firstJsonObjects(level) = false
     } else {
-      nestedJson1(rows)
+      sb.append(s",\n")
+      sb.append("   " * level)
+    }
+    sb.append("{")
+    branchPairs // adds branch pairs to `sb`
+    if (sb.last != '{')
+      sb.append(s", ") // when no pairs before nested
+    quote(sb, refAttr)
+    sb.append(": [\n")
+    sb.append("   " * (level + 1))
+    sb.append(leaf.toString)
+    leaf.clear
+    sb.append("]")
+    post // adds post fields to `sb`
+    sb.append("}")
+  }
+
+  def leaf(level: Int, sb: StringBuilder, leafPairs: => StringBuilder): StringBuilder = {
+    if (sb.nonEmpty) {
+      sb.append(s",\n")
+      sb.append("   " * level)
+    }
+    sb.append("{")
+    leafPairs.append("}")
+  }
+}
+
+private[molecule] object NestedJson {
+
+  trait NestedJson1[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples1[OuterTpl] { self: Molecule[OuterTpl] =>
+
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
+
+      if (last == 0) {
+        ""
+
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonLeaf1(sb1, row)).append("\n]").toString
+
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch0(sb0, prevRow, sb1)
+            }
+            jsonLeaf1(sb1, row)
+            if (i == last) {
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf1(sb1, row)
+            subsequentRow = true
+          }
+
+          prevRow = row
+          p0 = e0
+        }
+        sb0.append("\n]").toString()
+      }
     }
   }
 
-  def nestedJson1(rows: Iterable[jList[AnyRef]]) = {
+  trait NestedJson2[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples2[OuterTpl] { self: Molecule[OuterTpl] =>
 
-    //    debug("===================================================================================")
-    //debug(_model)
-    debug(modelE.toString)
-    //    debug(queryE)
-    //debug(_queryE.datalog)
-    debug("---- ")
-    flatModel.foreach(e => debug(e.toString))
-    debug("---- ")
-    fieldIndexes.foreach(e => debug(e.toString))
-    //    debug("---- ")
-    debug("---- " + entityIndexes)
-    debug("---- " + manyRefIndexes)
-    debug("---- " + indexMap)
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
 
-    val sortedRows = sortRows(rows.toSeq, entityIndexes)
-    val rowCount = sortedRows.length
+      if (last == 0) {
+        ""
 
-    sortedRows.foreach(r => debug(r.toString))
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonLeaf2(sb2, row))).append("\n]").toString
 
-    val buf0 = new StringBuilder("[")
-    val buffers = buf0 :: fieldIndexes.keys.toList.sorted.tail.map(_ => new StringBuilder(""))
-    val descendingLevels = fieldIndexes.keys.toList.sorted.reverse
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
 
-    def addPairs(buf: StringBuilder, level: Int, fields: Seq[(Int, Int, String, String, Int, Boolean)], row: Seq[Any]) {
-      buf.append("\n" + "   " * level + "{")
-      for {(i, rowIndex, field, tpeS, card, _) <- fields} yield {
-        if (i > 0) buf.append(", ")
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch1(sb1, prevRow, sb2)
+            }
+            jsonLeaf2(sb2, row)
+            if (i == last) {
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf2(sb2, row)
+            subsequentRow = true
+          }
 
-        if (tpeS == "Nested") {
-          quote(buf, field)
-          buf.append(": [")
-        } else {
-          fieldValue(buf, field, tpeS, card, row(rowIndex))
-          if (fields.size == i + 1) buf.append("}")
+          prevRow = row
+          p0 = e0
+          p1 = e1
         }
+        sb0.append("\n]").toString()
       }
     }
+  }
 
-    sortedRows.foldLeft(Seq.empty[Long], 1) { case ((prevEntities, r), row0) =>
 
-      val row = row0.asScala.asInstanceOf[Seq[Any]]
-      val curEntities = entityIndexes.map(i => row(i).asInstanceOf[Long])
+  trait NestedJson3[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples3[OuterTpl] { self: Molecule[OuterTpl] =>
 
-      debug("------------------ " + r + " --------------------------------")
-      debug(prevEntities.toString)
-      debug(curEntities.toString)
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
 
-      var startNewParent = false
+      if (last == 0) {
+        ""
 
-      descendingLevels.foreach { level =>
-        val buf = buffers(level)
-        val fields = fieldIndexes(level)
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonBranch2(sb2, row,
+              jsonLeaf3(sb3, row)))).append("\n]").toString
 
-        level match {
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
+          e2 = row.get(2).asInstanceOf[jLong]
 
-          // Single row --------------------------------------------------------
-
-          case l if rowCount == 1 => {
-            if (l == descendingLevels.size - 1) {
-              addPairs(buf, l, fields, row)
-            } else {
-              buf.append("\n" + "   " * l + "{")
-              for {(i, rowIndex, field, tpeS, card, _) <- fields} yield {
-                if (i > 0) buf.append(", ")
-
-                if (tpeS == "Nested") {
-                  quote(buf, field)
-                  buf.append(": [")
-                  // Close nested
-                  buf.append(buffers(l + 1).toString)
-                  buf.append("]}")
-                } else {
-                  fieldValue(buf, field, tpeS, card, row(rowIndex))
-                  if (fields.size == i + 1) buf.append("}")
-                }
-              }
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+            } else if (e2 != p2) {
+              jsonBranch2(sb2, prevRow, sb3)
             }
-          }
-
-
-          // Last row --------------------------------------------------------
-
-          case l if r == rowCount => {
-            val shift = fields.head._2 - indexMapSwapped(fields.head._2)
-            val i = l + shift
-            val (prevParentE, curParentE) = if (i == 0) (0, 0) else (prevEntities(i - 1), curEntities(i - 1))
-            val (prevE, curE) = (prevEntities(i), curEntities(i))
-            val manyAttrs = fields.map(_._6).reduce(_ || _)
-
-
-            if (prevParentE != curParentE) {
-              // New parent - add previously accumulated on this level to parent
-
-              val parentBuffer = buffers(l - 1)
-              // Append accumulated from this level
-              parentBuffer.append(buf.toString + "]")
-              // Round up parent level
-              parentBuffer.append("}")
-
-              // Start over with clean buffer on this level
-              buf.clear
-
-              // Add pairs on this level
-              buf.append("\n" + "   " * l + "{")
-              for {(i, rowIndex, field, tpeS, card, _) <- fields} yield {
-                if (i > 0) buf.append(", ")
-
-                if (tpeS == "Nested") {
-                  quote(buf, field)
-                  buf.append(": [")
-                  // Add nested
-                  buf.append(buffers(l + 1).toString)
-                  buf.append("]}")
-                } else {
-                  fieldValue(buf, field, tpeS, card, row(rowIndex))
-                  if (fields.size == i + 1) buf.append("}")
-                }
-              }
-            } else if (prevE != curE) {
-              // New pairs
-              buf.append(",")
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-              if (l < descendingLevels.size - 1) {
-                // Add nested
-                buf.append(buffers(l + 1).toString)
-                buf.append("]}")
-              }
-
-            } else if (manyAttrs && prevE == curE && l != 0) {
-              // New pairs
-              buf.append(",")
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-              if (l < descendingLevels.size - 1) {
-                // Add nested
-                buf.append(buffers(l + 1).toString)
-                buf.append("]}")
-              }
-
-            } else {
-              // No new data on this level: add nested
-              buf.append(buffers(l + 1).toString)
-              buf.append("]}")
+            jsonLeaf3(sb3, row)
+            if (i == last) {
+              jsonBranch2(sb2, row, sb3)
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
             }
+          } else {
+            jsonLeaf3(sb3, row)
+            subsequentRow = true
           }
 
-          // First row  -------------------------------------------------------
+          prevRow = row
+          p0 = e0
+          p1 = e1
+          p2 = e2
+        }
+        sb0.append("\n]").toString()
+      }
+    }
+  }
 
-          case l if r == 1 => {
-            addPairs(buf, l, fields, row)
-          }
 
+  trait NestedJson4[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples4[OuterTpl] { self: Molecule[OuterTpl] =>
 
-          // Intermediate rows  -----------------------------------------------
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
 
-          case l => {
-            val shift = fields.head._2 - indexMapSwapped(fields.head._2)
-            val i = l + shift
-            val (prevParentE, curParentE) = if (i == 0) (0, 0) else (prevEntities(i - 1), curEntities(i - 1))
-            val (prevE, curE) = (prevEntities(i), curEntities(i))
-            val (prevChildE, curChildE) = if (i >= fieldIndexes.size - 1) (0, 0) else (prevEntities(i + 1), curEntities(i + 1))
-            val manyAttrs = fields.map(_._6).reduce(_ || _)
+      if (last == 0) {
+        ""
 
-            if (prevParentE != curParentE) {
-              // New parent - add previously accumulated on this level to parent
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonBranch2(sb2, row,
+              jsonBranch3(sb3, row,
+                jsonLeaf4(sb4, row))))).append("\n]").toString
 
-              val parentBuffer = buffers(l - 1)
-              // Append accumulated from this level
-              parentBuffer.append(buf.toString + "]")
-              // Round up parent level
-              parentBuffer.append("}")
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
+          e2 = row.get(2).asInstanceOf[jLong]
+          e3 = row.get(3).asInstanceOf[jLong]
 
-              // Start over with clean buffer on this level
-              buf.clear
-
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-              if (shift > 0)
-                startNewParent = true
-
-            } else if (prevE != curE) {
-              // New on this level
-
-              buf.append(",")
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-
-            } else if (startNewParent && prevChildE != curChildE) {
-              // Still no new parent change
-              buf.append(",")
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-              startNewParent = false
-
-            } else if (manyAttrs && prevE == curE) {
-              // Still no new parent change
-              buf.append(",")
-              // Add pairs on this level
-              addPairs(buf, l, fields, row)
-
-            } else {
-              val dummy = 7
-              // No new data on this level: do nothing...
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+            } else if (e2 != p2) {
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+            } else if (e3 != p3) {
+              jsonBranch3(sb3, prevRow, sb4)
             }
+            jsonLeaf4(sb4, row)
+            if (i == last) {
+              jsonBranch3(sb3, row, sb4)
+              jsonBranch2(sb2, row, sb3)
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf4(sb4, row)
+            subsequentRow = true
           }
 
-        } // Level match
+          prevRow = row
+          p0 = e0
+          p1 = e1
+          p2 = e2
+          p3 = e3
+        }
+        sb0.append("\n]").toString()
+      }
+    }
+  }
 
-        debug(s"-$level-")
-        debug(buf.toString)
 
-      } // descending levels loop
+  trait NestedJson5[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples5[OuterTpl] { self: Molecule[OuterTpl] =>
 
-      (curEntities, r + 1)
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
 
-    } // rows loop
+      if (last == 0) {
+        ""
 
-    buf0.append("\n]").toString()
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonBranch2(sb2, row,
+              jsonBranch3(sb3, row,
+                jsonBranch4(sb4, row,
+                  jsonLeaf5(sb5, row)))))).append("\n]").toString
+
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
+          e2 = row.get(2).asInstanceOf[jLong]
+          e3 = row.get(3).asInstanceOf[jLong]
+          e4 = row.get(4).asInstanceOf[jLong]
+
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+            } else if (e2 != p2) {
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+            } else if (e3 != p3) {
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+            } else if (e4 != p4) {
+              jsonBranch4(sb4, prevRow, sb5)
+            }
+            jsonLeaf5(sb5, row)
+            if (i == last) {
+              jsonBranch4(sb4, row, sb5)
+              jsonBranch3(sb3, row, sb4)
+              jsonBranch2(sb2, row, sb3)
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf5(sb5, row)
+            subsequentRow = true
+          }
+
+          prevRow = row
+          p0 = e0
+          p1 = e1
+          p2 = e2
+          p3 = e3
+          p4 = e4
+        }
+        sb0.append("\n]").toString()
+      }
+    }
+  }
+
+
+  trait NestedJson6[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples6[OuterTpl] { self: Molecule[OuterTpl] =>
+
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
+
+      if (last == 0) {
+        ""
+
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonBranch2(sb2, row,
+              jsonBranch3(sb3, row,
+                jsonBranch4(sb4, row,
+                  jsonBranch5(sb5, row,
+                    jsonLeaf6(sb6, row))))))).append("\n]").toString
+
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
+          e2 = row.get(2).asInstanceOf[jLong]
+          e3 = row.get(3).asInstanceOf[jLong]
+          e4 = row.get(4).asInstanceOf[jLong]
+          e5 = row.get(5).asInstanceOf[jLong]
+
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+            } else if (e2 != p2) {
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+            } else if (e3 != p3) {
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+            } else if (e4 != p4) {
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+            } else if (e5 != p5) {
+              jsonBranch5(sb5, prevRow, sb6)
+            }
+            jsonLeaf6(sb6, row)
+            if (i == last) {
+              jsonBranch5(sb5, row, sb6)
+              jsonBranch4(sb4, row, sb5)
+              jsonBranch3(sb3, row, sb4)
+              jsonBranch2(sb2, row, sb3)
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf6(sb6, row)
+            subsequentRow = true
+          }
+
+          prevRow = row
+          p0 = e0
+          p1 = e1
+          p2 = e2
+          p3 = e3
+          p4 = e4
+          p5 = e5
+        }
+        sb0.append("\n]").toString()
+      }
+    }
+  }
+
+
+  trait NestedJson7[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples7[OuterTpl] { self: Molecule[OuterTpl] =>
+
+    final override def getJson(implicit conn: Conn): String = {
+      resetJsonVars
+      val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
+      val last = rows.size
+
+      if (last == 0) {
+        ""
+
+      } else if (last == 1) {
+        row = rows.iterator.next
+        jsonBranch0(sb0, row,
+          jsonBranch1(sb1, row,
+            jsonBranch2(sb2, row,
+              jsonBranch3(sb3, row,
+                jsonBranch4(sb4, row,
+                  jsonBranch5(sb5, row,
+                    jsonBranch6(sb6, row,
+                      jsonLeaf7(sb7, row)))))))).append("\n]").toString
+
+      } else {
+        rows.sort(this)
+        val it = rows.iterator
+        while (it.hasNext) {
+          i += 1
+          row = it.next
+          e0 = row.get(0).asInstanceOf[jLong]
+          e1 = row.get(1).asInstanceOf[jLong]
+          e2 = row.get(2).asInstanceOf[jLong]
+          e3 = row.get(3).asInstanceOf[jLong]
+          e4 = row.get(4).asInstanceOf[jLong]
+          e5 = row.get(5).asInstanceOf[jLong]
+          e6 = row.get(6).asInstanceOf[jLong]
+
+          if (subsequentRow) {
+            if (e0 != p0) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+              jsonBranch0(sb0, prevRow, sb1)
+            } else if (e1 != p1) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+              jsonBranch1(sb1, prevRow, sb2)
+            } else if (e2 != p2) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+              jsonBranch2(sb2, prevRow, sb3)
+            } else if (e3 != p3) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+              jsonBranch3(sb3, prevRow, sb4)
+            } else if (e4 != p4) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+              jsonBranch4(sb4, prevRow, sb5)
+            } else if (e5 != p5) {
+              jsonBranch6(sb6, prevRow, sb7)
+              jsonBranch5(sb5, prevRow, sb6)
+            } else if (e6 != p6) {
+              jsonBranch6(sb6, prevRow, sb7)
+            }
+            jsonLeaf7(sb7, row)
+            if (i == last) {
+              jsonBranch6(sb6, row, sb7)
+              jsonBranch5(sb5, row, sb6)
+              jsonBranch4(sb4, row, sb5)
+              jsonBranch3(sb3, row, sb4)
+              jsonBranch2(sb2, row, sb3)
+              jsonBranch1(sb1, row, sb2)
+              jsonBranch0(sb0, row, sb1)
+            }
+          } else {
+            jsonLeaf7(sb7, row)
+            subsequentRow = true
+          }
+
+          prevRow = row
+          p0 = e0
+          p1 = e1
+          p2 = e2
+          p3 = e3
+          p4 = e4
+          p5 = e5
+          p6 = e6
+        }
+        sb0.append("\n]").toString()
+      }
+    }
   }
 }

@@ -30,7 +30,7 @@ trait EntityOps {
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
     * @return
     */
-  implicit def long2Entity(id: Long)(implicit conn: Conn): Entity = Entity(conn.db.entity(id), conn, id.asInstanceOf[Object])
+  implicit final def long2Entity(id: Long)(implicit conn: Conn): Entity = Entity(conn.db.entity(id), conn, id.asInstanceOf[Object])
 
   /** Retract multiple entities with optional transaction meta data.
     * <br><br>

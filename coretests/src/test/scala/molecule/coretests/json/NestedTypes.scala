@@ -1,6 +1,6 @@
 package molecule.coretests.json
 
-import molecule.api._
+import molecule.api.out3._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -189,67 +189,67 @@ class NestedTypes extends CoreSpec {
 
     Ns.strMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.strMap": {"b":"B", "a":"A"}, "ns.refs1": [
+        |{"ns.strMap": {"b": "B", "a": "A"}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.intMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.intMap": {"b":2, "a":1}, "ns.refs1": [
+        |{"ns.intMap": {"b": 2, "a": 1}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.longMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.longMap": {"b":2, "a":1}, "ns.refs1": [
+        |{"ns.longMap": {"b": 2, "a": 1}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.floatMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.floatMap": {"b":2.0, "a":1.0}, "ns.refs1": [
+        |{"ns.floatMap": {"b": 2.0, "a": 1.0}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.doubleMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.doubleMap": {"b":2.0, "a":1.0}, "ns.refs1": [
+        |{"ns.doubleMap": {"b": 2.0, "a": 1.0}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.boolMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.boolMap": {"b":false, "a":true}, "ns.refs1": [
+        |{"ns.boolMap": {"b": false, "a": true}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.dateMap.Refs1.*(Ref1.int1).getJson ===
       s"""[
-         |{"ns.dateMap": {"b":"1970-01-01T01:00:02.000+01:00", "a":"1970-01-01T01:00:01.000+01:00"}, "ns.refs1": [
+         |{"ns.dateMap": {"b": "1970-01-01T01:00:02.000+01:00", "a": "1970-01-01T01:00:01.000+01:00"}, "ns.refs1": [
          |   {"ref1.int1": 1}]}
          |]""".stripMargin
 
     Ns.uuidMap.Refs1.*(Ref1.int1).getJson ===
       s"""[
-         |{"ns.uuidMap": {"a":"$uuid1"}, "ns.refs1": [
+         |{"ns.uuidMap": {"a": "$uuid1"}, "ns.refs1": [
          |   {"ref1.int1": 1}]}
          |]""".stripMargin
 
     Ns.uriMap.Refs1.*(Ref1.int1).getJson ===
       s"""[
-         |{"ns.uriMap": {"b":"$uri2", "a":"$uri1"}, "ns.refs1": [
+         |{"ns.uriMap": {"b": "$uri2", "a": "$uri1"}, "ns.refs1": [
          |   {"ref1.int1": 1}]}
          |]""".stripMargin
 
     Ns.bigIntMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.bigIntMap": {"b":2, "a":1}, "ns.refs1": [
+        |{"ns.bigIntMap": {"b": 2, "a": 1}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
 
     Ns.bigDecMap.Refs1.*(Ref1.int1).getJson ===
       """[
-        |{"ns.bigDecMap": {"b":2.0, "a":1.0}, "ns.refs1": [
+        |{"ns.bigDecMap": {"b": 2.0, "a": 1.0}, "ns.refs1": [
         |   {"ref1.int1": 1}]}
         |]""".stripMargin
   }
@@ -504,7 +504,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.int": 1, "ns.strMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.int": 1, "ns.strMap": {"a":"A", "b":"B"}, "ns.refs1": [
+        |{"ns.int": 1, "ns.strMap": {"a": "A", "b": "B"}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -512,7 +512,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.long": 2, "ns.intMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.long": 2, "ns.intMap": {"a":1, "b":2}, "ns.refs1": [
+        |{"ns.long": 2, "ns.intMap": {"a": 1, "b": 2}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -520,7 +520,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.int": 3, "ns.longMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.int": 3, "ns.longMap": {"a":1, "b":2}, "ns.refs1": [
+        |{"ns.int": 3, "ns.longMap": {"a": 1, "b": 2}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -528,7 +528,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.int": 4, "ns.floatMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.int": 4, "ns.floatMap": {"a":1.0, "b":2.0}, "ns.refs1": [
+        |{"ns.int": 4, "ns.floatMap": {"a": 1.0, "b": 2.0}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -536,7 +536,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.int": 5, "ns.doubleMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.int": 5, "ns.doubleMap": {"a":1.0, "b":2.0}, "ns.refs1": [
+        |{"ns.int": 5, "ns.doubleMap": {"a": 1.0, "b": 2.0}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -544,7 +544,7 @@ class NestedTypes extends CoreSpec {
       """[
         |{"ns.int": 6, "ns.boolMap": null, "ns.refs1": [
         |   {"ref1.int1": 1}]},
-        |{"ns.int": 6, "ns.boolMap": {"a":true, "b":false}, "ns.refs1": [
+        |{"ns.int": 6, "ns.boolMap": {"a": true, "b": false}, "ns.refs1": [
         |   {"ref1.int1": 2}]}
         |]""".stripMargin
 
@@ -552,7 +552,7 @@ class NestedTypes extends CoreSpec {
       s"""[
          |{"ns.int": 7, "ns.dateMap": null, "ns.refs1": [
          |   {"ref1.int1": 1}]},
-         |{"ns.int": 7, "ns.dateMap": {"a":"1970-01-01T01:00:01.000+01:00", "b":"1970-01-01T01:00:02.000+01:00"}, "ns.refs1": [
+         |{"ns.int": 7, "ns.dateMap": {"a": "1970-01-01T01:00:01.000+01:00", "b": "1970-01-01T01:00:02.000+01:00"}, "ns.refs1": [
          |   {"ref1.int1": 2}]}
          |]""".stripMargin
 
@@ -560,7 +560,7 @@ class NestedTypes extends CoreSpec {
       s"""[
          |{"ns.int": 8, "ns.uuidMap": null, "ns.refs1": [
          |   {"ref1.int1": 1}]},
-         |{"ns.int": 8, "ns.uuidMap": {"a":"$uuid1", "b":"$uuid2"}, "ns.refs1": [
+         |{"ns.int": 8, "ns.uuidMap": {"a": "$uuid1", "b": "$uuid2"}, "ns.refs1": [
          |   {"ref1.int1": 2}]}
          |]""".stripMargin
 
@@ -568,7 +568,7 @@ class NestedTypes extends CoreSpec {
       s"""[
          |{"ns.int": 9, "ns.uriMap": null, "ns.refs1": [
          |   {"ref1.int1": 1}]},
-         |{"ns.int": 9, "ns.uriMap": {"a":"$uri1", "b":"$uri2"}, "ns.refs1": [
+         |{"ns.int": 9, "ns.uriMap": {"a": "$uri1", "b": "$uri2"}, "ns.refs1": [
          |   {"ref1.int1": 2}]}
          |]""".stripMargin
 
@@ -576,7 +576,7 @@ class NestedTypes extends CoreSpec {
       s"""[
          |{"ns.int": 11, "ns.bigIntMap": null, "ns.refs1": [
          |   {"ref1.int1": 1}]},
-         |{"ns.int": 11, "ns.bigIntMap": {"a":$bigInt1, "b":$bigInt2}, "ns.refs1": [
+         |{"ns.int": 11, "ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}, "ns.refs1": [
          |   {"ref1.int1": 2}]}
          |]""".stripMargin
 
@@ -584,7 +584,7 @@ class NestedTypes extends CoreSpec {
       s"""[
          |{"ns.int": 12, "ns.bigDecMap": null, "ns.refs1": [
          |   {"ref1.int1": 1}]},
-         |{"ns.int": 12, "ns.bigDecMap": {"a":$bigDec1, "b":$bigDec2}, "ns.refs1": [
+         |{"ns.int": 12, "ns.bigDecMap": {"a": $bigDec1, "b": $bigDec2}, "ns.refs1": [
          |   {"ref1.int1": 2}]}
          |]""".stripMargin
   }

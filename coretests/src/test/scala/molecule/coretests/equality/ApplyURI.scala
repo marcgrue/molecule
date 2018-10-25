@@ -1,9 +1,9 @@
 package molecule.coretests.equality
 
 import java.net.URI
-import molecule.api._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.coretests.util.{CoreSetup, CoreSpec}
 
 class ApplyURI extends CoreSpec {
 

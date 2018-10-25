@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.api._
+import molecule.api.in1_out4._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.ops.exception.VerifyModelException

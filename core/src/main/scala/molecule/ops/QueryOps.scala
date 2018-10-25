@@ -9,7 +9,7 @@ import molecule.ops.exception.QueryOpsException
 import molecule.util.Helpers
 
 
-/** Query operations. */
+/** Query operations */
 object QueryOps extends Helpers {
 
   implicit class QueryOps(q: Query) {
@@ -271,6 +271,12 @@ object QueryOps extends Helpers {
       q.func(".toString", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
 
+    def castStr(tpe: String): String = tpe match {
+      case "Int"   => "Long"
+      case "Float" => "Double"
+      case other   => other
+    }
+
     def compareToMany[T](op: String, a: Atom, v: String, args: Seq[T]): Query =
       args.zipWithIndex.foldLeft(q) {
         case (q1, (arg: URI, i)) =>
@@ -291,9 +297,9 @@ object QueryOps extends Helpers {
             q.func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
               .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(w))
           case other    =>
-            q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(w))
+            q.func(".compareTo ^" + castStr(a.tpeS), Seq(Var(v), qv), ScalarBinding(w))
         }
-        case _              => q.func(".compareTo ^" + a.tpeS, Seq(Var(v), qv), ScalarBinding(w))
+        case _              => q.func(".compareTo ^" + castStr(a.tpeS), Seq(Var(v), qv), ScalarBinding(w))
       }
       q1.func(op, Seq(w, Val(0)))
     }

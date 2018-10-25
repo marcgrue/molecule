@@ -4,6 +4,7 @@ import java.net.URI
 import molecule.ast.query._
 import molecule.transform.exception.Query2StringException
 import molecule.util.Helpers
+import scala.language.implicitConversions
 
 
 /** Query to Datomic query string transformation.

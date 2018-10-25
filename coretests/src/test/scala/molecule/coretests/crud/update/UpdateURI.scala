@@ -1,8 +1,7 @@
 package molecule.coretests.crud.update
 
 import java.net.URI
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -124,12 +123,12 @@ class UpdateURI extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uris.replace(uri7 -> uri8, uri8 -> uri8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/uris`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uris`:" +
           "\n__ident__uri8")
 
       expectCompileError(
         """Ns(eid).uris.replace(Seq(uri7 -> uri8, uri8 -> uri8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/uris`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uris`:" +
           "\n__ident__uri8")
 
 

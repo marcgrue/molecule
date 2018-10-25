@@ -288,7 +288,6 @@ trait InputMolecule extends MoleculeBase {
             argss.map(args =>
               Rule(ruleName, Seq(e), args.zipWithIndex.map { case (arg, i) =>
                 Funct("fulltext", Seq(DS(), kw, Val(arg)), RelationBinding(List(e, Var(w + "_" + (i + 1)))))
-//                Funct("fulltext", Seq(DS(), kw, Val(arg)), RelationBinding(List(e, Var("_"))))
               })),
             Seq(
               DataClause(ImplDS, e, kw, Var(v_), Empty, NoBinding),

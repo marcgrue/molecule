@@ -1,10 +1,9 @@
 package molecule.examples.seattle
 import java.io.FileReader
 import datomic._
-import molecule.generic._
+import molecule.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.api._
-import scala.language.reflectiveCalls
+import molecule.generic._
 
 class SeattleTests extends SeattleSpec {
 
@@ -25,7 +24,7 @@ class SeattleTests extends SeattleSpec {
     // Get a community id
     val communityId: Long = Community.e.name_.get.head
 
-        // Use the community id to touch all the entity's attribute values
+    // Use the community id to touch all the entity's attribute values
     communityId.touch === Map(
       ":community/orgtype" -> ":community.orgtype/community",
       ":community/category" -> List("services", "for sale", "events"),
@@ -47,7 +46,7 @@ class SeattleTests extends SeattleSpec {
     communityId(":community/emptyOrBogusAttribute") === None
 
     // We can also use the entity id to query for an attribute value
-    Community(communityId).name.get.head === "Greenlake Community Wiki"
+    Community.apply(communityId).name.get.head === "Greenlake Community Wiki"
   }
 
 
@@ -403,7 +402,7 @@ class SeattleTests extends SeattleSpec {
     // We can also insert data in two steps:
 
     // 1. Define an "insert-molecule" (can be re-used!)
-    val insertCommunity = Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region insert
+    val insertCommunity = Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region.insert
 
     // 2. Apply data to the insert-molecule
     insertCommunity("BBB", "url B", "twitter", "personal", Set("some", "cat B"), "neighborhood B", "district B", "s").eids === List(

@@ -1,6 +1,6 @@
 package molecule.examples.mbrainz
 import datomic.Peer
-import molecule.api._
+import molecule.api.in1_out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec
@@ -67,27 +67,31 @@ class MBrainz extends MoleculeSpec {
 
     // Who collaborated with one of the Beatles?
     // Repeated attributes are translated to transitive lookups
-    Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.get === List(
-      ("John Lennon", "The Plastic Ono Band"),
-      ("George Harrison", "Bob Dylan"),
-      ("John Lennon", "Yoko Ono"),
-      ("George Harrison", "Ravi Shankar"),
-      ("Paul McCartney", "Linda McCartney"))
 
-    // Who directly collaborated with George Harrison,
-    Track.Artists.name_("George Harrison").name.get === List("Bob Dylan", "Ravi Shankar")
-    // .. or collaborated with one of his collaborators?
-    Track.Artists.name_("George Harrison").name_.name.get === List("Ali Akbar Khan")
-
-    // Parameterized input molecule for direct collaborators
-    val collaborators = m(Track.Artists.name_(?).name)
-
-    // George Harrison's collaborators
-    val collabs1 = collaborators("George Harrison").get.toSeq
-    collabs1 === List("Bob Dylan", "Ravi Shankar")
-
-    // George Harrison's collaborators collaborators (includes George...)
-    collaborators(collabs1).get === List("George Harrison", "Ali Akbar Khan")
+    // Todo: model as graph with bidirectional relationships
+    //
+    //    Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.get === List(
+    //      ("John Lennon", "The Plastic Ono Band"),
+    //      ("George Harrison", "Bob Dylan"),
+    //      ("John Lennon", "Yoko Ono"),
+    //      ("George Harrison", "Ravi Shankar"),
+    //      ("Paul McCartney", "Linda McCartney"))
+    //
+    //    // Who directly collaborated with George Harrison,
+    //    Track.Artists.name_("George Harrison").name.get === List("Bob Dylan", "Ravi Shankar")
+    //    // .. or collaborated with one of his collaborators?
+    //    Track.Artists.name_("George Harrison").name_.name.get === List("Ali Akbar Khan")
+    //
+    //    // Parameterized input molecule for direct collaborators
+    //    val collaborators = m(Track.Artists.name_(?).name)
+    //
+    //    // George Harrison's collaborators
+    //    val collabs1 = collaborators("George Harrison").get.toSeq
+    //    collabs1 === List("Bob Dylan", "Ravi Shankar")
+    //
+    //    // George Harrison's collaborators collaborators (includes George...)
+    //    collaborators(collabs1).get === List("George Harrison", "Ali Akbar Khan")
+    ok
   }
 
   "2-step querying" >> {
@@ -105,56 +109,4 @@ class MBrainz extends MoleculeSpec {
       ("Sensation", "Neon Rose")
     )
   }
-
-//  "Distinct" >> {
-//
-//    println(conn.q("""[:find (distinct ?sortName)
-//             | :with ?artist
-//             | :where [?artist :artist/name "Fire"]
-//             |        [?artist :artist/sortName ?sortName]]""".stripMargin))
-//
-//    println(conn.q("""[:find ?artist (distinct ?sortName)
-//             | :where [?artist :artist/name "Fire"]
-//             |        [?artist :artist/sortName ?sortName]]""".stripMargin))
-//
-//    Artist.e.name_("Fire").sortName.debugGet
-//    Artist.name_("Fire").sortName.debugGet
-//    Artist.name_("Fire").sortName(distinct).debugGet
-//
-//    ok
-//  }
-  //  "Transitive tests" >> {
-  //    "No Bonds" >> {
-  //      // Todo...
-  //      Artist.name.name.debug === 7
-  //
-  //      Artist.sortName.name.name.debug === 7
-  //      Artist.name.sortName.name.debug === 7
-  //      Artist.name.name.sortName.debug === 7
-  //    }
-  //
-  //    "One Bond" >> {
-  //      Track.Artists.name.name.debug === 7
-  //
-  //      Track.Artists.sortName.name.name.debug === 7
-  //      Track.Artists.name.sortName.name.debug === 7
-  //      Track.Artists.name.name.sortName.debug === 7
-  //    }
-  //
-  //    "Two Bond" >> {
-  //      Track.Artists.sortName.name._Track.Artists.name.debug === 7
-  //      Track.Artists.name.sortName._Track.Artists.name.debug === 7
-  //      Track.Artists.name._Track.Artists.sortName.name.debug === 7
-  //      Track.Artists.name._Track.Artists.name.sortName.debug === 7
-  //
-  //      Track.Artists.sortName.name._Track.Artists.name.debug === 7
-  //      Track.Artists.name.sortName._Track.Artists.name.debug === 7
-  //      Track.Artists.name._Track.Artists.sortName.name.debug === 7
-  //      Track.Artists.name._Track.Artists.name.sortName.debug === 7
-  //
-  //      //    Track.Artists.name.name.debug === 7
-  //
-  //      Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.debug === 7
-  //    }
-  //  }
 }

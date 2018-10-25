@@ -1,11 +1,12 @@
 package molecule.coretests.input2
 
 import java.net.URI
-import molecule.api._
+import molecule.api.in2_out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.InputMolecule_2_Exception
 import molecule.input.{InputMolecule_1, InputMolecule_2}
+import scala.reflect.ClassTag
 
 
 class ManyMany extends CoreSpec {
@@ -19,7 +20,7 @@ class ManyMany extends CoreSpec {
                               im2: InputMolecule_1.InputMolecule_1_01[I2, A],
                               inOut1: Seq[(I1, List[A])],
                               inOut2: Seq[(I2, List[A])]
-                             ) = {
+                             )(implicit ev: ClassTag[A]) = {
       println("------------------------")
       println(s"""$test   pairs tacit""")
       var i = 0
@@ -29,7 +30,6 @@ class ManyMany extends CoreSpec {
       } yield {
         try {
           i += 1
-          //          im.apply(in1, in2).debugGet
           im.apply(in1, in2).get === out1.intersect(out2)
         } catch {
           case e: Throwable =>
@@ -96,7 +96,7 @@ class ManyMany extends CoreSpec {
                                         im2: InputMolecule_1.InputMolecule_1_02[I2, A, C],
                                         inOut1: Seq[(I1, Seq[(A, B)])],
                                         inOut2: Seq[(I2, Seq[(A, C)])]
-                                       ) = {
+                                       )(implicit ev: ClassTag[(A, B, C)]) = {
       println("------------------------")
       println(s"""$test   pairs mandatory""")
       var i = 0

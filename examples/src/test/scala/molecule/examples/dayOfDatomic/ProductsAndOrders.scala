@@ -1,5 +1,8 @@
 package molecule.examples.dayOfDatomic
-import molecule.api._
+import molecule.api.out5._
+
+
+
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
 import molecule.util.MoleculeSpec
@@ -577,7 +580,7 @@ class ProductsAndOrders extends MoleculeSpec {
       .Authors.*(Person.name
     )).getJson ===
       """[
-        |{"lineItem.text": "in stock", "lineItem.comments": [
+        |{"lineItems.lineItem.text": "in stock", "lineItem.comments": [
         |   {"comment.text": "second", "comment.authors": [
         |      {"person.name": "Don Juan"}]},
         |   {"comment.text": "chance", "comment.authors": [

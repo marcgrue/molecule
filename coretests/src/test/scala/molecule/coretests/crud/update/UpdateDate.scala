@@ -1,8 +1,7 @@
 package molecule.coretests.crud.update
 
 import java.util.Date
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -123,12 +122,12 @@ class UpdateDate extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).dates.replace(date7 -> date8, date8 -> date8).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/dates`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/dates`:" +
           "\n__ident__date8")
 
       expectCompileError(
         """Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> date8)).update""",
-        "[Dsl2Model:apply (12)] Can't replace with duplicate values of attribute `:ns/dates`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/dates`:" +
           "\n__ident__date8")
 
 

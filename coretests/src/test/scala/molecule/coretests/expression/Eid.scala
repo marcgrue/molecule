@@ -1,11 +1,8 @@
 package molecule.coretests.expression
 
-import java.util.Date
-import datomic.Peer
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
 
 class Eid extends Base {
 

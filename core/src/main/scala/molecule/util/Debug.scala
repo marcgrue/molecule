@@ -103,7 +103,3 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
     }
   }
 }
-
-private[molecule] case class Trace() {
-  def apply(id: Int, msgs: Any*) {print(s"$id -> " + msgs.mkString("  ###  "))}
-}

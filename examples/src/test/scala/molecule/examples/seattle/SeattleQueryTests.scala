@@ -1,8 +1,7 @@
 package molecule.examples.seattle
-import molecule.api._
+import molecule.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
 import molecule.generic._
-
 import scala.language.reflectiveCalls
 
 

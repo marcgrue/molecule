@@ -1,6 +1,6 @@
 package molecule.coretests.json
 
-import molecule.api._
+import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 
@@ -62,8 +62,7 @@ class Attributes extends CoreSpec {
          |{"ns.uuid": "$uuid1"}
          |]""".stripMargin
 
-    Ns.uri.
-      getJson ===
+    Ns.uri.getJson ===
       s"""[
          |{"ns.uri": "$uri1"}
          |]""".stripMargin
@@ -169,57 +168,57 @@ class Attributes extends CoreSpec {
 
     Ns.strMap.getJson ===
       """[
-        |{"ns.strMap": {"b":"B", "a":"A"}}
+        |{"ns.strMap": {"b": "B", "a": "A"}}
         |]""".stripMargin
 
     Ns.intMap.getJson ===
       """[
-        |{"ns.intMap": {"b":2, "a":1}}
+        |{"ns.intMap": {"b": 2, "a": 1}}
         |]""".stripMargin
 
     Ns.longMap.getJson ===
       """[
-        |{"ns.longMap": {"b":2, "a":1}}
+        |{"ns.longMap": {"b": 2, "a": 1}}
         |]""".stripMargin
 
     Ns.floatMap.getJson ===
       """[
-        |{"ns.floatMap": {"b":2.0, "a":1.0}}
+        |{"ns.floatMap": {"b": 2.0, "a": 1.0}}
         |]""".stripMargin
 
     Ns.doubleMap.getJson ===
       """[
-        |{"ns.doubleMap": {"b":2.0, "a":1.0}}
+        |{"ns.doubleMap": {"b": 2.0, "a": 1.0}}
         |]""".stripMargin
 
     Ns.boolMap.getJson ===
       """[
-        |{"ns.boolMap": {"b":false, "a":true}}
+        |{"ns.boolMap": {"b": false, "a": true}}
         |]""".stripMargin
 
     Ns.dateMap.getJson ===
       s"""[
-         |{"ns.dateMap": {"b":"1970-01-01T01:00:02.000+01:00", "a":"1970-01-01T01:00:01.000+01:00"}}
+         |{"ns.dateMap": {"b": "1970-01-01T01:00:02.000+01:00", "a": "1970-01-01T01:00:01.000+01:00"}}
          |]""".stripMargin
 
     Ns.uuidMap.getJson ===
       s"""[
-         |{"ns.uuidMap": {"a":"$uuid1"}}
+         |{"ns.uuidMap": {"a": "$uuid1"}}
          |]""".stripMargin
 
     Ns.uriMap.getJson ===
       s"""[
-         |{"ns.uriMap": {"b":"$uri2", "a":"$uri1"}}
+         |{"ns.uriMap": {"b": "$uri2", "a": "$uri1"}}
          |]""".stripMargin
 
     Ns.bigIntMap.getJson ===
       """[
-        |{"ns.bigIntMap": {"b":2, "a":1}}
+        |{"ns.bigIntMap": {"b": 2, "a": 1}}
         |]""".stripMargin
 
     Ns.bigDecMap.getJson ===
       """[
-        |{"ns.bigDecMap": {"b":2.0, "a":1.0}}
+        |{"ns.bigDecMap": {"b": 2.0, "a": 1.0}}
         |]""".stripMargin
   }
 
@@ -422,67 +421,67 @@ class Attributes extends CoreSpec {
     Ns.int(1).strMap$.getJson ===
       """[
         |{"ns.int": 1, "ns.strMap": null},
-        |{"ns.int": 1, "ns.strMap": {"a":"A", "b":"B"}}
+        |{"ns.int": 1, "ns.strMap": {"a": "A", "b": "B"}}
         |]""".stripMargin
 
     Ns.long(2L).intMap$.getJson ===
       """[
         |{"ns.long": 2, "ns.intMap": null},
-        |{"ns.long": 2, "ns.intMap": {"a":1, "b":2}}
+        |{"ns.long": 2, "ns.intMap": {"a": 1, "b": 2}}
         |]""".stripMargin
 
     Ns.int(3).longMap$.getJson ===
       """[
         |{"ns.int": 3, "ns.longMap": null},
-        |{"ns.int": 3, "ns.longMap": {"a":1, "b":2}}
+        |{"ns.int": 3, "ns.longMap": {"a": 1, "b": 2}}
         |]""".stripMargin
 
     Ns.int(4).floatMap$.getJson ===
       """[
         |{"ns.int": 4, "ns.floatMap": null},
-        |{"ns.int": 4, "ns.floatMap": {"a":1.0, "b":2.0}}
+        |{"ns.int": 4, "ns.floatMap": {"a": 1.0, "b": 2.0}}
         |]""".stripMargin
 
     Ns.int(5).doubleMap$.getJson ===
       """[
         |{"ns.int": 5, "ns.doubleMap": null},
-        |{"ns.int": 5, "ns.doubleMap": {"a":1.0, "b":2.0}}
+        |{"ns.int": 5, "ns.doubleMap": {"a": 1.0, "b": 2.0}}
         |]""".stripMargin
 
     Ns.int(6).boolMap$.getJson ===
       """[
-        |{"ns.int": 6, "ns.boolMap": {"a":true, "b":false}},
+        |{"ns.int": 6, "ns.boolMap": {"a": true, "b": false}},
         |{"ns.int": 6, "ns.boolMap": null}
         |]""".stripMargin
 
     Ns.int(7).dateMap$.getJson ===
       s"""[
          |{"ns.int": 7, "ns.dateMap": null},
-         |{"ns.int": 7, "ns.dateMap": {"a":"1970-01-01T01:00:01.000+01:00", "b":"1970-01-01T01:00:02.000+01:00"}}
+         |{"ns.int": 7, "ns.dateMap": {"a": "1970-01-01T01:00:01.000+01:00", "b": "1970-01-01T01:00:02.000+01:00"}}
          |]""".stripMargin
 
     Ns.int(8).uuidMap$.getJson ===
       s"""[
          |{"ns.int": 8, "ns.uuidMap": null},
-         |{"ns.int": 8, "ns.uuidMap": {"a":"$uuid1", "b":"$uuid2"}}
+         |{"ns.int": 8, "ns.uuidMap": {"a": "$uuid1", "b": "$uuid2"}}
          |]""".stripMargin
 
     Ns.int(9).uriMap$.getJson ===
       s"""[
          |{"ns.int": 9, "ns.uriMap": null},
-         |{"ns.int": 9, "ns.uriMap": {"a":"$uri1", "b":"$uri2"}}
+         |{"ns.int": 9, "ns.uriMap": {"a": "$uri1", "b": "$uri2"}}
          |]""".stripMargin
 
     Ns.int(11).bigIntMap$.getJson ===
       s"""[
          |{"ns.int": 11, "ns.bigIntMap": null},
-         |{"ns.int": 11, "ns.bigIntMap": {"a":$bigInt1, "b":$bigInt2}}
+         |{"ns.int": 11, "ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}}
          |]""".stripMargin
 
     Ns.int(12).bigDecMap$.getJson ===
       s"""[
          |{"ns.int": 12, "ns.bigDecMap": null},
-         |{"ns.int": 12, "ns.bigDecMap": {"a":$bigDec1, "b":$bigDec2}}
+         |{"ns.int": 12, "ns.bigDecMap": {"a": $bigDec1, "b": $bigDec2}}
          |]""".stripMargin
   }
 }

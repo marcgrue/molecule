@@ -1,10 +1,6 @@
 package molecule.coretests.runtime
 
-import molecule.api._
-
-import java.net.URI
-import java.util.{Date, UUID}
-
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 

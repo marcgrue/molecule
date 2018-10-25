@@ -2,12 +2,12 @@ package molecule.util
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZoneId}
-import java.util.{Date, UUID}
+import java.util.{Date, TimeZone, UUID}
 import molecule.ast.query.format
 
 private[molecule] trait Helpers {
 
-  protected object mkDate {
+  final protected object mkDate {
     def apply(year: Int, month: Int = 1, day: Int = 1): Date = {
       val localDate = LocalDate.of(year, month, day)
       val instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant
@@ -15,31 +15,25 @@ private[molecule] trait Helpers {
     }
   }
 
-  // Todo: need advice on handling time zones!
-
-  protected def format(date: Date): String = {
+  final protected def format(date: Date): String = {
     val f = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
-    //    f.setTimeZone(TimeZone.getTimeZone("UTC"))
     f.format(date)
   }
+  final protected lazy val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  final protected def format2(date: Date): String = sdf.format(date)
+  final protected def date(s: String): Date = sdf.parse(s)
 
-  protected def format2(date: Date): String = {
-    val f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    //    f.setTimeZone(TimeZone.getTimeZone("UTC"))
-    f.format(date)
-  }
-
-  protected def f(a: Any) = a match {
+  final protected def f(a: Any) = a match {
     case date: Date => format2(date).replace("+", "\\\\+")
     case other      => other
   }
-  protected def f2(a: Any) = a match {
+  final protected def f2(a: Any) = a match {
     case date: Date => format2(date)
     case other      => other
   }
 
 
-  protected def cast(value: Any): String = value match {
+  final protected def cast(value: Any): String = value match {
     case (a, b)     => s"(${cast(a)}, ${cast(b)})"
     case v: Long    => v + "L"
     case v: Float   => v + "f"
@@ -49,15 +43,16 @@ private[molecule] trait Helpers {
     case v: URI     => "\"" + v + "\""
     case v          => v.toString
   }
-  protected def o(opt: Option[Any]): String = if (opt.isDefined) s"""Some(${cast(opt.get)})""" else "None"
-  protected def seq[T](values: Seq[T]) = values.map {
+  final protected def o(opt: Option[Any]): String = if (opt.isDefined) s"""Some(${cast(opt.get)})""" else "None"
+  final protected def seq[T](values: Seq[T]) = values.map {
     case set: Set[_] => set.map(cast).mkString("Set(", ", ", ")")
     case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
+    case (a, b)      => s"${cast(a)} -> ${cast(b)}"
     case v           => cast(v)
   }.mkString("Seq(", ", ", ")")
 
 
-  protected def tupleToSeq(arg: Any) = arg match {
+  final protected def tupleToSeq(arg: Any) = arg match {
     case t: (_, _)                                                             => Seq(t._1, t._2)
     case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
     case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)
@@ -81,5 +76,28 @@ private[molecule] trait Helpers {
     case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21, t._22)
     case l: Seq[_]                                                             => l
     case a                                                                     => Seq(a)
+  }
+
+
+  private var time0 = System.currentTimeMillis()
+  private val times = collection.mutable.Map.empty[Int, Long]
+  protected final def time(n: Int, prev: Int = 0) = {
+    if (n < 1 || prev < 0)
+      throw new IllegalArgumentException(s"Identifiers have to be positive numbers")
+
+    if (times.nonEmpty && n <= times.keys.max)
+      throw new IllegalArgumentException(s"Identifier have to be incremental. `$n` is smaller than or equal to previous `${times.keys.max}`")
+
+    if (times.keys.toSeq.contains(n))
+      throw new IllegalArgumentException(s"Can't use same time identifier `$n` multiple times")
+
+    val time1 = if (prev > 0) times(prev) else time0
+    val time2 = System.currentTimeMillis()
+    val elapsed = time2 - time1
+    times += n -> time2
+    val formatter = new java.text.SimpleDateFormat("HH:mm:ss.SSS", new java.util.Locale("en", "UK"))
+    formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
+    println(s"TIME $n: " + formatter.format(new java.util.Date(elapsed)))
+    time0 = System.currentTimeMillis()
   }
 }

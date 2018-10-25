@@ -8,9 +8,7 @@ import molecule.transform.Model2Transaction
 import molecule.util.{Debug, Helpers}
 
 
-/** Split big and compile-time heavy molecule inserts into composite inserts with smaller sub-molecules/tuples.
-  * <br><br>
-  * Molecules with more than 10 attributes are good candidates to split up in order to keep compile time fast.
+/** Insert methods to create composite entities containing multiple sub-molecules/tuples.
   *
   * == Insert composite data ==
   * {{{
@@ -42,8 +40,7 @@ import molecule.util.{Debug, Helpers}
   *
   * == Debug a composite insert ==
   *
-  * Without affecting the database, a composite insert can be debugged by adding a 'D' to
-  * your composite insert method and see the produced output:
+  * Without affecting the database, a composite insert can be debugged with `debugInsert` to see the produced output:
   * {{{
   *   debugInsert(
   *     Article.name.author, Tag.name.weight
@@ -96,9 +93,9 @@ import molecule.util.{Debug, Helpers}
   *
   * The two first sections are internal Molecule representations.
   * <br><br>
-  * The third section shows the transactional data sent to Datomic, in this case two rows of data and one row of transaction data.
+  * The third section shows the transactional data sent to Datomic (except the line indexing numbers in the
+  * left column) - in this case two rows of data and one row of transaction data.
   *
-  * @note For faster compilation less than 10 attributes per sub-molecule is recommended.
   * @see Manual: [[http://www.scalamolecule.org/manual/crud/composite-insert/ composite inserts]]
   *      | [[http://www.scalamolecule.org/manual/relationships/composites/ composites]]
   * @see Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/Composite.scala#L1 composite inserts]]

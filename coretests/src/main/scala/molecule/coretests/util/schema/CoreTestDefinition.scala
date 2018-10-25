@@ -1,8 +1,7 @@
 package molecule.coretests.util.schema
 import molecule.schema.definition._
 
-@InOut(3, 15)
-//@InOut(3, 8)
+@InOut(3, 22)
 object CoreTestDefinition {
 
   trait Ns {
@@ -22,7 +21,6 @@ object CoreTestDefinition {
     val parent  = one[Ns]
     val ref1    = one[Ref1]
     val refSub1 = one[Ref1].isComponent
-//    val oneNs   = oneBi[Ns]
 
     val strs     = manyString.fulltextSearch
     val ints     = manyInt
@@ -40,7 +38,6 @@ object CoreTestDefinition {
     val parents  = many[Ns]
     val refs1    = many[Ref1]
     val refsSub1 = many[Ref1].isComponent
-//    val manyNs   = manyBi[Ns]
 
     val strMap    = mapString.fulltextSearch
     val intMap    = mapInt

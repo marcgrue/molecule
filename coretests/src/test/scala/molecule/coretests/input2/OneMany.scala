@@ -1,6 +1,6 @@
 package molecule.coretests.input2
 
-import molecule.api._
+import molecule.api.in2_out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.input.exception.{InputMoleculeException, InputMolecule_2_Exception}

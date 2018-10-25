@@ -1,6 +1,6 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -41,14 +41,14 @@ class UpdateMapDouble extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).doubleMap.assert("str1" -> 1.0, "str1" -> 2.0).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       // Seq
       expectCompileError(
         """Ns(eid).doubleMap.assert(Seq("str1" -> 1.0, "str1" -> 2.0)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -87,13 +87,13 @@ class UpdateMapDouble extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).doubleMap.replace("str1" -> 1.0, "str1" -> 2.0).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       expectCompileError(
         """Ns(eid).doubleMap.replace(Seq("str1" -> 1.0, "str1" -> 2.0)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -208,14 +208,14 @@ class UpdateMapDouble extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).doubleMap.assert(str1 -> double1, str1 -> double2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\n__ident__str1 -> __ident__double1" +
           "\n__ident__str1 -> __ident__double2")
 
       // Seq
       expectCompileError(
         """Ns(eid).doubleMap.assert(Seq(str1 -> double1, str1 -> double2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\n__ident__str1 -> __ident__double1" +
           "\n__ident__str1 -> __ident__double2")
 
@@ -271,13 +271,13 @@ class UpdateMapDouble extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).doubleMap.replace(str1 -> double1, str1 -> double2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\n__ident__str1 -> __ident__double1" +
           "\n__ident__str1 -> __ident__double2")
 
       expectCompileError(
         """Ns(eid).doubleMap.replace(Seq(str1 -> double1, str1 -> double2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/doubleMap`:" +
           "\n__ident__str1 -> __ident__double1" +
           "\n__ident__str1 -> __ident__double2")
     }

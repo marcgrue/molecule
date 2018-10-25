@@ -34,7 +34,7 @@ class Conn(datConn: datomicConn) {
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
   private var _adhocDb: Option[TempDb] = None
-  private[molecule] def usingTempDb(tempDb: TempDb) = {
+  private[molecule] def usingTempDb(tempDb: TempDb): Conn = {
     _adhocDb = Some(tempDb)
     this
   }
@@ -47,7 +47,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param db
     */
-  def testDb(db: Database) {
+  def testDb(db: Database): Unit = {
     _testDb = Some(db)
   }
 
@@ -55,7 +55,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param t Long
     */
-  def testDbAsOf(t: Long) {
+  def testDbAsOf(t: Long): Unit = {
     _testDb = Some(datConn.db.asOf(t))
   }
 
@@ -63,7 +63,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param d Date
     */
-  def testDbAsOf(d: Date) {
+  def testDbAsOf(d: Date): Unit = {
     _testDb = Some(datConn.db.asOf(d))
   }
 
@@ -71,12 +71,12 @@ class Conn(datConn: datomicConn) {
     *
     * @param txR Transaction report
     */
-  def testDbAsOf(txR: TxReport) {
+  def testDbAsOf(txR: TxReport): Unit = {
     _testDb = Some(datConn.db.asOf(txR.t))
   }
 
   /** Use test database as of now. */
-  def testDbAsOfNow {
+  def testDbAsOfNow: Unit = {
     _testDb = Some(datConn.db)
   }
 
@@ -84,7 +84,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param t Long
     */
-  def testDbSince(t: Long) {
+  def testDbSince(t: Long): Unit = {
     _testDb = Some(datConn.db.since(t))
   }
 
@@ -92,7 +92,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param d Date
     */
-  def testDbSince(d: Date) {
+  def testDbSince(d: Date): Unit = {
     _testDb = Some(datConn.db.since(d))
   }
 
@@ -100,7 +100,7 @@ class Conn(datConn: datomicConn) {
     *
     * @param txR Transaction report
     */
-  def testDbSince(txR: TxReport) {
+  def testDbSince(txR: TxReport): Unit = {
     _testDb = Some(datConn.db.since(txR.t))
   }
 
@@ -129,13 +129,14 @@ class Conn(datConn: datomicConn) {
     *
     * @param txData List of List of transaction [[molecule.ast.transaction.Statement Statement]]'s
     */
-  def testDbWith(txData: Seq[Seq[Statement]]*) {
-    val txDataJava = txData.flatten.flatten.map(_.toJava).asJava
+  def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
+    //    val txDataJava = txData.flatten.flatten.map(_.toJava).asJava
+    val txDataJava: jList[jList[_]] = seqAsJavaListConverter(txData.flatten.flatten.map(_.toJava)).asJava
     _testDb = Some(datConn.db.`with`(txDataJava).get(datomicConn.DB_AFTER).asInstanceOf[Database])
   }
 
   /** Use test database with temporary raw Java transaction data. */
-  def testDbWith(txDataJava: jList[jList[AnyRef]]) {
+  def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = {
     _testDb = Some(datConn.db.`with`(txDataJava).get(datomicConn.DB_AFTER).asInstanceOf[Database])
   }
 
@@ -144,7 +145,7 @@ class Conn(datConn: datomicConn) {
    * */
 
   /** Get out of test mode and back to live db. */
-  def useLiveDb {
+  def useLiveDb: Unit = {
     _testDb = None
   }
 
@@ -281,7 +282,10 @@ class Conn(datConn: datomicConn) {
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
     */
-  def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] = qRaw(db, query, inputs).asScala.toList.map(_.asScala.toList)
+  def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
+    collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList.map(asScalaBufferConverter(_).asScala.toList)
+
+
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.
@@ -353,8 +357,7 @@ class Conn(datConn: datomicConn) {
   def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] = Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*)
 
 
-  // Raw query used by macros
-  /** Query Datomic with Model and Query and get raw Java data.
+  /** Query Datomic with Model and Query to get raw Java data.
     * <br><br>
     * Main query method that Molecule macros use.
     *
@@ -391,7 +394,7 @@ class Conn(datConn: datomicConn) {
     }
 
     val first = if (q.i.rules.isEmpty) Seq(dbUsed) else Seq(dbUsed, rules)
-    val allInputs: Seq[AnyRef] = first ++ q.inputs
+    val allInputs: Seq[AnyRef] = first ++ QueryOps(q).inputs
     try {
       blocking {
         Peer.q(q.toMap, allInputs: _*)

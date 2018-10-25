@@ -1,5 +1,5 @@
 package molecule.coretests.transaction
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.util.expectCompileError
@@ -93,18 +93,18 @@ class TransactionData extends Specification {
   "Optional tx data not allowed" in new CoreSetup {
     expectCompileError(
       """m(Ns.int$.tx.str)""",
-      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`tx`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`tx`).")
 
     expectCompileError(
       """m(Ns.int$.t.str)""",
-      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`t`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`t`).")
 
     expectCompileError(
       """m(Ns.int$.txInstant.str)""",
-      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`txInstant`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`txInstant`).")
 
     expectCompileError(
       """m(Ns.int$.op.str)""",
-      "[Dsl2Model:dslStructure] Optional attributes (`int$`) can't be followed by generic attributes (`op`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`op`).")
   }
 }

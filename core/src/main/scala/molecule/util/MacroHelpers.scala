@@ -1,52 +1,43 @@
 package molecule.util
 
 import molecule.ast.model._
+import molecule.exceptions.MoleculeCompileException
+import scala.reflect.macros.blackbox
+import scala.util.matching
 
-import scala.reflect.macros.whitebox.Context
-
-private[molecule] trait MacroHelpers[Ctx <: Context] {
-  val c: Ctx
+private[molecule] trait MacroHelpers {
+  val c: blackbox.Context
   import c.universe._
 
   type E = Expr[_]
   type W[T] = c.WeakTypeTag[T]
   type PF[A, B] = PartialFunction[A, B]
 
-  def expr(tree: Tree) = {
-    val typeCheckedTree = c.typecheck(tree.duplicate)
-    c.Expr(typeCheckedTree)(c.WeakTypeTag(typeCheckedTree.tpe))
+  def expr(tree: Tree): c.Expr[Nothing] = {
+    c.Expr(tree)(c.WeakTypeTag(tree.tpe))
   }
 
   implicit class TreeHelper(tree: Tree) {
     def raw: String = showRaw(tree)
   }
 
-  def abort(t: Any, i: Int = 0) = {
-    val j = if (i > 0) s"($i) " else ""
-    c.abort(c.enclosingPosition, j + t.toString.trim)
-  }
-  def warn(t: Any, i: Int = 0) = {
-    val j = if (i > 0) s"($i) " else ""
-    c.warning(c.enclosingPosition, j + t.toString.trim)
-  }
-
   def abortTree(tree: Tree, msg: String, debug: Boolean = true) = {
-    val e = Thread.currentThread.getStackTrace.tail.find(mth => mth.getMethodName != "abortTree").getOrElse {
-      abort("[MacroHelpers:abortTree] Couldn't find method where `abortTree` was called!")
+    val e: StackTraceElement = Thread.currentThread.getStackTrace.tail.find(mth => mth.getMethodName != "abortTree").getOrElse {
+      throw new MoleculeCompileException("[MacroHelpers:abortTree] Couldn't find method where `abortTree` was called!")
     }
-    val tr = s"${e.getClassName}   ${e.getMethodName}   line ${e.getLineNumber}"
-    val stack = if (debug) Seq("----------", tree.raw, "----------", tr, "----------") ++ Thread.currentThread.getStackTrace mkString "\n" else ""
-    abort(s"$msg:\n$tree \n$stack")
+    val tr: String = s"${e.getClassName}   ${e.getMethodName}   line ${e.getLineNumber}"
+    val stack: String = if (debug) Seq("----------", tree.raw, "----------", tr, "----------") ++ Thread.currentThread.getStackTrace mkString "\n" else ""
+    throw new MoleculeCompileException(s"$msg:\n$tree \n$stack")
   }
 
   implicit class Regex(sc: StringContext) {
-    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+    def r: matching.Regex = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
   }
 
   protected case class DebugMacro(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false) {
 
     def apply(id: Int, params: Any*): Unit = {
-      val stackTrace = if (showStackTrace) Thread.currentThread.getStackTrace mkString "\n" else ""
+      val stackTrace: String = if (showStackTrace) Thread.currentThread.getStackTrace mkString "\n" else ""
 
       if (id >= threshold && id <= max) {
 

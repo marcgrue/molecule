@@ -10,7 +10,7 @@ package molecule
   * <br><br>
   * Input molecules can await 1, 2 or 3 inputs and are constructed by applying the [[molecule.expression.AttrExpressions.? ?]] marker
   * to attributes. If one marker is applied, we get a [[molecule.input.InputMolecule_1 InputMolecule_1]], 2 inputs creates
-  * an [[molecule.input.InputMolecule_1 InputMolecule_3]] and 3 an [[molecule.input.InputMolecule_3 InputMolecule_3]].
+  * an [[molecule.input.InputMolecule_2 InputMolecule_2]] and 3 an [[molecule.input.InputMolecule_3 InputMolecule_3]].
   * <br><br>
   * The three input molecule interfaces come in arity-versions corresponding to the number of non-?-marked attributes
   * in the input molecule. Let's see a simple example:
@@ -33,6 +33,4 @@ package molecule
   * }}}
   *
   */
-package object input {
-
-}
+package object input

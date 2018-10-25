@@ -1,6 +1,6 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -41,14 +41,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert("str1" -> 1f, "str1" -> 2f).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -87,13 +87,13 @@ class UpdateMapFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floatMap.replace("str1" -> 1f, "str1" -> 2f).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       expectCompileError(
         """Ns(eid).floatMap.replace(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -208,14 +208,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert(str1 -> float1, str1 -> float2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq(str1 -> float1, str1 -> float2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
@@ -272,13 +272,13 @@ class UpdateMapFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floatMap.replace(str1 -> float1, str1 -> float2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
       expectCompileError(
         """Ns(eid).floatMap.replace(Seq(str1 -> float1, str1 -> float2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
     }

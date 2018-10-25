@@ -1,7 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.api._
-
+import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
 
 class Keyed extends Base {
@@ -13,7 +12,7 @@ class Keyed extends Base {
 
 
   "Key only" in new Setup {
-    Ns.strMapK("fr"). get === List("Bonjour")
+    Ns.strMapK("fr").get === List("Bonjour")
     Ns.intMapK("fr").get === List(20)
     Ns.longMapK("fr").get === List(20L)
     Ns.floatMapK("fr").get === List(20.0f)
@@ -114,9 +113,9 @@ class Keyed extends Base {
 
 
     Ns.int.intMapK("en|da")(30).get === List(
-      (4, 30L),
-      (3, 30L),
-      (1, 30L)
+      (4, 30),
+      (3, 30),
+      (1, 30)
     )
     Ns.int.intMapK_("en|da")(30).get === List(1, 3, 4)
 
@@ -124,7 +123,7 @@ class Keyed extends Base {
     Ns.int.dateMapK("en|da")(date3).get === List(
       (4, date3),
       (3, date3),
-      (1, date3)
+      (1, date3),
     )
     Ns.int.dateMapK_("en|da")(date3).get === List(1, 3, 4)
   }
@@ -160,7 +159,7 @@ class Keyed extends Base {
       (2, date1),
       (4, date3),
       (3, date3),
-      (1, date3)
+      (1, date3),
     )
     Ns.int.dateMapK("en|da")(date1 or date3).get === en_da_date1_date3
     Ns.int.dateMapK_("en|da")(date1 or date3).get === List(1, 2, 3, 4)
@@ -207,20 +206,20 @@ class Keyed extends Base {
     Ns.int.dateMapK("en|da").>(date2).get === List(
       (4, date3),
       (3, date3),
-      (1, date3)
+      (1, date3),
     )
     Ns.int.dateMapK("en|da").>=(date2).get === List(
       (4, date3),
       (3, date3),
-      (1, date3)
+      (1, date3),
     )
     Ns.int.dateMapK("en|da").<=(date2).get === List(
       (1, date1),
-      (2, date1)
+      (2, date1),
     )
     Ns.int.dateMapK("en|da").<(date2).get === List(
       (1, date1),
-      (2, date1)
+      (2, date1),
     )
 
     Ns.int.dateMapK_("en|da").>(date2).get === List(1, 3, 4)

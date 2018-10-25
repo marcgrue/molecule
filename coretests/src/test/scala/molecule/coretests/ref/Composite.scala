@@ -1,7 +1,7 @@
 package molecule.coretests.ref
 
 import molecule.action.exception.CompositeException
-import molecule.api._
+import molecule.api.in3_out22._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -314,133 +314,103 @@ class Composite extends CoreSpec {
   }
 
 
-  "Splitting high-arity data" in new CoreSetup {
+  "Arity 22+" in new CoreSetup {
 
-    // Compilation times of molecules increase dramatically after about 13-16 attributes length. Hopefully
-    // this will get better with faster Scala compilation and hardware over time. We can find ourselves in
-    // need of inserting a greater chunk of data and transaction meta data that would normally require a
-    // long molecule like this arity-22 molecule:
-    //
-    //    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums insert List(
-    //      (str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1, 11L, 12L, strs1, ints1, longs1, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1),
-    //      (str2, int2, long2, float2, double2, bool2, date2, uuid2, uri2, enum2, 10L, 20L, strs2, ints2, longs2, floats2, doubles2, bools2, dates2, uuids2, uris2, enums2)
-    //    )
-    //
-    // This compile-time checks but is commented out on purpose since it would take too long to compile!
-    //
-    // In special cases where we need to work with larger high-arity entities we can split the molecule
-    // into a composite molecule containing any number of sub-molecules matching sub-tuples of our base data
-
-
-    // Test reference base data
-    val entity1data = List(
-      ":db/id" -> 17592186045445L,
-      ":ns/bool" -> true,
-      ":ns/bools" -> List(true),
-      ":ns/date" -> date1,
-      ":ns/dates" -> List(date2, date3),
-      ":ns/double" -> 1.0,
-      ":ns/doubles" -> List(2.0, 3.0),
-      ":ns/enum" -> ":ns.enum/enum1",
-      ":ns/enums" -> List(":ns.enums/enum3", ":ns.enums/enum2"),
-      ":ns/float" -> 1.0,
-      ":ns/floats" -> List(2.0, 3.0),
-      ":ns/int" -> 1,
-      ":ns/ints" -> List(3, 2),
-      ":ns/long" -> 1,
-      ":ns/longs" -> List(3, 2),
-      ":ns/ref1" -> ":db.install/partition",
-      ":ns/refSub1" -> ":db.install/valueType",
-      ":ns/str" -> "a",
-      ":ns/strs" -> List("b", "c"),
-      ":ns/uri" -> uri1,
-      ":ns/uris" -> List(uri2, uri3),
-      ":ns/uuid" -> uuid1,
-      ":ns/uuids" -> List(uuid2)
+    // A single molecule can have up to 22 attributes
+    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums insert List(
+      (str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1, 11L, 12L, strs1, ints1, longs1, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1),
+      (str2, int2, long2, float2, double2, bool2, date2, uuid2, uri2, enum2, 10L, 20L, strs2, ints2, longs2, floats2, doubles2, bools2, dates2, uuids2, uris2, enums2)
     )
 
-    "Split into 2" in new CoreSetup {
+    Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums.get === List(
+      (str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1, 11L, 12L, strs1, ints1, longs1, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1),
+      (str2, int2, long2, float2, double2, bool2, date2, uuid2, uri2, enum2, 10L, 20L, strs2, ints2, longs2, floats2, doubles2, bools2, dates2, uuids2, uris2, enums2)
+    )
 
-      // Inserting high-arity data as a composite
-      val List(e1, e2) = insert(
-        // 2 sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats,
-        Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Two rows with tuples of 2 tuples that type-safely match the 2 molecules above!
-        Seq(
-          (
-            (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
-            (1, Set(2, 3), 1L, Set(2L, 3L), 11L, 12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
-          ),
-          (
-            (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f)),
-            (4, Set(5, 6), 4L, Set(5L, 6L), 21L, 22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-          )
-        )
-      )().eids
-
-      // First entity has all 22 values
-      e1.touchList === entity1data
-
-      // Similarly we can retrieve data with a composite molecule
-      m(Ns.bool.bools.date.dates.double.doubles.enum.enums.float.floats ~ Ns.int.ints.long.longs.ref1.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
+    // Molecules needing more than 22 attributes can be composed as composites. Here we compose a composite molecule with 22 + 9 = 31 attributes in total:
+    insert(
+      Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1.refSub1.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums,
+      Ref1.str1.int1.enum1.ref2.refSub2.strs1.ints1.refs2.refsSub2
+    )(
+      List(
         (
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6"), 4f, Set(5f, 6f)),
-          (4, Set(5, 6), 4L, Set(5L, 6L), 21L, 22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        ),
-        (
-          (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3"), 1f, Set(2f, 3f)),
-          (1, Set(2, 3), 1L, Set(2L, 3L), 11L, 12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+          (str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1, long3, long4, strs1, ints1, longs0, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1),
+          (str2, int2, enum11, long5, long6, strs2, ints2, longs1, longs2)
         )
       )
-    }
+    )()
+
+    // Retrieving composite data as Lists of tuples of two sub tuples, first of arity 22, and second of arity 9
+    m(Ns.str.int.long.float.double.bool.date.uuid.uri.enum.ref1
+      .refSub1.strs.ints.longs.floats.doubles.bools.dates.uuids.uris.enums ~
+      Ref1.str1.int1.enum1.ref2.refSub2.strs1.ints1.refs2.refsSub2).get === List(
+      (
+        (str1, int1, long1, float1, double1, bool1, date1, uuid1, uri1, enum1, long3, long4, strs1, ints1, longs0, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1),
+        (str2, int2, enum11, long5, long6, strs2, ints2, longs1, longs2)
+      )
+    )
+  }
 
 
-    "Split into 3" in new CoreSetup {
+  "Split into 3" in new CoreSetup {
 
-
-      val List(e1, e2) = insert(
-        // 3 sub-molecules
-        Ns.bool.bools.date.dates.double.doubles.enum.enums,
-        Ns.float.floats.int.ints.long.longs.ref1,
-        Ns.refSub1.str.strs.uri.uris.uuid.uuids
-      )(
-        // Two rows with tuples of 3 sub-tuples that type-safely match the 3 molecules above
-        Seq(
-          (
-            (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-            (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
-            (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
-          ),
-          (
-            (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
-            (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
-            (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-          )
-        )
-      )().eids
-
-      // First entity has all 22 values
-      e1.touchList === entity1data
-
-      m(Ns.bool.bools.date.dates.double.doubles.enum.enums ~ Ns.float.floats.int.ints.long.longs.ref1 ~ Ns.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
-        (
-          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
-          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
-          (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
-        ),
+    // Insert composite data with 3 sub-molecules
+    insert(
+      // 3 sub-molecules
+      Ns.bool.bools.date.dates.double.doubles.enum.enums,
+      Ns.float.floats.int.ints.long.longs.ref1,
+      Ns.refSub1.str.strs.uri.uris.uuid.uuids
+    )(
+      // Two rows with tuples of 3 sub-tuples that type-safely match the 3 sub-molecules above
+      Seq(
         (
           (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
           (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
           (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+        ),
+        (
+          (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
+          (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
+          (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
         )
       )
-    }
+    )().eids
 
-    // Etc... We can make composites of up to 22 molecules with each having up to 22 attributes
-    // adding up to a whopping arity-484 attribute composite!
+    // Retrieve composite data with the same 3 sub-molecules
+    m(Ns.bool.bools.date.dates.double.doubles.enum.enums ~
+      Ns.float.floats.int.ints.long.longs.ref1 ~
+      Ns.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
+      (
+        (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
+        (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), 21L),
+        (22L, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+      ),
+      (
+        (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+        (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), 11L),
+        (12L, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+      )
+    )
+
+    // Subsets of the composite data can be retrieved too
+    m(Ns.bool.bools.date.dates ~
+      Ns.float.floats.int ~
+      Ns.refSub1.str.strs).get === Seq(
+      (
+        (false, Set(false), date4, Set(date5, date6)),
+        (4f, Set(5f, 6f), 4),
+        (22L, "d", Set("e", "f"))
+      ),
+      (
+        (true, Set(true), date1, Set(date2, date3)),
+        (1f, Set(2f, 3f), 1),
+        (12L, "a", Set("b", "c"))
+      )
+    )
   }
+
+  // Etc... We can make composites of up to 22 molecules with each having up to 22 attributes
+  // adding up to a whopping arity-484 attribute composite!
 
 
   "References" >> {
@@ -700,7 +670,7 @@ class Composite extends CoreSpec {
       // Fetching composites with nested data not yet supported
       expectCompileError(
         "m(Ref2.int2.str2 ~ Ns.str.Refs1.*(Ref1.int1))",
-        "[Dsl2Model:apply (6)] Nested molecules in composites not yet implemented (todo)"
+        "molecule.transform.exception.Dsl2ModelException: Nested molecules in composites are not implemented"
       )
 
       // We can though fetch the nested data separately - although that wouldn't take the

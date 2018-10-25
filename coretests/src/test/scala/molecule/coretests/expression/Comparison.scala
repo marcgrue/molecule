@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 
 class Comparison extends Base {

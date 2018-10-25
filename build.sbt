@@ -1,12 +1,20 @@
-import sbtmolecule.MoleculeBoilerplate
+
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.14.0",
-  scalaVersion := "2.12.6",
+  version := "0.15.0",
+  scalaVersion := "2.12.7",
   scalacOptions := Seq(
     "-feature",
     "-language:implicitConversions",
-    "-Yrangepos"
+    "-deprecation",
+//    "-Yrangepos",
+//    "-Ystatistics",
+//    "-Ymacro-debug-lite",
+//    "-Xprint",
+//    "-Ymacro-debug-verbose",
+//    "-Yshow-trees-stringified",
+//    "-Yshow-trees"
+//    "-Yquasiquote-debug"
 //    ,"-Ydebug"
   ),
   resolvers ++= Seq(
@@ -52,13 +60,15 @@ lazy val moleculeCoretests = project.in(file("coretests"))
     moduleName := "molecule-coretests",
     moleculeSchemas := Seq(
       "molecule/coretests/bidirectionals",
+      "molecule/coretests/nested",
       "molecule/coretests/schemaDef",
       "molecule/coretests/util"
     )
   )
-//  .settings(Seq(definitionDirsSeparate(
-////  "molecule/coretests/bidirectionals",
-////  "molecule/coretests/schemaDef",
+//  .settings(Seq(definitionDirs(false,
+//  "molecule/coretests/bidirectionals",
+//  "molecule/coretests/nested",
+//  "molecule/coretests/schemaDef",
 //  "molecule/coretests/util"
 //)))
 
@@ -76,22 +86,19 @@ lazy val moleculeExamples = project.in(file("examples"))
       "molecule/examples/seattle"
     )
   )
-//  .settings(Seq(definitionDirsSeparate(
+//  .settings(Seq(definitionDirs(true,
 //  "molecule/examples/dayOfDatomic",
 //  "molecule/examples/gremlin",
 //  "molecule/examples/mbrainz",
 //  "molecule/examples/seattle"
 //)))
 
-
-//def definitionDirsSeparate(domainDirs: String*) = definitionDirs0(true, domainDirs: _*)
-//def definitionDirs(domainDirs: String*) = definitionDirs0(false, domainDirs: _*)
-//def definitionDirs0(separateInFiles: Boolean, domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {
+//def definitionDirs(docs: Boolean, domainDirs: String*): Def.Setting[Seq[Task[Seq[File]]]] = sourceGenerators in Compile += Def.task[Seq[File]] {
 //  val codeDir = (scalaSource in Compile).value
 //  val sourceDir = (sourceManaged in Compile).value
 //
 //  // generate source files
-//  val sourceFiles = MoleculeBoilerplate(codeDir, sourceDir, domainDirs.toSeq, separateInFiles)
+//  val sourceFiles = FileBuilder(codeDir, sourceDir, domainDirs.toSeq, docs)
 //
 //  // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
 //  val cache = FileFunction.cached(

@@ -1,6 +1,6 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -41,14 +41,14 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
@@ -105,13 +105,13 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
     }

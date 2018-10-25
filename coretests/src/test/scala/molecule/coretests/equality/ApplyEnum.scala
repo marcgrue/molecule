@@ -1,6 +1,6 @@
 package molecule.coretests.equality
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.util.expectCompileError
@@ -47,7 +47,7 @@ class ApplyEnum extends CoreSpec {
       expectCompileError(
         """m(Ns.enum("zzz"))""",
         """
-          |[Dsl2Model:validateStaticEnums] 'zzz' is not among available enum values of attribute :ns/enum:
+          |molecule.transform.exception.Dsl2ModelException: 'zzz' is not among available enum values of attribute :ns/enum:
           |  enum0
           |  enum1
           |  enum2

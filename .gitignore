@@ -4,6 +4,7 @@
 *.log
 
 # sbt specific
+.bloop
 .cache/
 .history/
 .lib/

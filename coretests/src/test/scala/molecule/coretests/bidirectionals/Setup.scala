@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals
 
-import molecule.api._
+import molecule.api.core._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import org.specs2.specification.Scope
 

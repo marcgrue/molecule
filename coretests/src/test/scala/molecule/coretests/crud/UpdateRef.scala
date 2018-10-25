@@ -1,6 +1,6 @@
 package molecule.coretests.crud
 
-import molecule.api._
+import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -35,6 +35,5 @@ class UpdateRef extends CoreSpec {
         .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't be composites."
     }
-
   }
 }

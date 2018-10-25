@@ -1,8 +1,7 @@
 package molecule.coretests.crud.updateMap
 
 import java.util.UUID
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -43,14 +42,14 @@ class UpdateMapUUID extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uuidMap.assert(str1 -> uuid1, str1 -> uuid2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
@@ -107,13 +106,13 @@ class UpdateMapUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(str1 -> uuid1, str1 -> uuid2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
     }
@@ -196,13 +195,13 @@ class UpdateMapUUID extends CoreSpec {
 
 //      expectCompileError(
 //        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
-//        "[Dsl2Model:apply (16)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
 //
 //      expectCompileError(
 //        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-//        "[Dsl2Model:apply (16)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
+//        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
     }

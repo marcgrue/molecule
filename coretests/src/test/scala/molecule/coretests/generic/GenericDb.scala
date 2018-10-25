@@ -1,8 +1,8 @@
 package molecule.coretests.generic
 
-import molecule.generic.Db
+import molecule.api.out4._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
-import molecule.api._
+import molecule.generic.Db
 
 // Todo: expand on generic/meta queries...
 

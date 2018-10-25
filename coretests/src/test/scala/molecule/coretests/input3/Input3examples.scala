@@ -1,6 +1,6 @@
 package molecule.coretests.input3
 
-import molecule.api._
+import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 

@@ -1,8 +1,7 @@
 package molecule.coretests.crud.updateMap
 
 import java.net.URI
-
-import molecule.api._
+import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.transform.exception.Model2TransactionException
@@ -43,14 +42,14 @@ class UpdateMapURI extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uriMap.assert(str1 -> uri1, str1 -> uri2).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "[Dsl2Model:apply (14)] Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
@@ -107,13 +106,13 @@ class UpdateMapURI extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uriMap.replace(str1 -> uri1, str1 -> uri2).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
       expectCompileError(
         """Ns(eid).uriMap.replace(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "[Dsl2Model:apply (15)] Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
     }

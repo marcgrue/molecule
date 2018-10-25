@@ -1,9 +1,7 @@
 package molecule.coretests.input1
 
-//import molecule.api._
-//import molecule.coretests.util.dsl.coreTest._
 import java.net.URI
-import molecule.api._
+import molecule.api.in1_out2._
 import molecule.ast.query._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}

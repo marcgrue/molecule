@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.api._
+import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.{CoreSetup, CoreSpec}
 import molecule.ops.exception.VerifyModelException
@@ -192,11 +192,11 @@ class Relations extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str.refs1.Refs1.int1)",
-      "[Dsl2Model:apply (10)] Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Ref1.e ...`")
+      "molecule.transform.exception.Dsl2ModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
 
     expectCompileError(
       "m(Ns.refs1.str.Refs1.int1)",
-      "[Dsl2Model:apply (10)] Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Ref1.e ...`")
+      "molecule.transform.exception.Dsl2ModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
   }
 
   "Molecule has to end with attribute" >> {
@@ -204,14 +204,15 @@ class Relations extends CoreSpec {
     "Ending with ref" in new CoreSetup {
       expectCompileError(
         "m(Ns.str.Ref1)",
-        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.transform.exception.Dsl2ModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
 
     "Ending with refs" in new CoreSetup {
+
       expectCompileError(
         "m(Ns.str.Refs1)",
-        "[Dsl2Model:apply (1)] Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.transform.exception.Dsl2ModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
   }
