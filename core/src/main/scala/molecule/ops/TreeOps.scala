@@ -329,11 +329,14 @@ private[molecule] trait TreeOps extends Liftables {
     def kw: KW = KW(ns.toString, this.toString)
     def kwS: String = s":$ns/$name"
 
-    def enumValues: List[String] = attrType.baseClasses.find {
-      cl => cl.isClass && !cl.isModuleClass && cl.name.toString == toString
-    }.get.asClass.toType.members.collect {
-      case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
-    }.toList.reverse
+    def enumValues: List[String] = {
+      val attrName = if(toString.last == '_') toString.init else toString
+      attrType.baseClasses.find {
+        cl => cl.isClass && !cl.isModuleClass && cl.name.toString == attrName
+      }.get.asClass.toType.members.collect {
+        case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
+      }.toList.reverse
+    }
 
     def hasEnum(enumCandidate: String): Boolean = enumValues.contains(enumCandidate)
     def enumPrefix: String = ns.enums.size match {
