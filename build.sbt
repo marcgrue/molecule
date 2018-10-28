@@ -1,7 +1,7 @@
 
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.15.0",
+  version := "0.15.1",
   scalaVersion := "2.12.7",
   scalacOptions := Seq(
     "-feature",

@@ -369,12 +369,22 @@ class OptionalValues extends CoreSpec {
 
   "Apply optional value" in new CoreSetup {
 
-    Ns.str.int$ insert List(
-      ("Ann", Some(37)),
-      ("Ben", None)
-    )
-
+    Ns.str.int$ insert List(("Ann", Some(37)), ("Ben", None))
     m(Ns.str.int$(Some(37))).get === List(("Ann", Some(37)))
     m(Ns.str.int$(None)).get === List(("Ben", None))
+
+
+    Ns.int.enum$ insert List((1, Some("enum1")), (2, None))
+    m(Ns.int(1).enum$(Some("enum1"))).get === List((1, Some("enum1")))
+    m(Ns.int(2).enum$(None)).get === List((2, None))
+    val noEnum = Option.empty[String]
+    m(Ns.int(2).enum$(noEnum)).get === List((2, None))
+
+    Ns.int.enums$ insert List((3, Some(Set("enum1"))), (4, None))
+    m(Ns.int(3).enums$(Some(Set("enum1")))).get === List((3, Some(Set("enum1"))))
+    m(Ns.int(4).enums$(None)).get === List((4, None))
+
+    val noEnums = Option.empty[Set[String]]
+    m(Ns.int(4).enums$(noEnums)).get === List((4, None))
   }
 }

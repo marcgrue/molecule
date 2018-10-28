@@ -37,9 +37,6 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
   def get(implicit conn: Conn, ev: ClassTag[Tpl]): List[Tpl] =
     getArray(conn, ev).to[List]
 
-  val xx = Array(2)
-
-  xx(0) = 7
 
   /** Get List of n rows as tuples matching molecule.
     * <br><br>

@@ -12,6 +12,7 @@ import scala.reflect.macros.blackbox
 private[molecule] trait TreeOps extends Liftables {
   val c: blackbox.Context
   import c.universe._
+  //  val q = DebugMacro("TreeOps", 1, 800)
 
   override def abort(msg: String) = throw new TreeOpsException(msg)
 
@@ -195,18 +196,6 @@ private[molecule] trait TreeOps extends Liftables {
     case o  => abort(s"[TreeOps:molecule_o] Unsupported arity for MoleculeX: $o")
   }
 
-  def nestedTuplesClassX(allLevels: Int): Tree = allLevels match {
-    case 1 => q""
-    case 2 => tq"_root_.molecule.macros.NestedTuples.NestedTuples1"
-    case 3 => tq"_root_.molecule.macros.NestedTuples.NestedTuples2"
-    case 4 => tq"_root_.molecule.macros.NestedTuples.NestedTuples3"
-    case 5 => tq"_root_.molecule.macros.NestedTuples.NestedTuples4"
-    case 6 => tq"_root_.molecule.macros.NestedTuples.NestedTuples5"
-    case 7 => tq"_root_.molecule.macros.NestedTuples.NestedTuples6"
-    case 8 => tq"_root_.molecule.macros.NestedTuples.NestedTuples7"
-    case o => abort(s"Unsupported arity for NestedTuplesX: $o")
-  }
-
   def nestedJsonClassX(allLevels: Int): Tree = allLevels match {
     case 1 => q""
     case 2 => tq"_root_.molecule.macros.NestedJson.NestedJson1"
@@ -240,7 +229,6 @@ private[molecule] trait TreeOps extends Liftables {
   }
 
   class nsp(val sym: Symbol) {
-    val x = DebugMacro("ModelOps:nsp", 1)
 
     lazy val nsType: Type = sym match {
       case s: TermSymbol if s.isPublic                => s.typeSignature.typeSymbol.typeSignature
@@ -273,7 +261,6 @@ private[molecule] trait TreeOps extends Liftables {
   }
 
   class att(val sym: Symbol) {
-    val x = DebugMacro("TreeOps:att", 1)
 
     lazy val attrType: Type = sym match {
       case t: ModuleSymbol                                               => t.moduleClass.asType.toType
@@ -297,7 +284,7 @@ private[molecule] trait TreeOps extends Liftables {
           case _ if tpe <:< weakTypeOf[MapAttr$[_, _, _]]     => t.typeSignature.baseType(weakTypeOf[MapAttr$[_, _, _]].typeSymbol).typeArgs.last
           case _                                              => NoType
         }
-      case unexpected =>
+      case unexpected                  =>
         abortTree(q"$unexpected", s"[TreeOps:tpe] ModelOps.att(sym) can only take an Attr symbol")
     }
 
@@ -342,13 +329,11 @@ private[molecule] trait TreeOps extends Liftables {
     def kw: KW = KW(ns.toString, this.toString)
     def kwS: String = s":$ns/$name"
 
-    def enumValues: List[String] = {
-      val attr = toString
-      val attrClean = if (attr.last == '_' || attr.last == '$') attr.init else attr
-      attrType.baseClasses.find { cl => cl.isClass && !cl.isModuleClass && cl.name.toString == attrClean }.get.asClass.toType.members.collect {
-        case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
-      }.toList.reverse
-    }
+    def enumValues: List[String] = attrType.baseClasses.find {
+      cl => cl.isClass && !cl.isModuleClass && cl.name.toString == toString
+    }.get.asClass.toType.members.collect {
+      case v: TermSymbol if v.isPrivate && v.isLazy && v.typeSignature.typeSymbol.asType.toType =:= typeOf[EnumValue.type] => v.name.decodedName.toString.trim
+    }.toList.reverse
 
     def hasEnum(enumCandidate: String): Boolean = enumValues.contains(enumCandidate)
     def enumPrefix: String = ns.enums.size match {

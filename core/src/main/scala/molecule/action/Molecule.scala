@@ -98,7 +98,7 @@ import scala.reflect.ClassTag
   * @groupname get get
   * @groupprio get 1
   *
-  * @groupname asof `getAsOf``
+  * @groupname asof getAsOf
   * @groupprio asof 11
   * @groupname arrayAsOf getArrayAsOf
   * @groupprio arrayAsOf 12
@@ -132,7 +132,7 @@ import scala.reflect.ClassTag
   * @groupprio rawWith 35
   *
   * @groupname history getHistory
-  * @groupdesc history (only implemented to return default List of tuples)
+  * @groupdesc history (only implemented to return List of tuples)
   * @groupprio history 41
   *
   * @groupname save save
@@ -144,7 +144,7 @@ import scala.reflect.ClassTag
   * @groupname update update
   * @groupprio update 53
   *
-  * @groupname tx Transaction data (input to `getWith`).
+  * @groupname tx Transaction data (input to getWith).
   * @groupprio tx 61
   *
   * @groupname debugGet Debug get

@@ -88,7 +88,7 @@ private[molecule] trait NestedJson[OuterTpl] extends NestedTuples[OuterTpl] with
   }
 }
 
-private[molecule] object NestedJson {
+object NestedJson {
 
   trait NestedJson1[OuterTpl] extends NestedJson[OuterTpl] with NestedTuples1[OuterTpl] { self: Molecule[OuterTpl] =>
 

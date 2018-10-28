@@ -14,16 +14,10 @@ case class TxReport(txResult: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) {
 
   /** Get List of affected entity ids from transaction */
   def eids: List[Long] = {
-    val txData = txResult.get(Connection.TX_DATA)
-
-    // Omit first transaction datom
-    val datoms = txData.asInstanceOf[java.util.Collection[Datom]].asScala.toList.tail
-
     val tempIds = stmtss.flatten.collect {
       case Add(e, _, _, meta) if e.toString.take(6) == "#db/id" => e
       case Add(_, _, v, meta) if v.toString.take(6) == "#db/id" => v
     }.distinct
-
     val txTtempIds = txResult.get(Connection.TEMPIDS)
     val dbAfter = txResult.get(Connection.DB_AFTER).asInstanceOf[Database]
     val ids: Seq[Long] = tempIds.map(tempId => datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]).distinct
