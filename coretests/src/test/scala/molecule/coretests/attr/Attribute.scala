@@ -2,9 +2,21 @@ package molecule.coretests.attr
 
 import molecule.api.out10._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class Attribute extends CoreSpec {
+
+
+  "Async" in new CoreSetup {
+
+    Ns.int(1).save
+
+    Ns.int.getAsync.map { result =>
+      result === List(1)
+    }
+  }
 
 
   "Single cardinality-1 attribute - one entity" in new CoreSetup {

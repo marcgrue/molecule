@@ -1,35 +1,40 @@
 package molecule.facade
 
 import java.util.{Date, Collection => jCollection, List => jList}
-import datomic.{Database, Peer, Connection => datomicConn}
+import datomic.{Database, Peer}
 import molecule.ast.model.Model
 import molecule.ast.query.{Query, QueryExpr}
 import molecule.ast.tempDb._
-import molecule.ast.transaction._
+import molecule.ast.transactionModel._
 import molecule.exceptions._
-import scala.concurrent.blocking
-import scala.util.control.NonFatal
-//import molecule.facade._
 import molecule.ops.QueryOps._
 import molecule.transform.Query2String
+import molecule.util.Helpers
 import scala.collection.JavaConverters._
-
+import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.util.control.NonFatal
 
 /** Factory methods to create facade to Datomic Connection. */
 object Conn {
   def apply(uri: String): Conn = new Conn(datomic.Peer.connect(uri))
-  def apply(datConn: datomicConn): Conn = new Conn(datConn)
+  def apply(datomicConn: datomic.Connection): Conn = new Conn(datomicConn)
+
+  // Constructor for transaction functions where db is supplied inside transaction by transactor
+  def apply(txDb: AnyRef): Conn = new Conn(null) {
+    testDb(txDb.asInstanceOf[Database])
+  }
+//  def apply(): Conn = new Conn(null)
 }
 
 
 /** Facade to Datomic Connection.
   *
   * @see [[http://www.scalamolecule.org/manual/time/testing/ Manual]]
-  *     | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
+  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  * */
-class Conn(datConn: datomicConn) {
+  **/
+class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
@@ -56,7 +61,7 @@ class Conn(datConn: datomicConn) {
     * @param t Long
     */
   def testDbAsOf(t: Long): Unit = {
-    _testDb = Some(datConn.db.asOf(t))
+    _testDb = Some(datomicConn.db.asOf(t))
   }
 
   /** Use test database as of date.
@@ -64,7 +69,7 @@ class Conn(datConn: datomicConn) {
     * @param d Date
     */
   def testDbAsOf(d: Date): Unit = {
-    _testDb = Some(datConn.db.asOf(d))
+    _testDb = Some(datomicConn.db.asOf(d))
   }
 
   /** Use test database as of transaction report.
@@ -72,12 +77,12 @@ class Conn(datConn: datomicConn) {
     * @param txR Transaction report
     */
   def testDbAsOf(txR: TxReport): Unit = {
-    _testDb = Some(datConn.db.asOf(txR.t))
+    _testDb = Some(datomicConn.db.asOf(txR.t))
   }
 
   /** Use test database as of now. */
   def testDbAsOfNow: Unit = {
-    _testDb = Some(datConn.db)
+    _testDb = Some(datomicConn.db)
   }
 
   /** Use test database since time t.
@@ -85,7 +90,7 @@ class Conn(datConn: datomicConn) {
     * @param t Long
     */
   def testDbSince(t: Long): Unit = {
-    _testDb = Some(datConn.db.since(t))
+    _testDb = Some(datomicConn.db.since(t))
   }
 
   /** Use test database since date.
@@ -93,7 +98,7 @@ class Conn(datConn: datomicConn) {
     * @param d Date
     */
   def testDbSince(d: Date): Unit = {
-    _testDb = Some(datConn.db.since(d))
+    _testDb = Some(datomicConn.db.since(d))
   }
 
   /** Use test database since transaction report.
@@ -101,7 +106,7 @@ class Conn(datConn: datomicConn) {
     * @param txR Transaction report
     */
   def testDbSince(txR: TxReport): Unit = {
-    _testDb = Some(datConn.db.since(txR.t))
+    _testDb = Some(datomicConn.db.since(txR.t))
   }
 
 
@@ -127,17 +132,16 @@ class Conn(datConn: datomicConn) {
     *   Person.name.get === List("Liz", "Joe")
     * }}}
     *
-    * @param txData List of List of transaction [[molecule.ast.transaction.Statement Statement]]'s
+    * @param txData List of List of transaction [[molecule.ast.transactionModel.Statement Statement]]'s
     */
   def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
-    //    val txDataJava = txData.flatten.flatten.map(_.toJava).asJava
     val txDataJava: jList[jList[_]] = seqAsJavaListConverter(txData.flatten.flatten.map(_.toJava)).asJava
-    _testDb = Some(datConn.db.`with`(txDataJava).get(datomicConn.DB_AFTER).asInstanceOf[Database])
+    _testDb = Some(datomicConn.db.`with`(txDataJava).get(datomic.Connection.DB_AFTER).asInstanceOf[Database])
   }
 
   /** Use test database with temporary raw Java transaction data. */
   def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = {
-    _testDb = Some(datConn.db.`with`(txDataJava).get(datomicConn.DB_AFTER).asInstanceOf[Database])
+    _testDb = Some(datomicConn.db.`with`(txDataJava).get(datomic.Connection.DB_AFTER).asInstanceOf[Database])
   }
 
   /* testDbHistory not implemented.
@@ -150,19 +154,20 @@ class Conn(datConn: datomicConn) {
   }
 
   /** Get current test/live db. Test db has preference. */
-  def db: Database = if (_testDb.isDefined) _testDb.get else datConn.db
+  def db: Database = if (_testDb.isDefined) _testDb.get else datomicConn.db
 
 
   private[molecule] def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
+
     if (_adhocDb.isDefined) {
-      val baseDb = _testDb.getOrElse(datConn.db)
+      val baseDb = _testDb.getOrElse(datomicConn.db)
       val adhocDb = _adhocDb.get match {
         case AsOf(TxLong(t))  => baseDb.asOf(t)
         case AsOf(TxDate(d))  => baseDb.asOf(d)
         case Since(TxLong(t)) => baseDb.since(t)
         case Since(TxDate(d)) => baseDb.since(d)
-        case With(tx)         => baseDb.`with`(tx).get(datomicConn.DB_AFTER).asInstanceOf[Database]
+        case With(tx)         => baseDb.`with`(tx).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
         case History          => baseDb.history()
         case Using(db)        => db
       }
@@ -170,6 +175,7 @@ class Conn(datConn: datomicConn) {
       _adhocDb = None
       // In-memory "transaction"
       TxReport(adhocDb.`with`(javaStmts), stmtss)
+
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
       val txReport = TxReport(_testDb.get.`with`(javaStmts), stmtss)
@@ -180,9 +186,58 @@ class Conn(datConn: datomicConn) {
       val dbAfter = txReport.dbAfter.asOf(txReport.t)
       _testDb = Some(dbAfter)
       txReport
+
     } else {
       // Live transaction
-      TxReport(datConn.transact(javaStmts).get, stmtss)
+      TxReport(datomicConn.transact(javaStmts).get, stmtss)
+    }
+  }
+
+  private[molecule] def transactAsync(stmtss: Seq[Seq[Statement]])(implicit ec: ExecutionContext): Future[TxReport] = {
+    val javaStmts: jList[jList[_]] = toJava(stmtss)
+
+    if (_adhocDb.isDefined) {
+      Future {
+        val baseDb = _testDb.getOrElse(datomicConn.db)
+        val adhocDb = _adhocDb.get match {
+          case AsOf(TxLong(t))  => baseDb.asOf(t)
+          case AsOf(TxDate(d))  => baseDb.asOf(d)
+          case Since(TxLong(t)) => baseDb.since(t)
+          case Since(TxDate(d)) => baseDb.since(d)
+          case With(tx)         => baseDb.`with`(tx).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
+          case History          => baseDb.history()
+          case Using(db)        => db
+        }
+        // Void adhoc db
+        _adhocDb = None
+
+        // In-memory "transaction"
+        TxReport(adhocDb.`with`(javaStmts), stmtss)
+      }
+
+    } else if (_testDb.isDefined) {
+      Future {
+        // In-memory "transaction"
+        val txReport = TxReport(_testDb.get.`with`(javaStmts), stmtss)
+
+        // Continue with updated in-memory db
+        // todo: why can't we just say this? Or: why are there 2 db-after db objects?
+        //      val dbAfter = txReport.dbAfter
+        val dbAfter = txReport.dbAfter.asOf(txReport.t)
+        _testDb = Some(dbAfter)
+        txReport
+      }
+
+    } else {
+      // Live transaction
+      val moleculeInvocationFuture = try {
+        bridgeDatomicFuture(datomicConn.transactAsync(javaStmts))
+      } catch {
+        case NonFatal(ex) => Future.failed(ex)
+      }
+      moleculeInvocationFuture map { moleculeInvocationResult: java.util.Map[_, _] =>
+        TxReport(moleculeInvocationResult, stmtss)
+      }
     }
   }
 
@@ -206,8 +261,9 @@ class Conn(datConn: datomicConn) {
     txReport
   } else {
     // Live transaction
-    TxReport(datConn.transact(tx).get)
+    TxReport(datomicConn.transact(tx).get)
   }
+
 
   /** Query Datomic directly with optional Scala inputs.
     * {{{
@@ -238,11 +294,12 @@ class Conn(datConn: datomicConn) {
     *   )
     * }}}
     *
-    * @param query Datomic query string
+    * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
-    */
+    **/
   def q(query: String, inputs: Any*): List[List[AnyRef]] = q(db, query, inputs.toSeq)
+
 
   /** Query Datomic directly with db value and optional Scala inputs.
     * {{{
@@ -277,15 +334,13 @@ class Conn(datConn: datomicConn) {
     *   )
     * }}}
     *
-    * @param db Any Datomic Database value (could be asOf(x) etc)
-    * @param query Datomic query string
+    * @param db     Any Datomic Database value (could be asOf(x) etc)
+    * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
-    */
+    **/
   def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
     collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList.map(asScalaBufferConverter(_).asScala.toList)
-
-
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.
@@ -313,10 +368,10 @@ class Conn(datConn: datomicConn) {
     *            |        [?a :ns/int ?c]]""".stripMargin, 42).toString === """[["Ben" 42]]"""
     * }}}
     *
-    * @param query Datomic query string
+    * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    */
+    **/
   def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] = qRaw(db, query, inputs)
 
 
@@ -349,12 +404,13 @@ class Conn(datConn: datomicConn) {
     *    ).toString === """[["Ben" 42]]"""
     * }}}
     *
-    * @param db Any Datomic Database value (could be asOf(x) etc)
-    * @param query Datomic query string
+    * @param db     Any Datomic Database value (could be asOf(x) etc)
+    * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
-  def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] = Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*)
+    **/
+  def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] =
+    blocking(Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*))
 
 
   /** Query Datomic with Model and Query to get raw Java data.
@@ -364,12 +420,12 @@ class Conn(datConn: datomicConn) {
     * @param m [[molecule.ast.model.Model Model]] instance
     * @param q [[molecule.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
-    */
+    **/
   def query(m: Model, q: Query): jCollection[jList[AnyRef]] = {
     val p = (expr: QueryExpr) => Query2String(q).p(expr)
     val rules = "[" + (q.i.rules map p mkString " ") + "]"
     val dbUsed = if (_adhocDb.isDefined) {
-      val baseDb = _testDb.getOrElse(datConn.db)
+      val baseDb = _testDb.getOrElse(datomicConn.db)
       val adhocDb = _adhocDb.get match {
         case AsOf(TxLong(t))  => baseDb.asOf(t)
         case AsOf(TxDate(d))  => baseDb.asOf(d)
@@ -390,7 +446,7 @@ class Conn(datConn: datomicConn) {
       _testDb.get
     } else {
       // Live db
-      datConn.db
+      datomicConn.db
     }
 
     val first = if (q.i.rules.isEmpty) Seq(dbUsed) else Seq(dbUsed, rules)
@@ -408,7 +464,7 @@ class Conn(datConn: datomicConn) {
           e = e.getCause
         }
         throw new QueryException(e, m, q, allInputs, p, builder.result)
-      case NonFatal(ex) =>
+      case NonFatal(ex)                                           =>
         throw new QueryException(ex, m, q, allInputs, p)
     }
   }

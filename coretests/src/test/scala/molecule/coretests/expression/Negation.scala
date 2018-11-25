@@ -2,7 +2,6 @@ package molecule.coretests.expression
 
 import java.net.URI
 import molecule.api.out4._
-import molecule.coretests.util.CoreSetup
 import molecule.coretests.util.dsl.coreTest._
 
 class Negation extends Base {

@@ -1,5 +1,5 @@
 
-import molecule.action.{CompositeInserts, EntityOps, OptionalMapOps}
+import molecule.api.{EntityOps, OptionalMapOps}
 import molecule.expression.{AggregateKeywords, AttrExpressions}
 import molecule.facade.Datomic
 import molecule.factory._
@@ -11,12 +11,8 @@ import molecule.factory._
   * == Sub-packages ==
   * <table>
   *   <tr>
-  *     <td><a href="action/index.html">action</a><td>
-  *     <td>Actions on molecules and entities.</td>
-  *   </tr>
-  *   <tr>
   *     <td><a href="api/index.html">api</a><td>
-  *     <td>Molecule import interfaces of various arities.</td>
+  *     <td>Molecule API.</td>
   *   </tr>
   *   <tr>
   *     <td><a href="ast/index.html">ast</a><td>

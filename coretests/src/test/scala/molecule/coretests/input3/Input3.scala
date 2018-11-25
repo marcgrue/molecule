@@ -3,7 +3,7 @@ package molecule.coretests.input3
 import java.net.URI
 import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.input.exception.InputMolecule_3_Exception
 import molecule.input.{InputMolecule_1, InputMolecule_3}
 import scala.reflect.ClassTag

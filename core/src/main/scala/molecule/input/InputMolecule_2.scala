@@ -1,6 +1,6 @@
 package molecule.input
 
-import molecule.action.Molecule._
+import molecule.api.Molecule._
 import molecule.ast.MoleculeBase
 import molecule.ast.model._
 import molecule.ast.query._

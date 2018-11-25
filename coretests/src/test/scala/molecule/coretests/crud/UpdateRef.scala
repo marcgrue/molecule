@@ -2,7 +2,7 @@ package molecule.coretests.crud
 
 import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.ops.exception.VerifyModelException
 
 class UpdateRef extends CoreSpec {
@@ -31,7 +31,7 @@ class UpdateRef extends CoreSpec {
         .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Ref1`."
 
-      (m(Ns(42L).str("b") ~ Ref2.int2(2)).update must throwA[VerifyModelException])
+      (m(Ns(42L).str("b") + Ref2.int2(2)).update must throwA[VerifyModelException])
         .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't be composites."
     }

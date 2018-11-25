@@ -1,60 +1,64 @@
 ![](project/resources/Molecule-logo.png)
 
 
-Molecule is a type safe and intuitive Scala query/modelling DSL for 
-[Datomic][datomic] - the immutable database of facts. 
+Molecule is a type safe and intuitive Scala meta-DSL for the
+[Datomic][datomic] database. 
 
 Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [Molecule forum](https://groups.google.com/forum/#!forum/molecule-dsl)
 
 
-# What Molecule does
+## A meta-DSL
 
-As an example: to find
+Molecule is a "meta-DSL" in the sense that _your domain terms_ form the tokens of your queries and 
+transactions. 
 
-_Names of twitter/facebook_page communities in neighborhoods of southern districts_
- 
-we can compose a "molecule query" that is very close to our
-human sentence:
+So instead of fitting in your domain terms between commands like `SELECT name, age FROM Person` etc, 
+or other query constructs in other database languages, you directly use your domain terms as tokens:
 
 ```scala
-Community.name.`type`("twitter" or "facebook_page")
-  .Neighborhood.District.region("sw" or "s" or "se")
+Person.name.age.get
 ```
 
-Molecule transforms this at compile time (with macros) to a little more elaborate Datalog query string and
- input rules that finds those communities in the Datomic database:
-
-<pre>
-[:find ?a
- :in $ %
- :where
-   [?ent :community/name ?a]
-   (rule1 ?ent)
-   [?ent :community/neighborhood ?c]
-   [?c :neighborhood/district ?d]
-   (rule2 ?d)]
-
-INPUTS:
-List(
-  datomic.db.Db@xxx,
-  [[[rule1 ?ent] [?ent :community/type ":community.type/twitter"]]
-   [[rule1 ?ent] [?ent :community/type ":community.type/facebook_page"]]
-   [[rule2 ?d] [?d :district/region ":district.region/sw"]]
-   [[rule2 ?d] [?d :district/region ":district.region/s"]]
-   [[rule2 ?d] [?d :district/region ":district.region/se"]]]
-)
-</pre>
-
-By not having to write such complex Datalog queries and rules "by hand", Molecule 
-allows you to
-
-- Type less
-- Make type safe queries with inferred return types
-- Use your domain terms directly as query building blocks
-- Model complex queries intuitively (easier to understand and maintain)
+This is possible since a schema is initially defined based on your domain terms:
 
 
-### Try demo
+```scala
+trait Person {
+  val name = oneString
+  val age  = oneInt
+}
+```
+When you compile your project with `sbt compile`, Molecule generates the necessary boilerplate code 
+in order to be able to write the more intuitive query. Since the types of each attribute `name` and
+`age` is encoded in the schema definition we'll also get typed data back from our query.
+
+```scala
+val personsWithAge: List[(String, Int)] = Person.name.age.get
+```
+
+
+## Producing Datalog
+Molecule transform "molecules" like `Person.name.age.get` to [Datalog](https://docs.datomic.com/on-prem/query.html) queries 
+for Datomic. The returned untyped data from Datomic is then casted by Molecule to the expected Scala type.
+
+All queries are prepared at compile time by macros. So there is no overhead at runtime when running the queries. All
+queries are ready to fire.
+
+
+## Sync and Async APIs
+Molecule offers both a synchronous and an asynchronous API for all query getters and transaction operations.
+
+
+   
+## Getting started
+
+- [Introduction](http://scalamolecule.org/home/introduction) to Datomic/Molecule
+- [Getting started](http://scalamolecule.org/manual/getting-started): define a schema and create a new Datomic database
+- [Populate Database](http://scalamolecule.org/manual/insert): populate a Datomic database with Molecule
+- [Molecule Seattle tutorial](http://scalamolecule.org/tutorials/seattle) examples of using Molecule
+
+
+## Try demo project
 
 1. `git clone https://github.com/scalamolecule/molecule-demo.git`
 2. `cd molecule-demo`
@@ -91,27 +95,14 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.15.1",
+      "org.scalamolecule" %% "molecule" % "0.16.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.15.1 for Scala 2.12.7 is available at
+Molecule 0.16.0 for Scala 2.12.7 is available at
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.12/).
-
-[Getting started](http://scalamolecule.org/manual/getting-started)...
-
-
-
-   
-### Read more
-
-- [Introduction](http://scalamolecule.org/home/introduction) to Datomic/Molecule
-- [Getting started](http://scalamolecule.org/manual/getting-started): define schema an initiate a Datomic database
-- [Populate Database](http://scalamolecule.org/manual/insert): populate a Datomic database with Molecule
-- [Molecule Seattle tutorial](http://scalamolecule.org/tutorials/seattle) examples of using Molecule (based on the 
-[Datomic Seattle tutorial](http://docs.datomic.com/tutorial.html))
 
 
 #### Author
@@ -128,17 +119,3 @@ Marc Grue
 Molecule is licensed under the [Apache License 2.0](http://en.wikipedia.org/wiki/Apache_license)
 
 [datomic]: http://www.datomic.com
-[seattle]: http://docs.datomic.com/tutorial.html
-[moleculegroup]: https://groups.google.com/forum/#!forum/molecule-dsl
-[pullrequests]: https://github.com/scalamolecule/molecule/pulls
-[issues]: https://github.com/scalamolecule/molecule/issues
-[moleculesbt]: https://github.com/scalamolecule/molecule/blob/master/project/build.scala
-
-[setup]: http://scalamolecule.org/manual/setup
-[schema]: http://scalamolecule.org/manual/schema
-[deffile]: http://scalamolecule.org/molecule/blob/master/examples/src/main/scala/molecule/examples/seattle/schema/SeattleDefinition.scala
-[populate]: http://scalamolecule.org/manual/insert
-[tutorial]: http://scalamolecule.org/tutorials/seattle
-[tutorialcode]: http://scalamolecule.org/molecule/blob/master/examples/src/test/scala/molecule/examples/seattle/SeattleTests.scala
-[tutorialqueries]: http://scalamolecule.org/molecule/blob/master/examples/src/test/scala/molecule/examples/seattle/SeattleQueryTests.scala
-[tutorialtransformations]: https://scalamolecule.org/molecule/blob/master/examples/src/test/scala/molecule/examples/seattle/SeattleTransformationTests.scala

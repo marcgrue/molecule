@@ -9,11 +9,12 @@ import molecule.coretests.util.schema.CoreTestSchema
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
-class CoreSetup extends Scope {
-  implicit val conn = recreateDbFrom(CoreTestSchema)
-}
-
 class CoreSpec extends MoleculeSpec {
+
+  class CoreSetup extends Scope {
+    // Empty db for each test
+    implicit val conn = recreateDbFrom(CoreTestSchema)
+  }
 
   def da(s: Int): Date = {
     val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")

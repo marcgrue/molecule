@@ -14,7 +14,10 @@ class AsOf extends CoreSpec {
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
   val tx1: TxReport = Ns.int(1).save
+  // Since using Date's are not that precise (use tx.t or anything else instead!), we help separate the dates:
+  Thread.sleep(1000)
   val tx2: TxReport = Ns.int(2).save
+  Thread.sleep(1000)
   val tx3: TxReport = Ns.int(3).save
 
   val t1: Long = tx1.t

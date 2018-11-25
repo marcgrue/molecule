@@ -2,7 +2,7 @@ package molecule.coretests.generic
 
 import molecule.api.in1_out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.ops.exception.VerifyModelException
 
 class Eid extends CoreSpec {

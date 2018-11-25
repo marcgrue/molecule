@@ -35,10 +35,10 @@ trait Datomic {
     try {
       Peer.deleteDatabase(uri)
       Peer.createDatabase(uri)
-      val datConn = Peer.connect(uri)
-      datConn.transact(schema.partitions)
-      datConn.transact(schema.namespaces)
-      Conn(datConn)
+      val datomicConn = Peer.connect(uri)
+      datomicConn.transact(schema.partitions)
+      datomicConn.transact(schema.namespaces)
+      Conn(datomicConn)
     } catch {
       case e: Throwable => throw new DatomicFacadeException("@@@@@@@@@@ " + e.getCause)
     }
@@ -63,9 +63,9 @@ trait Datomic {
     try {
       Peer.deleteDatabase(uri)
       Peer.createDatabase(uri)
-      val datConn = Peer.connect(uri)
-      datConn.transact(schemaData).get()
-      Conn(datConn)
+      val datomicConn = Peer.connect(uri)
+      datomicConn.transact(schemaData).get()
+      Conn(datomicConn)
     } catch {
       case e: Throwable => throw new DatomicFacadeException("@@@@@@@@@@ " + e.getCause)
     }
@@ -85,10 +85,10 @@ trait Datomic {
   def transactSchema(schema: SchemaTransaction, identifier: String, protocol: String = "mem"): Conn = {
     val uri = s"datomic:$protocol://$identifier"
     try {
-      val datConn = Peer.connect(uri)
-      datConn.transact(schema.partitions)
-      datConn.transact(schema.namespaces)
-      Conn(datConn)
+      val datomicConn = Peer.connect(uri)
+      datomicConn.transact(schema.partitions)
+      datomicConn.transact(schema.namespaces)
+      Conn(datomicConn)
     } catch {
       case e: Throwable => throw new DatomicFacadeException("@@@@@@@@@@ " + e.getCause)
     }

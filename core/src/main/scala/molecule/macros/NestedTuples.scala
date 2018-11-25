@@ -1,7 +1,7 @@
 package molecule.macros
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList, Comparator => jComparator, List => jList}
-import molecule.action.Molecule
+import molecule.api.Molecule
 import molecule.facade.Conn
 import scala.reflect.ClassTag
 
@@ -11,7 +11,9 @@ private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]
   // Lazily re-use nested list
   final override def getIterable(implicit conn: Conn, ev: ClassTag[OuterTpl]): Iterable[OuterTpl] = get(conn, ev)
 
-  val levels = _nestedQuery.get.f.outputs.size - _query.f.outputs.size
+  val levels = if(_nestedQuery.isDefined)
+    _nestedQuery.get.f.outputs.size - _query.f.outputs.size
+  else 0
 
   protected def castBranch0(row: jList[AnyRef], leaf: List[Any]): OuterTpl = ???
   protected def castBranch1(row: jList[AnyRef], leaf: List[Any]): Any = ???

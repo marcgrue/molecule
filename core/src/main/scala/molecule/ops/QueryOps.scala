@@ -70,11 +70,11 @@ object QueryOps extends Helpers {
 
     def pull(e: String, atom: Atom): Query =
       q.copy(f = Find(q.f.outputs :+ Pull(e + "_" + atom.name, atom.ns, atom.name)))
-        .func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
+        .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
 
     def pullEnum(e: String, atom: Atom): Query =
       q.copy(f = Find(q.f.outputs :+ Pull(e + "_" + atom.name, atom.ns, atom.name, atom.enumPrefix)))
-        .func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
+        .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(e + "_" + atom.name)))
 
 
     // In ..........................................

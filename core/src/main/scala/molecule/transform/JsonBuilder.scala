@@ -13,7 +13,7 @@ import molecule.util.Helpers
   */
 private[molecule] trait JsonBuilder extends Helpers {
 
-  // Macro-materialized row-to-json engine used by `molecule.action.Molecule.getJsonFlat`
+  // Macro-materialized row-to-json engine used by `molecule.api.Molecule.getJsonFlat`
   // Adds row as json to a mutable StringBuilder for fast build-up.
   protected def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = ???
 

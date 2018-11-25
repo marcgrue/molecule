@@ -2,12 +2,39 @@ package molecule.coretests.crud.update
 
 import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
+import molecule.facade.TxReport
 import molecule.ops.exception.VerifyModelException
 import molecule.transform.exception.Model2TransactionException
 import molecule.util.expectCompileError
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 
 class UpdateInt extends CoreSpec {
+
+
+  "Async" in new CoreSetup {
+
+    // Update data asynchronously. Internally calls Datomic's transactAsync API.
+
+    for {
+      // Initial data
+      saveTx <- Ns.int insertAsync List(1, 2)
+      List(id1, id2) = saveTx.eids
+
+      // Update 2 to 3
+      updateTx <- Ns(id2).int(3).updateAsync
+
+      // Get result
+      result <- Ns.int.getAsync
+    } yield {
+      // 2 was updated to 3
+      result === List(1, 3)
+    }
+
+    // For brevity, the synchronous equivalent `update` is used in the following tests
+  }
 
 
   "Card-one values" >> {
@@ -30,6 +57,10 @@ class UpdateInt extends CoreSpec {
 
 
       // Applying multiple values to card-one attribute not allowed
+
+      (Ns(eid).int.update must throwA[VerifyModelException])
+        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        "[onlyAtomsWithValue]  Update molecule can only have attributes with some value(s) applied/added/replaced etc."
 
       (Ns(eid).int(2, 3).update must throwA[VerifyModelException])
         .message === "Got the exception molecule.ops.exception.VerifyModelException: " +

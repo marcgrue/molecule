@@ -2,7 +2,7 @@ package molecule.coretests.expression
 
 import molecule.api.out3._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 
 class Aggregates extends CoreSpec {
 

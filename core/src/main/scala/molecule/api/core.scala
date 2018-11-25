@@ -1,6 +1,5 @@
 package molecule.api
 
-import molecule.action.EntityOps
 import molecule.expression.{AggregateKeywords, AttrExpressions, LogicImplicits}
 import molecule.facade.Datomic
 
@@ -34,6 +33,7 @@ private[molecule] trait core extends Datomic
   with AggregateKeywords
   with LogicImplicits
   with EntityOps
+  with TxMethods
 {
 
   object ? extends molecule.expression.AttrExpressions.?

@@ -2,10 +2,39 @@ package molecule.coretests.crud
 
 import molecule.api.out14._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
+import molecule.facade.TxReport
 import molecule.ops.exception.VerifyModelException
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class Save extends CoreSpec {
+
+
+  "Async" in new CoreSetup {
+
+    // Save asynchronously and return Future[TxReport]
+    // Calls Datomic's transactAsync API
+
+    Ns.int(1).saveAsync.map { tx => // tx report from successful save transaction
+      Ns.int.get === List(1)
+    }
+
+    val futureSave: Future[TxReport] = Ns.str("Ben").int(42).saveAsync
+
+    for {
+      _ <- futureSave
+      result <- Ns.str.int.getAsync
+    } yield {
+      // Data was saved
+      result.head === ("Ben", 42)
+    }
+
+
+    // For brevity, the synchronous equivalent `save` is used in the following tests
+  }
+
 
   "Card one attr" in new CoreSetup {
 

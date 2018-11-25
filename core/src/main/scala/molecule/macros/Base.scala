@@ -1,6 +1,7 @@
 package molecule
 package macros
 import molecule.ast.model._
+import molecule.macros.exception.TxFnException
 import molecule.transform._
 import scala.collection.mutable.ListBuffer
 import scala.language.higherKinds
@@ -300,4 +301,5 @@ private[molecule] trait Base extends Dsl2Model {
       case 8 => branch0until(level7)
     }
   }
+
 }

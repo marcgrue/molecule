@@ -48,14 +48,13 @@ object Model2Query extends Helpers {
       case nested: Nested         =>
         if (nestedEntityClauses.isEmpty) {
           nestedEntityVars = List(Var("sort0"))
-          nestedEntityClauses = List(Funct("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var("sort0"))))
+          nestedEntityClauses = List(Funct("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var("sort0"))))
         }
         // Next level
         nestedEntityVars = nestedEntityVars :+ Var("sort" + nestedEntityClauses.size)
-        nestedEntityClauses = nestedEntityClauses :+ Funct("molecule.util.JavaFunctions/bind", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
+        nestedEntityClauses = nestedEntityClauses :+ Funct("molecule.util.fns/bind", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
         makeNested(model, query, nested, e, v, w, prevNs, prevAttr, prevRefNs)
       case composite: Composite   => makeComposite(model, query, composite, e, v, prevNs, prevAttr, prevRefNs)
-      case transitive: Transitive => makeTransitive(model, query, transitive, v, w)
       case Self                   => (query, w, y, prevNs, prevAttr, prevRefNs)
       case other                  => throw new Model2QueryException("Unresolved query variables from model: " + (other, e, v, prevNs, prevAttr, prevRefNs))
     }
@@ -129,8 +128,7 @@ object Model2Query extends Helpers {
     case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         => (resolve(query, e, v, meta), e, w, ns, attr, "")
     case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" => (resolve(query, e, y, meta), e, y, ns, attr, "")
     case Meta(ns, attr, "e", NoValue, EntValue)                     => (resolve(query, v, w, meta), v, w, ns, attr, "")
-    //    case Meta(ns, attr, "e", NoValue, _)                            => (resolve(query, v, w, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, _, _, _) => (resolve(query, e, v, meta), e, v, ns, attr, "")
+    case Meta(ns, attr, _, _, _)                                    => (resolve(query, e, v, meta), e, v, ns, attr, "")
   }
 
   def makeTxMetaData(model: Model, query: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
@@ -157,11 +155,16 @@ object Model2Query extends Helpers {
     val eid: String = if (query.wh.clauses.isEmpty) {
       e
     } else {
-      query.wh.clauses.reverse.collectFirst {
-        case DataClause(_, Var(lastE), KW(ns, _, _), _, _, _) if ns != "db" => lastE
-      } getOrElse query.wh.clauses.reverse.collectFirst {
-        case Funct(_, Seq(Var(lastE)), _) => lastE
-      }.getOrElse(throw new Model2QueryException(s"Couldn't find `e` from last data clause"))
+      query.wh.clauses.head match {
+        case DataClause(_, Var(compositeEid), KW(ns, _, _), _, _, _) if ns != "db" => compositeEid
+        case other                                                                 =>
+          throw new Model2QueryException(s"Unexpected first clause of composite query: " + other)
+      }
+      //      query.wh.clauses.reverse.collectFirst {
+      //        case DataClause(_, Var(lastE), KW(ns, _, _), _, _, _) if ns != "db" => lastE
+      //      } getOrElse query.wh.clauses.reverse.collectFirst {
+      //        case Funct(_, Seq(Var(lastE)), _) => lastE
+      //      }.getOrElse(throw new Model2QueryException(s"Couldn't find `e` from last data clause"))
     }
 
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = composite.elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
@@ -169,19 +172,6 @@ object Model2Query extends Helpers {
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }
-
-  def makeTransitive(model: Model, query: Query, transitive: Transitive, v: String, w: String)
-  : (Query, String, String, String, String, String) = {
-    val Transitive(backRef, refAttr, refNs, _, _) = transitive
-    val (backRefE, backRefV) = query.wh.clauses.reverse.collectFirst {
-      case DataClause(_, backE, a, Var(backV), _, _) if a.ns == backRef => (backE.v, backV)
-    } getOrElse {
-      throw new Model2QueryException(s"Can't find back reference namespace `$backRef` in query so far:\n$query")
-    }
-    val backRefElement = transitive.copy(prevVar = backRefV)
-    (resolve(query, backRefE, w, backRefElement), v, w, backRef, refAttr, refNs)
-  }
-
 
   def resolve(q: Query, e: String, v: String, element: Element): Query = {
     val (v1: String, v2: String, v3: String) = (v + 1, v + 2, v + 3)
@@ -241,9 +231,9 @@ object Model2Query extends Helpers {
     case Meta(_, _, "e", _, Eq(Seq(Qm)))                         => q.find(e, Nil).in(e)
     case Meta(_, attr, "e", _, Eq(eids)) if attr.last == '_'     => q.in(eids, e)
     case Meta(_, _, "e", _, Eq(eids))                            => q.find(e, Nil).in(eids, e)
-    case Meta(_, _, "r", _, IndexVal)                            => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, Id(eid), IndexVal)                        => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _, IndexVal)                              => q.find(v, Nil).func("molecule.util.JavaFunctions/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, _, "r", _, IndexVal)                            => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, Id(eid), IndexVal)                        => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, _, IndexVal)                              => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
     case Meta(_, attr, _, _, EntValue) if attr.last == '_'       => q
     case Meta(_, _, _, _, EntValue)                              => q.find(e, Nil)
     case Meta(_, _, _, _, _)                                     => q

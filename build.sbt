@@ -1,34 +1,38 @@
-
+import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.15.1",
+  version := "0.16.0",
   scalaVersion := "2.12.7",
   scalacOptions := Seq(
     "-feature",
     "-language:implicitConversions",
     "-deprecation",
-//    "-Yrangepos",
-//    "-Ystatistics",
-//    "-Ymacro-debug-lite",
-//    "-Xprint",
-//    "-Ymacro-debug-verbose",
-//    "-Yshow-trees-stringified",
-//    "-Yshow-trees"
-//    "-Yquasiquote-debug"
-//    ,"-Ydebug"
+    //    "-Yrangepos",
+    //    "-Ystatistics",
+    //    "-Ymacro-debug-lite",
+    //    "-Xprint",
+    //    "-Ymacro-debug-verbose",
+    //    "-Yshow-trees-stringified",
+    //    "-Yshow-trees"
+    //    "-Yquasiquote-debug"
+    //    ,"-Ydebug"
   ),
   resolvers ++= Seq(
-    "datomic" at "http://files.datomic.com/maven",
+    "datomic" at "http://files.datomic.com/maven", // free
+    //    "datomic" at "https://my.datomic.com/repo", // pro
     "clojars" at "http://clojars.org/repo",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+    Resolver.sonatypeRepo("snapshots"),
   ),
-//  autoAPIMappings := true,
+  //  autoAPIMappings := true,
   apiURL := Some(url("https://example.org/api/")),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.datomic" % "datomic-free" % "0.9.5697",
-    "org.specs2" %% "specs2-core" % "4.2.0" % "test"
+    //    "com.datomic" % "datomic-pro" % "0.9.5783",
+    //    "com.datomic" % "client-pro" % "0.8.20",
+    "org.specs2" %% "specs2-core" % "4.2.0" % "test",
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
   ),
   incOptions := incOptions.value.withLogRecompileOnMacro(false)
 )
@@ -51,6 +55,11 @@ lazy val moleculeCore = project.in(file("core"))
     "-sourcepath", (baseDirectory in ThisBuild).value.toString,
     "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
   ))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "moleculeBuildInfo"
+  )
 
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
@@ -119,6 +128,9 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   publishArtifact in Test := false,
+
+  //  publishArtifact in (Compile, packageDoc) in ThisBuild := false, // create docs?
+
   scalacOptions in(Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value + "/src/main/scaladoc/rootdoc.txt"),
   pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),

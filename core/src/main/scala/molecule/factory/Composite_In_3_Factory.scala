@@ -22,7 +22,7 @@ import scala.language.{higherKinds, implicitConversions}
   * == Composite molecules ==
   * Composite molecules model entities with attributes from different namespaces that are
   * not necessarily related. Each group of attributes is modelled by a molecule and these
-  * "sub-molecules" are tied together with `~` methods to form a composite molecule.
+  * "sub-molecules" are tied together with `+` methods to form a composite molecule.
   *
   * == Composite input molecules ==
   * Composite input molecules awaiting 3 inputs have 3 attributes with `?` applied to mark that
@@ -42,7 +42,7 @@ trait Composite_In_3_Factory2 {
     * <br><br>
     * The builder pattern is used to add one or more attributes to an initial namespace
     * like `Person` from the example below. Further non-related attributes can be tied together
-    * with the `~` method to form "composite molecules" that is basically just attributes
+    * with the `+` method to form "composite molecules" that is basically just attributes
     * sharing the same entity id.
     * <br><br>
     * Applying the `?` marker to attributes changes the semantics of the composite
@@ -53,7 +53,7 @@ trait Composite_In_3_Factory2 {
     * we can call various actions on it, like `get` that retrieves matching data from the database.
     * {{{
     *   // Apply `?` to `age`, `score` and `flags` attributes to create composite input molecule
-    *   val personsAgeScoreFlags = m(Person.name.age_(?) ~ Tag.score_(?).flags_(?))
+    *   val personsAgeScoreFlags = m(Person.name.age_(?) + Tag.score_(?).flags_(?))
     *
     *   // At runtime, `age`, `score` and `flags` values are applied to get the Person's name
     *   personsAgeScoreFlags(42, 7, 3).get.head === "Ben"
@@ -64,21 +64,21 @@ trait Composite_In_3_Factory2 {
     * {{{
     *   Composite input molecule                  Composite type (1 output group)
     *
-    *   A.a1(?)       ~ B.b1_(?).b2_(?)     =>    a1
-    *   A.a1.a2(?)    ~ B.b1_(?).b2_(?)     =>    (a1, a2)
-    *   A.a1.a2.a3(?) ~ B.b1_(?).b2_(?)     =>    (a1, a2, a3)
+    *   A.a1(?)       + B.b1_(?).b2_(?)     =>    a1
+    *   A.a1.a2(?)    + B.b1_(?).b2_(?)     =>    (a1, a2)
+    *   A.a1.a2.a3(?) + B.b1_(?).b2_(?)     =>    (a1, a2, a3)
     *
-    *   A.a1_(?).a2_(?) ~ B.b1(?)           =>    b1
-    *   A.a1_(?).a2_(?) ~ B.b1.b2(?)        =>    (b1, b2)
-    *   A.a1_(?).a2_(?) ~ B.b1.b2.b3(?)     =>    (b1, b2, b3)
+    *   A.a1_(?).a2_(?) + B.b1(?)           =>    b1
+    *   A.a1_(?).a2_(?) + B.b1.b2(?)        =>    (b1, b2)
+    *   A.a1_(?).a2_(?) + B.b1.b2.b3(?)     =>    (b1, b2, b3)
     *
     *   We could even have multiple tacit sub-molecules with multiple tacit attributes
-    *   A.a1_(?).a2_ ~ B.b1_(?) ~ C.c1.c2_(?).c3     =>    (c1, c3)
+    *   A.a1_(?).a2_ + B.b1_(?) + C.c1.c2_(?).c3     =>    (c1, c3)
     * }}}
     * So, given 2 output attributes, a tuple is returned:
     * {{{
-    *   m(Person.name.age(?) ~ Tag.score_(?).flags_(?))(42, 7, 3).get.head === ("Ben", 42)
-    *   //  A   . a1 . a2(?) ~  B .   b1_(?).   b2_(?)                      => (  a1 , a2)
+    *   m(Person.name.age(?) + Tag.score_(?).flags_(?))(42, 7, 3).get.head === ("Ben", 42)
+    *   //  A   . a1 . a2(?) +  B .   b1_(?).   b2_(?)                      => (  a1 , a2)
     * }}}
     *
     * @group composite3
@@ -96,7 +96,7 @@ trait Composite_In_3_Factory2 {
     * <br><br>
     * The builder pattern is used to add one or more attributes to an initial namespace
     * like `Person` from the example below. Further non-related attributes can be tied together
-    * with the `~` method to form "composite molecules" that is basically just attributes
+    * with the `+` method to form "composite molecules" that is basically just attributes
     * sharing the same entity id.
     * <br><br>
     * Applying the `?` marker to attributes changes the semantics of the composite
@@ -107,7 +107,7 @@ trait Composite_In_3_Factory2 {
     * we can call various actions on it, like `get` that retrieves matching data from the database.
     * {{{
     *   // Apply `?` to `age`, `score` and `flags` attributes to create composite input molecule
-    *   val personsAgeScoreFlags = m(Person.name.age_(?) ~ Tag.score_(?).flags_(?))
+    *   val personsAgeScoreFlags = m(Person.name.age_(?) + Tag.score_(?).flags_(?))
     *
     *   // At runtime, `age`, `score` and `flags` values are applied to get the Person's name
     *   personsAgeScoreFlags(42, 7, 3).get.head === "Ben"
@@ -118,23 +118,23 @@ trait Composite_In_3_Factory2 {
     * {{{
     *   Composite input molecule               Composite type (2 output groups)
     *
-    *   A.a1.a2_(?) ~ B.b1(?).b2_(?)     =>    (a1, b1)
-    *   A.a1.a2_(?) ~ B.b1(?).b2(?)      =>    (a1, (b1, b2))
-    *   A.a1.a2(?)  ~ B.b1(?).b2_(?)     =>    ((a1, a2), b1)
-    *   A.a1.a2(?)  ~ B.b1(?).b2(?)      =>    ((a1, a2), (b1, b2)) etc...
+    *   A.a1.a2_(?) + B.b1(?).b2_(?)     =>    (a1, b1)
+    *   A.a1.a2_(?) + B.b1(?).b2(?)      =>    (a1, (b1, b2))
+    *   A.a1.a2(?)  + B.b1(?).b2_(?)     =>    ((a1, a2), b1)
+    *   A.a1.a2(?)  + B.b1(?).b2(?)      =>    ((a1, a2), (b1, b2)) etc...
     *
     *   We could even have additional non-output sub-molecules:
-    *   A.a1.a2(?) ~ B.b1(?).b2 ~ C.c1_(?)     =>    ((a1, a2), (b1, b2)) etc...
+    *   A.a1.a2(?) + B.b1(?).b2 + C.c1_(?)     =>    ((a1, a2), (b1, b2)) etc...
     * }}}
     * Translating into the example:
     * {{{
-    *   m(Person.name.age_(?) ~ Tag.score(?).flags_(?))(42, 7, 3).get.head === ("Ben", 7)
-    *   m(Person.name.age_(?) ~ Tag.score(?).flags(?) )(42, 7, 3).get.head === ("Ben", (7, 3))
-    *   m(Person.name.age(?)  ~ Tag.score(?).flags_(?))(42, 7, 3).get.head === (("Ben", 42), 7)
-    *   m(Person.name.age(?)  ~ Tag.score(?).flags(?) )(42, 7, 3).get.head === (("Ben", 42), (7, 3))
+    *   m(Person.name.age_(?) + Tag.score(?).flags_(?))(42, 7, 3).get.head === ("Ben", 7)
+    *   m(Person.name.age_(?) + Tag.score(?).flags(?) )(42, 7, 3).get.head === ("Ben", (7, 3))
+    *   m(Person.name.age(?)  + Tag.score(?).flags_(?))(42, 7, 3).get.head === (("Ben", 42), 7)
+    *   m(Person.name.age(?)  + Tag.score(?).flags(?) )(42, 7, 3).get.head === (("Ben", 42), (7, 3))
     *
-    *   m(Person.name.age(?) ~
-    *     Tag.score(?).flags ~
+    *   m(Person.name.age(?) +
+    *     Tag.score(?).flags +
     *     Cat.name_(?))(42, 7, "pitcher").get.head === (("Ben", 42), (7, 3))
     * }}}
     *

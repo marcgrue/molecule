@@ -8,10 +8,11 @@ import scala.reflect.macros.blackbox
 class MakeMolecule(val c: blackbox.Context) extends Base {
   import c.universe._
 
+
   private[this] final def generateMolecule(dsl: Tree, OutTypes: Type*): Tree = {
     val OutMoleculeTpe: Tree = molecule_o(OutTypes.size)
     val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons) = getModel2(dsl)
+    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons) = getModel(dsl)
 
     if (casts.size == 1) {
       if (hasVariables) {
@@ -27,14 +28,12 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          {
-            import molecule.ast.model._
-            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
-              final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-              final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
-            }
-            new $outMolecule
+          import molecule.ast.model._
+          final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
+            final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+            final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
           }
+          new $outMolecule
         """
       }
 

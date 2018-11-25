@@ -2,7 +2,7 @@ package molecule.coretests.input3
 
 import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 
 
 class Input3examples extends CoreSpec {

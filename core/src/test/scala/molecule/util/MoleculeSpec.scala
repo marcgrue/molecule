@@ -2,19 +2,28 @@ package molecule.util
 import molecule.ast.MoleculeBase
 import molecule.ast.model.Model
 import molecule.ast.query._
-import molecule.ast.transaction._
+import molecule.ast.transactionModel._
 import molecule.exceptions.MoleculeException
 import molecule.facade.Conn
 import molecule.input.InputMolecule
 import molecule.ops.QueryOps._
 import molecule.transform.{Model2Transaction, Query2String}
 import org.specs2.mutable._
+import scala.concurrent.{Await, Awaitable}
+import scala.concurrent.duration.Duration
 import scala.language.postfixOps
+import scala.concurrent.duration._
 
 
 trait MoleculeSpec extends Specification {
 
   def typed[T](t: => T) {}
+
+  def await[T](atMost: Duration)(awaitable: Awaitable[T]): T =
+    Await.result(awaitable, atMost)
+
+  def await[T](awaitable: Awaitable[T]): T =
+    Await.result(awaitable, 10.seconds)
 
   implicit class Regex(sc: StringContext) {
     def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)

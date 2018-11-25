@@ -149,7 +149,7 @@ class Provenance extends MoleculeSpec {
 
     // Ed fixes the spelling error
     val edTx   = Story(elasticacheStory).title("ElastiCache in 5 minutes").Tx(MetaData.user(ed).usecase_("UpdateStory")).update
-    val edTxId = edTx.eids.last
+    val edTxId = edTx.tx
 
     // Title now
     Story.url_(ecURL).title.get.head === "ElastiCache in 5 minutes"

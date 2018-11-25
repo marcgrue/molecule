@@ -2,11 +2,35 @@ package molecule.coretests.crud.updateMap
 
 import molecule.api.out1._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.transform.exception.Model2TransactionException
 import molecule.util.expectCompileError
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class UpdateMapInt extends CoreSpec {
+
+
+  "Async" in new CoreSetup {
+
+    // Update asynchronously and return Future[TxReport]
+    // Calls Datomic's transactAsync API
+
+    // Initial data
+    Ns.intMap("str1" -> 1).saveAsync map { tx => // tx report from successful insert transaction
+      // Inserted entity
+      val e = tx.eid
+      Ns.intMap.get === List("str1" -> 1)
+
+      // Update entity asynchronously
+      Ns(e).intMap.assert("str1" -> 10).updateAsync.map { tx2 => // tx report from successful update transaction
+        // Current data
+        Ns.intMap.get === List("str1" -> 10)
+      }
+    }
+
+    // For brevity, the synchronous equivalent `update` is used in the following tests
+  }
 
 
   "Mapped values" >> {

@@ -1,10 +1,43 @@
 package molecule.coretests.crud
 
 import molecule.api.out10._
+import molecule.api.out4.recreateDbFrom
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
+import molecule.coretests.util.schema.CoreTestSchema
+import molecule.facade.TxReport
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 
 class Insert extends CoreSpec {
+
+
+  "Async insert" in new CoreSetup {
+
+    // Insert single row of data with individual args
+    val singleInsertFuture: Future[TxReport] = Ns.str.int.insertAsync("Ann", 28)
+
+    // Insert Iterable of multiple rows of data
+    val multipleInsertFuture: Future[TxReport] = Ns.str.int insertAsync List(
+      ("Ben", 42),
+      ("Liz", 37))
+
+    for {
+      _ <- singleInsertFuture
+      _ <- multipleInsertFuture
+      result <- Ns.str.int.getAsync
+    } yield {
+      // Both inserts applied
+      result === List(
+        ("Ann", 28),
+        ("Ben", 42),
+        ("Liz", 37)
+      )
+    }
+
+    // For brevity, the synchronous equivalent `insert` is used in the following tests
+  }
 
 
   "Single attribute" >> {
@@ -368,11 +401,11 @@ class Insert extends CoreSpec {
         ("b", None, 2)
       )
 
-      Ns.str.Ref1.str1$.Ref2.int2.get ===List(
+      Ns.str.Ref1.str1$.Ref2.int2.get === List(
         ("b", None, 2),
         ("a", Some("aa"), 1)
       )
-      Ns.str.Ref1.str1.Ref2.int2.get ===List(
+      Ns.str.Ref1.str1.Ref2.int2.get === List(
         ("a", "aa", 1)
       )
     }
@@ -457,7 +490,10 @@ class Insert extends CoreSpec {
 
       val insertAll = Ns.str.int.long.float.double.bool.date.uuid.uri.enum.insert
 
+      // Var-arg for single entity
       insertAll(" ", 0, 0L, 0.0f, 0.0, false, date0, uuid0, uri0, "enum0")
+
+      // List of tuples for multiple entities
       insertAll(List(
         ("a", 1, 1L, 1.0f, 1.0, true, date1, uuid1, uri1, "enum1"),
         ("b", 2, 2L, 2.0f, 2.0, false, date2, uuid2, uri2, "enum2")

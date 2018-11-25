@@ -1,6 +1,6 @@
 package molecule.factory
 
-import molecule.action.Molecule._
+import molecule.api.Molecule._
 import molecule.boilerplate.out._
 import molecule.macros.MakeMolecule
 import scala.language.experimental.macros

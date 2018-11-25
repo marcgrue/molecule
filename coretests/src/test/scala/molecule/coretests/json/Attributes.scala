@@ -2,7 +2,7 @@ package molecule.coretests.json
 
 import molecule.api.out2._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 
 
 class Attributes extends CoreSpec {

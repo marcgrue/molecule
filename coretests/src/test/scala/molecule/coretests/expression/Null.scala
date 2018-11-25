@@ -1,7 +1,7 @@
 package molecule.coretests.expression
 import molecule.api.in1_out4._
 import molecule.coretests.util.dsl.coreTest.Ns
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.util.expectCompileError
 
 class Null extends CoreSpec {

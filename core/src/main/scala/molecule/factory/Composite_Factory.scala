@@ -1,6 +1,6 @@
 package molecule.factory
 
-import molecule.action.Molecule._
+import molecule.api.Molecule._
 import molecule.composition.Composite._
 import molecule.macros.MakeComposite
 import scala.language.experimental.macros
@@ -11,7 +11,7 @@ import scala.language.{higherKinds, implicitConversions}
   * <br><br>
   * Composite molecules model entities with attributes from different namespaces that are
   * not necessarily related. Each group of attributes is modelled by a molecule and these
-  * "sub-molecules" are tied together with `~` methods to form a composite molecule.
+  * "sub-molecules" are tied together with `+` methods to form a composite molecule.
   * <br><br>
   * For brevity, only arity 1 and 2 method signatures are shown. Arity 3-22 follow the same pattern.
   * @see [[http://www.scalamolecule.org/manual/relationships/composites/ Manual]]
@@ -25,7 +25,7 @@ trait Composite_Factory2 {
     * <br><br>
     * The builder pattern is used to add one or more attributes to an initial namespace
     * like `Person` from the example below. Further non-related attributes can be tied together
-    * with the `~` method to form "composite molecules" that is basically just attributes
+    * with the `+` method to form "composite molecules" that is basically just attributes
     * sharing the same entity id.
     * <br><br>
     * Once the composite molecule models the desired data structure
@@ -33,10 +33,10 @@ trait Composite_Factory2 {
     * {{{
     *   // Explicitly calling `m` to create composite molecule
     *   // with 1 output attribute (`name`) and 1 tacit attribute (`score`).
-    *   m(Person.name ~ Tag.score_).get.head === "Ben"
+    *   m(Person.name + Tag.score_).get.head === "Ben"
     *
     *   // Alternatively we can create the composite molecule implicitly
-    *   Person.name.~(Tag.score_).get.head === "Ben"
+    *   Person.name.+(Tag.score_).get.head === "Ben"
     * }}}
     * Composite molecules of arity 1 has only one sub-molecule with output attribute(s).
     * If the sub-molecule has multiple output attributes, a tuple is returned, otherwise
@@ -44,21 +44,21 @@ trait Composite_Factory2 {
     * {{{
     *   Composite molecule           Composite type (1 output group)
     *
-    *   A.a1       ~ B.b1_     =>    a1
-    *   A.a1.a2    ~ B.b1_     =>    (a1, a2)
-    *   A.a1.a2.a3 ~ B.b1_     =>    (a1, a2, a3) etc...
+    *   A.a1       + B.b1_     =>    a1
+    *   A.a1.a2    + B.b1_     =>    (a1, a2)
+    *   A.a1.a2.a3 + B.b1_     =>    (a1, a2, a3) etc...
     *
-    *   A.a1_ ~ B.b1           =>    b1
-    *   A.a1_ ~ B.b1.b2        =>    (b1, b2)
-    *   A.a1_ ~ B.b1.b2.b3)    =>    (b1, b2, b3) etc...
+    *   A.a1_ + B.b1           =>    b1
+    *   A.a1_ + B.b1.b2        =>    (b1, b2)
+    *   A.a1_ + B.b1.b2.b3)    =>    (b1, b2, b3) etc...
     *
     *   We could even have multiple tacit sub-molecules with multiple tacit attributes
-    *   A.a1_.a2_ ~ B.b1_ ~ C.c1.c2_.c3     =>    (c1, c3) etc...
+    *   A.a1_.a2_ + B.b1_ + C.c1.c2_.c3     =>    (c1, c3) etc...
     * }}}
     * So, given two output attributes, a tuple is returned:
     * {{{
-    *   m(Person.name.age ~ Tag.score_).get.head === ("Ben", 42)
-    *   //  A   . a1 . a2 ~  B .  b1              => (  a1 , a2)
+    *   m(Person.name.age + Tag.score_).get.head === ("Ben", 42)
+    *   //  A   . a1 . a2 +  B .  b1              => (  a1 , a2)
     * }}}
     * @group composite
     * @param dsl User-defined DSL structure modelling the composite molecule
@@ -72,17 +72,17 @@ trait Composite_Factory2 {
     * <br><br>
     * The builder pattern is used to add one or more attributes to an initial namespace
     * like `Person` from the example below. Further non-related attributes can be tied together
-    * with the `~` method to form "composite molecules" that is basically just attributes
+    * with the `+` method to form "composite molecules" that is basically just attributes
     * sharing the same entity id.
     * <br><br>
     * Once the composite molecule models the desired data structure
     * we can call various actions on it, like `get` that retrieves matching data from the database.
     * {{{
     *   // Explicitly calling `m` to create composite molecule with 2 output attributes
-    *   m(Person.name ~ Tag.score).get.head === ("Ben", 7)
+    *   m(Person.name + Tag.score).get.head === ("Ben", 7)
     *
     *   // Alternatively we can create the composite molecule implicitly
-    *   Person.name.~(Tag.score).get.head === ("Ben", 7)
+    *   Person.name.+(Tag.score).get.head === ("Ben", 7)
     * }}}
     * Composite molecules of arity 2 has two sub-molecules with output attribute(s). If a sub-molecule
     * has multiple output attributes, a tuple is returned, otherwise just the single value. The two
@@ -90,22 +90,22 @@ trait Composite_Factory2 {
     * {{{
     *   Composite molecule          Composite type (2 output groups)
     *
-    *   A.a1    ~ B.b1        =>    (a1, b1)
-    *   A.a1    ~ B.b1.b2     =>    (a1, (b1, b2))
-    *   A.a1.a2 ~ B.b1        =>    ((a1, a2), b1)
-    *   A.a1.a2 ~ B.b1.b2     =>    ((a1, a2), (b1, b2)) etc...
+    *   A.a1    + B.b1        =>    (a1, b1)
+    *   A.a1    + B.b1.b2     =>    (a1, (b1, b2))
+    *   A.a1.a2 + B.b1        =>    ((a1, a2), b1)
+    *   A.a1.a2 + B.b1.b2     =>    ((a1, a2), (b1, b2)) etc...
     *
     *   We could even have additional non-output sub-molecules:
-    *   A.a1.a2 ~ B.b1.b2 ~ C.c1_     =>    ((a1, a2), (b1, b2)) etc...
+    *   A.a1.a2 + B.b1.b2 + C.c1_     =>    ((a1, a2), (b1, b2)) etc...
     * }}}
     * Translating into the example:
     * {{{
-    *   m(Person.name ~ Tag.score.flags).get.head                         === ("Ben", (7, 3))
-    *   m(Person.name.age ~ Tag.score).get.head                           === (("Ben", 42), 7)
-    *   m(Person.name.age ~ Tag.score.flags).get.head                     === (("Ben", 42), (7, 3))
+    *   m(Person.name + Tag.score.flags).get.head                         === ("Ben", (7, 3))
+    *   m(Person.name.age + Tag.score).get.head                           === (("Ben", 42), 7)
+    *   m(Person.name.age + Tag.score.flags).get.head                     === (("Ben", 42), (7, 3))
     *
-    *   m(Person.name.age ~
-    *     Tag.score.flags ~
+    *   m(Person.name.age +
+    *     Tag.score.flags +
     *     Cat.name_("pitcher")).get.head === (("Ben", 42), (7, 3))
     * }}}
     * @group composite

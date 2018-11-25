@@ -2,9 +2,33 @@ package molecule.coretests.crud
 
 import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class UpdateMultipleAttributes extends CoreSpec {
+
+
+  "Async" in new CoreSetup {
+
+    // Update multiple attributes of an entity asynchronously and return Future[TxReport]
+    // Calls Datomic's transactAsync API
+
+    // Initial data
+    Ns.int.str insertAsync List((1, "a"), (2, "b")) map { tx => // tx report from successful insert transaction
+      // 2 inserted entities
+      val List(e1, e2) = tx.eids
+      Ns.int.get === List((1, "a"), (2, "b"))
+
+      // Update second entity asynchronously
+      Ns(e2).int(42).str("hello world").updateAsync.map { tx2 => // tx report from successful update transaction
+        // Current data
+        Ns.int.get === List((1, "a"), (42, "hello world"))
+      }
+    }
+
+    // For brevity, the synchronous equivalent `update` is used in the following tests
+  }
 
 
   "Updating same/new values" >> {

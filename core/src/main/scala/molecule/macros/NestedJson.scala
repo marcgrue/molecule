@@ -1,7 +1,7 @@
 package molecule.macros
 import java.lang.{Long => jLong}
 import java.util.{Comparator => jComparator, List => jList}
-import molecule.action.Molecule
+import molecule.api.Molecule
 import molecule.facade.Conn
 import molecule.macros.NestedTuples._
 

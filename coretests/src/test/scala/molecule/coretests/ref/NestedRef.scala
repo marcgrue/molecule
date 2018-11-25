@@ -2,7 +2,7 @@ package molecule.coretests.ref
 
 import molecule.api.in3_out4._
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.{CoreSetup, CoreSpec}
+import molecule.coretests.util.CoreSpec
 import molecule.util.expectCompileError
 
 // (`Nested` is a model class..)

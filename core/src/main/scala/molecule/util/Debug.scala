@@ -1,8 +1,8 @@
 package molecule.util
 import java.util.{List => jList}
-
 import molecule.ast.model._
-import molecule.ast.transaction._
+import molecule.ast.transactionModel._
+import scala.collection.mutable.ArrayBuffer
 
 //import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -29,16 +29,17 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
         val max = level >= maxLevel
         x match {
           case Add(e, a, stmts: Seq[_], bi) =>
-            val biStr = if(bi != NoValue) s"      <$bi>" else ""
+            val biStr = if (bi != NoValue) s"      <$bi>" else ""
             indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + s"List($biStr\n" +
-            stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+              stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Add(e, a, v, bi)             =>
-            val biStr = if(bi != NoValue) bi else ""
+            val biStr = if (bi != NoValue) bi else ""
             indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
-          case Retract(e, a, v, bi)    =>
-            val biStr = if(bi != NoValue) bi else ""
+
+          case Retract(e, a, v, bi) =>
+            val biStr = if (bi != NoValue) bi else ""
             indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
-          case RetractEntity(e)             =>
+          case RetractEntity(e)     =>
             indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
 
           case l: java.util.List[_] if l.size() == 4 && l.asScala.head.toString.take(4) == ":db/" => {
@@ -46,17 +47,19 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
             indent + action + padS(13, action.toString) + e + padS(34, e.toString) + a + padS(26, a.toString) + "   " + v
           }
 
-          case l: List[_] if max      => indent + "List(" + l.mkString(",   ") + ")"
-          case l: List[_]             => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: jList[_] if max     => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
-          case l: jList[_]            => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: Map[_, _] if max    => indent + "Map(" + l.mkString(",   ") + ")"
-          case l: Map[_, _]           => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Nested(bond, nested)   => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case TxMetaData(elements)   => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Composite(elements)    => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case m: Model               => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case m: java.util.Map[_, _] => {
+          case l: List[_] if max        => indent + "List(" + l.mkString(",   ") + ")"
+          case l: List[_]               => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: jList[_] if max       => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
+          case l: jList[_]              => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: ArrayBuffer[_] if max => indent + "ArrayBuffer(" + l.zipWithIndex.mkString(",   ") + ")"
+          case l: ArrayBuffer[_]        => indent + "ArrayBuffer(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: Map[_, _] if max      => indent + "Map(" + l.mkString(",   ") + ")"
+          case l: Map[_, _]             => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case Nested(bond, nested)     => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case TxMetaData(elements)     => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case Composite(elements)      => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case m: Model                 => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case m: java.util.Map[_, _]   => {
             if (m.size() == 4 && m.asScala.keys.map(_.toString).toSeq.contains(":db-before")) {
               val tx = m.asScala.toList
               indent + "Transaction(\n" +
@@ -96,10 +99,13 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
         }
       }
 
-      println(s"## $id ## $clazz \n========================================================================\n" +
-        params.toList.zipWithIndex.map { case (e, i) => traverse(e, 0, i + 1) }
-          .mkString("\n------------------------------------------------\n") +
-        s"\n========================================================================\n$stackTrace")
+      println(
+        s"## $id ## $clazz \n========================================================================\n" +
+          params.toList.zipWithIndex.map {
+            case (e, i) => traverse(e, 0, i + 1)
+          }.mkString("\n------------------------------------------------\n") +
+          s"\n========================================================================\n$stackTrace"
+      )
     }
   }
 }

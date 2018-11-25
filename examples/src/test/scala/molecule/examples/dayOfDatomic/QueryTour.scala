@@ -50,11 +50,11 @@ class QueryTour extends MoleculeSpec {
 
     // 7. Have people commented on other people?
     // Composite molecule with a User.email (a User) sharing entity id with Parent that points to a Comment author
-    m(User.email_ ~ Parent.Comment.author).get.size === 0
+    m(User.email_ + Parent.Comment.author).get.size === 0
 
     // Sanity check: 2 people are commenting on stories
     // Composite molecule with a Story.title (a Story) sharing entity id with Parent that points to a Comment author
-    m(Story.title_ ~ Parent.Comment.author).get.size === 2
+    m(Story.title_ + Parent.Comment.author).get.size === 2
   }
 
 
@@ -72,14 +72,14 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Attributes of stories having comments
-    m(Story.a.title_ ~ Parent.comment_).get.sorted === List(
+    m(Story.a.title_ + Parent.comment_).get.sorted === List(
       ":parent/comment",
       ":story/title",
       ":story/url"
     )
 
     // Attributes of comments having a sub-comment
-    m(Comment.a.text_ ~ Parent.comment_).get.sorted === List(
+    m(Comment.a.text_ + Parent.comment_).get.sorted === List(
       ":comment/author",
       ":comment/text",
       ":parent/comment"
@@ -143,10 +143,10 @@ class QueryTour extends MoleculeSpec {
 //    } yield subComments._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)
-    m(Comment.author_(editor) ~ Parent.comment).get.sorted === List(c3, c6, c8, c12)
+    m(Comment.author_(editor) + Parent.comment).get.sorted === List(c3, c6, c8, c12)
 
     // Editors comments and responses (note that c4 wasn't commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment).get.sorted === List(
+    m(Comment.author_(editor) + Parent.e.comment).get.sorted === List(
       (c2, c3),
       (c5, c6),
       (c7, c8),
@@ -154,7 +154,7 @@ class QueryTour extends MoleculeSpec {
     )
 
     // Editors comments having responses (c4 not commented on)
-    m(Comment.author_(editor) ~ Parent.e.comment_).get.sorted === List(c2, c5, c7, c11)
+    m(Comment.author_(editor) + Parent.e.comment_).get.sorted === List(c2, c5, c7, c11)
   }
 
 

@@ -6,16 +6,27 @@ import molecule.transform.exception.Dsl2ModelException
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
+
 private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
   import c.universe._
-  //  val x = DebugMacro("Dsl2Model", 801, 800)
+  val x = DebugMacro("Dsl2Model", 801, 800)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
-  private[molecule] final def getModel2(dsl: Tree): (Model, List[List[Tree]], List[List[Int => Tree]], List[List[Int => Tree]], List[String], Boolean, List[Tree], List[Int => Tree], List[Int => Tree]) = {
+  private[molecule] final def getModel(dsl: Tree): (
+    Model,
+      List[List[Tree]],
+      List[List[Int => Tree]],
+      List[List[Int => Tree]],
+      List[String],
+      Boolean,
+      List[Tree],
+      List[Int => Tree],
+      List[Int => Tree]
+    ) = {
 
-    var composite: Boolean = false
+    var isComposite: Boolean = false
     var collectCompositeElements: Boolean = false
 
     var post: Boolean = true
@@ -117,7 +128,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     }
 
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
-      if (composite) {
+      if (isComposite) {
         // x(741, prev, elements)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
@@ -162,7 +173,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         // x(500, manyRef)
         resolveNested(prev, richTree(prev), manyRef, nested)
 
-      case q"$prev.~[..$types]($subComposite)" =>
+      case q"$prev.+[..$types]($subComposite)" =>
         // x(600, prev)
         resolveComposite(prev, richTree(prev), q"$subComposite")
 
@@ -172,7 +183,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree): Seq[Element] = {
       // x(801, prev, subCompositeTree)
       post = false
-      composite = true
+      isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
       addJsonLambdas
@@ -434,6 +445,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           case "v_"         => traverseElement(prev, p, Meta("", "", "v", NoValue, modelValue("apply", null, vs)))
           case "ns_"        => traverseElement(prev, p, Atom("ns_", "?", "ns", 1, modelValue("apply", null, vs)))
         }
+
       } else if (t.isFirstNS) {
         // x(230, attrStr)
         tree match {
@@ -446,7 +458,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           case t@q"$prev.$mapAttr.apply($key)" =>
             val tpeStr = t.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
             val ns = new nsp(t.tpe.typeSymbol.owner).toString
-            // x(240, attrStr, tpeStr)
+            // // x(240, attrStr, tpeStr)
             if (attrStr.last != '_') {
               addSpecific(castKeyedMapAttr(tpeStr), tpeStr)
               addJson(jsonKeyedMapAttr, tpeStr, ns + "." + clean(mapAttr.toString))
@@ -457,7 +469,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         tree match {
           case q"$prev.$ref.apply(..$values)" if t.isRef => abort(s"Can't apply value to a reference (`$ref`)")
           case tr@q"$prev.$attr.apply(..$values)"        =>
-            // x(250, attrStr)
+            // x(260, attrStr)
             traverseElement(prev, p, resolveOp(q"$prev.$attr", richTree(q"$prev.$attr"), prev, p, attr.toString(), q"apply", q"Seq(..$values)"))
 
         }
@@ -1038,6 +1050,14 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
     val last: Int = rawElements.length
     var reversedElements: List[Element] = List.empty[Element]
+
+    // Hieararchy depth of each sub-molecule in composites
+    var compLevel = 0
+    // Top-level attributes in composites have to be unique accross sub-molecules
+    var compTopLevelAttrs: List[String] = List.empty[String]
+    // Sub-molecules in composites can build hierarchies independently, but with no duplicate attributes within the local branch
+    var compLocalAttrs: List[String] = List.empty[String]
+
     var i: Int = 0
     var after: Boolean = false
     var hasMandatory: Boolean = false
@@ -1063,6 +1083,12 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case a: Atom                       =>
           if (a.name.last != '$')
             hasMandatory = true
+
+          //          if (isComposite && duplAtoms.contains(clean(a.name)))
+          //            abort(s"Comosite molecules can't contain the same attribute more than once. Found multiple instances of `${a.name}`")
+          //          else
+          //            duplAtoms = duplAtoms :+ clean(a.name)
+
           a match {
             case a@Atom(ns, name, _, _, ReplaceValue(pairs), _, _, _) if dupValues(pairs).nonEmpty =>
               abort(s"Can't replace with duplicate values of attribute `:$ns/$name`:\n" + dupValues(pairs).mkString("\n"))
@@ -1085,9 +1111,39 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case b: Bond if i == last          => abort(s"Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
         case b: Bond                       => hasMandatory = true
         case Meta(_, "txInstant", _, _, _) => hasMandatory = true
-        case c: Composite                  => hasMandatory = true
+        case c: Composite                  =>
+          hasMandatory = true
+          // Start over for each sub-molecule
+          compLevel = 0
+          compLocalAttrs = List.empty[String]
           c.elements.foreach {
-            case n: Nested => abort("Nested molecules in composites are not implemented")
+            case _: Nested =>
+              abort("Nested molecules in composites are not implemented")
+
+            case Atom(ns, name, _, _, _, _, _, _) =>
+              if (compLevel == 0) {
+                if (compTopLevelAttrs.contains(ns + "/" + clean(name)))
+                  abort(s"Composite molecules can't contain the same attribute more than once. Found multiple instances of `:$ns/${clean(name)}`")
+                compTopLevelAttrs = compTopLevelAttrs :+ (ns + "/" + clean(name))
+              } else {
+                if (compLocalAttrs.contains(ns + "/" + clean(name)))
+                  abort(s"Composite sub-molecules can't contain the same attribute more than once. Found multiple instances of `:$ns/${clean(name)}`")
+                compLocalAttrs = compLocalAttrs :+ clean(ns + "/" + clean(name))
+              }
+
+            case Bond(ns, refAttr, _, _, _) =>
+              if (compLevel == 0) {
+                if (compTopLevelAttrs.contains(ns + "/" + clean(refAttr)))
+                  abort(s"Composite molecules can't contain the same ref more than once. Found multiple instances of `:$ns/${clean(refAttr)}`")
+                compTopLevelAttrs = compTopLevelAttrs :+ (ns + "/" + clean(refAttr))
+              } else {
+                if (compLocalAttrs.contains(ns + "/" + clean(refAttr)))
+                  abort(s"Composite sub-molecules can't contain the same ref more than once. Found multiple instances of `:$ns/${clean(refAttr)}`")
+                compLocalAttrs = compLocalAttrs :+ clean(ns + "/" + clean(refAttr))
+              }
+              compLevel += 1
+
+            case _: ReBond => compLevel -= 1
             case _         =>
           }
         case Meta(_, "e_", _, _, EntValue) => abort("Tacit entity only allowed if applying an entity id")
@@ -1127,13 +1183,14 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       case tx: TxValue_                                                                          => gs = tx :: gs
       case com@Composite(compositeElements)                                                      => compositeElements.last match {
         case txmd: TxMetaData => {
-          // Add TxValue internally to previous Atom
-          val baseElems = compositeElements.init
-          val atomWithTxValue = baseElems.last match {
-            case a: Atom    => a.copy(gs = a.gs :+ TxValue_(None))
-            case unexpected => abort("Expected attribute before `tx`. Found: " + unexpected)
-          }
-          val compositeWithTx = Composite(baseElems.init :+ atomWithTxValue :+ txmd)
+          // Find first Atom (possibly before further TxMetaData elements
+          val markedInitElements = compositeElements.init.foldRight(1, Seq.empty[Element]) {
+            case (a: Atom, (1, elems))          => (0, a.copy(gs = a.gs :+ TxValue_(None)) +: elems)
+            case (txmd: TxMetaData, (1, elems)) => (1, txmd +: elems)
+            case (unexpected, (1, _))           => abort("Expected attribute before `Tx`. Found: " + unexpected)
+            case (other, (_, elems))            => (0, other +: elems)
+          }._2
+          val compositeWithTx = Composite(markedInitElements :+ txmd)
           es = compositeWithTx :: es
         }
         case _                => es = com :: es
