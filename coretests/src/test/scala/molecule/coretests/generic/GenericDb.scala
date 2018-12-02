@@ -84,7 +84,7 @@ class GenericDb extends CoreSpec {
       (":db/cardinality", 35),
       (":db/fulltext", true),
       (":db/ident", ":ns/str"),
-//      (":db/index", true),
+      (":db/index", true),
       (":db/valueType", 23)
     )
 
@@ -92,7 +92,7 @@ class GenericDb extends CoreSpec {
     Db.e_(80L).a.v.get.map(clean).sortBy(_._1) === List(
       (":db/cardinality", 36),
       (":db/ident", ":ns/ints"),
-//      (":db/index", true),
+      (":db/index", true),
       (":db/valueType", 22) // Uses Datomic long internally
     )
 

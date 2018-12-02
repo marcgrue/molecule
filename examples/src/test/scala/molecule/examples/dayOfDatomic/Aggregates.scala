@@ -97,7 +97,7 @@ class Aggregates extends MoleculeSpec {
     // Todo: original datomic query returns count of ident
     // See https://github.com/Datomic/day-of-datomic/blob/master/tutorial/aggregates.clj#L101-L105
     //    Db.a(count).valueType(countDistinct).get.head === (38, 8)
-    Db.a(count).valueType(countDistinct).get.head === (122, 8)
+    Db.a(count).valueType(countDistinct).get.head === (124, 8)
   }
 
 

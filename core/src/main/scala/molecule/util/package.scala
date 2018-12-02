@@ -1,4 +1,4 @@
 package molecule
 
-/** Internal Java database functions for Datomic. */
+/** Internal database functions for Datomic. */
 package object util

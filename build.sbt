@@ -1,7 +1,7 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.16.0",
+  version := "0.16.1",
   scalaVersion := "2.12.7",
   scalacOptions := Seq(
     "-feature",
@@ -74,12 +74,6 @@ lazy val moleculeCoretests = project.in(file("coretests"))
       "molecule/coretests/util"
     )
   )
-//  .settings(Seq(definitionDirs(false,
-//  "molecule/coretests/bidirectionals",
-//  "molecule/coretests/nested",
-//  "molecule/coretests/schemaDef",
-//  "molecule/coretests/util"
-//)))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
@@ -95,30 +89,6 @@ lazy val moleculeExamples = project.in(file("examples"))
       "molecule/examples/seattle"
     )
   )
-//  .settings(Seq(definitionDirs(true,
-//  "molecule/examples/dayOfDatomic",
-//  "molecule/examples/gremlin",
-//  "molecule/examples/mbrainz",
-//  "molecule/examples/seattle"
-//)))
-
-//def definitionDirs(docs: Boolean, domainDirs: String*): Def.Setting[Seq[Task[Seq[File]]]] = sourceGenerators in Compile += Def.task[Seq[File]] {
-//  val codeDir = (scalaSource in Compile).value
-//  val sourceDir = (sourceManaged in Compile).value
-//
-//  // generate source files
-//  val sourceFiles = FileBuilder(codeDir, sourceDir, domainDirs.toSeq, docs)
-//
-//  // Avoid re-generating boilerplate if nothing has changed when running `sbt compile`
-//  val cache = FileFunction.cached(
-//    streams.value.cacheDirectory / "moleculeBoilerplateTesting",
-//    inStyle = FilesInfo.lastModified,
-//    outStyle = FilesInfo.hash
-//  ) {
-//    in: Set[File] => sourceFiles.toSet
-//  }
-//  cache(sourceFiles.toSet).toSeq
-//}.taskValue
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -128,9 +98,7 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   publishArtifact in Test := false,
-
   //  publishArtifact in (Compile, packageDoc) in ThisBuild := false, // create docs?
-
   scalacOptions in(Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value + "/src/main/scaladoc/rootdoc.txt"),
   pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),

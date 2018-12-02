@@ -30,6 +30,27 @@ class Retract extends CoreSpec {
     // For brevity, the synchronous equivalent `retract` is used in the following tests
   }
 
+  "Async multiple" in new CoreSetup {
+
+    // Retract data asynchronously and return Future[TxReport]
+    // Calls Datomic's transactAsync API
+
+    // Initial data
+    Ns.int.insertAsync(1, 2, 3).map { tx => // tx report from successful insert transaction
+      // 2 inserted entities
+      val List(e1, e2, e3) = tx.eids
+      Ns.int.get === List(1, 2, 3)
+
+      // Retract first entity asynchronously
+      retractAsync(Seq(e1, e2)).map { tx2 => // tx report from successful retract transaction
+        // Current data
+        Ns.int.get === List(3)
+      }
+    }
+
+    // For brevity, the synchronous equivalent `retract` is used in the following tests
+  }
+
 
   "Implicit entity" in new CoreSetup {
 

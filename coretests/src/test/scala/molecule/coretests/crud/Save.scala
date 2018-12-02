@@ -21,6 +21,7 @@ class Save extends CoreSpec {
       Ns.int.get === List(1)
     }
 
+    // Deferred resolution
     val futureSave: Future[TxReport] = Ns.str("Ben").int(42).saveAsync
 
     for {

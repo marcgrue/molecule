@@ -10,7 +10,7 @@ import scala.reflect.macros.blackbox
 private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
   import c.universe._
-  val x = DebugMacro("Dsl2Model", 801, 800)
+  val x = DebugMacro("Dsl2Model", 125, 124)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -239,8 +239,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         traverseElement(prev, p, Atom(t.ns, t.name, t.tpeS, t.card, VarValue, gs = bi(tree, t)))
 
       } else if (attrStr.head == '_') {
-        // x(124, t.tpeS)
-        traverseElement(prev, p, ReBond(firstLow(c.typecheck(tree).tpe.baseClasses.tail.head.name.toString.split("_").init.mkString("_")), ""))
+         x(124, t.tpeS)
+        traverseElement(prev, p, ReBond(firstLow(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")), ""))
 
       } else if (t.isRef) {
         // x(125, t.tpeS, t.card, t.refCard)
@@ -555,13 +555,16 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case q"$pre.apply($value)" if p.isMapAttrK      => new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
         case q"$pre.apply($value)" if p.isAttr          => richTree(pre).ns
         case q"$pre.apply($value)"                      => richTree(pre).name
-        case _ if prev.symbol.name.toString.head == '_' => firstLow(prev.tpe.baseClasses.tail.head.name.toString.split("_").init.mkString("_"))
+        case _ if prev.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""))
         case q"$pre.e" if p.isAttr                      => q"$pre".symbol.name
         case _ if p.isAttr                              => p.ns
         case _ if p.isRef                               => p.refNext
         case _                                          => p.name
       }
-      // x(510, prev, parentNs, jsons, tempJsons, post, postJsons)
+       x(510, prev, parentNs, jsons, tempJsons, post, postJsons
+
+
+       )
       val (ns, refAttr) = (firstLow(parentNs.toString), firstLow(manyRef))
       nestedRefAttrs = nestedRefAttrs :+ s"$ns.$refAttr"
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
@@ -575,7 +578,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       val nestedNs = curNs(nestedElements.head)
       if (refNext != nestedNs) {
         // Find refs in `manyRef` namespace and match the target type with the first namespace of the first nested element
-        val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isModule && e.typeSignature <:< weakTypeOf[Ref[_, _]])
+        val refs = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
         val refPairs = refs.map(r => r.name -> r.typeSignature.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name)
         val refPairsFiltered = refPairs.filter(_._2.toString == nestedNs.capitalize)
         if (refPairsFiltered.isEmpty) {

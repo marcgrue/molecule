@@ -330,7 +330,6 @@ class Comparison extends Base {
 
     // UUID (comparisons not of much relevance - only works here because we sorted the values)
 
-    Ns.uuid.uuids.>(uuid2).debugGet
     Ns.uuid.uuids.>(uuid2).get === List(
       (uuid2, Set(uuid3)),
       (uuid3, Set(uuid4))
