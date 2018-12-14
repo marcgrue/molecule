@@ -244,24 +244,60 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
   /** Transact edn files or other raw transaction data.
     * {{{
     *   val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
-    *   val newDataTx = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
+    *   val rawTxStmts = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
     *
     *   // transact
-    *   conn.transact(newDataTx)
+    *   val result: TxReport = conn.transact(rawTxStmts)
     * }}}
     *
-    * @param tx Raw transaction data, typically from edn file.
+    * @param rawTxStmts Raw transaction data, typically from edn file.
     * @return [[molecule.facade.TxReport TxReport]]
     */
-  def transact(tx: jList[AnyRef]): TxReport = if (_testDb.isDefined) {
+  def transact(rawTxStmts: jList[AnyRef]): TxReport = if (_testDb.isDefined) {
     // In-memory "transaction"
-    val txReport = TxReport(_testDb.get.`with`(tx))
+    val txReport = TxReport(_testDb.get.`with`(rawTxStmts))
     // Continue with updated in-memory db
     _testDb = Some(txReport.dbAfter.asOf(txReport.t))
     txReport
   } else {
     // Live transaction
-    TxReport(datomicConn.transact(tx).get)
+    TxReport(datomicConn.transact(rawTxStmts).get)
+  }
+
+  /** Asynchronously transact edn files or other raw transaction data.
+    * {{{
+    *   val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
+    *   val rawTxStmts = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
+    *
+    *   // transact
+    *   val result: Future[TxReport] = conn.transactAsync(rawTxStmts)
+    * }}}
+    *
+    * @param rawTxStmts Raw transaction data, typically from edn file.
+    * @return Future with [[molecule.facade.TxReport TxReport]] with result of transaction
+    */
+  def transactAsync(rawTxStmts: jList[AnyRef])(implicit ec: ExecutionContext): Future[TxReport] = if (_testDb.isDefined) {
+    Future {
+      // In-memory "transaction"
+      val txReport = TxReport(_testDb.get.`with`(rawTxStmts))
+
+      // Continue with updated in-memory db
+      // todo: why can't we just say this? Or: why are there 2 db-after db objects?
+      //      val dbAfter = txReport.dbAfter
+      val dbAfter = txReport.dbAfter.asOf(txReport.t)
+      _testDb = Some(dbAfter)
+      txReport
+    }
+  } else {
+    // Live transaction
+    val moleculeInvocationFuture = try {
+      bridgeDatomicFuture(datomicConn.transactAsync(rawTxStmts))
+    } catch {
+      case NonFatal(ex) => Future.failed(ex)
+    }
+    moleculeInvocationFuture map { moleculeInvocationResult: java.util.Map[_, _] =>
+      TxReport(moleculeInvocationResult)
+    }
   }
 
 

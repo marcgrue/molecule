@@ -33,6 +33,12 @@ object query extends Helpers {
     def toMap: String = print.toMap
     def datalog(maxLength: Int = 30): String = print.multiLine(maxLength)
     def datalog: String = datalog(30)
+    def rules: String = if (i.rules.isEmpty) "none\n\n" else "[\n " + i.rules.map(Query2String(this).p(_)).mkString("\n ") + "\n]"
+    def debug: String =
+    s"""$datalog
+       |
+       |RULES: $rules
+       |""".stripMargin
 
     override def toString: String = {
       val sep = ",\n    "
@@ -62,12 +68,11 @@ object query extends Helpers {
     override def toString: String = s"""AggrExpr("$fn", ${seq(args)}, $v)"""
   }
 
-  case class KW(ns: String, attr: String, refNs: String = "") extends QueryTerm {
-    override def toString: String = s"""KW("$ns", "$attr", "$refNs")"""
-  }
-
   sealed trait QueryValue extends QueryTerm
 
+  case class KW(ns: String, attr: String, refNs: String = "") extends QueryValue {
+    override def toString: String = s"""KW("$ns", "$attr", "$refNs")"""
+  }
   case class Var(v: String) extends QueryValue with Output {
     override def toString: String = s"""Var("$v")"""
   }
@@ -110,7 +115,7 @@ object query extends Helpers {
 
   sealed trait Clause extends QueryExpr
 
-  case class DataClause(ds: DataSource, e: Var, a: KW, v: QueryValue, tx: QueryTerm, op: QueryTerm = NoBinding) extends Clause {
+  case class DataClause(ds: DataSource, e: QueryValue, a: KW, v: QueryValue, tx: QueryTerm, op: QueryTerm = NoBinding) extends Clause {
     override def toString: String = s"""DataClause($ds, $e, $a, $v, $tx, $op)"""
   }
   case class NotClause(e: Var, a: KW) extends Clause {

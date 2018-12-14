@@ -101,7 +101,12 @@ object QueryOps extends Helpers {
 
     def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String, gs: Seq[Generic]): Query = {
       val attrClauses = if (gs.isEmpty) {
-        Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty))
+        (ns, attr) match {
+//          case ("?", "ns" | "attr")  => Seq(DataClause(ImplDS, KW("db.part", "db"), KW("db.install", "attribute"), v, Empty))
+          case ("db", "ns" | "a") => Seq(DataClause(ImplDS, KW("db.part", "db"), KW("db.install", "attribute"), v, Empty))
+          case _                     => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty))
+        }
+
       } else {
         val opValue = gs.collectFirst {
           case ov: OpValue => Some(ov)
@@ -140,8 +145,8 @@ object QueryOps extends Helpers {
 
         // unique txT/txInstant variable
         def gV(g: String): String = g + q.wh.clauses.foldLeft(Option.empty[Int]) {
-          case (None, Funct(_, _, ScalarBinding(Var(txV)))) if g == txV        => Some(2)
-          case (None, DataClause(_, _, _, Var(txV), _, _)) if g == txV         => Some(2)
+          case (None, Funct(_, _, ScalarBinding(Var(`g`))))                    => Some(2)
+          case (None, DataClause(_, _, _, Var(`g`), _, _))                     => Some(2)
           case (Some(i), Funct(_, _, ScalarBinding(Var(txV)))) if g + i == txV => Some(i + 1)
           case (Some(i), DataClause(_, _, _, Var(txV), _, _)) if g + i == txV  => Some(i + 1)
           case (count, _)                                                      => count
@@ -233,6 +238,10 @@ object QueryOps extends Helpers {
 
     // Meta ..........................................
 
+
+
+    // Generic ns/attr ..........................................
+
     def attr(e: String, v: QueryValue, v1: String, v2: String, gs: Seq[Generic]): Query = {
       // Build on from `ns` ident if it is already there
       q.wh.clauses.collectFirst {
@@ -254,6 +263,45 @@ object QueryOps extends Helpers {
           .ident("ns", v1)
           .func(".getNamespace ^clojure.lang.Keyword", Seq(Var(v1)), ScalarBinding(Var(v2)))
     }
+
+
+    // Db ns/attr ..........................................
+
+    def findWithValue(v: String, gs: Seq[Generic]): Query = {
+      // Build on from `ns` ident if it is already there
+      q.wh.clauses.reverse.collectFirst {
+        // `ns`
+        case DataClause(ImplDS, KW("db.part", "db", _), KW("db.install", "attribute", _), Var(b), _, _) => q.find(v, gs, b)
+        // `a`
+        case DataClause(ImplDS, _, KW("?", "attr", _), Var(b), _, _) => q.find(v, gs, b)
+      }.getOrElse(throw new QueryOpsException("Generic `v` has to have a generic attribute `a` before."))
+    }
+
+    def attr(e: String, v: String, v1: String, v2: String, gs: Seq[Generic]): Query = {
+      // Build on from `ns` ident if it preceeds `a`
+      q.wh.clauses.collectFirst {
+        case DataClause(ImplDS, _, KW("db", "ident", _), Var(b), _, _) =>
+          q.func("name", Seq(Var(b)), ScalarBinding(Var(v2)))
+      } getOrElse
+        q.where(e, "?", "attr", Var(v), "", gs)
+          .ident(v, v1)
+          .func("name", Seq(Var(v1)), ScalarBinding(Var(v2)))
+    }
+
+    def ns(e: String, v: String, v1: String, v2: String, gs: Seq[Generic]): Query = {
+      // Build on from `attr` ident if it is already there
+      q.wh.clauses.collectFirst {
+        case DataClause(ImplDS, Var("attr"), KW("db", "ident", _), Var(b), _, _) =>
+          q.func(".getNamespace ^clojure.lang.Keyword", Seq(Var(b)), ScalarBinding(Var(v2)))
+      } getOrElse
+        q.where(e, "?", "ns", Var(v), "", gs)
+          .ident(v, v1)
+          .func(".getNamespace ^clojure.lang.Keyword", Seq(Var(v1)), ScalarBinding(Var(v2)))
+    }
+
+    def attrId(v: String): Query =
+      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, KW("db.part", "db"), KW("db.install", "attribute"), Var(v), Empty)))
+
 
 
     // Extra ..........................................
@@ -299,6 +347,7 @@ object QueryOps extends Helpers {
           case other    =>
             q.func(".compareTo ^" + castStr(a.tpeS), Seq(Var(v), qv), ScalarBinding(w))
         }
+        case "ns" | "a"     => q.func(".compareTo ^String", Seq(Var(v), qv), ScalarBinding(w))
         case _              => q.func(".compareTo ^" + castStr(a.tpeS), Seq(Var(v), qv), ScalarBinding(w))
       }
       q1.func(op, Seq(w, Val(0)))
@@ -419,9 +468,10 @@ object QueryOps extends Helpers {
       case other     => other
     }
 
-    def orRules(e: String, a: Atom, args: Seq[Any], uriV: String = "", fulltext: Boolean = false): Query = {
+    def orRules(e: String, a: Atom, args: Seq[Any], specialV: String = "", flag: Boolean = false): Query = {
       val ruleName = "rule" + (q.i.rules.map(_.name).distinct.size + 1)
-      val orRules = if (fulltext && a.card == 2) {
+      val orRules = if (flag && a.card == 2) {
+        // Fulltext search for card-many attribute
         val ruleClauses = args.zipWithIndex.map { case (arg, i) =>
           Funct("fulltext", Seq(DS(""), KW(a.ns, a.name), Val(arg)), RelationBinding(List(Var(e), Var(e + "_" + (i + 1)))))
         }
@@ -429,27 +479,30 @@ object QueryOps extends Helpers {
       } else {
         args.zipWithIndex.distinct.flatMap { case (arg, i) =>
           val ruleClauses = arg match {
-            case set: Set[_] if uriV.nonEmpty => set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
-              val x = Var(uriV + "_" + (j + 1))
+            case set: Set[_] if specialV.nonEmpty => set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
+              val x = Var(specialV + "_" + (j + 1))
               Seq(
                 DataClause(ImplDS, Var(e), KW(a.ns, a.name), x, Empty),
                 Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(x))
               )
             }
-            case set: Set[_]                  => set.toSeq.map(arg =>
+            case set: Set[_]                      => set.toSeq.map(arg =>
               DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, arg)), Empty)
             )
-            case mapArg if a.card == 3        => Seq(
+            case mapArg if a.card == 3            => Seq(
               Funct(".matches ^String", Seq(Var(e), Val(".+@" + esc(mapArg))), NoBinding)
             )
-            case uri if uriV.nonEmpty         => Seq(
-              DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(uriV), Empty),
-              Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(Var(uriV)))
+            case ns if specialV.nonEmpty && flag  => Seq(
+              Funct("=", Seq(Var(specialV), Val(arg)), NoBinding)
             )
-            case _ if fulltext                => Seq(
+            case uri if specialV.nonEmpty         => Seq(
+              DataClause(ImplDS, Var(e), KW(a.ns, a.name), Var(specialV), Empty),
+              Funct( s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(Var(specialV)))
+            )
+            case fulltext if flag                 => Seq(
               Funct("fulltext", Seq(DS(""), KW(a.ns, a.name), Val(arg)), RelationBinding(List(Var(e), Var(e + "_" + (i + 1)))))
             )
-            case _                            => Seq(
+            case _                                => Seq(
               DataClause(ImplDS, Var(e), KW(a.ns, a.name), Val(pre(a, esc(arg))), Empty)
             )
           }
@@ -458,22 +511,6 @@ object QueryOps extends Helpers {
       }
       val newIn = q.i.copy(ds = (q.i.ds :+ DS).distinct, rules = q.i.rules ++ orRules)
       val newWhere = Where(q.wh.clauses :+ RuleInvocation(ruleName, Seq(Var(e))))
-      q.copy(i = newIn, wh = newWhere)
-    }
-
-    def transitive(ns: String, attr: String, v1: String, v2: String, depth: Int): Query = {
-      val newRules: Seq[Rule] = 1 to depth map {
-        case 1 => Rule("transitive1", Seq(Var("attr"), Var("tra1"), Var("tra2")), Seq(
-          DataClause(ImplDS, Var("x"), KW("?", "attr"), Var("tra1"), Empty),
-          DataClause(ImplDS, Var("x"), KW("?", "attr"), Var("tra2"), Empty),
-          Funct("!=", Seq(Var("tra1"), Var("tra2")), NoBinding)))
-        case n => Rule(s"transitive$n", Seq(Var("attr"), Var("tra1"), Var("tra2")), Seq(
-          RuleInvocation(s"transitive${n - 1}", Seq(KW("?", "attr"), Var("tra1"), Var("tra3"))),
-          RuleInvocation(s"transitive${n - 1}", Seq(KW("?", "attr"), Var("tra3"), Var("tra2"))),
-          Funct("!=", Seq(Var("tra1"), Var("tra2")), NoBinding)))
-      }
-      val newIn = q.i.copy(ds = (q.i.ds :+ DS).distinct, rules = (q.i.rules ++ newRules).distinct)
-      val newWhere = Where(q.wh.clauses :+ RuleInvocation("transitive" + depth, Seq(KW(ns, attr), Var(v1), Var(v2))))
       q.copy(i = newIn, wh = newWhere)
     }
 

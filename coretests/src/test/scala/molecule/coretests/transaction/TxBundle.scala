@@ -17,16 +17,16 @@ class TxBundle extends CoreSpec {
     val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     // Transact multiple molecule statements in one bundled transaction
-transact(
-  // retract
-  e1.getRetractTx,
-  // save
-  Ns.int(4).getSaveTx,
-  // insert
-  Ns.int.getInsertTx(List(5, 6)),
-  // update
-  Ns(e2).int(20).getUpdateTx
-)
+    transact(
+      // retract
+      e1.getRetractTx,
+      // save
+      Ns.int(4).getSaveTx,
+      // insert
+      Ns.int.getInsertTx(List(5, 6)),
+      // update
+      Ns(e2).int(20).getUpdateTx
+    )
 
     // Data after group transaction
     Ns.int.get.sorted === List(

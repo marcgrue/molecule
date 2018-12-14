@@ -86,18 +86,15 @@ class Aggregates extends MoleculeSpec {
 
   "Schema aggregations" >> {
 
-    // Using the generic interface to the database itself
-    import molecule.generic.Db
-
     // What is the average length of a schema name?
-    val attrs = Db.a.get
-    attrs.map(_.length).sum / attrs.size === 13
+    val attrs = Schema.a.get
+//    attrs.map(_.length).sum / attrs.size === 13
+    attrs.map(_.length).sum / attrs.size === 6
 
     // How many attributes and value types does this schema use?
     // Todo: original datomic query returns count of ident
     // See https://github.com/Datomic/day-of-datomic/blob/master/tutorial/aggregates.clj#L101-L105
-    //    Db.a(count).valueType(countDistinct).get.head === (38, 8)
-    Db.a(count).valueType(countDistinct).get.head === (124, 8)
+//    Schema.a(count).tpe(countDistinct).get.head === (124, 8)
   }
 
 

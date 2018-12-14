@@ -1,8 +1,8 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.16.1",
-  scalaVersion := "2.12.7",
+  version := "0.17.0",
+  scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",
     "-language:implicitConversions",
@@ -11,7 +11,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     //    "-Ystatistics",
     //    "-Ymacro-debug-lite",
     //    "-Xprint",
-    //    "-Ymacro-debug-verbose",
+//        "-Ymacro-debug-verbose",
     //    "-Yshow-trees-stringified",
     //    "-Yshow-trees"
     //    "-Yquasiquote-debug"
@@ -69,6 +69,7 @@ lazy val moleculeCoretests = project.in(file("coretests"))
     moduleName := "molecule-coretests",
     moleculeSchemas := Seq(
       "molecule/coretests/bidirectionals",
+      "molecule/coretests/generic",
       "molecule/coretests/nested",
       "molecule/coretests/schemaDef",
       "molecule/coretests/util"

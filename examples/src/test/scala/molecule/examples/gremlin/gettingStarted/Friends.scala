@@ -172,6 +172,48 @@ class Friends extends MoleculeSpec {
     )
 
     // How many young friends does the older people have?
+    Person.name.age.>=(30).Friends.e(count).age_.<(30).debugGet
+
+    // todo
+//    Person.name.age.>=(30).Friends.e_(vadas).age.debugGet
+
+    /*
+
+    --------------------------------------------------------------------------
+Model(List(
+  Atom("person", "name", "String", 1, VarValue, None, Seq(), Seq()),
+  Atom("person", "age", "Int", 1, Ge(30), None, Seq(NoValue), Seq()),
+  Bond("person", "friends", "person", 2, Seq(BiSelfRef(2))),
+  Meta("friends", "e", "e", NoValue, Fn("count", None)),
+  Atom("person", "age_", "Int", 1, Lt(30), None, Seq(), Seq())))
+
+Query(
+  Find(List(
+    Var("b"),
+    Var("c"),
+    AggrExpr("count", Seq(), Var("a")))),
+  Where(List(
+    DataClause(ImplDS, Var("a"), KW("person", "name", ""), Var("b"), Empty, NoBinding),
+    DataClause(ImplDS, Var("a"), KW("person", "age", ""), Var("c"), NoBinding, NoBinding),
+    Funct(".compareTo ^Long", Seq(Var("c"), Val(30)), ScalarBinding(Var("c2"))),
+    Funct(">=", Seq(Var("c2"), Val(0)), NoBinding),
+    DataClause(ImplDS, Var("a"), KW("person", "friends", "person"), Var("d"), Empty, NoBinding),
+    DataClause(ImplDS, Var("a"), KW("person", "age", ""), Var("d"), Empty, NoBinding),
+    Funct(".compareTo ^Long", Seq(Var("d"), Val(30)), ScalarBinding(Var("d2"))),
+    Funct("<", Seq(Var("d2"), Val(0)), NoBinding))))
+
+[:find  ?b ?c (count ?a)
+ :where [?a :person/name ?b]
+        [?a :person/age ?c]
+        [(.compareTo ^Long ?c 30) ?c2]
+        [(>= ?c2 0)]
+        [?a :person/friends ?d]
+        [?a :person/age ?d]
+        [(.compareTo ^Long ?d 30) ?d2]
+        [(< ?d2 0)]]
+
+    */
+
     Person.name.age.>=(30).Friends.e(count).age_.<(30).get === List(
       ("josh", 32, 1), // josh (32) knows 1
       ("peter", 35, 1) // peter (35) knows 1

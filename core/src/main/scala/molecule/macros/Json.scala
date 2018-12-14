@@ -15,6 +15,7 @@ private[molecule] trait Json extends TreeOps {
   val jsonOneAttr: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
     case "String"         => (i: Int) => q"jsonOneQuoted(sb, $field, row, $i)"
     case "Int"            => (i: Int) => q"jsonOne(sb, $field, row, $i)"
+    case "Int2"           => (i: Int) => q"jsonOne(sb, $field, row, $i)"
     case "Float"          => (i: Int) => q"jsonOne(sb, $field, row, $i)"
     case "Boolean"        => (i: Int) => q"jsonOneToString(sb, $field, row, $i)"
     case "Long"           => (i: Int) => q"jsonOneToString(sb, $field, row, $i)"

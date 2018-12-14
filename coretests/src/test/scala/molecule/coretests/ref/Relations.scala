@@ -71,8 +71,7 @@ class Relations extends CoreSpec {
     // Avoid mixing update/save semantics
     (Ns(id).Refs1.int1(1).save must throwA[VerifyModelException])
       .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
-      "[unexpectedAppliedId]  Can't save molecule with an applied eid as in `Ns(eid)`. " +
-      """Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
+      "[unexpectedAppliedId]  Applying an eid is only allowed for updates."
 
     // Updating across namespaces not allowed
 

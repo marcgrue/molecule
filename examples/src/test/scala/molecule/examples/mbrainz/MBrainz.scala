@@ -66,8 +66,7 @@ class MBrainz extends MoleculeSpec {
   "Collaboration" >> {
 
     // Who collaborated with one of the Beatles?
-    // Repeated attributes are translated to transitive lookups
-
+    // Repeated attributes was translated to transitive lookups - model graph instead... todo
     // Todo: model as graph with bidirectional relationships
     //
     //    Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.get === List(

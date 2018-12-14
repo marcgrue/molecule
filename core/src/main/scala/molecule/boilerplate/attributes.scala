@@ -117,6 +117,7 @@ object attributes {
   trait OneUUID$      [Ns] extends OneValueAttr$[Ns, UUID      ]
   trait OneURI$       [Ns] extends OneValueAttr$[Ns, URI       ]
   trait OneByte$      [Ns] extends OneValueAttr$[Ns, Byte      ]
+  trait OneAny$       [Ns] extends OneValueAttr$[Ns, Any       ]
 
 
   trait ManyValueAttr$[Ns, TT, T] extends ValueAttr$[T] with OptionalExpr[Ns, TT]

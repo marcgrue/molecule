@@ -61,12 +61,10 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   // Avoid mixing insert/update style
   private def unexpectedAppliedId: Element = model.elements.head match {
-    case Meta(ns, _, "e", NoValue, Eq(List(eid)))  => err("unexpectedAppliedId",
-      s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
-        s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
-    case Meta(ns, _, "ns", NoValue, Eq(List(eid))) => err("unexpectedAppliedId",
-      s"Can't $op molecule with an applied eid as in `${ns.capitalize}(eid)`. " +
-        s"""Applying an eid is for updates, like `${Ns(ns)}(johnId).likes("pizza").update`""")
+    case Meta(_, _, "e", NoValue, Eq(List(eid)))  => err("unexpectedAppliedId",
+        s"""Applying an eid is only allowed for updates.""")
+    case Meta(_, _, "ns", NoValue, Eq(List(eid))) => err("unexpectedAppliedId",
+        s"""Applying an eid is only allowed for updates.""")
     case ok                                        => ok
   }
   private def missingAppliedId: Boolean = model.elements.head match {
@@ -112,10 +110,6 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     }
     detectTacitAttrs(model.elements)
   }
-
-  //  private def noTransitiveAttrs = model.elements collectFirst {
-  //    case t: Transitive => err("noTransitiveAttrs", s"Can't $op transitive attribute values (repeated attributes).")
-  //  }
 
   private def missingAttrInStartEnd {
     model.elements.foldLeft(Seq[Element]()) {

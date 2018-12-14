@@ -126,7 +126,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         if attr.last == '$' && enumPrefix.init.last == '$'       => a.copy(name = attr.init, enumPrefix = Some(enumPrefix.init.init + "/"))
       case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '$' => a.copy(name = attr.init)
       case b@Bond(_, attr, _, _, _) if attr.last == '$'          => b.copy(refAttr = attr.init)
-      case t@Transitive(_, attr, _, _, _) if attr.last == '$'    => t.copy(refAttr = attr.init)
       case Nested(ref, es)                                       => Nested(ref, replace$(es))
       case other                                                 => other
     }

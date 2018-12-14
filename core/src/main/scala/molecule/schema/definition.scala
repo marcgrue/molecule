@@ -455,6 +455,19 @@ object definition {
   object manyEnum extends manyEnum
 
 
+
+  // Any ---------------------------------------------------------
+
+  /** Internal card-one Any attribute for multi-typed values in log and indexes.
+    *
+    * Do _not_ use in custom schema definitions.
+    *
+    * It is only implemented internally for generic log and indexes.
+    * @group one
+    */
+  private[molecule] object oneAny extends optionBuilder[oneString]
+
+
   // References ---------------------------------------------------------
 
   /** Card-one reference.

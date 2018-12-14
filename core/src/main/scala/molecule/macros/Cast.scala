@@ -15,6 +15,7 @@ private[molecule] trait Cast extends TreeOps {
   def castOneAttr(tpe: String): Int => Tree = tpe match {
     case "String"         => (i: Int) => q"castOne[String](row, $i)"
     case "Int"            => (i: Int) => q"castOneInt(row, $i)"
+    case "Int2"           => (i: Int) => q"castOneInt2(row, $i)"
     case "Float"          => (i: Int) => q"castOneFloat(row, $i)"
     case "Boolean"        => (i: Int) => q"castOne[Boolean](row, $i)"
     case "Long"           => (i: Int) => q"castOne[Long](row, $i)"

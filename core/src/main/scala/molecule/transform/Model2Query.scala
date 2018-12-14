@@ -1,7 +1,7 @@
 package molecule
 package transform
-import molecule.ast.model.{Transitive, _}
-import molecule.ast.query.{Val, _}
+import molecule.ast.model._
+import molecule.ast.query._
 import molecule.ops.QueryOps._
 import molecule.transform.exception.Model2QueryException
 import molecule.util.{Debug, Helpers}
@@ -19,12 +19,27 @@ import molecule.util.{Debug, Helpers}
 object Model2Query extends Helpers {
   val x = Debug("Model2Query", 1, 19)
 
+  val genericNamespaces = Seq("?", "schema", "eavt", "aevt", "avet", "vaet", "log")
+
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
   var nestedEntityVars   : List[Var]   = List.empty[Var]
+  //  var genericValues      : List[GenericValue] = List.empty[GenericValue]
+  var attrId             : String      = ""
+  var attrIdent          : String      = ""
+  var attrNs             : String      = ""
+  var attrName           : String      = ""
+  var attrValue          : String      = ""
 
   def apply(model: Model): (Query, Option[Query]) = {
+
     // reset on each apply
     nestedEntityClauses = Nil
+    attrId = ""
+    attrIdent = ""
+    attrNs = ""
+    attrName = ""
+    attrValue = ""
+
     val query = model.elements.foldLeft((Query(), "a", "b", "", "", "")) {
       case ((query_, e, v, prevNs, prevAttr, prevRefNs), element) => make(model, query_, element, e, v, prevNs, prevAttr, prevRefNs)
     }._1
@@ -77,12 +92,18 @@ object Model2Query extends Helpers {
 
   def makeBond(model: Model, query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = bond match {
-    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional) => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, refAttr, refNs, _, _)                    => (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
-    case Bond(`prevAttr`, refAttr, refNs, _, _)                  => (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
-    case Bond(`prevRefNs`, refAttr, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
-    case Bond(ns, refAttr, refNs, _, _)                          => (resolve(query, e, v, bond), e, v, ns, refAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional) =>
+      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                 =>
+      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, refAttr, refNs, _, _)                    =>
+      (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
+    case Bond(`prevAttr`, refAttr, refNs, _, _)                  =>
+      (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
+    case Bond(`prevRefNs`, refAttr, refNs, _, _)                 =>
+      (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
+    case Bond(ns, refAttr, refNs, _, _)                          =>
+      (resolve(query, e, v, bond), e, v, ns, refAttr, refNs)
   }
 
   def makeAtomUnify(model: Model, query: Query, a: Atom, ns: String, attr: String, e: String, v: String, w: String, prevNs: String)
@@ -111,7 +132,7 @@ object Model2Query extends Helpers {
   : (Query, String, String, String, String, String) = {
     val backRef = rb.backRef
     val backRefE = query.wh.clauses.reverse.collectFirst {
-      case DataClause(_, backE, a, Var(backV), _, _) if a.ns == backRef => backE.v
+      case DataClause(_, Var(backE), a, Var(_), _, _) if a.ns == backRef => backE
     } getOrElse {
       throw new Model2QueryException(s"Can't find back reference namespace `$backRef` in query so far:\n$model\n---------\n$query\n---------\n$rb")
     }
@@ -120,15 +141,26 @@ object Model2Query extends Helpers {
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = meta match {
-    case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", NoValue, Eq(eids))                     => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        => (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", _, IndexVal)                           => (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
-    case Meta(ns, attr, "r", _, IndexVal)                           => (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
-    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         => (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" => (resolve(query, e, y, meta), e, y, ns, attr, "")
-    case Meta(ns, attr, "e", NoValue, EntValue)                     => (resolve(query, v, w, meta), v, w, ns, attr, "")
-    case Meta(ns, attr, _, _, _)                                    => (resolve(query, e, v, meta), e, v, ns, attr, "")
+    case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  =>
+      (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
+    case Meta(ns, attr, "e", NoValue, Eq(eids))                     =>
+      (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
+    case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        =>
+      (resolve(query, e, v, meta), e, w, ns, attr, "")
+    case Meta(ns, attr, "e", _, IndexVal)                           =>
+      (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
+    case Meta(ns, attr, "r", _, IndexVal)                           =>
+      (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
+    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         =>
+      (resolve(query, e, v, meta), e, w, ns, attr, "")
+    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" =>
+      (resolve(query, e, y, meta), e, y, ns, attr, "")
+    case Meta(ns, attr, "e", NoValue, EntValue)                     =>
+      (resolve(query, v, w, meta), v, w, ns, attr, "")
+    case Meta(ns, attr, _, _, _) if prevRefNs.nonEmpty              =>
+      (resolve(query, e, v, meta), v, w, ns, attr, prevNs)
+    case Meta(ns, attr, _, _, _)                                    =>
+      (resolve(query, e, v, meta), e, v, ns, attr, "")
   }
 
   def makeTxMetaData(model: Model, query: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
@@ -160,11 +192,6 @@ object Model2Query extends Helpers {
         case other                                                                 =>
           throw new Model2QueryException(s"Unexpected first clause of composite query: " + other)
       }
-      //      query.wh.clauses.reverse.collectFirst {
-      //        case DataClause(_, Var(lastE), KW(ns, _, _), _, _, _) if ns != "db" => lastE
-      //      } getOrElse query.wh.clauses.reverse.collectFirst {
-      //        case Funct(_, Seq(Var(lastE)), _) => lastE
-      //      }.getOrElse(throw new Model2QueryException(s"Couldn't find `e` from last data clause"))
     }
 
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = composite.elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
@@ -176,123 +203,232 @@ object Model2Query extends Helpers {
   def resolve(q: Query, e: String, v: String, element: Element): Query = {
     val (v1: String, v2: String, v3: String) = (v + 1, v + 2, v + 3)
     element match {
-      case atom: Atom                                      => resolveAtom(q, e, atom, v, v1, v2, v3)
-      case Bond(ns, refAttr, refNs, _, _)                  => q.ref(e, ns, refAttr, v, refNs)
-      case meta: Meta                                      => resolveMeta(q, e, meta, v, v1, v2, v3)
-      case ReBond(backRef, refAttr, refNs, _, _)           => q.ref(e, backRef, refAttr, v, refNs)
-      case Transitive(backRef, refAttr, _, depth, prevVar) => q.transitive(backRef, refAttr, prevVar, v, depth)
-      case unresolved                                      => throw new Model2QueryException("Unresolved model: " + unresolved)
+      case atom: Atom                            => resolveAtom(q, e, atom, v, v1, v2, v3)
+      case Bond(ns, refAttr, refNs, _, _)        => q.ref(e, ns, refAttr, v, refNs)
+      case meta: Meta                            => resolveMeta(q, e, meta, v, v1, v2, v3)
+      case ReBond(backRef, refAttr, refNs, _, _) => q.ref(e, backRef, refAttr, v, refNs)
+      case unresolved                            => throw new Model2QueryException("Unresolved model: " + unresolved)
     }
   }
 
   def resolveAtom(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val (opt: Boolean, tacit: Boolean) = (a.name.last == '$', a.name.last == '_')
-    a match {
-      // Manipulation (not relevant to queries)
-      case Atom(_, _, _, _, AssertValue(_) | ReplaceValue(_) | RetractValue(_) | AssertMapPairs(_) | ReplaceMapPairs(_) | RetractMapKeys(_), _, _, _) => q
+    if (genericNamespaces.contains(a.ns)) a.ns match {
+      case "?"      => resolveGenericAtom(q, e, a, v, v1, v2, v3)
+      case "schema" => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+      //      case "eavt"   => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+      //      case "aevt"   => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+      //      case "avet"   => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+      //      case "vaet"   => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+      //      case "log"    => resolveSchemaAtom(q, e, a, v, v1, v2, v3)
+    } else {
+      a match {
+        // Manipulation (not relevant to queries, only to transactions)
+        case Atom(_, _, _, _, AssertValue(_) | ReplaceValue(_) | RetractValue(_) | AssertMapPairs(_) | ReplaceMapPairs(_) | RetractMapKeys(_), _, _, _) => q
 
-      // Generic
-      case a@Atom("?", "attr_", _, _, _, _, _, _) => resolveGenericAttrTacit(q, e, a, v, v1, v2, v3)
-      case a@Atom("?", "attr", _, _, _, _, _, _)  => resolveGenericAttrMandatory(q, e, a, v, v1, v2, v3)
-      case a@Atom("ns_", "?", _, _, _, _, _, _)   => resolveGenericNsTacit(q, e, a, v, v1, v2, v3)
-      case a@Atom("ns", "?", _, _, _, _, _, _)    => resolveGenericNsMandatory(q, e, a, v, v1, v2, v3)
+        // Generic
+        //        case a@Atom("?", "a_", _, _, _, _, _, _)  => resolveGenericAttrTacit(q, e, a, v, v1, v2, v3)
+        //        case a@Atom("?", "a", _, _, _, _, _, _)   => resolveGenericAttrMandatory(q, e, a, v, v1, v2, v3)
+        //        case a@Atom("?", "ns_", _, _, _, _, _, _) => resolveGenericNsTacit(q, e, a, v, v1, v2, v3)
+        //        case a@Atom("?", "ns", _, _, _, _, _, _)  => resolveGenericNsMandatory(q, e, a, v, v1, v2, v3)
 
-      // Enum
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional2(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional1(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveAtomEnumTacit(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveAtomEnumMandatory2(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveAtomEnumMandatory1(q, e, a, v, v1, v2, v3, prefix)
+        // Enum
+        case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional2(q, e, a, v, v1, v2, prefix)
+        case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional1(q, e, a, v, v1, v2, prefix)
+        case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveAtomEnumTacit(q, e, a, v, v1, v2, v3, prefix)
+        case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveAtomEnumMandatory2(q, e, a, v, v1, v2, v3, prefix)
+        case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveAtomEnumMandatory1(q, e, a, v, v1, v2, v3, prefix)
 
-      // Atom
-      case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v)
-      case a@Atom(_, _, _, 1, _, _, _, _) if opt       => resolveAtomOptional1(q, e, a, v)
-      case a@Atom(_, _, _, 1 | 2, _, _, _, _) if tacit => resolveAtomTacit(q, e, a, v, v1)
-      case a@Atom(_, _, _, 2, _, _, _, _)              => resolveAtomMandatory2(q, e, a, v, v1, v2)
-      case a@Atom(_, _, _, 1, _, _, _, _)              => resolveAtomMandatory1(q, e, a, v, v1, v2)
+        // Atom
+        case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v)
+        case a@Atom(_, _, _, 1, _, _, _, _) if opt       => resolveAtomOptional1(q, e, a, v)
+        case a@Atom(_, _, _, 1 | 2, _, _, _, _) if tacit => resolveAtomTacit(q, e, a, v, v1)
+        case a@Atom(_, _, _, 2, _, _, _, _)              => resolveAtomMandatory2(q, e, a, v, v1, v2)
+        case a@Atom(_, _, _, 1, _, _, _, _)              => resolveAtomMandatory1(q, e, a, v, v1, v2)
 
-      // Mapped attributes
-      case a@Atom(_, _, _, 3, _, _, _, _) if opt      => resolveAtomMapOptional(q, e, a, v)
-      case a@Atom(_, _, _, 3, _, _, _, keys) if tacit => resolveAtomMapTacit(q, e, a, v, keys)
-      case a@Atom(_, _, _, 3, _, _, _, keys)          => resolveAtomMapMandatory(q, e, a, v, keys)
+        // Mapped attributes
+        case a@Atom(_, _, _, 3, _, _, _, _) if opt      => resolveAtomMapOptional(q, e, a, v)
+        case a@Atom(_, _, _, 3, _, _, _, keys) if tacit => resolveAtomMapTacit(q, e, a, v, keys)
+        case a@Atom(_, _, _, 3, _, _, _, keys)          => resolveAtomMapMandatory(q, e, a, v, keys)
 
-      // Keyed mapped attributes
-      case a@Atom(_, _, _, 4, _, _, _, _) if opt            => resolveAtomKeyedMapOptional(q, e, a)
-      case a@Atom(_, _, _, 4, _, _, _, key :: Nil) if tacit => resolveAtomKeyedMapTacit(q, e, a, v, v1, v2, key)
-      case a@Atom(_, _, _, 4, _, _, _, key :: Nil)          => resolveAtomKeyedMapMandatory(q, e, a, v, v1, v2, v3, key)
+        // Keyed mapped attributes
+        case a@Atom(_, _, _, 4, _, _, _, _) if opt            => resolveAtomKeyedMapOptional(q, e, a)
+        case a@Atom(_, _, _, 4, _, _, _, key :: Nil) if tacit => resolveAtomKeyedMapTacit(q, e, a, v, v1, v2, key)
+        case a@Atom(_, _, _, 4, _, _, _, key :: Nil)          => resolveAtomKeyedMapMandatory(q, e, a, v, v1, v2, v3, key)
+      }
     }
   }
 
+  def resolveGenericAtom(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.name match {
+    case "a_"  => resolveGenericAttrTacit(q, e, a, v, v1, v2, v3)
+    case "a"   => resolveGenericAttrMandatory(q, e, a, v, v1, v2, v3)
+    case "ns_" => resolveGenericNsTacit(q, e, a, v, v1, v2, v3)
+    case "ns"  => resolveGenericNsMandatory(q, e, a, v, v1, v2, v3)
+  }
+
+  def resolveSchemaAtom(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.name match {
+    case "a_"  => resolveSchemaAttrTacit(q, e, a, v, v1, v2, v3)
+    case "a"   => resolveSchemaAttrMandatory(q, e, a, v, v1, v2, v3)
+    case "ns_" => resolveSchemaNsTacit(q, e, a, v, v1, v2, v3)
+    case "ns"  => resolveSchemaNsMandatory(q, e, a, v, v1, v2, v3)
+  }
+
+
   def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta match {
-    case Meta(_, _, "e", _, Fn("count", Some(i)))                => q.find("count", Seq(i), e, Nil)
-    case Meta(_, _, "e", _, Fn("count", _))                      => q.find("count", Nil, e, Nil)
-    case Meta(_, _, "e", _, Length(Some(Fn(_, _))))              => q.find(e, Nil)
-    case Meta(ns, attr, "e", _, Eq(Seq(Qm))) if attr.last == '_' => q.in(e, ns, attr, e)
-    case Meta(_, _, "e", _, Eq(Seq(Qm)))                         => q.find(e, Nil).in(e)
-    case Meta(_, attr, "e", _, Eq(eids)) if attr.last == '_'     => q.in(eids, e)
-    case Meta(_, _, "e", _, Eq(eids))                            => q.find(e, Nil).in(eids, e)
-    case Meta(_, _, "r", _, IndexVal)                            => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, Id(eid), IndexVal)                        => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _, IndexVal)                              => q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, attr, _, _, EntValue) if attr.last == '_'       => q
-    case Meta(_, _, _, _, EntValue)                              => q.find(e, Nil)
-    case Meta(_, _, _, _, _)                                     => q
+    //    case Meta(_, _, "e", _, Fn("count", Some(i)))                => q.find("count", Seq(i), e, Nil)
+    case Meta("?", _, _, _, _)                                   =>
+      resolveGenericMeta(q, e, meta, v, v1, v2, v3)
+    case Meta(_, _, "e", _, Fn("count", _))                      =>
+      q.find("count", Nil, e, Nil)
+    case Meta(ns, attr, "e", _, Eq(Seq(Qm))) if attr.last == '_' =>
+      q.in(e, ns, attr, e)
+    case Meta(_, _, "e", _, Eq(Seq(Qm)))                         =>
+      q.find(e, Nil).in(e)
+    case Meta(_, attr, "e", _, Eq(eids)) if attr.last == '_'     =>
+      q.in(eids, e)
+    case Meta(_, _, "e", _, Eq(eids))                            =>
+      q.find(e, Nil).in(eids, e)
+    case Meta(_, _, "r", _, IndexVal)                            =>
+      q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, Id(eid), IndexVal)                        =>
+      q.find(v, Nil).func("molecule.util.fns/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, _, IndexVal)                              =>
+      q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, attr, _, _, EntValue) if attr.last == '_'       =>
+      q
+    case Meta(_, _, _, _, EntValue)                              =>
+      q.find(e, Nil)
+    case Meta(_, _, _, _, _)                                     =>
+      q
+  }
+
+  def lastV(q: Query, e0: String): String = q.wh.clauses.reverse.collectFirst {
+    case DataClause(_, _, KW(_, _, refNs), Var(refE), _, _) if refNs.nonEmpty => refE
+    case DataClause(_, Var(eid), _, _, _, _)                                  => eid
+  }.getOrElse(e0)
+
+  def resolveGenericMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
+    case "e"  => resolveGenericMetaMandatoryE(q, e, meta, v, v1, v2, v3)
+    case "e_" => resolveGenericMetaOptionalE(q, e, meta, v, v1, v2, v3)
+  }
+
+  def resolveGenericMetaMandatoryE(q: Query, e0: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = {
+    val gs = meta.generic
+    val e = lastV(q, e0)
+    meta.value match {
+      case Eq(eids)       => q.find(e, Nil).in(eids, e)
+      case Fn("count", _) => q.find("count", Nil, e, Nil)
+      case other          => throw new Model2QueryException("Unexpected value: " + other)
+    }
+  }
+
+
+  def resolveGenericMetaOptionalE(q: Query, e0: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = {
+    meta.value match {
+      case Eq(eids)       => q.in(eids, lastV(q, e0))
+      case Fn("count", _) => q
+      case other          => throw new Model2QueryException("Unexpected value: " + other)
+    }
   }
 
 
   def resolveGenericAttrTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.value match {
-    case Distinct                  => q.attr(e, Var(v), v1, v2, a.gs)
-    case Fn(fn, Some(i))           => q.attr(e, Var(v), v1, v2, a.gs)
-    case Fn(fn, _)                 => q.attr(e, Var(v), v1, v2, a.gs)
-    case Length(Some(Fn(fn, _)))   => q.attr(e, Var(v), v1, v2, a.gs).func("count", Var(v2), v3)
-    case Length(_)                 => q.attr(e, Var(v), v1, v2, a.gs)
-    case Eq(args) if args.size > 1 => q.attr(e, Var(v), v1, v2, a.gs)
-    case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, a.gs).func("=", Seq(Var(v3), Val(arg)))
-    case _                         => q.attr(e, Var(v), v1, v2, a.gs)
+    case Distinct                 => q.attr(e, Var(v), v1, v2, a.gs)
+    case Fn(fn, Some(_))          => q.attr(e, Var(v), v1, v2, a.gs)
+    case Fn(fn, _)                => q.attr(e, Var(v), v1, v2, a.gs)
+    case Eq((arg: String) :: Nil) => q.attr(e, Var(v3), v1, v2, a.gs).func("=", Seq(Var(v3), Val(arg)))
+    case Eq(args)                 => q.attr(e, Var(v), v1, v2, a.gs)
+    case _                        => q.attr(e, Var(v), v1, v2, a.gs)
   }
 
   def resolveGenericAttrMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Distinct                  => q.attr(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v).widh(e)
-      case Fn(fn, Some(i))           => q.attr(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
-      case Fn(fn, _)                 => q.attr(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
-      case Length(Some(Fn(fn, _)))   => q.attr(e, Var(v), v1, v2, gs).func("count", Var(v2), v3).find(fn, Nil, v3, gs)
-      case Length(_)                 => q.attr(e, Var(v), v1, v2, gs).find("count", Nil, v2, gs)
-      case Eq(args) if args.size > 1 => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
-      case Eq((arg: String) :: Nil)  => q.attr(e, Var(v3), v1, v2, gs).func("=", Seq(Var(v3), Val(arg))).find(v2, gs, v3)
-      case _                         => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case Distinct                 => q.attr(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v).widh(e)
+      case Fn(fn, Some(i))          => q.attr(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.attr(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.attr(e, Var(v3), v1, v2, gs).func("=", Seq(Var(v3), Val(arg))).find(v2, gs, v3)
+      case Eq(args)                 => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case _                        => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
     }
   }
 
   def resolveGenericNsTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Qm                        => q.ns(e, Var(v), v1, v2, gs).in(v2, "ns", "?", v2)
-      case Distinct                  => q.ns(e, Var(v), v1, v2, gs)
-      case Fn(fn, Some(i))           => q.ns(e, Var(v), v1, v2, gs)
-      case Fn(fn, _)                 => q.ns(e, Var(v), v1, v2, gs)
-      case Length(Some(Fn(fn, _)))   => q.ns(e, Var(v), v1, v2, gs).func("count", Var(v2), v3)
-      case Length(_)                 => q.ns(e, Var(v), v1, v2, gs)
-      case Eq(args) if args.size > 1 => q.ns(e, Var(v), v1, v2, gs)
-      case Eq((arg: String) :: Nil)  => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg)))
-      case _                         => q.ns(e, Var(v), v1, v2, gs)
+      case Qm                       => q.ns(e, Var(v), v1, v2, gs).in(v2, "?", "ns", v2)
+      case Distinct                 => q.ns(e, Var(v), v1, v2, gs)
+      case Fn(fn, Some(i))          => q.ns(e, Var(v), v1, v2, gs)
+      case Fn(fn, _)                => q.ns(e, Var(v), v1, v2, gs)
+      case Eq((arg: String) :: Nil) => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg)))
+      case Eq(args)                 => q.ns(e, Var(v), v1, v2, gs)
+      case _                        => q.ns(e, Var(v), v1, v2, gs)
     }
   }
 
   def resolveGenericNsMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Distinct                  => q.ns(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v)
-      case Fn(fn, Some(i))           => q.ns(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
-      case Fn(fn, _)                 => q.ns(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
-      case Length(Some(Fn(fn, _)))   => q.ns(e, Var(v), v1, v2, gs).func("count", Var(v2), v3).find(fn, Nil, v3, gs)
-      case Length(_)                 => q.ns(e, Var(v), v1, v2, gs).find("count", Nil, v2, gs)
-      case Eq(args) if args.size > 1 => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
-      case Eq((arg: String) :: Nil)  => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg))).find(v2, gs, v3)
-      case _                         => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case Distinct                 => q.ns(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v)
+      case Fn(fn, Some(i))          => q.ns(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.ns(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg))).find(v2, gs, v3)
+      case Eq(args)                 => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case _                        => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
     }
   }
+
+
+  def resolveSchemaAttrTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.value match {
+    case Distinct                 => q.attr(e, v, v1, v2, a.gs) // todo?
+    case Fn(fn, Some(i))          => q.attr(e, v, v1, v2, a.gs) // todo
+    case Fn(fn, _)                => q.attr(e, v, v1, v2, a.gs) // todo
+    case Eq((arg: String) :: Nil) => q.attr(e, v, v1, v2, a.gs).func("=", Seq(Var(v2), Val(arg)))
+    case Eq(args)                 => q.attr(e, v, v1, v2, a.gs).orRules(v2, a, args, v2, true)
+    case Neq(args)                => q.attr(e, v, v1, v2, a.gs).compareToMany("!=", a, v2, args)
+    case _                        => q.attr(e, v, v1, v2, a.gs)
+  }
+
+  def resolveSchemaAttrMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
+    val gs = a.gs
+    a.value match {
+      case Distinct                 => q.attr(e, v, v1, v2, gs).find("distinct", Nil, v2, gs, v).widh(e)
+      case Fn(fn, Some(i))          => q.attr(e, v, v1, v2, gs).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.attr(e, v, v1, v2, gs).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.attr(e, v, v1, v2, gs).func("=", Seq(Var(v2), Val(arg))).find(v2, gs, v)
+      case Eq(args)                 => q.attr(e, v, v1, v2, gs).orRules(v2, a, args, v2, true).find(v2, gs, v)
+      case Neq(args)                => q.attr(e, v, v1, v2, gs).compareToMany("!=", a, v2, args).find(v2, gs, v)
+      case _                        => q.attr(e, v, v1, v2, gs).findWithValue(v2, gs)
+    }
+  }
+
+  def resolveSchemaNsTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
+    val gs = a.gs
+    a.value match {
+      case Qm                       => q.ns(e, v, v1, v2, gs).in(v2, "?", "ns", v2)
+      case Distinct                 => q.ns(e, v, v1, v2, gs)
+      case Fn(fn, Some(i))          => q.ns(e, v, v1, v2, gs)
+      case Fn(fn, _)                => q.ns(e, v, v1, v2, gs)
+      case Eq((arg: String) :: Nil) => q.ns(e, v, v1, v2, gs).func("=", Seq(Var(v2), Val(arg)))
+      case Eq(args)                 => q.ns(e, v, v1, v2, gs).orRules(v2, a, args, v2, true)
+      case Neq(args)                => q.ns(e, v, v1, v2, gs).compareToMany("!=", a, v2, args)
+      case _                        => q.ns(e, v, v1, v2, gs)
+    }
+  }
+
+  def resolveSchemaNsMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
+    val gs = a.gs
+    a.value match {
+      case Distinct                 => q.ns(e, v, v1, v2, gs).find("distinct", Nil, v2, gs)
+      case Fn(fn, Some(i))          => q.ns(e, v, v1, v2, gs).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.ns(e, v, v1, v2, gs).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.ns(e, v, v1, v2, gs).func("=", Seq(Var(v2), Val(arg))).find(v2, gs)
+      case Eq(args)                 => q.ns(e, v, v1, v2, gs).orRules(v2, a, args, v2, true).find(v2, gs)
+      case Neq(args)                => q.ns(e, v, v1, v2, gs).compareToMany("!=", a, v2, args).find(v2, gs)
+      case _                        => q.ns(e, v, v1, v2, gs).find(v2, gs)
+    }
+  }
+
 
   def resolveAtomKeyedMapOptional(q: Query, e: String, a0: Atom): Query = {
     val a = a0.copy(name = a0.name.slice(0, a0.name.length - 2))
@@ -733,16 +869,14 @@ object Model2Query extends Helpers {
       case Neq(args)                               => q.find(v, gs).where(e, a, v, gs).compareToMany("!=", a, v, args)
       case Gt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">", a, v, Val(arg))
       case Ge(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Val(arg))
-      case Lt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
+      case Lt(arg)                                 =>
+        q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
       case Le(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v, gs).where(e, a, v, gs)
       case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v, gs).where(e, a, v, gs).widh(e)
       case Fn(fn, _)                               => q.find(fn, Nil, v, gs).where(e, a, v, gs)
       case Fulltext(arg :: Nil)                    => q.find(v, gs).fulltext(e, a, v, Val(arg))
       case Fulltext(args)                          => q.find(v, gs).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
-      case Length(Some(Fn(fn, Some(i))))           => q.find(v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
-      case Length(Some(Fn(fn, _)))                 => q.find(fn, Nil, v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
-      case Length(_)                               => q.find(v2, gs).where(e, a, v, gs).cast(v, v1).func("count", Var(v1), v2)
       case other                                   => throw new Model2QueryException(s"Unresolved cardinality-one Atom:\nAtom   : $a\nElement: $other")
     }
   }
@@ -816,22 +950,22 @@ object Model2Query extends Helpers {
           case other          => makeSelfJoinClauses(other)
         }
         def dataClauses(dc: DataClause): Seq[Clause] = dc match {
-          case DataClause(ds, e, a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
+          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
             // Add next And-value
             Seq(
               DataClause(ds, vi(e), a, Var(v + "_" + i), queryTerm(tx), queryTerm(op)),
               Funct(".matches ^String", List(Var(v + "_" + i), Val(".+@(" + andValue + ")$")), NoBinding)
             )
 
-          case DataClause(ds, e, a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
+          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
             // Add next And-value
             Seq(DataClause(ds, vi(e), a, Val(andValue), queryTerm(tx), queryTerm(op)))
 
-          case DataClause(ds, e, a@KW(ns2, attr2, _), v, tx, op) if unifyAttrs.contains((ns2, attr2)) =>
+          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), v, tx, op) if unifyAttrs.contains((ns2, attr2)) =>
             // Keep value-position value to unify
             Seq(DataClause(ds, vi(e), a, v, queryTerm(tx), queryTerm(op)))
 
-          case DataClause(ds, e, a, v, tx, op) =>
+          case DataClause(ds, e@Var(_), a, v, tx, op) =>
             // Add i to variables
             Seq(DataClause(ds, vi(e), a, queryValue(v), queryTerm(tx), queryTerm(op)))
         }

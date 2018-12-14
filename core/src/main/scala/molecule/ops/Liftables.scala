@@ -107,6 +107,7 @@ private[molecule] trait Liftables extends MacroHelpers {
   implicit val liftWith  : c.universe.Liftable[With] = Liftable[With] { widh => q"With(Seq(..${widh.variables}))" }
 
   implicit val liftQueryValue: c.universe.Liftable[QueryValue] = Liftable[QueryValue] {
+    case KW(ns, attr, refNs)           => q"KW($ns, $attr, $refNs)"
     case Var(sym)                      => q"Var($sym)"
     case Val(v)                        => q"Val($v)"
     case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
@@ -295,7 +296,6 @@ private[molecule] trait Liftables extends MacroHelpers {
     case Le(value)                    => q"Le($value)"
     case Ge(value)                    => q"Ge($value)"
     case Fn(fn, value)                => q"Fn($fn, $value)"
-    case Length(fn)                   => q"Length($fn)"
     case Qm                           => q"Qm"
     case Distinct                     => q"Distinct"
     case Fulltext(search)             => q"Fulltext(Seq(..$search))"
@@ -309,59 +309,52 @@ private[molecule] trait Liftables extends MacroHelpers {
     case MapKeys(keys)                => q"MapKeys(Seq(..$keys))"
   }
 
-  implicit val liftAtom      : c.universe.Liftable[Atom]       = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
-  implicit val liftBond      : c.universe.Liftable[Bond]       = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
-  implicit val liftReBond    : c.universe.Liftable[ReBond]     = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
-  implicit val liftTransitive: c.universe.Liftable[Transitive] = Liftable[Transitive] { r => q"Transitive(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.depth}, ${r.prevVar})" }
-  implicit val liftMeta      : c.universe.Liftable[Meta]       = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
-  implicit val liftGroup     : c.universe.Liftable[Nested]     = Liftable[Nested] { g0 =>
+  implicit val liftAtom  : c.universe.Liftable[Atom]   = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.name}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
+  implicit val liftBond  : c.universe.Liftable[Bond]   = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
+  implicit val liftReBond: c.universe.Liftable[ReBond] = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
+  implicit val liftMeta  : c.universe.Liftable[Meta]   = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.generic}, ${m.value})" }
+  implicit val liftGroup : c.universe.Liftable[Nested] = Liftable[Nested] { g0 =>
     val es0: Seq[c.universe.Tree] = g0.elements map {
-      case a: Atom       => q"$a"
-      case b: Bond       => q"$b"
-      case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
-      case Self          => q"Self"
-      case m: Meta       => q"$m"
-      case g1: Nested    => {
+      case a: Atom    => q"$a"
+      case b: Bond    => q"$b"
+      case r: ReBond  => q"$r"
+      case Self       => q"Self"
+      case m: Meta    => q"$m"
+      case g1: Nested => {
         val es1: Seq[c.universe.Tree] = g1.elements map {
-          case a: Atom       => q"$a"
-          case b: Bond       => q"$b"
-          case r: ReBond     => q"$r"
-          case r: Transitive => q"$r"
-          case Self          => q"Self"
-          case m: Meta       => q"$m"
-          case g1: Nested    => {
+          case a: Atom    => q"$a"
+          case b: Bond    => q"$b"
+          case r: ReBond  => q"$r"
+          case Self       => q"Self"
+          case m: Meta    => q"$m"
+          case g1: Nested => {
             val es1: Seq[c.universe.Tree] = g1.elements map {
-              case a: Atom       => q"$a"
-              case b: Bond       => q"$b"
-              case r: ReBond     => q"$r"
-              case r: Transitive => q"$r"
-              case Self          => q"Self"
-              case m: Meta       => q"$m"
-              case g1: Nested    => {
+              case a: Atom    => q"$a"
+              case b: Bond    => q"$b"
+              case r: ReBond  => q"$r"
+              case Self       => q"Self"
+              case m: Meta    => q"$m"
+              case g1: Nested => {
                 val es1: Seq[c.universe.Tree] = g1.elements map {
-                  case a: Atom       => q"$a"
-                  case b: Bond       => q"$b"
-                  case r: ReBond     => q"$r"
-                  case r: Transitive => q"$r"
-                  case Self          => q"Self"
-                  case m: Meta       => q"$m"
-                  case g1: Nested    => {
+                  case a: Atom    => q"$a"
+                  case b: Bond    => q"$b"
+                  case r: ReBond  => q"$r"
+                  case Self       => q"Self"
+                  case m: Meta    => q"$m"
+                  case g1: Nested => {
                     val es1: Seq[c.universe.Tree] = g1.elements map {
-                      case a: Atom       => q"$a"
-                      case b: Bond       => q"$b"
-                      case r: ReBond     => q"$r"
-                      case r: Transitive => q"$r"
-                      case Self          => q"Self"
-                      case m: Meta       => q"$m"
-                      case g1: Nested    => {
+                      case a: Atom    => q"$a"
+                      case b: Bond    => q"$b"
+                      case r: ReBond  => q"$r"
+                      case Self       => q"Self"
+                      case m: Meta    => q"$m"
+                      case g1: Nested => {
                         val es1: Seq[c.universe.Tree] = g1.elements map {
-                          case a: Atom       => q"$a"
-                          case b: Bond       => q"$b"
-                          case r: ReBond     => q"$r"
-                          case r: Transitive => q"$r"
-                          case Self          => q"Self"
-                          case m: Meta       => q"$m"
+                          case a: Atom   => q"$a"
+                          case b: Bond   => q"$b"
+                          case r: ReBond => q"$r"
+                          case Self      => q"Self"
+                          case m: Meta   => q"$m"
                         }
                         q"Nested(${g1.bond}, Seq(..$es1))"
                       }
@@ -383,26 +376,24 @@ private[molecule] trait Liftables extends MacroHelpers {
 
   implicit val liftTxMetaData: c.universe.Liftable[TxMetaData] = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
-      case a: Atom       => q"$a"
-      case b: Bond       => q"$b"
-      case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
-      case Self          => q"Self"
-      case m: Meta       => q"$m"
-      case q"$e"         => e
+      case a: Atom   => q"$a"
+      case b: Bond   => q"$b"
+      case r: ReBond => q"$r"
+      case Self      => q"Self"
+      case m: Meta   => q"$m"
+      case q"$e"     => e
     }
     q"TxMetaData(Seq(..$es))"
   }
 
   implicit val liftComposite: c.universe.Liftable[Composite] = Liftable[Composite] { fm =>
     val es = fm.elements map {
-      case a: Atom       => q"$a"
-      case b: Bond       => q"$b"
-      case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
-      case Self          => q"Self"
-      case m: Meta       => q"$m"
-      case q"$e"         => e
+      case a: Atom   => q"$a"
+      case b: Bond   => q"$b"
+      case r: ReBond => q"$r"
+      case Self      => q"Self"
+      case m: Meta   => q"$m"
+      case q"$e"     => e
     }
     q"Composite(Seq(..$es))"
   }
@@ -412,7 +403,6 @@ private[molecule] trait Liftables extends MacroHelpers {
       case a: Atom       => q"$a"
       case b: Bond       => q"$b"
       case r: ReBond     => q"$r"
-      case r: Transitive => q"$r"
       case Self          => q"Self"
       case g: Nested     => q"$g"
       case m: Meta       => q"$m"
@@ -426,7 +416,6 @@ private[molecule] trait Liftables extends MacroHelpers {
     case Atom(ns, name, tpeS, card, value, enumPrefix, gs, keys) => q"Atom($ns, $name, $tpeS, $card, $value, $enumPrefix, Seq(..$gs), Seq(..$keys))"
     case Bond(ns, refAttr, refNs, card, gs)                      => q"Bond($ns, $refAttr, $refNs, $card, Seq(..$gs))"
     case ReBond(backRef, refAttr, refNs, distinct, prevVar)      => q"ReBond($backRef, $refAttr, $refNs, $distinct, $prevVar)"
-    case Transitive(backRef, refAttr, refNs, level, prevVar)     => q"Transitive($backRef, $refAttr, $refNs, $level, $prevVar)"
     case Self                                                    => q"Self"
     case Nested(ref, elements)                                   => q"Nested($ref, $elements)"
     case Meta(ns, attr, kind, generic, value)                    => q"Meta($ns, $attr, $kind, $generic, $value)"

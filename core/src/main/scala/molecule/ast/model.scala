@@ -76,15 +76,6 @@ object model extends Helpers {
     override def toString: String = s"""ReBond("$backRef", "$refAttr", "$refNs", $distinct, "$prevVar")"""
   }
 
-  case class Transitive(
-    backRef: String,
-    refAttr: String,
-    refNs: String,
-    depth: Int = 1,
-    prevVar: String = "") extends Element{
-    override def toString: String = s"""Transitive("$backRef", "$refAttr", "$refNs", $depth, "$prevVar")"""
-  }
-
   case class Nested(
     bond: Bond,
     elements: Seq[Element]) extends Element
@@ -116,7 +107,6 @@ object model extends Helpers {
   // Function
   case class Fulltext(search: Seq[Any]) extends Value
   case class Fn(name: String, value: Option[Int] = None) extends Value { override def toString: String = s"""Fn("$name", ${o(value)})"""}
-  case class Length(fn: Option[Fn] = None) extends Value { override def toString: String = s"Length(${o(fn)})" }
 
   // Logic
   case class And(values: Seq[Any]) extends Value { override def toString: String = s"And(${seq(values)})" }

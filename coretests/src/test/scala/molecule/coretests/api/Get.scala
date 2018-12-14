@@ -60,7 +60,7 @@ class Get extends CoreSpec {
 
     Await.result(
       Ns.int.getAsyncArray,
-      2.seconds
+      1 second
     ) === Array(1, 2, 3)
 
     await(Ns.int.getAsync) === List(1, 2, 3)

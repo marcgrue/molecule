@@ -344,7 +344,7 @@ class SeattleTests extends SeattleSpec {
 
   "Working with time" in new SeattleSetup {
 
-    val txDates      = Db.txInstant.get.sorted.reverse
+    val txDates      = Schema.txInstant.get.sorted.reverse
     val schemaTxDate = txDates(1)
     val dataTxDate   = txDates(0)
 

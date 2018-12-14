@@ -106,14 +106,11 @@ class Eid extends CoreSpec {
 
 
   "Saving generic `e` values not allowed" in new CoreSetup {
-
     (Ns(42L).str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
-      s"[unexpectedAppliedId]  " +
-      s"""Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
+      s"[unexpectedAppliedId]  Applying an eid is only allowed for updates."
 
     (Ns.e(42L).str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
-      s"[unexpectedAppliedId]  " +
-      s"""Can't save molecule with an applied eid as in `Ns(eid)`. Applying an eid is for updates, like `Ns(johnId).likes("pizza").update`"""
+      s"[unexpectedAppliedId]  Applying an eid is only allowed for updates."
   }
 
 
@@ -122,7 +119,7 @@ class Eid extends CoreSpec {
     val eid = Ns.str("a").save.eid
 
     m(Ns.e.str("a")).get === List((eid, "a"))
-    m(Ns.ns.str("a")).get === List(("ns", "a"))
+//    m(Ns.ns.str("a")).get === List(("ns", "a"))
 
     // todo
     //    (Ns.ns("hi").str("man").save must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +

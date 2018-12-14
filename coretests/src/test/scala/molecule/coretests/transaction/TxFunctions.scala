@@ -158,7 +158,7 @@ class TxFunctions extends CoreSpec {
     // Synchronous, blocking tx fn call
     transact(inc(e, 10))
 
-    // Db is updated
+    // Schema.is updated
     Ns.int.get.head === 110
 
     // Asynchronous, non-blocking tx fn call (uses Datomic's asynchronous api)

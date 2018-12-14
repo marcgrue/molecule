@@ -442,7 +442,7 @@ class SeattleQueryTests extends SeattleSpec {
 
   "Working with time" >> {
 
-    m(Db.txInstant) -->
+    m(Schema.txInstant) -->
       """[:find  ?b
         | :where [?a :db/txInstant ?b]]""".stripMargin
   }

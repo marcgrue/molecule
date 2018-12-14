@@ -161,7 +161,7 @@ trait InputMolecule extends MoleculeBase {
         query.copy(i = In(Seq(InVar(CollectionBinding(v), Seq(values.flatten))), query.i.rules, query.i.ds))
       } else if (values.nonEmpty && values.head.size > 1) {
         val In(List(Placeholder(_, kw, v, _)), _, _) = query.i
-        val (e, newClauses) = query.wh.clauses.foldLeft(null: Var, Seq.empty[Clause]) {
+        val (e, newClauses) = query.wh.clauses.foldLeft(null: QueryValue, Seq.empty[Clause]) {
           case ((_, acc), DataClause(_, e, _, `v`, _, _)) => (e, acc :+ RuleInvocation(ruleName, List(e)))
           case ((e, acc), other)                          => (e, acc :+ other)
         }

@@ -2,6 +2,9 @@ package molecule.api
 
 import molecule.expression.{AggregateKeywords, AttrExpressions, LogicImplicits}
 import molecule.facade.Datomic
+import molecule.generic.dsl.index.{GenericAEVT, GenericAVET, GenericEAVT, GenericVAET}
+import molecule.generic.dsl.GenericLog
+import molecule.generic.dsl.schema.GenericSchema
 
 
 /** Molecule API to be imported into your project to use Molecule.
@@ -34,6 +37,12 @@ private[molecule] trait core extends Datomic
   with LogicImplicits
   with EntityOps
   with TxMethods
+  with GenericSchema
+  with GenericLog
+  with GenericAEVT
+  with GenericAVET
+  with GenericEAVT
+  with GenericVAET
 {
 
   object ? extends molecule.expression.AttrExpressions.?

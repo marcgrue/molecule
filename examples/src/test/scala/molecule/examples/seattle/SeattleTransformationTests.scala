@@ -3,7 +3,6 @@ import molecule.api.in2_out8._
 import molecule.ast.model._
 import molecule.ast.query._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.generic.Db
 import scala.language.reflectiveCalls
 
 
@@ -1074,7 +1073,7 @@ class SeattleTransformationTests extends SeattleSpec {
 
     //    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
 
-    m(Db.txInstant) -->
+    m(Schema.txInstant) -->
       Model(List(
         Atom("db", "txInstant", "Long", 1, VarValue))
       ) -->
