@@ -139,17 +139,17 @@ class GetAsOf extends CoreSpec {
     val ben = tx1.eid
     val afterInsert = new java.util.Date
     // We slow down to allow new Date times to catch up (avoid using Date for precision times!)
-    Thread.sleep(500)
+    Thread.sleep(1000)
 
     // Update
     val tx2 = Ns(ben).int(43).update
     val afterUpdate = new java.util.Date
-    Thread.sleep(500)
+    Thread.sleep(1000)
 
     // Retract
     val tx3 = ben.retract
     val afterRetract = new java.util.Date
-    Thread.sleep(500)
+    Thread.sleep(1000)
 
     // No data yet before insert
     Ns.str.int.getAsOf(beforeInsert) === Nil

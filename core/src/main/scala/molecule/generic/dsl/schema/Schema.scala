@@ -2,6 +2,7 @@ package molecule.generic.dsl
 package schema
 import molecule.boilerplate.attributes._
 import molecule.boilerplate.base._
+import molecule.generic.GenericNs
 import scala.language.higherKinds
 
 
@@ -12,7 +13,7 @@ trait GenericSchema {
   }
 }
 
-trait Schema {
+trait Schema extends GenericNs {
   final class id            [Ns, In] extends OneLong   [Ns, In] with Indexed
   final class ident         [Ns, In] extends OneString [Ns, In] with Indexed
   final class ns            [Ns, In] extends OneString [Ns, In] with Indexed

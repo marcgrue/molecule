@@ -30,6 +30,8 @@ object Model2Query extends Helpers {
   var attrName           : String      = ""
   var attrValue          : String      = ""
 
+  var _model: Model = null
+
   def apply(model: Model): (Query, Option[Query]) = {
 
     // reset on each apply
@@ -39,6 +41,7 @@ object Model2Query extends Helpers {
     attrNs = ""
     attrName = ""
     attrValue = ""
+    _model = model
 
     val query = model.elements.foldLeft((Query(), "a", "b", "", "", "")) {
       case ((query_, e, v, prevNs, prevAttr, prevRefNs), element) => make(model, query_, element, e, v, prevNs, prevAttr, prevRefNs)
@@ -80,30 +83,33 @@ object Model2Query extends Helpers {
     val (ns, attr) = (atom.ns, atom.name)
     atom match {
       case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(model, query, atom, ns, attr, e, v, w, prevNs)
-      case Atom(_, _, "a", _, _, _, _, _)            => (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case Atom(_, _, "ns", _, _, _, _, _)           => (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case _ if prevRefNs == "IndexVal"              => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    => (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevAttr`, _, _, _, _, _, _, _)     => (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevNs`, _, _, _, _, _, _, _)       => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _                                         => (resolve(query, e, v, atom), e, v, ns, attr, "")
+      case Atom(_, _, "a", _, _, _, _, _)            =>
+        (resolve(query, e, v, atom), e, w, ns, attr, "")
+      case Atom(_, _, "ns", _, _, _, _, _)           =>
+        (resolve(query, e, v, atom), e, w, ns, attr, "")
+      case _ if prevRefNs == "IndexVal"              =>
+        (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    =>
+        (resolve(query, v, w, atom), v, w, ns, attr, "")
+      case Atom(`prevAttr`, _, _, _, _, _, _, _)     =>
+        (resolve(query, v, w, atom), v, w, ns, attr, "")
+      case Atom(`prevNs`, _, _, _, _, _, _, _)       =>
+        (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case _ if prevNs == "?"                        =>
+        (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case _                                         =>
+        (resolve(query, e, v, atom), e, v, ns, attr, "")
     }
   }
 
   def makeBond(model: Model, query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = bond match {
-    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional) =>
-      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                 =>
-      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, refAttr, refNs, _, _)                    =>
-      (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
-    case Bond(`prevAttr`, refAttr, refNs, _, _)                  =>
-      (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
-    case Bond(`prevRefNs`, refAttr, refNs, _, _)                 =>
-      (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
-    case Bond(ns, refAttr, refNs, _, _)                          =>
-      (resolve(query, e, v, bond), e, v, ns, refAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional) => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, refAttr, refNs, _, _)                    => (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
+    case Bond(`prevAttr`, refAttr, refNs, _, _)                  => (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
+    case Bond(`prevRefNs`, refAttr, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
+    case Bond(ns, refAttr, refNs, _, _)                          => (resolve(query, e, v, bond), e, v, ns, refAttr, refNs)
   }
 
   def makeAtomUnify(model: Model, query: Query, a: Atom, ns: String, attr: String, e: String, v: String, w: String, prevNs: String)
@@ -141,6 +147,11 @@ object Model2Query extends Helpers {
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = meta match {
+    case Meta("?", attr, _, _, _) if prevRefNs.nonEmpty             =>
+      (resolve(query, v, w, meta), v, y, "?", attr, "")
+    case Meta("?", attr, _, _, _)                                   =>
+      //      (resolve(query, e, v, meta), e, w, "?", attr, "")
+      (resolve(query, e, v, meta), e, v, "?", attr, "")
     case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  =>
       (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
     case Meta(ns, attr, "e", NoValue, Eq(eids))                     =>
@@ -163,9 +174,24 @@ object Model2Query extends Helpers {
       (resolve(query, e, v, meta), e, v, ns, attr, "")
   }
 
-  def makeTxMetaData(model: Model, query: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
+  def makeTxMetaData(model: Model, query0: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
-    val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
+    // Ensure tx variable is present in previous DataClause
+    val (query, txV) = {
+      val (cls1, txV) = query0.wh.clauses.foldRight(Seq.empty[Clause], "") {
+        case (dcl@DataClause(_, _, KW("db", "ident", _), _, _, _), (cls, "")) => (dcl +: cls, "")
+        case (dcl@DataClause(_, _, _, Var(v), Var("_"), _), (cls, ""))        => (dcl.copy(tx = Var(v + "_tx")) +: cls, v + "_tx")
+        case (dcl@DataClause(_, _, _, _, Var(tx), _), (cls, ""))              => (dcl +: cls, tx)
+        case (dcl: DataClause, (cls, ""))                                     => (dcl.copy(tx = Var("tx")) +: cls, "tx")
+        case (cl, (cls, tx))                                                  => (cl +: cls, tx)
+      }
+      if (txV.isEmpty)
+        throw new Model2QueryException("Couldn't attach tx to any DataClause in query:\n" + query0)
+      (query0.copy(wh = Where(cls1)), txV)
+    }
+
+    //    val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
+    val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, txV, w, prevNs, prevAttr, prevRefNs)) {
       case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
@@ -260,17 +286,17 @@ object Model2Query extends Helpers {
   }
 
   def resolveGenericAtom(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.name match {
-    case "a_"  => resolveGenericAttrTacit(q, e, a, v, v1, v2, v3)
     case "a"   => resolveGenericAttrMandatory(q, e, a, v, v1, v2, v3)
-    case "ns_" => resolveGenericNsTacit(q, e, a, v, v1, v2, v3)
+    case "a_"  => resolveGenericAttrTacit(q, e, a, v, v1, v2, v3)
     case "ns"  => resolveGenericNsMandatory(q, e, a, v, v1, v2, v3)
+    case "ns_" => resolveGenericNsTacit(q, e, a, v, v1, v2, v3)
   }
 
   def resolveSchemaAtom(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.name match {
-    case "a_"  => resolveSchemaAttrTacit(q, e, a, v, v1, v2, v3)
     case "a"   => resolveSchemaAttrMandatory(q, e, a, v, v1, v2, v3)
-    case "ns_" => resolveSchemaNsTacit(q, e, a, v, v1, v2, v3)
+    case "a_"  => resolveSchemaAttrTacit(q, e, a, v, v1, v2, v3)
     case "ns"  => resolveSchemaNsMandatory(q, e, a, v, v1, v2, v3)
+    case "ns_" => resolveSchemaNsTacit(q, e, a, v, v1, v2, v3)
   }
 
 
@@ -294,87 +320,123 @@ object Model2Query extends Helpers {
       q.find(v, Nil).func("molecule.util.fns/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
     case Meta(_, _, _, _, IndexVal)                              =>
       q.find(v, Nil).func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, attr, _, _, EntValue) if attr.last == '_'       =>
-      q
-    case Meta(_, _, _, _, EntValue)                              =>
-      q.find(e, Nil)
-    case Meta(_, _, _, _, _)                                     =>
+    //    case Meta(_, attr, _, _, EntValue) if attr.last == '_'       =>
+    //      q
+    //    case Meta(_, _, _, _, EntValue)                              =>
+    //      q.find(e, Nil)
+    case Meta(_, _, _, _, _) =>
       q
   }
-
-  def lastV(q: Query, e0: String): String = q.wh.clauses.reverse.collectFirst {
-    case DataClause(_, _, KW(_, _, refNs), Var(refE), _, _) if refNs.nonEmpty => refE
-    case DataClause(_, Var(eid), _, _, _, _)                                  => eid
-  }.getOrElse(e0)
 
   def resolveGenericMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
-    case "e"  => resolveGenericMetaMandatoryE(q, e, meta, v, v1, v2, v3)
-    case "e_" => resolveGenericMetaOptionalE(q, e, meta, v, v1, v2, v3)
+    case "e"         =>
+      val q1 = q.genericE(e, v, v1, _model.elements.size == 1)
+      val w = if (q1.wh.clauses.exists {
+        case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
+        case _                                                                   => false
+      }) v else e
+      resolveGenericMetaMandatory(q1, e, meta, "", w)
+    case "tx"        => resolveGenericMetaMandatory(q.genericTx(e, v, v1), e, meta, v)
+    case "t"         => resolveGenericMetaMandatory(q.genericT(e, v, v1), e, meta, v)
+    case "txInstant" => resolveGenericMetaMandatory(q.genericTxInstant(e, v, v1), e, meta, v)
+    case "op"        => resolveGenericMetaMandatory(q.genericOp(e, v, v1), e, meta, v)
+    case "ns"        => resolveGenericMetaMandatory(q.genericNs(e, v, v1), e, meta, v)
+    case "a"         => resolveGenericMetaMandatory(q.genericA(e, v, v1), e, meta, v)
+    case "v"         =>
+      val q1 = q.genericV(e, v, v1)
+      val w = if (q1.wh.clauses.exists {
+        case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
+        case _                                                                => false
+      }) v else v + "_v"
+      resolveGenericMetaMandatory(q1, e, meta, "", w)
+
+    case "e_"         =>
+      val q1 = q.genericE(e, v, v1)
+      val w = if (q1.wh.clauses.exists {
+        case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
+        case _                                                                   => false
+      }) v else e
+      resolveGenericMetaTacit(q1, e, meta, "", w)
+    case "tx_"        => resolveGenericMetaTacit(q.genericTx(e, v, v1), e, meta, v)
+    case "t_"         => resolveGenericMetaTacit(q.genericT(e, v, v1), e, meta, v)
+    case "txInstant_" => resolveGenericMetaTacit(q.genericTxInstant(e, v, v1), e, meta, v)
+    case "op_"        => resolveGenericMetaTacit(q.genericOp(e, v, v1), e, meta, v)
+    case "ns_"        => resolveGenericMetaTacit(q.genericNs(e, v, v1), e, meta, v)
+    case "a_"         => resolveGenericMetaTacit(q.genericA(e, v, v1), e, meta, v)
+    case "v_"         =>
+      val q1 = q.genericV(e, v, v1)
+      val w = if (q1.wh.clauses.exists {
+        case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
+        case _                                                                => false
+      }) v else v + "_v"
+      resolveGenericMetaTacit(q1, e, meta, "", w)
   }
 
-  def resolveGenericMetaMandatoryE(q: Query, e0: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = {
-    val gs = meta.generic
-    val e = lastV(q, e0)
+  def resolveGenericMetaMandatory(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
+    val v = if (w.nonEmpty) w else v0 + "_" + meta.attr
     meta.value match {
-      case Eq(eids)       => q.find(e, Nil).in(eids, e)
-      case Fn("count", _) => q.find("count", Nil, e, Nil)
-      case other          => throw new Model2QueryException("Unexpected value: " + other)
+      case NoValue | EntValue => q.find(v, Nil)
+      case Eq(args)           => q.find(v, Nil).in(args, v)
+      case Neq(args)          => q.find(v, Nil).compareToMany2("!=", v, args)
+      case Fn("count", _)     => q.find("count", Nil, v, Nil)
+      case other              => throw new Model2QueryException("Unexpected value: " + other)
     }
   }
 
-
-  def resolveGenericMetaOptionalE(q: Query, e0: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = {
+  def resolveGenericMetaTacit(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
+    val v = if (w.nonEmpty) w else v0 + "_" + meta.attr.init // skip underscore at end
     meta.value match {
-      case Eq(eids)       => q.in(eids, lastV(q, e0))
-      case Fn("count", _) => q
-      case other          => throw new Model2QueryException("Unexpected value: " + other)
+      case NoValue | EntValue => q
+      case Eq(args)           => q.in(args, v)
+      case Neq(args)          => q.compareToMany2("!=", v, args)
+      case other              => throw new Model2QueryException("Unexpected value: " + other)
     }
   }
 
 
   def resolveGenericAttrTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = a.value match {
-    case Distinct                 => q.attr(e, Var(v), v1, v2, a.gs)
-    case Fn(fn, Some(_))          => q.attr(e, Var(v), v1, v2, a.gs)
-    case Fn(fn, _)                => q.attr(e, Var(v), v1, v2, a.gs)
-    case Eq((arg: String) :: Nil) => q.attr(e, Var(v3), v1, v2, a.gs).func("=", Seq(Var(v3), Val(arg)))
-    case Eq(args)                 => q.attr(e, Var(v), v1, v2, a.gs)
-    case _                        => q.attr(e, Var(v), v1, v2, a.gs)
+    case Distinct                 => q.genericA(e, v, v1)
+    case Fn(fn, Some(_))          => q.genericA(e, v, v1)
+    case Fn(fn, _)                => q.genericA(e, v, v1)
+    case Eq((arg: String) :: Nil) => q.genericA(e, v, v1).func("=", Seq(Var(v3), Val(arg)))
+    case Eq(args)                 => q.genericA(e, v, v1)
+    case _                        => q.genericA(e, v, v1)
   }
 
   def resolveGenericAttrMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Distinct                 => q.attr(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v).widh(e)
-      case Fn(fn, Some(i))          => q.attr(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
-      case Fn(fn, _)                => q.attr(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
-      case Eq((arg: String) :: Nil) => q.attr(e, Var(v3), v1, v2, gs).func("=", Seq(Var(v3), Val(arg))).find(v2, gs, v3)
-      case Eq(args)                 => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
-      case _                        => q.attr(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case Distinct                 => q.genericA(e, v, v1).find("distinct", Nil, v2, gs, v).widh(e)
+      case Fn(fn, Some(i))          => q.genericA(e, v, v1).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.genericA(e, v, v1).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.genericA(e, v, v1).func("=", Seq(Var(v3), Val(arg))).find(v2, gs, v3)
+      case Eq(args)                 => q.genericA(e, v, v1).find(v2, gs, v)
+      case _                        => q.genericA(e, v, v1).find(v2, gs, v)
     }
   }
 
   def resolveGenericNsTacit(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Qm                       => q.ns(e, Var(v), v1, v2, gs).in(v2, "?", "ns", v2)
-      case Distinct                 => q.ns(e, Var(v), v1, v2, gs)
-      case Fn(fn, Some(i))          => q.ns(e, Var(v), v1, v2, gs)
-      case Fn(fn, _)                => q.ns(e, Var(v), v1, v2, gs)
-      case Eq((arg: String) :: Nil) => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg)))
-      case Eq(args)                 => q.ns(e, Var(v), v1, v2, gs)
-      case _                        => q.ns(e, Var(v), v1, v2, gs)
+      case Qm                       => q.genericNs(e, v, v1).in(v2, "?", "ns", v2)
+      case Distinct                 => q.genericNs(e, v, v1)
+      case Fn(fn, Some(i))          => q.genericNs(e, v, v1)
+      case Fn(fn, _)                => q.genericNs(e, v, v1)
+      case Eq((arg: String) :: Nil) => q.genericNs(e, v, v1).func("=", Seq(Var(v2), Val(arg)))
+      case Eq(args)                 => q.genericNs(e, v, v1)
+      case _                        => q.genericNs(e, v, v1)
     }
   }
 
   def resolveGenericNsMandatory(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String): Query = {
     val gs = a.gs
     a.value match {
-      case Distinct                 => q.ns(e, Var(v), v1, v2, gs).find("distinct", Nil, v2, gs, v)
-      case Fn(fn, Some(i))          => q.ns(e, Var(v), v1, v2, gs).find(fn, Seq(i), v2, gs)
-      case Fn(fn, _)                => q.ns(e, Var(v), v1, v2, gs).find(fn, Nil, v2, gs)
-      case Eq((arg: String) :: Nil) => q.ns(e, Var(v), v1, v2, gs).func("=", Seq(Var(v2), Val(arg))).find(v2, gs, v3)
-      case Eq(args)                 => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
-      case _                        => q.ns(e, Var(v), v1, v2, gs).find(v2, gs, v)
+      case Distinct                 => q.genericNs(e, v, v1).find("distinct", Nil, v2, gs, v)
+      case Fn(fn, Some(i))          => q.genericNs(e, v, v1).find(fn, Seq(i), v2, gs)
+      case Fn(fn, _)                => q.genericNs(e, v, v1).find(fn, Nil, v2, gs)
+      case Eq((arg: String) :: Nil) => q.genericNs(e, v, v1).func("=", Seq(Var(v2), Val(arg))).find(v2, gs, v3)
+      case Eq(args)                 => q.genericNs(e, v, v1).find(v2, gs, v)
+      case _                        => q.genericNs(e, v, v1).find(v2, gs, v)
     }
   }
 
@@ -869,8 +931,7 @@ object Model2Query extends Helpers {
       case Neq(args)                               => q.find(v, gs).where(e, a, v, gs).compareToMany("!=", a, v, args)
       case Gt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">", a, v, Val(arg))
       case Ge(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Val(arg))
-      case Lt(arg)                                 =>
-        q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
+      case Lt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
       case Le(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v, gs).where(e, a, v, gs)
       case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v, gs).where(e, a, v, gs).widh(e)

@@ -88,7 +88,6 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
             ids += d.e
             val pad3 = " " * (5 - no.toString.length)
             val pad4 = " " * (6 - i.toString.length)
-            val datomS = d.toString + (" " * (30 - d.toString.length))
             val added = if (d.added) "true " else "false"
             val r = if (d.added) " " else "-"
             val datum = List("added: " + added, "t: " + d.tx, "e: " + d.e, "a: " + d.a, "v: " + d.v)

@@ -192,7 +192,6 @@ class Knows extends MoleculeSpec {
     )
 
     // How many young friends does the older people have?
-    Person.name.age.>=(30).Knows.Person.e(count).age_.<(30).debugGet
     Person.name.age.>=(30).Knows.Person.e(count).age_.<(30).get === List(
       ("josh", 32, 1), // josh (32) knows 1
       ("peter", 35, 1) // peter (35) knows 1

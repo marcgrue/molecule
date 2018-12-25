@@ -102,14 +102,6 @@ class SelfJoin extends CoreSpec {
     // Multiple ANDs
 
     Ns.str_("Joe" and "Ben" and "Liz").Refs1.str1.get === List("Coffee")
-
-
-    // We can't apply AND semantics to card-one attribute returning a value
-    // since a card-one attribute naturally can't have multiple values.
-
-    expectCompileError(
-      """Ns.str("str1" and "str2").get""",
-      "molecule.transform.exception.Dsl2ModelException: Card-one attribute `str` cannot return multiple values.")
   }
 
 

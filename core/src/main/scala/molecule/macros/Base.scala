@@ -54,6 +54,7 @@ private[molecule] trait Base extends Dsl2Model {
       case Atom(_, _, _, _, MapKeys(idents), _, gs, keyIdents)         => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
       case Atom(_, _, _, _, _, _, gs, keyIdents)                       => mapIdents(mapGenerics(gs) ++ keyIdents)
       case Meta(_, _, _, _, Eq(idents))                                => mapIdents(idents)
+      case Meta(_, _, _, _, Neq(idents))                               => mapIdents(idents)
       case Meta(_, _, _, Id(eid), _)                                   => mapIdents(Seq(eid))
       case Nested(_, nestedElements)                                   => mapIdentifiers(nestedElements, identifiers0)
       case Composite(compositeElements)                                => mapIdentifiers(compositeElements, identifiers0)

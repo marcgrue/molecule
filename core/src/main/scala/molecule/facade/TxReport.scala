@@ -44,6 +44,7 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
     kw.toString
   }
 
+  private def datom2string(d: datomic.db.Datum) = s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"
 
   def debug: Unit = Debug("TxReport", 1)(1, stmtss, txDataRaw)
 
@@ -55,7 +56,7 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
        |  dbBefore.basisT: ${dbBefore.basisT}
        |  dbAfter        : $dbAfter
        |  dbAfter.basisT : ${dbAfter.basisT}
-       |  txData         : ${txDataRaw.mkString(",\n                   ")}
+       |  txData         : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
        |  tempids        : $tempids
        |}""".stripMargin
 

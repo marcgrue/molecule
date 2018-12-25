@@ -1,11 +1,16 @@
 package molecule.coretests
 
+import java.util.Date
 import molecule.api.in3_out22._
+import molecule.api.out10.retract
 import molecule.ast.model._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.facade.TxReport
 import molecule.transform.Model2Query
+import scala.collection.JavaConverters._
+
 
 class AdHocTest extends CoreSpec {
 
@@ -15,85 +20,787 @@ class AdHocTest extends CoreSpec {
   // Create new db from schema
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
-  //    // First entity - 3 transactions
-  //      val tx1 = Ns.str("a").int(1).save
-  //      val e1  = tx1.eid
-  //      val t1  = tx1.t
-  //
-  //      val tx2 = Ns(e1).str("b").update
-  //      val t2  = tx2.t
-  //
-  //      val tx3 = Ns(e1).int(2).update
-  //      val t3  = tx3.t
-  //
-  //
-  //      // Second entity - 2 transactions
-  //
-  //      val tx4 = Ns.str("x").int(4).save
-  //      val e2  = tx4.eid
-  //      val t4  = tx4.t
-  //
-  //      val tx5 = Ns(e2).int(5).update
-  //      val t5  = tx5.t
+//  // First entity
+//
+//  val txR1 = Ns.str("a").int(1).save
+//  val tx1  = txR1.tx
+//  val e1   = txR1.eid
+//  val t1   = txR1.t
+//  val d1   = txR1.inst
+//
+//  val txR2 = Ns(e1).str("b").update
+//  val tx2  = txR2.tx
+//  val t2   = txR2.t
+//  val d2   = txR2.inst
+//
+//  val txR3 = Ns(e1).int(2).update
+//  val tx3  = txR3.tx
+//  val t3   = txR3.t
+//  val d3   = txR3.inst
+//
+//
+//  // Second entity
+//
+//  val txR4 = Ns.str("x").int(4).save
+//  val tx4  = txR4.tx
+//  val e2   = txR4.eid
+//  val t4   = txR4.t
+//  val d4   = txR4.inst
+//
+//  val txR5 = Ns(e2).int(5).update
+//  val tx5  = txR5.tx
+//  val t5   = txR5.t
+//  val d5   = txR5.inst
+//
+//
+//  // Third entity, a ref
+//
+//  val txR6 = Ref1.str1("hello").save
+//  val r1   = txR6.eid
+//  val tx6  = txR6.tx
+//  val t6   = txR6.t
+//  val d6   = txR6.inst
+//
+//  val txR7 = Ns(e2).ref1(r1).update
+//  val tx7  = txR7.tx
+//  val t7   = txR7.t
+//  val d7   = txR7.inst
+//
+//  println("e1: " + e1)
+//  println("e2: " + e2)
+//  println(Seq(1, tx1, t1).mkString("   "))
+//  println(Seq(2, tx2, t2).mkString("   "))
+//  println(Seq(3, tx3, t3).mkString("   "))
+//  println(Seq(4, tx4, t4).mkString("   "))
+//  println(Seq(5, tx5, t5).mkString("   "))
+//  println(Seq(6, tx6, t6).mkString("   "))
+//  println(Seq(7, tx7, t7).mkString("   "))
 
 
-  //  "Applied eid to `e`" in new CoreSetup {
-  //
-  ////    val List(e1, e2, e3) = Ns.int.insert(1, 2, 3).eids
-  //
-  ////    Ns.int.get === List(1, 2, 3)
-  //
-  //    val e4 = 42L
-  //
-  //
-  ////    Ns.e(e4).int.get
-  ////    Ns.e_(e1).int.get === List(1)
-  ////
-  ////    Ns.e(e1, e2).int.get === List((e2, 2), (e1, 1))
-  ////    Ns.e_(e1, e2).int.get === List(1, 2)
-  ////
-  ////    val e23 = Seq(e2, e3)
-  ////    Ns.e(e23).int.get === List((e2, 2), (e3, 3))
-  ////    Ns.e_(e23).int.get === List(2, 3)
-  //
-  //    ok
-  //  }
+  val tx1: TxReport = Ns.int(1).save
+  val tx2: TxReport = Ns.int(2).save
+  val tx3: TxReport = Ns.int(3).save
+
+  val t1: Long = tx1.t
+  val t2: Long = tx2.t
+  val t3: Long = tx3.t
+
+  val d1: Date = tx1.inst
+  val d2: Date = tx2.inst
+  val d3: Date = tx3.inst
+
 
   //  "adhoc" in new CoreSetup {
   "adhoc" >> {
 
 
-    // Create ref
-    val List(e1, r1) = Ns.int(1).Ref1.int1(10).save.eids
-    r1.retract
-    // Ref entity with attribute values is gone - no ref orphan exist
-    Ns.int(1).ref1$.get.head === (1, None)
+    Ns.int.getSince(d3) === List()
 
 
-    // Create another ref
-    val List(e2, r2) = Ns.int(2).Ref1.int1(20).save.eids
 
-    println(e1)
-    println(r1)
-    println("----------")
-    println(e2)
-    println(r2)
+//
+//    Ns.op(true).debugGet
+//    Ns.op(true).get === List(true)
 
-    // Retract attribute value from ref entity - ref entity still exist
-    Ref1(r2).int1().update
 
-    // Ref entity r2 is now an orphan
-    // Entity e2 still has a reference to r2
-    Ns.int(2).ref1$.get.head === (2, Some(r2))
-    // r2 has no attribute values
-    Ns.int(2).Ref1.int1$.get.head === (2, None)
+//    // Insert multiple entities with tx meta data
+//    val List(e1, e2, e3, tx) = Ns.int.Tx(Ns.str_("a")) insert List(1, 2, 3) eids
+//
+//    // Retract multiple entities with tx meta data
+//    retract(Seq(e1, e2), Ns.str("b"))
+//
+////    // History with transaction data
+//    Ns.int.t.op.Tx(Ns.str).debugGet
+////    Ns.int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+////      (1, 1028, true, "a"),
+////      (2, 1028, true, "a"),
+////      (3, 1028, true, "a"),
+////
+////      // 1 and 2 were retracted with tx meta data "b"
+////      (1, 1032, false, "b"),
+////      (2, 1032, false, "b")
+////    )
+//
+//    // Entities and int values that were retracted with tx meta data "b"
+//    Ns.e.int.op(false).Tx(Ns.str("b")).debugGet
+//
+//    Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+//      (e1, 1, false, "b"),
+//      (e2, 2, false, "b")
+//    )
+//
+////    // Or: What int values were retracted with tx meta data "b"?
+//    Ns.int.op_(false).Tx(Ns.str_("b")).getHistory === List(1, 2)
 
-    // Add attribute value to ref entity again
-    Ref1(r2).int1(21).update
 
-    // Ref entity is no longer an orphan
-    Ns.int.Ref1.e.int1.debugGet
-    Ns.int(2).Ref1.e.int1.get.head === (2, r2, 21)
+//    // `tx` being tacit or mandatory has same effect
+//    // tx meta attributes can be in any mode
+//    val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
+//    val tx2 = Ns.int(2).Tx(Ns.str("str mandatory")).save.tx
+//    val tx3 = Ns.int(3).Tx(Ns.str("attr mandatory")).save.tx
+//    val tx4 = Ns.int(4).Tx(Ns.str_("attr tacit")).save.tx
+//    val tx5 = Ns.int(5).Tx(Ns.str$(Some("attr optional with value"))).save.tx
+//    val tx6 = Ns.int(6).Tx(Ns.str$(None)).save.tx // attr optional without value
+//
+//
+////    Ns.int.Tx(Ns.str$).debugGet
+//
+//    Ns.int.Tx(Ns.str$).get.sortBy(_._1) === List(
+//      (1, Some("str tacit")),
+//      (2, Some("str mandatory")),
+//      (3, Some("attr mandatory")),
+//      (4, Some("attr tacit")),
+//      (5, Some("attr optional with value")),
+//      (6, None) // attr optional without value
+//    )
+//
+//    // Mandatory tx meta data
+//    Ns.int.Tx(Ns.str).get.sortBy(_._1) === List(
+//      (1, "str tacit"),
+//      (2, "str mandatory"),
+//      (3, "attr mandatory"),
+//      (4, "attr tacit"),
+//      (5, "attr optional with value")
+//    )
+//
+//    // Transactions without tx meta data
+//    Ns.int.Tx(Ns.str_(Nil)).get === List(6)
+//
+//    // Transaction meta data expressions
+//    Ns.int.Tx(Ns.str.contains("mandatory")).get.sortBy(_._1) === List(
+//      (2, "str mandatory"),
+//      (3, "attr mandatory")
+//    )
+//    Ns.int.<(3).Tx(Ns.str.contains("mandatory")).get === List(
+//      (2, "str mandatory")
+//    )
+//
+//
+////    Ns.int.tx.Tx(Ns.str$).debugGet
+//
+//    Ns.int.tx.Tx(Ns.str$).get.sortBy(_._1) === List(
+//      (1, tx1, Some("str tacit")),
+//      (2, tx2, Some("str mandatory")),
+//      (3, tx3, Some("attr mandatory")),
+//      (4, tx4, Some("attr tacit")),
+//      (5, tx5, Some("attr optional with value")),
+//      (6, tx6, None) // attr optional without value
+//    )
+
+
+//    Ns(e1).str_.tx.debugGet
+//    Ns(e1).str_.tx.get.head === tx2
+
+
+
+//    Ns.str.int.t.op.debugGet
+//    Ns.str.int.t.op.getHistory === List(
+//      ("a", 1, t1, true)
+//    )
+//
+//    Ns.str.t.int.op.getHistory === List(
+//      ("a", t1, 1, true)
+//    )
+//
+//    Ns.str.t.op.int.getHistory === List(
+//      ("a", t1, true, 1)
+//    )
+
+
+//    val result = Ns.str("Fred").int(1).save
+//    val eid    = result.eid
+//    val t1     = result.t
+//
+//    val t2 = Ns(eid).int(2).update.t
+//
+//
+//    Ns.int.op.str.debugGet
+//    Ns.int.op.str.getHistory.sortBy(t => (t._1, !t._2)) === List(
+//      (1, true, "Fred"),
+//      (1, false, "Fred"),
+//      (2, true, "Fred")
+//    )
+
+
+//    Ns.e.str.tx.debugGet
+//    Ns.e.str.tx.t.debugGet
+//    Ns.e_(e1).str.tx.t.debugGet
+////    Ns.e_(e1).str.tx.t.int.debugGet
+//
+//    Ns.e_(e1).str.tx.txInstant.t.op.int.debugGet
+//
+//    val e1 = 42L
+//    val t1 = 1001
+//    val t2 = 1002
+
+//    Ns(e1).str.t.op.int.t.op.debugGet
+//
+//    Ns(e1).str.t.op.int.t.op.getHistory === List(
+//      ("a", 1030, false, 1, 1031, false),
+//      ("b", 1030, true, 1, 1028, true),
+//      ("b", 1030, true, 2, 1031, true),
+//      ("a", 1028, true, 1, 1028, true),
+//      ("b", 1030, true, 1, 1031, false),
+//      ("a", 1028, true, 1, 1031, false),
+//      ("a", 1030, false, 2, 1031, true),
+//      ("a", 1030, false, 1, 1028, true),
+//      ("a", 1028, true, 2, 1031, true)
+//    )
+
+
+//    Ns.str.t.op.int.debugGet
+//
+//    Ns.str.t.op.int.getHistory.sortBy(t => (t._2, t._3, t._4)) === List(
+//      ("a", t1, true, 1),
+//      ("a", t1, true, 2),
+//
+//      ("a", t2, false, 1),
+//      ("a", t2, false, 2),
+//
+//      ("b", t2, true, 1),
+//      ("b", t2, true, 2),
+//
+//      // Note how str("x") was never retracted and stays the same for both int values
+//      ("x", t4, true, 4),
+//      ("x", t4, true, 5)
+//    )
+
+
+//    Ns(e1).str.t.op.int.debugGet
+//
+//    Ns(e1).str.t.op.int.getHistory.sortBy(t => (t._2, t._3, t._4)) === List(
+//      ("a", t1, true, 1),
+//      ("a", t1, true, 2),
+//
+//      ("a", t2, false, 1),
+//      ("a", t2, false, 2),
+//
+//      ("b", t2, true, 1),
+//      ("b", t2, true, 2)
+//    )
+
+
+
+//    Ns.tx(tx3).debugGet
+//    Ns.op(true).debugGet
+
+    //    Ns.int.Ref1.str1.debugGet
+
+//    conn.q("""[:find  ?b ?d ?d
+//             | :where [?a :ns/int ?b]
+//             |        [?a :ns/ref1 ?c]
+//             |        [?c :ref1/str1 ?d]
+//             |        [?c ?c_attr ?d]
+//             |        [?c_attr :db/ident ?d1]
+//             |        [(namespace ?d1) ?d_ns]
+//             |        [(!= ?d_ns "db.install")]
+//             |        [(!= ?d_ns "db")]
+//             |        [(!= ?d_ns "fressian")]]""".stripMargin) foreach println
+//
+//
+//    conn.q("""[:find  ?b ?d ?d
+//             | :where [?a :ns/int ?b]
+//             |        [?a :ns/ref1 ?c]
+//             |        [?c :ref1/str1 ?d]
+//             |        [?c ?c_attr ?d]
+//             |        [?c_attr :db/ident ?d1]
+//             |        [(namespace ?d1) ?d_ns]]""".stripMargin) foreach println
+
+//    Ns.int.Ref1.str1.v.debugGet
+//    Ns.int.Ref1.str1.v.get === List((5, "hello", "hello"))
+
+
+//    Ns(e1, e2).e.t.a.v.debugGet
+//
+//    Ns(e1, e2).e.t.a.v.get.sortBy(t => (t._1, t._2)) === List(
+//      (e1, t2, "str", "b"),
+//      (e1, t3, "int", 2),
+//      (e2, t4, "str", "x"),
+//      (e2, t5, "int", 5),
+//      (e2, t7, "ref1", r1)
+//    )
+//
+//    Ns.tx.not(tx3).debugGet
+//    Ns.tx.not(tx3).get === List(tx2, tx4, tx5, tx6, tx7)
+
+
+//    Ns.tx(tx3).debugGet
+//    Ns.tx(tx3).get === List(tx3)
+
+
+//    val n = 2
+//
+//    Ns.int.e.debugGet
+//    Ns.int.ns.debugGet
+//    Ns.int.a.debugGet
+//    Ns.int.v.debugGet
+//    Ns.int.tx.debugGet
+//    Ns.int.t.debugGet
+//    Ns.int.txInstant.debugGet
+//    Ns.int.op.debugGet
+
+
+
+//    Ns.int.Ref1.v.debugGet
+
+//    Ns.int.Ref1.v.str1.debugGet
+//    Ns.int.Ref1.v.str1.get === List((5, "hello", "hello"))
+
+//    Ns.int.tx.debugGet
+//    Ns.str.v.debugGet
+//    Ns.int.Ref1.str1.v.get === List((5, "hello", "hello"))
+
+    //    Ns.int.Ref1.str1.debugGet
+//    Ns(e2).int.Ref1.str1.e.debugGet
+//    Ns(e2).int.Ref1.e.str1.debugGet
+
+    //    Ns.int.Ref1.str1.debugGet
+    //    Ns.int.Ref1.str1.e(count).debugGet
+    //    Ns.int.Ref1.e(count).str1.debugGet
+
+    //    Ns.e.a.v_(2).debugGet
+
+
+    //    Ns.e.not(e1).debugGet
+    //    Ns.e.not(e1).get === List(e2, r1)
+
+    //    Ns.ns("ns").debugGet
+    //    Ns.int.ns_("ns").debugGet
+    //
+    //    Ns.int.ns_("ns").get === List(2, 5)
+    //    Ns.int.ns_("ns", "ref1").get === List(2, 5)
+    //    Ns.int.ns_.not("ns").get === Nil
+    //    Ns.int.ns_.not("ref1").get === List(2, 5)
+    //    Ns.int.ns_.not("ns", "ref1").get === Nil
+    //
+    //    Ns.int.a_("int").get === List(2, 5)
+    //    Ns.int.a_("str").get === Nil
+    //    Ns.int.a_("str", "int").get === List(2, 5)
+    //    Ns.int.a_.not("str").get === List(2, 5)
+    //    Ns.int.a_.not("str", "int").get === Nil
+    //
+    //    Ns.int.v_(2).get === List(2)
+    //    // Value only relates to previous custom datom
+    //    Ns.int.v_("b").get === Nil
+    //    Ns.int.v_(2, "b").get === List(2)
+    //    Ns.int.v_.not(2).get === List(5)
+    //    Ns.int.v_.not(2, "b").get === List(5)
+    //    Ns.int.v_.not(2, 5).get === Nil
+    //
+    //    Ns.int.tx_(tx3).get === List(2)
+    //    Ns.int.tx_(tx3, tx5).get === List(2, 5)
+    //    Ns.int.tx_.not(tx3).get === List(5)
+    //    Ns.int.tx_.not(tx3, tx5).get === Nil
+    //
+    //    Ns.int.t_(t3).get === List(2)
+    //    Ns.int.t_(t3, t5).get === List(2, 5)
+    //    Ns.int.t_.not(t3).get === List(5)
+    //    Ns.int.t_.not(t3, t5).get === Nil
+    //
+    //    Ns.int.txInstant_(d3).get === List(2)
+    //    Ns.int.txInstant_(d3, d5).get === List(2, 5)
+    //    Ns.int.txInstant_.not(d3).get === List(5)
+    //    Ns.int.txInstant_.not(d3, d5).get === Nil
+    //
+    //    Ns.int.op_(true).get === List(2, 5)
+    //    Ns.int.op_(true, false).get === List(2, 5)
+    //    Ns.int.op_.not(true).get === Nil
+    //    Ns.int.op_.not(false).get === List(2, 5)
+    //    Ns.int.op_.not(true, false).get === Nil
+
+    //    val n = 42L
+    //    val n = e2
+
+    //    Ns(42).int.debugGet
+    //    Ns.e(n).int.debugGet
+    //    Ns.e_(n).int.debugGet
+    //    val x1 = Ns(n).int.get
+    //    val x2 = Ns.e_(n).int.get
+    //    Ns(e1).int.get === 7
+    //    Ns(e1).int.debugGet
+    //    Ns.e_(e1).int.debugGet
+    //    Ns.int.e_(e1).debugGet
+
+    //    Ns(e1, e2).int.debugGet
+    //    Ns.e_(e1, e2).int.debugGet
+    //    Ns.e_.not(e1).int.debugGet
+    //    Ns.e_.not(e1, e2).int.debugGet
+    //
+    //    Ns.int.e_(e1, e2).debugGet
+    //    Ns.int.e_.not(e1).debugGet
+    //    Ns.int.e_.not(e1, e2).debugGet
+
+    //    Ns.int.e_(e1).get === List(2)
+    //    Ns.int.e_(e1, e2).get === List(2, 5)
+    //    Ns.int.e_.not(e1).get === List(5)
+    //    Ns.int.e_.not(e1, e2).get === Nil
+
+    //    Ns.e.tx(tx2).debugGet
+    //    Ns.ns.tx(tx2).debugGet
+    //    Ns.a.tx(tx2).debugGet
+    //    Ns.v.tx(tx2).debugGet
+    //    Ns.t.tx(tx2).debugGet
+    //    Ns.txInstant.tx(tx2).debugGet
+    //    Ns.op.tx(tx2).debugGet
+    //
+    //    Ns.t(t1).debugGet
+    //    Ns.t(t2).debugGet
+
+    //    Ns.v.not(2).debugGet
+    //    Ns.v.not(2).get.map(_.toString).sorted === 349
+
+
+    //    Ns.v.not(2).get.size === 349
+
+    //    Ns(e2).date(d6).update
+    //
+    //    Ns.v(2).debugGet
+    //    Ns.v(2).get === List(2)
+    //
+    //    Ns.v(2, "b").debugGet
+    ////    Ns.v(2, "b").get === List(2, "b")
+    //
+    //    Ns.v(2, d6).debugGet
+    //    Ns.v(2, d6).get === List(d6, 2)
+
+    //    Ns.ns("ns", "ref1").debugGet
+
+
+    //    Schema.a.debugGet
+
+    //    println(tx1)
+    //    println(tx2)
+    //    println(tx3)
+    //    println(tx4)
+    //    println(tx5)
+    //    println(tx6)
+    //    println(tx7)
+    //
+    //    println(txR1)
+    //    println(txR2)
+    //    println(txR3)
+    //    println(txR4)
+    //    println(txR5)
+    //    println(txR6)
+    //    println(txR7)
+
+    //    Ns.int(1).save
+    //    Ns.int(2).save
+
+    //    conn.q(
+    //      s"""[:find  ?b_tx ?b1 ?b
+    //         | :where [?a ?a_attr ?b ?b_tx]
+    //         |        [?a_attr :db/ident ?b1]
+    //         |        ]""".stripMargin).toList.sortBy(_.head.toString) foreach println
+    //
+    //    println("-----------------")
+    //    conn.q(
+    //      s"""[:find  ?b_tx ?b_ns ?b_a
+    //         | :where [?a ?a_attr ?b ?b_tx]
+    //         |        [?a_attr :db/ident ?b1]
+    //         |        [(name ?b1) ?b_a]
+    //         |        [(namespace ?b1) ?b_ns]
+    //         |        ]""".stripMargin).toList.sortBy(_.head.toString) foreach println
+
+    //    println(conn.q(s"""[:find  ?b_tx ?b_ns
+    //             | :where [?a ?a_attr ?b ?b_tx]
+    //             |        [?a_attr :db/ident ?b1]
+    //             |        [(namespace ?b1) ?b_ns]
+    //             |        [(= ?b_tx $tx1)]
+    //             |        ]""".stripMargin)) //foreach println
+
+    //    println(conn.q(s"""[:find  ?b_tx
+    //             | :where [?a ?a_attr ?b ?b_tx]
+    //             |        [?a_attr :db/ident ?b1]
+    //             |        [(namespace ?b1) ?b_ns]
+    //             |        [(!= ?b_ns "db.install")]
+    //             |        [(!= ?b_ns "db")]
+    //             |        [(!= ?b_ns "fressian")]
+    //             |        [(= ?b_tx $tx4)]
+    //             |
+    //             |        ]""".stripMargin)) foreach println
+    //
+    //    println(conn.q("""[:find  ?b_tx
+    //             | :in    $ [?b_tx ...]
+    //             | :where [?a ?a_attr ?b ?b_tx]
+    //             |        [?a_attr :db/ident ?b1]
+    //             |        [(namespace ?b1) ?b_ns]
+    //             |        [(!= ?b_ns "db.install")]
+    //             |        [(!= ?b_ns "db")]
+    //             |        [(!= ?b_ns "fressian")]]""".stripMargin, tx2))
+
+    //    Ns.tx.not(tx3).debugGet
+
+    //    Ns.tx.not(tx3).debugGet
+
+
+    //        Ns.e.ns.debugGet
+    //        Ns.e.ns.not("db.install", "db", "fressian").debugGet
+    //        Ns.e.ns.not("ref1").debugGet
+    //        Ns.e.ns("ns").ns.not("db.install", "db", "fressian").debugGet
+    //        Ns.e.not(e1).ns.not("db.install", "db", "fressian").debugGet
+    //    Ns.e.not(e1).debugGet
+    //    Ns.e.not(e1).get.size === 163
+
+
+    //    Ns.int.ns_("ns").get === List("ns")
+    //    Ns.int.ns_("ns", "ref1").get === List("ns", "ref1")
+    //    Ns.int.ns_.not("ns").get === List("ref1", "db.install", "db", "fressian")
+    //    Ns.int.ns_.not("ns", "ref1").get === List("db.install", "db", "fressian")
+    //
+    //    Ns.int.a_("str").get === List("str")
+    //    Ns.int.a_("str", "int").get === List("str", "int")
+    //    Ns.int.a_.not("str").get(5) === List("code", "ref1", "str1", "index", "txInstant")
+    //    Ns.int.a_.not("str", "ref1").get(5) === List("code", "str1", "index", "txInstant", "cardinality")
+    //
+    //    Ns.int.v_(2).get === List(2)
+    //    Ns.int.v_("hello").get === List("hello")
+    //    Ns.int.v_("non-existing value").get === Nil
+    //    Ns.int.v_(2, "b").get === List(2, "b")
+    //    Ns.int.v_.not(2).get.size === 349
+    //    Ns.int.v_.not(2, "b").get.size === 348
+    //
+    //    Ns.int.tx_(tx3).get === List(tx3)
+    //    Ns.int.tx_(tx3, tx5).get === List(tx3, tx5)
+    //    Ns.int.tx_.not(tx3).get.size === 12
+    //    Ns.int.tx_.not(tx3, tx5).get.size === 11
+    //
+    //    Ns.int.t_(t3).get === List(t3)
+    //    Ns.int.t_(t3, t5).get === List(t3, t5)
+    //    Ns.int.t_.not(t3).get.size === 12
+    //    Ns.int.t_.not(t3, t5).get.size === 11
+    //
+    //    Ns.int.txInstant(d2).get === List(d2)
+    //    Ns.int.txInstant(d2, d3).get.toString === List(d2, d3).toString
+    //    Ns.int.txInstant_.not(d2).get.size === 9
+    //    Ns.int.txInstant_.not(d2, d3).get.size === 8
+    //
+    //    Ns.int.op_(true).get === List(true)
+    //    Ns.int.op_(true, false).get === List(true)
+    //    Ns.int.op_.not(true).get === Nil
+    //    Ns.int.op_.not(true, false).get === Nil
+
+
+    //    Ns.e(e1).debugGet
+    //    Ns.e(e1, e2).debugGet
+    //    Ns.e.not(e1).debugGet
+    //    Ns.a.e.not(e1).debugGet
+    //    Ns.e.not(e1).a.debugGet
+    //    Ns.e.not(e1, e2).debugGet
+
+
+    //    Ns.e(e1).get === List(e1)
+    //    Ns.e(e1, e2).get === List(e1, e2)
+    //    Ns.e.not(e1).get.size === 163
+    //    Ns.e.not(e1, e2).get.size === 162
+
+
+    //    Ns.ns("ns").get === List("ns")
+    //    Ns.ns("ns", "ref1").get === List("ns", "ref1")
+    //    Ns.ns.not("ns").get === List("ref1", "db.install", "db", "fressian")
+    //    Ns.ns.not("ns", "ref1").get === List("db.install", "db", "fressian")
+    //
+    //    Ns.a("str").get === List("str")
+    //    Ns.a("str", "int").get === List("str", "int")
+    //    Ns.a.not("str").get(5) === List("code", "ref1", "str1", "index", "txInstant")
+    //    Ns.a.not("str", "ref1").get(5) === List("code", "str1", "index", "txInstant", "cardinality")
+    //
+    //    Ns.v(2).get === List(2)
+    //    Ns.v(2, "b").get === List(2, "b")
+    //    Ns.v.not(2).get.size === 349
+    //    Ns.v.not(2, "b").get.size === 348
+    //
+    //    Ns.tx(tx3).get === List(tx3)
+    //    Ns.tx(tx3, tx5).get === List(tx3, tx5)
+    //    Ns.tx.not(tx3).get.size === 12
+    //    Ns.tx.not(tx3, tx5).get.size === 11
+    //
+    //    Ns.t(t3).get === List(t3)
+    //    Ns.t(t3, t5).get === List(t3, t5)
+    //    Ns.t.not(t3).get.size === 12
+    //    Ns.t.not(t3, t5).get.size === 11
+    //
+    //    Ns.txInstant(d2).get === List(d2)
+    //    Ns.txInstant(d2, d3).get.toString === List(d2, d3).toString
+    //    Ns.txInstant.not(d2).get.size === 9
+    //    Ns.txInstant.not(d2, d3).get.size === 8
+    //
+    //    Ns.op(true).get === List(true)
+    //    Ns.op(true, false).get === List(true)
+    //    Ns.op.not(true).get === Nil
+    //    Ns.op.not(true, false).get === Nil
+    //
+
+
+    //    Ns.a("str", "int").debugGet
+    //
+    //    Ns.a.not("str", "xxx").debugGet
+
+    //    Ns.a(xx).get === List()
+    //    Ns.a("str").get === List()
+    //    Ns.e.a("str").v.t.get === List()
+
+
+    //    conn.datomicConn.sync(t3).get
+    //    println(conn.q("""[:find ?e :where [?e :ns/int 2]]""".stripMargin))
+    //    println(conn.q("""[:find ?e :where [?e _ 2]]""".stripMargin))
+
+    //    println(conn.q("""[:find ?e :where [?e 40 21]]""".stripMargin))
+    //    println(conn.q("""[:find ?e :where [?e _ 21]]""".stripMargin))
+
+
+    //    println(conn.db.datoms(VAET, 2.asInstanceOf[AnyRef]))
+    //    println(conn.db.datoms(VAET, ""))
+    //    conn.db.datoms(datomic.Database.EAVT, 17592186045445L.asInstanceOf[Object])
+    //      .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+
+    //    conn.db.datoms(datomic.Database.EAVT, e1.asInstanceOf[Object]).forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+    //        conn.db.datoms(datomic.Database.EAVT).forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+    //    println("§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§")
+    //    conn.db.datoms(datomic.Database.AEVT, ":ns/int").forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+    //    println("§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§")
+    //    conn.db.datoms(datomic.Database.AVET, ":ns/int").forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+
+
+    //    conn.db.datoms(datomic.Database.VAET).forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+
+    //    conn.datomicConn.log.txRange(1028, null).iterator().asScala.toList.foreach { map =>
+    //      val it = map.values().iterator()
+    //      val t = it.next
+    //      val datoms = it.next.asInstanceOf[java.util.Collection[datomic.Datom]]
+    //      println(t)
+    //      datoms.forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+    //    }
+
+    //    println(conn.q(
+    //      """[:find  ?e :where [?e ?attr 2][?attr :db/ident _]]]""".stripMargin))
+    //
+    //
+    //    println(conn.q(
+    //      """[:find  ?e
+    //        | :where [?e ?attr 2]
+    //        |        [?attr :db/ident _]]
+    //        | ]""".stripMargin))
+    //
+    //    println(conn.q(
+    //      """[:find  ?a
+    //        | :where [?a ?a_attr ?b]
+    //        |        [?a_attr :db/ident _]
+    //        |        [(str ?b) ?b1]
+    //        |        [(= ?b1 "2")]
+    //        | ]""".stripMargin))
+    //
+    //    println(conn.q(
+    //      """[:find  ?a
+    //        | :where [?a ?a_attr ?b 13194139534343]]""".stripMargin))
+    //
+    //    println(conn.q(
+    //      """[:find  ?b_tx
+    //        | :where [?a ?a_attr ?b ?b_tx]
+    //        |        [(= ?b_tx 13194139534343)]]""".stripMargin))
+
+
+    // odo: disallow full scans
+    //    Ns.e.debugGet
+    //    Ns.e.debugGet
+    //    Ns.ns.debugGet
+    //    Ns.a.debugGet
+    //    Ns.v.debugGet
+    //    Ns.t.debugGet
+    //    Ns.tx.debugGet
+    //    Ns.txInstant.debugGet
+    //    Ns.op.debugGet
+
+
+    //        println(Model2Query(Model(List(
+    //          Bond("ns", "ref1", "ref1", 1, Seq()),
+    //          Meta("?", "ns", "ns", NoValue, NoValue)))))
+    //
+    //        Ns.Ref1.e.debugGet
+    //        Ns.Ref1.ns.debugGet
+    //        Ns.Ref1.a.debugGet
+    //        Ns.Ref1.v.debugGet
+    //        Ns.Ref1.tx.debugGet
+    //        Ns.Ref1.t.debugGet
+    //        Ns.Ref1.txInstant.debugGet
+    //        Ns.Ref1.op.debugGet
+
+
+    //    Ns.e_(42L).int.debugGet
+    //    Ns.e.int.ns.debugGet
+    //    Ns.ns.int.debugGet
+    //    Ns.a.int.debugGet
+    //    Ns.v.int.debugGet
+    //    Ns.int.tx.op.debugGet
+    //    Ns.tx.op.int.debugGet
+
+    //    Ns.t.int.debugGet
+    //    Ns.txInstant.int.debugGet
+    //    Ns.op.int.debugGet
+    //
+    //
+    //
+    //    Ns(e1).int.tx.debugGet
+    //    Ns(e1).int.t.debugGet
+    //    Ns(e1).int.txInstant.debugGet
+    //
+    //    Ns(e1).tx.int.debugGet
+    //    Ns(e1).t.int.debugGet
+    //    Ns(e1).txInstant.int.debugGet
+    //
+    //    Ns(e1).int.e.debugGet
+    //    Ns(e1).int.ns.debugGet
+    //    Ns(e1).int.a.debugGet
+    //    Ns(e1).int.v.debugGet
+    //    Ns(e1).int.op.debugGet
+    //
+    //    Ns(e1).e.int.debugGet
+    //    Ns(e1).ns.int.debugGet
+    //    Ns(e1).a.int.debugGet
+    //    Ns(e1).v.int.debugGet
+    //    Ns(e1).op.int.debugGet
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //    Ns(e1).int.t.debugGetHistory
+    //    Ns(e1).int.tx.debugGetHistory
+    //    Ns(e1).int.txInstant.debugGetHistory
+    //
+    //    Ns(e1).t.int.debugGetHistory
+    //    Ns(e1).tx.int.debugGetHistory
+    //    Ns(e1).txInstant.int.debugGetHistory
+    //
+    //    Ns(e1).int.e.debugGetHistory
+    //    Ns(e1).int.ns.debugGetHistory
+    //    Ns(e1).int.a.debugGetHistory
+    //    Ns(e1).int.v.debugGetHistory
+    //    Ns(e1).int.op.debugGetHistory
+    //
+    //    Ns(e1).e.int.debugGetHistory
+    //    Ns(e1).ns.int.debugGetHistory
+    //    Ns(e1).a.int.debugGetHistory
+    //    Ns(e1).v.int.debugGetHistory
+    //    Ns(e1).op.int.debugGetHistory
+
+
+    //    Ns(e1).int.op_(true).debugGet
+    //    Ns(e1).int.op_(false).debugGet
+
+    // All attribute assertions/retractions of entity e1 at t2
+    //    Ns(e1).a.debugGet
+    //    Ns(e1).a.v.debugGet
+    //    Ns(e1).a.v.t(t2).debugGet
+    //    Ns(e1).a.v.t(t2).op.debugGet
+
+    //    Ns(e1).a.v.t(t2).op.getHistory.sortBy(t => t._4) === List(
+    //      // str value was updated from "a" to "b"
+    //      (":ns/str", "a", t2, false),
+    //      (":ns/str", "b", t2, true)
+    //    )
 
     //        val rows = conn.q("""[:find  ?b ?b2
     //                            | :where [?a :ns/str ?b]
@@ -119,34 +826,34 @@ class AdHocTest extends CoreSpec {
     //    Ns.ns.debugGet
 
 
-//    val List(_, e2) = Ns.strs("a").Ref1.int1(1).save.eids
+    //    val List(_, e2) = Ns.strs("a").Ref1.int1(1).save.eids
 
-//    Ns.int.Ref1.e(count).debugGet
-//    Ns.e(count).Ref1.e(count).debugGet
+    //    Ns.int.Ref1.e(count).debugGet
+    //    Ns.e(count).Ref1.e(count).debugGet
 
-//    Ns.e(count).Ref1.int1_(1).debugGet
-//    val two = 2
-//    m(Ns.strs.Ref1.e.int1.<(two)).debugGet
-//    Ns.strs.Ref1.e(count).int1.<(two).debugGet
-//    Ns.strs.Ref1.int1.<(two).debugGet
+    //    Ns.e(count).Ref1.int1_(1).debugGet
+    //    val two = 2
+    //    m(Ns.strs.Ref1.e.int1.<(two)).debugGet
+    //    Ns.strs.Ref1.e(count).int1.<(two).debugGet
+    //    Ns.strs.Ref1.int1.<(two).debugGet
 
-//    Schema.tpe.apply(count).get
-//    Schema.tpe.apply(max).get
+    //    Schema.tpe.apply(count).get
+    //    Schema.tpe.apply(max).get
 
     //    Ns.e.str.debugGet
-//    //    Ns.ns.str.debugGet
-//    //    Ns.a.str.debugGet
-//    //    Ns.v.str.debugGet
-//    //    Ns.t.str.debugGet
-//
-//    Ns.str.e.debugGet
-//    Ns.str.ns.debugGet
-//    Ns.str.a.debugGet
-//    //    Ns.str.v.debugGet
-//    Ns.str.t.debugGet
-//    Ns.str.op.debugGet
-//
-//    Ns.str.ns.a.v.debugGet
+    //    //    Ns.ns.str.debugGet
+    //    //    Ns.a.str.debugGet
+    //    //    Ns.v.str.debugGet
+    //    //    Ns.t.str.debugGet
+    //
+    //    Ns.str.e.debugGet
+    //    Ns.str.ns.debugGet
+    //    Ns.str.a.debugGet
+    //    //    Ns.str.v.debugGet
+    //    Ns.str.t.debugGet
+    //    Ns.str.op.debugGet
+    //
+    //    Ns.str.ns.a.v.debugGet
 
     //    Schema.ns.a.debugGet
     //    m(Schema.ns + Ns.str.t).debugGet
@@ -382,26 +1089,26 @@ class AdHocTest extends CoreSpec {
     //      "ref2"
     //    )
 
-//        val model1 = Model(List(
-//          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
-//          Bond("ns", "ref1", "ref1", 1, Seq()),
-//          Meta("ref1", "ref1", "e", NoValue, Fn("count", None)),
-//          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
-//        val model1 = Model(List(
-//          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
-//          Bond("ns", "ref1", "ref1", 1, Seq()),
-//          Meta("?", "e", "e", NoValue, Fn("count", None)),
-//          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
-//        val query1 = Model2Query(model1)
-//
-//        val model2 = Model(List(
-//          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
-//          Bond("ns", "ref1", "ref1", 1, Seq()),
-//          Meta("?", "e", "e", NoValue, Fn("count", None)),
-//          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
-//        val query2 = Model2Query(model2)
-//        println(model)
-//        println(query)
+    //        val model1 = Model(List(
+    //          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
+    //          Bond("ns", "ref1", "ref1", 1, Seq()),
+    //          Meta("ref1", "ref1", "e", NoValue, Fn("count", None)),
+    //          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
+    //        val model1 = Model(List(
+    //          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
+    //          Bond("ns", "ref1", "ref1", 1, Seq()),
+    //          Meta("?", "e", "e", NoValue, Fn("count", None)),
+    //          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
+    //        val query1 = Model2Query(model1)
+    //
+    //        val model2 = Model(List(
+    //          Atom("ns", "int", "Int", 1, VarValue, None, Seq(NoValue), Seq()),
+    //          Bond("ns", "ref1", "ref1", 1, Seq()),
+    //          Meta("?", "e", "e", NoValue, Fn("count", None)),
+    //          Atom("ref1", "int1", "Int", 1, Lt(2), None, Seq(), Seq())))
+    //        val query2 = Model2Query(model2)
+    //        println(model)
+    //        println(query)
 
     //        Schema.a.debugGet
     //        Schema.a("attribute").debugGet

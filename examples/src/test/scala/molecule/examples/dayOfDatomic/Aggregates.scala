@@ -88,8 +88,8 @@ class Aggregates extends MoleculeSpec {
 
     // What is the average length of a schema name?
     val attrs = Schema.a.get
-//    attrs.map(_.length).sum / attrs.size === 13
-    attrs.map(_.length).sum / attrs.size === 6
+    attrs.map(_.length).sum / attrs.size === 13
+//    attrs.map(_.length).sum / attrs.size === 6
 
     // How many attributes and value types does this schema use?
     // Todo: original datomic query returns count of ident

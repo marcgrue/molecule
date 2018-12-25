@@ -15,8 +15,10 @@ private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
   import c.universe._
   //    val x = DebugMacro("Dsl2Model", 804, 804)
-  //    val x = DebugMacro("Dsl2Model", 220, 230)
-  val x = DebugMacro("Dsl2Model", 119, 116)
+  //  val x = DebugMacro("Dsl2Model", 119, 116)
+  //      val x = DebugMacro("Dsl2Model", 220, 230)
+  val x = DebugMacro("Dsl2Model", 802, 801)
+  //  val x = DebugMacro("Dsl2Model", 98, 99)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -32,6 +34,12 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       List[Int => Tree],
       List[Int => Tree]
     ) = {
+
+    val mandatoryGenerics = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "ns", "Self")
+    val mandatoryDatomGenerics = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "ns")
+    val datomGenerics = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_", "ns", "ns_")
+    val keywords = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct",
+      "median", "variance", "stddev", "rand", "sample")
 
     var isComposite: Boolean = false
     var collectCompositeElements: Boolean = false
@@ -53,7 +61,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var aggrType: String = ""
 
     var first: Boolean = true
-    var generic: Boolean = false
     // Generic namespace
     var gns: String = "?"
 
@@ -166,9 +173,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
     def resolve(tree: Tree): Seq[Element] = {
       if (first) {
-        val tpe = tree.tpe_
-        generic = tpe <:< typeOf[GenericNs]
-        if (generic) tpe match {
+        if (tree.tpe_ <:< typeOf[GenericNs]) tree.tpe_ match {
           case t if t <:< typeOf[Schema] => gns = "schema"
           case t if t <:< typeOf[EAVT]   => gns = "eavt"
           case t if t <:< typeOf[AEVT]   => gns = "aevt"
@@ -177,7 +182,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           case t if t <:< typeOf[Log]    => gns = "log"
         }
         first = false
-        x(99, tpe, generic, gns, ns(tree, richTree(tree)))
+        x(99, tree.tpe_, gns, ns(tree, richTree(tree)))
       }
 
       tree match {
@@ -244,7 +249,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         x(110, attrStr)
         resolveMandatoryAttrOrRef(tree, t, prev, p, attrStr)
     }
-
 
     def resolveMandatoryAttrOrRef(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
       if (Seq("e", "tx", "t", "txInstant", "op", "a", "v", "ns", "Self").contains(attrStr)) {
@@ -413,6 +417,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
             abort(s"Please add `$attrStr` after an attribute or another transaction value")
           if (prev.toString.endsWith("$"))
             abort(s"Optional attribute (`${p.name}`) can't be followed by generic transaction attribute (`$attrStr`).")
+
           tx match {
             case "t"         => castMeta("Long", TxTValue(), NoValue)
             case "tx"        => castMeta("Long", TxValue(), NoValue)
@@ -427,53 +432,57 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         x(112, attrStr, p.ns, gns)
         addSpecific(castOneAttr("Long"), "Long")
         addJson(jsonOneAttr, "Long", p.ns + ".e")
-        traverseElement(q"$prev", p, Meta("", "eid", "e", NoValue, EntValue))
+        traverseElement(q"$prev", p, Meta(gns, "e", "e", NoValue, EntValue))
+      //        traverseElement(q"$prev", p, Meta("", "eid", "e", NoValue, EntValue))
 
       case q"$prev.a" =>
         x(113, attrStr, p.ns, gns)
         addSpecific(castOneAttr("String"), "String")
         addJson(jsonOneAttr, "String", p.ns + ".a")
-        traverseElement(prev, p, Atom(gns, "a", "a", 1, NoValue))
+        traverseElement(q"$prev", p, Meta(gns, "a", "a", NoValue, NoValue))
+      //        traverseElement(prev, p, Atom(gns, "a", "a", 1, NoValue))
 
       case q"$prev.ns" =>
         x(114, attrStr, p.ns, gns)
         addSpecific(castOneAttr("String"), "String")
         addJson(jsonOneAttr, "String", p.ns + ".ns")
-        traverseElement(prev, p, Atom(gns, "ns", "ns", 1, NoValue))
+        traverseElement(q"$prev", p, Meta(gns, "ns", "ns", NoValue, NoValue))
+      //        traverseElement(prev, p, Atom(gns, "ns", "ns", 1, NoValue))
 
       case q"$prev.v" =>
         x(115, attrStr, p.ns, gns)
         addSpecific(castOneAttr("Any"), "Any")
         addJson(jsonOneAttr, "Any", p.ns + ".v")
-        traverseElement(prev, p, Meta("", "", "v", AttrVar(""), NoValue))
+        //        traverseElement(prev, p, Meta(gns, "v", "v", AttrVar(""), NoValue))
+        traverseElement(prev, p, Meta(gns, "v", "v", NoValue, NoValue))
 
-      case q"$prev.Schema.t" =>
-        x(114, p.ns, gns)
-        addSpecific(castOneAttr("Long"), "Long")
-        addJson(jsonOneAttr, "Long", "db.t")
-        traverseElement(prev, p, Atom("db", "txT", "Long", 1, VarValue))
-
-      case q"$prev.Schema.tx" =>
-        addSpecific(castOneAttr("Long"), "Long")
-        addJson(jsonOneAttr, "Long", "db.tx")
-        traverseElement(prev, p, Atom("db", "tx", "Long", 1, VarValue))
-
-      case q"$prev.Schema.txInstant" =>
-        addSpecific(castOneAttr("java.util.Date"), "java.util.Date")
-        addJson(jsonOneAttr, "java.util.Date", "db.txInstant")
-        traverseElement(prev, p, Atom("db", "txInstant", "Long", 1, VarValue))
-
-      case q"$prev.Schema.op" =>
-        addSpecific(castOneAttr("Boolean"), "Boolean")
-        addJson(jsonOneAttr, "Boolean", "db.op")
-        traverseElement(prev, p, Atom("db", "op", "Boolean", 1, VarValue))
+      //      case q"$prev.Schema.t" =>
+      //        x(114, p.ns, gns)
+      //        addSpecific(castOneAttr("Long"), "Long")
+      //        addJson(jsonOneAttr, "Long", "db.t")
+      //        traverseElement(prev, p, Atom("db", "txT", "Long", 1, VarValue))
+      //
+      //      case q"$prev.Schema.tx" =>
+      //        addSpecific(castOneAttr("Long"), "Long")
+      //        addJson(jsonOneAttr, "Long", "db.tx")
+      //        traverseElement(prev, p, Atom("db", "tx", "Long", 1, VarValue))
+      //
+      //      case q"$prev.Schema.txInstant" =>
+      //        addSpecific(castOneAttr("java.util.Date"), "java.util.Date")
+      //        addJson(jsonOneAttr, "java.util.Date", "db.txInstant")
+      //        traverseElement(prev, p, Atom("db", "txInstant", "Long", 1, VarValue))
+      //
+      //      case q"$prev.Schema.op" =>
+      //        addSpecific(castOneAttr("Boolean"), "Boolean")
+      //        addJson(jsonOneAttr, "Boolean", "db.op")
+      //        traverseElement(prev, p, Atom("db", "op", "Boolean", 1, VarValue))
 
       // ns.txInstant.attr - `txInstant` doesn't relate to any previous attr
-      case q"$prev.tx" if !p.isAttr        => abort(s"Please add `tx` after an attribute or another transaction value")
-      case q"$prev.t" if !p.isAttr         => abort(s"Please add `t` after an attribute or another transaction value")
-      case q"$prev.t" if !p.isAttr         => abort(s"Please add `t` after an attribute or another transaction value")
-      case q"$prev.txInstant" if !p.isAttr => abort(s"Please add `txInstant` after an attribute or another transaction value")
-      case q"$prev.op" if !p.isAttr        => abort(s"Please add `op` after an attribute or another transaction value")
+      //      case q"$prev.tx" if !p.isAttr        => abort(s"Please add `tx` after an attribute or another transaction value")
+      //      case q"$prev.t" if !p.isAttr         => abort(s"Please add `t` after an attribute or another transaction value")
+      //      case q"$prev.t" if !p.isAttr         => abort(s"Please add `t` after an attribute or another transaction value")
+      //      case q"$prev.txInstant" if !p.isAttr => abort(s"Please add `txInstant` after an attribute or another transaction value")
+      //      case q"$prev.op" if !p.isAttr        => abort(s"Please add `op` after an attribute or another transaction value")
 
       // Generic attributes not after optional attributes
       case q"$prev.tx" if prev.toString.endsWith("$")        => abort(s"Optional attributes (`" + p.name + "`) can't be followed by generic attributes (`tx`).")
@@ -484,23 +493,23 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       case q"$prev.tx" =>
         addSpecific(castOneAttr("Long"), "Long")
         addJson(jsonOneAttr, "Long", p.ns + ".tx")
-        traverseElement(prev, p, Meta("db", "tx", "tx", TxValue(None), NoValue))
+        traverseElement(prev, p, Meta(gns, "tx", "tx", TxValue(None), NoValue))
 
       case q"$prev.t" =>
         x(116, attrStr, p.ns, gns)
         addSpecific(castOneAttr("Long"), "Long")
         addJson(jsonOneAttr, "Long", p.ns + ".t")
-        traverseElement(prev, p, Meta("db", "txT", "tx", TxTValue(None), NoValue))
+        traverseElement(prev, p, Meta(gns, "t", "tx", TxTValue(None), NoValue))
 
       case q"$prev.txInstant" =>
         addSpecific(castOneAttr("java.util.Date"), "java.util.Date")
         addJson(jsonOneAttr, "java.util.Date", p.ns + ".txInstant")
-        traverseElement(prev, p, Meta("db", "txInstant", "tx", TxInstantValue(None), NoValue))
+        traverseElement(prev, p, Meta(gns, "txInstant", "tx", TxInstantValue(None), NoValue))
 
       case q"$prev.op" =>
         addSpecific(castOneAttr("Boolean"), "Boolean")
         addJson(jsonOneAttr, "Boolean", p.ns + ".op")
-        traverseElement(prev, p, Meta("db", "op", "tx", OpValue(None), NoValue))
+        traverseElement(prev, p, Meta(gns, "op", "op", OpValue(None), NoValue))
 
       // Self join -----------------------------
       case q"$prev.Self" => traverseElement(prev, p, Self)
@@ -520,51 +529,69 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
 
     def resolveApply(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String, vs: Tree): Seq[Element] = {
-      if (Seq("tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "v", "v_", "ns", "ns_").contains(attrStr)) {
-        def singleValue = vs match {
-          case q"scala.collection.immutable.List($pkg.?)" => Qm
-          case q"scala.collection.immutable.List($v)"     => extract(v)
-          case _                                          => abort("Generic attributes only accept 1 argument. Found: " + vs)
+      if (datomGenerics.contains(attrStr)) {
+
+        def resolve(value: Value, aggrType: String = ""): Seq[Element] = {
+
+          def casts(mandatory: Boolean, tpe: String, kind: String): Seq[Element] = {
+            if (prev.toString.endsWith("$"))
+              abort(s"Optional attributes (`${p.name}`) can't be followed by generic attribute (`$attrStr`).")
+            if (mandatory) {
+              x(225, "aggrType: " + aggrType)
+              if (aggrType.nonEmpty) {
+                // Aggregate
+                addSpecific(castOneAttr(aggrType), aggrType)
+                addJson(jsonOneAttr, aggrType, gns + "." + attrStr)
+                traverseElement(prev, p, Meta(gns, attrStr, kind, NoValue, value))
+              } else {
+                // Clean/comparison
+                addSpecific(castOneAttr(tpe), tpe)
+                addJson(jsonOneAttr, tpe, gns + "." + attrStr)
+                traverseElement(prev, p, Meta(gns, attrStr, kind, NoValue, value))
+              }
+            } else {
+              // Tacit
+              if (aggrType.isEmpty) {
+                traverseElement(prev, p, Meta(gns, attrStr, kind, NoValue, value))
+              } else {
+                abort(s"Can only apply `count` to mandatory generic attribute. Please remove underscore from `$attrStr`")
+              }
+            }
+          }
+
+          // Sorted by usage likelihood
+          attrStr match {
+            case "e"          => casts(true, "Long", "e")
+            case "e_"         => casts(false, "Long", "e")
+            case "tx"         => casts(true, "Long", "tx")
+            case "t"          => casts(true, "Long", "tx")
+            case "txInstant"  => casts(true, "java.util.Date", "tx")
+            case "op"         => casts(true, "Boolean", "op")
+            case "tx_"        => casts(false, "Long", "tx")
+            case "t_"         => casts(false, "Long", "tx")
+            case "txInstant_" => casts(false, "java.util.Date", "tx")
+            case "op_"        => casts(false, "Boolean", "op")
+            case "ns"         => casts(true, "String", "ns")
+            case "a"          => casts(true, "String", "a")
+            case "v"          => casts(true, "Any", "v")
+            case "ns_"        => casts(false, "String", "ns")
+            case "a_"         => casts(false, "String", "a")
+            case "v_"         => casts(false, "Any", "v")
+          }
         }
-        x(220, attrStr, vs, singleValue)
-        attrStr match {
-          case "tx" =>
-            addSpecific(castOneAttr("Long"), "Long")
-            addJson(jsonOneAttr, "Long", p.ns + ".tx")
-            traverseElement(prev, p, Meta("db", "tx", "tx", TxValue(Some(singleValue)), NoValue))
 
-          case "t" =>
-            addSpecific(castOneAttr("Long"), "Long")
-            addJson(jsonOneAttr, "Long", p.ns + ".t")
-            traverseElement(prev, p, Meta("db", "txT", "tx", TxTValue(Some(singleValue)), NoValue))
-
-          case "txInstant" =>
-            addSpecific(castOneAttr("java.util.Date"), "java.util.Date")
-            addJson(jsonOneAttr, "java.util.Date", p.ns + ".txInstant")
-            traverseElement(prev, p, Meta("db", "txInstant", "tx", TxInstantValue(Some(singleValue)), NoValue))
-
-          case "op" =>
-            addSpecific(castOneAttr("Boolean"), "Boolean")
-            addJson(jsonOneAttr, "Boolean", p.ns + ".op")
-            traverseElement(prev, p, Meta("db", "op", "tx", OpValue(Some(singleValue)), NoValue))
-
-          case "v" =>
-            addSpecific(castOneAttr("Any"), "Any")
-            addJson(jsonOneAttr, "Any", p.ns + ".v")
-            traverseElement(prev, p, Meta("", "", "v", AttrVar(""), modelValue("apply", null, vs)))
-
-          case "ns" =>
-            addSpecific(castOneAttr("String"), "String")
-            addJson(jsonOneAttr, "String", p.ns + ".ns")
-            traverseElement(prev, p, Atom("?", "ns", "ns", 1, modelValue("apply", null, vs)))
-
-          case "tx_"        => traverseElement(prev, p, Meta("db", "tx", "tx", TxValue_(Some(singleValue)), NoValue))
-          case "t_"         => traverseElement(prev, p, Meta("db", "txT", "tx", TxTValue_(Some(singleValue)), NoValue))
-          case "txInstant_" => traverseElement(prev, p, Meta("db", "txInstant", "tx", TxInstantValue_(Some(singleValue)), NoValue))
-          case "op_"        => traverseElement(prev, p, Meta("db", "op", "tx", OpValue_(Some(singleValue)), NoValue))
-          case "v_"         => traverseElement(prev, p, Meta("", "", "v", NoValue, modelValue("apply", null, vs)))
-          case "ns_"        => traverseElement(prev, p, Atom("?", "ns_", "ns", 1, modelValue("apply", null, vs)))
+        val element = vs match {
+          case q"scala.collection.immutable.List($pkg.count)" => resolve(Fn("count"), "Int2")
+          case q"scala.collection.immutable.List($pkg.?)"     => abort("Generic input attributes not implemented.")
+          //          case q"scala.collection.immutable.List($pkg.this.$ident)" => resolve(Eq(Seq(s"__ident__$ident")))
+          //          case q"scala.collection.immutable.List($$anon.this.$ident)" => resolve(Eq(Seq(s"__ident__$ident")))
+          //          case q"scala.collection.immutable.List($pkg.$fn)"           => abort(s"Can only apply `count` fn to generic attribute. Found: `$fn` \n" + q"$pkg.$fn")
+          case q"scala.collection.immutable.List($v)"    => resolve(modelValue("apply", null, v))
+          case q"scala.collection.immutable.List(..$vs)" => resolve(modelValue("apply", null, q"Seq(..$vs)"))
+          case _                                         => abort("Unexpected value applied to generic attribute: " + vs)
         }
+        x(220, p.ns, attrStr, vs, element)
+        element
 
       } else if (t.isFirstNS) {
         x(230, attrStr)
@@ -624,6 +651,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         traverseElement(prev, p, nested1(prev, p, manyRef, nested))
     }
 
+
     def resolveOperation(tree: Tree): Seq[Element] = tree match {
 
       // Attribute map using k/apply
@@ -652,6 +680,100 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         x(430, attr)
         traverseElement(prev, richTree(prev), resolveOp(q"$prev.$attr", richTree(q"$prev.$attr"), prev, richTree(prev), attr.toString(), q"$op", q"Seq(..$values)"))
     }
+
+
+    def resolveOp(tree: Tree, t: richTree, prev: Tree, p: richTree, attr: String, op: Tree, values0: Tree): Element = {
+      val value: Value = modelValue(op.toString(), tree, values0)
+
+      if (attr.head.isUpper) {
+        x(91, attr, value)
+        Atom(t.name, t.name, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
+
+        //      } else if (List("e", "e_", "a", "a_", "ns", "ns_").contains(attr)) {
+      } else if (datomGenerics.contains(attr)) {
+        x(92, attr, values0, value)
+
+        def resolve(kind: String, tpe: String): Meta = {
+          addAttrOrAggr(attr, t, tpe)
+          Meta(gns, attr, kind, NoValue, value)
+        }
+
+        attr match {
+          case "e"          => resolve("e", "Long")
+          case "e_"         => resolve("e", "Long")
+          case "ns"         => resolve("ns", "String")
+          case "ns_"        => resolve("ns", "String")
+          case "a"          => resolve("a", "String")
+          case "a_"         => resolve("a", "String")
+          case "v"          => resolve("v", "Any")
+          case "v_"         => resolve("v", "Any")
+          case "tx"         => resolve("tx", "Long")
+          case "tx_"        => resolve("tx", "Long")
+          case "t"          => resolve("tx", "Long")
+          case "t_"         => resolve("tx", "Long")
+          case "txInstant"  => resolve("tx", "java.util.Date")
+          case "txInstant_" => resolve("tx", "java.util.Date")
+          case "op"         => resolve("op", "Boolean")
+          case "op_"        => resolve("op", "Boolean")
+        }
+
+        //
+        //        attr match {
+        //          //          case "e" if p.isRef  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", EidValue(value), NoValue)
+        //          //          case "e_" if p.isRef => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", EidValue_(value), NoValue)
+        //          //          case "e"             => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", EidValue(value), NoValue)
+        //          //          case "e_"            => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", EidValue_(value), NoValue)
+        //          //          case "ns"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "ns", "String", NsValue(value), bi2(tree, t))
+        //          //          case "ns_"           => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "ns_", "String", NsValue_(value), bi2(tree, t))
+        //          //          case "a"             => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "a", "String", AttrValue(value), bi2(tree, t))
+        //          //          case "a_"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "a_", "String", AttrValue_(value), bi2(tree, t))
+        //          //          case "v"             => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "v", "String", ValueValue(value), bi2(tree, t))
+        //          //          case "v_"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "v_", "String", ValueValue_(value), bi2(tree, t))
+        //
+        //          //          case "e" if p.isRef  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", NoValue, value)
+        //          //          case "e_" if p.isRef => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", NoValue, value)
+        //
+        //          //                    case "e"             => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", NoValue, value)
+        //          //                    case "e_"            => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", NoValue, value)
+        //          //          case "e"   => addAttrOrAggr(attr, t, "Long"); Meta(p.name, "e", "e", NoValue, value)
+        //          //          case "e_"  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, "e_", "e", NoValue, value)
+        //
+        //          case "e"   => addAttrOrAggr(attr, t, "Long"); Meta("?", "e", "e", NoValue, value)
+        //          case "e_"  => addAttrOrAggr(attr, t, "Long"); Meta("?", "e_", "e", NoValue, value)
+        //          case "ns"  => addAttrOrAggr(attr, t, "String"); Meta("?", "ns", "ns", NoValue, value)
+        //          case "ns_" => addAttrOrAggr(attr, t, "String"); Meta("?", "ns_", "ns", NoValue, value)
+        //          case "a"   => addAttrOrAggr(attr, t, "String"); Meta("?", "a", "a", NoValue, value)
+        //          case "a_"  => addAttrOrAggr(attr, t, "String"); Meta("?", "a_", "a", NoValue, value)
+        //          case "v"   => addAttrOrAggr(attr, t, "Any"); Meta("?", "v", "v", NoValue, value)
+        //          case "v_"  => addAttrOrAggr(attr, t, "Any"); Meta("?", "v_", "v", NoValue, value)
+        //          //          case "ns"  => addAttrOrAggr(attr, t, "String"); Atom("?", "ns", "ns", 1, value, gs = bi(tree, t))
+        //          //          case "ns_" => addAttrOrAggr(attr, t, "String"); Atom("?", "ns_", "ns", 1, value, gs = bi(tree, t))
+        //          //          case "a"   => addAttrOrAggr(attr, t, "String"); Atom("?", "a", "a", 1, value, gs = bi(tree, t))
+        //          //          case "a_"  => addAttrOrAggr(attr, t, "String"); Atom("?", "a_", "a", 1, value, gs = bi(tree, t))
+        //        }
+
+      } else if (t.isMapAttr) {
+        x(93, attr, value)
+        addCast(castMandatoryMapAttr, t)
+        addJson1(jsonMandatoryMapAttr, t)
+        Atom(t.ns, attr, t.tpeS, 3, value, None, bi(tree, t))
+
+      } else if (t.isMapAttr$) {
+        x(94, attr, value)
+        addCast(castOptionalMapApplyAttr, t)
+        addJson1(jsonOptionalMapAttr, t)
+        Atom(t.ns, attr, t.tpeS, 3, value, None, bi(tree, t))
+
+      } else if (t.isAttr) {
+        x(95, attr, value)
+        addAttrOrAggr(attr, t, t.tpeS, true)
+        Atom(t.ns, attr, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
+
+      } else {
+        abort(s"Unexpected attribute operation for `$attr` having value: " + value)
+      }
+    }
+
 
     def resolveNested(prev: Tree, p: richTree, manyRef: TermName, nested: Tree): Seq[Element] = {
       x(521, jsons, tempJsons, post, postJsons)
@@ -813,65 +935,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
 
-    def resolveOp(tree: Tree, t: richTree, prev: Tree, p: richTree, attr: String, op: Tree, values0: Tree): Element = {
-      val value: Value = modelValue(op.toString(), tree, values0)
-
-      if (attr.head.isUpper) {
-        x(91, attr, value)
-        Atom(t.name, t.name, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
-
-      } else if (List("e", "e_", "a", "a_", "ns", "ns_").contains(attr)) {
-        x(92, attr, values0, value)
-        attr match {
-          //          case "e" if p.isRef  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", EidValue(value), NoValue)
-          //          case "e_" if p.isRef => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", EidValue_(value), NoValue)
-          //          case "e"             => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", EidValue(value), NoValue)
-          //          case "e_"            => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", EidValue_(value), NoValue)
-          //          case "ns"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "ns", "String", NsValue(value), bi2(tree, t))
-          //          case "ns_"           => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "ns_", "String", NsValue_(value), bi2(tree, t))
-          //          case "a"             => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "a", "String", AttrValue(value), bi2(tree, t))
-          //          case "a_"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "a_", "String", AttrValue_(value), bi2(tree, t))
-          //          case "v"             => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "v", "String", ValueValue(value), bi2(tree, t))
-          //          case "v_"            => addAttrOrAggr(attr, t, "String"); Meta(ns(prev, p), "v_", "String", ValueValue_(value), bi2(tree, t))
-
-//          case "e" if p.isRef  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", NoValue, value)
-//          case "e_" if p.isRef => addAttrOrAggr(attr, t, "Long"); Meta(p.name, p.refNext, "e", NoValue, value)
-
-          //                    case "e"             => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", NoValue, value)
-          //                    case "e_"            => addAttrOrAggr(attr, t, "Long"); Meta(p.name, attr, "e", NoValue, value)
-          //          case "e"   => addAttrOrAggr(attr, t, "Long"); Meta(p.name, "e", "e", NoValue, value)
-          //          case "e_"  => addAttrOrAggr(attr, t, "Long"); Meta(p.name, "e_", "e", NoValue, value)
-
-          case "e"   => addAttrOrAggr(attr, t, "Long"); Meta("?", "e", "e", NoValue, value)
-          case "e_"  => addAttrOrAggr(attr, t, "Long"); Meta("?", "e_", "e", NoValue, value)
-          case "a"   => addAttrOrAggr(attr, t, "String"); Atom("?", "a", "a", 1, value, gs = bi(tree, t))
-          case "a_"  => addAttrOrAggr(attr, t, "String"); Atom("?", "a_", "a", 1, value, gs = bi(tree, t))
-          case "ns"  => addAttrOrAggr(attr, t, "String"); Atom("?", "ns", "ns", 1, value, gs = bi(tree, t))
-          case "ns_" => addAttrOrAggr(attr, t, "String"); Atom("?", "ns_", "ns", 1, value, gs = bi(tree, t))
-        }
-
-      } else if (t.isMapAttr) {
-        x(93, attr, value)
-        addCast(castMandatoryMapAttr, t)
-        addJson1(jsonMandatoryMapAttr, t)
-        Atom(t.ns, attr, t.tpeS, 3, value, None, bi(tree, t))
-
-      } else if (t.isMapAttr$) {
-        x(94, attr, value)
-        addCast(castOptionalMapApplyAttr, t)
-        addJson1(jsonOptionalMapAttr, t)
-        Atom(t.ns, attr, t.tpeS, 3, value, None, bi(tree, t))
-
-      } else if (t.isAttr) {
-        x(95, attr, value)
-        addAttrOrAggr(attr, t, t.tpeS, true)
-        Atom(t.ns, attr, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
-
-      } else {
-        abort(s"Unexpected attribute operation for `$attr` having value: " + value)
-      }
-    }
-
 
     // Values ================================================================================
 
@@ -973,11 +1036,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case "stddev"                      => standard = false; aggrType = "Double"; aggr("stddev")
       }
 
-      def keyword(v: String): Boolean =
-        Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample").contains(v)
-
       def single(value: Tree) = value match {
-        case q"$pkg.$kw" if keyword(kw.toString)                => keyw(kw.toString)
+        case q"$pkg.$kw" if keywords.contains(kw.toString)      => keyw(kw.toString)
         case q"$pkg.min.apply(${Literal(Constant(i: Int))})"    => standard = false; aggrType = "list"; aggr("min", Some(i))
         case q"$pkg.max.apply(${Literal(Constant(i: Int))})"    => standard = false; aggrType = "list"; aggr("max", Some(i))
         case q"$pkg.rand.apply(${Literal(Constant(i: Int))})"   => standard = false; aggrType = "listRand"; aggr("rand", Some(i))
@@ -1169,6 +1229,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       postCasts = Nil
       postJsons = Nil
     }
+    x(801, rawElements)
 
 
     // Sanity checks .......................................................................
@@ -1196,34 +1257,27 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var i: Int = 0
     var after: Boolean = false
     var hasMandatory: Boolean = false
+    var generics: Seq[String] = Nil
+    var beforeFirstAttr: Boolean = true
+    var isFiltered: Boolean = false
     rawElements.foreach { el =>
       i += 1
       // build reversed elements now that we loop the elements anyway (avoiding looping again)
       reversedElements ::= el
 
       el match {
-        case n: Nested     => hasMandatory = true
-        case e: TxMetaData => after = true
-        case e if after    => e match {
+        case e if after => e match {
           // No non-tx meta attributes after TxMetaData/Nested
-          case Atom(_, "a", _, _, _, _, _, _)  => txError(s" attribute `a`")
-          case Meta(_, _, "e", _, _)           => txError(s" attribute `e`")
-          case Meta(_, _, "v", _, _)           => txError(s" attribute `v`")
-          case Atom(_, name, _, _, _, _, _, _) => txError(s" attribute `$name`")
-          case Bond(_, name, _, _, _)          => txError(s" reference `${name.capitalize}`")
+          case Meta(_, attr, _, _, _)          => txError(s" generic attribute `$attr`")
+          case Atom(_, attr, _, _, _, _, _, _) => txError(s" attribute `$attr`")
+          case Bond(_, refAttr, _, _, _)       => txError(s" reference `${refAttr.capitalize}`")
+          case txm: TxMetaData                 => // ok
           case _                               => txError(s": " + e)
-
-          //          case Meta(_, _, "e", _, _)           => txError(s" attribute `e`")
-          //          case Meta(_, _, "ns", _, _)          => txError(s" attribute `ns`")
-          //          case Meta(_, _, "a", _, _)           => txError(s" attribute `a`")
-          //          case Meta(_, _, "v", _, _)           => txError(s" attribute `v`")
-          //          case Atom(_, name, _, _, _, _, _, _) => txError(s" attribute `$name`")
-          //          case Bond(_, name, _, _, _)          => txError(s" reference `${name.capitalize}`")
-          //          case _                               => txError(s": " + e)
         }
 
         // Molecule should at least have one mandatory attribute
         case a: Atom =>
+          isFiltered = true
           if (a.name.last != '$')
             hasMandatory = true
 
@@ -1245,17 +1299,54 @@ private[molecule] trait Dsl2Model extends Cast with Json {
               abort(s"`Distinct` keyword not supported for card many attributes like `:$ns/$name` (card many values already returned as Sets of distinct values).")
 
             case _ =>
+              if (beforeFirstAttr) {
+                if (generics.nonEmpty)
+                  abort(s"Can't add first attribute `${a.name}` after generic attributes (except `e` which is ok to have first). " +
+                    s"Please add generic attributes ${generics.map(g => s"`$g`").mkString(", ")} after `${a.name}`.")
+                beforeFirstAttr = false
+              }
           }
-        case b: Bond =>
-          if (i == last) abort(s"Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
-          hasMandatory = true
-        //        case m: Meta => hasMandatory = true
-        case Meta(_, "txInstant", _, _, _) => hasMandatory = true
-        case Meta(_, "e_", _, _, EntValue) => abort("Tacit entity only allowed if applying an entity id")
 
+        case b: Bond =>
+          if (i == last)
+            abort(s"Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+          hasMandatory = true
+          beforeFirstAttr = false
+
+
+        case m: Meta => {
+          if (m.attr.last != '_')
+            hasMandatory = true
+          m match {
+            case Meta("schema", metaAttr, _, _, value)                                         =>
+              isFiltered = true
+            case Meta("?", metaAttr, _, _, value) if mandatoryDatomGenerics.contains(metaAttr) =>
+              if (beforeFirstAttr && (metaAttr != "e" && metaAttr != "e_"))
+                generics = generics :+ metaAttr
+              value match {
+                case NoValue | EntValue =>
+                case Fn(fn, _)          =>
+                  if (fn != "count")
+                    abort("Generic attributes only allowed to apply `count` aggregate. Found: " + fn)
+                case _                  => isFiltered = true
+              }
+            case Meta(_, _, _, _, NoValue | EntValue)                                          =>
+            case _                                                                             =>
+              isFiltered = true
+          }
+        }
+
+        case n: Nested =>
+          hasMandatory = true
+          beforeFirstAttr = false
+
+        case e: TxMetaData =>
+          after = true
 
         case c: Composite =>
           hasMandatory = true
+          beforeFirstAttr = false
+
           // Start over for each sub-molecule
           compLevel = 0
           compLocalAttrs = List.empty[String]
@@ -1293,14 +1384,15 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
     if (!hasMandatory) {
-      //      val firstNs = rawElements.head match {
-      //        case Meta(ns, _, _, _, _) => ns
-      //        case _                    => ""
-      //
-      //      }
-      //      if (!genericNss.contains(firstNs))
       abort(s"Molecule has only optional attributes. Please add one or more mandatory/tacit attributes.")
     }
+
+    x(802, rawElements, beforeFirstAttr, isFiltered)
+
+
+    if (beforeFirstAttr && !isFiltered)
+      abort(s"Molecule with only generic attributes and no entity id(s) applied are not allowed " +
+        s"since it would cause a full scan of the whole database.")
 
 
     // Resolve generic elements ............................................................
@@ -1329,12 +1421,14 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           es = a.copy(gs = a.gs ++ gs) :: es
           gs = Nil
         }
-      case m@Meta(_, _, "e", g, v1)                                                              => es = m :: es; gs = g :: gs; v = v1
-      case Meta(_, _, _, g, v1)                                                                  => gs = g :: gs; v = v1
-      case txmd@TxMetaData(_)                                                                    => es = txmd :: es; gs = TxValue_(None) :: gs
-      case tx: TxValue                                                                           => gs = tx :: gs
-      case tx: TxValue_                                                                          => gs = tx :: gs
-      case com@Composite(compositeElements)                                                      => compositeElements.last match {
+
+      case m@Meta(_, _, "e", g, v1) => es = m :: es; gs = g :: gs; v = v1
+      //      case Meta(_, _, _, g, v1)                                                                  => gs = g :: gs; v = v1
+
+      case txmd@TxMetaData(_)               => es = txmd :: es; gs = TxValue_(None) :: gs
+      case tx: TxValue                      => gs = tx :: gs
+      case tx: TxValue_                     => gs = tx :: gs
+      case com@Composite(compositeElements) => compositeElements.last match {
         case txmd: TxMetaData => {
           // Find first Atom (possibly before further TxMetaData elements
           val markedInitElements = compositeElements.init.foldRight(1, Seq.empty[Element]) {
@@ -1348,11 +1442,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         }
         case _                => es = com :: es
       }
-      case b@Bond(ns, refAttr, refNs, _, _)                                                      =>
+      case b@Bond(ns, refAttr, refNs, _, _) =>
         lastBondNs = ns
         lastBondAttr = refAttr
         es = b :: es
-      case other                                                                                 => es = other :: es
+      case other                            => es = other :: es
     }
 
 
@@ -1386,9 +1480,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       case other                        => other
     }
 
-    x(800, rawElements, es)
+    x(810, rawElements, es)
 
     // Return checked model
-    (Model(removeDuplicateValues(es)), types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons)
+//    (Model(removeDuplicateValues(es)), types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons)
+//    (Model(removeDuplicateValues(rawElements)), types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons)
+    (Model(rawElements), types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons)
   }
 }

@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.api.out6._
+import molecule.api.out7._
 
 import molecule.ast.model._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
@@ -25,7 +25,7 @@ class Provenance extends MoleculeSpec {
     m(Story.title.url.Tx(MetaData.user_(stu).usecase_("AddStories"))) -->
       Model(List(
         Atom("story", "title", "String", 1, VarValue, None, List(), List()),
-        Atom("story", "url", "String", 1, VarValue, None, List(TxValue_(None)), List()),
+        Atom("story", "url", "String", 1, VarValue, None, List(), List()),
         TxMetaData(List(
           Atom("metaData", "user_", "Long", 1, Eq(List(17592186045423L)), None, List(), List()),
           Atom("metaData", "usecase_", "String", 1, Eq(List("AddStories")), None, List(), List())))
@@ -165,11 +165,11 @@ class Provenance extends MoleculeSpec {
     )
 
     // Entire attributes history of ElastiCache story _entity_
-    Story(elasticacheStory).a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory === List(
-      (":story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
-      (":story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
-      (":story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
-      (":story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")
+    Story(elasticacheStory).ns.a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._5, r._4)) === List(
+      ("story", "title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
+      ("story", "url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
+      ("story", "title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
+      ("story", "title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
     )
 
     // Stories with latest use case meta date
