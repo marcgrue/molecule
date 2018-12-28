@@ -16,7 +16,7 @@ import scala.annotation.StaticAnnotation
   *   object SeattleDefinition {                // Schema definition object
   *
   *     trait Person {                          // Namespace
-  *       val name = oneString.fulltextSearch   // String attribute definition with fulltext search
+  *       val name = oneString.fulltext   // String attribute definition with fulltext search
   *       val age  = oneInt                     // Int attribute definition
   *     }
   *
@@ -33,13 +33,13 @@ import scala.annotation.StaticAnnotation
   *
   *     object customer {
   *       trait Person {
-  *         val name    = oneString.fulltextSearch
+  *         val name    = oneString.fulltext
   *         val age     = oneInt
   *         val address = one[Address]
   *         val bought  = many[products.Item]
   *       }
   *       trait Address {
-  *         val street = oneString.fulltextSearch
+  *         val street = oneString.fulltext
   *         val city   = oneInt
   *       }
   *       // ..more namespaces in the `customer` partition
@@ -137,7 +137,7 @@ object definition {
       * <br><br>
       * Generate eventually consistent fulltext search index for this attribute.
       */
-    lazy val fulltextSearch: oneString = ???
+    lazy val fulltext: oneString = ???
   }
   object oneString extends oneString
 
@@ -151,7 +151,7 @@ object definition {
       * <br><br>
       * Generate eventually consistent fulltext search index for this attribute.
       */
-    lazy val fulltextSearch: manyString = ???
+    lazy val fulltext: manyString = ???
   }
   object manyString extends manyString
 
@@ -165,7 +165,7 @@ object definition {
       * <br><br>
       * Generate eventually consistent fulltext search index for this attribute.
       */
-    val fulltextSearch: mapString = ???
+    val fulltext: mapString = ???
   }
   object mapString extends mapString
 

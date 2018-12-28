@@ -23,7 +23,6 @@ object Conn {
   def apply(txDb: AnyRef): Conn = new Conn(null) {
     testDb(txDb.asInstanceOf[Database])
   }
-//  def apply(): Conn = new Conn(null)
 }
 
 

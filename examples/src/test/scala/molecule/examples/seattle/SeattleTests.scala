@@ -344,20 +344,19 @@ class SeattleTests extends SeattleSpec {
 
   "Working with time" in new SeattleSetup {
 
-    val txDates      = Schema.txInstant.get.sorted.reverse
-    val schemaTxDate = txDates(1)
-    val dataTxDate   = txDates(0)
+    val schemaTxT = Schema.t.get.head
+    val dataTxT   = Community.name_.t.get.head
 
     // Take all Community entities
     val communities = m(Community.e.name_)
 
     // Revisiting the past
 
-    communities.getAsOf(schemaTxDate).size === 0
-    communities.getAsOf(dataTxDate).size === 150
+    communities.getAsOf(schemaTxT).size === 0
+    communities.getAsOf(dataTxT).size === 150
 
-    communities.getSince(schemaTxDate).size === 150
-    communities.getSince(dataTxDate).size === 0
+    communities.getSince(schemaTxT).size === 150
+    communities.getSince(dataTxT).size === 0
 
     // Imagining the future
     val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
@@ -376,7 +375,7 @@ class SeattleTests extends SeattleSpec {
     communities.get.size === 258
 
     // number of new transactions
-    communities.getSince(dataTxDate).size === 108
+    communities.getSince(dataTxT).size === 108
   }
 
 

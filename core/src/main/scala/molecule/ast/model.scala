@@ -1,6 +1,5 @@
 package molecule.ast
 import molecule.ast.exception.ModelException
-import molecule.exceptions.MoleculeException
 import molecule.util.Helpers
 
 /** AST for molecule [[molecule.ast.model.Model Model]] representation.

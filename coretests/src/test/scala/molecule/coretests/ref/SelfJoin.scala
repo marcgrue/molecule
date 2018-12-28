@@ -1,8 +1,8 @@
 package molecule.coretests.ref
 
 import molecule.api.out6._
-import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.coretests.util.dsl.coreTest._
 import molecule.util.expectCompileError
 
 class SelfJoin extends CoreSpec {
@@ -347,6 +347,5 @@ class SelfJoin extends CoreSpec {
     Ns.str_("Joe").Refs1.str1._Ns.Self
       .str_("Ben").Refs1.str1_(unify)._Ns.Self
       .str_("Liz").Refs1.str1_(unify).get === List("Coffee")
-
   }
 }

@@ -6,9 +6,9 @@ import molecule.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_0 extends Schema with OutSchema_0[Schema_0] {
-  type Next[Attr[_, _], Type] = Attr[Schema_1[Type], P2[_,_]] with Schema_1[Type]
-  type Stay[Attr[_, _], Type] = Attr[Schema_0, P1[_]] with Schema_0
+trait Schema_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends Schema with OutSchema_20[Schema_20, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] {
+  type Next[Attr[_, _], Type] = Attr[Schema_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Type], P22[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Type]
+  type Stay[Attr[_, _], Type] = Attr[Schema_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], P21[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
   
   final lazy val id           : Next[id           , Long   ] = ???
   final lazy val ident        : Next[ident        , String ] = ???
@@ -35,7 +35,7 @@ trait Schema_0 extends Schema with OutSchema_0[Schema_0] {
   final lazy val fulltext$    : Next[fulltext$    , Option[Boolean]] = ???
   final lazy val isComponent$ : Next[isComponent$ , Option[Boolean]] = ???
   final lazy val noHistory$   : Next[noHistory$   , Option[Boolean]] = ???
-  
+
   final lazy val id_          : Stay[id           , Long   ] = ???
   final lazy val ident_       : Stay[ident        , String ] = ???
   final lazy val part_        : Stay[part         , String ] = ???

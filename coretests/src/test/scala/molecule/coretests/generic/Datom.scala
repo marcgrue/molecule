@@ -10,6 +10,7 @@ import molecule.util.expectCompileError
 
 
 class Datom extends CoreSpec {
+  sequential
 
   // Create new db from schema
   implicit val conn = recreateDbFrom(CoreTestSchema)
@@ -240,14 +241,6 @@ class Datom extends CoreSpec {
     }
 
 
-    //    "n attribute" >> {
-    //
-    //      Ns.str.t.int.t.debugGet
-    //      Ns.str.t.int.t.get === List((2, t3, true), (5, t5, true))
-    //
-    //    }
-
-
     "Ref" >> {
 
       // Generic attributes after ref id
@@ -353,6 +346,15 @@ class Datom extends CoreSpec {
   }
 
 
+  "Tacit" >> {
+    expectCompileError(
+      """m(Ns.int.tx_)""",
+      "molecule.transform.exception.Dsl2ModelException: " +
+        "Tacit `tx_` can only be used with an applied value i.e. `tx_(<value>)`")
+    ok
+  }
+
+
   "Filters, tacit" >> {
 
     Ns.int.ns_("ns").get === List(2, 5)
@@ -411,19 +413,19 @@ class Datom extends CoreSpec {
   "Optional tx data not allowed" >> {
     expectCompileError(
       """m(Ns.int$.tx.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`tx`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")
 
     expectCompileError(
       """m(Ns.int$.t.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`t`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
 
     expectCompileError(
       """m(Ns.int$.txInstant.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`txInstant`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`txInstant`).")
 
     expectCompileError(
       """m(Ns.int$.op.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic attributes (`op`).")
+      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`op`).")
 
     ok
   }

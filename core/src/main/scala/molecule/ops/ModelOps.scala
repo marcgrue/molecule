@@ -69,6 +69,10 @@ object ModelOps {
         case Seq(None) => atom.copy(value = Fn("not", None), gs = getGenerics(gs2), keys = getKeys(keyIdents))
         case values    => atom.copy(value = Eq(values), gs = getGenerics(gs2), keys = getKeys(keyIdents))
       }
+      case meta@Meta(_, _, _, _, Eq(idents))              => getValues(idents) match {
+        case Seq(None) => meta.copy(value = Fn("not", None))
+        case values    => meta.copy(value = Eq(values))
+      }
       case atom@Atom(_, _, _, _, Neq(idents), _, gs2, keyIdents)             => atom.copy(value = Neq(getValues(idents)), gs = getGenerics(gs2), keys = getKeys(keyIdents))
       case atom@Atom(_, _, _, _, And(idents), _, gs2, keyIdents)             => atom.copy(value = And(getValues(idents)), gs = getGenerics(gs2), keys = getKeys(keyIdents))
       case atom@Atom(_, _, _, _, Lt(ident), _, gs2, keyIdents)               => atom.copy(value = Lt(getValues(Seq(ident)).head), gs = getGenerics(gs2), keys = getKeys(keyIdents))
@@ -83,7 +87,6 @@ object ModelOps {
       case atom@Atom(_, _, _, _, RetractMapKeys(idents), _, gs2, keyIdents)  => atom.copy(value = RetractMapKeys(getValues(idents).map(_.toString)), gs = getGenerics(gs2), keys = getKeys(keyIdents))
       case atom@Atom(_, _, _, _, MapKeys(idents), _, gs2, _)                 => atom.copy(value = MapKeys(getValues(idents).asInstanceOf[Seq[String]]), gs = getGenerics(gs2))
       case atom@Atom(_, _, _, _, _, _, gs2, _)                               => atom.copy(gs = getGenerics(gs2))
-      case meta@Meta(_, _, _, _, Eq(idents))                                 => meta.copy(value = Eq(getValues(idents)))
       case meta@Meta(_, _, _, _, Neq(idents))                                => meta.copy(value = Neq(getValues(idents)))
       case meta@Meta(_, _, _, Id(eid), _)                                    => meta.copy(generic = Id(getValues(Seq(eid)).head))
       case Nested(ns, nestedElements)                                        => Nested(ns, resolve(nestedElements))

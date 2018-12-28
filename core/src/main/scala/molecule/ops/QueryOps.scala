@@ -4,7 +4,8 @@ import java.net.URI
 import java.util.{Date, UUID}
 import datomic.Util
 import molecule.ast.model._
-import molecule.ast.query._
+import molecule.ast.query
+import molecule.ast.query.{Funct, _}
 import molecule.ops.exception.QueryOpsException
 import molecule.util.Helpers
 
@@ -187,7 +188,9 @@ object QueryOps extends Helpers {
       q.copy(wh = Where(q.wh.clauses ++ attrClauses))
     }
 
-    def where(e: KW, a: KW, v: String, gs: Seq[Generic]): Query =
+    def where(e: QueryValue, a: KW, v: String, txV: String = ""): Query = if (txV.nonEmpty)
+      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, e, a, Var(v), Var(txV))))
+    else
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, e, a, Var(v), NoBinding)))
 
     def where(e: String, a: Atom, v: String, gs: Seq[Generic]): Query =
@@ -239,7 +242,93 @@ object QueryOps extends Helpers {
     }
 
 
-    // Generic/Meta attributes ..........................................
+    // Schema attribute/values ..........................................
+
+    def schema: Query = q.wh.clauses.reverse.collectFirst {
+      case Funct("=", Seq(Var("sys"), Val(false)), _) => q
+    }.getOrElse(
+      q.where(Var("_"), KW("db.install", "attribute"), "id", "tx")
+        .where(Var("id"), KW("db", "ident"), "idIdent")
+        .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
+        .func(".matches ^String",
+          Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")),
+          ScalarBinding(Var("sys")))
+        .func("=", Seq(Var("sys"), Val(false)))
+        .func("molecule.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs")))
+        .func("first", Seq(Var("partNs")), ScalarBinding(Var("part")))
+        .func("second", Seq(Var("partNs")), ScalarBinding(Var("ns")))
+    )
+
+    def schemaIdent: Query = q.schema
+      .func("str", Seq(Var("idIdent")), ScalarBinding(Var("ident")))
+
+    def schemaA: Query = q.schema
+      .func("name", Seq(Var("idIdent")), ScalarBinding(Var("a")))
+
+    def schemaTpe: Query = q.schema
+      .where(Var("id"), KW("db", "valueType"), "tpeId")
+      .where(Var("tpeId"), KW("db", "ident"), "tpeIdent")
+      .func("name", Seq(Var("tpeIdent")), ScalarBinding(Var("tpe")))
+
+    def schemaCard: Query = q.schema
+      .where(Var("id"), KW("db", "cardinality"), "cardId")
+      .where(Var("cardId"), KW("db", "ident"), "cardIdent")
+      .func("name", Seq(Var("cardIdent")), ScalarBinding(Var("card")))
+
+    def schemaDoc: Query = q.schema
+      .where(Var("id"), KW("db", "doc"), "doc")
+
+    def schemaDocFulltext(arg: String): Query =
+      q.func("fulltext", Seq(DS, KW("db", "doc"), Val(arg)), RelationBinding(Seq(Var("id"), Var("docValue"))))
+
+    def schemaIndex: Query = q.schema
+      .where(Var("id"), KW("db", "index"), "index")
+
+    def schemaUnique: Query = q.schema
+      .where(Var("id"), KW("db", "unique"), "uniqueId")
+      .where(Var("uniqueId"), KW("db", "ident"), "uniqueIdent")
+      .func("name", Seq(Var("uniqueIdent")), ScalarBinding(Var("unique")))
+
+    def schemaFulltext: Query = q.schema
+      .where(Var("id"), KW("db", "fulltext"), "fulltext")
+
+    def schemaIsComponent: Query = q.schema
+      .where(Var("id"), KW("db", "isComponent"), "isComponent")
+
+    def schemaNoHistory: Query = q.schema
+      .where(Var("id"), KW("db", "noHistory"), "noHistory")
+
+    def schemaEnum: Query = {
+      val q1 = q.wh.clauses.collectFirst {
+        case Funct("name", _, ScalarBinding(Var("a"))) => q.schema
+      }.getOrElse(q.schema.func("name", Seq(Var("idIdent")), ScalarBinding(Var("a"))))
+      q1.where(Var("_"), KW("db", "ident"), "enumIdent")
+        .func("namespace", Seq(Var("enumIdent")), ScalarBinding(Var("enumNs")))
+        .func("str", Seq(Var("nsFull"), Val("."), Var("a")), ScalarBinding(Var("enumSubNs")))
+        .func("=", Seq(Var("enumSubNs"), Var("enumNs")))
+        .func("name", Seq(Var("enumIdent")), ScalarBinding(Var("enum")))
+    }
+
+    def schemaT: Query = q.schema
+      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
+
+    def schemaTxInstant: Query = q.schema
+      .where("tx", "db", "txInstant", Var("txInstant"), "", Nil)
+
+
+    def schemaPull(v: String): Query =
+      q.copy(f = Find(q.f.outputs :+ Pull(v + "_pull", "db", v)))
+        .func("molecule.util.fns/bind", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
+
+    def schemaPullUnique(v: String): Query =
+      q.copy(f = Find(q.f.outputs :+ Pull(v + "_pull", "db", v, Some(""))))
+        .func("molecule.util.fns/bind", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
+
+    def not(attr: String): Query =
+      q.copy(wh = Where(q.wh.clauses :+ NotClause(Var("id"), KW("db", attr))))
+
+
+    // Generic Datom attribute/values ..........................................
 
     def genericE(e: String, v: String, v1: String, singleElement: Boolean = false): Query = {
       if (singleElement) {
@@ -270,12 +359,6 @@ object QueryOps extends Helpers {
             .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
             .func("!=", Seq(Var(v + "_ns"), Val("db")))
             .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
-        //          q.where(e, "?", e + "_attr", Var(v), "", Nil)
-        //            .ident(e + "_attr", v1)
-        //            .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-        //            .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
-        //            .func("!=", Seq(Var(v + "_ns"), Val("db")))
-        //            .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
       }
     }
 
@@ -289,7 +372,7 @@ object QueryOps extends Helpers {
           q.ident(e + "_attr", v1)
             .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
         case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
-          q.where(KW(ns, attr), KW("db", "ident"), v1, Nil)
+          q.where(KW(ns, attr), KW("db", "ident"), v1)
             .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
       }.getOrElse(
         q.where(e, "?", e + "_attr", Var(v), "", Nil)
@@ -310,7 +393,7 @@ object QueryOps extends Helpers {
           q.ident(e + "_attr", v1)
             .func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
         case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
-          q.where(KW(ns, attr), KW("db", "ident"), v1, Nil)
+          q.where(KW(ns, attr), KW("db", "ident"), v1)
             .func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
       }.getOrElse(
         q.where(e, "?", e + "_attr", Var(v), "", Nil)
@@ -414,8 +497,7 @@ object QueryOps extends Helpers {
 
       // Add necessary bind to ident to prepare working with tx value
       q1.wh.clauses.reverse.collectFirst {
-//        case DataClause(_, _, _, _, _, Var(op0)) if op0 == v + "_op" && cls.size > 1    =>
-        case DataClause(_, _, _, _, _, Var(op0)) if op0 == v + "_op" && ok == 1    =>
+        case DataClause(_, _, _, _, _, Var(op0)) if op0 == v + "_op" && ok == 1         =>
           q1
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
           q1

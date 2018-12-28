@@ -3,7 +3,7 @@ package molecule.coretests.expression
 import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 
-class FulltextSearch extends Base {
+class Fulltext extends Base {
 
 
   "Card one" in new CoreSetup {

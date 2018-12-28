@@ -14,7 +14,9 @@ class Since extends CoreSpec {
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
   val tx1: TxReport = Ns.int(1).save
+  Thread.sleep(1000)
   val tx2: TxReport = Ns.int(2).save
+  Thread.sleep(1000)
   val tx3: TxReport = Ns.int(3).save
 
   val t1: Long = tx1.t

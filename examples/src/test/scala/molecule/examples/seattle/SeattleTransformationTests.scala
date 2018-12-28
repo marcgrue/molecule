@@ -1071,20 +1071,34 @@ class SeattleTransformationTests extends SeattleSpec {
 
   "Working with time" >> {
 
-    //    implicit val conn = loadFromFiles("seattle-schema1a.dtm", "seattle-data0a.dtm", 2)
-
     m(Schema.txInstant) -->
       Model(List(
-        Atom("db", "txInstant", "Long", 1, VarValue))
+        Meta("schema", "txInstant", "txInstant", NoValue, NoValue))
       ) -->
       Query(
         Find(List(
-          Var("b"))),
+          Var("txInstant"))),
         Where(List(
-          DataClause("a", KW("db", "txInstant"), "b")))
+          DataClause(ImplDS, Var("_"), KW("db.install", "attribute", ""), Var("id"), Var("tx"), NoBinding),
+          DataClause(ImplDS, Var("id"), KW("db", "ident", ""), Var("idIdent"), NoBinding, NoBinding),
+          Funct("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull"))),
+          Funct(".matches ^String", Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")), ScalarBinding(Var("sys"))),
+          Funct("=", Seq(Var("sys"), Val(false)), NoBinding),
+          Funct("molecule.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs"))),
+          Funct("first", Seq(Var("partNs")), ScalarBinding(Var("part"))),
+          Funct("second", Seq(Var("partNs")), ScalarBinding(Var("ns"))),
+          DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInstant"), Empty, NoBinding)))
       ) -->
-      """[:find  ?b
-        | :where [?a :db/txInstant ?b]]""".stripMargin
+      """[:find  ?txInstant
+        | :where [_ :db.install/attribute ?id ?tx]
+        |        [?id :db/ident ?idIdent]
+        |        [(namespace ?idIdent) ?nsFull]
+        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
+        |        [(= ?sys false)]
+        |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
+        |        [(first ?partNs) ?part]
+        |        [(second ?partNs) ?ns]
+        |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 
 

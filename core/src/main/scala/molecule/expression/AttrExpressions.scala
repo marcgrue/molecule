@@ -1162,7 +1162,7 @@ trait AttrExpressions {
   }
 
   /** Expression methods of String attributes with fulltext search. */
-  trait FulltextSearchExpr[Ns, In] {
+  trait FulltextExpr[Ns, In] {
 
     /** Match words of String attribute.
       * <br><br>
@@ -1199,7 +1199,7 @@ trait AttrExpressions {
       *       "no", "not", "of", "on", "or", "such",
       *       "that", "the", "their", "then", "there", "these",
       *       "they", "this", "to", "was", "will", "with"
-      * @param words     Search words
+      * @param word     Search word
       * @param moreWords Optional additional search words
       * @return Filtered molecule
       */

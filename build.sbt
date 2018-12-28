@@ -69,7 +69,7 @@ lazy val moleculeCoretests = project.in(file("coretests"))
     moduleName := "molecule-coretests",
     moleculeSchemas := Seq(
       "molecule/coretests/bidirectionals",
-      "molecule/coretests/generic",
+//      "molecule/coretests/generic",
       "molecule/coretests/nested",
       "molecule/coretests/schemaDef",
       "molecule/coretests/util"

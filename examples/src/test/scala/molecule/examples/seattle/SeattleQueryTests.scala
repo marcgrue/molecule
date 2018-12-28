@@ -443,8 +443,16 @@ class SeattleQueryTests extends SeattleSpec {
   "Working with time" >> {
 
     m(Schema.txInstant) -->
-      """[:find  ?b
-        | :where [?a :db/txInstant ?b]]""".stripMargin
+      """[:find  ?txInstant
+        | :where [_ :db.install/attribute ?id ?tx]
+        |        [?id :db/ident ?idIdent]
+        |        [(namespace ?idIdent) ?nsFull]
+        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
+        |        [(= ?sys false)]
+        |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
+        |        [(first ?partNs) ?part]
+        |        [(second ?partNs) ?ns]
+        |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 
 

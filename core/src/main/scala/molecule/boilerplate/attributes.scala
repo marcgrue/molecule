@@ -159,7 +159,7 @@ object attributes {
   trait UniqueValue
   trait UniqueIdentity
   trait Indexed
-  trait FulltextSearch[Ns, In] extends FulltextSearchExpr[Ns, In]
+  trait Fulltext[Ns, In] extends FulltextExpr[Ns, In]
   trait IsComponent
   trait NoHistory
 

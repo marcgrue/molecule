@@ -1,15 +1,17 @@
 package molecule.coretests.generic.schema
 import molecule.schema.definition._
 
-@InOut(0, 16)
+@InOut(0, 22)
 object SchemaDefinition {
 
   trait Schema {
 
-    val id    = oneLong.doc("Attribute entity id")
-    val ident = oneString.doc("Attribute ident ':ns/attr' (clojure KeyWord as String)")
-    val ns    = oneString.doc("Namespace name 'ns'")
-    val a     = oneString.doc("Attribute name 'attr'")
+    val id     = oneLong.doc("Attribute entity id")
+    val ident  = oneString.doc("Attribute ident ':part_ns/attr' or :ns/attr (clojure KeyWord as String)")
+    val part   = oneString.doc("Partition name 'part'")
+    val nsFull = oneString.doc("Namespace name with partition prefix 'part_ns' or 'ns' if no partitions defined")
+    val ns     = oneString.doc("Namespace name 'ns'")
+    val a      = oneString.doc("Attribute name 'attr'")
 
     // Required
     val tpe  = oneString.doc("Datomic value type: string, long, double, boolean, bigint, bigdec, instant, uuid, uri, bytes, ref")
@@ -17,13 +19,13 @@ object SchemaDefinition {
 
 
     // Optional
-    val doc            = oneString.fulltextSearch.doc("Attribute description")
-    val indexed        = oneBoolean.doc("Are attribute values indexed?")
-    val unique         = oneString.doc("Attribute value unique constraints: identity, value")
-    val fulltextSearch = oneBoolean.doc("Does attribute allow fulltext search?")
-    val isComponent    = oneBoolean.doc("Is attribute a component?")
-    val noHistory      = oneBoolean.doc("Is attribute prohibiting history?")
-    val enums          = manyString.doc("Enum values of attribute")
+    val doc         = oneString.fulltext.doc("Attribute description")
+    val index       = oneBoolean.doc("Are attribute values indexed?")
+    val unique      = oneString.doc("Attribute value unique constraints: identity, value")
+    val fulltext    = oneBoolean.doc("Does attribute allow fulltext search?")
+    val isComponent = oneBoolean.doc("Is attribute a component?")
+    val noHistory   = oneBoolean.doc("Is attribute prohibiting history?")
+    val enum        = oneString.doc("Enum value(s) of attribute")
 
     // Meta information about schema transactions
     val t         = oneLong.doc("Schema transaction time t of when Attribute was created")

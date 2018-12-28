@@ -5,8 +5,8 @@ import molecule.schema.definition._
 object CoreTestDefinition {
 
   trait Ns {
-    val str     = oneString.fulltextSearch
-    val int     = oneInt
+    val str     = oneString.fulltext.doc("Card one String attribute")
+    val int     = oneInt.doc("Card one Int attribute")
     val long    = oneLong
     val float   = oneFloat
     val double  = oneDouble
@@ -22,7 +22,7 @@ object CoreTestDefinition {
     val ref1    = one[Ref1]
     val refSub1 = one[Ref1].isComponent
 
-    val strs     = manyString.fulltextSearch
+    val strs     = manyString.fulltext
     val ints     = manyInt
     val longs    = manyLong
     val floats   = manyFloat
@@ -39,7 +39,7 @@ object CoreTestDefinition {
     val refs1    = many[Ref1]
     val refsSub1 = many[Ref1].isComponent
 
-    val strMap    = mapString.fulltextSearch
+    val strMap    = mapString.fulltext
     val intMap    = mapInt
     val longMap   = mapLong
     val floatMap  = mapFloat
@@ -69,10 +69,10 @@ object CoreTestDefinition {
   object Ref1 extends Ref1
 
   trait Ref2 {
-    val str2  = oneString
-    val int2  = oneInt
+    val str2  = oneString.uniqueIdentity
+    val int2  = oneInt.uniqueValue
     val enum2 = oneEnum('enum20, 'enum21, 'enum22)
     val strs2 = manyString
-    val ints2 = manyInt
+    val ints2 = manyInt.noHistory
   }
 }
