@@ -184,7 +184,7 @@ Model(List(
   Atom("person", "name", "String", 1, VarValue, None, Seq(), Seq()),
   Atom("person", "age", "Int", 1, Ge(30), None, Seq(NoValue), Seq()),
   Bond("person", "friends", "person", 2, Seq(BiSelfRef(2))),
-  Meta("friends", "e", "e", NoValue, Fn("count", None)),
+  Meta("friends", "e", "e", Fn("count", None)),
   Atom("person", "age_", "Int", 1, Lt(30), None, Seq(), Seq())))
 
 Query(

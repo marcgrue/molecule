@@ -59,7 +59,7 @@ object ModelOps {
         case Seq(None) => atom.copy(value = Fn("not", None), keys = getKeys(keyIdents))
         case values    => atom.copy(value = Eq(values), keys = getKeys(keyIdents))
       }
-      case meta@Meta(_, _, _, _, Eq(idents))                               => getValues(idents) match {
+      case meta@Meta(_, _, _, Eq(idents))                               => getValues(idents) match {
         case Seq(None) => meta.copy(value = Fn("not", None))
         case values    => meta.copy(value = Eq(values))
       }
@@ -76,7 +76,7 @@ object ModelOps {
       case atom@Atom(_, _, _, _, ReplaceMapPairs(idents), _, _, keyIdents) => atom.copy(value = ReplaceMapPairs(getValues(idents).asInstanceOf[Seq[(String, Any)]]), keys = getKeys(keyIdents))
       case atom@Atom(_, _, _, _, RetractMapKeys(idents), _, _, keyIdents)  => atom.copy(value = RetractMapKeys(getValues(idents).map(_.toString)), keys = getKeys(keyIdents))
       case atom@Atom(_, _, _, _, MapKeys(idents), _, _, _)                 => atom.copy(value = MapKeys(getValues(idents).asInstanceOf[Seq[String]]))
-      case meta@Meta(_, _, _, _, Neq(idents))                              => meta.copy(value = Neq(getValues(idents)))
+      case meta@Meta(_, _, _, Neq(idents))                              => meta.copy(value = Neq(getValues(idents)))
       case Nested(ns, nestedElements)                                      => Nested(ns, resolve(nestedElements))
       case Composite(compositeElements)                                    => Composite(resolve(compositeElements))
       case TxMetaData(txElements)                                          => TxMetaData(resolve(txElements))

@@ -147,31 +147,31 @@ object Model2Query extends Helpers {
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = meta match {
-    case Meta("?", attr, _, _, _) if prevRefNs.nonEmpty             =>
+    case Meta("?", attr, _, _) if prevRefNs.nonEmpty             =>
       (resolve(query, v, w, meta), v, y, "?", attr, "")
-    case Meta("?", attr, _, _, _)                                   =>
+    case Meta("?", attr, _, _)                                   =>
       (resolve(query, e, v, meta), e, v, "?", attr, "")
-    case Meta("schema", attr, _, _, _)                              =>
+    case Meta("schema", attr, _, _)                              =>
       (resolve(query, e, v, meta), e, v, "schema", attr, "")
-    case Meta(ns, attr, "e", NoValue, Eq(Seq(Qm)))                  =>
+    case Meta(ns, attr, "e", Eq(Seq(Qm)))                  =>
       (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", NoValue, Eq(eids))                     =>
+    case Meta(ns, attr, "e", Eq(eids))                     =>
       (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", _, IndexVal) if prevRefNs == ""        =>
+    case Meta(ns, attr, "e", IndexVal) if prevRefNs == ""        =>
       (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", _, IndexVal)                           =>
+    case Meta(ns, attr, "e", IndexVal)                           =>
       (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
-    case Meta(ns, attr, "r", _, IndexVal)                           =>
+    case Meta(ns, attr, "r", IndexVal)                           =>
       (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
-    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == ""         =>
+    case Meta(ns, attr, "e", _) if prevRefNs == ""         =>
       (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", NoValue, _) if prevRefNs == "IndexVal" =>
+    case Meta(ns, attr, "e", _) if prevRefNs == "IndexVal" =>
       (resolve(query, e, y, meta), e, y, ns, attr, "")
-    case Meta(ns, attr, "e", NoValue, EntValue)                     =>
+    case Meta(ns, attr, "e", EntValue)                     =>
       (resolve(query, v, w, meta), v, w, ns, attr, "")
-    case Meta(ns, attr, _, _, _) if prevRefNs.nonEmpty              =>
+    case Meta(ns, attr, _, _) if prevRefNs.nonEmpty              =>
       (resolve(query, e, v, meta), v, w, ns, attr, prevNs)
-    case Meta(ns, attr, _, _, _)                                    =>
+    case Meta(ns, attr, _, _)                                    =>
       (resolve(query, e, v, meta), e, v, ns, attr, "")
   }
 
@@ -272,25 +272,25 @@ object Model2Query extends Helpers {
 
 
   def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta match {
-    case Meta("?", _, _, _, _)                                   =>
+    case Meta("?", _, _, _)                                   =>
       resolveGenericMeta(q, e, meta, v, v1, v2, v3)
-    case Meta("schema", _, _, _, _)                              =>
+    case Meta("schema", _, _, _)                              =>
       resolveSchemaMeta(q, meta)
-    case Meta(_, _, "e", _, Fn("count", _))                      =>
+    case Meta(_, _, "e", Fn("count", _))                      =>
       q.find("count", Nil, e, Nil)
-    case Meta(ns, attr, "e", _, Eq(Seq(Qm))) if attr.last == '_' =>
+    case Meta(ns, attr, "e", Eq(Seq(Qm))) if attr.last == '_' =>
       q.in(e, ns, attr, e)
-    case Meta(_, _, "e", _, Eq(Seq(Qm)))                         =>
+    case Meta(_, _, "e", Eq(Seq(Qm)))                         =>
       q.find(e, Nil).in(e)
-    case Meta(_, attr, "e", _, Eq(eids)) if attr.last == '_'     =>
+    case Meta(_, attr, "e", Eq(eids)) if attr.last == '_'     =>
       q.in(eids, e)
-    case Meta(_, _, "e", _, Eq(eids))                            =>
+    case Meta(_, _, "e", Eq(eids))                            =>
       q.find(e, Nil).in(eids, e)
-    case Meta(_, _, "r", _, IndexVal)                            =>
+    case Meta(_, _, "r", IndexVal)                            =>
       q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _, IndexVal)                              =>
+    case Meta(_, _, _, IndexVal)                              =>
       q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _, _)                                     =>
+    case Meta(_, _, _, _)                                     =>
       q
   }
 
