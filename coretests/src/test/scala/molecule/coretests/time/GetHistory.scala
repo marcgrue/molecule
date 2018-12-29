@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.api.out6._
+import molecule.api.in1_out6._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable.Specification
@@ -43,6 +43,13 @@ class GetHistory extends Specification {
 
     // str updated at t2
     Ns(e1).str.t.op.getHistory.sortBy(t => (t._2, t._3)) === List(
+      ("a", t1, true), // "a" asserted
+      ("a", t2, false), // "a" retracted
+      ("b", t2, true) // "b" asserted
+    )
+
+    val genericInputMolecule = m(Ns(?).str.t.op)
+    genericInputMolecule(e1).getHistory.sortBy(t => (t._2, t._3)) === List(
       ("a", t1, true), // "a" asserted
       ("a", t2, false), // "a" retracted
       ("b", t2, true) // "b" asserted

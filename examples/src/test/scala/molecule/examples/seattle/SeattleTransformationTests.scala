@@ -1206,7 +1206,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "name", "String", 1, Eq(List("belltown 2")), None),
         Atom("community", "url", "String", 1, Eq(List("url 2")), None))
       ) -->
@@ -1224,7 +1224,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
       ) -->
       """List(
@@ -1241,7 +1241,7 @@ class SeattleTransformationTests extends SeattleSpec {
       )
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "category", "String", 2, ReplaceValue(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
@@ -1259,7 +1259,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.assert("extra category")
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "category", "String", 2, AssertValue(List("extra category")), None))
       ) -->
       """List(
@@ -1272,7 +1272,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.retract("Super cool events")
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "category", "String", 2, RetractValue(List("Super cool events")), None))
       ) -->
       """List(
@@ -1288,7 +1288,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 3").url().category()
     ) -->
       Model(List(
-        Meta("community", "eid_", "e", NoValue, Eq(List(17592186045886L))),
+        Meta("?", "e_", "e", NoValue, Eq(List(17592186045886L))),
         Atom("community", "name", "String", 1, Eq(List("belltown 3")), None),
         Atom("community", "url", "String", 1, Eq(List()), None),
         Atom("community", "category", "String", 2, Eq(List()), None))

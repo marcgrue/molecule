@@ -460,7 +460,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         tree match {
           case q"$prev.$ns.apply($pkg.?)"             => traverseElement(prev, p, Meta(firstLow(ns), "eid_", "e", NoValue, Eq(Seq(Qm))))
           case q"$prev.$ns.apply($eid)" if t.isBiEdge => traverseElement(prev, p, Meta(firstLow(ns), "eid_", "e", BiEdge, Eq(Seq(extract(eid)))))
-          case q"$prev.$ns.apply(..$eids)"            => traverseElement(prev, p, Meta(firstLow(ns), "eid_", "e", NoValue, Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$ns.apply(..$eids)"            => traverseElement(prev, p, Meta("?", "e_", "e", NoValue, Eq(resolveValues(q"Seq(..$eids)"))))
         }
       } else if (tree.isMapAttrK) {
         tree match {

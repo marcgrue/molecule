@@ -26,45 +26,14 @@ object QueryOps extends Helpers {
     def find(v: String, gs: Seq[Generic]): Query =
       find(Var(v), gs)
 
-    def find(gs: Seq[Generic]): Query =
-      find(NoVal, gs, "")
-
     def find(fn: String, args: Seq[String], v: String, gs: Seq[Generic], attrV: String): Query =
       find(AggrExpr(fn, args, Var(v)), gs, attrV)
 
     def find(v: String, gs: Seq[Generic], attrV: String): Query =
       find(Var(v), gs, attrV)
 
-    def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query = {
-
-      val genericVars = if (gs.isEmpty) Nil else {
-        // unique transaction find variable
-        def gV(g: String): String = g + q.f.outputs.foldLeft(Option.empty[Int]) {
-          case (None, Var(v)) if g == v        => Some(2)
-          case (Some(i), Var(v)) if g + i == v => Some(i + 1)
-          case (count, _)                      => count
-        }.getOrElse("")
-
-        gs.flatMap {
-          case AttrVar(v)         => Some(Var(attrV))
-          case TxValue(_)         => Some(Var(gV("tx")))
-          case TxValue_(_)        => None
-          case TxTValue(_)        => Some(Var(gV("txT")))
-          case TxTValue_(_)       => None
-          case TxInstantValue(_)  => Some(Var(gV("txInst")))
-          case TxInstantValue_(_) => None
-          case OpValue(_)         => Some(Var(gV("op")))
-          case OpValue_(_)        => None
-          case other              => None
-        }.distinct
-      }
-
-      val moreOutputs = o match {
-        case NoVal => genericVars
-        case _     => o +: genericVars
-      }
-      q.copy(f = Find(q.f.outputs ++ moreOutputs))
-    }
+    def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query =
+      q.copy(f = Find(q.f.outputs :+ o))
 
 
     // Pull ..........................................
@@ -100,93 +69,8 @@ object QueryOps extends Helpers {
 
     // Where ..........................................
 
-    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String, gs: Seq[Generic]): Query = {
-      val attrClauses = if (gs.isEmpty) {
-        (ns, attr) match {
-          //          case ("?", "ns" | "attr")  => Seq(DataClause(ImplDS, KW("db.part", "db"), KW("db.install", "attribute"), v, Empty))
-          case ("db", "ns" | "a") => Seq(DataClause(ImplDS, KW("db.part", "db"), KW("db.install", "attribute"), v, Empty))
-          case _                  => Seq(DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty))
-        }
-
-      } else {
-        val opValue: Option[OpValue] = gs.collectFirst {
-          case ov: OpValue => Some(ov)
-        }.flatten
-
-        // unique tx variable
-        val tx = "tx" + q.wh.clauses.foldLeft(Option.empty[Int]) {
-          case (None, DataClause(_, _, _, _, Var(txV), _)) if "tx" == txV        => Some(2)
-          case (Some(i), DataClause(_, _, _, _, Var(txV), _)) if "tx" + i == txV => Some(i + 1)
-          case (count, _)                                                        => count
-        }.getOrElse("")
-
-        val extendedClause = if (opValue.nonEmpty) {
-          // unique operation variable
-          val op = "op" + q.wh.clauses.foldLeft(Option.empty[Int]) {
-            case (None, DataClause(_, _, _, _, _, Var(opV))) if "op" == opV        => Some(2)
-            case (Some(i), DataClause(_, _, _, _, _, Var(opV))) if "op" + i == opV => Some(i + 1)
-            case (count, _)                                                        => count
-          }.getOrElse("")
-
-          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Var(op))
-        } else if (
-          gs.collectFirst {
-            case TxValue(_)         => true
-            case TxValue_(_)        => true
-            case TxTValue(_)        => true
-            case TxTValue_(_)       => true
-            case TxInstantValue(_)  => true
-            case TxInstantValue_(_) => true
-          }.getOrElse(false)
-        ) {
-          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), NoBinding)
-        } else {
-          DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, NoBinding, NoBinding)
-        }
-
-        // unique txT/txInstant variable
-        def gV(g: String): String = g + q.wh.clauses.foldLeft(Option.empty[Int]) {
-          case (None, Funct(_, _, ScalarBinding(Var(`g`))))                    => Some(2)
-          case (None, DataClause(_, _, _, Var(`g`), _, _))                     => Some(2)
-          case (Some(i), Funct(_, _, ScalarBinding(Var(txV)))) if g + i == txV => Some(i + 1)
-          case (Some(i), DataClause(_, _, _, Var(txV), _, _)) if g + i == txV  => Some(i + 1)
-          case (count, _)                                                      => count
-        }.getOrElse("")
-
-        val extraClauses = gs.flatMap {
-          case TxTValue(None)              => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT"))))
-          )
-          case TxTValue(Some(t))           => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT")))),
-            Funct("=", Seq(Var(gV("txT")), Val(t)), NoBinding)
-          )
-          case TxTValue_(Some(t))          => Seq(
-            Funct("datomic.Peer/toT ^Long", Seq(Var(tx)), ScalarBinding(Var(gV("txT")))),
-            Funct("=", Seq(Var(gV("txT")), Val(t)), NoBinding)
-          )
-          case TxInstantValue(None)        => Seq(
-            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Var(gV("txInst")), Empty)
-          )
-          case TxInstantValue(Some(date))  => Seq(
-            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Var(gV("txInst")), Empty),
-            Funct("=", Seq(Var("txInst"), Val(date)), NoBinding)
-          )
-          case TxInstantValue_(Some(date)) => Seq(
-            DataClause(ImplDS, Var(tx), KW("db", "txInstant", ""), Val(date), Empty)
-          )
-          case OpValue(Some(added))        => Seq(
-            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Val(added))
-          )
-          case OpValue_(Some(added))       => Seq(
-            DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Var(tx), Val(added))
-          )
-          case _                           => Nil
-        }
-        extendedClause +: extraClauses
-      }
-      q.copy(wh = Where(q.wh.clauses ++ attrClauses))
-    }
+    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String, gs: Seq[Generic]): Query =
+      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty, NoBinding)))
 
     def where(e: QueryValue, a: KW, v: String, txV: String = ""): Query = if (txV.nonEmpty)
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, e, a, Var(v), Var(txV))))
@@ -430,16 +314,20 @@ object QueryOps extends Helpers {
 
     def genericTx(e: String, v: String, v1: String): Query = {
       // Ensure tx value is present
-      val (ok, cls0): (Int, Seq[Clause]) = q.wh.clauses.foldRight(0, Seq.empty[Clause]) {
-        case (cl@DataClause(_, Var(`e`), _, _, Empty | Var("_"), _), (0, acc))           => (1, cl.copy(tx = Var(v + "_tx")) +: acc)
-        case (cl@DataClause(_, Var(`e`), _, _, Var(tx), _), (0, acc)) if tx == v + "_tx" => (1, cl +: acc)
-        case (cl@DataClause(_, _, _, Var(`e`), Empty | Var("_"), _), (0, acc))           => (1, cl.copy(tx = Var(v + "_tx")) +: acc)
-        case (cl@DataClause(_, _, _, Var(`e`), Var(tx), _), (0, acc)) if tx == v + "_tx" => (1, cl +: acc)
-        case (cl, (ok, acc))                                                             => (ok, cl +: acc)
+      val (hasTxV, cls0): (Int, Seq[Clause]) = q.wh.clauses.foldRight(0, Seq.empty[Clause]) {
+        case (cl@DataClause(_, Var(`e`), _, _, NoBinding | Empty | Var("_"), _), (0, acc)) => (1, cl.copy(tx = Var(v + "_tx")) +: acc)
+        case (cl@DataClause(_, Var(`e`), _, _, Var(tx), _), (0, acc)) if tx == v + "_tx"   => (1, cl +: acc)
+        case (cl@DataClause(_, _, _, Var(`e`), NoBinding | Empty | Var("_"), _), (0, acc)) => (1, cl.copy(tx = Var(v + "_tx")) +: acc)
+        case (cl@DataClause(_, _, _, Var(`e`), Var(tx), _), (0, acc)) if tx == v + "_tx"   => (1, cl +: acc)
+        case (cl, (ok, acc))                                                               => (ok, cl +: acc)
       }
-      val cls: Seq[Clause] = if (ok == 1) cls0 else Seq(
-        DataClause(ImplDS, Var(e), KW("?", e + "_attr"), Var(v), Var(v + "_tx"))
-      )
+      val cls: Seq[Clause] = if (hasTxV == 1) {
+        cls0
+      } else {
+        Seq(
+          DataClause(ImplDS, Var(e), KW("?", e + "_attr"), Var(v), Var(v + "_tx"))
+        )
+      }
       val q1 = q.copy(wh = Where(cls))
 
       // Add necessary bind to ident to prepare working with tx value
@@ -482,10 +370,10 @@ object QueryOps extends Helpers {
 
     def genericOp(e: String, v: String, v1: String): Query = {
       val (ok, cls0): (Int, Seq[Clause]) = q.wh.clauses.foldRight(0, Seq.empty[Clause]) {
-        case (cl@DataClause(_, Var(`e`), _, _, Empty, NoBinding), (0, acc))              => (1, cl.copy(tx = Var("_"), op = Var(v + "_op")) +: acc)
+        case (cl@DataClause(_, Var(`e`), _, _, Empty | NoBinding, NoBinding), (0, acc))  => (1, cl.copy(tx = Var("_"), op = Var(v + "_op")) +: acc)
         case (cl@DataClause(_, Var(`e`), _, _, _, NoBinding), (0, acc))                  => (1, cl.copy(op = Var(v + "_op")) +: acc)
         case (cl@DataClause(_, Var(`e`), _, _, _, Var(op)), (0, acc)) if op == v + "_op" => (1, cl +: acc)
-        case (cl@DataClause(_, _, _, Var(`e`), Empty, NoBinding), (0, acc))              => (1, cl.copy(tx = Var("_"), op = Var(v + "_op")) +: acc)
+        case (cl@DataClause(_, _, _, Var(`e`), Empty | NoBinding, NoBinding), (0, acc))  => (1, cl.copy(tx = Var("_"), op = Var(v + "_op")) +: acc)
         case (cl@DataClause(_, _, _, Var(`e`), _, NoBinding), (0, acc))                  => (1, cl.copy(op = Var(v + "_op")) +: acc)
         case (cl@DataClause(_, _, _, Var(`e`), _, Var(op)), (0, acc)) if op == v + "_op" => (1, cl +: acc)
         case (cl, (ok, acc))                                                             => (ok, cl +: acc)

@@ -68,7 +68,8 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case ok                                        => ok
   }
   private def missingAppliedId: Boolean = model.elements.head match {
-    case Meta(_, _, "e", BiEdge, Eq(List(eid))) => true
+    case Meta(_, _, "e", BiEdge, Eq(List(eid))) =>
+      true
     case Meta(_, _, "e", NoValue, Eq(eids))     => true
     case Composite(elements) => elements.head match {
       case Meta(_, _, "e", NoValue, Eq(eids))     => true
