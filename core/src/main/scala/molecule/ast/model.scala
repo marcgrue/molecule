@@ -137,23 +137,8 @@ object model extends Helpers {
 
   sealed trait Generic extends Value
 
-  case class Id(eid: Any) extends Generic
-  case class NsValue(values: Seq[String]) extends Generic { override def toString: String = s"NsValue(${seq(values)})" }
-  case class AttrVar(v: String) extends Generic { override def toString: String = s"""AttrVar("$v")"""}
-
-  case class TxValue(t: Option[Any] = None) extends Generic { override def toString: String = s"TxValue(${o(t)})" }
-  case class TxValue_(t: Option[Any] = None) extends Generic { override def toString: String = s"TxValue_(${o(t)})" }
-
-  case class TxTValue(t: Option[Any] = None) extends Generic { override def toString: String = s"TxTValue(${o(t)})" }
-  case class TxTValue_(t: Option[Any] = None) extends Generic { override def toString: String = s"TxTValue_(${o(t)})" }
-
-  case class TxInstantValue(date: Option[Any] = None) extends Generic { override def toString: String = s"TxInstantValue(${o(date)})" }
-  case class TxInstantValue_(date: Option[Any] = None) extends Generic { override def toString: String = s"TxInstantValue_(${o(date)})" }
-
-  case class OpValue(added: Option[Any] = None) extends Generic { override def toString: String = s"OpValue(${o(added)})" }
-  case class OpValue_(added: Option[Any] = None) extends Generic { override def toString: String = s"OpValue_(${o(added)})" }
-
   case object NoValue extends Generic
+  case class Id(eid: Any) extends Generic
   case class Card(card: Int) extends Generic { override def toString: String = s"Card($card)" }
 
 

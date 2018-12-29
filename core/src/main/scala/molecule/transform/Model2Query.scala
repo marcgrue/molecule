@@ -288,8 +288,6 @@ object Model2Query extends Helpers {
       q.find(e, Nil).in(eids, e)
     case Meta(_, _, "r", _, IndexVal)                            =>
       q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, Id(eid), IndexVal)                        =>
-      q.find(v, Nil).func(s"$fns/bind", Seq(Val(eid)), ScalarBinding(Var(v)))
     case Meta(_, _, _, _, IndexVal)                              =>
       q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
     case Meta(_, _, _, _, _)                                     =>

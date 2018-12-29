@@ -228,16 +228,6 @@ private[molecule] trait Liftables extends MacroHelpers {
   }
 
   implicit val liftGeneric: c.universe.Liftable[Generic] = Liftable[Generic] {
-    case NsValue(values)             => q"NsValue(Seq(..$values))"
-    case AttrVar(v)                  => q"AttrVar($v)"
-    case TxValue(t)                  => q"TxValue($t)"
-    case TxValue_(t)                 => q"TxValue_($t)"
-    case TxTValue(t)                 => q"TxTValue($t)"
-    case TxTValue_(t)                => q"TxTValue_($t)"
-    case TxInstantValue(tx)          => q"TxInstantValue($tx)"
-    case TxInstantValue_(tx)         => q"TxInstantValue_($tx)"
-    case OpValue(added)              => q"OpValue($added)"
-    case OpValue_(added)             => q"OpValue_($added)"
     case NoValue                     => q"NoValue"
     case Id(eid)                     => q"Id($eid)"
     case Card(card)                  => q"Card($card)"
@@ -258,17 +248,7 @@ private[molecule] trait Liftables extends MacroHelpers {
   implicit val liftFn   : c.universe.Liftable[Fn]    = Liftable[Fn] { fn => q"Fn(${fn.name}, ${fn.value})" }
   implicit val liftValue: c.universe.Liftable[Value] = Liftable[Value] {
     case EntValue                     => q"EntValue"
-    case NsValue(values)              => q"NsValue(Seq(..$values))"
     case VarValue                     => q"VarValue"
-    case AttrVar(v)                   => q"AttrVar($v)"
-    case TxValue(t)                   => q"TxValue($t)"
-    case TxValue_(t)                  => q"TxValue_($t)"
-    case TxTValue(t)                  => q"TxTValue($t)"
-    case TxTValue_(t)                 => q"TxTValue_($t)"
-    case TxInstantValue(tx)           => q"TxInstantValue($tx)"
-    case TxInstantValue_(tx)          => q"TxInstantValue_($tx)"
-    case OpValue(added)               => q"OpValue($added)"
-    case OpValue_(added)              => q"OpValue_($added)"
     case NoValue                      => q"NoValue"
     case Id(eid)                      => q"Id($eid)"
     case Card(card)                   => q"Card($card)"

@@ -25,40 +25,29 @@ private[molecule] trait Base extends Dsl2Model {
     case other                                                                                => Nil
   }
 
-  def mapGenerics(gs: Seq[Generic]): Seq[Any] = gs.flatMap {
-    case TxTValue(Some(ident))        => Some(ident)
-    case TxTValue_(Some(ident))       => Some(ident)
-    case TxInstantValue(Some(ident))  => Some(ident)
-    case TxInstantValue_(Some(ident)) => Some(ident)
-    case OpValue(Some(ident))         => Some(ident)
-    case OpValue_(Some(ident))        => Some(ident)
-    case _                            => None
-  }
-
   def mapIdentifiers(elements: Seq[Element], identifiers0: Seq[(String, Tree)] = Seq()): Seq[(String, Tree)] = {
     val newIdentifiers = (elements collect {
-      case Atom(_, _, _, _, Eq(idents), _, gs, keyIdents)              => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, Neq(idents), _, gs, keyIdents)             => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, And(idents), _, gs, keyIdents)             => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, Lt(ident), _, gs, keyIdents)               => mapIdents(ident +: (mapGenerics(gs) ++ keyIdents))
-      case Atom(_, _, _, _, Gt(ident), _, gs, keyIdents)               => mapIdents(ident +: (mapGenerics(gs) ++ keyIdents))
-      case Atom(_, _, _, _, Le(ident), _, gs, keyIdents)               => mapIdents(ident +: (mapGenerics(gs) ++ keyIdents))
-      case Atom(_, _, _, _, Ge(ident), _, gs, keyIdents)               => mapIdents(ident +: (mapGenerics(gs) ++ keyIdents))
-      case Atom(_, _, _, _, AssertValue(idents), _, gs, keyIdents)     => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, RetractValue(idents), _, gs, keyIdents)    => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, ReplaceValue(idents), _, gs, keyIdents)    => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, MapEq(idents), _, gs, keyIdents)           => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, AssertMapPairs(idents), _, gs, keyIdents)  => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, ReplaceMapPairs(idents), _, gs, keyIdents) => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, RetractMapKeys(idents), _, gs, keyIdents)  => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, MapKeys(idents), _, gs, keyIdents)         => mapIdents(idents ++ mapGenerics(gs) ++ keyIdents)
-      case Atom(_, _, _, _, _, _, gs, keyIdents)                       => mapIdents(mapGenerics(gs) ++ keyIdents)
-      case Meta(_, _, _, _, Eq(idents))                                => mapIdents(idents)
-      case Meta(_, _, _, _, Neq(idents))                               => mapIdents(idents)
-      case Meta(_, _, _, Id(eid), _)                                   => mapIdents(Seq(eid))
-      case Nested(_, nestedElements)                                   => mapIdentifiers(nestedElements, identifiers0)
-      case Composite(compositeElements)                                => mapIdentifiers(compositeElements, identifiers0)
-      case TxMetaData(txElements)                                      => mapIdentifiers(txElements, identifiers0)
+      case Atom(_, _, _, _, Eq(idents), _, _, keyIdents)              => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, Neq(idents), _, _, keyIdents)             => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, And(idents), _, _, keyIdents)             => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, Lt(ident), _, _, keyIdents)               => mapIdents(ident +: keyIdents)
+      case Atom(_, _, _, _, Gt(ident), _, _, keyIdents)               => mapIdents(ident +: keyIdents)
+      case Atom(_, _, _, _, Le(ident), _, _, keyIdents)               => mapIdents(ident +: keyIdents)
+      case Atom(_, _, _, _, Ge(ident), _, _, keyIdents)               => mapIdents(ident +: keyIdents)
+      case Atom(_, _, _, _, AssertValue(idents), _, _, keyIdents)     => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, RetractValue(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, ReplaceValue(idents), _, _, keyIdents)    => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, MapEq(idents), _, _, keyIdents)           => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, AssertMapPairs(idents), _, _, keyIdents)  => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, ReplaceMapPairs(idents), _, _, keyIdents) => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, RetractMapKeys(idents), _, _, keyIdents)  => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, MapKeys(idents), _, _, keyIdents)         => mapIdents(idents ++ keyIdents)
+      case Atom(_, _, _, _, _, _, _, keyIdents)                       => mapIdents(keyIdents)
+      case Meta(_, _, _, _, Eq(idents))                               => mapIdents(idents)
+      case Meta(_, _, _, _, Neq(idents))                              => mapIdents(idents)
+      case Nested(_, nestedElements)                                  => mapIdentifiers(nestedElements, identifiers0)
+      case Composite(compositeElements)                               => mapIdentifiers(compositeElements, identifiers0)
+      case TxMetaData(txElements)                                     => mapIdentifiers(txElements, identifiers0)
     }).flatten
     (identifiers0 ++ newIdentifiers).distinct
   }
