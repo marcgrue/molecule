@@ -83,22 +83,14 @@ object Model2Query extends Helpers {
     val (ns, attr) = (atom.ns, atom.name)
     atom match {
       case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(model, query, atom, ns, attr, e, v, w, prevNs)
-      case Atom(_, _, "a", _, _, _, _, _)            =>
-        (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case Atom(_, _, "ns", _, _, _, _, _)           =>
-        (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case _ if prevRefNs == "IndexVal"              =>
-        (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    =>
-        (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevAttr`, _, _, _, _, _, _, _)     =>
-        (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevNs`, _, _, _, _, _, _, _)       =>
-        (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _ if prevNs == "?"                        =>
-        (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _                                         =>
-        (resolve(query, e, v, atom), e, v, ns, attr, "")
+      case Atom(_, _, "a", _, _, _, _, _)            => (resolve(query, e, v, atom), e, w, ns, attr, "")
+      case Atom(_, _, "ns", _, _, _, _, _)           => (resolve(query, e, v, atom), e, w, ns, attr, "")
+      case _ if prevRefNs == "IndexVal"              => (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    => (resolve(query, v, w, atom), v, w, ns, attr, "")
+      case Atom(`prevAttr`, _, _, _, _, _, _, _)     => (resolve(query, v, w, atom), v, w, ns, attr, "")
+      case Atom(`prevNs`, _, _, _, _, _, _, _)       => (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case _ if prevNs == "?"                        => (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case _                                         => (resolve(query, e, v, atom), e, v, ns, attr, "")
     }
   }
 
@@ -147,32 +139,19 @@ object Model2Query extends Helpers {
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = meta match {
-    case Meta("?", attr, _, _) if prevRefNs.nonEmpty             =>
-      (resolve(query, v, w, meta), v, y, "?", attr, "")
-    case Meta("?", attr, _, _)                                   =>
-      (resolve(query, e, v, meta), e, v, "?", attr, "")
-    case Meta("schema", attr, _, _)                              =>
-      (resolve(query, e, v, meta), e, v, "schema", attr, "")
-    case Meta(ns, attr, "e", Eq(Seq(Qm)))                  =>
-      (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", Eq(eids))                     =>
-      (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", IndexVal) if prevRefNs == ""        =>
-      (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", IndexVal)                           =>
-      (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
-    case Meta(ns, attr, "r", IndexVal)                           =>
-      (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
-    case Meta(ns, attr, "e", _) if prevRefNs == ""         =>
-      (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", _) if prevRefNs == "IndexVal" =>
-      (resolve(query, e, y, meta), e, y, ns, attr, "")
-    case Meta(ns, attr, "e", EntValue)                     =>
-      (resolve(query, v, w, meta), v, w, ns, attr, "")
-    case Meta(ns, attr, _, _) if prevRefNs.nonEmpty              =>
-      (resolve(query, e, v, meta), v, w, ns, attr, prevNs)
-    case Meta(ns, attr, _, _)                                    =>
-      (resolve(query, e, v, meta), e, v, ns, attr, "")
+    case Meta("?", attr, _, _) if prevRefNs.nonEmpty       => (resolve(query, v, w, meta), v, y, "?", attr, "")
+    case Meta("?", attr, _, _)                             => (resolve(query, e, v, meta), e, v, "?", attr, "")
+    case Meta("schema", attr, _, _)                        => (resolve(query, e, v, meta), e, v, "schema", attr, "")
+    case Meta(ns, attr, "e", Eq(Seq(Qm)))                  => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
+    case Meta(ns, attr, "e", Eq(eids))                     => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
+    case Meta(ns, attr, "e", IndexVal) if prevRefNs == ""  => (resolve(query, e, v, meta), e, w, ns, attr, "")
+    case Meta(ns, attr, "e", IndexVal)                     => (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
+    case Meta(ns, attr, "r", IndexVal)                     => (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
+    case Meta(ns, attr, "e", _) if prevRefNs == ""         => (resolve(query, e, v, meta), e, w, ns, attr, "")
+    case Meta(ns, attr, "e", _) if prevRefNs == "IndexVal" => (resolve(query, e, y, meta), e, y, ns, attr, "")
+    case Meta(ns, attr, "e", EntValue)                     => (resolve(query, v, w, meta), v, w, ns, attr, "")
+    case Meta(ns, attr, _, _) if prevRefNs.nonEmpty        => (resolve(query, e, v, meta), v, w, ns, attr, prevNs)
+    case Meta(ns, attr, _, _)                              => (resolve(query, e, v, meta), e, v, ns, attr, "")
   }
 
   def makeTxMetaData(model: Model, query0: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
@@ -272,36 +251,26 @@ object Model2Query extends Helpers {
 
 
   def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta match {
-    case Meta("?", _, _, _)                                   =>
-      resolveGenericMeta(q, e, meta, v, v1, v2, v3)
-    case Meta("schema", _, _, _)                              =>
-      resolveSchemaMeta(q, meta)
-    case Meta(_, _, "e", Fn("count", _))                      =>
-      q.find("count", Nil, e, Nil)
-    case Meta(ns, attr, "e", Eq(Seq(Qm))) if attr.last == '_' =>
-      q.in(e, ns, attr, e)
-    case Meta(_, _, "e", Eq(Seq(Qm)))                         =>
-      q.find(e, Nil).in(e)
-    case Meta(_, attr, "e", Eq(eids)) if attr.last == '_'     =>
-      q.in(eids, e)
-    case Meta(_, _, "e", Eq(eids))                            =>
-      q.find(e, Nil).in(eids, e)
-    case Meta(_, _, "r", IndexVal)                            =>
-      q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, IndexVal)                              =>
-      q.find(v, Nil).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _)                                     =>
-      q
+    case Meta("?", _, _, _)                                   => resolveGenericMeta(q, e, meta, v, v1, v2, v3)
+    case Meta("schema", _, _, _)                              => resolveSchemaMeta(q, meta)
+    case Meta(_, _, "e", Fn("count", _))                      => q.find("count", Nil, e)
+    case Meta(ns, attr, "e", Eq(Seq(Qm))) if attr.last == '_' => q.in(e, ns, attr, e)
+    case Meta(_, _, "e", Eq(Seq(Qm)))                         => q.find(e).in(e)
+    case Meta(_, attr, "e", Eq(eids)) if attr.last == '_'     => q.in(eids, e)
+    case Meta(_, _, "e", Eq(eids))                            => q.find(e).in(eids, e)
+    case Meta(_, _, "r", IndexVal)                            => q.find(v).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, IndexVal)                              => q.find(v).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
+    case Meta(_, _, _, _)                                     => q
   }
 
 
   def resolveSchemaMeta(q: Query, meta: Meta): Query = meta.attr match {
     case "id"          => resolveSchemaMandatory(meta, q.schema)
-    case "ident"       => resolveSchemaMandatory(meta, q.schemaIdent)
+    case "a"           => resolveSchemaMandatory(meta, q.schemaA)
     case "part"        => resolveSchemaMandatory(meta, q.schema)
     case "nsFull"      => resolveSchemaMandatory(meta, q.schema)
     case "ns"          => resolveSchemaMandatory(meta, q.schema)
-    case "a"           => resolveSchemaMandatory(meta, q.schemaA)
+    case "attr"        => resolveSchemaMandatory(meta, q.schemaAttr)
     case "tpe"         => resolveSchemaMandatory(meta, q.schemaTpe)
     case "card"        => resolveSchemaMandatory(meta, q.schemaCard)
     case "doc"         => resolveSchemaMandatory(meta, q.schemaDoc)
@@ -316,11 +285,11 @@ object Model2Query extends Helpers {
     case "txInstant"   => resolveSchemaMandatory(meta, q.schemaTxInstant)
 
     case "id_"          => resolveSchemaTacit(meta, q.schema)
-    case "ident_"       => resolveSchemaTacit(meta, q.schemaIdent)
+    case "a_"           => resolveSchemaTacit(meta, q.schemaA)
     case "part_"        => resolveSchemaTacit(meta, q.schema)
     case "nsFull_"      => resolveSchemaTacit(meta, q.schema)
     case "ns_"          => resolveSchemaTacit(meta, q.schema)
-    case "a_"           => resolveSchemaTacit(meta, q.schemaA)
+    case "attr_"        => resolveSchemaTacit(meta, q.schemaAttr)
     case "tpe_"         => resolveSchemaTacit(meta, q.schemaTpe)
     case "card_"        => resolveSchemaTacit(meta, q.schemaCard)
     case "doc_"         => resolveSchemaTacit(meta, q.schemaDoc)
@@ -339,11 +308,11 @@ object Model2Query extends Helpers {
   }
 
   def resolveSchemaMandatory(meta: Meta, q: Query): Query = meta.value match {
-    case NoValue                        => q.find(meta.attr, Nil)
-    case Eq(args)                       => q.find(meta.attr, Nil).in(args, meta.attr)
-    case Neq(args)                      => q.find(meta.attr, Nil).compareToMany2("!=", meta.attr, args)
-    case Fn("count", _)                 => q.find("count", Nil, meta.attr, Nil)
-    case Fulltext((arg: String) :: Nil) => q.find(meta.attr + "Value", Nil).schemaDocFulltext(arg)
+    case NoValue                        => q.find(meta.attr)
+    case Eq(args)                       => q.find(meta.attr).in(args, meta.attr)
+    case Neq(args)                      => q.find(meta.attr).compareToMany2("!=", meta.attr, args)
+    case Fn("count", _)                 => q.find("count", Nil, meta.attr)
+    case Fulltext((arg: String) :: Nil) => q.find(meta.attr + "Value").schemaDocFulltext(arg)
     case Fulltext(_)                    => abort("Fulltext search can only be performed with 1 search phrase.")
     case other                          => abort(s"Unexpected value for mandatory schema attribute `${meta.attr}`: " + other)
   }
@@ -361,7 +330,7 @@ object Model2Query extends Helpers {
     val v = meta.attr.init
     meta.value match {
       case NoValue        => q.schemaPull(v)
-      case Eq(arg :: Nil) => q.find(v, Nil).where(Var("id"), KW("db", v), v).where("id", "db", v, Val(arg), "", Nil)
+      case Eq(arg :: Nil) => q.find(v).where(Var("id"), KW("db", v), v).where("id", "db", v, Val(arg), "")
       case Fn("not", _)   => q.schemaPull(v).not(v) // None
       case other          => abort(s"Unexpected value for optional schema attribute `${meta.attr}`: " + other)
     }
@@ -372,7 +341,7 @@ object Model2Query extends Helpers {
     meta.value match {
       case NoValue        => q.schemaPullUnique(v)
       case Eq(arg :: Nil) =>
-        q.find(v + 2, Nil)
+        q.find(v + 2)
           .where(Var("id"), KW("db", v), v)
           .ident(v, v + 1)
           .kw(v + 1, v + 2)
@@ -395,7 +364,6 @@ object Model2Query extends Helpers {
     case "t"         => resolveGenericMandatory(q.genericT(e, v, v1), e, meta, v)
     case "txInstant" => resolveGenericMandatory(q.genericTxInstant(e, v, v1), e, meta, v)
     case "op"        => resolveGenericMandatory(q.genericOp(e, v, v1), e, meta, v)
-    case "ns"        => resolveGenericMandatory(q.genericNs(e, v, v1), e, meta, v)
     case "a"         => resolveGenericMandatory(q.genericA(e, v, v1), e, meta, v)
     case "v"         =>
       val q1 = q.genericV(e, v, v1)
@@ -416,7 +384,6 @@ object Model2Query extends Helpers {
     case "t_"         => resolveGenericTacit(q.genericT(e, v, v1), e, meta, v)
     case "txInstant_" => resolveGenericTacit(q.genericTxInstant(e, v, v1), e, meta, v)
     case "op_"        => resolveGenericTacit(q.genericOp(e, v, v1), e, meta, v)
-    case "ns_"        => resolveGenericTacit(q.genericNs(e, v, v1), e, meta, v)
     case "a_"         => resolveGenericTacit(q.genericA(e, v, v1), e, meta, v)
     case "v_"         =>
       val q1 = q.genericV(e, v, v1)
@@ -430,10 +397,10 @@ object Model2Query extends Helpers {
   def resolveGenericMandatory(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr
     meta.value match {
-      case NoValue | EntValue => q.find(v, Nil)
-      case Eq(args)           => q.find(v, Nil).in(args, v)
-      case Neq(args)          => q.find(v, Nil).compareToMany2("!=", v, args)
-      case Fn("count", _)     => q.find("count", Nil, v, Nil)
+      case NoValue | EntValue => q.find(v)
+      case Eq(args)           => q.find(v).in(args, v)
+      case Neq(args)          => q.find(v).compareToMany2("!=", v, args)
+      case Fn("count", _)     => q.find("count", Nil, v)
       case other              => throw new Model2QueryException("Unexpected value: " + other)
     }
   }
@@ -464,48 +431,48 @@ object Model2Query extends Helpers {
     a.value match {
       case Qm => q
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
 
       case Fulltext(Seq(Qm)) => q
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
 
       case Neq(Seq(Qm)) => q
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"(?!($key)@("), Var(v + "Value"), Val(")$).*")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
 
-      case Gt(Qm) => q.mapIn2(e, a, v, gs).mapInCompareToK(">", e, a, v, key, gs)
-      case Ge(Qm) => q.mapIn2(e, a, v, gs).mapInCompareToK(">=", e, a, v, key, gs)
-      case Lt(Qm) => q.mapIn2(e, a, v, gs).mapInCompareToK("<", e, a, v, key, gs)
-      case Le(Qm) => q.mapIn2(e, a, v, gs).mapInCompareToK("<=", e, a, v, key, gs)
+      case Gt(Qm) => q.mapIn2(e, a, v).mapInCompareToK(">", e, a, v, key)
+      case Ge(Qm) => q.mapIn2(e, a, v).mapInCompareToK(">=", e, a, v, key)
+      case Lt(Qm) => q.mapIn2(e, a, v).mapInCompareToK("<", e, a, v, key)
+      case Le(Qm) => q.mapIn2(e, a, v).mapInCompareToK("<=", e, a, v, key)
 
-      case Gt(arg) => q.mapCompareTo(">", e, a, v, Seq(key), arg, gs)
-      case Ge(arg) => q.mapCompareTo(">=", e, a, v, Seq(key), arg, gs)
-      case Lt(arg) => q.mapCompareTo("<", e, a, v, Seq(key), arg, gs)
-      case Le(arg) => q.mapCompareTo("<=", e, a, v, Seq(key), arg, gs)
+      case Gt(arg) => q.mapCompareTo(">", e, a, v, Seq(key), arg)
+      case Ge(arg) => q.mapCompareTo(">=", e, a, v, Seq(key), arg)
+      case Lt(arg) => q.mapCompareTo("<", e, a, v, Seq(key), arg)
+      case Le(arg) => q.mapCompareTo("<=", e, a, v, Seq(key), arg)
 
       case VarValue => q
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func(".startsWith ^String", Seq(Var(v), Val(key + "@")), NoBinding)
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v1)))
         .func("second", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
       case Fulltext(args) => q
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val("(" + key + ")@.*(" + args.map(f).mkString("|") + ").*$")))
 
       case Eq(arg :: Nil) => q
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val(s"($key)@" + f(arg))))
 
       case Eq(args) => q
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val("(" + key + ")@(" + args.map(f).mkString("|") + ")$")))
 
       case other => abort(s"Unresolved tacit mapped Atom_:\nAtom_   : $a\nElement: $other")
@@ -517,71 +484,71 @@ object Model2Query extends Helpers {
     val gs = a.gs
     a.value match {
       case Qm => q
-        .find(v3, gs)
+        .find(v3)
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
 
       case Fulltext(Seq(Qm)) => q
-        .find(v3, gs)
+        .find(v3)
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"($key)@("), Var(v + "Value"), Val(")")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
 
       case Neq(Seq(Qm)) => q
-        .find(v3, gs)
+        .find(v3)
         .in(e, a, None, v + "Value")
-        .where(e, a, v, gs)
+        .where(e, a, v)
         .func("str", Seq(Val(s"(?!($key)@("), Var(v + "Value"), Val(")$).*")), ScalarBinding(Var(v1)))
         .func(".matches ^String", Seq(Var(v), Var(v1)))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
 
-      case Gt(Qm) => q.find(v2, gs).mapIn2(e, a, v, gs).mapInCompareToK(">", e, a, v, key, gs)
-      case Ge(Qm) => q.find(v2, gs).mapIn2(e, a, v, gs).mapInCompareToK(">=", e, a, v, key, gs)
-      case Lt(Qm) => q.find(v2, gs).mapIn2(e, a, v, gs).mapInCompareToK("<", e, a, v, key, gs)
-      case Le(Qm) => q.find(v2, gs).mapIn2(e, a, v, gs).mapInCompareToK("<=", e, a, v, key, gs)
+      case Gt(Qm) => q.find(v2).mapIn2(e, a, v).mapInCompareToK(">", e, a, v, key)
+      case Ge(Qm) => q.find(v2).mapIn2(e, a, v).mapInCompareToK(">=", e, a, v, key)
+      case Lt(Qm) => q.find(v2).mapIn2(e, a, v).mapInCompareToK("<", e, a, v, key)
+      case Le(Qm) => q.find(v2).mapIn2(e, a, v).mapInCompareToK("<=", e, a, v, key)
 
-      case Gt(arg) => q.find(v2, gs).mapCompareTo(">", e, a, v, Seq(key), arg, gs)
-      case Ge(arg) => q.find(v2, gs).mapCompareTo(">=", e, a, v, Seq(key), arg, gs)
-      case Lt(arg) => q.find(v2, gs).mapCompareTo("<", e, a, v, Seq(key), arg, gs)
-      case Le(arg) => q.find(v2, gs).mapCompareTo("<=", e, a, v, Seq(key), arg, gs)
+      case Gt(arg) => q.find(v2).mapCompareTo(">", e, a, v, Seq(key), arg)
+      case Ge(arg) => q.find(v2).mapCompareTo(">=", e, a, v, Seq(key), arg)
+      case Lt(arg) => q.find(v2).mapCompareTo("<", e, a, v, Seq(key), arg)
+      case Le(arg) => q.find(v2).mapCompareTo("<=", e, a, v, Seq(key), arg)
 
       case VarValue => q
-        .find(v2, gs)
-        .where(e, a, v, gs)
+        .find(v2)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val(s"($key)@.*")))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v1)))
         .func("second", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
       case Fulltext(args) => q
-        .find(v2, gs)
-        .where(e, a, v, gs)
+        .find(v2)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val("(" + key + ")@.*(" + args.map(f).mkString("|") + ").*$")))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
 
       case Eq(arg :: Nil) => q
-        .find(v2, gs)
-        .where(e, a, v, gs)
+        .find(v2)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val(s"($key)@" + f(arg))))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
 
       case Eq(args) => q
-        .find(v2, gs)
-        .where(e, a, v, gs)
+        .find(v2)
+        .where(e, a, v)
         .func(".matches ^String", Seq(Var(v), Val("(" + key + ")@(" + args.map(f).mkString("|") + ")$")))
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
 
-      case Neq(args) => q.find(v, gs).where(e, a, v, gs).matches(v, Seq(key), "(?!(" + args.map(f).mkString("|") + ")$).*")
+      case Neq(args) => q.find(v).where(e, a, v).matches(v, Seq(key), "(?!(" + args.map(f).mkString("|") + ")$).*")
 
       case other => abort(s"Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
     }
@@ -593,8 +560,8 @@ object Model2Query extends Helpers {
     a.value match {
       case VarValue           => q.pull(e, a)
       case Fn("not", _)       => q.pull(e, a).not(e, a)
-      case MapEq(pair :: Nil) => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")$")
-      case MapEq(pairs)       => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs)
+      case MapEq(pair :: Nil) => q.findD(v).where(e, a, v).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")$")
+      case MapEq(pairs)       => q.findD(v).where(e, a, v).mappings(v, a, pairs)
       case other              => abort("Unresolved optional mapped Atom$:\nAtom$   : " + s"$a\nElement: $other")
     }
   }
@@ -603,29 +570,29 @@ object Model2Query extends Helpers {
     val a = a0.copy(name = a0.name.init)
     val gs = a.gs
     a.value match {
-      case Qm                       => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-      case Fulltext(Seq(Qm))        => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-      case Neq(Seq(Qm))             => q.mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
-      case Gt(Qm)                   => q.mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
-      case Ge(Qm)                   => q.mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
-      case Lt(Qm)                   => q.mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
-      case Le(Qm)                   => q.mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
-      case Gt(arg)                  => q.mapCompareTo(">", e, a, v, keys, arg, gs)
-      case Ge(arg)                  => q.mapCompareTo(">=", e, a, v, keys, arg, gs)
-      case Lt(arg)                  => q.mapCompareTo("<", e, a, v, keys, arg, gs)
-      case Le(arg)                  => q.mapCompareTo("<=", e, a, v, keys, arg, gs)
-      case VarValue                 => q.where(e, a, v, gs)
-      case Fulltext(arg :: Nil)     => q.where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
-      case Fulltext(args)           => q.where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
-      case Eq((set: Set[_]) :: Nil) => q.where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
-      case Eq(arg :: Nil)           => q.where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
-      case Eq(args)                 => q.where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
-      case Neq(args)                => q.where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
-      case MapKeys(arg :: Nil)      => q.where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
-      case MapKeys(args)            => q.where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-      case MapEq(pair :: Nil)       => q.where(e, a, v, gs).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")")
-      case MapEq(pairs)             => q.where(e, a, v, gs).mappings(v, a, pairs.toSeq)
-      case And(args)                => q.where(e, a, v, gs).matches(v, keys, "(" + args.head + ")$") // (post-processed)
+      case Qm                       => q.mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+      case Fulltext(Seq(Qm))        => q.mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+      case Neq(Seq(Qm))             => q.mapIn(e, a, v).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
+      case Gt(Qm)                   => q.mapIn(e, a, v).mapInCompareTo(">", e, a, v)
+      case Ge(Qm)                   => q.mapIn(e, a, v).mapInCompareTo(">=", e, a, v)
+      case Lt(Qm)                   => q.mapIn(e, a, v).mapInCompareTo("<", e, a, v)
+      case Le(Qm)                   => q.mapIn(e, a, v).mapInCompareTo("<=", e, a, v)
+      case Gt(arg)                  => q.mapCompareTo(">", e, a, v, keys, arg)
+      case Ge(arg)                  => q.mapCompareTo(">=", e, a, v, keys, arg)
+      case Lt(arg)                  => q.mapCompareTo("<", e, a, v, keys, arg)
+      case Le(arg)                  => q.mapCompareTo("<=", e, a, v, keys, arg)
+      case VarValue                 => q.where(e, a, v)
+      case Fulltext(arg :: Nil)     => q.where(e, a, v).matches(v, keys, ".*" + f(arg) + ".*")
+      case Fulltext(args)           => q.where(e, a, v).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
+      case Eq((set: Set[_]) :: Nil) => q.where(e, a, v).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
+      case Eq(arg :: Nil)           => q.where(e, a, v).matches(v, keys, "(" + f(arg) + ")")
+      case Eq(args)                 => q.where(e, a, v).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
+      case Neq(args)                => q.where(e, a, v).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
+      case MapKeys(arg :: Nil)      => q.where(e, a, v).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
+      case MapKeys(args)            => q.where(e, a, v).matches(v, "(" + args.mkString("|") + ")@.*")
+      case MapEq(pair :: Nil)       => q.where(e, a, v).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")")
+      case MapEq(pairs)             => q.where(e, a, v).mappings(v, a, pairs.toSeq)
+      case And(args)                => q.where(e, a, v).matches(v, keys, "(" + args.head + ")$") // (post-processed)
       case Fn("not", _)             => q.not(e, a)
       case other                    => abort(s"Unresolved tacit mapped Atom_:\nAtom_   : $a\nElement: $other")
     }
@@ -634,29 +601,29 @@ object Model2Query extends Helpers {
   def resolveAtomMapMandatory(q: Query, e: String, a: Atom, v: String, keys: Seq[String]): Query = {
     val gs = a.gs
     a.value match {
-      case Qm                       => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
-      case Fulltext(Seq(Qm))        => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
-      case Neq(Seq(Qm))             => q.findD(v, gs).mapIn(e, a, v, gs).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
-      case Gt(Qm)                   => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">", e, a, v, gs)
-      case Ge(Qm)                   => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo(">=", e, a, v, gs)
-      case Lt(Qm)                   => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<", e, a, v, gs)
-      case Le(Qm)                   => q.findD(v, gs).mapIn(e, a, v, gs).mapInCompareTo("<=", e, a, v, gs)
-      case Gt(arg)                  => q.findD(v, gs).mapCompareTo(">", e, a, v, keys, arg, gs)
-      case Ge(arg)                  => q.findD(v, gs).mapCompareTo(">=", e, a, v, keys, arg, gs)
-      case Lt(arg)                  => q.findD(v, gs).mapCompareTo("<", e, a, v, keys, arg, gs)
-      case Le(arg)                  => q.findD(v, gs).mapCompareTo("<=", e, a, v, keys, arg, gs)
-      case VarValue                 => q.findD(v, gs).where(e, a, v, gs)
-      case Fulltext(arg :: Nil)     => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*" + f(arg) + ".*")
-      case Fulltext(args)           => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
-      case Eq((set: Set[_]) :: Nil) => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
-      case Eq(arg :: Nil)           => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + f(arg) + ")")
-      case Eq(args)                 => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
-      case Neq(args)                => q.findD(v, gs).where(e, a, v, gs).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
-      case MapKeys(arg :: Nil)      => q.findD(v, gs).where(e, a, v, gs).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
-      case MapKeys(args)            => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + args.mkString("|") + ")@.*")
-      case MapEq(pair :: Nil)       => q.findD(v, gs).where(e, a, v, gs).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")$")
-      case MapEq(pairs)             => q.findD(v, gs).where(e, a, v, gs).mappings(v, a, pairs)
-      case And(args)                => q.findD(v, gs).whereAnd(e, a, v, args)
+      case Qm                       => q.findD(v).mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
+      case Fulltext(Seq(Qm))        => q.findD(v).mapIn(e, a, v).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
+      case Neq(Seq(Qm))             => q.findD(v).mapIn(e, a, v).matchRegEx(v, Seq(Val("(?!("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")$).*")))
+      case Gt(Qm)                   => q.findD(v).mapIn(e, a, v).mapInCompareTo(">", e, a, v)
+      case Ge(Qm)                   => q.findD(v).mapIn(e, a, v).mapInCompareTo(">=", e, a, v)
+      case Lt(Qm)                   => q.findD(v).mapIn(e, a, v).mapInCompareTo("<", e, a, v)
+      case Le(Qm)                   => q.findD(v).mapIn(e, a, v).mapInCompareTo("<=", e, a, v)
+      case Gt(arg)                  => q.findD(v).mapCompareTo(">", e, a, v, keys, arg)
+      case Ge(arg)                  => q.findD(v).mapCompareTo(">=", e, a, v, keys, arg)
+      case Lt(arg)                  => q.findD(v).mapCompareTo("<", e, a, v, keys, arg)
+      case Le(arg)                  => q.findD(v).mapCompareTo("<=", e, a, v, keys, arg)
+      case VarValue                 => q.findD(v).where(e, a, v)
+      case Fulltext(arg :: Nil)     => q.findD(v).where(e, a, v).matches(v, keys, ".*" + f(arg) + ".*")
+      case Fulltext(args)           => q.findD(v).where(e, a, v).matches(v, keys, ".*(" + args.map(f).mkString("|") + ").*")
+      case Eq((set: Set[_]) :: Nil) => q.findD(v).where(e, a, v).matches(v, keys, "(" + set.toSeq.map(f).mkString("|") + ")$")
+      case Eq(arg :: Nil)           => q.findD(v).where(e, a, v).matches(v, keys, "(" + f(arg) + ")")
+      case Eq(args)                 => q.findD(v).where(e, a, v).matches(v, keys, "(" + args.map(f).mkString("|") + ")$")
+      case Neq(args)                => q.findD(v).where(e, a, v).matches(v, keys, "(?!(" + args.map(f).mkString("|") + ")$).*")
+      case MapKeys(arg :: Nil)      => q.findD(v).where(e, a, v).func(".startsWith ^String", Seq(Var(v), Val(arg + "@")), NoBinding)
+      case MapKeys(args)            => q.findD(v).where(e, a, v).matches(v, "(" + args.mkString("|") + ")@.*")
+      case MapEq(pair :: Nil)       => q.findD(v).where(e, a, v).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")$")
+      case MapEq(pairs)             => q.findD(v).where(e, a, v).mappings(v, a, pairs)
+      case And(args)                => q.findD(v).whereAnd(e, a, v, args)
       case other                    => abort(s"Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
     }
   }
@@ -668,7 +635,7 @@ object Model2Query extends Helpers {
     a.value match {
       case EnumVal      => q.pullEnum(e, a)
       case Fn("not", _) => q.pullEnum(e, a).not(e, a) // None
-      case Eq(args)     => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
+      case Eq(args)     => q.findD(v2).enum(e, a, v).orRules(e, a, args)
       case other        => abort("Unresolved optional cardinality-many enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
     }
   }
@@ -679,8 +646,8 @@ object Model2Query extends Helpers {
     a.value match {
       case EnumVal        => q.pullEnum(e, a)
       case Fn("not", _)   => q.pullEnum(e, a).not(e, a) // None
-      case Eq(arg :: Nil) => q.find(v2, gs).enum(e, a, v, gs).where(e, a, Val(prefix + arg), gs)
-      case Eq(args)       => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
+      case Eq(arg :: Nil) => q.find(v2).enum(e, a, v).where(e, a, Val(prefix + arg))
+      case Eq(args)       => q.find(v2).enum(e, a, v).orRules(e, a, args)
       case other          => abort("Unresolved optional cardinality-one enum Atom$:\nAtom$   : " + s"$a\nElement: $other")
     }
   }
@@ -689,26 +656,26 @@ object Model2Query extends Helpers {
     val a = a0.copy(name = a0.name.init)
     val gs = a.gs
     a.value match {
-      case Qm                                      => q.enum(e, a, v, gs).in(e, a, Some(prefix), v2)
-      case Neq(Seq(Qm))                            => q.enum(e, a, v, gs).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Gt(Qm)                                  => q.enum(e, a, v, gs).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Ge(Qm)                                  => q.enum(e, a, v, gs).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Lt(Qm)                                  => q.enum(e, a, v, gs).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Le(Qm)                                  => q.enum(e, a, v, gs).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case EnumVal                                 => q.enum(e, a, v, gs)
-      case Neq(args)                               => q.enum(e, a, v, gs).compareToMany("!=", a, v2, args)
+      case Qm                                      => q.enum(e, a, v).in(e, a, Some(prefix), v2)
+      case Neq(Seq(Qm))                            => q.enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Gt(Qm)                                  => q.enum(e, a, v).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Ge(Qm)                                  => q.enum(e, a, v).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Lt(Qm)                                  => q.enum(e, a, v).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Le(Qm)                                  => q.enum(e, a, v).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case EnumVal                                 => q.enum(e, a, v)
+      case Neq(args)                               => q.enum(e, a, v).compareToMany("!=", a, v2, args)
       case Fn("not", _)                            => q.not(e, a)
       case Eq(Nil)                                 => q.not(e, a)
       case Eq((set: Set[_]) :: Nil) if set.isEmpty => q.not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.not(e, a)
-      case Eq((set: Set[_]) :: Nil)                => q.enum(e, a, v, gs).whereAnd(e, a, v, set.toSeq.map(prefix + _))
-      case Eq(arg :: Nil)                          => q.where(e, a, Val(prefix + arg), gs)
+      case Eq((set: Set[_]) :: Nil)                => q.enum(e, a, v).whereAnd(e, a, v, set.toSeq.map(prefix + _))
+      case Eq(arg :: Nil)                          => q.where(e, a, Val(prefix + arg))
       case Eq(args)                                => q.orRules(e, a, args)
-      case And(args) if a.card == 2                => q.enum(e, a, v, gs).whereAnd(e, a, v, args.map(prefix + _))
-      case Gt(arg)                                 => q.enum(e, a, v, gs).compareTo(">", a, v2, Val(arg), 1)
-      case Ge(arg)                                 => q.enum(e, a, v, gs).compareTo(">=", a, v2, Val(arg), 1)
-      case Lt(arg)                                 => q.enum(e, a, v, gs).compareTo("<", a, v2, Val(arg), 1)
-      case Le(arg)                                 => q.enum(e, a, v, gs).compareTo("<=", a, v2, Val(arg), 1)
+      case And(args) if a.card == 2                => q.enum(e, a, v).whereAnd(e, a, v, args.map(prefix + _))
+      case Gt(arg)                                 => q.enum(e, a, v).compareTo(">", a, v2, Val(arg), 1)
+      case Ge(arg)                                 => q.enum(e, a, v).compareTo(">=", a, v2, Val(arg), 1)
+      case Lt(arg)                                 => q.enum(e, a, v).compareTo("<", a, v2, Val(arg), 1)
+      case Le(arg)                                 => q.enum(e, a, v).compareTo("<=", a, v2, Val(arg), 1)
       case other                                   => abort(s"Unresolved tacit enum Atom_:\nAtom_  : $a\nElement: $other")
     }
   }
@@ -716,29 +683,29 @@ object Model2Query extends Helpers {
   def resolveAtomEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
-      case Qm                                          => q.findD(v2, gs).enum(e, a, v, gs).in(e, a, Some(prefix), v2)
-      case Neq(Seq(Qm))                                => q.findD(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Gt(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Ge(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Lt(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Le(Qm)                                      => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case EnumVal                                     => q.findD(v2, gs).enum(e, a, v, gs)
-      case Fn("not", _)                                => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq(Nil)                                     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq((set: Set[_]) :: Nil)                    => q.findD(v2, gs).enum(e, a, v, gs).whereAnd(e, a, v, set.toSeq.map(prefix + _))
-      case Eq(args)                                    => q.findD(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
-      case And(args)                                   => q.findD(v2, gs).whereAndEnum(e, a, v, prefix, args)
-      case Neq(Nil)                                    => q.findD(v2, gs).enum(e, a, v, gs)
-      case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v2, gs).enum(e, a, v, gs).nots(e, a, v2, sets)
-      case Neq(arg :: Nil) if uri(t)                   => q.findD(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Val(arg))
-      case Neq(arg :: Nil)                             => q.findD(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Val(arg))
-      case Neq(args)                                   => q.findD(v2, gs).enum(e, a, v, gs).compareToMany("!=", a, v2, args)
-      case Gt(arg)                                     => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Val(arg), 1)
-      case Ge(arg)                                     => q.findD(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Val(arg), 1)
-      case Lt(arg)                                     => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Val(arg), 1)
-      case Le(arg)                                     => q.findD(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Val(arg), 1)
+      case Qm                                          => q.findD(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
+      case Neq(Seq(Qm))                                => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Gt(Qm)                                      => q.findD(v2).enum(e, a, v).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Ge(Qm)                                      => q.findD(v2).enum(e, a, v).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Lt(Qm)                                      => q.findD(v2).enum(e, a, v).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Le(Qm)                                      => q.findD(v2).enum(e, a, v).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case EnumVal                                     => q.findD(v2).enum(e, a, v)
+      case Fn("not", _)                                => q.findD(v2).enum(e, a, v).not(e, a)
+      case Eq(Nil)                                     => q.findD(v2).enum(e, a, v).not(e, a)
+      case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v2).enum(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v2).enum(e, a, v).not(e, a)
+      case Eq((set: Set[_]) :: Nil)                    => q.findD(v2).enum(e, a, v).whereAnd(e, a, v, set.toSeq.map(prefix + _))
+      case Eq(args)                                    => q.findD(v2).enum(e, a, v).orRules(e, a, args)
+      case And(args)                                   => q.findD(v2).whereAndEnum(e, a, v, prefix, args)
+      case Neq(Nil)                                    => q.findD(v2).enum(e, a, v)
+      case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v2).enum(e, a, v).nots(e, a, v2, sets)
+      case Neq(arg :: Nil) if uri(t)                   => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Val(arg))
+      case Neq(arg :: Nil)                             => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Val(arg))
+      case Neq(args)                                   => q.findD(v2).enum(e, a, v).compareToMany("!=", a, v2, args)
+      case Gt(arg)                                     => q.findD(v2).enum(e, a, v).compareTo(">", a, v2, Val(arg), 1)
+      case Ge(arg)                                     => q.findD(v2).enum(e, a, v).compareTo(">=", a, v2, Val(arg), 1)
+      case Lt(arg)                                     => q.findD(v2).enum(e, a, v).compareTo("<", a, v2, Val(arg), 1)
+      case Le(arg)                                     => q.findD(v2).enum(e, a, v).compareTo("<=", a, v2, Val(arg), 1)
       case other                                       => abort(s"Unresolved cardinality-many enum Atom:\nAtom   : $a\nElement: $other")
     }
   }
@@ -746,24 +713,24 @@ object Model2Query extends Helpers {
   def resolveAtomEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
-      case Qm                                      => q.find(v2, gs).enum(e, a, v, gs).in(e, a, Some(prefix), v2)
-      case Neq(Seq(Qm))                            => q.find(v2, gs).enum(e, a, v, gs).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Gt(Qm)                                  => q.find(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Ge(Qm)                                  => q.find(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Lt(Qm)                                  => q.find(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case Le(Qm)                                  => q.find(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
-      case EnumVal                                 => q.find(v2, gs).enum(e, a, v, gs)
-      case Fn("not", _)                            => q.find(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq(Nil)                                 => q.find(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v2, gs).enum(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil)                => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, seq)
-      case Eq(arg :: Nil)                          => q.find(v2, gs).enum(e, a, v, gs).where(e, a, Val(prefix + arg), gs)
-      case Eq(args)                                => q.find(v2, gs).enum(e, a, v, gs).orRules(e, a, args)
-      case Neq(args)                               => q.find(v2, gs).enum(e, a, v, gs).compareToMany("!=", a, v2, args)
-      case Gt(arg)                                 => q.find(v2, gs).enum(e, a, v, gs).compareTo(">", a, v2, Val(arg), 1)
-      case Ge(arg)                                 => q.find(v2, gs).enum(e, a, v, gs).compareTo(">=", a, v2, Val(arg), 1)
-      case Lt(arg)                                 => q.find(v2, gs).enum(e, a, v, gs).compareTo("<", a, v2, Val(arg), 1)
-      case Le(arg)                                 => q.find(v2, gs).enum(e, a, v, gs).compareTo("<=", a, v2, Val(arg), 1)
+      case Qm                                      => q.find(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
+      case Neq(Seq(Qm))                            => q.find(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Gt(Qm)                                  => q.find(v2).enum(e, a, v).compareTo(">", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Ge(Qm)                                  => q.find(v2).enum(e, a, v).compareTo(">=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Lt(Qm)                                  => q.find(v2).enum(e, a, v).compareTo("<", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case Le(Qm)                                  => q.find(v2).enum(e, a, v).compareTo("<=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
+      case EnumVal                                 => q.find(v2).enum(e, a, v)
+      case Fn("not", _)                            => q.find(v2).enum(e, a, v).not(e, a)
+      case Eq(Nil)                                 => q.find(v2).enum(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v2).enum(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil)                => q.find(v2).enum(e, a, v).orRules(e, a, seq)
+      case Eq(arg :: Nil)                          => q.find(v2).enum(e, a, v).where(e, a, Val(prefix + arg))
+      case Eq(args)                                => q.find(v2).enum(e, a, v).orRules(e, a, args)
+      case Neq(args)                               => q.find(v2).enum(e, a, v).compareToMany("!=", a, v2, args)
+      case Gt(arg)                                 => q.find(v2).enum(e, a, v).compareTo(">", a, v2, Val(arg), 1)
+      case Ge(arg)                                 => q.find(v2).enum(e, a, v).compareTo(">=", a, v2, Val(arg), 1)
+      case Lt(arg)                                 => q.find(v2).enum(e, a, v).compareTo("<", a, v2, Val(arg), 1)
+      case Le(arg)                                 => q.find(v2).enum(e, a, v).compareTo("<=", a, v2, Val(arg), 1)
       case other                                   => abort(s"Unresolved cardinality-one enum Atom:\nAtom   : $a\nElement: $other")
     }
   }
@@ -773,9 +740,9 @@ object Model2Query extends Helpers {
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
-      case Eq(arg :: Nil) if uri(t) => q.findD(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Nil)
-      case Eq(arg :: Nil)           => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Nil)
-      case Eq(args)                 => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, u(t, v))
+      case Eq(arg :: Nil) if uri(t) => q.findD(v).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
+      case Eq(arg :: Nil)           => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
+      case Eq(args)                 => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case other                    => abort("Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
     }
   }
@@ -785,9 +752,9 @@ object Model2Query extends Helpers {
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
-      case Eq(arg :: Nil) if uri(t) => q.find(v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v, Nil)
-      case Eq(arg :: Nil)           => q.find(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Nil)
-      case Eq(args)                 => q.find(v, gs).where(e, a, v, gs).orRules(e, a, args, u(t, v))
+      case Eq(arg :: Nil) if uri(t) => q.find(v).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
+      case Eq(arg :: Nil)           => q.find(v).where(e, a, Val(arg)).where(e, a, v)
+      case Eq(args)                 => q.find(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case other                    => abort("Unresolved optional cardinality-one Atom$:\nAtom$   : " + s"$a0\nElement: $other")
     }
   }
@@ -797,32 +764,32 @@ object Model2Query extends Helpers {
     val a = a0.copy(name = a0.name.init)
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
-      case Qm                                      => q.where(e, a, v, gs).in(e, a, None, v)
-      case Neq(Seq(Qm))                            => q.where(e, a, v, gs).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
-      case Gt(Qm)                                  => q.where(e, a, v, gs).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
-      case Ge(Qm)                                  => q.where(e, a, v, gs).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
-      case Lt(Qm)                                  => q.where(e, a, v, gs).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
-      case Le(Qm)                                  => q.where(e, a, v, gs).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
+      case Qm                                      => q.where(e, a, v).in(e, a, None, v)
+      case Neq(Seq(Qm))                            => q.where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
+      case Gt(Qm)                                  => q.where(e, a, v).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
+      case Ge(Qm)                                  => q.where(e, a, v).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
+      case Lt(Qm)                                  => q.where(e, a, v).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
+      case Le(Qm)                                  => q.where(e, a, v).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
       case Fulltext(Seq(Qm))                       => q.fulltext(e, a, v, Var(v1)).in(e, a, None, v1)
-      case VarValue                                => q.where(e, a, v, gs)
+      case VarValue                                => q.where(e, a, v)
       case Fn("not", _)                            => q.not(e, a)
       case Eq(Nil)                                 => q.not(e, a)
       case Eq((set: Set[_]) :: Nil) if set.isEmpty => q.not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.not(e, a)
       case Eq((set: Set[_]) :: Nil)                => q.whereAnd(e, a, v, set.toSeq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                => q.where(e, a, v, gs).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case Eq(arg :: Nil)                          => q.where(e, a, Val(arg), gs)
+      case Eq(arg :: Nil) if uri(t)                => q.where(e, a, v).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
+      case Eq(arg :: Nil)                          => q.where(e, a, Val(arg))
       case Eq(args)                                => q.orRules(e, a, args, u(t, v))
-      case Neq(args)                               => q.where(e, a, v, gs).compareToMany("!=", a, v, args)
-      case Gt(arg)                                 => q.where(e, a, v, gs).compareTo(">", a, v, Val(arg))
-      case Ge(arg)                                 => q.where(e, a, v, gs).compareTo(">=", a, v, Val(arg))
-      case Lt(arg)                                 => q.where(e, a, v, gs).compareTo("<", a, v, Val(arg))
-      case Le(arg)                                 => q.where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
+      case Neq(args)                               => q.where(e, a, v).compareToMany("!=", a, v, args)
+      case Gt(arg)                                 => q.where(e, a, v).compareTo(">", a, v, Val(arg))
+      case Ge(arg)                                 => q.where(e, a, v).compareTo(">=", a, v, Val(arg))
+      case Lt(arg)                                 => q.where(e, a, v).compareTo("<", a, v, Val(arg))
+      case Le(arg)                                 => q.where(e, a, v).compareTo("<=", a, v, Val(arg))
       case And(args) if a.card == 2                => q.whereAnd(e, a, v, args, u(t, v))
-      case And(args)                               => q.where(e, a, Val(args.head), gs)
-      case Fn("unify", _)                          => q.where(e, a, v, gs)
+      case And(args)                               => q.where(e, a, Val(args.head))
+      case Fn("unify", _)                          => q.where(e, a, v)
       case Fulltext(arg :: Nil)                    => q.fulltext(e, a, v, Val(arg))
-      case Fulltext(args)                          => q.where(e, a, v, gs).orRules(e, a, args, "", true)
+      case Fulltext(args)                          => q.where(e, a, v).orRules(e, a, args, "", true)
       case other                                   => abort(s"Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
     }
   }
@@ -830,34 +797,34 @@ object Model2Query extends Helpers {
   def resolveAtomMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
-      case Qm                                          => q.findD(v, gs).where(e, a, v, gs).in(e, a, None, v)
-      case Neq(Seq(Qm))                                => q.findD(v, gs).where(e, a, v, gs).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
-      case Gt(Qm)                                      => q.findD(v, gs).where(e, a, v, gs).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
-      case Ge(Qm)                                      => q.findD(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
-      case Lt(Qm)                                      => q.findD(v, gs).where(e, a, v, gs).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
-      case Le(Qm)                                      => q.findD(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
-      case Fulltext(Seq(Qm))                           => q.findD(v, gs).fulltext(e, a, v, Var(v1)).in(e, a, None, v1)
-      case VarValue                                    => q.findD(v, gs).where(e, a, v, gs)
-      case Fn("not", _)                                => q.findD(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq(Nil)                                     => q.findD(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq((set: Set[_]) :: Nil)                    => q.findD(v, gs).whereAnd(e, a, v, set.toSeq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                    => q.findD(v, gs).where(e, a, v, Nil).where(e, a, v + "_uri", Nil).func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
-      case Eq(arg :: Nil)                              => q.findD(v, gs).where(e, a, Val(arg), gs).where(e, a, v, Nil)
-      case Eq(args)                                    => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, u(t, v))
-      case Neq(Nil)                                    => q.findD(v, gs).where(e, a, v, gs)
-      case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v, gs).where(e, a, v, gs).nots(e, a, v, sets)
-      case Neq(arg :: Nil) if uri(t)                   => q.findD(v, gs).where(e, a, v, gs).compareTo("!=", a, v, Val(arg))
-      case Neq(arg :: Nil)                             => q.findD(v, gs).where(e, a, v, gs).compareTo("!=", a, v, Val(arg))
-      case Neq(args)                                   => q.findD(v, gs).where(e, a, v, gs).compareToMany("!=", a, v, args)
-      case Gt(arg)                                     => q.findD(v, gs).where(e, a, v, gs).compareTo(">", a, v, Val(arg))
-      case Ge(arg)                                     => q.findD(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Val(arg))
-      case Lt(arg)                                     => q.findD(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
-      case Le(arg)                                     => q.findD(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
-      case And(args)                                   => q.findD(v, gs).whereAnd(e, a, v, args, u(t, v))
-      case Fn(fn, _)                                   => q.find(fn, Nil, v, gs).where(e, a, v, gs)
-      case Fulltext(args)                              => q.findD(v, gs).where(e, a, v, gs).orRules(e, a, args, "", true)
+      case Qm                                          => q.findD(v).where(e, a, v).in(e, a, None, v)
+      case Neq(Seq(Qm))                                => q.findD(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
+      case Gt(Qm)                                      => q.findD(v).where(e, a, v).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
+      case Ge(Qm)                                      => q.findD(v).where(e, a, v).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
+      case Lt(Qm)                                      => q.findD(v).where(e, a, v).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
+      case Le(Qm)                                      => q.findD(v).where(e, a, v).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
+      case Fulltext(Seq(Qm))                           => q.findD(v).fulltext(e, a, v, Var(v1)).in(e, a, None, v1)
+      case VarValue                                    => q.findD(v).where(e, a, v)
+      case Fn("not", _)                                => q.findD(v).where(e, a, v).not(e, a)
+      case Eq(Nil)                                     => q.findD(v).where(e, a, v).not(e, a)
+      case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
+      case Eq((set: Set[_]) :: Nil)                    => q.findD(v).whereAnd(e, a, v, set.toSeq, u(t, v))
+      case Eq(arg :: Nil) if uri(t)                    => q.findD(v).where(e, a, v).where(e, a, v + "_uri").func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
+      case Eq(arg :: Nil)                              => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
+      case Eq(args)                                    => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
+      case Neq(Nil)                                    => q.findD(v).where(e, a, v)
+      case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v).where(e, a, v).nots(e, a, v, sets)
+      case Neq(arg :: Nil) if uri(t)                   => q.findD(v).where(e, a, v).compareTo("!=", a, v, Val(arg))
+      case Neq(arg :: Nil)                             => q.findD(v).where(e, a, v).compareTo("!=", a, v, Val(arg))
+      case Neq(args)                                   => q.findD(v).where(e, a, v).compareToMany("!=", a, v, args)
+      case Gt(arg)                                     => q.findD(v).where(e, a, v).compareTo(">", a, v, Val(arg))
+      case Ge(arg)                                     => q.findD(v).where(e, a, v).compareTo(">=", a, v, Val(arg))
+      case Lt(arg)                                     => q.findD(v).where(e, a, v).compareTo("<", a, v, Val(arg))
+      case Le(arg)                                     => q.findD(v).where(e, a, v).compareTo("<=", a, v, Val(arg))
+      case And(args)                                   => q.findD(v).whereAnd(e, a, v, args, u(t, v))
+      case Fn(fn, _)                                   => q.find(fn, Nil, v).where(e, a, v)
+      case Fulltext(args)                              => q.findD(v).where(e, a, v).orRules(e, a, args, "", true)
       case other                                       => abort(s"Unresolved cardinality-many Atom:\nAtom   : $a\nElement: $other")
     }
   }
@@ -865,35 +832,35 @@ object Model2Query extends Helpers {
   def resolveAtomMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
-      case Qm                                      => q.find(v, gs).where(e, a, v, gs).in(e, a, None, v)
-      case Neq(Seq(Qm))                            => q.find(v, gs).where(e, a, v, gs).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
-      case Gt(Qm)                                  => q.find(v, gs).where(e, a, v, gs).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
-      case Ge(Qm)                                  => q.find(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
-      case Lt(Qm)                                  => q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
-      case Le(Qm)                                  => q.find(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
-      case Fulltext(Seq(Qm))                       => q.find(v, gs).fulltext(e, a, v, Var(v1)).in(e, a, None, v1)
-      case EntValue                                => q.find(e, gs)
-      case VarValue                                => q.find(v, gs).where(e, a, v, gs)
-      case NoValue                                 => q.find(NoVal, gs).where(e, a, v, gs)
-      case Distinct                                => q.find("distinct", Nil, v, gs).where(e, a, v, gs).widh(e)
-      case BackValue(backNs)                       => q.find(e, gs).where(v, a.ns, a.name, Var(e), backNs, gs)
-      case Fn("not", _)                            => q.find(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq(Nil)                                 => q.find(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v, gs).where(e, a, v, gs).not(e, a)
-      case Eq((seq: Seq[_]) :: Nil)                => q.find(v, gs).where(e, a, v, gs).orRules(e, a, seq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                => q.find(v, gs).where(e, a, v, Nil).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case Eq(arg :: Nil)                          => q.find(v, gs).where(e, a, v, gs).compareTo("=", a, v, Val(arg))
-      case Eq(args)                                => q.find(v, gs).where(e, a, v, gs).orRules(e, a, args, u(t, v))
-      case Neq(args)                               => q.find(v, gs).where(e, a, v, gs).compareToMany("!=", a, v, args)
-      case Gt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">", a, v, Val(arg))
-      case Ge(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo(">=", a, v, Val(arg))
-      case Lt(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<", a, v, Val(arg))
-      case Le(arg)                                 => q.find(v, gs).where(e, a, v, gs).compareTo("<=", a, v, Val(arg))
-      case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v, gs).where(e, a, v, gs)
-      case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v, gs).where(e, a, v, gs).widh(e)
-      case Fn(fn, _)                               => q.find(fn, Nil, v, gs).where(e, a, v, gs)
-      case Fulltext(arg :: Nil)                    => q.find(v, gs).fulltext(e, a, v, Val(arg))
-      case Fulltext(args)                          => q.find(v, gs).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
+      case Qm                                      => q.find(v).where(e, a, v).in(e, a, None, v)
+      case Neq(Seq(Qm))                            => q.find(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
+      case Gt(Qm)                                  => q.find(v).where(e, a, v).compareTo(">", a, v, Var(v1)).in(e, a, None, v1)
+      case Ge(Qm)                                  => q.find(v).where(e, a, v).compareTo(">=", a, v, Var(v1)).in(e, a, None, v1)
+      case Lt(Qm)                                  => q.find(v).where(e, a, v).compareTo("<", a, v, Var(v1)).in(e, a, None, v1)
+      case Le(Qm)                                  => q.find(v).where(e, a, v).compareTo("<=", a, v, Var(v1)).in(e, a, None, v1)
+      case Fulltext(Seq(Qm))                       => q.find(v).fulltext(e, a, v, Var(v1)).in(e, a, None, v1)
+      case EntValue                                => q.find(e)
+      case VarValue                                => q.find(v).where(e, a, v)
+      case NoValue                                 => q.find(NoVal).where(e, a, v)
+      case Distinct                                => q.find("distinct", Nil, v).where(e, a, v).widh(e)
+      case BackValue(backNs)                       => q.find(e).where(v, a.ns, a.name, Var(e), backNs)
+      case Fn("not", _)                            => q.find(v).where(e, a, v).not(e, a)
+      case Eq(Nil)                                 => q.find(v).where(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v).where(e, a, v).not(e, a)
+      case Eq((seq: Seq[_]) :: Nil)                => q.find(v).where(e, a, v).orRules(e, a, seq, u(t, v))
+      case Eq(arg :: Nil) if uri(t)                => q.find(v).where(e, a, v).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
+      case Eq(arg :: Nil)                          => q.find(v).where(e, a, v).compareTo("=", a, v, Val(arg))
+      case Eq(args)                                => q.find(v).where(e, a, v).orRules(e, a, args, u(t, v))
+      case Neq(args)                               => q.find(v).where(e, a, v).compareToMany("!=", a, v, args)
+      case Gt(arg)                                 => q.find(v).where(e, a, v).compareTo(">", a, v, Val(arg))
+      case Ge(arg)                                 => q.find(v).where(e, a, v).compareTo(">=", a, v, Val(arg))
+      case Lt(arg)                                 => q.find(v).where(e, a, v).compareTo("<", a, v, Val(arg))
+      case Le(arg)                                 => q.find(v).where(e, a, v).compareTo("<=", a, v, Val(arg))
+      case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v).where(e, a, v)
+      case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v).where(e, a, v).widh(e)
+      case Fn(fn, _)                               => q.find(fn, Nil, v).where(e, a, v)
+      case Fulltext(arg :: Nil)                    => q.find(v).fulltext(e, a, v, Val(arg))
+      case Fulltext(args)                          => q.find(v).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
       case other                                   => abort(s"Unresolved cardinality-one Atom:\nAtom   : $a\nElement: $other")
     }
   }

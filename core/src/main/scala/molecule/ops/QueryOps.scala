@@ -17,22 +17,16 @@ object QueryOps extends Helpers {
 
     // Find ..........................................
 
-    def find(fn: String, args: Seq[Any], v: String, gs: Seq[Generic]): Query =
-      find(AggrExpr(fn, args, Var(v)), gs)
+    def findD(v: String): Query =
+      find("distinct", Seq(), v)
 
-    def findD(v: String, gs: Seq[Generic]): Query =
-      find("distinct", Seq(), v, gs)
+    def find(fn: String, args: Seq[Any], v: String): Query =
+      find(AggrExpr(fn, args, Var(v)))
 
-    def find(v: String, gs: Seq[Generic]): Query =
-      find(Var(v), gs)
+    def find(v: String): Query =
+      find(Var(v))
 
-    def find(fn: String, args: Seq[String], v: String, gs: Seq[Generic], attrV: String): Query =
-      find(AggrExpr(fn, args, Var(v)), gs, attrV)
-
-    def find(v: String, gs: Seq[Generic], attrV: String): Query =
-      find(Var(v), gs, attrV)
-
-    def find(o: Output, gs: Seq[Generic], attrV: String = ""): Query =
+    def find(o: Output): Query =
       q.copy(f = Find(q.f.outputs :+ o))
 
 
@@ -69,7 +63,7 @@ object QueryOps extends Helpers {
 
     // Where ..........................................
 
-    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String, gs: Seq[Generic]): Query =
+    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String): Query =
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty, NoBinding)))
 
     def where(e: QueryValue, a: KW, v: String, txV: String = ""): Query = if (txV.nonEmpty)
@@ -77,21 +71,21 @@ object QueryOps extends Helpers {
     else
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, e, a, Var(v), NoBinding)))
 
-    def where(e: String, a: Atom, v: String, gs: Seq[Generic]): Query =
-      where(e, a.ns, a.name, Var(v), "", gs)
+    def where(e: String, a: Atom, v: String): Query =
+      where(e, a.ns, a.name, Var(v), "")
 
-    def where(e: String, a: Atom, qv: Val, gs: Seq[Generic]): Query =
-      where(e, a.ns, a.name, qv, "", gs)
+    def where(e: String, a: Atom, qv: Val): Query =
+      where(e, a.ns, a.name, qv, "")
 
     def whereAnd[T](e: String, a: Atom, v: String, args: Seq[T], uriV: String = ""): Query =
       args.zipWithIndex.foldLeft(q) {
-        case (q1, (arg, i)) if uriV.nonEmpty => q1.where(e, a, v + "_uri" + (i + 1), Nil).func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri" + (i + 1))
-        case (q1, (arg, i))                  => q1.where(e, a, Val(arg), Nil)
-      }.where(e, a, v, Nil)
+        case (q1, (arg, i)) if uriV.nonEmpty => q1.where(e, a, v + "_uri" + (i + 1)).func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri" + (i + 1))
+        case (q1, (arg, i))                  => q1.where(e, a, Val(arg))
+      }.where(e, a, v)
 
 
     def whereAndEnum[T](e: String, a: Atom, v: String, prefix: String, args: Seq[T]): Query = {
-      args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(prefix + arg), Nil) }.enum(e, a, v, Nil)
+      args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(prefix + arg)) }.enum(e, a, v)
     }
 
 
@@ -143,11 +137,11 @@ object QueryOps extends Helpers {
         .func("second", Seq(Var("partNs")), ScalarBinding(Var("ns")))
     )
 
-    def schemaIdent: Query = q.schema
-      .func("str", Seq(Var("idIdent")), ScalarBinding(Var("ident")))
-
     def schemaA: Query = q.schema
-      .func("name", Seq(Var("idIdent")), ScalarBinding(Var("a")))
+      .func("str", Seq(Var("idIdent")), ScalarBinding(Var("a")))
+
+    def schemaAttr: Query = q.schema
+      .func("name", Seq(Var("idIdent")), ScalarBinding(Var("attr")))
 
     def schemaTpe: Query = q.schema
       .where(Var("id"), KW("db", "valueType"), "tpeId")
@@ -185,10 +179,10 @@ object QueryOps extends Helpers {
     def schemaEnum: Query = {
       val q1 = q.wh.clauses.collectFirst {
         case Funct("name", _, ScalarBinding(Var("a"))) => q.schema
-      }.getOrElse(q.schema.func("name", Seq(Var("idIdent")), ScalarBinding(Var("a"))))
+      }.getOrElse(q.schema.func("name", Seq(Var("idIdent")), ScalarBinding(Var("attr"))))
       q1.where(Var("_"), KW("db", "ident"), "enumIdent")
         .func("namespace", Seq(Var("enumIdent")), ScalarBinding(Var("enumNs")))
-        .func("str", Seq(Var("nsFull"), Val("."), Var("a")), ScalarBinding(Var("enumSubNs")))
+        .func("str", Seq(Var("nsFull"), Val("."), Var("attr")), ScalarBinding(Var("enumSubNs")))
         .func("=", Seq(Var("enumSubNs"), Var("enumNs")))
         .func("name", Seq(Var("enumIdent")), ScalarBinding(Var("enum")))
     }
@@ -197,7 +191,7 @@ object QueryOps extends Helpers {
       .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
 
     def schemaTxInstant: Query = q.schema
-      .where("tx", "db", "txInstant", Var("txInstant"), "", Nil)
+      .where("tx", "db", "txInstant", Var("txInstant"), "")
 
 
     def schemaPull(v: String): Query =
@@ -216,7 +210,7 @@ object QueryOps extends Helpers {
 
     def genericE(e: String, v: String, v1: String, singleElement: Boolean = false): Query = {
       if (singleElement) {
-        q.where(e, "?", e + "_attr", Var(v), "", Nil)
+        q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
           .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
           .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
@@ -237,7 +231,7 @@ object QueryOps extends Helpers {
           case DataClause(_, Var("a"), _, _, _, _)                                        =>
             q
         } getOrElse
-          q.where(e, "?", e + "_attr", Var(v), "", Nil)
+          q.where(e, "?", e + "_attr", Var(v), "")
             .ident(e + "_attr", v1)
             .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
             .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
@@ -246,43 +240,21 @@ object QueryOps extends Helpers {
       }
     }
 
-    def genericNs(e: String, v: String, v1: String): Query = {
-      q.wh.clauses.reverse.collectFirst {
-        case Funct("namespace", _, _)                                                   =>
-          q
-        case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
-          q.func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-        case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         =>
-          q.ident(e + "_attr", v1)
-            .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-        case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
-          q.where(KW(ns, attr), KW("db", "ident"), v1)
-            .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-      }.getOrElse(
-        q.where(e, "?", e + "_attr", Var(v), "", Nil)
-          .ident(e + "_attr", v1)
-          .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-          .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
-          .func("!=", Seq(Var(v + "_ns"), Val("db")))
-          .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
-      )
-    }
-
     def genericA(e: String, v: String, v1: String): Query = {
       var nss = false
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
-          q.func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+          q.func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         =>
           q.ident(e + "_attr", v1)
-            .func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+            .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
         case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
           q.where(KW(ns, attr), KW("db", "ident"), v1)
-            .func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+            .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
       }.getOrElse(
-        q.where(e, "?", e + "_attr", Var(v), "", Nil)
+        q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
-          .func("name", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+          .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
           .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
           .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
           .func("!=", Seq(Var(v + "_ns"), Val("db")))
@@ -299,7 +271,7 @@ object QueryOps extends Helpers {
         case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
           q.func("molecule.util.fns/bind", Seq(Var(v)), ScalarBinding(Var(v + "_v")))
       } getOrElse
-        q.where(e, "?", e + "_attr", Var(v), "", Nil)
+        q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
           .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
           .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
@@ -362,10 +334,10 @@ object QueryOps extends Helpers {
     def genericTxInstant(e: String, v: String, v1: String): Query = {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
-          q.where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "", Nil)
+          q.where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "")
       } getOrElse
         q.genericTx(e, v, v1)
-          .where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "", Nil)
+          .where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "")
     }
 
     def genericOp(e: String, v: String, v1: String): Query = {
@@ -400,34 +372,34 @@ object QueryOps extends Helpers {
 
     // Db ns/attr ..........................................
 
-    def findWithValue(v: String, gs: Seq[Generic]): Query = {
+    def findWithValue(v: String): Query = {
       // Build on from `ns` ident if it is already there
       q.wh.clauses.reverse.collectFirst {
         // `ns`
-        case DataClause(_, KW("db.part", "db", _), KW("db.install", "attribute", _), Var(b), _, _) => q.find(v, gs, b)
+        case DataClause(_, KW("db.part", "db", _), KW("db.install", "attribute", _), Var(b), _, _) => q.find(v)
         // `a`
-        case DataClause(_, _, KW("?", "attr", _), Var(b), _, _) => q.find(v, gs, b)
+        case DataClause(_, _, KW("?", "attr", _), Var(b), _, _) => q.find(v)
       }.getOrElse(throw new QueryOpsException("Generic `v` has to have a generic attribute `a` before."))
     }
 
-    def attr(e: String, v: String, v1: String, v2: String, gs: Seq[Generic]): Query = {
+    def attr(e: String, v: String, v1: String, v2: String): Query = {
       // Build on from `ns` ident if it preceeds `a`
       q.wh.clauses.collectFirst {
         case DataClause(_, _, KW("db", "ident", _), Var(b), _, _) =>
           q.func("name", Seq(Var(b)), ScalarBinding(Var(v2)))
       } getOrElse
-        q.where(e, "?", "attr", Var(v), "", gs)
+        q.where(e, "?", "attr", Var(v), "")
           .ident(v, v1)
           .func("name", Seq(Var(v1)), ScalarBinding(Var(v2)))
     }
 
-    def ns(e: String, v: String, v1: String, v2: String, gs: Seq[Generic]): Query = {
+    def ns(e: String, v: String, v1: String, v2: String): Query = {
       // Build on from `attr` ident if it is already there
       q.wh.clauses.collectFirst {
         case DataClause(_, Var("attr"), KW("db", "ident", _), Var(b), _, _) =>
           q.func(".getNamespace ^clojure.lang.Keyword", Seq(Var(b)), ScalarBinding(Var(v2)))
       } getOrElse
-        q.where(e, "?", "ns", Var(v), "", gs)
+        q.where(e, "?", "ns", Var(v), "")
           .ident(v, v1)
           .func(".getNamespace ^clojure.lang.Keyword", Seq(Var(v1)), ScalarBinding(Var(v2)))
     }
@@ -438,11 +410,11 @@ object QueryOps extends Helpers {
 
     // Extra ..........................................
 
-    def enum(e: String, a: Atom, v: String, gs: Seq[Generic] = Seq()): Query =
-      q.where(e, a, v, gs).ident(v, v + 1).kw(v + 1, v + 2)
+    def enum(e: String, a: Atom, v: String): Query =
+      q.where(e, a, v).ident(v, v + 1).kw(v + 1, v + 2)
 
-    def ident(v: String, v1: String, gs: Seq[Generic] = Seq()): Query =
-      q.where(v, "db", "ident", Var(v1), "", gs)
+    def ident(v: String, v1: String): Query =
+      q.where(v, "db", "ident", Var(v1), "")
 
     def kw(v1: String, v2: String): Query =
       q.func(".getName ^clojure.lang.Keyword", Seq(Var(v1)), ScalarBinding(Var(v2)))
@@ -514,14 +486,14 @@ object QueryOps extends Helpers {
       q.func(".matches ^String", Seq(Var(v), Val(keyRegEx + "@" + valueRegEx)))
     }
 
-    def mapCompareTo(op: String, e: String, a: Atom, v: String, keys: Seq[String], arg: Any, gs: Seq[Generic] = Seq()): Query = {
+    def mapCompareTo(op: String, e: String, a: Atom, v: String, keys: Seq[String], arg: Any): Query = {
       lazy val q1 = keys match {
         case Nil   =>
-          q.where(e, a, v, gs)
+          q.where(e, a, v)
             .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
             .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
         case keys_ =>
-          q.where(e, a, v, gs)
+          q.where(e, a, v)
             .func(".matches ^String", Seq(Var(v), Val("(" + keys_.mkString("|") + ")" + "@.*")))
             .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
             .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
@@ -540,7 +512,7 @@ object QueryOps extends Helpers {
       }
     }
 
-    def mapInCompareTo(op: String, e: String, a: Atom, v: String, gs: Seq[Generic] = Seq()): Query = {
+    def mapInCompareTo(op: String, e: String, a: Atom, v: String): Query = {
       val q1 = q
         // Concatenate search string from input vars
         .func("str", Seq(Val("("), Var(v + "Key"), Val(")@.*")), ScalarBinding(Var(v + 1)))
@@ -565,7 +537,7 @@ object QueryOps extends Helpers {
       }
     }
 
-    def mapInCompareToK(op: String, e: String, a: Atom, v: String, key: String, gs: Seq[Generic] = Seq()): Query = {
+    def mapInCompareToK(op: String, e: String, a: Atom, v: String, key: String): Query = {
       val q1 = q
         // match key(s) (could be regex)
         .func(".matches ^String", Seq(Var(v), Val(s"($key)@.*")))
@@ -588,11 +560,11 @@ object QueryOps extends Helpers {
       }
     }
 
-    def mapIn(e: String, a: Atom, v: String, gs: Seq[Generic]): Query =
-      q.in(e, a, None, v + "Key").in(e, a, None, v + "Value").where(e, a, v, gs)
+    def mapIn(e: String, a: Atom, v: String): Query =
+      q.in(e, a, None, v + "Key").in(e, a, None, v + "Value").where(e, a, v)
 
-    def mapIn2(e: String, a: Atom, v: String, gs: Seq[Generic]): Query =
-      q.in(e, a, None, v + "Value").where(e, a, v, gs)
+    def mapIn2(e: String, a: Atom, v: String): Query =
+      q.in(e, a, None, v + "Value").where(e, a, v)
 
     def matchRegEx(v: String, regex: Seq[QueryTerm]): Query =
       q.func("str", regex, ScalarBinding(Var(v + 1))).matches(v, Var(v + 1))

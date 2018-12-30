@@ -81,11 +81,8 @@ class Datom extends CoreSpec {
       // Same as
       Ns(e1).e.get === List(e1)
 
-      // Namespace of attributes
-      Ns(e1).ns.get === List("ns")
-
       // Attribute names
-      Ns(e1).a.get === List("str", "int")
+      Ns(e1).a.get === List(":ns/int", ":ns/str")
 
       // Attribute values (of `Any` type)
       Ns(e1).v.get === List("b", 2)
@@ -105,43 +102,43 @@ class Datom extends CoreSpec {
 
       // Core 5 Datom values (quintuplets)
       Ns(e1).e.a.v.tx.op.get === List(
-        (e1, "str", "b", tx2, true),
-        (e1, "int", 2, tx3, true)
+        (e1, ":ns/str", "b", tx2, true),
+        (e1, ":ns/int", 2, tx3, true)
       )
 
       // Generic attributes can be added in any order
-      Ns(e1).v.t.e.ns.op.tx.a.get === List(
-        ("b", 1030, e1, "ns", true, tx2, "str"),
-        (2, 1031, e1, "ns", true, tx3, "int")
+      Ns(e1).v.t.e.op.tx.a.get === List(
+        ("b", 1030, e1, true, tx2, ":ns/str"),
+        (2, 1031, e1, true, tx3, ":ns/int")
       )
     }
 
 
     "n entities" >> {
       Ns(e1, e2).e.t.a.v.get.sortBy(t => (t._1, t._2)) === List(
-        (e1, t2, "str", "b"),
-        (e1, t3, "int", 2),
-        (e2, t4, "str", "x"),
-        (e2, t5, "int", 5),
-        (e2, t7, "ref1", r1)
+        (e1, t2, ":ns/str", "b"),
+        (e1, t3, ":ns/int", 2),
+        (e2, t4, ":ns/str", "x"),
+        (e2, t5, ":ns/int", 5),
+        (e2, t7, ":ns/ref1", r1)
       )
     }
 
 
     "History" >> {
       Ns(e1, e2).e.t.a.v.op.getHistory.sortBy(t => (t._1, t._2)) === List(
-        (e1, t1, "str", "a", true),
-        (e1, t1, "int", 1, true),
-        (e1, t2, "str", "a", false),
-        (e1, t2, "str", "b", true),
-        (e1, t3, "int", 1, false),
-        (e1, t3, "int", 2, true),
+        (e1, t1, ":ns/str", "a", true),
+        (e1, t1, ":ns/int", 1, true),
+        (e1, t2, ":ns/str", "a", false),
+        (e1, t2, ":ns/str", "b", true),
+        (e1, t3, ":ns/int", 1, false),
+        (e1, t3, ":ns/int", 2, true),
 
-        (e2, t4, "int", 4, true),
-        (e2, t4, "str", "x", true),
-        (e2, t5, "int", 4, false),
-        (e2, t5, "int", 5, true),
-        (e2, t7, "ref1", r1, true)
+        (e2, t4, ":ns/str", "x", true),
+        (e2, t4, ":ns/int", 4, true),
+        (e2, t5, ":ns/int", 4, false),
+        (e2, t5, ":ns/int", 5, true),
+        (e2, t7, ":ns/ref1", r1, true)
       )
     }
   }
@@ -152,8 +149,7 @@ class Datom extends CoreSpec {
     "1 Attribute" >> {
 
       Ns.int.e.get === List((2, e1), (5, e2))
-      Ns.int.ns.get === List((5, "ns"), (2, "ns"))
-      Ns.int.a.get === List((5, "int"), (2, "int"))
+      Ns.int.a.get === List((5, ":ns/int"), (2, ":ns/int"))
       Ns.int.v.get === List((2, 2), (5, 5))
       Ns.int.tx.get === List((2, tx3), (5, tx5))
       Ns.int.t.get === List((2, t3), (5, t5))
@@ -162,8 +158,7 @@ class Datom extends CoreSpec {
 
       // Generic attributes after attribute with applied value
       Ns.int(5).e.get === List((5, e2))
-      Ns.int(5).ns.get === List((5, "ns"))
-      Ns.int(5).a.get === List((5, "int"))
+      Ns.int(5).a.get === List((5, ":ns/int"))
       Ns.int(5).v.get === List((5, 5))
       Ns.int(5).tx.get === List((5, tx5))
       Ns.int(5).t.get === List((5, t5))
@@ -172,8 +167,7 @@ class Datom extends CoreSpec {
 
       // Generic attributes after attribute with applied aggregate keyword
       Ns.int(max).e.get === List((2, e1), (5, e2))
-      Ns.int(max).ns.get === List((5, "ns"))
-      Ns.int(max).a.get === List((5, "int"))
+      Ns.int(max).a.get === List((5, ":ns/int"))
       Ns.int(max).v.get === List((2, 2), (5, 5))
       Ns.int(max).tx.get === List((2, tx3), (5, tx5))
       Ns.int(max).t.get === List((2, t3), (5, t5))
@@ -182,8 +176,7 @@ class Datom extends CoreSpec {
 
       // Generic attributes after attribute with applied operation
       Ns.int.<(3).e.get === List((2, e1))
-      Ns.int.<(3).ns.get === List((2, "ns"))
-      Ns.int.<(3).a.get === List((2, "int"))
+      Ns.int.<(3).a.get === List((2, ":ns/int"))
       Ns.int.<(3).v.get === List((2, 2))
       Ns.int.<(3).tx.get === List((2, tx3))
       Ns.int.<(3).t.get === List((2, t3))
@@ -222,9 +215,9 @@ class Datom extends CoreSpec {
 
       // Any filter will prevent a full scan
 
-      Ns.e.a("str").v.t.get === List(
-        (e1, "str", "b", 1030),
-        (e2, "str", "x", 1032)
+      Ns.e.a(":ns/str").v.t.get === List(
+        (e1, ":ns/str", "b", 1030),
+        (e2, ":ns/str", "x", 1032)
       )
 
 
@@ -245,8 +238,7 @@ class Datom extends CoreSpec {
 
       // Generic attributes after ref id
       Ns.Ref1.e.get === List(r1)
-      Ns.Ref1.ns.get === List("ref1")
-      Ns.Ref1.a.get === List("str1")
+      Ns.Ref1.a.get === List(":ref1/str1")
       Ns.Ref1.v.get === List("hello")
       // `ref1` ref datom asserted in tx7
       Ns.Ref1.tx.get === List(tx7)
@@ -256,8 +248,7 @@ class Datom extends CoreSpec {
 
 
       Ns.int.Ref1.e.get === List((5, r1))
-      Ns.int.Ref1.ns.get === List((5, "ref1"))
-      Ns.int.Ref1.a.get === List((5, "str1"))
+      Ns.int.Ref1.a.get === List((5, ":ref1/str1"))
       Ns.int.Ref1.v.get === List((5, "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.get === List((5, tx7))
@@ -267,8 +258,7 @@ class Datom extends CoreSpec {
 
 
       Ns.int.Ref1.e.str1.get === List((5, r1, "hello"))
-      Ns.int.Ref1.ns.str1.get === List((5, "ref1", "hello"))
-      Ns.int.Ref1.a.str1.get === List((5, "str1", "hello"))
+      Ns.int.Ref1.a.str1.get === List((5, ":ref1/str1", "hello"))
       Ns.int.Ref1.v.str1.get === List((5, "hello", "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.str1.get === List((5, tx7, "hello"))
@@ -278,8 +268,7 @@ class Datom extends CoreSpec {
 
 
       Ns.int.Ref1.str1.e.get === List((5, "hello", r1))
-      Ns.int.Ref1.str1.ns.get === List((5, "hello", "ref1"))
-      Ns.int.Ref1.str1.a.get === List((5, "hello", "str1"))
+      Ns.int.Ref1.str1.a.get === List((5, "hello", ":ref1/str1"))
       Ns.int.Ref1.str1.v.get === List((5, "hello", "hello"))
       // `str1` datom asserted in tx6
       Ns.int.Ref1.str1.tx.get === List((5, "hello", tx6))
@@ -301,16 +290,10 @@ class Datom extends CoreSpec {
     Ns.e(count).int_.get === List(2)
     Ns.int_.e(count).get === List(2)
 
-    Ns.ns("ns").get === List("ns")
-    Ns.ns("ns", "ref1").get === List("ns", "ref1")
-    Ns.ns.not("ns").get === List("ref1")
-    Ns.ns.not("ns", "ref1").get === Nil
-    Ns.int_.ns(count).get === List(1)
-
-    Ns.a("str").get === List("str")
-    Ns.a("str", "int").get === List("str", "int")
-    Ns.a.not("str").get(5) === List("ref1", "str1", "int")
-    Ns.a.not("str", "ref1").get(5) === List("str1", "int")
+    Ns.a(":ns/str").get === List(":ns/str")
+    Ns.a(":ns/str", ":ns/int").get === List(":ns/int", ":ns/str")
+    Ns.a.not(":ns/str").get(5) === List(":ns/int", ":ns/ref1", ":ref1/str1")
+    Ns.a.not(":ns/str", ":ns/ref1").get(5) === List(":ns/int", ":ref1/str1")
     Ns.int_.a(count).get === List(1)
 
     Ns.v(2).get === List(2)
@@ -357,17 +340,11 @@ class Datom extends CoreSpec {
 
   "Filters, tacit" >> {
 
-    Ns.int.ns_("ns").get === List(2, 5)
-    Ns.int.ns_("ns", "ref1").get === List(2, 5)
-    Ns.int.ns_.not("ns").get === Nil
-    Ns.int.ns_.not("ref1").get === List(2, 5)
-    Ns.int.ns_.not("ns", "ref1").get === Nil
-
-    Ns.int.a_("int").get === List(2, 5)
-    Ns.int.a_("str").get === Nil
-    Ns.int.a_("str", "int").get === List(2, 5)
-    Ns.int.a_.not("str").get === List(2, 5)
-    Ns.int.a_.not("str", "int").get === Nil
+    Ns.int.a_(":ns/int").get === List(2, 5)
+    Ns.int.a_(":ns/str").get === Nil
+    Ns.int.a_(":ns/str", ":ns/int").get === List(2, 5)
+    Ns.int.a_.not(":ns/str").get === List(2, 5)
+    Ns.int.a_.not(":ns/str", ":ns/int").get === Nil
 
     Ns.int.v_(2).get === List(2)
     // Value only relates to previous custom datom

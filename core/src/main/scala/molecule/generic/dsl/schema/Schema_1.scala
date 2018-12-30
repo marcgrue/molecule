@@ -11,11 +11,11 @@ trait Schema_1[A] extends Schema with OutSchema_1[Schema_1, A] {
   type Stay[Attr[_, _], Type] = Attr[Schema_1[A], P2[_,_]] with Schema_1[A]
   
   final lazy val id           : Next[id           , Long   ] = ???
-  final lazy val ident        : Next[ident        , String ] = ???
+  final lazy val a            : Next[a            , String ] = ???
   final lazy val part         : Next[part         , String ] = ???
   final lazy val nsFull       : Next[nsFull       , String ] = ???
   final lazy val ns           : Next[ns           , String ] = ???
-  final lazy val a            : Next[a            , String ] = ???
+  final lazy val attr         : Next[attr         , String ] = ???
   final lazy val tpe          : Next[tpe          , String ] = ???
   final lazy val card         : Next[card         , String ] = ???
   final lazy val doc          : Next[doc          , String ] = ???
@@ -37,11 +37,11 @@ trait Schema_1[A] extends Schema with OutSchema_1[Schema_1, A] {
   final lazy val noHistory$   : Next[noHistory$   , Option[Boolean]] = ???
 
   final lazy val id_          : Stay[id           , Long   ] = ???
-  final lazy val ident_       : Stay[ident        , String ] = ???
+  final lazy val a_           : Stay[a            , String ] = ???
   final lazy val part_        : Stay[part         , String ] = ???
   final lazy val nsFull_      : Stay[nsFull       , String ] = ???
   final lazy val ns_          : Stay[ns           , String ] = ???
-  final lazy val a_           : Stay[a            , String ] = ???
+  final lazy val attr_        : Stay[attr         , String ] = ???
   final lazy val tpe_         : Stay[tpe          , String ] = ???
   final lazy val card_        : Stay[card         , String ] = ???
   final lazy val doc_         : Stay[doc          , String ] = ???

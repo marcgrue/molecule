@@ -165,11 +165,11 @@ class Provenance extends MoleculeSpec {
     )
 
     // Entire attributes history of ElastiCache story _entity_
-    Story(elasticacheStory).ns.a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._5, r._4)) === List(
-      ("story", "title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
-      ("story", "url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
-      ("story", "title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
-      ("story", "title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
+    Story(elasticacheStory).a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._4, r._3)) === List(
+      (":story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
+      (":story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
+      (":story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
+      (":story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
     )
 
     // Stories with latest use case meta date

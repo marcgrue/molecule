@@ -64,28 +64,28 @@ class QueryTour extends MoleculeSpec {
 
     // Attributes of all entities having comments
     val commentIds = Parent.e.comment_.get
-    Parent(commentIds).ns.a.get.sorted === List(
-      ("comment", "author"),
-      ("comment", "text"),
-      ("parent", "comment"),
-      ("story", "title"),
-      ("story", "url")
+    Parent(commentIds).a.get.sorted === List(
+      ":comment/author",
+      ":comment/text",
+      ":parent/comment",
+      ":story/title",
+      ":story/url"
     )
 
     // Attributes of stories having comments
     val storiesWithComments = m(Story.e.title_ + Parent.comment_).get
-    Story(storiesWithComments).ns.a.get === List(
-      ("story", "title"),
-      ("parent", "comment"),
-      ("story", "url")
+    Story(storiesWithComments).a.get === List(
+      ":parent/comment",
+      ":story/title",
+      ":story/url"
     )
 
     // Attributes of comments having a sub-comment
     val commentsWithSubComments = m(Comment.e.text_ + Parent.comment_).get
-    Comment(commentsWithSubComments).ns.a.get.sorted === List(
-      ("comment", "author"),
-      ("comment", "text"),
-      ("parent", "comment"),
+    Comment(commentsWithSubComments).a.get.sorted === List(
+      ":comment/author",
+      ":comment/text",
+      ":parent/comment"
     )
   }
 

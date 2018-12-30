@@ -88,17 +88,17 @@ class Aggregates extends MoleculeSpec {
 
     // What is the average length of a schema name?
     val attrs = Schema.a.get
-    attrs.map(_.length).sum / attrs.size === 6
+    attrs.map(_.length).sum / attrs.size === 12
 
     // How many attributes does this schema use?
-    Schema.ident.get.sorted === List(
+    Schema.a.get.sorted === List(
       ":data/source",
       ":monster/heads",
       ":monster/name",
       ":obj/meanRadius",
       ":obj/name"
     )
-    Schema.ident(count).get.head === 5
+    Schema.a(count).get.head === 5
 
     // How many (Datomic) types does this schema use?
     Schema.tpe.get === List(

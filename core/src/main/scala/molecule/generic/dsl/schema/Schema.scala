@@ -15,11 +15,11 @@ trait GenericSchema {
 
 trait Schema extends GenericNs {
   final class id           [Ns, In] extends OneLong   [Ns, In] with Indexed
-  final class ident        [Ns, In] extends OneString [Ns, In] with Indexed
+  final class a            [Ns, In] extends OneString [Ns, In] with Indexed
   final class part         [Ns, In] extends OneString [Ns, In] with Indexed
   final class ns           [Ns, In] extends OneString [Ns, In] with Indexed
   final class nsFull       [Ns, In] extends OneString [Ns, In] with Indexed
-  final class a            [Ns, In] extends OneString [Ns, In] with Indexed
+  final class attr         [Ns, In] extends OneString [Ns, In] with Indexed
   final class tpe          [Ns, In] extends OneString [Ns, In] with Indexed
   final class card         [Ns, In] extends OneString [Ns, In] with Indexed
   final class doc          [Ns, In] extends OneString [Ns, In] with Indexed with Fulltext[Ns, In]
