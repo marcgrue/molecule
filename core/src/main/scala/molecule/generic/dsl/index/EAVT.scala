@@ -10,10 +10,10 @@ import scala.language.higherKinds
 
 trait GenericEAVT {
   object EAVT extends EAVT_0 with FirstNS {
-    final def apply(e: Long): EAVT_0 = ???
-    final def apply(e: Long, a: String): EAVT_0 = ???
-    final def apply(e: Long, a: String, v: Any): EAVT_0 = ???
-    final def apply(e: Long, a: String, v: Any, t: Long): EAVT_0 = ???
+    final def apply(e: Long)                                    : EAVT_0 = ???
+    final def apply(e: Long, a: String)                         : EAVT_0 = ???
+    final def apply(e: Long, a: String, v: Any)                 : EAVT_0 = ???
+    final def apply(e: Long, a: String, v: Any, t: Long)        : EAVT_0 = ???
     final def apply(e: Long, a: String, v: Any, txInstant: Date): EAVT_0 = ???
   }
 }

@@ -15,6 +15,10 @@ class Datom extends CoreSpec {
   // Create new db from schema
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
+  // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
+  // the wall clock time since Date's are a bit unreliable for precision.
+
+
   // First entity
 
   val txR1 = Ns.str("a").int(1).save

@@ -10,10 +10,10 @@ import scala.language.higherKinds
 
 trait GenericLog {
   object Log extends Log_0 with FirstNS {
-    final def apply(e: Long): Log_0 = ???
-    final def apply(e: Long, a: String): Log_0 = ???
-    final def apply(e: Long, a: String, v: Any): Log_0 = ???
-    final def apply(e: Long, a: String, v: Any, t: Long): Log_0 = ???
+    final def apply(e: Long)                                    : Log_0 = ???
+    final def apply(e: Long, a: String)                         : Log_0 = ???
+    final def apply(e: Long, a: String, v: Any)                 : Log_0 = ???
+    final def apply(e: Long, a: String, v: Any, t: Long)        : Log_0 = ???  // or tx: Long
     final def apply(e: Long, a: String, v: Any, txInstant: Date): Log_0 = ???
   }
 }

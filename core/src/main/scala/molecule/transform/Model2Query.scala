@@ -3,7 +3,7 @@ package transform
 import molecule.ast.model._
 import molecule.ast.query._
 import molecule.ops.QueryOps._
-import molecule.transform.exception.{Dsl2ModelException, Model2QueryException}
+import molecule.transform.exception.Model2QueryException
 import molecule.util.{Debug, Helpers}
 
 
@@ -53,6 +53,9 @@ object Model2Query extends Helpers {
       (query2, Some(query2.copy(f = Find(nestedEntityVars ++ query2.f.outputs), wh = Where(query2.wh.clauses ++ nestedEntityClauses))))
     }
   }
+
+
+  // Make =======================================================================================================
 
   def make(model: Model, query: Query, element: Element, e: String, v: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
@@ -138,20 +141,11 @@ object Model2Query extends Helpers {
   }
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
-  : (Query, String, String, String, String, String) = meta match {
-    case Meta("?", attr, _, _) if prevRefNs.nonEmpty       => (resolve(query, v, w, meta), v, y, "?", attr, "")
-    case Meta("?", attr, _, _)                             => (resolve(query, e, v, meta), e, v, "?", attr, "")
-    case Meta("schema", attr, _, _)                        => (resolve(query, e, v, meta), e, v, "schema", attr, "")
-    case Meta(ns, attr, "e", Eq(Seq(Qm)))                  => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", Eq(eids))                     => (resolve(query, e, v, meta), e, v, ns, attr, prevRefNs)
-    case Meta(ns, attr, "e", IndexVal) if prevRefNs == ""  => (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", IndexVal)                     => (resolve(query, v, w, meta), v, y, ns, attr, "IndexVal")
-    case Meta(ns, attr, "r", IndexVal)                     => (resolve(query, w, v, meta), e, w, ns, attr, "IndexVal")
-    case Meta(ns, attr, "e", _) if prevRefNs == ""         => (resolve(query, e, v, meta), e, w, ns, attr, "")
-    case Meta(ns, attr, "e", _) if prevRefNs == "IndexVal" => (resolve(query, e, y, meta), e, y, ns, attr, "")
-    case Meta(ns, attr, "e", EntValue)                     => (resolve(query, v, w, meta), v, w, ns, attr, "")
-    case Meta(ns, attr, _, _) if prevRefNs.nonEmpty        => (resolve(query, e, v, meta), v, w, ns, attr, prevNs)
-    case Meta(ns, attr, _, _)                              => (resolve(query, e, v, meta), e, v, ns, attr, "")
+  : (Query, String, String, String, String, String) = if (prevRefNs.nonEmpty){
+    // Advance variable letters to next namespace
+    (resolve(query, v, w, meta), v, y, meta.ns, meta.attr, "")
+  } else{
+    (resolve(query, e, v, meta), e, v, meta.ns, meta.attr, "")
   }
 
   def makeTxMetaData(model: Model, query0: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
@@ -206,6 +200,9 @@ object Model2Query extends Helpers {
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }
 
+
+  // Resolve =======================================================================================================
+
   def resolve(q: Query, e: String, v: String, element: Element): Query = {
     val (v1: String, v2: String, v3: String) = (v + 1, v + 2, v + 3)
     element match {
@@ -224,11 +221,11 @@ object Model2Query extends Helpers {
       case Atom(_, _, _, _, AssertValue(_) | ReplaceValue(_) | RetractValue(_) | AssertMapPairs(_) | ReplaceMapPairs(_) | RetractMapKeys(_), _, _, _) => q
 
       // Enum
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional2(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveAtomEnumOptional1(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveAtomEnumTacit(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveAtomEnumMandatory2(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveAtomEnumMandatory1(q, e, a, v, v1, v2, v3, prefix)
+      case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveEnumOptional2(q, e, a, v, v1, v2, prefix)
+      case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveEnumOptional1(q, e, a, v, v1, v2, prefix)
+      case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveEnumTacit(q, e, a, v, v1, v2, v3, prefix)
+      case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveEnumMandatory2(q, e, a, v, v1, v2, v3, prefix)
+      case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveEnumMandatory1(q, e, a, v, v1, v2, v3, prefix)
 
       // Atom
       case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v)
@@ -250,21 +247,15 @@ object Model2Query extends Helpers {
   }
 
 
-  def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta match {
-    case Meta("?", _, _, _)                                   => resolveGenericMeta(q, e, meta, v, v1, v2, v3)
-    case Meta("schema", _, _, _)                              => resolveSchemaMeta(q, meta)
-    case Meta(_, _, "e", Fn("count", _))                      => q.find("count", Nil, e)
-    case Meta(ns, attr, "e", Eq(Seq(Qm))) if attr.last == '_' => q.in(e, ns, attr, e)
-    case Meta(_, _, "e", Eq(Seq(Qm)))                         => q.find(e).in(e)
-    case Meta(_, attr, "e", Eq(eids)) if attr.last == '_'     => q.in(eids, e)
-    case Meta(_, _, "e", Eq(eids))                            => q.find(e).in(eids, e)
-    case Meta(_, _, "r", IndexVal)                            => q.find(v).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, IndexVal)                              => q.find(v).func(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var(v)))
-    case Meta(_, _, _, _)                                     => q
+  def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.ns match {
+    case "schema" => resolveSchema(q, meta)
+    case _        => resolveGeneric(q, e, meta, v, v1, v2, v3)
   }
 
 
-  def resolveSchemaMeta(q: Query, meta: Meta): Query = meta.attr match {
+  // Schema ....................................................................................
+
+  def resolveSchema(q: Query, meta: Meta): Query = meta.attr match {
     case "id"          => resolveSchemaMandatory(meta, q.schema)
     case "a"           => resolveSchemaMandatory(meta, q.schemaA)
     case "part"        => resolveSchemaMandatory(meta, q.schema)
@@ -352,7 +343,9 @@ object Model2Query extends Helpers {
   }
 
 
-  def resolveGenericMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
+  // Generic ....................................................................................
+
+  def resolveGeneric(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
     case "e"         =>
       val q1 = q.genericE(e, v, v1, _model.elements.size == 1)
       val w = if (q1.wh.clauses.exists {
@@ -409,11 +402,18 @@ object Model2Query extends Helpers {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr.init // skip underscore at end
     meta.value match {
       case NoValue | EntValue => q
+      case Eq(Seq(Qm))        =>
+        val q1 = q.in(v, meta.ns, meta.attr, e)
+
+        q1
       case Eq(args)           => q.in(args, v)
       case Neq(args)          => q.compareToMany2("!=", v, args)
       case other              => throw new Model2QueryException("Unexpected value: " + other)
     }
   }
+
+
+  // Map ....................................................................................
 
   def resolveAtomKeyedMapOptional(q: Query, e: String, a0: Atom): Query = {
     val a = a0.copy(name = a0.name.slice(0, a0.name.length - 2))
@@ -629,7 +629,9 @@ object Model2Query extends Helpers {
   }
 
 
-  def resolveAtomEnumOptional2(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
+  // Enum ....................................................................................
+
+  def resolveEnumOptional2(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
     val a = a0.copy(name = a0.name.init)
     val gs = a.gs
     a.value match {
@@ -640,7 +642,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomEnumOptional1(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
+  def resolveEnumOptional1(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
     val a = a0.copy(name = a0.name.init)
     val gs = a.gs
     a.value match {
@@ -652,7 +654,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomEnumTacit(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumTacit(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val a = a0.copy(name = a0.name.init)
     val gs = a.gs
     a.value match {
@@ -680,7 +682,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
       case Qm                                          => q.findD(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
@@ -710,7 +712,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val (gs, t) = (a.gs, a.tpeS)
     a.value match {
       case Qm                                      => q.find(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
@@ -734,6 +736,10 @@ object Model2Query extends Helpers {
       case other                                   => abort(s"Unresolved cardinality-one enum Atom:\nAtom   : $a\nElement: $other")
     }
   }
+
+
+  // Atom ....................................................................................
+
   def resolveAtomOptional2(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(name = a0.name.init)
     val (gs, t) = (a.gs, a.tpeS)
@@ -864,6 +870,7 @@ object Model2Query extends Helpers {
       case other                                   => abort(s"Unresolved cardinality-one Atom:\nAtom   : $a\nElement: $other")
     }
   }
+
 
   def coalesce(fn: String): Boolean = Seq("sum", "count", "count-distinct", "median", "avg", "variance", "stddev").contains(fn)
 

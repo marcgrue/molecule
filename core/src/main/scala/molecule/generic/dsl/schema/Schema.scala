@@ -7,10 +7,7 @@ import scala.language.higherKinds
 
 
 trait GenericSchema {
-  object Schema extends Schema_0 with FirstNS {
-    final override def apply(eid: Long, eids: Long*): Schema_0 = ???
-    final override def apply(eids: Iterable[Long]): Schema_0 = ???
-  }
+  object Schema extends Schema_0 with FirstNS
 }
 
 trait Schema extends GenericNs {

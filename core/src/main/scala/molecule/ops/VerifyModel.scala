@@ -62,19 +62,19 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   // Avoid mixing insert/update style
   private def unexpectedAppliedId: Element = model.elements.head match {
     case Meta(_, _, "e", Eq(List(eid)))  => err("unexpectedAppliedId",
-        s"""Applying an eid is only allowed for updates.""")
+      s"""Applying an eid is only allowed for updates.""")
     case Meta(_, _, "ns", Eq(List(eid))) => err("unexpectedAppliedId",
-        s"""Applying an eid is only allowed for updates.""")
-    case ok                                        => ok
+      s"""Applying an eid is only allowed for updates.""")
+    case ok                              => ok
   }
   private def missingAppliedId: Boolean = model.elements.head match {
     case Meta(_, _, "e", Eq(List(eid))) =>
       true
-    case Meta(_, _, "e", Eq(eids))     => true
-    case Composite(elements) => elements.head match {
-      case Meta(_, _, "e", Eq(eids))     => true
+    case Meta(_, _, "e", Eq(eids))      => true
+    case Composite(elements)            => elements.head match {
+      case Meta(_, _, "e", Eq(eids)) => true
     }
-    case Atom(ns, _, _, _, _, _, _, _)          => err("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
+    case Atom(ns, _, _, _, _, _, _, _)  => err("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
   }
   private def onlyAtomsWithValue = model.elements.foreach {
     case a: Atom => a.value match {
@@ -115,10 +115,10 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   private def missingAttrInStartEnd {
     model.elements.foldLeft(Seq[Element]()) {
       case (attrs, e) => e match {
-        case a: Atom if a.name.last != '$'        => attrs :+ a
-        case m@Meta(_, _, "e", EntValue) => attrs :+ m
-        case b: Bond if attrs.isEmpty             => err("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
-        case _                                    => attrs
+        case a: Atom if a.name.last != '$' => attrs :+ a
+        case m@Meta(_, _, "e", EntValue)   => attrs :+ m
+        case b: Bond if attrs.isEmpty      => err("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
+        case _                             => attrs
       }
     }
     def missingAttrInEnd(elements: Seq[Element]): Seq[Element] = elements.foldRight(Seq[Element]()) {
@@ -241,8 +241,8 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     }
 
     model.elements.head match {
-      case Meta(ns, "eid_", "e", Eq(List(eid))) => // BiEdge
-      case checkNext                               =>
+      case Meta(ns, "e_", "e", Eq(List(eid))) => // BiEdge
+      case checkNext                          =>
         //        missingBase(model.elements)
         missingTarget(model.elements)
     }
