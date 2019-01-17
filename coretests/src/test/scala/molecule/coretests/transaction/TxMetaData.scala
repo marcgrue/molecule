@@ -364,21 +364,15 @@ class TxMetaData extends CoreSpec {
 
   "1 entity" in new CoreSetup {
 
-    val e = Ns.int(1).Tx(Ns.str("a")).save.eid
+    val e = Ns.int(1).save.eid
 
     // Retract entity with tx meta data
-    e.Tx(Ns.str("b")).retract
+    e.Tx(Ns.str("meta")).retract
 
-    Ns(e).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
-      (1, 1028, true), // 1 asserted (save)
-      (1, 1030, false) // 1 retracted (delete)
-    )
-
-    Ns(e).int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._3)) === List(
-      (1, 1028, true, "a"),
-
-      // 1 was retracted with tx meta data "b"
-      (1, 1030, false, "b")
+    // What was retracted and with what tx meta data
+    Ns.e.int.t.op.Tx(Ns.str).getHistory === List(
+      // 1 was retracted with tx meta data "meta"
+      (e, 1, 1030, false, "meta")
     )
   }
 

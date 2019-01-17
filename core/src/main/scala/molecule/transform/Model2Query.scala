@@ -141,10 +141,10 @@ object Model2Query extends Helpers {
   }
 
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
-  : (Query, String, String, String, String, String) = if (prevRefNs.nonEmpty){
+  : (Query, String, String, String, String, String) = if (prevRefNs.nonEmpty) {
     // Advance variable letters to next namespace
     (resolve(query, v, w, meta), v, y, meta.ns, meta.attr, "")
-  } else{
+  } else {
     (resolve(query, e, v, meta), e, v, meta.ns, meta.attr, "")
   }
 
@@ -249,7 +249,8 @@ object Model2Query extends Helpers {
 
   def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.ns match {
     case "schema" => resolveSchema(q, meta)
-    case _        => resolveGeneric(q, e, meta, v, v1, v2, v3)
+    case "?"      => resolveGeneric(q, e, meta, v, v1, v2, v3)
+    case _        => q
   }
 
 
@@ -298,23 +299,37 @@ object Model2Query extends Helpers {
     case optional  => resolveSchemaOptional(meta, q)
   }
 
-  def resolveSchemaMandatory(meta: Meta, q: Query): Query = meta.value match {
-    case NoValue                        => q.find(meta.attr)
-    case Eq(args)                       => q.find(meta.attr).in(args, meta.attr)
-    case Neq(args)                      => q.find(meta.attr).compareToMany2("!=", meta.attr, args)
-    case Fn("count", _)                 => q.find("count", Nil, meta.attr)
-    case Fulltext((arg: String) :: Nil) => q.find(meta.attr + "Value").schemaDocFulltext(arg)
-    case Fulltext(_)                    => abort("Fulltext search can only be performed with 1 search phrase.")
-    case other                          => abort(s"Unexpected value for mandatory schema attribute `${meta.attr}`: " + other)
+  def resolveSchemaMandatory(meta: Meta, q: Query): Query = {
+    val (v, tpe) = (meta.attr, meta.kind)
+    meta.value match {
+      case NoValue                        => q.find(v)
+      case Eq(args)                       => q.find(v).in(args, v)
+      case Neq(args)                      => q.find(v).compareToMany2("!=", v, args)
+      case Gt(arg)                        => q.find(v).compareTo2(">", tpe, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)                        => q.find(v).compareTo2(">=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)                        => q.find(v).compareTo2("<", tpe, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)                        => q.find(v).compareTo2("<=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Fn("count", _)                 => q.find("count", Nil, v)
+      case Fulltext((arg: String) :: Nil) => q.find(v + "Value").schemaDocFulltext(arg)
+      case Fulltext(_)                    => abort("Fulltext search can only be performed with 1 search phrase.")
+      case other                          => abort(s"Unexpected value for mandatory schema attribute `$v`: $other")
+    }
   }
 
-  def resolveSchemaTacit(meta: Meta, q: Query): Query = meta.value match {
-    case NoValue                        => q
-    case Eq(args)                       => q.in(args, meta.attr.init)
-    case Neq(args)                      => q.compareToMany2("!=", meta.attr.init, args)
-    case Fulltext((arg: String) :: Nil) => q.schemaDocFulltext(arg)
-    case Fulltext(_)                    => abort("Fulltext search can only be performed with 1 search phrase.")
-    case other                          => abort(s"Unexpected value for tacit schema attribute `${meta.attr}`: " + other)
+  def resolveSchemaTacit(meta: Meta, q: Query): Query = {
+    val (v, tpe) = (meta.attr.init, meta.kind)
+    meta.value match {
+      case NoValue                        => q
+      case Eq(args)                       => q.in(args, v)
+      case Neq(args)                      => q.compareToMany2("!=", v, args)
+      case Gt(arg)                        => q.compareTo2(">", tpe, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)                        => q.compareTo2(">=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)                        => q.compareTo2("<", tpe, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)                        => q.compareTo2("<=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Fulltext((arg: String) :: Nil) => q.schemaDocFulltext(arg)
+      case Fulltext(_)                    => abort("Fulltext search can only be performed with 1 search phrase.")
+      case other                          => abort(s"Unexpected value for tacit schema attribute `${meta.attr}`: $other")
+    }
   }
 
   def resolveSchemaOptional(meta: Meta, q: Query): Query = {
@@ -389,12 +404,17 @@ object Model2Query extends Helpers {
 
   def resolveGenericMandatory(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr
+//    val w =
     meta.value match {
       case NoValue | EntValue => q.find(v)
       case Eq(args)           => q.find(v).in(args, v)
       case Neq(args)          => q.find(v).compareToMany2("!=", v, args)
+      case Gt(arg)            => q.find(v).compareTo2(">", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)            => q.find(v).compareTo2(">=", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)            => q.find(v).compareTo2("<", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)            => q.find(v).compareTo2("<=", meta.kind, v, Val(arg), q.wh.clauses.length)
       case Fn("count", _)     => q.find("count", Nil, v)
-      case other              => throw new Model2QueryException("Unexpected value: " + other)
+      case other              => abort("Unexpected value: " + other)
     }
   }
 
@@ -402,13 +422,14 @@ object Model2Query extends Helpers {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr.init // skip underscore at end
     meta.value match {
       case NoValue | EntValue => q
-      case Eq(Seq(Qm))        =>
-        val q1 = q.in(v, meta.ns, meta.attr, e)
-
-        q1
+      case Eq(Seq(Qm))        => q.in(v, meta.ns, meta.attr, e)
       case Eq(args)           => q.in(args, v)
       case Neq(args)          => q.compareToMany2("!=", v, args)
-      case other              => throw new Model2QueryException("Unexpected value: " + other)
+      case Gt(arg)            => q.compareTo2(">", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)            => q.compareTo2(">=", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)            => q.compareTo2("<", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)            => q.compareTo2("<=", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case other              => abort("Unexpected value: " + other)
     }
   }
 

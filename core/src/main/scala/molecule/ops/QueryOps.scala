@@ -236,6 +236,8 @@ object QueryOps extends Helpers {
     def genericA(e: String, v: String, v1: String): Query = {
       var nss = false
       q.wh.clauses.reverse.collectFirst {
+        case Funct("str", Seq(Var(`v1`)), _) =>
+          q
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
           q.func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         =>
@@ -385,8 +387,10 @@ object QueryOps extends Helpers {
           q1.compareTo(op, a, v, Val(arg), i + 1)
       }
 
-    def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = {
-      val tpeS = a.tpeS
+    def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query =
+      compareTo2(op, a.tpeS, v, qv, i)
+
+    def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = Var(if (i > 0) v + "_" + i else v + 2)
       val q1 = tpeS match {
         case "BigInt"       => q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
@@ -398,7 +402,6 @@ object QueryOps extends Helpers {
           case other    =>
             q.func(".compareTo ^" + castStr(tpeS), Seq(Var(v), qv), ScalarBinding(w))
         }
-        case "ns" | "a"     => q.func(".compareTo ^String", Seq(Var(v), qv), ScalarBinding(w))
         case _              => q.func(".compareTo ^" + castStr(tpeS), Seq(Var(v), qv), ScalarBinding(w))
       }
       q1.func(op, Seq(w, Val(0)))

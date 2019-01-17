@@ -49,7 +49,7 @@ trait EntityOps {
     *   )
     * }}}
     * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/manipulation/Retract.scala#L1 Test]]
+    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
@@ -93,7 +93,7 @@ trait EntityOps {
     *   )
     * }}}
     * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/manipulation/Retract.scala#L1 Test]]
+    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
@@ -162,18 +162,19 @@ trait EntityOps {
       Model(Nil)
     } else if (txMetaDataMolecules.size == 1) {
       val txMetaDataModel = Model(Seq(TxMetaData(txMetaDataMolecules.head._model.elements)))
+      VerifyModel(txMetaDataModel, "save")
       txMetaDataModel
     } else {
       val txMetaDataModel = Model(
         txMetaDataMolecules.map(m => TxMetaData(m._model.elements))
       )
+      VerifyModel(txMetaDataModel, "save")
       txMetaDataModel
     }
 
     val transformer = Model2Transaction(conn, txMetaDataModel)
 
     val stmts = try {
-      VerifyModel(txMetaDataModel, "save")
       Seq(retractStmts ++ transformer.saveStmts())
     } catch {
       case e: Throwable =>

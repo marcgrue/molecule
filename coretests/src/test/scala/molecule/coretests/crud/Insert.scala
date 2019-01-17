@@ -15,26 +15,26 @@ class Insert extends CoreSpec {
 
   "Async insert" in new CoreSetup {
 
-// Insert single row of data with individual args
-val singleInsertFuture: Future[TxReport] = Ns.str.int.insertAsync("Ann", 28)
+    // Insert single row of data with individual args
+    val singleInsertFuture: Future[TxReport] = Ns.str.int.insertAsync("Ann", 28)
 
-// Insert Iterable of multiple rows of data
-val multipleInsertFuture: Future[TxReport] = Ns.str.int insertAsync List(
-  ("Ben", 42),
-  ("Liz", 37))
+    // Insert Iterable of multiple rows of data
+    val multipleInsertFuture: Future[TxReport] = Ns.str.int insertAsync List(
+      ("Ben", 42),
+      ("Liz", 37))
 
-for {
-  _ <- singleInsertFuture
-  _ <- multipleInsertFuture
-  result <- Ns.str.int.getAsync
-} yield {
-  // Both inserts applied
-  result === List(
-    ("Ann", 28),
-    ("Ben", 42),
-    ("Liz", 37)
-  )
-}
+    for {
+      _ <- singleInsertFuture
+      _ <- multipleInsertFuture
+      result <- Ns.str.int.getAsync
+    } yield {
+      // Both inserts applied
+      result === List(
+        ("Ann", 28),
+        ("Ben", 42),
+        ("Liz", 37)
+      )
+    }
 
     // For brevity, the synchronous equivalent `insert` is used in the following tests
   }
@@ -460,7 +460,7 @@ for {
       // Like the classical order/products example
       // Note how our "sub-molecule" `Ref1.int.str` is regarded as
       // one type `Seq[(Int, String)]` by the outer molecule
-
+      m(Ns.str.Refs1 * Ref1.int1.str1).debugInsert("order", List((4, "product1"), (7, "product2")))
       val order = m(Ns.str.Refs1 * Ref1.int1.str1).insert("order", List((4, "product1"), (7, "product2"))).eid
       order.touch === Map(
         ":db/id" -> 17592186045449L,

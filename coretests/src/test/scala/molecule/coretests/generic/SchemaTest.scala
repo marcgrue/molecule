@@ -29,6 +29,13 @@ class SchemaTest extends CoreSpec {
       Schema.part.not("gen").get === List("lit")
       Schema.part.not("gen", "lit").get === Nil
 
+      // All Schema attributes can be compared. But maybe not that useful,
+      // so this is only tested here:
+      Schema.part.>("gen").get === List("lit")
+      Schema.part.>=("gen").get === List("lit", "gen")
+      Schema.part.<=("gen").get === List("gen")
+      Schema.part.<("gen").get === Nil
+
       Schema.part(count).get === List(2)
 
 
@@ -742,9 +749,8 @@ class SchemaTest extends CoreSpec {
     // Schema transaction entity id
     Schema.tx.get === List(13194139534313L)
 
-    // todo
-    // Schema transaction wall clock time (compare Schema tx Date with Log tx Date)
-    //        val txInstant = Log.t(1001).txInstant.get
-    //        Schema.txInstant.get === List(txInstant)
+    // Get tx wall clock time from Log for comparison with time from Schema query
+    val txInstant = Log(Some(1001), Some(1002)).txInstant.get.head
+    Schema.txInstant.get === List(txInstant)
   }
 }

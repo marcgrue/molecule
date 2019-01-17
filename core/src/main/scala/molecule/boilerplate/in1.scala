@@ -2,7 +2,8 @@ package molecule.boilerplate
 import molecule.boilerplate.base._
 import molecule.composition.CompositeInit_In_1._
 import molecule.expression.AggregateKeywords._
-import molecule.generic.dsl.datom._
+import molecule.generic.datom._
+import molecule.generic.datom._
 import scala.language.higherKinds
 
 

@@ -3,7 +3,8 @@ import molecule.expression.AggregateKeywords._
 import molecule.boilerplate.base._
 import molecule.composition.CompositeInit._
 import molecule.composition.Tx._
-import molecule.generic.dsl.datom._
+import molecule.generic.datom._
+import molecule.generic.datom._
 import scala.language.higherKinds
 
 

@@ -56,6 +56,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case s: HashSet[_] => q"Set(..${s map any})"
       case emptySet      => q"Set()"
     }
+    case q"scala.None"                 => q"None"
     case null                          => q"null"
     case other                         =>
       abort("Can't lift unexpected Any type: " + other.getClass +

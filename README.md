@@ -80,7 +80,7 @@ sbt.version=1.1.6
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.7.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.7.1")
 ```
 
 `build.sbt`:
@@ -95,13 +95,13 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.16.1",
+      "org.scalamolecule" %% "molecule" % "0.17.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.16.1 for Scala 2.12.7 is available at
+Molecule 0.17.0 for Scala 2.12.8 is available at
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.12/).
 
 
@@ -109,11 +109,7 @@ Molecule 0.16.1 for Scala 2.12.7 is available at
 Marc Grue
 
 #### Credits/inspiration/acknowledgements
-- [Rogue](https://github.com/foursquare/rogue), type-safe Scala DSL for MongoDB
 - [Datomisca](https://github.com/pellucidanalytics/datomisca), a Scala API for Datomic
-- [SqlTyped](https://github.com/jonifreeman/sqltyped), Embedding SQL as an external DSL into Scala
-- [JScala](https://github.com/nau/jscala), Scala macro that produces JavaScript from Scala code
-- [Parboiled2](https://github.com/sirthias/parboiled2), A macro-based PEG parser generator for Scala
 
 #### License
 Molecule is licensed under the [Apache License 2.0](http://en.wikipedia.org/wiki/Apache_license)

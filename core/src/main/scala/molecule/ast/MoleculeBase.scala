@@ -10,8 +10,9 @@ trait MoleculeBase {
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
     * Custom DSL molecule --> Model --> Query --> Datomic query string
+    *
     * @group internal
-    * */
+    **/
   val _model: Model
 
   /** Internal [[molecule.ast.query.Query Query]] representation of molecule.
@@ -19,8 +20,9 @@ trait MoleculeBase {
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
     * Custom DSL molecule --> Model --> Query --> Datomic query string
+    *
     * @group internal
-    * */
+    **/
   val _query: Query
 
   /** Internal optional [[molecule.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
@@ -28,7 +30,8 @@ trait MoleculeBase {
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
     * Custom DSL molecule --> Model --> Query --> Datomic query string
+    *
     * @group internal
-    * */
+    **/
   val _nestedQuery: Option[Query]
 }

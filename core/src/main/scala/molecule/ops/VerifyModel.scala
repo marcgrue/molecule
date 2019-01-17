@@ -5,6 +5,8 @@ import molecule.ops.exception.VerifyModelException
 
 private[molecule] case class VerifyModel(model: Model, op: String) {
 
+  val datomGenerics = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
+
   // Perform verifications upon instantiation
   op match {
     case "save"   => verifySave()
@@ -61,18 +63,16 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   // Avoid mixing insert/update style
   private def unexpectedAppliedId: Element = model.elements.head match {
-    case Meta(_, _, "e", Eq(List(eid)))  => err("unexpectedAppliedId",
-      s"""Applying an eid is only allowed for updates.""")
-    case Meta(_, _, "ns", Eq(List(eid))) => err("unexpectedAppliedId",
+    case Meta(_, "e" | "e_", _, Eq(List(eid)))  => err("unexpectedAppliedId",
       s"""Applying an eid is only allowed for updates.""")
     case ok                              => ok
   }
   private def missingAppliedId: Boolean = model.elements.head match {
-    case Meta(_, _, "e", Eq(List(eid))) =>
+    case Meta(_, "e" | "e_", _, Eq(List(eid))) =>
       true
-    case Meta(_, _, "e", Eq(eids))      => true
+    case Meta(_, "e" | "e_", _, Eq(eids))      => true
     case Composite(elements)            => elements.head match {
-      case Meta(_, _, "e", Eq(eids)) => true
+      case Meta(_, "e" | "e_", _, Eq(eids)) => true
     }
     case Atom(ns, _, _, _, _, _, _, _)  => err("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
   }
@@ -88,7 +88,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   }
 
   private def noGenericsInTail: Option[Nothing] = model.elements.tail.collectFirst {
-    case Meta(_, _, "e", Eq(List(eid))) => err("noGenerics",
+    case Meta(_, attr, _, Eq(List(eid))) if datomGenerics.contains(attr) => err("noGenerics",
       s"Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in $op molecules. Found `e($eid)`")
   }
@@ -116,7 +116,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     model.elements.foldLeft(Seq[Element]()) {
       case (attrs, e) => e match {
         case a: Atom if a.name.last != '$' => attrs :+ a
-        case m@Meta(_, _, "e", EntValue)   => attrs :+ m
+        case m@Meta(_, "e" | "e_", _, EntValue)   => attrs :+ m
         case b: Bond if attrs.isEmpty      => err("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
         case _                             => attrs
       }
@@ -133,8 +133,6 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   }
 
   private def noConflictingCardOneValues {
-    //    def abort(i: Int, ns: String, attr: String, values: Seq[Any]) =
-
     def catchConflictingCardOneValues(elements: Seq[Element]): Unit = elements.collectFirst {
       case Atom(ns, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => err("noConflictingCardOneValues",
         s"""Can't $op multiple values for cardinality-one attribute:

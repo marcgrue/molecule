@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 //import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99) {
+private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99, showBi: Boolean = false) {
 
   // Helpers ..........................................
 
@@ -29,16 +29,16 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
         val max = level >= maxLevel
         x match {
           case Add(e, a, stmts: Seq[_], bi) =>
-            val biStr = if (bi != NoValue) s"      <$bi>" else ""
-            indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + s"List($biStr\n" +
+            val biStr = if (showBi && bi != NoValue) s"      <$bi>" else ""
+            indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + s"List($biStr\n" +
               stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Add(e, a, v, bi)             =>
-            val biStr = if (bi != NoValue) bi else ""
-            indent + ":db/add" + padS(13, ":db/add") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
+            val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
+            indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + v + biStr
 
           case Retract(e, a, v, bi) =>
-            val biStr = if (bi != NoValue) bi else ""
-            indent + ":db/retract" + padS(13, ":db/retract") + e + padS(34, e.toString) + a + padS(30, a.toString) + v + padS(60, v.toString) + "   " + biStr
+            val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
+            indent + ":db/retract" + padS(10, ":db/retract") + e + padS(34, e.toString) + a + padS(20, a.toString) + v + biStr
           case RetractEntity(e)     =>
             indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
 
@@ -99,11 +99,11 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
       }
 
       println(
-        s"## $id ## $clazz \n========================================================================\n" +
+        s"## $id ## $clazz \n================================================================================================================\n" +
           params.toList.zipWithIndex.map {
             case (e, i) => traverse(e, 0, i + 1)
-          }.mkString("\n------------------------------------------------\n") +
-          s"\n========================================================================\n$stackTrace"
+          }.mkString("\n----------------------------------------------------------------------------------------------------------------\n") +
+          s"\n================================================================================================================\n$stackTrace"
       )
     }
   }

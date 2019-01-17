@@ -11,7 +11,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     //    "-Ystatistics",
     //    "-Ymacro-debug-lite",
     //    "-Xprint",
-//        "-Ymacro-debug-verbose",
+    //    "-Ymacro-debug-verbose",
     //    "-Yshow-trees-stringified",
     //    "-Yshow-trees"
     //    "-Yquasiquote-debug"
@@ -64,32 +64,31 @@ lazy val moleculeCore = project.in(file("core"))
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-coretests",
-    moleculeSchemas := Seq(
-      "molecule/coretests/bidirectionals",
-//      "molecule/coretests/generic",
-      "molecule/coretests/nested",
-      "molecule/coretests/schemaDef",
-      "molecule/coretests/util"
-    )
-  )
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-coretests",
+//    moleculeSchemas := Seq(
+//      "molecule/coretests/bidirectionals",
+//      "molecule/coretests/nested",
+//      "molecule/coretests/schemaDef",
+//      "molecule/coretests/util"
+//    )
+//  )
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
   .settings(Seq(autoAPIMappings := true))
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-examples",
-    moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/gremlin",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
-    )
-  )
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-examples",
+//    moleculeSchemas := Seq(
+//      "molecule/examples/dayOfDatomic",
+//      "molecule/examples/gremlin",
+//      "molecule/examples/mbrainz",
+//      "molecule/examples/seattle"
+//    )
+//  )
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -99,7 +98,7 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   publishArtifact in Test := false,
-  //  publishArtifact in (Compile, packageDoc) in ThisBuild := false, // create docs?
+  //  publishArtifact in (Compile, packageDoc) in ThisBuild := false, // suppress docs creation?
   scalacOptions in(Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value + "/src/main/scaladoc/rootdoc.txt"),
   pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),

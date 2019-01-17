@@ -2,7 +2,8 @@ package molecule.boilerplate
 import molecule.expression.AggregateKeywords._
 import molecule.boilerplate.base._
 import molecule.composition.CompositeInit_In_3._
-import molecule.generic.dsl.datom._
+import molecule.generic.datom._
+import molecule.generic.datom._
 import scala.language.higherKinds
 
 /** Type distribution to groups of functionality for input molecules expecting 3 inputs. */

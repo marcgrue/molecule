@@ -3,7 +3,6 @@ import java.io.FileReader
 import datomic._
 import molecule.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.generic._
 
 class SeattleTests extends SeattleSpec {
 

@@ -78,6 +78,7 @@ class Retract extends CoreSpec {
     Ns.int(count).get === List(3)
 
     retract(Seq(e1, e2))
+    debugRetract(Seq(e1, e2))
 
     Ns.int(count).get === List(1)
   }
@@ -88,6 +89,7 @@ class Retract extends CoreSpec {
 
     Ns.int(count).get === List(3)
 
+    debugRetract(Seq(e1, e2), Ref1.str1("Some tx info"))
     retract(Seq(e1, e2), Ref1.str1("Some tx info"))
 
     Ns.int(count).get === List(1)

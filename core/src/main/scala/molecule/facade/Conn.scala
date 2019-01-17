@@ -1,8 +1,11 @@
 package molecule.facade
 
+import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
-import datomic.{Database, Peer}
-import molecule.ast.model.Model
+import datomic.{Database, Datom, Peer}
+import datomic.Util._
+import datomic.Peer._
+import molecule.ast.model._
 import molecule.ast.query.{Query, QueryExpr}
 import molecule.ast.tempDb._
 import molecule.ast.transactionModel._
@@ -32,7 +35,7 @@ object Conn {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  **/
+  * */
 class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   // Temporary db for ad-hoc queries against time variation dbs
@@ -46,6 +49,9 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
   // In-memory fixed test db for integration testing of domain model
   // (takes precedence over live db)
   private var _testDb: Option[Database] = None
+
+  /** Flag to indicate if live database is used */
+  def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
   /** Manually apply a database to use.
     *
@@ -153,7 +159,33 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
   }
 
   /** Get current test/live db. Test db has preference. */
-  def db: Database = if (_testDb.isDefined) _testDb.get else datomicConn.db
+  def db: Database = if (_adhocDb.isDefined) {
+    val baseDb = _testDb.getOrElse(datomicConn.db)
+    val adhocDb = _adhocDb.get match {
+      case AsOf(TxLong(t))  =>
+        baseDb.asOf(t)
+      case AsOf(TxDate(d))  => baseDb.asOf(d)
+      case Since(TxLong(t)) => baseDb.since(t)
+      case Since(TxDate(d)) => baseDb.since(d)
+      case With(tx)         => {
+        val txReport = TxReport(baseDb.`with`(tx))
+        txReport.dbAfter.asOf(txReport.t)
+      }
+      case History          => baseDb.history()
+      case Using(db)        => db
+    }
+    // Void adhoc db
+    _adhocDb = None
+
+    // Return singleton adhoc db
+    adhocDb
+  } else if (_testDb.isDefined) {
+    // Test db
+    _testDb.get
+  } else {
+    // Live db
+    datomicConn.db
+  }
 
 
   private[molecule] def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
@@ -187,6 +219,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
       txReport
 
     } else {
+      // println("---------\n" + javaStmts)
       // Live transaction
       TxReport(datomicConn.transact(javaStmts).get, stmtss)
     }
@@ -332,7 +365,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
-    **/
+    * */
   def q(query: String, inputs: Any*): List[List[AnyRef]] = q(db, query, inputs.toSeq)
 
 
@@ -373,7 +406,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
-    **/
+    * */
   def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
     collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList.map(asScalaBufferConverter(_).asScala.toList)
 
@@ -406,7 +439,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] = qRaw(db, query, inputs)
 
 
@@ -418,7 +451,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *     ("Ben", 42),
     *   )
     *
-    *   // Start out easily with a Datomic query from debug output
+    *   // Get some Datomic query from debug output
     *   Ns.str.int.debugGet // shows datomic query...
     *
     *   // Paste Datomic query into `q` call and use some db value
@@ -443,52 +476,41 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] =
     blocking(Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*))
 
 
   /** Query Datomic with Model and Query to get raw Java data.
     * <br><br>
-    * Main query method that Molecule macros use.
+    * Will transparently relegate query depending on Model to:
     *
-    * @param m [[molecule.ast.model.Model Model]] instance
-    * @param q [[molecule.ast.query.Query Query]] instance
+    * - Datalog query execution
+    * - Datoms API accessing index
+    * - Log API accessing log
+    *
+    * Return type (tuple matching the molecule) is the same for all 3 APIs so that
+    * application code can query and access data of all molecules the same way.
+    *
+    * @param model [[molecule.ast.model.Model Model]] instance
+    * @param query [[molecule.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
     **/
-  def query(m: Model, q: Query): jCollection[jList[AnyRef]] = {
-    val p = (expr: QueryExpr) => Query2String(q).p(expr)
-    val rules = "[" + (q.i.rules map p mkString " ") + "]"
-    val dbUsed = if (_adhocDb.isDefined) {
-      val baseDb = _testDb.getOrElse(datomicConn.db)
-      val adhocDb = _adhocDb.get match {
-        case AsOf(TxLong(t))  => baseDb.asOf(t)
-        case AsOf(TxDate(d))  => baseDb.asOf(d)
-        case Since(TxLong(t)) => baseDb.since(t)
-        case Since(TxDate(d)) => baseDb.since(d)
-        case With(tx)         => {
-          val txReport = TxReport(baseDb.`with`(tx))
-          txReport.dbAfter.asOf(txReport.t)
-        }
-        case History          => baseDb.history()
-        case Using(db)        => db
-      }
-      // Void adhoc db
-      _adhocDb = None
-      adhocDb
-    } else if (_testDb.isDefined) {
-      // Test db
-      _testDb.get
-    } else {
-      // Live db
-      datomicConn.db
-    }
+  def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
+    case Meta("log" | "eavt" | "aevt" | "avet" | "vaet", _, _, _) => _index(model)
+    case _                                                        => _query(model, query)
+  }
 
-    val first = if (q.i.rules.isEmpty) Seq(dbUsed) else Seq(dbUsed, rules)
-    val allInputs: Seq[AnyRef] = first ++ QueryOps(q).inputs
+  // Datalog query execution
+  private[molecule] def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]] = {
+    val p = (expr: QueryExpr) => Query2String(query).p(expr)
+    val rules = "[" + (query.i.rules map p mkString " ") + "]"
+    val adhocDb = _db.getOrElse(db)
+    val first = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
+    val allInputs: Seq[AnyRef] = first ++ QueryOps(query).inputs
     try {
       blocking {
-        Peer.q(q.toMap, allInputs: _*)
+        Peer.q(query.toMap, allInputs: _*)
       }
     } catch {
       case ex: Throwable if ex.getMessage startsWith "processing" =>
@@ -498,9 +520,181 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
           builder += e.getMessage
           e = e.getCause
         }
-        throw new QueryException(e, m, q, allInputs, p, builder.result)
+        throw new QueryException(e, model, query, allInputs, p, builder.result)
       case NonFatal(ex)                                           =>
-        throw new QueryException(ex, m, q, allInputs, p)
+        throw new QueryException(ex, model, query, allInputs, p)
     }
+  }
+
+  // Datoms API providing direct access to indexes
+  private[molecule] def _index(model: Model): jCollection[jList[AnyRef]] = {
+    val (api, index, args) = model.elements.head match {
+      case Meta("eavt", _, _, value) =>
+        ("datoms", datomic.Database.EAVT, value match {
+          case Eq(Seq(e))                => Seq(e.asInstanceOf[Object])
+          case Eq(Seq(e, a))             => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object])
+          case Eq(Seq(e, a, v))          => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
+          case Eq(Seq(e, a, v, d: Date)) => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object], d.asInstanceOf[Object])
+          case Eq(Seq(e, a, v, t))       => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
+        })
+
+      case Meta("aevt", _, _, value) =>
+        ("datoms", datomic.Database.AEVT, value match {
+          case Eq(Seq(a))                => Seq(a.asInstanceOf[Object])
+          case Eq(Seq(a, e))             => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object])
+          case Eq(Seq(a, e, v))          => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object])
+          case Eq(Seq(a, e, v, d: Date)) => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object], d.asInstanceOf[Object])
+          case Eq(Seq(a, e, v, t))       => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
+        })
+
+      case Meta("avet", attr, _, value) =>
+        attr match {
+          case "range" =>
+            ("indexRange", datomic.Database.AVET, value match {
+              case Eq(Seq(a, None, None))  => throw new MoleculeException(
+                "Molecule not allowing returning from start to end (the whole database!).\n" +
+                  "If you need this, please use raw Datomic access:\n" +
+                  "`conn.db.datoms(datomic.Database.AVET)`")
+              case Eq(Seq(a, from, None))  => Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], null)
+              case Eq(Seq(a, None, until)) => Seq(a.asInstanceOf[Object], null, until.asInstanceOf[Object])
+              case Eq(Seq(a, from, until)) =>
+                if (from.getClass != until.getClass)
+                  throw new MoleculeException("Please supply range arguments of same type as attribute.")
+                Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], until.asInstanceOf[Object])
+            })
+          case _       =>
+            ("datoms", datomic.Database.AVET, value match {
+              case Eq(Seq(a))                => Seq(a.asInstanceOf[Object])
+              case Eq(Seq(a, v))             => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object])
+              case Eq(Seq(a, v, e))          => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object])
+              case Eq(Seq(a, v, e, d: Date)) => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object], d.asInstanceOf[Object])
+              case Eq(Seq(a, v, e, t))       => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object], t.asInstanceOf[Object])
+            })
+        }
+
+      case Meta("vaet", attr, _, value) =>
+        ("datoms", datomic.Database.VAET, value match {
+          case Eq(Seq(v))                => Seq(v.asInstanceOf[Object])
+          case Eq(Seq(v, a))             => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object])
+          case Eq(Seq(v, a, e))          => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object])
+          case Eq(Seq(v, a, e, d: Date)) => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object], d.asInstanceOf[Object])
+          case Eq(Seq(v, a, e, t))       => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object], t.asInstanceOf[Object])
+        })
+
+      case Meta("log", _, _, value) =>
+        ("txRange", datomic.Database.VAET, value match {
+          case Eq(Seq(from: Int, until: Int))   => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Int, until: Long))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Int, until: Date))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Long, until: Int))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Long, until: Long)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Long, until: Date)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Date, until: Int))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Date, until: Long)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Date, until: Date)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+
+          case Eq(Seq(from: Int, None))  => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Long, None)) => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Date, None)) => Seq(from.asInstanceOf[Object], null)
+
+          case Eq(Seq(None, until: Int))  => Seq(null, until.asInstanceOf[Object])
+          case Eq(Seq(None, until: Long)) => Seq(null, until.asInstanceOf[Object])
+          case Eq(Seq(None, until: Date)) => Seq(null, until.asInstanceOf[Object])
+
+          case Eq(Seq(None, None)) =>
+            throw new MoleculeException(
+              "Molecule not allowing returning from start to end (the whole database!).\n" +
+                "If you need this, please use raw Datomic access:\n" +
+                "`conn.datomicConn.log.txRange(tx1, tx2)`")
+
+          case Eq(Seq(_, _)) => throw new MoleculeException("Args to Log can only be t, tx or txInstant of type Int/Long/Date")
+        })
+
+      case other => throw new MoleculeException("Only Index queries accepted (EAVT, AEVT, AVET, VAET, Log).")
+    }
+
+    val (combination, order) = model.elements.tail.foldLeft("", Seq.empty[String]) {
+      case ((comb, attrs), Meta(_, attr, _, _)) => (comb + attr, attrs :+ attr)
+      case ((comb, attrs), element)             => throw new MoleculeException("Unexpected model element: " + element)
+    }
+
+    val adhocDb = db
+    def date(d: Datom): Date = adhocDb.entity(d.tx).get(":db/txInstant").asInstanceOf[Date]
+    def ident(d: Datom): AnyRef = adhocDb.ident(d.a).toString
+    def t(d: Datom): AnyRef = toT(d.tx).asInstanceOf[AnyRef]
+    def op(d: Datom): AnyRef = d.added.asInstanceOf[AnyRef]
+    def customRow(d: Datom): jList[AnyRef] = {
+      val row: jList[AnyRef] = new util.ArrayList().asInstanceOf[jList[AnyRef]]
+      order.foreach {
+        case "e"         => row.add(d.e)
+        case "a"         => row.add(ident(d))
+        case "v"         => row.add(d.v)
+        case "t"         => row.add(t(d))
+        case "tx"        => row.add(d.tx)
+        case "txInstant" => row.add(date(d))
+        case "op"        => row.add(op(d))
+      }
+      row
+    }
+
+    // Anticipating some standard combinations
+    def row(d: Datom): jList[AnyRef] = (combination match {
+      case "e"            => list(d.e)
+      case "a"            => list(ident(d))
+      case "v"            => list(d.v)
+      case "t"            => list(t(d))
+      case "tx"           => list(d.tx)
+      case "txInstant"    => list(date(d))
+      case "op"           => list(op(d))
+      case "ea"           => list(d.e, ident(d))
+      case "ae"           => list(ident(d), d.e)
+      case "av"           => list(ident(d), d.v)
+      case "va"           => list(d.v, ident(d))
+      case "eav"          => list(d.e, ident(d), d.v)
+      case "aev"          => list(ident(d), d.e, d.v)
+      case "ave"          => list(ident(d), d.v, d.e)
+      case "vae"          => list(d.v, ident(d), d.e)
+      case "eavt"         => list(d.e, ident(d), d.v, t(d))
+      case "eavtx"        => list(d.e, ident(d), d.v, d.tx)
+      case "eavtxInstant" => list(d.e, ident(d), d.v, date(d))
+      case "eavtop"       => list(d.e, ident(d), d.v, t(d), op(d))
+      case "aevt"         => list(ident(d), d.e, d.v, t(d))
+      case "aevtx"        => list(ident(d), d.e, d.v, d.tx)
+      case "aevtxInstant" => list(ident(d), d.e, d.v, date(d))
+      case "aevtop"       => list(ident(d), d.e, d.v, t(d), op(d))
+      case "avet"         => list(ident(d), d.v, d.e, t(d))
+      case "avetx"        => list(ident(d), d.v, d.e, d.tx)
+      case "avetxInstant" => list(ident(d), d.v, d.e, date(d))
+      case "avetop"       => list(ident(d), d.v, d.e, t(d), op(d))
+      case "vaet"         => list(d.v, ident(d), d.e, t(d))
+      case "vaetx"        => list(d.v, ident(d), d.e, d.tx)
+      case "vaetxInstant" => list(d.v, ident(d), d.e, date(d))
+      case "vaetop"       => list(d.v, ident(d), d.e, t(d), op(d))
+      case _              => customRow(d)
+    }).asInstanceOf[jList[AnyRef]]
+
+    // Convert Datoms to standard list of rows so that we can use the same Molecule query API
+    val jColl: jCollection[jList[AnyRef]] = new util.ArrayList().asInstanceOf[jCollection[jList[AnyRef]]]
+    api match {
+      case "datoms"     => adhocDb.datoms(index, args: _*).forEach { datom =>
+        jColl.add(
+          row(datom)
+        )
+      }
+      case "indexRange" => adhocDb.indexRange(args.head, args(1), args(2)).forEach { datom =>
+        jColl.add(
+          row(datom)
+        )
+      }
+      case "txRange"    => datomicConn.log.txRange(args.head, args(1)).forEach { txMap =>
+        // Flatten transaction datoms to unified tuples return type
+        txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]].forEach { datom =>
+          jColl.add(
+            row(datom)
+          )
+        }
+      }
+    }
+    jColl
   }
 }
