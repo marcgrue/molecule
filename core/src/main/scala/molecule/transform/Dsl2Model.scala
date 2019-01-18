@@ -1274,7 +1274,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var generics: Seq[String] = Nil
     var beforeFirstAttr: Boolean = true
     var isFiltered: Boolean = false
-    var nsAttrs: Seq[String] = Nil
+    var nsAttrs: Map[String, String] = Map.empty[String, String]
 
     elements.foreach { el =>
       i += 1
@@ -1292,7 +1292,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         // Molecule should at least have one mandatory attribute
         case a: Atom =>
           isFiltered = true
-          if (a.name.last != '$')
+          if (a.attr.last != '$')
             hasMandatory = true
 
           a match {
@@ -1315,21 +1315,21 @@ private[molecule] trait Dsl2Model extends Cast with Json {
             case Atom(ns, attr, _, _, _, _, _, _) =>
               if (beforeFirstAttr) {
                 if (generics.nonEmpty)
-                  abort(s"Can't add first attribute `${a.name}` after generic attributes (except `e` which is ok to have first). " +
-                    s"Please add generic attributes ${generics.map(g => s"`$g`").mkString(", ")} after `${a.name}`.")
+                  abort(s"Can't add first attribute `${a.attr}` after generic attributes (except `e` which is ok to have first). " +
+                    s"Please add generic attributes ${generics.map(g => s"`$g`").mkString(", ")} after `${a.attr}`.")
                 beforeFirstAttr = false
               }
-              nsAttrs = nsAttrs :+ (ns + "/" + clean(attr))
+              nsAttrs = nsAttrs + ((ns + "/" + clean(attr)) -> attr)
           }
 
         case Bond(ns, refAttr, _, _, _) =>
           if (i == last)
             abort(s"Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
 
-          if (nsAttrs.contains(ns + "/" + refAttr))
-            abort(s"Instead of getting the ref id with `$refAttr` please get it via the referenced namespace: `${refAttr.capitalize}.e ...`")
+          if (nsAttrs.keySet.contains(ns + "/" + refAttr))
+            abort(s"Instead of getting the ref id with `${nsAttrs.apply(ns + "/" + refAttr)}` please get it via the referenced namespace: `${refAttr.capitalize}.e ...`")
 
-          nsAttrs = Nil
+          nsAttrs = Map.empty[String, String]
           hasMandatory = true
           beforeFirstAttr = false
 

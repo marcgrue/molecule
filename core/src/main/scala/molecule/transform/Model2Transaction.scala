@@ -123,8 +123,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def replace$(elements: Seq[Element]): Seq[Element] = elements map {
       case a@Atom(_, attr, _, _, _, Some(enumPrefix), _, _)
-        if attr.last == '$' && enumPrefix.init.last == '$'       => a.copy(name = attr.init, enumPrefix = Some(enumPrefix.init.init + "/"))
-      case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '$' => a.copy(name = attr.init)
+        if attr.last == '$' && enumPrefix.init.last == '$'       => a.copy(attr = attr.init, enumPrefix = Some(enumPrefix.init.init + "/"))
+      case a@Atom(_, attr, _, _, _, _, _, _) if attr.last == '$' => a.copy(attr = attr.init)
       case b@Bond(_, attr, _, _, _) if attr.last == '$'          => b.copy(refAttr = attr.init)
       case Nested(ref, es)                                       => Nested(ref, replace$(es))
       case other                                                 => other
@@ -929,8 +929,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case (stmts, Add('tx, a, Values(vs, prefix), bi)) if txRefAttr(stmts) => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
       case (stmts, Add('tx, a, Values(vs, prefix), bi))                     => valueStmts(stmts, txId, a, vs, prefix, bi, None)
       case (stmts, Add('tx, a, refNs: String, bi))                          => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
-      case (stmts, Add('v, a, Values(vs, prefix), bi))                      =>
-        valueStmts(stmts, txId, a, vs, prefix, bi, None)
+      case (stmts, Add('v, a, Values(vs, prefix), bi))                      => valueStmts(stmts, txId, a, vs, prefix, bi, None)
       case (stmts, unexpected)                                              => err("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
@@ -1001,7 +1000,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case (stmts, Add('tx, a, Values(vs, prefix), bi)) => valueStmts(stmts, txId, a, vs, prefix, bi, None)
       case (stmts, unexpected)                          => err("updateStmts", "Unexpected insert statement: " + unexpected)
     }
-    dataStmts foreach println
     dataStmts ++ txStmts
   }
 

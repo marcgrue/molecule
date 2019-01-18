@@ -104,7 +104,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   private def noTacitAttrs: Unit = {
     def detectTacitAttrs(elements: Seq[Element]): Seq[Element] = elements flatMap {
-      case a: Atom if a.name.last == '_' => err("noTacitAttrs", s"Tacit attributes like `${a.name}` not allowed in $op molecules.")
+      case a: Atom if a.attr.last == '_' => err("noTacitAttrs", s"Tacit attributes like `${a.attr}` not allowed in $op molecules.")
       case Nested(ref, es)               => detectTacitAttrs(es)
       case Composite(es)                 => detectTacitAttrs(es)
       case e: Element                    => Seq(e)
@@ -115,15 +115,15 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   private def missingAttrInStartEnd {
     model.elements.foldLeft(Seq[Element]()) {
       case (attrs, e) => e match {
-        case a: Atom if a.name.last != '$' => attrs :+ a
-        case m@Meta(_, "e" | "e_", _, EntValue)   => attrs :+ m
-        case b: Bond if attrs.isEmpty      => err("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
-        case _                             => attrs
+        case a: Atom if a.attr.last != '$'      => attrs :+ a
+        case m@Meta(_, "e" | "e_", _, EntValue) => attrs :+ m
+        case b: Bond if attrs.isEmpty           => err("missingAttrInStartEnd", "Missing mandatory attributes of first namespace.")
+        case _                                  => attrs
       }
     }
     def missingAttrInEnd(elements: Seq[Element]): Seq[Element] = elements.foldRight(Seq[Element]()) {
       case (e, attrs) => e match {
-        case a: Atom if a.name.last != '$' => attrs :+ a
+        case a: Atom if a.attr.last != '$' => attrs :+ a
         case Nested(ref, es)               => missingAttrInEnd(es)
         case b: Bond if attrs.isEmpty      => err("missingAttrInStartEnd", "Missing mandatory attributes of last namespace.")
         case _                             => attrs

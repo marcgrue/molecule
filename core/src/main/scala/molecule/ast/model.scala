@@ -45,15 +45,28 @@ object model extends Helpers {
 
   trait Element
 
+  trait MetaAtom extends Element {
+    val ns   : String
+    val attr : String
+    val value: Value
+  }
+
+  case class Meta(ns: String,
+                  attr: String,
+                  kind: String,
+                  value: Value) extends MetaAtom {
+    override def toString: String = s"""Meta("$ns", "$attr", "$kind", $value)"""
+  }
+
   case class Atom(ns: String,
-                  name: String,
+                  attr: String,
                   tpeS: String,
                   card: Int,
                   value: Value,
                   enumPrefix: Option[String] = None,
                   gs: Seq[Generic] = Nil,
-                  keys: Seq[String] = Nil) extends Element {
-    override def toString: String = s"""Atom("$ns", "$name", "$tpeS", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
+                  keys: Seq[String] = Nil) extends MetaAtom {
+    override def toString: String = s"""Atom("$ns", "$attr", "$tpeS", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
   }
 
   case class Bond(ns: String,
@@ -74,13 +87,6 @@ object model extends Helpers {
 
   case class Nested(bond: Bond,
                     elements: Seq[Element]) extends Element
-
-  case class Meta(ns: String,
-                  attr: String,
-                  kind: String,
-                  value: Value) extends Element {
-    override def toString: String = s"""Meta("$ns", "$attr", "$kind", $value)"""
-  }
 
   case class TxMetaData(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
