@@ -3,13 +3,12 @@ import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList, Comparator => jComparator, List => jList}
 import molecule.api.Molecule
 import molecule.facade.Conn
-import scala.reflect.ClassTag
 
 /** Builder classes of various arity of nested tuples. */
 private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
   // Lazily re-use nested list
-  final override def getIterable(implicit conn: Conn, ev: ClassTag[OuterTpl]): Iterable[OuterTpl] = get(conn, ev)
+  final override def getIterable(implicit conn: Conn): Iterable[OuterTpl] = get(conn)
 
   val levels = if(_nestedQuery.isDefined)
     _nestedQuery.get.f.outputs.size - _query.f.outputs.size
@@ -121,7 +120,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples1[OuterTpl] extends NestedTuples[OuterTpl] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -179,7 +178,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples2[OuterTpl] extends NestedTuples[OuterTpl] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -257,7 +256,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples3[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -360,7 +359,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples4[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -493,7 +492,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples5[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -661,7 +660,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples6[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size
@@ -869,7 +868,7 @@ private[molecule] object NestedTuples {
 
   trait NestedTuples7[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
 
-    final override def get(implicit conn: Conn, ev: ClassTag[OuterTpl]): List[OuterTpl] = {
+    final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
       val last = rows.size

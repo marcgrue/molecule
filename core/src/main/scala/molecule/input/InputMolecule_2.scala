@@ -6,7 +6,6 @@ import molecule.ast.model._
 import molecule.ast.query._
 import molecule.facade.Conn
 import molecule.input.exception.InputMolecule_2_Exception
-import scala.reflect.ClassTag
 
 
 /** Shared interfaces of input molecules awaiting 2 inputs.

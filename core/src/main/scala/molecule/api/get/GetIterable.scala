@@ -7,7 +7,6 @@ import molecule.ast.transactionModel.Statement
 import molecule.facade.Conn
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
-import scala.reflect.ClassTag
 
 
 /** Data getter methods on molecules that return Iterable[Tpl].
@@ -31,11 +30,10 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     *
     * @group get
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
     */
-  def getIterable(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] = new Iterable[Tpl] {
+  def getIterable(implicit conn: Conn): Iterable[Tpl] = new Iterable[Tpl] {
     private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
     override def isEmpty: Boolean = jColl.isEmpty
     override def size: Int = jColl.size
@@ -107,13 +105,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(t:Long)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxLong(t))), tplType)
+  def getIterableAsOf(t: Long)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(AsOf(TxLong(t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule as of tx.
@@ -165,13 +162,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableAsOf
     * @param tx   [[molecule.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(tx:molecule\.facade\.TxReport)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(tx: molecule.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxLong(tx.t))), tplType)
+  def getIterableAsOf(tx: molecule.facade.TxReport)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule as of date.
@@ -229,13 +225,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxDate(date))), tplType)
+  def getIterableAsOf(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(AsOf(TxDate(date))))
 
 
   // get since ================================================================================================
@@ -271,13 +266,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableSince(t:Long)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxLong(t))), tplType)
+  def getIterableSince(t: Long)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(Since(TxLong(t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule since tx.
@@ -310,13 +304,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableSince
     * @param tx   [[molecule.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableSince(tx:molecule\.facade\.TxReport)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(tx: molecule.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxLong(tx.t))), tplType)
+  def getIterableSince(tx: molecule.facade.TxReport)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(Since(TxLong(tx.t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule since date.
@@ -344,13 +337,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxDate(date))), tplType)
+  def getIterableSince(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(Since(TxDate(date))))
 
 
   // get with ================================================================================================
@@ -381,13 +373,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableWith
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType          Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable of molecule data
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableWith(txMolecules* getAsyncIterableWith]] method.
     */
-  def getIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), tplType)
+  def getIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule with applied raw transaction data.
@@ -408,13 +399,12 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @group getIterableWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for later Array extractions
     * @return Iterable of molecule data
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncIterable.getAsyncIterableWith(txData:java\.util\.List[_])* getAsyncIterableWith]] method.
     */
-  def getIterableWith(txData: java.util.List[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), tplType)
+  def getIterableWith(txData: java.util.List[_])(implicit conn: Conn): Iterable[Tpl] =
+    getIterable(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
 
 
   // get history ================================================================================================

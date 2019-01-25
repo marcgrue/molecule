@@ -62,7 +62,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * all rows (same as calling `getArray` without any number of rows parameter).
     *
     * @group get
-    * @param n       Number of rows
+    * @param n       Number of rows. If -1, all rows are fetched.
     * @param conn    Implicit [[molecule.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
@@ -771,7 +771,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_])* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txData: java.util.List[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayWith(txData: jList[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), tplType)
 
 
@@ -807,7 +807,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_],n:Int)* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txData: java.util.List[_], n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayWith(txData: jList[_], n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), tplType)
 
 

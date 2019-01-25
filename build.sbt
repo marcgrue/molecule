@@ -1,7 +1,7 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.17.1",
+  version := "0.17.2",
   scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",

@@ -6,7 +6,6 @@ import molecule.facade.Conn
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
-import scala.reflect.ClassTag
 
 
 /** Default asynchronous data getter methods on molecules returning `Future[List[Tpl]]`.
@@ -42,11 +41,10 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     *
     * @group getAsync
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     */
-  def getAsync(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(get(conn, tplType))
+  def getAsync(implicit conn: Conn): Future[List[Tpl]] =
+    Future(get(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule.
@@ -60,11 +58,10 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsync
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     */
-  def getAsync(n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(get(n)(conn, tplType))
+  def getAsync(n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(get(n)(conn))
 
 
   // get as of ================================================================================================
@@ -82,12 +79,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncAsOf(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(t)(conn, tplType))
+  def getAsyncAsOf(t: Long)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(t)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule as of transaction time `t`.
@@ -104,12 +100,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param t    Long Transaction time t
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncAsOf(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(t, n)(conn, tplType))
+  def getAsyncAsOf(t: Long, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(t, n)(conn))
 
 
   /** Get `Future` with `List` of all rows as tuples matching molecule as of tx.
@@ -128,12 +123,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncAsOf
     * @param tx   [[molecule.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * */
-  def getAsyncAsOf(tx: molecule.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(tx.t)(conn, tplType))
+  def getAsyncAsOf(tx: molecule.facade.TxReport)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(tx.t)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule as of tx.
@@ -153,12 +147,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param tx   [[molecule.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * */
-  def getAsyncAsOf(tx: molecule.facade.TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(tx.t, n)(conn, tplType))
+  def getAsyncAsOf(tx: molecule.facade.TxReport, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(tx.t, n)(conn))
 
 
   /** Get `Future` with `List` of all rows as tuples matching molecule as of date.
@@ -171,12 +164,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncAsOf(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(date)(conn, tplType))
+  def getAsyncAsOf(date: java.util.Date)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(date)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule as of date.
@@ -190,12 +182,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param date java.util.Date
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getAsOf(date, n)(conn, tplType))
+  def getAsyncAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getAsOf(date, n)(conn))
 
 
   // get since ================================================================================================
@@ -210,12 +201,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(t)(conn, tplType))
+  def getAsyncSince(t: Long)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(t)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule since transaction time `t`.
@@ -229,12 +219,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(t, n)(conn, tplType))
+  def getAsyncSince(t: Long, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(t, n)(conn))
 
 
   /** Get `Future` with `List` of all rows as tuples matching molecule since tx.
@@ -252,12 +241,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncSince
     * @param tx   [[molecule.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(tx: molecule.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(tx.t)(conn, tplType))
+  def getAsyncSince(tx: molecule.facade.TxReport)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(tx.t)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule since tx.
@@ -276,12 +264,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param tx   [[molecule.facade.TxReport TxReport]]
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(tx: molecule.facade.TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(tx.t, n)(conn, tplType))
+  def getAsyncSince(tx: molecule.facade.TxReport, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(tx.t, n)(conn))
 
 
   /** Get `Future` with `List` of all rows as tuples matching molecule since date.
@@ -294,12 +281,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(date)(conn, tplType))
+  def getAsyncSince(date: java.util.Date)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(date)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule since date.
@@ -313,12 +299,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param date java.util.Date
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncSince(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getSince(date, n)(conn, tplType))
+  def getAsyncSince(date: java.util.Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getSince(date, n)(conn))
 
 
   // get with ================================================================================================
@@ -334,12 +319,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncWith
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
-  def getAsyncWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getWith(txMolecules: _*)(conn, tplType))
+  def getAsyncWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getWith(txMolecules: _*)(conn))
 
 
   /** Get `Future` with `List` of n rows as tuples matching molecule with applied molecule transaction data.
@@ -353,13 +337,12 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param n           Int Number of rows returned
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
-  def getAsyncWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getWith(n, txMolecules: _*)(conn, tplType))
+  def getAsyncWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getWith(n, txMolecules: _*)(conn))
 
 
   /** Get `Future` with `List` of all rows as tuples matching molecule with applied raw transaction data.
@@ -372,12 +355,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
-  def getAsyncWith(txData: java.util.List[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getWith(txData)(conn, tplType))
+  def getAsyncWith(txData: java.util.List[_])(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getWith(txData)(conn))
 
   /** Get `Future` with `List` of n rows as tuples matching molecule with applied raw transaction data.
     * <br><br>
@@ -390,12 +372,11 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param n      Int Number of rows returned
     * @param conn   Implicit [[molecule.facade.Conn Conn]] value in scope
-    * @param tplType   Implicit `ClassTag[Tpl]` to capture Tuple type for Array extraction
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
-  def getAsyncWith(txData: java.util.List[_], n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getWith(txData, n)(conn, tplType))
+  def getAsyncWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getWith(txData, n)(conn))
 
 
   // get history ================================================================================================
@@ -410,8 +391,8 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @return List[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/history/ manual]] for more info on generic attributes.
     */
-  def getAsyncHistory(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[List[Tpl]] =
-    Future(getHistory(conn, tplType))
+  def getAsyncHistory(implicit conn: Conn): Future[List[Tpl]] =
+    Future(getHistory(conn))
 
 
   // `getAsyncHistory(n: Int)` is not implemented since the whole data set normally needs to be sorted
