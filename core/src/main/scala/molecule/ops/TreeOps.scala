@@ -41,8 +41,8 @@ private[molecule] trait TreeOps extends Liftables {
     def owner: String = t.symbol.typeSignature.typeParams.head.name.toString
     def alias: String = t.symbol.typeSignature.typeParams.head.name.toString
 
-    def refThis: String = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString)
-    def refNext: String = firstLow(tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString)
+    def refThis: String = tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.head.typeSymbol.name.toString
+    def refNext: String = tpe_.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString
 
     def isBidirectional: Boolean = tpe_ <:< weakTypeOf[Bidirectional_]
     def isBiSelfRef: Boolean = tpe_ <:< weakTypeOf[BiSelfRef_]
@@ -80,8 +80,6 @@ private[molecule] trait TreeOps extends Liftables {
     def isEnum: Boolean = tpe_ <:< weakTypeOf[Enum]
     def isEnum$: Boolean = tpe_ <:< weakTypeOf[Enum$[_, _]]
     def isAnyEnum: Boolean = isEnum || isEnum$
-
-    //    override def toString: String = t.tpe.typeSymbol.name.toString
   }
   def nsString(ns: String): String = ns
   def nsString(ns: Tree): String = nsString(ns.symbol.name.toString)
@@ -242,7 +240,7 @@ private[molecule] trait TreeOps extends Liftables {
     override def toString: String = {
       val s = sym.name.toString
       val first = s.split("_(\\d+|In_.*)").head
-      first.head.toLower + first.tail
+      first
     }
 
     def attrs: List[att] = nsType.members.collect {
@@ -330,7 +328,7 @@ private[molecule] trait TreeOps extends Liftables {
     def kwS: String = s":$ns/$name"
 
     def enumValues: List[String] = {
-      val attrName = if(toString.last == '_') toString.init else toString
+      val attrName = if (toString.last == '_') toString.init else toString
       attrType.baseClasses.find {
         cl => cl.isClass && !cl.isModuleClass && cl.name.toString == attrName
       }.get.asClass.toType.members.collect {

@@ -7,7 +7,7 @@ object SchemaDefinition {
   trait Schema {
 
     val id     = oneLong.doc("Attribute entity id")
-    val ident  = oneString.doc("Attribute ident ':part_ns/attr' or :ns/attr (clojure KeyWord as String)")
+    val ident  = oneString.doc("Attribute ident ':part_Ns/attr' or :Ns/attr (clojure KeyWord as String)")
     val part   = oneString.doc("Partition name 'part'")
     val nsFull = oneString.doc("Namespace name with partition prefix 'part_ns' or 'ns' if no partitions defined")
     val ns     = oneString.doc("Namespace name 'ns'")

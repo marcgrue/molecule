@@ -125,7 +125,7 @@ class UpdateEnum extends CoreSpec {
       (Ns(eid).enums.replace("x" -> "enum9").update must throwA[ExecutionException])
         .message === "Got the exception java.util.concurrent.ExecutionException: " +
         "java.lang.IllegalArgumentException: :db.error/not-an-entity " +
-        """Unable to resolve entity: :ns.enums/x in datom [17592186045445 ":ns/enums" ":ns.enums/x"]""".stripMargin
+        """Unable to resolve entity: :Ns.enums/x in datom [17592186045445 ":Ns/enums" ":Ns.enums/x"]""".stripMargin
 
 
       Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
@@ -143,12 +143,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace("enum7" -> "enum8", "enum8" -> "enum8").update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq("enum7" -> "enum8", "enum8" -> "enum8")).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
     }
 
@@ -300,12 +300,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace(enum7 -> enum8, enum8 -> enum8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> enum8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/enums`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
 
@@ -314,13 +314,13 @@ class UpdateEnum extends CoreSpec {
 
       (Ns(eid).enums.replace(enum7 -> enum8, enum8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/enums`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/enums`:" +
         "\nenum8"
 
       // Conflicting new values
       (Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/enums`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/enums`:" +
         "\nenum8"
     }
 

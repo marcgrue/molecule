@@ -37,9 +37,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     */
   def getArray(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] = {
     val jColl = conn.query(_model, _query)
-    val n = jColl.size
     val it = jColl.iterator
-    val a = new Array[Tpl](n)
+    val a = new Array[Tpl](jColl.size)
     var i = 0
     while (it.hasNext) {
       a(i) = castRow(it.next)

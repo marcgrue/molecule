@@ -28,11 +28,35 @@ class ProductsAndOrders extends MoleculeSpec {
 
     order.touch === Map(
       ":db/id" -> 17592186045422L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045423L, ":lineItem/price" -> 48.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"), ":lineItem/quantity" -> 1),
-        Map(":db/id" -> 17592186045424L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"), ":lineItem/quantity" -> 2)))
+      ":Order/lineItems" -> List(Map(
+        ":db/id" -> 17592186045423L,
+        ":LineItem/price" -> 48.0,
+        ":LineItem/product" -> Map(
+          ":db/id" -> 17592186045419L,
+          ":Product/description" -> "Expensive Chocolate"),
+        ":LineItem/quantity" -> 1), Map(
+        ":db/id" -> 17592186045424L,
+        ":LineItem/price" -> 38.0,
+        ":LineItem/product" -> Map(
+          ":db/id" -> 17592186045420L,
+          ":Product/description" -> "Cheap Whisky"),
+        ":LineItem/quantity" -> 2)))
+    
+    order.touch === Map(
+      ":db/id" -> 17592186045422L,
+      ":Order/lineItems" -> List(Map(
+        ":db/id" -> 17592186045423L,
+        ":LineItem/price" -> 48.0, 
+        ":LineItem/product" -> Map(
+          ":db/id" -> 17592186045419L, 
+          ":Product/description" -> "Expensive Chocolate"), 
+        ":LineItem/quantity" -> 1), Map(
+        ":db/id" -> 17592186045424L, 
+        ":LineItem/price" -> 38.0,
+        ":LineItem/product" -> Map(
+          ":db/id" -> 17592186045420L, 
+          ":Product/description" -> "Cheap Whisky"), 
+        ":LineItem/quantity" -> 2)))
 
     // We can get the created order entity id and its lineItem's data
     m(Order.e.LineItems * LineItem.product.price.quantity).get === Seq(
@@ -75,12 +99,12 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get all attributes/values of this entity. Sub-component values are recursively retrieved
     orderId.touch === Map(
       ":db/id" -> 17592186045422L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045423L, ":lineItem/price" -> 48.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"), ":lineItem/quantity" -> 1),
-        Map(":db/id" -> 17592186045424L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"), ":lineItem/quantity" -> 2)),
-      ":order/orderid" -> 23)
+      ":Order/lineItems" -> List(
+        Map(":db/id" -> 17592186045423L, ":LineItem/price" -> 48.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045419L, ":Product/description" -> "Expensive Chocolate"), ":LineItem/quantity" -> 1),
+        Map(":db/id" -> 17592186045424L, ":LineItem/price" -> 38.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky"), ":LineItem/quantity" -> 2)),
+      ":Order/orderid" -> 23)
 
     // We can re-use the `order` molecule
     order.get === List(
@@ -131,24 +155,24 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get all attributes/values of this entity. Sub-component values are recursively retrieved
     order23.touch === Map(
       ":db/id" -> 17592186045423L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045424L, ":lineItem/price" -> 48.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"), ":lineItem/quantity" -> 1),
-        Map(":db/id" -> 17592186045425L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
+      ":Order/lineItems" -> List(
+        Map(":db/id" -> 17592186045424L, ":LineItem/price" -> 48.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045419L, ":Product/description" -> "Expensive Chocolate"), ":LineItem/quantity" -> 1),
+        Map(":db/id" -> 17592186045425L, ":LineItem/price" -> 38.0, ":LineItem/product" ->
           // Whisky _is_ touched although it has no quantity asserted!
-          Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky")),
-        Map(":db/id" -> 17592186045426L, ":lineItem/price" -> 77.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045421L, ":product/description" -> "Licorice"), ":lineItem/quantity" -> 2)),
-      ":order/orderid" -> 23)
+          Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky")),
+        Map(":db/id" -> 17592186045426L, ":LineItem/price" -> 77.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045421L, ":Product/description" -> "Licorice"), ":LineItem/quantity" -> 2)),
+      ":Order/orderid" -> 23)
 
     order24.touch === Map(
       ":db/id" -> 17592186045427L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045428L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"), ":lineItem/quantity" -> 3),
-        Map(":db/id" -> 17592186045429L, ":lineItem/price" -> 77.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045421L, ":product/description" -> "Licorice"), ":lineItem/quantity" -> 4)),
-      ":order/orderid" -> 24)
+      ":Order/lineItems" -> List(
+        Map(":db/id" -> 17592186045428L, ":LineItem/price" -> 38.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky"), ":LineItem/quantity" -> 3),
+        Map(":db/id" -> 17592186045429L, ":LineItem/price" -> 77.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045421L, ":Product/description" -> "Licorice"), ":LineItem/quantity" -> 4)),
+      ":Order/orderid" -> 24)
 
 
     // Get ................................
@@ -229,23 +253,23 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get all attributes/values of this entity. Sub-component values are recursively retrieved
     order23.touch === Map(
       ":db/id" -> 17592186045419L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045420L, ":lineItem/price" -> 48.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045421L, ":product/description" -> "Expensive Chocolate"), ":lineItem/quantity" -> 1),
-        Map(":db/id" -> 17592186045422L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045423L, ":product/description" -> "Cheap Whisky")),
-        Map(":db/id" -> 17592186045424L, ":lineItem/price" -> 77.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045425L, ":product/description" -> "Licorice"), ":lineItem/quantity" -> 2)),
-      ":order/orderid" -> 23)
+      ":Order/lineItems" -> List(
+        Map(":db/id" -> 17592186045420L, ":LineItem/price" -> 48.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045421L, ":Product/description" -> "Expensive Chocolate"), ":LineItem/quantity" -> 1),
+        Map(":db/id" -> 17592186045422L, ":LineItem/price" -> 38.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045423L, ":Product/description" -> "Cheap Whisky")),
+        Map(":db/id" -> 17592186045424L, ":LineItem/price" -> 77.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045425L, ":Product/description" -> "Licorice"), ":LineItem/quantity" -> 2)),
+      ":Order/orderid" -> 23)
 
     order24.touch === Map(
       ":db/id" -> 17592186045426L,
-      ":order/lineItems" -> List(
-        Map(":db/id" -> 17592186045427L, ":lineItem/price" -> 38.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045428L, ":product/description" -> "Cheap Whisky"), ":lineItem/quantity" -> 3),
-        Map(":db/id" -> 17592186045429L, ":lineItem/price" -> 77.0, ":lineItem/product" ->
-          Map(":db/id" -> 17592186045430L, ":product/description" -> "Licorice"), ":lineItem/quantity" -> 4)),
-      ":order/orderid" -> 24)
+      ":Order/lineItems" -> List(
+        Map(":db/id" -> 17592186045427L, ":LineItem/price" -> 38.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045428L, ":Product/description" -> "Cheap Whisky"), ":LineItem/quantity" -> 3),
+        Map(":db/id" -> 17592186045429L, ":LineItem/price" -> 77.0, ":LineItem/product" ->
+          Map(":db/id" -> 17592186045430L, ":Product/description" -> "Licorice"), ":LineItem/quantity" -> 4)),
+      ":Order/orderid" -> 24)
 
     // Get ................................
 
@@ -285,23 +309,23 @@ class ProductsAndOrders extends MoleculeSpec {
     // 2 levels of nested data entered
     eid.touch === Map(
       ":db/id" -> 17592186045422L,
-      ":order/lineItems" -> List(
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045424L, ":comment/text" -> "first"),
-          Map(":db/id" -> 17592186045425L, ":comment/text" -> "product")),
-          ":lineItem/price" -> 48.0, ":lineItem/quantity" -> 1, ":lineItem/product" ->
-            Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"),
+      ":Order/lineItems" -> List(
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045424L, ":Comment/text" -> "first"),
+          Map(":db/id" -> 17592186045425L, ":Comment/text" -> "product")),
+          ":LineItem/price" -> 48.0, ":LineItem/quantity" -> 1, ":LineItem/product" ->
+            Map(":db/id" -> 17592186045419L, ":Product/description" -> "Expensive Chocolate"),
           ":db/id" -> 17592186045423L),
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045427L, ":comment/text" -> "second"),
-          Map(":db/id" -> 17592186045428L, ":comment/text" -> "is"),
-          Map(":db/id" -> 17592186045429L, ":comment/text" -> "best")),
-          ":lineItem/price" -> 38.0,
-          ":lineItem/quantity" -> 2,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"),
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045427L, ":Comment/text" -> "second"),
+          Map(":db/id" -> 17592186045428L, ":Comment/text" -> "is"),
+          Map(":db/id" -> 17592186045429L, ":Comment/text" -> "best")),
+          ":LineItem/price" -> 38.0,
+          ":LineItem/quantity" -> 2,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045426L)),
-      ":order/orderid" -> 23)
+      ":Order/orderid" -> 23)
 
 
     m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * Comment.text)).get === List(
@@ -336,25 +360,25 @@ class ProductsAndOrders extends MoleculeSpec {
     // 2 levels of nested data entered
     orderId.touch === Map(
       ":db/id" -> 17592186045422L,
-      ":order/lineItems" -> List(
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045424L, ":comment/descr" -> "1a", ":comment/text" -> "first"),
-          Map(":db/id" -> 17592186045425L, ":comment/descr" -> "1b", ":comment/text" -> "product")),
-          ":lineItem/price" -> 48.0,
-          ":lineItem/quantity" -> 1,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"),
+      ":Order/lineItems" -> List(
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045424L, ":Comment/descr" -> "1a", ":Comment/text" -> "first"),
+          Map(":db/id" -> 17592186045425L, ":Comment/descr" -> "1b", ":Comment/text" -> "product")),
+          ":LineItem/price" -> 48.0,
+          ":LineItem/quantity" -> 1,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045419L, ":Product/description" -> "Expensive Chocolate"),
           ":db/id" -> 17592186045423L),
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045427L, ":comment/descr" -> "2b", ":comment/text" -> "second"),
-          Map(":db/id" -> 17592186045428L, ":comment/descr" -> "2b", ":comment/text" -> "is"),
-          Map(":db/id" -> 17592186045429L, ":comment/descr" -> "2c", ":comment/text" -> "best")),
-          ":lineItem/price" -> 38.0,
-          ":lineItem/quantity" -> 2,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"),
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045427L, ":Comment/descr" -> "2b", ":Comment/text" -> "second"),
+          Map(":db/id" -> 17592186045428L, ":Comment/descr" -> "2b", ":Comment/text" -> "is"),
+          Map(":db/id" -> 17592186045429L, ":Comment/descr" -> "2c", ":Comment/text" -> "best")),
+          ":LineItem/price" -> 38.0,
+          ":LineItem/quantity" -> 2,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045426L)),
-      ":order/orderid" -> 23)
+      ":Order/orderid" -> 23)
 
 
     m(Order.orderid.LineItems * (LineItem.quantity.price.Comments * Comment.text.descr)).get === List(
@@ -394,43 +418,43 @@ class ProductsAndOrders extends MoleculeSpec {
     /* 3 levels of nested data entered*/
     orderId.touch === Map(
       ":db/id" -> 17592186045422L,
-      ":order/lineItems" -> List(
+      ":Order/lineItems" -> List(
         Map(
-          ":lineItem/comments" -> List(
+          ":LineItem/comments" -> List(
             Map(
-              ":db/id" -> 17592186045424L, ":comment/authors" -> List(
-                Map(":db/id" -> 17592186045425L, ":person/name" -> "Marc Grue")),
-              ":comment/descr" -> "1a",
-              ":comment/text" -> "first"),
-            Map(":db/id" -> 17592186045426L, ":comment/authors" -> List(
-              Map(":db/id" -> 17592186045427L, ":person/name" -> "Marc Grue")),
-              ":comment/descr" -> "1b",
-              ":comment/text" -> "product")),
-          ":lineItem/price" -> 48.0,
-          ":lineItem/quantity" -> 1,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045419L, ":product/description" -> "Expensive Chocolate"),
+              ":db/id" -> 17592186045424L, ":Comment/authors" -> List(
+                Map(":db/id" -> 17592186045425L, ":Person/name" -> "Marc Grue")),
+              ":Comment/descr" -> "1a",
+              ":Comment/text" -> "first"),
+            Map(":db/id" -> 17592186045426L, ":Comment/authors" -> List(
+              Map(":db/id" -> 17592186045427L, ":Person/name" -> "Marc Grue")),
+              ":Comment/descr" -> "1b",
+              ":Comment/text" -> "product")),
+          ":LineItem/price" -> 48.0,
+          ":LineItem/quantity" -> 1,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045419L, ":Product/description" -> "Expensive Chocolate"),
           ":db/id" -> 17592186045423L),
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045429L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045430L, ":person/name" -> "Don Juan"),
-            Map(":db/id" -> 17592186045431L, ":person/name" -> "Stuart Halloway")),
-            ":comment/descr" -> "2b",
-            ":comment/text" -> "second"),
-          Map(":db/id" -> 17592186045432L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045433L, ":person/name" -> "Nick Smith")),
-            ":comment/descr" -> "2b",
-            ":comment/text" -> "is"),
-          Map(":db/id" -> 17592186045434L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045435L, ":person/name" -> "test")),
-            ":comment/descr" -> "2c",
-            ":comment/text" -> "best")),
-          ":lineItem/price" -> 38.0,
-          ":lineItem/quantity" -> 2,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045420L, ":product/description" -> "Cheap Whisky"),
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045429L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045430L, ":Person/name" -> "Don Juan"),
+            Map(":db/id" -> 17592186045431L, ":Person/name" -> "Stuart Halloway")),
+            ":Comment/descr" -> "2b",
+            ":Comment/text" -> "second"),
+          Map(":db/id" -> 17592186045432L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045433L, ":Person/name" -> "Nick Smith")),
+            ":Comment/descr" -> "2b",
+            ":Comment/text" -> "is"),
+          Map(":db/id" -> 17592186045434L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045435L, ":Person/name" -> "test")),
+            ":Comment/descr" -> "2c",
+            ":Comment/text" -> "best")),
+          ":LineItem/price" -> 38.0,
+          ":LineItem/quantity" -> 2,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045420L, ":Product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045428L)),
-      ":order/orderid" -> 23)
+      ":Order/orderid" -> 23)
 
     m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
       (23, List(
@@ -466,20 +490,20 @@ class ProductsAndOrders extends MoleculeSpec {
     // 3 levels of nested data entered, some with missing values that are then not asserted
     orderId.touch === Map(
       ":db/id" -> 17592186045421L,
-      ":order/lineItems" -> List(
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045423L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045424L, ":person/name" -> "Don Juan")),
-            ":comment/descr" -> "2b",
-            ":comment/text" -> "second"),
-          Map(":db/id" -> 17592186045425L, ":comment/descr" -> "2b", ":comment/text" -> "is"),
-          Map(":db/id" -> 17592186045426L, ":comment/descr" -> "2c", ":comment/text" -> "best")),
-          ":lineItem/price" -> 38.0,
-          ":lineItem/quantity" -> 2,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045419L, ":product/description" -> "Cheap Whisky"),
+      ":Order/lineItems" -> List(
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045423L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045424L, ":Person/name" -> "Don Juan")),
+            ":Comment/descr" -> "2b",
+            ":Comment/text" -> "second"),
+          Map(":db/id" -> 17592186045425L, ":Comment/descr" -> "2b", ":Comment/text" -> "is"),
+          Map(":db/id" -> 17592186045426L, ":Comment/descr" -> "2c", ":Comment/text" -> "best")),
+          ":LineItem/price" -> 38.0,
+          ":LineItem/quantity" -> 2,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045419L, ":Product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045422L)),
-      ":order/orderid" -> 23)
+      ":Order/orderid" -> 23)
 
     // Comments with no author are not fetched
     m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
@@ -511,21 +535,21 @@ class ProductsAndOrders extends MoleculeSpec {
     // 3 levels of nested data entered, some with missing values that are then not asserted
     orderId.touch === Map(
       ":db/id" -> 17592186045421L,
-      ":order/lineItems" -> List(
-        Map(":lineItem/comments" -> List(
-          Map(":db/id" -> 17592186045423L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045424L, ":person/name" -> "Don Juan")),
-            ":comment/text" -> "second"),
-          Map(":db/id" -> 17592186045425L, ":comment/authors" -> List(
-            Map(":db/id" -> 17592186045426L, ":person/name" -> "Marc")),
-            ":comment/descr" -> "foo",
-            ":comment/text" -> "chance")),
-          ":lineItem/price" -> 38.0,
-          ":lineItem/quantity" -> 2,
-          ":lineItem/product" ->
-            Map(":db/id" -> 17592186045419L, ":product/description" -> "Cheap Whisky"),
+      ":Order/lineItems" -> List(
+        Map(":LineItem/comments" -> List(
+          Map(":db/id" -> 17592186045423L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045424L, ":Person/name" -> "Don Juan")),
+            ":Comment/text" -> "second"),
+          Map(":db/id" -> 17592186045425L, ":Comment/authors" -> List(
+            Map(":db/id" -> 17592186045426L, ":Person/name" -> "Marc")),
+            ":Comment/descr" -> "foo",
+            ":Comment/text" -> "chance")),
+          ":LineItem/price" -> 38.0,
+          ":LineItem/quantity" -> 2,
+          ":LineItem/product" ->
+            Map(":db/id" -> 17592186045419L, ":Product/description" -> "Cheap Whisky"),
           ":db/id" -> 17592186045422L)),
-      ":order/orderid" -> 23)
+      ":Order/orderid" -> 23)
 
     // Comment with no `description` is not fetched
     m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
@@ -580,11 +604,11 @@ class ProductsAndOrders extends MoleculeSpec {
       .Authors.*(Person.name
     )).getJson ===
       """[
-        |{"lineItems.lineItem.text": "in stock", "lineItem.comments": [
-        |   {"comment.text": "second", "comment.authors": [
-        |      {"person.name": "Don Juan"}]},
-        |   {"comment.text": "chance", "comment.authors": [
-        |      {"person.name": "Marc"}]}]}
+        |{"lineItems.LineItem.text": "in stock", "LineItem.comments": [
+        |   {"Comment.text": "second", "Comment.authors": [
+        |      {"Person.name": "Don Juan"}]},
+        |   {"Comment.text": "chance", "Comment.authors": [
+        |      {"Person.name": "Marc"}]}]}
         |]""".stripMargin
   }
 }

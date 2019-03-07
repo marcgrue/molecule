@@ -40,21 +40,21 @@ trait GenericAEVT {
   * or more arguments and then add generic attributes:
   * {{{
   *   // Create AEVT Index molecule with 1 entity id argument
-  *   AEVT(":person/name").e.v.t.get === List(
+  *   AEVT(":Person/name").e.v.t.get === List(
   *     (e1, "Ben", t2),
   *     (e2, "Liz", t5)
   *   )
   *
   *   // Narrow search with multiple arguments
-  *   AEVT(":person/name", e1).e.v.get === List( (e1, "Ben") )
-  *   AEVT(":person/name", e1, "Ben").e.v.get === List( (e1, "Ben") )
-  *   AEVT(":person/name", e1, "Ben", t2).e.v.get === List( (e1, "Ben") )
+  *   AEVT(":Person/name", e1).e.v.get === List( (e1, "Ben") )
+  *   AEVT(":Person/name", e1, "Ben").e.v.get === List( (e1, "Ben") )
+  *   AEVT(":Person/name", e1, "Ben", t2).e.v.get === List( (e1, "Ben") )
   * }}}
   *
   * Index attributes available:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)

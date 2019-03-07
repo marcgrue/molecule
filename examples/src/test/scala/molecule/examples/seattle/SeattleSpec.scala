@@ -1,46 +1,28 @@
 package molecule.examples.seattle
 
-import java.io.FileReader
-import datomic.{Connection, Peer, Util}
-//import molecule.api.all._
-import molecule.factory.Molecule_Factory8._
 import molecule.api.core._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.examples.seattle.schema.SeattleSchema
+import molecule.examples.seattle.schema._
 import molecule.facade.Conn
+import molecule.factory.Molecule_Factory8._
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 
 
 trait SeattleSpec extends MoleculeSpec {
 
-  def loadFromFiles(schemaFile: String, dataFile: String, version: Int): Connection = {
-    val uri = "datomic:mem://seattle" + version
-    Peer.deleteDatabase(uri)
-    Peer.createDatabase(uri)
-    implicit val conn = Peer.connect(uri)
-
-    val dataDir = "examples/resources/seattle/"
-    val schema_rdr = new FileReader(dataDir + schemaFile)
-    val schema_tx = Util.readAll(schema_rdr).get(0).asInstanceOf[java.util.List[_]]
-    conn.transact(schema_tx).get()
-
-    val data_rdr = new FileReader(dataDir + dataFile)
-    val data_tx = Util.readAll(data_rdr).get(0).asInstanceOf[java.util.List[_]]
-    conn.transact(data_tx).get()
-
-    conn
-  }
-
   class SeattleSetup extends Scope {
     implicit val conn: Conn = recreateDbFrom(SeattleSchema)
+
+    // Add lowercase-namespaced attribute names so that we can import data with those names
+    conn.datomicConn.transact(SeattleSchemaUpperToLower.namespaces)
+
     // Insert data
-    m(Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$)
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
   def loadSeattle(version: Int): Conn = {
-    implicit val conn: Conn = recreateDbFrom(SeattleSchema, "resources/seattle" + version)
+    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
 
     // Insert data
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData

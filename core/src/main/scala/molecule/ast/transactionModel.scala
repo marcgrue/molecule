@@ -27,9 +27,9 @@ object transactionModel {
     }).asInstanceOf[Object]
 
     def toJava: jList[_] = this match {
-      case _: RetractEntity     => Util.list(action, e.asInstanceOf[Object])
-      case _: Cas               => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(oldV), value(v))
-      case _                    => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(v))
+      case _: RetractEntity => Util.list(action, e.asInstanceOf[Object])
+      case _: Cas           => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(oldV), value(v))
+      case _                => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(v))
     }
   }
 
@@ -61,10 +61,10 @@ object transactionModel {
 
 
   def toJava(stmtss: Seq[Seq[Statement]]): jList[jList[_]] = stmtss.flatten.map {
-    case Add(e, a, i: Int, meta)             => Add(e, a, i.toLong: java.lang.Long, meta).toJava
-    case Add(e, a, f: Float, meta)           => Add(e, a, f.toDouble: java.lang.Double, meta).toJava
-    case Add(e, a, bigInt: BigInt, meta)     => Add(e, a, bigInt.bigInteger, meta).toJava
-    case Add(e, a, bigDec: BigDecimal, meta) => Add(e, a, bigDec.bigDecimal, meta).toJava
-    case other                               => other.toJava
+    case Add(e, a, i: Int, bi)             => Add(e, a, i.toLong: java.lang.Long, bi).toJava
+    case Add(e, a, f: Float, bi)           => Add(e, a, f.toDouble: java.lang.Double, bi).toJava
+    case Add(e, a, bigInt: BigInt, bi)     => Add(e, a, bigInt.bigInteger, bi).toJava
+    case Add(e, a, bigDec: BigDecimal, bi) => Add(e, a, bigDec.bigDecimal, bi).toJava
+    case other                             => other.toJava
   }.asJava
 }

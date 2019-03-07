@@ -92,11 +92,11 @@ class Aggregates extends MoleculeSpec {
 
     // How many attributes does this schema use?
     Schema.a.get.sorted === List(
-      ":data/source",
-      ":monster/heads",
-      ":monster/name",
-      ":obj/meanRadius",
-      ":obj/name"
+      ":Data/source",
+      ":Monster/heads",
+      ":Monster/name",
+      ":Obj/meanRadius",
+      ":Obj/name",
     )
     Schema.a(count).get.head === 5
 

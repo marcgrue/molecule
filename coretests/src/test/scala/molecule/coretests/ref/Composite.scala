@@ -22,13 +22,13 @@ class Composite extends CoreSpec {
       // Two entities created
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/int" -> 11,
-        ":ref2/int2" -> 1
+        ":Ns/int" -> 11,
+        ":Ref2/int2" -> 1
       )
       e2.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ns/int" -> 22,
-        ":ref2/int2" -> 2
+        ":Ns/int" -> 22,
+        ":Ref2/int2" -> 2
       )
 
       // Queries via each namespace
@@ -55,15 +55,15 @@ class Composite extends CoreSpec {
       // Two entities created
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/int" -> 11,
-        ":ns/str" -> "aa",
-        ":ref2/int2" -> 1
+        ":Ns/int" -> 11,
+        ":Ns/str" -> "aa",
+        ":Ref2/int2" -> 1
       )
       e2.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ns/int" -> 22,
-        ":ns/str" -> "bb",
-        ":ref2/int2" -> 2
+        ":Ns/int" -> 22,
+        ":Ns/str" -> "bb",
+        ":Ref2/int2" -> 2
       )
 
       // Queries via each namespace
@@ -97,15 +97,15 @@ class Composite extends CoreSpec {
       // Two entities created
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/int" -> 11,
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ns/int" -> 11,
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
       e2.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ns/int" -> 22,
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ns/int" -> 22,
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
 
       // Queries via each namespace
@@ -137,17 +137,17 @@ class Composite extends CoreSpec {
       // Two entities created
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/int" -> 11,
-        ":ns/str" -> "aa",
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ns/int" -> 11,
+        ":Ns/str" -> "aa",
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
       e2.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ns/int" -> 22,
-        ":ns/str" -> "bb",
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ns/int" -> 22,
+        ":Ns/str" -> "bb",
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
 
       // Queries via each namespace
@@ -181,22 +181,23 @@ class Composite extends CoreSpec {
       // Three (!) entities created
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ref1/int1" -> 11,
-        ":ref1/str1" -> "aa",
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ref1/int1" -> 11,
+        ":Ref1/str1" -> "aa",
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
       e2.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ref1/int1" -> 22,
-        ":ref1/str1" -> "bb",
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ref1/int1" -> 22,
+        ":Ref1/str1" -> "bb",
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
       txId.touchList === List(
         ":db/id" -> 13194139534340L,
+        ":Ns/str" -> "Tx meta data",
         ":db/txInstant" -> txId(":db/txInstant").get,
-        ":ns/str" -> "Tx meta data")
+      )
 
       // Queries via one namespace
       Ref2.int2.str2.get.sorted === List(
@@ -400,29 +401,29 @@ class Composite extends CoreSpec {
       // First entity (including referenced entity)
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/ref1" -> List((":db/id", 17592186045446L), (":ref1/int1", 11)),
-        ":ns/str" -> "aa",
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ns/ref1" -> List((":db/id", 17592186045446L), (":Ref1/int1", 11)),
+        ":Ns/str" -> "aa",
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
       // First referenced entity (same as we see included above)
       r1.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ref1/int1" -> 11
+        ":Ref1/int1" -> 11
       )
 
       // Second entity (including referenced entity)
       e2.touchList === List(
         ":db/id" -> 17592186045447L,
-        ":ns/ref1" -> List((":db/id", 17592186045448L), (":ref1/int1", 22)),
-        ":ns/str" -> "bb",
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ns/ref1" -> List((":db/id", 17592186045448L), (":Ref1/int1", 22)),
+        ":Ns/str" -> "bb",
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
       // Second referenced entity (same as we see included above)
       r2.touchList === List(
         ":db/id" -> 17592186045448L,
-        ":ref1/int1" -> 22
+        ":Ref1/int1" -> 22
       )
 
       // Queries via each namespace
@@ -453,30 +454,30 @@ class Composite extends CoreSpec {
       // First entity (including referenced entity)
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/refs1" -> List(List((":db/id", 17592186045446L), (":ref1/int1", 11))),
-        ":ns/str" -> "aa",
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ns/refs1" -> List(List((":db/id", 17592186045446L), (":Ref1/int1", 11))),
+        ":Ns/str" -> "aa",
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
 
       // First referenced entity (same as we see included above)
       r11.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ref1/int1" -> 11
+        ":Ref1/int1" -> 11
       )
 
       // Second entity (including referenced entity)
       e2.touchList === List(
         ":db/id" -> 17592186045447L,
-        ":ns/refs1" -> List(List((":db/id", 17592186045448L), (":ref1/int1", 22))),
-        ":ns/str" -> "bb",
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ns/refs1" -> List(List((":db/id", 17592186045448L), (":Ref1/int1", 22))),
+        ":Ns/str" -> "bb",
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
       // Second referenced entity (same as we see included above)
       r22.touchList === List(
         ":db/id" -> 17592186045448L,
-        ":ref1/int1" -> 22
+        ":Ref1/int1" -> 22
       )
 
       // Queries via each namespace
@@ -507,28 +508,28 @@ class Composite extends CoreSpec {
       // First entity (including referenced entity)
       e1.touchList === List(
         ":db/id" -> 17592186045445L,
-        ":ns/refs1" -> List(List((":db/id", 17592186045446L), (":ref1/int1", 11))),
-        ":ref2/int2" -> 1,
-        ":ref2/str2" -> "a"
+        ":Ns/refs1" -> List(List((":db/id", 17592186045446L), (":Ref1/int1", 11))),
+        ":Ref2/int2" -> 1,
+        ":Ref2/str2" -> "a"
       )
 
       // First referenced entity (same as we see included above)
       r11.touchList === List(
         ":db/id" -> 17592186045446L,
-        ":ref1/int1" -> 11
+        ":Ref1/int1" -> 11
       )
 
       // Second entity (including referenced entity)
       e2.touchList === List(
         ":db/id" -> 17592186045447L,
-        ":ns/refs1" -> List(List((":db/id", 17592186045448L), (":ref1/int1", 22))),
-        ":ref2/int2" -> 2,
-        ":ref2/str2" -> "b"
+        ":Ns/refs1" -> List(List((":db/id", 17592186045448L), (":Ref1/int1", 22))),
+        ":Ref2/int2" -> 2,
+        ":Ref2/str2" -> "b"
       )
       // Second referenced entity (same as we see included above)
       r22.touchList === List(
         ":db/id" -> 17592186045448L,
-        ":ref1/int1" -> 22
+        ":Ref1/int1" -> 22
       )
 
       // Queries via each namespace
@@ -558,31 +559,31 @@ class Composite extends CoreSpec {
       expectCompileError(
         "m(Ns.int + Ns.int)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:ns/int`")
+          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:Ns/int`")
 
       // 0 + 2 attr
       expectCompileError(
         "m(Ns.int + Ns.str.str)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:ns/str`")
+          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:Ns/str`")
 
       // 1 + 1 ref
       expectCompileError(
         "m(Ns.bool.Ref1.int1 + Ns.str.Ref1.int1)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite molecules can't contain the same ref more than once. Found multiple instances of `:ns/ref1`")
+          "Composite molecules can't contain the same ref more than once. Found multiple instances of `:Ns/ref1`")
 
       // 0 + 2 attr after backref
       expectCompileError(
         "m(Ns.int + Ref1.int1.Ref2.int2._Ref1.int1)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:ref1/int1`")
+          "Composite molecules can't contain the same attribute more than once. Found multiple instances of `:Ref1/int1`")
 
       // 0 + 2 ref after backref
       expectCompileError(
         "m(Ns.int + Ref1.int1.Ref2.int2._Ref1.str1.Ref2.str2)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite molecules can't contain the same ref more than once. Found multiple instances of `:ref1/ref2`")
+          "Composite molecules can't contain the same ref more than once. Found multiple instances of `:Ref1/ref2`")
 
       ok
     }
@@ -594,19 +595,19 @@ class Composite extends CoreSpec {
       expectCompileError(
         "m(Ref1.int1 + Ns.int.Ref1.int1.int1)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite sub-molecules can't contain the same attribute more than once. Found multiple instances of `:ref1/int1`")
+          "Composite sub-molecules can't contain the same attribute more than once. Found multiple instances of `:Ref1/int1`")
 
       // 2 attr after backref
       expectCompileError(
         "m(Ref1.int1 + Ns.int.Ref1.int1.Ref2.int2._Ref1.int1)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite sub-molecules can't contain the same attribute more than once. Found multiple instances of `:ref1/int1`")
+          "Composite sub-molecules can't contain the same attribute more than once. Found multiple instances of `:Ref1/int1`")
 
       // 2 ref
       expectCompileError(
         "m(Ref1.int1 + Ns.int.Ref1.int1.Ref2.int2._Ref1.str1.Ref2.str2)",
         "molecule.transform.exception.Dsl2ModelException: " +
-          "Composite sub-molecules can't contain the same ref more than once. Found multiple instances of `:ref1/ref2`")
+          "Composite sub-molecules can't contain the same ref more than once. Found multiple instances of `:Ref1/ref2`")
 
       ok
     }

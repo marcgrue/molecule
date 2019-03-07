@@ -55,7 +55,7 @@ class Input1URI extends CoreSpec {
           Find(List(
             Var("b"))),
           Where(List(
-            DataClause(ImplDS, Var("a"), KW("ns", "uri", ""), Var("b"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uri"), Var("b"), Empty, NoBinding),
             Funct("""ground (java.net.URI. "uri1")""", Seq(Empty), ScalarBinding(Var("b_1a"))),
             Funct(".compareTo ^java.net.URI", Seq(Var("b"), Var("b_1a")), ScalarBinding(Var("b_1b"))),
             Funct("!=", Seq(Var("b_1b"), Val(0)), NoBinding),
@@ -201,12 +201,12 @@ class Input1URI extends CoreSpec {
             AggrExpr("distinct", Seq(), Var("c")))),
           In(
             List(
-              Placeholder(Var("a"), KW("ns", "uris", ""), Var("c"), None)),
+              Placeholder(Var("a"), KW("Ns", "uris"), Var("c"), None)),
             List(),
             List(DS)),
           Where(List(
-            DataClause(ImplDS, Var("a"), KW("ns", "uri", ""), Var("b"), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c"), Empty, NoBinding))))
+            DataClause(ImplDS, Var("a"), KW("Ns", "uri"), Var("b"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c"), Empty, NoBinding))))
 
 
         inputMolecule(Nil).get === Nil
@@ -220,8 +220,8 @@ class Input1URI extends CoreSpec {
             List(),
             List(DS)),
           Where(List(
-            DataClause(ImplDS, Var("a"), KW("ns", "uri", ""), Var("b"), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c"), Empty, NoBinding))))
+            DataClause(ImplDS, Var("a"), KW("Ns", "uri"), Var("b"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c"), Empty, NoBinding))))
 
         inputMolecule(List(Set[URI]())).get === Nil
 
@@ -238,11 +238,11 @@ class Input1URI extends CoreSpec {
             List(
               Rule("rule1", Seq(Var("a")), Seq(
                 Funct("""ground (java.net.URI. "uri1")""", Seq(Empty), ScalarBinding(Var("c_uri1"))),
-                DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c_uri1"), Empty, NoBinding)))),
+                DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c_uri1"), Empty, NoBinding)))),
             List(DS)),
           Where(List(
-            DataClause(ImplDS, Var("a"), KW("ns", "uri", ""), Var("b"), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uri"), Var("b"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c"), Empty, NoBinding),
             RuleInvocation("rule1", Seq(Var("a"))))))
 
         inputMolecule(List(Set(uri1, uri1))).get === List((uri1, Set(uri1, uri2)))
@@ -256,13 +256,13 @@ class Input1URI extends CoreSpec {
             List(
               Rule("rule1", Seq(Var("a")), Seq(
                 Funct("""ground (java.net.URI. "uri1")""", Seq(Empty), ScalarBinding(Var("c_uri1"))),
-                DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c_uri1"), Empty, NoBinding),
+                DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c_uri1"), Empty, NoBinding),
                 Funct("""ground (java.net.URI. "uri2")""", Seq(Empty), ScalarBinding(Var("c_uri2"))),
-                DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c_uri2"), Empty, NoBinding)))),
+                DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c_uri2"), Empty, NoBinding)))),
             List(DS)),
           Where(List(
-            DataClause(ImplDS, Var("a"), KW("ns", "uri", ""), Var("b"), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "uris", ""), Var("c"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uri"), Var("b"), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "uris"), Var("c"), Empty, NoBinding),
             RuleInvocation("rule1", Seq(Var("a"))))))
 
 

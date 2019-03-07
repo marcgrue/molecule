@@ -48,21 +48,21 @@ trait GenericVAET {
   *
   *   // .. then we can get the reverse relationships with the VAET Index:
   *   VAET(a1).v.a.e.get === List(
-  *     (a1, ":release/artists", r1),
-  *     (a1, ":release/artists", r2),
-  *     (a1, ":release/artists", r3),
+  *     (a1, ":Release/artists", r1),
+  *     (a1, ":Release/artists", r2),
+  *     (a1, ":Release/artists", r3),
   *   )
   *
   *   // Narrow search with multiple arguments
-  *   VAET(a1, ":release/artist").e.get === List(r1, r2, r3)
-  *   VAET(a1, ":release/artist", r2).e.get === List(r2)
-  *   VAET(a1, ":release/artist", r2, t7).e.get === List(r2)
+  *   VAET(a1, ":Release/artist").e.get === List(r1, r2, r3)
+  *   VAET(a1, ":Release/artist", r2).e.get === List(r2)
+  *   VAET(a1, ":Release/artist", r2, t7).e.get === List(r2)
   * }}}
   *
   * Index attributes available:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)

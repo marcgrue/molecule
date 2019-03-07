@@ -28,11 +28,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(Nil).get === Nil
@@ -45,7 +45,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === Nil
@@ -58,7 +58,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set(int1))).get === List(Set(int1, int2))
@@ -69,10 +69,10 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
     inputMolecule(List(Set(int2))).get === List(Set(int1, int2, int3)) // (int1, int2) + (int2, int3)
@@ -87,10 +87,10 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -102,11 +102,11 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
     inputMolecule(List(Set(int1, int3))).get === Nil
@@ -122,11 +122,11 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -138,10 +138,10 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -153,12 +153,12 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
     inputMolecule(List(Set(int1), Set(int3))).get === List(Set(int1, int4, int3, int2)) // (int1, int2) + (int2, int3) + (int3, int4)
@@ -172,13 +172,13 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -190,13 +190,13 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -208,14 +208,14 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
 
@@ -227,14 +227,14 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding))),
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding),
-            DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int4), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding),
+            DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int4), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         RuleInvocation("rule1", Seq(Var("a"))))))
   }
 
@@ -254,11 +254,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b1"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b1"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct("!=", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -268,7 +268,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int1, int2, int3, int4, int5))
@@ -276,7 +276,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set(int1))).get === List(Set(int2, int3, int4, int5))
@@ -284,9 +284,9 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding))))))
 
     inputMolecule(List(Set(int2))).get === List(Set(int3, int4, int5))
     inputMolecule(List(Set(int3))).get === Nil
@@ -297,10 +297,10 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding))))))
 
 
     // nothing omitted
@@ -309,10 +309,10 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(int1), Set(int1))).get === List(Set(int2, int3, int4, int5))
@@ -320,9 +320,9 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(int1), Set(int2))).get === List(Set(int3, int4, int5))
@@ -330,11 +330,11 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(2), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(2), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(int1), Set(int3))).get === Nil
@@ -347,12 +347,12 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(1), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(2), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(1), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(2), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(3), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(3), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(int1, int2), Set(int2, int3))).get === List(Set(int3, int4, int5))
@@ -360,13 +360,13 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int1), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int1), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int2), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Val(int3), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int2), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Val(int3), Empty, NoBinding))))))
   }
 
 
@@ -378,11 +378,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b1"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b1"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct(">", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -392,7 +392,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
@@ -400,7 +400,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     // (int3, int4), (int4, int5), (int4, int5, int6)
@@ -414,7 +414,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct(">", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -438,11 +438,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b1"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b1"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct(">=", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -452,7 +452,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
@@ -460,7 +460,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     // (int2, int4), (int3, int4), (int4, int5), (int4, int5, int6)
@@ -474,7 +474,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct(">=", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -498,11 +498,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b1"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b1"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct("<", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -512,7 +512,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
@@ -520,7 +520,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set(int2))).get === List(Set(int1))
@@ -533,7 +533,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct("<", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -557,11 +557,11 @@ class IntCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "ints", ""), Var("b1"), None)),
+          Placeholder(Var("a"), KW("Ns", "ints"), Var("b1"), None)),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct("<=", Seq(Var("b2"), Val(0)), NoBinding))))
 
@@ -571,7 +571,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
@@ -579,7 +579,7 @@ class IntCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
 
 
     inputMolecule(List(Set(int2))).get === List(Set(int1, int2))
@@ -592,7 +592,7 @@ class IntCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "ints", ""), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding),
         Funct(".compareTo ^Long", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
         Funct("<=", Seq(Var("b2"), Val(0)), NoBinding))))
 

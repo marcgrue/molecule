@@ -3,6 +3,7 @@ package molecule.coretests.equality
 import molecule.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.util.expectCompileError
 
 class ApplyString extends CoreSpec {
 
@@ -311,6 +312,17 @@ class ApplyString extends CoreSpec {
 
       // `and`
       Ns.int.strs_.apply(str1 and str2).get === List(1)
+    }
+
+
+    "String interpolation" in new ManySetup {
+
+      val world = "world"
+
+      // Applying string-interpolated value not allowed to compile
+      // Ns.str(s"hello $world").get
+
+      ok
     }
   }
 }

@@ -95,18 +95,18 @@ class Since extends CoreSpec {
 
     Ns.int.getJsonSince(t2) ===
       """[
-        |{"ns.int": 3}
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(t1) ===
       """[
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(t1, 1) ===
       """[
-        |{"ns.int": 2}
+        |{"Ns.int": 2}
         |]""".stripMargin
 
 
@@ -114,18 +114,18 @@ class Since extends CoreSpec {
 
     Ns.int.getJsonSince(tx2) ===
       """[
-        |{"ns.int": 3}
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(tx1) ===
       """[
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(tx1, 1) ===
       """[
-        |{"ns.int": 2}
+        |{"Ns.int": 2}
         |]""".stripMargin
 
 
@@ -133,18 +133,18 @@ class Since extends CoreSpec {
 
     Ns.int.getJsonSince(d2) ===
       """[
-        |{"ns.int": 3}
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(d1) ===
       """[
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonSince(d1, 1) ===
       """[
-        |{"ns.int": 2}
+        |{"Ns.int": 2}
         |]""".stripMargin
 
   }

@@ -65,27 +65,27 @@ class QueryTour extends MoleculeSpec {
     // Attributes of all entities having comments
     val commentIds = Parent.e.comment_.get
     Parent(commentIds).a.get.sorted === List(
-      ":comment/author",
-      ":comment/text",
-      ":parent/comment",
-      ":story/title",
-      ":story/url"
+      ":Comment/author",
+      ":Comment/text",
+      ":Parent/comment",
+      ":Story/title",
+      ":Story/url"
     )
 
     // Attributes of stories having comments
     val storiesWithComments = m(Story.e.title_ + Parent.comment_).get
     Story(storiesWithComments).a.get === List(
-      ":parent/comment",
-      ":story/title",
-      ":story/url"
+      ":Story/url",
+      ":Story/title",
+      ":Parent/comment",
     )
 
     // Attributes of comments having a sub-comment
     val commentsWithSubComments = m(Comment.e.text_ + Parent.comment_).get
     Comment(commentsWithSubComments).a.get.sorted === List(
-      ":comment/author",
-      ":comment/text",
-      ":parent/comment"
+      ":Comment/author",
+      ":Comment/text",
+      ":Parent/comment"
     )
   }
 
@@ -98,7 +98,7 @@ class QueryTour extends MoleculeSpec {
 
 
     // 12. Requesting an Attribute value
-    editor(":user/firstName") === Some("Ed")
+    editor(":User/firstName") === Some("Ed")
 
     // Or as query
     User(editor).firstName.get.head === "Ed"
@@ -108,16 +108,16 @@ class QueryTour extends MoleculeSpec {
     // Get all attributes/values of this entity. Sub-component values are recursively retrieved
     editor.touch === Map(
       ":db/id" -> 17592186045424L,
-      ":user/email" -> "editor@example.com",
-      ":user/firstName" -> "Ed",
-      ":user/lastName" -> "Itor"
+      ":User/email" -> "editor@example.com",
+      ":User/firstName" -> "Ed",
+      ":User/lastName" -> "Itor"
     )
 
 
     // 14. Navigating backwards
 
     // The editors comments (Comments pointing to the Editor entity)
-    editor(":comment/_author") === Some(List(c2, c4, c5, c7, c11))
+    editor(":Comment/_author") === Some(List(c2, c4, c5, c7, c11))
 
     // .. almost same as: (here, only matching data is returned)
     // Comments of editor
@@ -129,20 +129,20 @@ class QueryTour extends MoleculeSpec {
     // Todo: using the entity api like this is clumsy. Find a better way...
 
     // Comments to the editors comments (with mapping)
-    editor(":comment/_author").get.asInstanceOf[List[Long]]
-      .flatMap(_(":parent/comment")).asInstanceOf[List[Map[String, Any]]]
+    editor(":Comment/_author").get.asInstanceOf[List[Long]]
+      .flatMap(_(":Parent/comment")).asInstanceOf[List[Map[String, Any]]]
       .map(_.head._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with `for` comprehension)
     (for {
-      editorComment <- editor(":comment/_author").get.asInstanceOf[List[Long]]
-      editorCommentComment <- editorComment(":parent/comment").asInstanceOf[Option[Map[String, Any]]]
+      editorComment <- editor(":Comment/_author").get.asInstanceOf[List[Long]]
+      editorCommentComment <- editorComment(":Parent/comment").asInstanceOf[Option[Map[String, Any]]]
     } yield editorCommentComment.head._2) === List(c3, c6, c8, c12)
 
     // todo - make some nice entity traversal dsl instead of this...
 //    (for {
-//      comments <- editor.apply[Seq[Long]](":comment/_author").get
-//      subComments <- comments.apply[Map[String, Any]](":parent/comment").get
+//      comments <- editor.apply[Seq[Long]](":Comment/_author").get
+//      subComments <- comments.apply[Map[String, Any]](":Parent/comment").get
 //    } yield subComments._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)

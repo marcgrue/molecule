@@ -35,7 +35,7 @@ object Conn {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  * */
+  **/
 class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   // Temporary db for ad-hoc queries against time variation dbs
@@ -346,8 +346,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *
     *   // Paste Datomic query into `q` call
     *   conn.q("""[:find  ?b ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin) === List(
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin) === List(
     *     List("Liz", 37),
     *     List("Ben", 42)
     *   )
@@ -356,8 +356,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *   // by adding input to query and applying input value
     *   conn.q("""[:find  ?b ?c
     *            | :in    $ ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin, 42) === List(
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin, 42) === List(
     *     List("Ben", 42)
     *   )
     * }}}
@@ -365,7 +365,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
-    * */
+    **/
   def q(query: String, inputs: Any*): List[List[AnyRef]] = q(db, query, inputs.toSeq)
 
 
@@ -383,8 +383,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *   // Paste Datomic query into `q` call and use some db value
     *   conn.q(conn.db,
     *          """[:find  ?b ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin) === List(
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin) === List(
     *     List("Liz", 37),
     *     List("Ben", 42)
     *   )
@@ -394,8 +394,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *   conn.q(conn.db,
     *          """[:find  ?b ?c
     *            | :in    $ ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin,
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin,
     *          Seq(42) // input values in list
     *    ) === List(
     *     List("Ben", 42)
@@ -406,9 +406,15 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
-    * */
+    **/
   def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
-    collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList.map(asScalaBufferConverter(_).asScala.toList)
+    collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList
+      .map(asScalaBufferConverter(_).asScala.toList
+        .map {
+          case set: clojure.lang.PersistentHashSet => asScalaSetConverter(set).asScala.toSet
+          case other                               => other
+        }
+      )
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.
@@ -424,22 +430,22 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *
     *   // Paste Datomic query into `q` call
     *   conn.q("""[:find  ?b ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin)
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin)
     *       .toString === """[["Liz" 37], ["Ben" 42]]"""
     *
     *   // Modify Datomic query to see result, for instance
     *   // by adding input to query and applying input value
     *   conn.q("""[:find  ?b ?c
     *            | :in    $ ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin, 42).toString === """[["Ben" 42]]"""
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin, 42).toString === """[["Ben" 42]]"""
     * }}}
     *
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
+    **/
   def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] = qRaw(db, query, inputs)
 
 
@@ -457,8 +463,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *   // Paste Datomic query into `q` call and use some db value
     *   conn.q(conn.db,
     *          """[:find  ?b ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin)
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin)
     *       .toString === """[["Liz" 37], ["Ben" 42]]"""
     *
     *   // Modify Datomic query to see result, for instance
@@ -466,8 +472,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     *   conn.q(conn.db,
     *          """[:find  ?b ?c
     *            | :in    $ ?c
-    *            | :where [?a :ns/str ?b]
-    *            |        [?a :ns/int ?c]]""".stripMargin,
+    *            | :where [?a :Ns/str ?b]
+    *            |        [?a :Ns/int ?c]]""".stripMargin,
     *          Seq(42) // input values in list
     *    ).toString === """[["Ben" 42]]"""
     * }}}
@@ -476,7 +482,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
+    **/
   def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] =
     blocking(Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*))
 
@@ -495,7 +501,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param model [[molecule.ast.model.Model Model]] instance
     * @param query [[molecule.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
     case Meta("log" | "eavt" | "aevt" | "avet" | "vaet", _, _, _) => _index(model)
     case _                                                        => _query(model, query)

@@ -11,15 +11,15 @@ package molecule.generic
   *
   *   // Attribute name elements
   *   Schema.a.part.ns.nsFull.attr.get === List (
-  *     (":sales_Customer/name", "sales", "customer", "sales_Customer", "name"),
-  *     (":sales_Customer/name", "sales", "customer", "sales_Customer", "name"),
+  *     (":sales_Customer/name", "sales", "Customer", "sales_Customer", "name"),
+  *     (":sales_Customer/name", "sales", "Customer", "sales_Customer", "name"),
   *     // etc..
   *   )
   *
   *   // Datomic type and cardinality of attributes
   *   Schema.a.tpe.card.get === List (
-  *     (":sales_customer/name", "string", "one"),
-  *     (":accounting_invoice/invoiceLine", "ref", "many"),
+  *     (":sales_Customer/name", "string", "one"),
+  *     (":accounting_Invoice/invoiceLine", "ref", "many"),
   *   )
   *
   *   // Optional docs and attribute options
@@ -32,7 +32,7 @@ package molecule.generic
   *         .isComponent$
   *         .noHistory$
   *         .get === List(
-  *     (":sales_customer/name",
+  *     (":sales_Customer/name",
   *       true,            // indexed
   *       "Customer name", // doc
   *       None,            // Uniqueness not set
@@ -40,7 +40,7 @@ package molecule.generic
   *       None,            // Not a component
   *       None             // History is preserved (noHistory not set)
   *       ),
-  *     (":accounting_invoice/invoiceLine",
+  *     (":accounting_Invoice/invoiceLine",
   *       true,                   // indexed
   *       "Ref to Invoice lines", // doc
   *       None,                   // Uniqueness not set
@@ -52,8 +52,8 @@ package molecule.generic
   *
   *   // Defined enum values
   *   Schema.a.enum.get.groupBy(_._1).map(g => g._1 -> g._2) === Map(
-  *     ":person/gender" -> List("female", "male"),
-  *     ":interests/sports" -> List("golf", "basket", "badminton")
+  *     ":Person/gender" -> List("female", "male"),
+  *     ":Interests/sports" -> List("golf", "basket", "badminton")
   *   )
   *
   *   // Schema transaction times
@@ -66,10 +66,10 @@ package molecule.generic
   * Apply expressions to narrow the returned selection of Schema data:
   * {{{
   *   // Namespaces in the "gen" partition (partition name tacit)
-  *   Schema.part_("location").ns.get === List("country", "region", etc...)
+  *   Schema.part_("location").ns.get === List("Country", "Region", etc...)
   *
   *   // Attributes in the "Person" namespace
-  *   Schema.ns_("person").a.get === List("name", "age", "hobbies", etc...)
+  *   Schema.ns_("Person").attr.get === List("name", "age", "hobbies", etc...)
   *
   *   // How many enum attributes?
   *   Schema.enum_.a(count).get === List(2)

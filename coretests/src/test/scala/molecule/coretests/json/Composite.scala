@@ -16,8 +16,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2 + Ns.int).getJson ===
       """[
-        |[{"ref2.int2": 2}, {"ns.int": 22}],
-        |[{"ref2.int2": 1}, {"ns.int": 11}]
+        |[{"Ref2.int2": 2}, {"Ns.int": 22}],
+        |[{"Ref2.int2": 1}, {"Ns.int": 11}]
         |]""".stripMargin
   }
 
@@ -31,8 +31,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2 + Ns.int.str).getJson ===
       """[
-        |[{"ref2.int2": 1}, {"ns.int": 11, "ns.str": "aa"}],
-        |[{"ref2.int2": 2}, {"ns.int": 22, "ns.str": "bb"}]
+        |[{"Ref2.int2": 1}, {"Ns.int": 11, "Ns.str": "aa"}],
+        |[{"Ref2.int2": 2}, {"Ns.int": 22, "Ns.str": "bb"}]
         |]""".stripMargin
   }
 
@@ -46,8 +46,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.int).getJson ===
       """[
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22}],
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11}]
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.int": 22}],
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.int": 11}]
         |]""".stripMargin
   }
 
@@ -61,8 +61,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.int.str).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ns.str": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ns.str": "bb"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.int": 11, "Ns.str": "aa"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.int": 22, "Ns.str": "bb"}]
         |]""".stripMargin
   }
 
@@ -75,15 +75,15 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ref1.int1.str1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb"}]
         |]""".stripMargin
 
     // .. including transaction meta data
     m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str)).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa", "tx.ns.str": "Tx meta data"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb", "tx.ns.str": "Tx meta data"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ns.str": "Tx meta data"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ns.str": "Tx meta data"}]
         |]""".stripMargin
   }
 
@@ -97,8 +97,8 @@ class Composite extends CoreSpec {
     // Note how ref attr in tx meta data has both a `tx` and `ref1` prefix
     m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str.Ref1.int1)).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ref1.int1": 11, "ref1.str1": "aa", "tx.ns.str": "Tx meta data", "tx.ref1.ref1.int1": 42}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ref1.int1": 22, "ref1.str1": "bb", "tx.ns.str": "Tx meta data", "tx.ref1.ref1.int1": 42}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ns.str": "Tx meta data", "tx.ref1.Ref1.int1": 42}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ns.str": "Tx meta data", "tx.ref1.Ref1.int1": 42}]
         |]""".stripMargin
   }
 
@@ -111,8 +111,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.int.Ref1.str1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "ref1.ref1.str1": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "ref1.ref1.str1": "bb"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.int": 11, "ref1.Ref1.str1": "aa"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.int": 22, "ref1.Ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -125,8 +125,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.int.Refs1.str1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.int": 11, "refs1.ref1.str1": "aa"}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.int": 22, "refs1.ref1.str1": "bb"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.int": 11, "refs1.Ref1.str1": "aa"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.int": 22, "refs1.Ref1.str1": "bb"}]
         |]""".stripMargin
   }
 
@@ -139,14 +139,14 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.Refs1.int1).getJson ===
       """[
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"refs1.ref1.int1": 22}],
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"refs1.ref1.int1": 11}]
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"refs1.Ref1.int1": 22}],
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"refs1.Ref1.int1": 11}]
         |]""".stripMargin
 
     m(Ref2.int2.str2 + Ns.refs1).getJson ===
       """[
-        |[{"ref2.int2": 1, "ref2.str2": "a"}, {"ns.refs1": [17592186045446]}],
-        |[{"ref2.int2": 2, "ref2.str2": "b"}, {"ns.refs1": [17592186045448]}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.refs1": [17592186045446]}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.refs1": [17592186045448]}]
         |]""".stripMargin
   }
 }

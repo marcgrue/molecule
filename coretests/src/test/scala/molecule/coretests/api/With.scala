@@ -18,7 +18,7 @@ class With extends CoreSpec {
   val saveTx2 = Ns.int(2).getSaveTx
   val saveTx3 = Ns.int(3).getSaveTx
 
-  val data = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:ns/int 2} {:ns/int 3}]"
+  val data = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:Ns/int 2} {:Ns/int 3}]"
   val txData2_3 = Util.readAll(data).get(0).asInstanceOf[java.util.List[Object]]
 
 
@@ -58,35 +58,35 @@ class With extends CoreSpec {
 
     Ns.int.getJsonWith(saveTx2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
     Ns.int.getJsonWith(saveTx2, saveTx3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonWith(2, saveTx2, saveTx3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
 
     Ns.int.getJsonWith(txData2_3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonWith(txData2_3, 2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
   }

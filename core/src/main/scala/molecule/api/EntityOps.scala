@@ -139,13 +139,13 @@ trait EntityOps {
     *       1      Atom(metaData,user,String,1,Eq(List(Ben Goodman)),None,List(),List())))
     *   ------------------------------------------------
     *   2      List(
-    *     1      :db/add     'tx                             :metaData/user     Values(Eq(List(Ben Goodman)),None)   Card(1))
+    *     1      :db/add     'tx                             :MetaData/user     Values(Eq(List(Ben Goodman)),None)   Card(1))
     *   ------------------------------------------------
     *   3      List(
     *     1      List(
     *       1      :db.fn/retractEntity   17592186045445
     *       2      :db.fn/retractEntity   17592186045446
-    *       3      :db/add   #db/id[:db.part/tx -1000097]    :metaData/user     b                                    Card(1)))
+    *       3      :db/add   #db/id[:db.part/tx -1000097]    :MetaData/user     b                                    Card(1)))
     *   ===================================================================================================================
     * }}}
     *

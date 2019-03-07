@@ -1,5 +1,6 @@
 package molecule.schema
 
+import molecule.schema.definition.many
 import scala.annotation.StaticAnnotation
 
 /** Schema definition DSL.
@@ -58,9 +59,9 @@ import scala.annotation.StaticAnnotation
   * }}}
   *
   * @see [[http://www.scalamolecule.org/manual/schema/ Manual]]
-  *     | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Schema without partitions]],
-  *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/schemaDef/schema/PartitionTestDefinition.scala Schema with partitions]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/bidirectionals Bidirectionals]]
+  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Schema without partitions]],
+  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/schemaDef/schema/PartitionTestDefinition.scala Schema with partitions]],
+  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/bidirectionals Bidirectionals]]
   * @groupname setup Setup
   * @groupprio setup 1
   * @groupname opt Options
@@ -81,6 +82,7 @@ import scala.annotation.StaticAnnotation
 object definition {
 
   /** Arity annotation for number of molecule input/output attributes.
+    *
     * @group setup
     */
   class InOut(inputArity: Int = 3, outputArity: Int = 8) extends StaticAnnotation
@@ -89,6 +91,7 @@ object definition {
   // Options ---------------------------------------------------------
 
   /** Attribute options.
+    *
     * @group opt
     */
   sealed trait optionBuilder[Self] {
@@ -101,10 +104,10 @@ object definition {
       * Generated index for this attribute. By default all attributes are set with
       * the indexed option automatically by Molecule, so you don't need to set this.
       * */
-    lazy val indexed       : Self      = ???
+    lazy val indexed: Self = ???
 
     /** No history option. */
-    lazy val noHistory     : Self      = ???
+    lazy val noHistory: Self = ???
 
     /** Unique identity option.
       * <br><br>
@@ -114,7 +117,7 @@ object definition {
       * attributes associated with that temporary id to be merged with the entity
       * already in the database.
       * */
-    lazy val uniqueIdentity: oneString = ???
+    lazy val uniqueIdentity: Self = ???
 
     /** Unique value option.
       * <br><br>
@@ -122,13 +125,36 @@ object definition {
       * <br><br>
       * Attempts to insert a duplicate value for a different entity id will fail.
       * */
-    lazy val uniqueValue   : oneString = ???
+    lazy val uniqueValue: Self = ???
+  }
+
+
+  trait refOptionBuilder[RefType] extends optionBuilder[RefType] {
+
+    /** Apply namespace type to reference.
+      *
+      * @tparam RefNs Ref namespace type
+      */
+    def apply[RefNs]: RefType = ???
+
+    /** Is-component option.
+      * <br><br>
+      * Specifies that an attribute whose type is :db.type/ref is a component.
+      * <br><br>
+      * Referenced entities become subcomponents of the entity to which the attribute is applied.
+      * <br><br>
+      * When you retract an entity with :db.fn/retractEntity, all subcomponents are also retracted.
+      * <br><br>
+      * When you touch an entity, all its subcomponent entities are touched recursively.
+      */
+    lazy val isComponent: RefType = ???
   }
 
 
   // String ---------------------------------------------------------
 
   /** Card-one String attribute.
+    *
     * @group one
     */
   trait oneString extends optionBuilder[oneString] {
@@ -143,6 +169,7 @@ object definition {
 
 
   /** Card-many String attribute.
+    *
     * @group many
     */
   trait manyString extends optionBuilder[manyString] {
@@ -157,6 +184,7 @@ object definition {
 
 
   /** String map attribute.
+    *
     * @group map
     */
   trait mapString extends optionBuilder[mapString] {
@@ -183,6 +211,7 @@ object definition {
   // Int ---------------------------------------------------------
 
   /** Card-one Int attribute.
+    *
     * @group one
     */
   trait oneInt extends number[oneInt, Int]
@@ -190,6 +219,7 @@ object definition {
 
 
   /** Card-many Int attribute.
+    *
     * @group many
     */
   trait manyInt extends number[manyInt, Int]
@@ -197,6 +227,7 @@ object definition {
 
 
   /** Int map attribute.
+    *
     * @group map
     */
   trait mapInt extends number[mapInt, Int]
@@ -206,6 +237,7 @@ object definition {
   // Long ---------------------------------------------------------
 
   /** Card-one Long attribute.
+    *
     * @group one
     */
   trait oneLong extends number[oneLong, Long]
@@ -213,6 +245,7 @@ object definition {
 
 
   /** Card-many Long attribute.
+    *
     * @group many
     */
   trait manyLong extends number[manyLong, Long]
@@ -220,6 +253,7 @@ object definition {
 
 
   /** Long map attribute.
+    *
     * @group map
     */
   trait mapLong extends number[mapLong, Long]
@@ -229,6 +263,7 @@ object definition {
   // Float ---------------------------------------------------------
 
   /** Card-one Float attribute.
+    *
     * @group one
     */
   trait oneFloat extends number[oneFloat, Float]
@@ -236,6 +271,7 @@ object definition {
 
 
   /** Card-many Float attribute.
+    *
     * @group many
     */
   trait manyFloat extends number[manyFloat, Float]
@@ -243,6 +279,7 @@ object definition {
 
 
   /** Float map attribute.
+    *
     * @group map
     */
   trait mapFloat extends number[mapFloat, Float]
@@ -252,6 +289,7 @@ object definition {
   // Double ---------------------------------------------------------
 
   /** Card-one Double attribute.
+    *
     * @group one
     */
   trait oneDouble extends number[oneDouble, Double]
@@ -259,6 +297,7 @@ object definition {
 
 
   /** Card-many Double attribute.
+    *
     * @group many
     */
   trait manyDouble extends number[manyDouble, Double]
@@ -266,6 +305,7 @@ object definition {
 
 
   /** Double map attribute.
+    *
     * @group map
     */
   trait mapDouble extends number[mapDouble, Double]
@@ -275,6 +315,7 @@ object definition {
   // Boolean ---------------------------------------------------------
 
   /** Card-one Boolean attribute.
+    *
     * @group one
     */
   trait oneBoolean extends optionBuilder[oneBoolean]
@@ -282,6 +323,7 @@ object definition {
 
 
   /** Card-many Boolean attribute.
+    *
     * @group many
     */
   trait manyBoolean extends optionBuilder[manyBoolean]
@@ -289,6 +331,7 @@ object definition {
 
 
   /** Boolean map attribute.
+    *
     * @group map
     */
   trait mapBoolean extends optionBuilder[mapBoolean]
@@ -298,6 +341,7 @@ object definition {
   // BigInt ---------------------------------------------------------
 
   /** Card-one BigInt attribute.
+    *
     * @group one
     */
   trait oneBigInt extends number[oneBigInt, BigInt]
@@ -305,6 +349,7 @@ object definition {
 
 
   /** Card-many BigInt attribute.
+    *
     * @group many
     */
   trait manyBigInt extends number[manyBigInt, BigInt]
@@ -312,6 +357,7 @@ object definition {
 
 
   /** BigInt map attribute.
+    *
     * @group map
     */
   trait mapBigInt extends number[mapBigInt, BigInt]
@@ -321,6 +367,7 @@ object definition {
   // BigDecimal ---------------------------------------------------------
 
   /** Card-one BigDecimal attribute.
+    *
     * @group one
     */
   trait oneBigDecimal extends number[oneBigDecimal, BigDecimal]
@@ -328,6 +375,7 @@ object definition {
 
 
   /** Card-many BigDecimal attribute.
+    *
     * @group many
     */
   trait manyBigDecimal extends number[manyBigDecimal, BigDecimal]
@@ -335,6 +383,7 @@ object definition {
 
 
   /** BigDecimal map attribute.
+    *
     * @group map
     */
   trait mapBigDecimal extends number[mapBigDecimal, BigDecimal]
@@ -344,6 +393,7 @@ object definition {
   // Date ---------------------------------------------------------
 
   /** Card-one Date attribute.
+    *
     * @group one
     */
   trait oneDate extends optionBuilder[oneDate]
@@ -351,6 +401,7 @@ object definition {
 
 
   /** Card-many Date attribute.
+    *
     * @group many
     */
   trait manyDate extends optionBuilder[manyDate]
@@ -358,6 +409,7 @@ object definition {
 
 
   /** Date map attribute.
+    *
     * @group map
     */
   trait mapDate extends optionBuilder[mapDate]
@@ -367,6 +419,7 @@ object definition {
   // UUID ---------------------------------------------------------
 
   /** Card-one UUID attribute.
+    *
     * @group one
     */
   trait oneUUID extends optionBuilder[oneUUID]
@@ -374,6 +427,7 @@ object definition {
 
 
   /** Card-many UUID attribute.
+    *
     * @group many
     */
   trait manyUUID extends optionBuilder[manyUUID]
@@ -381,6 +435,7 @@ object definition {
 
 
   /** UUID map attribute.
+    *
     * @group map
     */
   trait mapUUID extends optionBuilder[mapUUID]
@@ -390,6 +445,7 @@ object definition {
   // URI ---------------------------------------------------------
 
   /** Card-one URI attribute.
+    *
     * @group one
     */
   trait oneURI extends optionBuilder[oneURI]
@@ -397,6 +453,7 @@ object definition {
 
 
   /** Card-many URI attribute.
+    *
     * @group many
     */
   trait manyURI extends optionBuilder[manyURI]
@@ -404,6 +461,7 @@ object definition {
 
 
   /** URI map attribute.
+    *
     * @group map
     */
   trait mapURI extends optionBuilder[mapURI]
@@ -413,6 +471,7 @@ object definition {
   // Bytes ---------------------------------------------------------
 
   /** Card-one Bytes attribute.
+    *
     * @group one
     */
   trait oneByte extends optionBuilder[oneByte]
@@ -420,6 +479,7 @@ object definition {
 
 
   /** Card-many Bytes attribute.
+    *
     * @group many
     */
   trait manyByte extends optionBuilder[manyByte]
@@ -427,6 +487,7 @@ object definition {
 
 
   /** Bytes map attribute.
+    *
     * @group map
     */
   trait mapByte extends optionBuilder[mapByte]
@@ -442,6 +503,7 @@ object definition {
 
 
   /** Card-one Enum attribute.
+    *
     * @group one
     */
   trait oneEnum extends enum
@@ -449,11 +511,11 @@ object definition {
 
 
   /** Card-many Enum attribute.
+    *
     * @group many
     */
   trait manyEnum extends enum
   object manyEnum extends manyEnum
-
 
 
   // Any ---------------------------------------------------------
@@ -463,6 +525,7 @@ object definition {
     * Do _not_ use in custom schema definitions.
     *
     * It is only implemented internally for generic log and indexes.
+    *
     * @group one
     */
   private[molecule] object oneAny extends optionBuilder[oneString]
@@ -473,61 +536,21 @@ object definition {
   /** Card-one reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/card-one/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
     * @group ref
     */
-  object one {
-
-    /** Apply namespace type to reference.
-      *
-      * @tparam RefNs Ref namespace type
-      */
-    def apply[RefNs] = this
-
-    /** Is-component option.
-      * <br><br>
-      * Specifies that an attribute whose type is :db.type/ref is a component.
-      * <br><br>
-      * Referenced entities become subcomponents of the entity to which the attribute is applied.
-      * <br><br>
-      * When you retract an entity with :db.fn/retractEntity, all subcomponents are also retracted.
-      * <br><br>
-      * When you touch an entity, all its subcomponent entities are touched recursively.
-      */
-    lazy val isComponent = this
-    def doc(s: String) = ??? // can only be last
-  }
+  trait one extends refOptionBuilder[one]
+  object one extends one
 
 
   /** Card-many reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/card-many/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
     * @group ref
     */
-  object many {
-
-    /** Apply namespace type to reference.
-      *
-      * @tparam RefNs Ref namespace type
-      */
-    def apply[RefNs] = this
-
-    /** Is-component option.
-      * <br><br>
-      * Specifies that an attribute whose type is :db.type/ref is a component.
-      * <br><br>
-      * Referenced entities become subcomponents of the entity to which the attribute is applied.
-      * <br><br>
-      * When you retract an entity with :db.fn/retractEntity, all subcomponents are also retracted.
-      * <br><br>
-      * When you touch an entity, all its subcomponent entities are touched recursively.
-      */
-    lazy val isComponent = this
-
-    /** Attribute description. */
-    def doc(s: String) = ???
-  }
+  trait many extends refOptionBuilder[many]
+  object many extends many
 
 
   // Bidirectional ref ---------------------------------------------------------
@@ -535,33 +558,21 @@ object definition {
   /** Card-one bi-directional reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group bi
     */
-  object oneBi {
-
-    /** Apply namespace type to reference. */
-    def apply[ThisNsOrRevRefAttr] = this
-
-    /** Attribute description */
-    def doc(s: String) = ???
-  }
+  trait oneBi extends refOptionBuilder[oneBi]
+  object oneBi extends oneBi
 
 
   /** Card-many bi-directional reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group bi
     */
-  object manyBi {
-
-    /** Apply namespace type to reference. */
-    def apply[ThisNsOrRevRefAttr] = this
-
-    /** Attribute description */
-    def doc(s: String) = ???
-  }
+  trait manyBi extends refOptionBuilder[manyBi]
+  object manyBi extends manyBi
 
 
   // Bidirectional edge ---------------------------------------------------------
@@ -569,48 +580,30 @@ object definition {
   /** Card-one bi-directional edge reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
-  object oneBiEdge {
-
-    /** Other end/start point of edges between different namespaces. */
-    def apply[ThisNsOrRevRefAttr] = this
-
-    /** Attribute description */
-    def doc(s: String) = ???
-  }
+  trait oneBiEdge extends refOptionBuilder[oneBiEdge]
+  object oneBiEdge extends oneBiEdge
 
 
   /** Card-many bi-directional edge reference.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
-  object manyBiEdge {
-
-    /** Other end/start point of edges between different namespaces. */
-    def apply[ThisNsOrRevRefAttr] = this
-
-    /** Attribute description */
-    def doc(s: String) = ???
-  }
+  trait manyBiEdge extends refOptionBuilder[manyBiEdge]
+  object manyBiEdge extends manyBiEdge
 
 
   /** Bi-directional edge target attribute.
     *
     * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
+    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
-  object target {
-
-    /** Apply namespace type to reference. */
-    def apply[biRefAttr] = this
-
-    /** Attribute description. */
-    def doc(s: String) = ???
-  }
+  trait target extends refOptionBuilder[target]
+  object target extends target
 }
 

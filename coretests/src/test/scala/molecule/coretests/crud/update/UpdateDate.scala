@@ -122,12 +122,12 @@ class UpdateDate extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).dates.replace(date7 -> date8, date8 -> date8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/dates`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
       expectCompileError(
         """Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> date8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/dates`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
 
@@ -136,13 +136,13 @@ class UpdateDate extends CoreSpec {
 
       (Ns(eid).dates.replace(date7 -> date8, date8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/dates`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\nThu Jan 01 01:00:08 CET 1970"
 
       // Conflicting new values
       (Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/dates`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\nThu Jan 01 01:00:08 CET 1970"
     }
 

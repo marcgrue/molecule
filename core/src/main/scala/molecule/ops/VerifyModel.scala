@@ -203,15 +203,6 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
         // Base.attr.edge ...
         case Atom(_, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) if extractNs(edgeRefAttr) == edgeNs => true
       }
-
-      //      elements.collectFirst {
-      // ?.. TargetNs
-      //        case Bond(edgeNs, _, _, _, Seq(BiTargetRef(_, _))) => hasBase(elements, edgeNs) getOrElse
-      //          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
-      // ?.. targetAttr
-      //        case Atom(edgeNs, _, _, _, _, _, Seq(BiTargetRefAttr(_, _)), _) => hasBase(elements, edgeNs) getOrElse
-      //          iae("edgeComplete", s"Missing base namespace before edge namespace `${Ns(edgeNs)}`.")
-      //      }
     }
 
     def missingTarget(elements: Seq[Element]): Unit = {
@@ -227,9 +218,6 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
         // Base.attr.Edge ..?
         case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
           err("edgeComplete", s"Missing target namespace after edge namespace `${Ns(edgeNs)}`.")
-        // Base.attr.edge ..?
-        //        case Atom(baseNs, _, _, _, _, _, Seq(BiEdgeRefAttr(_, edgeRefAttr)), _) => hasTarget(elements, extractNs(edgeRefAttr)) getOrElse
-        //          iae("edgeComplete", s"Missing target namespace after edge namespace `${extractNs(edgeRefAttr)}`.")
 
         // Edge.prop ..?
         case Atom(edgeNs, prop, _, _, _, _, Seq(BiEdgePropAttr(_)), _) =>
@@ -240,9 +228,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
     model.elements.head match {
       case Meta(ns, "e_", "e", Eq(List(eid))) => // BiEdge
-      case checkNext                          =>
-        //        missingBase(model.elements)
-        missingTarget(model.elements)
+      case checkNext                          => missingTarget(model.elements)
     }
   }
 

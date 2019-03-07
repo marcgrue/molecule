@@ -2,6 +2,7 @@ package molecule.examples.mbrainz
 import datomic.Peer
 import molecule.api.in1_out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
+import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec
 import scala.language.postfixOps
@@ -27,8 +28,15 @@ import scala.language.postfixOps
 */
 
 class MBrainz extends MoleculeSpec {
+  sequential
 
   implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
+
+  if (Schema.a(":Artist/name").get.isEmpty) {
+    // Add uppercase-namespaced attribute names so that we can access the externally
+    // transacted lowercase names with uppercase names of the molecule code.
+    conn.datomicConn.transact(MBrainzSchemaLowerToUpper.namespaces)
+  }
 
 
   "Data" >> {
@@ -36,7 +44,7 @@ class MBrainz extends MoleculeSpec {
     // What are the titles of all the tracks John Lennon played on?
     Track.name.Artists.name_("John Lennon").get(3) === List("Baby's Heartbeat", "John & Yoko", "Nutopian International Anthem")
 
-    // What are the titles, album names, and release years of John Lennon's tracks?
+        // What are the titles, album names, and release years of John Lennon's tracks?
     Release.year.name.Media.Tracks.name.Artists.name_("John Lennon").get(5) === List(
       (1969, "Unfinished Music No. 3: Wedding Album", "Amsterdam"),
       (1973, "Some Time in New York City", "Sunday Bloody Sunday"),
@@ -61,37 +69,44 @@ class MBrainz extends MoleculeSpec {
       (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
       (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
       (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"))
+
+
+    // How many male artists (checking enums)
+    Artist.gender_("male").e(count).get === List(1325)
+    Artist.gender_("female").e(count).get === List(309)
+    Artist.gender_("other").e(count).get === List(1)
   }
 
-  "Collaboration" >> {
 
-    // Who collaborated with one of the Beatles?
-    // Repeated attributes was translated to transitive lookups - model graph instead... todo
-    // Todo: model as graph with bidirectional relationships
-    //
-    //    Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.get === List(
-    //      ("John Lennon", "The Plastic Ono Band"),
-    //      ("George Harrison", "Bob Dylan"),
-    //      ("John Lennon", "Yoko Ono"),
-    //      ("George Harrison", "Ravi Shankar"),
-    //      ("Paul McCartney", "Linda McCartney"))
-    //
-    //    // Who directly collaborated with George Harrison,
-    //    Track.Artists.name_("George Harrison").name.get === List("Bob Dylan", "Ravi Shankar")
-    //    // .. or collaborated with one of his collaborators?
-    //    Track.Artists.name_("George Harrison").name_.name.get === List("Ali Akbar Khan")
-    //
-    //    // Parameterized input molecule for direct collaborators
-    //    val collaborators = m(Track.Artists.name_(?).name)
-    //
-    //    // George Harrison's collaborators
-    //    val collabs1 = collaborators("George Harrison").get.toSeq
-    //    collabs1 === List("Bob Dylan", "Ravi Shankar")
-    //
-    //    // George Harrison's collaborators collaborators (includes George...)
-    //    collaborators(collabs1).get === List("George Harrison", "Ali Akbar Khan")
-    ok
-  }
+  //  // Todo: model as graph with bidirectional relationships
+  //  "Collaboration" >> {
+  //
+  //    // Who collaborated with one of the Beatles?
+  //    // Repeated attributes was translated to transitive lookups - model graph instead... todo
+  //
+  //    Track.Artists.name("John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr").name.get === List(
+  //      ("John Lennon", "The Plastic Ono Band"),
+  //      ("George Harrison", "Bob Dylan"),
+  //      ("John Lennon", "Yoko Ono"),
+  //      ("George Harrison", "Ravi Shankar"),
+  //      ("Paul McCartney", "Linda McCartney"))
+  //
+  //    // Who directly collaborated with George Harrison,
+  //    Track.Artists.name_("George Harrison").name.get === List("Bob Dylan", "Ravi Shankar")
+  //    // .. or collaborated with one of his collaborators?
+  //    Track.Artists.name_("George Harrison").name_.name.get === List("Ali Akbar Khan")
+  //
+  //    // Parameterized input molecule for direct collaborators
+  //    val collaborators = m(Track.Artists.name_(?).name)
+  //
+  //    // George Harrison's collaborators
+  //    val collabs1 = collaborators("George Harrison").get.toSeq
+  //    collabs1 === List("Bob Dylan", "Ravi Shankar")
+  //
+  //    // George Harrison's collaborators collaborators (includes George...)
+  //    collaborators(collabs1).get === List("George Harrison", "Ali Akbar Khan")
+  //  }
+
 
   "2-step querying" >> {
     // Which artists have songs that might be covers of The Who (or vice versa)?

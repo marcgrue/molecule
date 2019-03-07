@@ -24,7 +24,7 @@ package molecule.generic
   * Available generic attributes:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)

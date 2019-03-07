@@ -34,7 +34,13 @@ in order to be able to write the more intuitive query. Since the types of each a
 
 ```scala
 val personsWithAge: List[(String, Int)] = Person.name.age.get
+
+// or asynchronously
+val personsWithAgeFut: Future[List[(String, Int)]] = Person.name.age.getAsync
 ```
+
+## Sync and Async APIs
+Molecule offers both a synchronous and an asynchronous API for all query getters and transaction operations.
 
 
 ## Producing Datalog
@@ -43,10 +49,6 @@ for Datomic. The returned untyped data from Datomic is then casted by Molecule t
 
 All queries are prepared at compile time by macros. So there is no overhead at runtime when running the queries. All
 queries are ready to fire.
-
-
-## Sync and Async APIs
-Molecule offers both a synchronous and an asynchronous API for all query getters and transaction operations.
 
 
    
@@ -80,7 +82,7 @@ sbt.version=1.1.6
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.7.2")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.0")
 ```
 
 `build.sbt`:
@@ -95,13 +97,13 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.17.2",
+      "org.scalamolecule" %% "molecule" % "0.18.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.17.2 for Scala 2.12.8 is available at
+Molecule 0.18.0 for Scala 2.12.8 is available at
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.12/).
 
 

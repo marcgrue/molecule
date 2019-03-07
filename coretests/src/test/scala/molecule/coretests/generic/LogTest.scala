@@ -103,45 +103,45 @@ class LogTest extends CoreSpec {
 
     // Apply attribute name and `from` + `until` value range arguments
 
-    // Datoms with attribute :ns/int having a value between 2 until 6 (not included)
+    // Datoms with attribute :Ns/int having a value between 2 until 6 (not included)
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     Log(Some(tx1), Some(tx3)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true),
 
       (t2, tx2, ":db/txInstant", d2, true),
-      (t2, e1, ":ns/str", "b", true),
-      (t2, e1, ":ns/str", "a", false)
+      (t2, e1, ":Ns/str", "b", true),
+      (t2, e1, ":Ns/str", "a", false)
     )
 
     Log(Some(t1), Some(t4)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true),
 
       (t2, tx2, ":db/txInstant", d2, true),
-      (t2, e1, ":ns/str", "b", true),
-      (t2, e1, ":ns/str", "a", false),
+      (t2, e1, ":Ns/str", "b", true),
+      (t2, e1, ":Ns/str", "a", false),
 
       (t3, tx3, ":db/txInstant", d3, true),
-      (t3, e1, ":ns/int", 2, true),
-      (t3, e1, ":ns/int", 1, false)
+      (t3, e1, ":Ns/int", 2, true),
+      (t3, e1, ":Ns/int", 1, false)
     )
 
     Log(Some(t2), Some(t4)).t.e.a.v.op.get === List(
       (t2, tx2, ":db/txInstant", d2, true),
-      (t2, e1, ":ns/str", "b", true),
-      (t2, e1, ":ns/str", "a", false),
+      (t2, e1, ":Ns/str", "b", true),
+      (t2, e1, ":Ns/str", "a", false),
 
       (t3, tx3, ":db/txInstant", d3, true),
-      (t3, e1, ":ns/int", 2, true),
-      (t3, e1, ":ns/int", 1, false)
+      (t3, e1, ":Ns/int", 2, true),
+      (t3, e1, ":Ns/int", 1, false)
     )
   }
 
@@ -154,26 +154,26 @@ class LogTest extends CoreSpec {
     logMap === Map(
       t1 -> List(
         (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":ns/str", "a", true),
-        (t1, e1, ":ns/int", 1, true)
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
       ),
       t2 -> List(
         (t2, tx2, ":db/txInstant", d2, true),
-        (t2, e1, ":ns/str", "b", true),
-        (t2, e1, ":ns/str", "a", false)
+        (t2, e1, ":Ns/str", "b", true),
+        (t2, e1, ":Ns/str", "a", false)
       ),
       t3 -> List(
         (t3, tx3, ":db/txInstant", d3, true),
-        (t3, e1, ":ns/int", 2, true),
-        (t3, e1, ":ns/int", 1, false)
+        (t3, e1, ":Ns/int", 2, true),
+        (t3, e1, ":Ns/int", 1, false)
       )
     )
 
     // Individual transactions within the range can then be retrieved
     logMap(t2) === List(
       (t2, tx2, ":db/txInstant", d2, true),
-      (t2, e1, ":ns/str", "b", true),
-      (t2, e1, ":ns/str", "a", false)
+      (t2, e1, ":Ns/str", "b", true),
+      (t2, e1, ":Ns/str", "a", false)
     )
   }
 
@@ -183,71 +183,71 @@ class LogTest extends CoreSpec {
     // t1 - tx2 as static values
     Log(Some(1028), Some(13194139534342L)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // t - t
     Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // t - tx
     Log(Some(t1), Some(tx2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // t - txInstant
     Log(Some(t1), Some(d2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // tx - t
     Log(Some(tx1), Some(t2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // tx - tx
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // tx - txInstant
     Log(Some(tx1), Some(d2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // txInstant - t
     Log(Some(d1), Some(t2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // txInstant - tx
     Log(Some(d1), Some(tx2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // txInstant - tx
     Log(Some(d1), Some(d2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     // Applying values to Schema attributes not allowed
@@ -268,11 +268,11 @@ class LogTest extends CoreSpec {
     // t12 (inclusive) - end
     Log(Some(t12), None).t.e.a.v.op.get === List(
       (t12, tx12, ":db/txInstant", d12, true),
-      (t12, e2, ":ns/ref1", e4, true),
-      (t12, e2, ":ns/ref1", e3, false),
+      (t12, e2, ":Ns/ref1", e4, true),
+      (t12, e2, ":Ns/ref1", e3, false),
 
       (t13, tx13, ":db/txInstant", d13, true),
-      (t13, e2, ":ns/refs1", e4, true)
+      (t13, e2, ":Ns/refs1", e4, true)
     )
 
     // Start - t3 (exclusive)
@@ -303,10 +303,10 @@ class LogTest extends CoreSpec {
 
 
     // Attributes involved in transactions t1-t2
-    Log(Some(t1), Some(t3)).a.get.distinct.sorted === List(":db/txInstant", ":ns/int", ":ns/str")
+    Log(Some(t1), Some(t3)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":db/txInstant")
 
     // Attributes involved in transactions t1-t6
-    Log(Some(t1), Some(t7)).a.get.distinct.sorted === List(":db/txInstant", ":ns/int", ":ns/str", ":ref1/str1")
+    Log(Some(t1), Some(t7)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":Ref1/str1", ":db/txInstant")
 
 
     // Values asserted in transactions t1-t2
@@ -347,20 +347,20 @@ class LogTest extends CoreSpec {
 
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.getHistory === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
 
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.getAsOf(t7) === List(
       (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":ns/str", "a", true),
-      (t1, e1, ":ns/int", 1, true)
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
     )
   }
 }

@@ -96,8 +96,6 @@ object QueryOps extends Helpers {
 
     def nots(e: String, a: Atom, v: String, argss: Seq[Any]): Query = {
       argss.zipWithIndex.foldLeft(q) {
-        //        case (q1, (set: Set[_], i)) if set.size == 1            =>
-        //          q1.compareTo("!=", a, v, Val(set.head), i + 1)
         case (q1, (set: Set[_], i)) if a.tpeS == "java.net.URI" =>
           val notClauses = set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
             val x = Var(v + "_" + (j + 1))
@@ -133,6 +131,7 @@ object QueryOps extends Helpers {
         .func("molecule.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs")))
         .func("first", Seq(Var("partNs")), ScalarBinding(Var("part")))
         .func("second", Seq(Var("partNs")), ScalarBinding(Var("ns")))
+        .func("molecule.util.fns/live", Seq(Var("nsFull")))
     )
 
     def schemaA: Query = q.schema
@@ -240,16 +239,21 @@ object QueryOps extends Helpers {
           q
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
           q.func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+            .func("molecule.util.fns/live", Seq(Var(v + "_a")))
+
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         =>
           q.ident(e + "_attr", v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+            .func("molecule.util.fns/live", Seq(Var(v + "_a")))
         case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
           q.where(KW(ns, attr), KW("db", "ident"), v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+            .func("molecule.util.fns/live", Seq(Var(v + "_a")))
       }.getOrElse(
         q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
           .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
+          .func("molecule.util.fns/live", Seq(Var(v + "_a")))
           .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
           .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
           .func("!=", Seq(Var(v + "_ns"), Val("db")))
@@ -368,7 +372,7 @@ object QueryOps extends Helpers {
       q.where(v, "db", "ident", Var(v1), "")
 
     def kw(v1: String, v2: String): Query =
-      q.func(".getName ^clojure.lang.Keyword", Seq(Var(v1)), ScalarBinding(Var(v2)))
+      q.func("name", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
 
     def castStr(tpe: String): String = tpe match {

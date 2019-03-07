@@ -42,14 +42,14 @@ class UpdateMapURI extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uriMap.assert(str1 -> uri1, str1 -> uri2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
@@ -59,7 +59,7 @@ class UpdateMapURI extends CoreSpec {
       // vararg
       (Ns(eid).uriMap.assert(str1 -> uri1, str1x -> uri2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
 
@@ -67,7 +67,7 @@ class UpdateMapURI extends CoreSpec {
       // Seq
       (Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1x -> uri2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
     }
@@ -106,13 +106,13 @@ class UpdateMapURI extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uriMap.replace(str1 -> uri1, str1 -> uri2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
 
       expectCompileError(
         """Ns(eid).uriMap.replace(Seq(str1 -> uri1, str1 -> uri2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
           "\n__ident__str1 -> __ident__uri1" +
           "\n__ident__str1 -> __ident__uri2")
     }
@@ -180,13 +180,13 @@ class UpdateMapURI extends CoreSpec {
 
       (Ns(eid).uriMap(str1 -> uri1, str1 -> uri2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
 
       (Ns(eid).uriMap(Seq(str1 -> uri1, str1 -> uri2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/uriMap`:" +
+        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
     }

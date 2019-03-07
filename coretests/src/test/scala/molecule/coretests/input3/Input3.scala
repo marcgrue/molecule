@@ -474,7 +474,7 @@ class Input3 extends CoreSpec {
 
       (m(Ns.int.ints_.<=(?).longs_(?).strs_(?)).apply(List(Set(1), Set(2)), List(Set(1L)), List(Set("a"))).get must throwA[InputMolecule_3_Exception])
         .message === "Got the exception molecule.input.exception.InputMolecule_3_Exception: " +
-        s"Can't apply multiple values to input attribute `:ns/ints` having expression (<, >, <=, >=, !=)"
+        s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
     }
   }
 }

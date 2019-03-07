@@ -111,24 +111,24 @@ class Index extends CoreSpec {
 
       // EAVT datom values of entity e1
       EAVT(e1).e.a.v.t.get === List(
-        (e1, ":ns/str", "b", t2),
-        (e1, ":ns/int", 2, t3)
+        (e1, ":Ns/str", "b", t2),
+        (e1, ":Ns/int", 2, t3)
       )
 
       // Freely order generic attributes as you like
       EAVT(e1).t.v.e.a.get === List(
-        (t2, "b", e1, ":ns/str"),
-        (t3, 2, e1, ":ns/int")
+        (t2, "b", e1, ":Ns/str"),
+        (t3, 2, e1, ":Ns/int")
       )
 
       // No need to return the entity id that we filter by
       EAVT(e1).a.v.t.get === List(
-        (":ns/str", "b", t2),
-        (":ns/int", 2, t3)
+        (":Ns/str", "b", t2),
+        (":Ns/int", 2, t3)
       )
 
       // Attributes of entity e1
-      EAVT(e1).a.get === List(":ns/str", ":ns/int")
+      EAVT(e1).a.get === List(":Ns/str", ":Ns/int")
 
       // Values of e1
       EAVT(e1).v.get === List("b", 2)
@@ -157,39 +157,39 @@ class Index extends CoreSpec {
       // the transaction value is sorted after the operation (so he index seems actually sorted by
       // all 5 datom elements EAVOpT and not only EAVT)
       EAVT(e1).e.a.v.t.op.getHistory === List(
-        (e1, ":ns/str", "a", t2, false),
-        (e1, ":ns/str", "a", t1, true),
-        (e1, ":ns/str", "b", t2, true),
-        (e1, ":ns/int", 1, t3, false),
-        (e1, ":ns/int", 1, t1, true),
-        (e1, ":ns/int", 2, t3, true)
+        (e1, ":Ns/str", "a", t2, false),
+        (e1, ":Ns/str", "a", t1, true),
+        (e1, ":Ns/str", "b", t2, true),
+        (e1, ":Ns/int", 1, t3, false),
+        (e1, ":Ns/int", 1, t1, true),
+        (e1, ":Ns/int", 2, t3, true)
       )
 
-      // History of attribute :ns/int values of entity e1
+      // History of attribute :Ns/int values of entity e1
       // or
-      // "What values has attribute :ns/int of entity e1 had over time?"
+      // "What values has attribute :Ns/int of entity e1 had over time?"
       // - 1 was asserted in transaction t1, retracted in t3, and new value 2 asserted in t3
-      EAVT(e1, ":ns/int").e.a.v.t.op.getHistory === List(
-        (e1, ":ns/int", 1, t3, false),
-        (e1, ":ns/int", 1, t1, true),
-        (e1, ":ns/int", 2, t3, true)
+      EAVT(e1, ":Ns/int").e.a.v.t.op.getHistory === List(
+        (e1, ":Ns/int", 1, t3, false),
+        (e1, ":Ns/int", 1, t1, true),
+        (e1, ":Ns/int", 2, t3, true)
       )
 
-      // History of attribute :ns/int value being 1 of entity e1
+      // History of attribute :Ns/int value being 1 of entity e1
       // or
-      // "What happened to entity e1's attribute :ns/int value 1?"
+      // "What happened to entity e1's attribute :Ns/int value 1?"
       // - 1 was asserted in transaction t1 and then retracted in t3
-      EAVT(e1, ":ns/int", 1).e.a.v.t.op.getHistory === List(
-        (e1, ":ns/int", 1, t3, false),
-        (e1, ":ns/int", 1, t1, true),
+      EAVT(e1, ":Ns/int", 1).e.a.v.t.op.getHistory === List(
+        (e1, ":Ns/int", 1, t3, false),
+        (e1, ":Ns/int", 1, t1, true),
       )
 
-      // History of attribute :ns/int value being 1 of entity e1 in transaction t3
+      // History of attribute :Ns/int value being 1 of entity e1 in transaction t3
       // or
-      // "Was entity e1's attribute :ns/int value 1 in transaction t1 asserted or retracted?"
+      // "Was entity e1's attribute :Ns/int value 1 in transaction t1 asserted or retracted?"
       // - 1 was asserted in transaction t1
-      EAVT(e1, ":ns/int", 1, t1).e.a.v.t.op.getHistory === List(
-        (e1, ":ns/int", 1, t1, true)
+      EAVT(e1, ":Ns/int", 1, t1).e.a.v.t.op.getHistory === List(
+        (e1, ":Ns/int", 1, t1, true)
       )
     }
 
@@ -198,24 +198,24 @@ class Index extends CoreSpec {
 
       // Each value is asserted/retracted on its own
       EAVT(e4).a.v.t.get === List(
-        (":ns/ints", 60, t11),
-        (":ns/ints", 70, t9),
-        (":ns/ints", 80, t9)
+        (":Ns/ints", 60, t11),
+        (":Ns/ints", 70, t9),
+        (":Ns/ints", 80, t9)
       )
 
       EAVT(e4).a.v.t.op.getHistory === List(
-        (":ns/ints", 6, t10, false),
-        (":ns/ints", 6, t8, true),
+        (":Ns/ints", 6, t10, false),
+        (":Ns/ints", 6, t8, true),
 
-        (":ns/ints", 7, t9, false),
-        (":ns/ints", 7, t8, true),
+        (":Ns/ints", 7, t9, false),
+        (":Ns/ints", 7, t8, true),
 
-        (":ns/ints", 8, t9, false),
-        (":ns/ints", 8, t8, true),
+        (":Ns/ints", 8, t9, false),
+        (":Ns/ints", 8, t8, true),
 
-        (":ns/ints", 60, t11, true),
-        (":ns/ints", 70, t9, true),
-        (":ns/ints", 80, t9, true),
+        (":Ns/ints", 60, t11, true),
+        (":Ns/ints", 70, t9, true),
+        (":Ns/ints", 80, t9, true),
       )
     }
 
@@ -249,42 +249,42 @@ class Index extends CoreSpec {
       // The AEVT index provides efficient access to all values for a given attribute,
       // comparable to traditional column access style.
 
-      // Attribute :ns/int's entities, values and transactions
-      AEVT(":ns/int").e.v.t.get === List(
+      // Attribute :Ns/int's entities, values and transactions
+      AEVT(":Ns/int").e.v.t.get === List(
         (e1, 2, t3),
         (e2, 5, t5)
       )
 
-      // Entities having :ns/int asserted
-      AEVT(":ns/int").e.get === List(e1, e2)
+      // Entities having :Ns/int asserted
+      AEVT(":Ns/int").e.get === List(e1, e2)
 
-      // All values of attribute :ns/int
-      AEVT(":ns/int").v.get === List(2, 5)
+      // All values of attribute :Ns/int
+      AEVT(":Ns/int").v.get === List(2, 5)
 
-      // All transactions where attribute :ns/int is asserted
-      AEVT(":ns/int").t.get === List(t3, t5)
+      // All transactions where attribute :Ns/int is asserted
+      AEVT(":Ns/int").t.get === List(t3, t5)
 
 
-      // Attribute :ns/int of entity e1's value and transaction
-      AEVT(":ns/int", e1).e.v.t.get === List(
+      // Attribute :Ns/int of entity e1's value and transaction
+      AEVT(":Ns/int", e1).e.v.t.get === List(
         (e1, 2, t3)
       )
 
-      // Attribute :ns/int of entity e1 with value 2's transaction
-      AEVT(":ns/int", e1, 2).e.v.t.get === List(
+      // Attribute :Ns/int of entity e1 with value 2's transaction
+      AEVT(":Ns/int", e1, 2).e.v.t.get === List(
         (e1, 2, t3)
       )
 
-      // Attribute :ns/int of entity e1 with value 2 in transaction t3
-      AEVT(":ns/int", e1, 2, t3).e.v.t.get === List(
+      // Attribute :Ns/int of entity e1 with value 2 in transaction t3
+      AEVT(":Ns/int", e1, 2, t3).e.v.t.get === List(
         (e1, 2, t3)
       )
 
 
 
-      // Attribute :ns/int's historic entities, values and transactions
+      // Attribute :Ns/int's historic entities, values and transactions
       // Note that retractions (false) takes precedence in T order
-      AEVT(":ns/int").e.v.t.op.getHistory === List(
+      AEVT(":Ns/int").e.v.t.op.getHistory === List(
         (e1, 1, t3, false),
         (e1, 1, t1, true),
         (e1, 2, t3, true),
@@ -307,7 +307,7 @@ class Index extends CoreSpec {
 
       // Applying values to Index attributes not allowed
       expectCompileError(
-        """m(AEVT(":ns/int").a.e.v(42).t)""",
+        """m(AEVT(":Ns/int").a.e.v(42).t)""",
         "molecule.transform.exception.Dsl2ModelException: " +
           "AEVT index attributes not allowed to have values applied.\n" +
           "AEVT index only accepts datom arguments: `AEVT(<a/e/v/t>)`.")
@@ -323,22 +323,22 @@ class Index extends CoreSpec {
 
       // The AVET index provides efficient access to particular combinations of attribute and value.
 
-      // Which entities in what transactions have attribute :ns/int asserted with value 2?
-      AVET(":ns/int", 2).e.t.get === List(
+      // Which entities in what transactions have attribute :Ns/int asserted with value 2?
+      AVET(":Ns/int", 2).e.t.get === List(
         (e1, t3)
       )
 
-      AVET(":ns/int", 2, e1).t.get === List(t3)
+      AVET(":Ns/int", 2, e1).t.get === List(t3)
 
-      AVET(":ns/int", 2, e1, t3).op.get === List(true)
+      AVET(":Ns/int", 2, e1, t3).op.get === List(true)
 
-      // History of entities with attribute :ns/int having value 4
-      AVET(":ns/int", 4).e.t.op.getHistory === List(
+      // History of entities with attribute :Ns/int having value 4
+      AVET(":Ns/int", 4).e.t.op.getHistory === List(
         (e2, t5, false),
         (e2, t4, true)
       )
 
-      AEVT(":ns/int").v.e.t.op.getHistory === List(
+      AEVT(":Ns/int").v.e.t.op.getHistory === List(
         (1, e1, t3, false),
         (1, e1, t1, true),
         (2, e1, t3, true),
@@ -361,7 +361,7 @@ class Index extends CoreSpec {
 
       // Applying values to Index attributes not allowed
       expectCompileError(
-        """m(AVET(":ns/int").a.v.e(77L).t)""",
+        """m(AVET(":Ns/int").a.v.e(77L).t)""",
         "molecule.transform.exception.Dsl2ModelException: " +
           "AVET index attributes not allowed to have values applied.\n" +
           "AVET index only accepts datom arguments: `AVET(<a/v/e/t>)` or range arguments: `AVET.range(a, from, until)`.")
@@ -377,8 +377,8 @@ class Index extends CoreSpec {
 
       // Apply attribute name and `from` + `until` value range arguments
 
-      // Datoms with attribute :ns/int having a value between 2 until 6 (not included)
-      AVET.range(":ns/int", Some(2), Some(6)).v.e.t.get === List(
+      // Datoms with attribute :Ns/int having a value between 2 until 6 (not included)
+      AVET.range(":Ns/int", Some(2), Some(6)).v.e.t.get === List(
         (2, e1, t3),
         (5, e2, t5)
       )
@@ -388,38 +388,38 @@ class Index extends CoreSpec {
     "Arg combinations" >> {
 
       // `until` arg 5 is not included
-      AVET.range(":ns/int", Some(2), Some(5)).e.get === List(e1)
+      AVET.range(":Ns/int", Some(2), Some(5)).e.get === List(e1)
 
       // Both 2 and 5 matched
-      AVET.range(":ns/int", Some(2), Some(6)).e.get === List(e1, e2)
+      AVET.range(":Ns/int", Some(2), Some(6)).e.get === List(e1, e2)
 
       // Only 5 matched
-      AVET.range(":ns/int", Some(3), Some(6)).e.get === List(e2)
+      AVET.range(":Ns/int", Some(3), Some(6)).e.get === List(e2)
 
 
       // 2 to end (2 included)
-      AVET.range(":ns/int", Some(2), None).e.get === List(e1, e2)
+      AVET.range(":Ns/int", Some(2), None).e.get === List(e1, e2)
 
       // 3 to end (2 not included)
-      AVET.range(":ns/int", Some(3), None).e.get === List(e2)
+      AVET.range(":Ns/int", Some(3), None).e.get === List(e2)
 
       // 6 to end (2 and 5 not included)
-      AVET.range(":ns/int", Some(6), None).e.get === Nil
+      AVET.range(":Ns/int", Some(6), None).e.get === Nil
 
 
       // Start until 5 (5 not included)
-      AVET.range(":ns/int", None, Some(5)).e.get === List(e1)
+      AVET.range(":Ns/int", None, Some(5)).e.get === List(e1)
 
       // Start until 6 (5 included)
-      AVET.range(":ns/int", None, Some(6)).e.get === List(e1, e2)
+      AVET.range(":Ns/int", None, Some(6)).e.get === List(e1, e2)
 
       // Start until 2 (2 and 5 not included)
-      AVET.range(":ns/int", None, Some(2)).e.get === Nil
+      AVET.range(":Ns/int", None, Some(2)).e.get === Nil
 
 
       // Start - end
       // Molecule disallow returning from beginning to end (the whole database!)
-      (AVET.range(":ns/int", None, None).e.get must throwA[MoleculeException])
+      (AVET.range(":Ns/int", None, None).e.get must throwA[MoleculeException])
         .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
         "Molecule not allowing returning from start to end (the whole database!).\n" +
         "If you need this, please use raw Datomic access:\n" +
@@ -430,12 +430,12 @@ class Index extends CoreSpec {
     "Arg types" >> {
 
       // Different range types throw an exception
-      (AVET.range(":ns/int", Some(1), Some("y")).e.get must throwA[MoleculeException])
+      (AVET.range(":Ns/int", Some(1), Some("y")).e.get must throwA[MoleculeException])
         .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
         "Please supply range arguments of same type as attribute."
 
       // Two wrong types simply returns no result
-      AVET.range(":ns/int", Some("x"), Some("y")).e.get === Nil
+      AVET.range(":Ns/int", Some("x"), Some("y")).e.get === Nil
     }
 
 
@@ -443,7 +443,7 @@ class Index extends CoreSpec {
 
       // Args can be supplied as variables
 
-      val attr = ":ns/int"
+      val attr = ":Ns/int"
       val one = 1
       val six = 6
 
@@ -451,21 +451,21 @@ class Index extends CoreSpec {
       AVET.range(attr, Some(one), Some(six)).e.get === Seq(e1, e2)
 
       // Mixing static values and variables ok
-      AVET.range(":ns/int", Some(one), Some(6)).e.get === Seq(e1, e2)
+      AVET.range(":Ns/int", Some(one), Some(6)).e.get === Seq(e1, e2)
 
       // Optionals can be supplied as variables too
       val from1 = Some(1)
       val until6 = Some(6)
       val end = None
-      AVET.range(":ns/int", from1, end).e.get === List(e1, e2)
-      AVET.range(":ns/int", from1, until6).e.get === List(e1, e2)
+      AVET.range(":Ns/int", from1, end).e.get === List(e1, e2)
+      AVET.range(":Ns/int", from1, until6).e.get === List(e1, e2)
     }
 
 
     "History" >> {
 
-      // Attribute :ns/int values from 1 to end
-      AVET.range(":ns/int", Some(1), None).v.e.t.op.getHistory === List(
+      // Attribute :Ns/int values from 1 to end
+      AVET.range(":Ns/int", Some(1), None).v.e.t.op.getHistory === List(
         (1, e1, t3, false),
         (1, e1, t1, true),
         (2, e1, t3, true),
@@ -474,8 +474,8 @@ class Index extends CoreSpec {
         (5, e2, t5, true)
       )
 
-      // Attribute :ns/int values from 1 until 6
-      AVET.range(":ns/int", Some(1), Some(6)).v.e.t.op.getHistory === List(
+      // Attribute :Ns/int values from 1 until 6
+      AVET.range(":Ns/int", Some(1), Some(6)).v.e.t.op.getHistory === List(
         (1, e1, t3, false),
         (1, e1, t1, true),
         (2, e1, t3, true),
@@ -484,8 +484,8 @@ class Index extends CoreSpec {
         (5, e2, t5, true)
       )
 
-      // Attribute :ns/int values from 1 until 5 (5 not included)
-      AVET.range(":ns/int", Some(1), Some(5)).v.e.t.op.getHistory === List(
+      // Attribute :Ns/int values from 1 until 5 (5 not included)
+      AVET.range(":Ns/int", Some(1), Some(5)).v.e.t.op.getHistory === List(
         (1, e1, t3, false),
         (1, e1, t1, true),
         (2, e1, t3, true),
@@ -493,15 +493,15 @@ class Index extends CoreSpec {
         (4, e2, t4, true)
       )
 
-      // Attribute :ns/int values from 2 until 5 (1 and 5 not included)
-      AVET.range(":ns/int", Some(2), Some(5)).v.e.t.op.getHistory === List(
+      // Attribute :Ns/int values from 2 until 5 (1 and 5 not included)
+      AVET.range(":Ns/int", Some(2), Some(5)).v.e.t.op.getHistory === List(
         (2, e1, t3, true),
         (4, e2, t5, false),
         (4, e2, t4, true)
       )
 
-      // Attribute :ns/int values from 3 until 5 (1, 2 and 5 not included)
-      AVET.range(":ns/int", Some(3), Some(5)).v.e.t.op.getHistory === List(
+      // Attribute :Ns/int values from 3 until 5 (1, 2 and 5 not included)
+      AVET.range(":Ns/int", Some(3), Some(5)).v.e.t.op.getHistory === List(
         (4, e2, t5, false),
         (4, e2, t4, true)
       )
@@ -518,20 +518,20 @@ class Index extends CoreSpec {
 
       // e1 and e2 points to e4
       VAET(e4).a.e.t.get === List(
-        (":ns/ref1", e2, t12),
-        (":ns/refs1", e2, t13)
+        (":Ns/ref1", e2, t12),
+        (":Ns/refs1", e2, t13)
       )
 
       // e2 pointed to e3
       VAET(e3).a.e.t.op.getHistory === List(
-        (":ns/ref1", e2, t12, false),
-        (":ns/ref1", e2, t7, true)
+        (":Ns/ref1", e2, t12, false),
+        (":Ns/ref1", e2, t7, true)
       )
 
       // e1 and e2 now points to e4
       VAET(e4).a.e.t.op.getHistory === List(
-        (":ns/ref1", e2, t12, true),
-        (":ns/refs1", e2, t13, true)
+        (":Ns/ref1", e2, t12, true),
+        (":Ns/refs1", e2, t13, true)
       )
     }
 

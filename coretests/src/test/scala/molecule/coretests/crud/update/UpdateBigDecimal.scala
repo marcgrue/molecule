@@ -126,12 +126,12 @@ class UpdateBigDecimal extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigDecs.replace(bigDec7 -> bigDec8, bigDec8 -> bigDec8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/bigDecs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
           "\n__ident__bigDec8")
 
       expectCompileError(
         """Ns(eid).bigDecs.replace(Seq(bigDec7 -> bigDec8, bigDec8 -> bigDec8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/bigDecs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
           "\n__ident__bigDec8")
 
 
@@ -140,13 +140,13 @@ class UpdateBigDecimal extends CoreSpec {
 
       (Ns(eid).bigDecs.replace(bigDec7 -> bigDec8, bigDec8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/bigDecs`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigDecs`:" +
         "\n8.0"
 
       // Conflicting new values
       (Ns(eid).bigDecs.replace(Seq(bigDec7 -> bigDec8, bigDec8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/bigDecs`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigDecs`:" +
         "\n8.0"
     }
 

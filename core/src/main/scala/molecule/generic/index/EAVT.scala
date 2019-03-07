@@ -44,21 +44,21 @@ trait GenericEAVT {
   * {{{
   *   // Create EAVT Index molecule with 1 entity id argument
   *   EAVT(e1).e.a.v.t.get === List(
-  *     (e1, ":person/name", "Ben", t1),
-  *     (e1, ":person/age", 42, t2),
-  *     (e1, ":golf/score", 5.7, t2)
+  *     (e1, ":Person/name", "Ben", t1),
+  *     (e1, ":Person/age", 42, t2),
+  *     (e1, ":Golf/score", 5.7, t2)
   *   )
   *
   *   // Narrow search with multiple arguments
-  *   EAVT(e1, ":person/age").a.v.get === List( (":person/age", 42) )
-  *   EAVT(e1, ":person/age", 42).a.v.get === List( (":person/age", 42) )
-  *   EAVT(e1, ":person/age", 42, t1).a.v.get === List( (":person/age", 42) )
+  *   EAVT(e1, ":Person/age").a.v.get === List( (":Person/age", 42) )
+  *   EAVT(e1, ":Person/age", 42).a.v.get === List( (":Person/age", 42) )
+  *   EAVT(e1, ":Person/age", 42, t1).a.v.get === List( (":Person/age", 42) )
   * }}}
   *
   * Index attributes available:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)

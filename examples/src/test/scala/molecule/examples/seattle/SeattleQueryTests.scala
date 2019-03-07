@@ -13,7 +13,7 @@ class SeattleQueryTests extends SeattleSpec {
     // Query of molecule
     m(Community.name) --> {
       """[:find  ?b
-        | :where [?a :community/name ?b]]""".stripMargin
+        | :where [?a :Community/name ?b]]""".stripMargin
     }
   }
 
@@ -23,9 +23,9 @@ class SeattleQueryTests extends SeattleSpec {
     // Multiple attributes
     m(Community.name.url.category) -->
       """[:find  ?b ?c (distinct ?d)
-        | :where [?a :community/name ?b]
-        |        [?a :community/url ?c]
-        |        [?a :community/category ?d]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/url ?c]
+        |        [?a :Community/category ?d]]""".stripMargin
   }
 
 
@@ -34,29 +34,29 @@ class SeattleQueryTests extends SeattleSpec {
     // Names of twitter communities
     m(Community.name.type_("twitter")) -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ":community.type/twitter"]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ":Community.type/twitter"]]""".stripMargin
 
 
     // Categories (many-cardinality) of the Belltown community
     m(Community.name_("belltown").category) -->
       """[:find  (distinct ?c)
-        | :where [?a :community/name "belltown"]
-        |        [?a :community/category ?c]]""".stripMargin
+        | :where [?a :Community/name "belltown"]
+        |        [?a :Community/category ?c]]""".stripMargin
 
 
     // Names of news or arts communities - transforms to a query using Rules
     m(Community.name.category_("news" or "arts")) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/category "news"]]
-        |     [(rule1 ?a) [?a :community/category "arts"]]]
+        |  2 [[(rule1 ?a) [?a :Community/category "news"]]
+        |     [(rule1 ?a) [?a :Community/category "arts"]]]
         |)""".stripMargin
   }
 
@@ -67,21 +67,21 @@ class SeattleQueryTests extends SeattleSpec {
     // Ref's are modelled as "Bond"'s (between Atoms)
     m(Community.name.Neighborhood.District.region_("ne")) -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
-        |        [?d :district/region ":district.region/ne"]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
+        |        [?d :District/region ":District.region/ne"]]""".stripMargin
 
 
     // Communities and their region
     m(Community.name.Neighborhood.District.region) -->
       """[:find  ?b ?e2
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
-        |        [?d :district/region ?e]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
+        |        [?d :District/region ?e]
         |        [?e :db/ident ?e1]
-        |        [(.getName ^clojure.lang.Keyword ?e1) ?e2]]""".stripMargin
+        |        [(name ?e1) ?e2]]""".stripMargin
   }
 
 
@@ -93,22 +93,22 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_.apply(?)) -->
       """[:find  ?b
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]""".stripMargin
+        |        [(name ?c1) ?c2]]""".stripMargin
 
     // Applying a value completes the query
     m(Community.name.type_(?))("twitter") -->
       """[:find  ?b
         | :in    $ ?c
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 :community.type/twitter
+        |  2 :Community.type/twitter
         |)""".stripMargin
 
 
@@ -116,19 +116,19 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.`type`(?)) -->
       """[:find  ?b ?c2
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]""".stripMargin
+        |        [(name ?c1) ?c2]]""".stripMargin
 
 
     m(Community.name.`type`(?)).apply("twitter") -->
       """[:find  ?b ?c2
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -142,10 +142,10 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.`type`(?)).apply("facebook_page" or "twitter") -->
       """[:find  ?b ?c2
         | :in    $ [?c2 ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -161,10 +161,10 @@ class SeattleQueryTests extends SeattleSpec {
       //    m(Community.name.`type`(?))(List("facebook_page", "twitter")) -->
       """[:find  ?b ?c2
         | :in    $ [?c2 ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -180,13 +180,13 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_(?).orgtype_(?)) -->
       """[:find  ?b
         | :in    $ ?c2 ?d2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/orgtype ?d]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]""".stripMargin
+        |        [(name ?d1) ?d2]]""".stripMargin
 
 
     // The following 3 notation variations transform in the same way
@@ -196,15 +196,15 @@ class SeattleQueryTests extends SeattleSpec {
       //    m(Community.name.type_(?).orgtype_(?)).apply(List(("email_list", "community"))) -->
       """[:find  ?b
         | :in    $ ?c ?d
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/orgtype ?d]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/orgtype ?d]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 :community.type/email_list
-        |  3 :community.orgtype/community
+        |  2 :Community.type/email_list
+        |  3 :Community.orgtype/community
         |)""".stripMargin
 
 
@@ -214,13 +214,13 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.`type`(?).orgtype(?)) -->
       """[:find  ?b ?c2 ?d2
         | :in    $ ?c2 ?d2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/orgtype ?d]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]""".stripMargin
+        |        [(name ?d1) ?d2]]""".stripMargin
 
 
     // The following 3 notation variations transform in the same way
@@ -230,24 +230,24 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.`type`(?).orgtype(?)).apply(Seq(("email_list", "community"), ("website", "commercial"))) -->
       """[:find  ?b ?c2 ?d2
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
+        |        [(name ?c1) ?c2]
         |        (rule1 ?a)
-        |        [?a :community/orgtype ?d]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]
+        |        [(name ?d1) ?d2]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
         |  2 [[(rule1 ?a)
-        |   [?a :community/type ":community.type/email_list"]
-        |   [?a :community/orgtype ":community.orgtype/community"]]
+        |   [?a :Community/type ":Community.type/email_list"]
+        |   [?a :Community/orgtype ":Community.orgtype/community"]]
         |     [(rule1 ?a)
-        |   [?a :community/type ":community.type/website"]
-        |   [?a :community/orgtype ":community.orgtype/commercial"]]]
+        |   [?a :Community/type ":Community.type/website"]
+        |   [?a :Community/orgtype ":Community.orgtype/commercial"]]]
         |)""".stripMargin
   }
 
@@ -256,21 +256,21 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name < "C") -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b "C") ?b2]
         |        [(< ?b2 0)]]""".stripMargin
 
     m(Community.name < ?) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b ?b1) ?b2]
         |        [(< ?b2 0)]]""".stripMargin
 
     m(Community.name < ?).apply("C") -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b ?b1) ?b2]
         |        [(< ?b2 0)]]
         |
@@ -286,19 +286,19 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name contains "Wallingford") -->
       """[:find  ?b
-        | :where [(fulltext $ :community/name "Wallingford") [[ ?a ?b ]]]]""".stripMargin
+        | :where [(fulltext $ :Community/name "Wallingford") [[ ?a ?b ]]]]""".stripMargin
 
 
     m(Community.name contains ?) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [(fulltext $ :community/name ?b1) [[ ?a ?b ]]]]""".stripMargin
+        | :where [(fulltext $ :Community/name ?b1) [[ ?a ?b ]]]]""".stripMargin
 
 
     m(Community.name contains ?).apply("Wallingford") -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [(fulltext $ :community/name ?b1) [[ ?a ?b ]]]]
+        | :where [(fulltext $ :Community/name ?b1) [[ ?a ?b ]]]]
         |
         |INPUTS:
         |List(
@@ -312,41 +312,41 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_("website").category contains "food") -->
       """[:find  ?b (distinct ?d)
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ":community.type/website"]
-        |        [?a :community/category ?d]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ":Community.type/website"]
+        |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?a_1 ]]]]]
+        |  2 [[(rule1 ?a) [(fulltext $ :Community/category "food") [[ ?a ?a_1 ]]]]]
         |)""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?) -->
       """[:find  ?b (distinct ?d)
         | :in    $ ?c2 ?d1
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [(fulltext $ :community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
+        |        [(name ?c1) ?c2]
+        |        [(fulltext $ :Community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?).apply("website", Set("food")) -->
       """[:find  ?b (distinct ?d)
         | :in    $ % ?c
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/category ?d]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?d1_1 ]]]]]
-        |  3 :community.type/website
+        |  2 [[(rule1 ?a) [(fulltext $ :Community/category "food") [[ ?a ?d1_1 ]]]]]
+        |  3 :Community.type/website
         |)""".stripMargin
   }
 
@@ -356,30 +356,30 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_("twitter" or "facebook_page")) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/type ":community.type/twitter"]]
-        |     [(rule1 ?a) [?a :community/type ":community.type/facebook_page"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
+        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]]
         |)""".stripMargin
 
 
     m(Community.name.Neighborhood.District.region_("ne" or "sw")) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
         |        (rule1 ?d)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?d) [?d :district/region ":district.region/ne"]]
-        |     [(rule1 ?d) [?d :district/region ":district.region/sw"]]]
+        |  2 [[(rule1 ?d) [?d :District/region ":District.region/ne"]]
+        |     [(rule1 ?d) [?d :District/region ":District.region/sw"]]]
         |)""".stripMargin
 
 
@@ -387,35 +387,35 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_("twitter" or "facebook_page").Neighborhood.District.region_("sw" or "s" or "se")) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
         |        (rule2 ?e)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/type ":community.type/twitter"]]
-        |     [(rule1 ?a) [?a :community/type ":community.type/facebook_page"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/sw"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/s"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/se"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
+        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/sw"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/s"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/se"]]]
         |)""".stripMargin
 
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)) -->
       """[:find  ?b
         | :in    $ ?c2 ?f2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
+        |        [?e :District/region ?f]
         |        [?f :db/ident ?f1]
-        |        [(.getName ^clojure.lang.Keyword ?f1) ?f2]]""".stripMargin
+        |        [(name ?f1) ?f2]]""".stripMargin
 
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)).apply(
@@ -425,17 +425,17 @@ class SeattleQueryTests extends SeattleSpec {
     ) -->
       """[:find  ?b
         | :in    $ [?c ...] [?f ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
+        |        [?e :District/region ?f]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [:community.type/twitter, :community.type/facebook_page]
-        |  3 [:district.region/sw, :district.region/s, :district.region/se]
+        |  2 [:Community.type/twitter, :Community.type/facebook_page]
+        |  3 [:District.region/sw, :District.region/s, :District.region/se]
         |)""".stripMargin
   }
 
@@ -452,6 +452,7 @@ class SeattleQueryTests extends SeattleSpec {
         |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
         |        [(first ?partNs) ?part]
         |        [(second ?partNs) ?ns]
+        |        [(molecule.util.fns/live ?nsFull)]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 
@@ -471,22 +472,22 @@ class SeattleQueryTests extends SeattleSpec {
         .District.name("myDistrict").region("nw")
     ) -->
       //  Some things to notice:
-      //  - Enum values are prefixed with their namespace ("nw" becomes ":district.region/nw")
+      //  - Enum values are prefixed with their namespace ("nw" becomes ":District.region/nw")
       //  - Multiple values of many-cardinality attributes each get their own statement ("my" + "favorites")
       //
       //           action             temp id                   attribute                 value
       """List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  AAA                           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  myUrl                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/twitter       ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/personal   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  my                            ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  favorites                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  myNeighborhood                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  myDistrict                    ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/nw           )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/name        ,  AAA                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/url         ,  myUrl                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/type        ,  :Community.type/twitter       ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/orgtype     ,  :Community.orgtype/personal   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  my                            ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  favorites                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/neighborhood,  #db/id[:db.part/user -1000002]),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/name     ,  myNeighborhood                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/district ,  #db/id[:db.part/user -1000003]),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/name         ,  myDistrict                    ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/region       ,  :District.region/nw           )
         |)""".stripMargin
 
 
@@ -504,27 +505,27 @@ class SeattleQueryTests extends SeattleSpec {
       ) -->
       // Semantically identical to the previous transaction
       """List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  DDD Blogging Georgetown                      ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  http://www.blogginggeorgetown.com/           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/blog                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/commercial                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 1                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 2                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  DD Georgetown                                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  Greater Duwamish                             ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/s                           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/name        ,  DDD Interbay District Blog                   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/url         ,  http://interbayneighborhood.neighborlogs.com/),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/type        ,  :community.type/blog                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/orgtype     ,  :community.orgtype/community                 ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/category    ,  DD cat 3                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/neighborhood,  #db/id[:db.part/user -1000005]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/name     ,  DD Interbay                                  ),
-        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/district ,  #db/id[:db.part/user -1000006]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/name         ,  Magnolia/Queen Anne                          ),
-        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/region       ,  :district.region/w                           )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/name        ,  DDD Blogging Georgetown                      ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/url         ,  http://www.blogginggeorgetown.com/           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/type        ,  :Community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/orgtype     ,  :Community.orgtype/commercial                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  DD cat 1                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  DD cat 2                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/neighborhood,  #db/id[:db.part/user -1000002]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/name     ,  DD Georgetown                                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/district ,  #db/id[:db.part/user -1000003]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/name         ,  Greater Duwamish                             ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/region       ,  :District.region/s                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/name        ,  DDD Interbay District Blog                   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/url         ,  http://interbayneighborhood.neighborlogs.com/),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/type        ,  :Community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/orgtype     ,  :Community.orgtype/community                 ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/category    ,  DD cat 3                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/neighborhood,  #db/id[:db.part/user -1000005]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :Neighborhood/name     ,  DD Interbay                                  ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :Neighborhood/district ,  #db/id[:db.part/user -1000006]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :District/name         ,  Magnolia/Queen Anne                          ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :District/region       ,  :District.region/w                           )
         |)""".stripMargin
   }
 
@@ -541,8 +542,8 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
       """List(
-        |  List(:db/add,  17592186045886                ,  :community/name,  belltown 2),
-        |  List(:db/add,  17592186045886                ,  :community/url ,  url 2     )
+        |  List(:db/add,  17592186045886                ,  :Community/name,  belltown 2),
+        |  List(:db/add,  17592186045886                ,  :Community/url ,  url 2     )
         |)""".stripMargin
 
 
@@ -554,8 +555,8 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Cool news)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  news     ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Cool news)
         |)""".stripMargin
 
 
@@ -567,10 +568,10 @@ class SeattleQueryTests extends SeattleSpec {
       )
     ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  Cool news        ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool news  ),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  events           ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool events)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  Cool news        ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool news  ),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  events           ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -579,7 +580,7 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category.assert("extra category")
     ) -->
       """List(
-        |  List(:db/add,  17592186045886                ,  :community/category,  extra category)
+        |  List(:db/add,  17592186045886                ,  :Community/category,  extra category)
         |)""".stripMargin
 
 
@@ -588,7 +589,7 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).category.retract("Super cool events")
     ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  Super cool events)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -600,10 +601,10 @@ class SeattleQueryTests extends SeattleSpec {
       Community(belltownId).name("belltown 3").url().category()
     ) -->
       """List(
-        |  List(:db/add    ,  17592186045886                ,  :community/name    ,  belltown 3                    ),
-        |  List(:db/retract,  17592186045886                ,  :community/url     ,  http://www.belltownpeople.com/),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  news                          ),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  events                        )
+        |  List(:db/add    ,  17592186045886                ,  :Community/name    ,  belltown 3                    ),
+        |  List(:db/retract,  17592186045886                ,  :Community/url     ,  http://www.belltownpeople.com/),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  news                          ),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  events                        )
         |)""".stripMargin
   }
 }

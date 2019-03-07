@@ -52,21 +52,19 @@ object CoreTestDefinition {
     val uriMap    = mapURI
     val byteMap   = mapByte
   }
-  object Ns extends Ns
 
   trait Ref1 {
-    val str1     = oneString
-    val int1     = oneInt
-    val enum1    = oneEnum('enum10, 'enum11, 'enum12)
-    val ref2     = one[Ref2]
-    val refSub2  = one[Ref2].isComponent
+    val str1    = oneString
+    val int1    = oneInt
+    val enum1   = oneEnum('enum10, 'enum11, 'enum12)
+    val ref2    = one[Ref2]
+    val refSub2 = one[Ref2].isComponent
 
     val strs1    = manyString
     val ints1    = manyInt
     val refs2    = many[Ref2]
     val refsSub2 = many[Ref2].isComponent
   }
-  object Ref1 extends Ref1
 
   trait Ref2 {
     val str2  = oneString.uniqueIdentity

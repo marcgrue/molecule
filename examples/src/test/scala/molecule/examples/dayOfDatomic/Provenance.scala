@@ -24,11 +24,11 @@ class Provenance extends MoleculeSpec {
     // Transaction meta data (stu id and use case name) is transacted as datoms in the db.part/tx partition
     m(Story.title.url.Tx(MetaData.user_(stu).usecase_("AddStories"))) -->
       Model(List(
-        Atom("story", "title", "String", 1, VarValue, None, List(), List()),
-        Atom("story", "url", "String", 1, VarValue, None, List(), List()),
+        Atom("Story", "title", "String", 1, VarValue, None, List(), List()),
+        Atom("Story", "url", "String", 1, VarValue, None, List(), List()),
         TxMetaData(List(
-          Atom("metaData", "user_", "Long", 1, Eq(List(17592186045423L)), None, List(), List()),
-          Atom("metaData", "usecase_", "String", 1, Eq(List("AddStories")), None, List(), List())))
+          Atom("MetaData", "user_", "Long", 1, Eq(List(17592186045423L)), None, List(), List()),
+          Atom("MetaData", "usecase_", "String", 1, Eq(List("AddStories")), None, List(), List())))
       )) -->
       List(
         List("ElastiCache in 6 minutes", ecURL),
@@ -36,12 +36,12 @@ class Provenance extends MoleculeSpec {
       ) -->
       //       operation     temp id (dummy values)         attribute          value
       """List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :story/title     ,  ElastiCache in 6 minutes                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :story/title     ,  Keep Chocolate Love Atomic                                   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :metaData/user   ,  17592186045423                                               ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :metaData/usecase,  AddStories                                                   )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/title     ,  ElastiCache in 6 minutes                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/title     ,  Keep Chocolate Love Atomic                                   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
+        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/user   ,  17592186045423                                               ),
+        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/usecase,  AddStories                                                   )
         |)""".stripMargin
 
     // Two story entities and one transaction entity is created
@@ -60,13 +60,13 @@ class Provenance extends MoleculeSpec {
     // We can also traverse the generated entity ids to see what is saved
     elasticacheStory.touch === Map(
       ":db/id" -> elasticacheStory,
-      ":story/title" -> "ElastiCache in 6 minutes",
-      ":story/url" -> "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html")
+      ":Story/title" -> "ElastiCache in 6 minutes",
+      ":Story/url" -> "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html")
 
     chocolateStory.touch === Map(
       ":db/id" -> chocolateStory,
-      ":story/title" -> "Keep Chocolate Love Atomic",
-      ":story/url" -> "http://blog.datomic.com/2012/08/atomic-chocolate.html")
+      ":Story/title" -> "Keep Chocolate Love Atomic",
+      ":Story/url" -> "http://blog.datomic.com/2012/08/atomic-chocolate.html")
 
     // Time of transaction
     val stuTxInstant = stuTxId[java.util.Date](":db/txInstant").get
@@ -75,20 +75,20 @@ class Provenance extends MoleculeSpec {
     stuTxId.touchMax(1) === Map(
       ":db/id" -> stuTxId,
       ":db/txInstant" -> stuTxInstant,
-      ":metaData/usecase" -> "AddStories",
-      ":metaData/user" -> stu
+      ":MetaData/usecase" -> "AddStories",
+      ":MetaData/user" -> stu
     )
 
     // Or full traversal to Stu's data
     stuTxId.touch === Map(
       ":db/id" -> stuTxId,
       ":db/txInstant" -> stuTxInstant,
-      ":metaData/usecase" -> "AddStories",
-      ":metaData/user" -> Map(
+      ":MetaData/usecase" -> "AddStories",
+      ":MetaData/user" -> Map(
         ":db/id" -> stu,
-        ":user/email" -> "stuarthalloway@datomic.com",
-        ":user/firstName" -> "Stu",
-        ":user/lastName" -> "Halloway"
+        ":User/email" -> "stuarthalloway@datomic.com",
+        ":User/firstName" -> "Stu",
+        ":User/lastName" -> "Halloway"
       )
     )
 
@@ -166,10 +166,10 @@ class Provenance extends MoleculeSpec {
 
     // Entire attributes history of ElastiCache story _entity_
     Story(elasticacheStory).a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._4, r._3)) === List(
-      (":story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
-      (":story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
-      (":story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
-      (":story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
+      (":Story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
+      (":Story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
+      (":Story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
+      (":Story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
     )
 
     // Stories with latest use case meta date

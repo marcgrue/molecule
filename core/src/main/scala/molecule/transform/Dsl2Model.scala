@@ -15,7 +15,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
   import c.universe._
 
-  val x = DebugMacro("Dsl2Model", 999, 999)
+  val x = DebugMacro("Dsl2Model", 519, 511)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -287,7 +287,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else if (attrStr.head == '_') {
         // x(134, t.tpeS)
-        traverseElement(prev, p, ReBond(firstLow(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")), ""))
+        traverseElement(prev, p, ReBond(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""), ""))
 
       } else if (t.isRef) {
         // x(135, t.tpeS, t.card, t.refCard)
@@ -667,7 +667,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       case q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef =>
         // x(340, manyRef, nested)
-        Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", firstLow(manyRef.toString), q"$nested")))
+        Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", manyRef.toString, q"$nested")))
 
       case q"$prev.$manyRef.apply[..$types]($nested)" =>
         // x(350, manyRef, nested)
@@ -723,7 +723,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         // x(93, gns, attrStr)
         gns match {
           case "schema" => resolveOpSchema(t, attrStr, value)
-          //          case "eavt" =>
         }
       } else if (t.isMapAttr) {
         // x(94, attrStr, value)
@@ -819,19 +818,19 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       val parentNs = prev match {
         case q"$pre.apply($value)" if p.isMapAttrK      => new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
         case q"$pre.apply($value)" if p.isAttr          => richTree(pre).ns
-        case q"$pre.apply($value)"                      => richTree(pre).name
-        case _ if prev.symbol.name.toString.head == '_' => firstLow(prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""))
+        case q"$pre.apply($value)"                      => richTree(pre).name.capitalize
+        case _ if prev.symbol.name.toString.head == '_' => prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")
         case q"$pre.e" if p.isAttr                      => q"$pre".symbol.name
         case _ if p.isAttr                              => p.ns
         case _ if p.isRef                               => p.refNext
-        case _                                          => p.name
+        case _                                          => p.name.capitalize
       }
-      // x(510, prev, parentNs, jsons, tempJsons, post, postJsons)
-      val (ns, refAttr) = (firstLow(parentNs.toString), firstLow(manyRef))
+      // x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, jsons, tempJsons, post, postJsons)
+      val (ns, refAttr) = (parentNs.toString, firstLow(manyRef))
       nestedRefAttrs = nestedRefAttrs :+ s"$ns.$refAttr"
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
       addJsonLambdas
-      // x(511, nestedRefAttrs, nestedElems, jsons, tempJsons, post, postJsons)
+      // x(511, ns, nestedRefAttrs, nestedElems, jsons, tempJsons, post, postJsons)
       Nested(Bond(ns, refAttr, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
     }
 
@@ -847,7 +846,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           nestedElements
         } else if (refPairsFiltered.size == 1) {
           val (refAttr, refNs) = refPairsFiltered.head
-          Bond(refNext, firstLow(refAttr), firstLow(refNs), 2, bi(manyRef, richTree(manyRef))) +: nestedElements
+          Bond(refNext, firstLow(refAttr), refNs.toString, 2, bi(manyRef, richTree(manyRef))) +: nestedElements
         } else
           abort(s"`$manyRef` has more than one ref pointing to `$nestedNs`:\n${refPairs.mkString("\n")}")
       } else {
@@ -864,19 +863,19 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else if (t.isBiOtherRef) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiOtherRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiOtherRef(t.refCard, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiOtherRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else if (t.isBiOtherRefAttr) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiOtherRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiOtherRefAttr(t.card, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiOtherRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else if (t.isBiEdgeRef) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiEdgeRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiEdgeRef(t.refCard, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiEdgeRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else if (t.isBiEdgeRefAttr) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiEdgeRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiEdgeRefAttr(t.card, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiEdgeRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else if (t.isBiEdgePropRef) {
         Seq(BiEdgePropRef(t.refCard))
@@ -889,11 +888,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else if (t.isBiTargetRef) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiTargetRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiTargetRef(t.refCard, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiTargetRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else if (t.isBiTargetRefAttr) {
         val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiTargetRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiTargetRefAttr(t.card, ":" + firstLow(baseType.owner.name) + "/" + baseType.name))
+        Seq(BiTargetRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
 
       } else {
         throw new Dsl2ModelException("Unexpected Bidirectional: " + t)
@@ -1131,7 +1130,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
               resolveValues(q"$vs", t)
           }
         case other          =>
-          // x(22, other)
+          // x(22, other, other.raw)
           resolveValues(q"Seq($other)", t)
       }
 
@@ -1218,10 +1217,12 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolveValues(tree: Tree, t: richTree = null): Seq[Any] = {
       val at: att = if (t == null) null else t.at
       def resolve(tree0: Tree, values: Seq[Tree] = Seq.empty[Tree]): Seq[Tree] = tree0 match {
-        case q"$a.or($b)"             => resolve(b, resolve(a, values))
-        case q"${_}.string2Model($v)" => values :+ v
-        case Apply(_, vs)             => values ++ vs.flatMap(resolve(_))
-        case v                        => values :+ v
+        case q"$a.or($b)"                                            => resolve(b, resolve(a, values))
+        case q"${_}.string2Model($v)"                                => values :+ v
+        case q"scala.StringContext.apply(..$tokens).s(..$variables)" => abort(
+          "Can't use string interpolation for applied values. Please assign the interpolated value to a single variable and apply that instead.")
+        case Apply(_, vs)                                            => values ++ vs.flatMap(resolve(_))
+        case v                                                       => values :+ v
       }
       def validateStaticEnums(value: Any, enumValues: Seq[String]) = {
         if (value != "?" && !value.toString.startsWith("__ident__") && !enumValues.contains(value.toString))

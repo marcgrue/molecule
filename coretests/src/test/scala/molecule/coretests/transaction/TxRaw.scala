@@ -21,7 +21,7 @@ class TxRaw extends CoreSpec {
     Ns.int.get === List(1)
 
     // Add raw data from external file with edn transactional data
-    val data = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:ns/int 2} {:ns/int 3}]"
+    val data = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:Ns/int 2} {:Ns/int 3}]"
     conn.transact(Util.readAll(data).get(0).asInstanceOf[java.util.List[AnyRef]])
 
     // Raw data has been added
@@ -38,8 +38,8 @@ class TxRaw extends CoreSpec {
     // Add raw transactional data
     // (Scala integers are internally stored as Longs)
     conn.transact(Util.list(
-      Util.map(":ns/int", 2L.asInstanceOf[AnyRef]),
-      Util.map(":ns/int", 3L.asInstanceOf[AnyRef])
+      Util.map(":Ns/int", 2L.asInstanceOf[AnyRef]),
+      Util.map(":Ns/int", 3L.asInstanceOf[AnyRef])
     ).asInstanceOf[java.util.List[AnyRef]])
 
     // Raw data has been added
@@ -58,8 +58,8 @@ class TxRaw extends CoreSpec {
       // (Scala integers are internally stored as Longs)
       conn.transactAsync(
         Util.list(
-          Util.map(":ns/int", 2L.asInstanceOf[AnyRef]),
-          Util.map(":ns/int", 3L.asInstanceOf[AnyRef])
+          Util.map(":Ns/int", 2L.asInstanceOf[AnyRef]),
+          Util.map(":Ns/int", 3L.asInstanceOf[AnyRef])
         ).asInstanceOf[java.util.List[AnyRef]]
       ) map { txReport =>
         // Raw data has been added

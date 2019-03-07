@@ -18,7 +18,7 @@ import scala.language.{existentials, higherKinds}
 /** Entity wrapper with actions on entity.
   *
   * @see [[http://www.scalamolecule.org/manual/entities/ Manual]]
-  *     | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/runtime/EntityAPI.scala#L1 entity api]]
+  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/runtime/EntityAPI.scala#L1 entity api]]
   * @groupname retract Entity retraction
   * @groupprio retract 1
   * @groupname tx Entity retraction with transaction meta data
@@ -97,7 +97,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *
     * @group retract
     * @return List[List[Retractentity[Long]]]
-    **/
+    * */
   def getRetractTx = List(List(RetractEntity(id)))
 
   /** Debug entity transaction data of method `retract` without affecting the database.
@@ -216,16 +216,16 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   val List(benId, benAddressId) = Person.name.age.Address.street.insert("Ben", 42, "Hollywood Rd").eids
     *
     *   // Level 1
-    *   benId[String](":person/name") === Some("Ben")
-    *   benId[Int](":person/age") === Some(42)
+    *   benId[String](":Person/name") === Some("Ben")
+    *   benId[Int](":Person/age") === Some(42)
     *
     *   // Level 2
-    *   val refMap = benId[Map[String, Any]](":person/address").getOrElse(Map.empty[String, Any])
-    *   benAddressId[String](":address/street") === Some("Hollywood Rd")
+    *   val refMap = benId[Map[String, Any]](":Person/address").getOrElse(Map.empty[String, Any])
+    *   benAddressId[String](":Address/street") === Some("Hollywood Rd")
     *
     *   // Non-asserted or non-existing attribute returns None
-    *   benId[Int](":person/non-existing-attribute") === None
-    *   benId[Int](":person/existing-but-non-asserted-attribute") === None
+    *   benId[Int](":Person/non-existing-attribute") === None
+    *   benId[Int](":Person/existing-but-non-asserted-attribute") === None
     * }}}
     *
     * @group entityApi
@@ -257,16 +257,16 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *     optAge: Option[Int],
     *     optAddress: Option[Map[String, Any]]
     *   ) = benId(
-    *     ":person/name",
-    *     ":person/age",
-    *     ":person/address"
+    *     ":Person/name",
+    *     ":Person/age",
+    *     ":Person/address"
     *   )
     *
     *   val name: String = optName.getOrElse("no name")
     *
     *   // Type casting necessary to get right value type from Map[String, Any]
     *   val address: Map[String, Any] = optAddress.getOrElse(Map.empty[String, Any])
-    *   val street: String = address.getOrElse(":address/street", "no street").asInstanceOf[String]
+    *   val street: String = address.getOrElse(":Address/street", "no street").asInstanceOf[String]
     *
     *   name === "Ben"
     *   street === "Hollywood Rd"
@@ -298,11 +298,11 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *
     *   benId.touch === Map(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> Map(
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> Map(
     *       ":db/id" -> 17592186045446L,
-    *       ":address/street" -> "Hollywood Rd"),
-    *     ":person/name" -> "Ben"
+    *       ":Address/street" -> "Hollywood Rd"),
+    *     ":Person/name" -> "Ben"
     *   )
     * }}}
     *
@@ -323,19 +323,19 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   // 2 levels returned
     *   benId.touchMax(2) === Map(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> Map(
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> Map(
     *       ":db/id" -> 17592186045446L,
-    *       ":address/street" -> "Hollywood Rd"),
-    *     ":person/name" -> "Ben"
+    *       ":Address/street" -> "Hollywood Rd"),
+    *     ":Person/name" -> "Ben"
     *   )
     *
     *   // 1 level returned
     *   benId.touchMax(1) === Map(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> 17592186045446L // Only reference returned
-    *     ":person/name" -> "Ben"
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> 17592186045446L // Only reference returned
+    *     ":Person/name" -> "Ben"
     *   )
     * }}}
     *
@@ -362,11 +362,11 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   benId.touchQuoted ===
     *     """Map(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> Map(
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> Map(
     *       |    ":db/id" -> 17592186045446L,
-    *       |    ":address/street" -> "Hollywood Rd"),
-    *       |  ":person/name" -> "Ben")""".stripMargin
+    *       |    ":Address/street" -> "Hollywood Rd"),
+    *       |  ":Person/name" -> "Ben")""".stripMargin
     * }}}
     *
     * @group touch
@@ -391,20 +391,20 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   benId.touchQuotedMax(2) ===
     *     """Map(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> Map(
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> Map(
     *       |    ":db/id" -> 17592186045446L,
-    *       |    ":address/street" -> "Hollywood Rd"),
-    *       |  ":person/name" -> "Ben")""".stripMargin
+    *       |    ":Address/street" -> "Hollywood Rd"),
+    *       |  ":Person/name" -> "Ben")""".stripMargin
     *
     *   // 1 level returned
     *   // Note that only reference to Address entity on level 2 is returned
     *   benId.touchQuotedMax(1) ===
     *     """Map(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> 17592186045446L,
-    *       |  ":person/name" -> "Ben")""".stripMargin
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> 17592186045446L,
+    *       |  ":Person/name" -> "Ben")""".stripMargin
     * }}}
     *
     * @group touch
@@ -426,11 +426,11 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *
     *   benId.touchList === List(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> List(
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> List(
     *       ":db/id" -> 17592186045446L,
-    *       ":address/street" -> "Hollywood Rd"),
-    *     ":person/name" -> "Ben"
+    *       ":Address/street" -> "Hollywood Rd"),
+    *     ":Person/name" -> "Ben"
     *   )
     * }}}
     *
@@ -451,19 +451,19 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   // 2 levels returned
     *   benId.touchListMax(2) === List(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> List(
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> List(
     *       ":db/id" -> 17592186045446L,
-    *       ":address/street" -> "Hollywood Rd"),
-    *     ":person/name" -> "Ben"
+    *       ":Address/street" -> "Hollywood Rd"),
+    *     ":Person/name" -> "Ben"
     *   )
     *
     *   // 1 level returned
     *   benId.touchListMax(1) === List(
     *     ":db/id" -> 17592186045445L,
-    *     ":person/age" -> 42,
-    *     ":person/address" -> 17592186045446L // Only reference returned
-    *     ":person/name" -> "Ben"
+    *     ":Person/age" -> 42,
+    *     ":Person/address" -> 17592186045446L // Only reference returned
+    *     ":Person/name" -> "Ben"
     *   )
     * }}}
     *
@@ -487,11 +487,11 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   benId.touchListQuoted ===
     *     """List(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> List(
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> List(
     *       |    ":db/id" -> 17592186045446L,
-    *       |    ":address/street" -> "Hollywood Rd"),
-    *       |  ":person/name" -> "Ben")""",stripMargin
+    *       |    ":Address/street" -> "Hollywood Rd"),
+    *       |  ":Person/name" -> "Ben")""",stripMargin
     * }}}
     *
     * @group touch
@@ -512,27 +512,26 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *   benId.touchListQuotedMax(2) ===
     *     """List(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> List(
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> List(
     *       |    ":db/id" -> 17592186045446L,
-    *       |    ":address/street" -> "Hollywood Rd"),
-    *       |  ":person/name" -> "Ben")""",stripMargin
+    *       |    ":Address/street" -> "Hollywood Rd"),
+    *       |  ":Person/name" -> "Ben")""",stripMargin
     *
     *   // 1 level returned
     *   // Note that only reference to Address entity on level 2 is returned
     *   benId.touchListQuotedMax(1) ===
     *     """List(
     *       |  ":db/id" -> 17592186045445L,
-    *       |  ":person/age" -> 42,
-    *       |  ":person/address" -> 17592186045446L,
-    *       |  ":person/name" -> "Ben")""",stripMargin
+    *       |  ":Person/age" -> 42,
+    *       |  ":Person/address" -> 17592186045446L,
+    *       |  ":Person/name" -> "Ben")""",stripMargin
     * }}}
     *
     * @group touch
     * @return String
     */
   def touchListQuotedMax(maxDepth: Int): String = format(asList(1, maxDepth))
-
 
 
   // Private helper methods ...........................................................................
@@ -546,6 +545,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
       value match {
         case s: String           => sb.append(s""""$s"""")
         case l: Long             => if (l > Int.MaxValue) sb.append(s"${l}L") else sb.append(l) // Int/Long hack
+        case d: Double           => sb.append(d)
         case s: Set[_]           =>
           sb.append("Set(")
           s.foreach { v =>

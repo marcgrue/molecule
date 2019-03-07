@@ -94,76 +94,76 @@ class AsOf extends CoreSpec {
 
     Ns.int.getJsonAsOf(t1) ===
       """[
-        |{"ns.int": 1}
+        |{"Ns.int": 1}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(t2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(t3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(t3, 2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
 
     Ns.int.getJsonAsOf(tx1) ===
       """[
-        |{"ns.int": 1}
+        |{"Ns.int": 1}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(tx2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(tx3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(tx3, 2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
 
     Ns.int.getJsonAsOf(d1) ===
       """[
-        |{"ns.int": 1}
+        |{"Ns.int": 1}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(d2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(d3) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.getJsonAsOf(d3, 2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
   }
 }

@@ -27,13 +27,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b2"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b2"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
 
     inputMolecule(Nil).get === Nil
@@ -46,9 +46,9 @@ class EnumCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
     inputMolecule(List(Set[String]())).get === Nil
 
@@ -62,12 +62,12 @@ class EnumCard2coalesce extends CoreSpec {
         List(),
         List(
           Rule("rule1", Seq(Var("a")), Seq(
-            DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding)))),
+            DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding)))),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         RuleInvocation("rule1", Seq(Var("a"))))))
 
     inputMolecule(List(Set(enum2))).get === List(Set(enum1, enum2, enum3)) // (enum1, enum2) + (enum2, enum3)
@@ -107,13 +107,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b3"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct("!=", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
@@ -123,9 +123,9 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
 
     inputMolecule(List(Set[String]())).get === List(Set(enum1, enum2, enum3, enum4, enum5))
@@ -133,9 +133,9 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
 
     inputMolecule(List(Set(enum1))).get === List(Set(enum2, enum3, enum4, enum5))
@@ -143,11 +143,11 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding))))))
 
     inputMolecule(List(Set(enum2))).get === List(Set(enum3, enum4, enum5))
     inputMolecule(List(Set(enum3))).get === Nil
@@ -158,12 +158,12 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum2"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum2"), Empty, NoBinding))))))
 
 
     // nothing omitted
@@ -172,12 +172,12 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum3"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum1))).get === List(Set(enum2, enum3, enum4, enum5))
@@ -185,11 +185,11 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum2))).get === List(Set(enum3, enum4, enum5))
@@ -197,13 +197,13 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum2"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum2"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum3))).get === Nil
@@ -216,14 +216,14 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum2"), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum2"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum3"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1, enum2), Set(enum2, enum3))).get === List(Set(enum3, enum4, enum5))
@@ -231,15 +231,15 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum1"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum2"), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum2"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum2"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Val(":ns.enums/enum3"), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum2"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(":Ns.enums/enum3"), Empty, NoBinding))))))
   }
 
 
@@ -250,13 +250,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b3"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct(">", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
@@ -266,9 +266,9 @@ class EnumCard2coalesce extends CoreSpec {
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
 
     inputMolecule(List(Set[String]())).get === List(Set(enum1, enum2, enum3, enum4, enum5, enum6))
@@ -283,9 +283,9 @@ class EnumCard2coalesce extends CoreSpec {
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct(">", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
@@ -306,13 +306,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b3"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct(">=", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
@@ -338,13 +338,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b3"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct("<", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
@@ -370,13 +370,13 @@ class EnumCard2coalesce extends CoreSpec {
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
         List(
-          Placeholder(Var("a"), KW("ns", "enums", ""), Var("b3"), Some(":ns.enums/"))),
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
         List(),
         List(DS)),
       Where(List(
-        DataClause(ImplDS, Var("a"), KW("ns", "enums", ""), Var("b"), Empty, NoBinding),
-        DataClause(ImplDS, Var("b"), KW("db", "ident", ""), Var("b1"), Empty, NoBinding),
-        Funct(".getName ^clojure.lang.Keyword", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct("<=", Seq(Var("b2_1"), Val(0)), NoBinding))))
 

@@ -137,12 +137,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace("g" -> "h", "h" -> "h").update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\nh")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq("g" -> "h", "h" -> "h")).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\nh")
     }
 
@@ -297,12 +297,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace(str7 -> str8, str8 -> str8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\n__ident__str8")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq(str7 -> str8, str8 -> str8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/strs`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\n__ident__str8")
 
 
@@ -311,13 +311,13 @@ class UpdateString extends CoreSpec {
 
       (Ns(eid).strs.replace(str7 -> str8, str8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/strs`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/strs`:" +
         "\nh"
 
       // Conflicting new values
       (Ns(eid).strs.replace(Seq(str7 -> str8, str8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/strs`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/strs`:" +
         "\nh"
     }
 

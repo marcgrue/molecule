@@ -44,8 +44,8 @@ class TxBundle extends CoreSpec {
     ) must throwA[java.util.concurrent.ExecutionException]).message ===
       "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
         ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
-        "{:d1 [17592186045447 :ns/int 31 13194139534348 true],\n" +
-        " :d2 [17592186045447 :ns/int 32 13194139534348 true]}\n"
+        "{:d1 [17592186045447 :Ns/int 31 13194139534348 true],\n" +
+        " :d2 [17592186045447 :Ns/int 32 13194139534348 true]}\n"
   }
 
 
@@ -93,13 +93,13 @@ class TxBundle extends CoreSpec {
         1          List(
           1          :db.fn/retractEntity   17592186045445)
         2          List(
-          1          :db/add       #db/id[:db.part/user -1000247]     :ns/int          4           Card(1))
+          1          :db/add       #db/id[:db.part/user -1000247]     :Ns/int          4           Card(1))
         3          List(
-          1          :db/add       #db/id[:db.part/user -1000252]     :ns/int          5           Card(1))
+          1          :db/add       #db/id[:db.part/user -1000252]     :Ns/int          5           Card(1))
         4          List(
-          1          :db/add       #db/id[:db.part/user -1000253]     :ns/int          6           Card(1))
+          1          :db/add       #db/id[:db.part/user -1000253]     :Ns/int          6           Card(1))
         5          List(
-          1          :db/add       17592186045446                     :ns/int          20          Card(1)))
+          1          :db/add       17592186045446                     :Ns/int          20          Card(1)))
       ------------------------------------------------
       2          List(
         1    1     added: true ,   t: 13194139534345,   e: 13194139534345,   a: 50,   v: Wed Nov 14 23:38:15 CET 2018

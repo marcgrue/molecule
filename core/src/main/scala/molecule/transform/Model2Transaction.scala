@@ -188,7 +188,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
            | :in $$ ?id
            | :where [?id $attr ?a]
            |        [?a :db/ident ?b]
-           |        [(.getName ^clojure.lang.Keyword ?b) ?enums]
+           |        [(name ?b) ?enums]
            |]""".stripMargin
       else
         s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"

@@ -14,43 +14,43 @@ class EntityAPI extends CoreSpec {
 
     eid.touch === Map(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> Map(
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> Map(
         ":db/id" -> 17592186045446L,
-        ":ref1/str1" -> "Hollywood Rd"),
-      ":ns/str" -> "Ben"
+        ":Ref1/str1" -> "Hollywood Rd"),
+      ":Ns/str" -> "Ben"
     )
 
     eid.touchQuoted ===
       """Map(
         |  ":db/id" -> 17592186045445L,
-        |  ":ns/int" -> 42,
-        |  ":ns/ref1" -> Map(
+        |  ":Ns/int" -> 42,
+        |  ":Ns/ref1" -> Map(
         |    ":db/id" -> 17592186045446L,
-        |    ":ref1/str1" -> "Hollywood Rd"),
-        |  ":ns/str" -> "Ben")""".stripMargin
+        |    ":Ref1/str1" -> "Hollywood Rd"),
+        |  ":Ns/str" -> "Ben")""".stripMargin
 
     // Level
 
     eid.touchMax(2) === Map(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> Map(":db/id" -> 17592186045446L, ":ref1/str1" -> "Hollywood Rd"),
-      ":ns/str" -> "Ben"
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> Map(":db/id" -> 17592186045446L, ":Ref1/str1" -> "Hollywood Rd"),
+      ":Ns/str" -> "Ben"
     )
     eid.touchMax(1) === Map(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> 17592186045446L,
-      ":ns/str" -> "Ben"
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> 17592186045446L,
+      ":Ns/str" -> "Ben"
     )
 
     eid.touchQuotedMax(1) ===
       """Map(
         |  ":db/id" -> 17592186045445L,
-        |  ":ns/int" -> 42,
-        |  ":ns/ref1" -> 17592186045446L,
-        |  ":ns/str" -> "Ben")""".stripMargin
+        |  ":Ns/int" -> 42,
+        |  ":Ns/ref1" -> 17592186045446L,
+        |  ":Ns/str" -> "Ben")""".stripMargin
   }
 
 
@@ -60,40 +60,40 @@ class EntityAPI extends CoreSpec {
 
     eid.touchList === List(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> List((":db/id", 17592186045446L), (":ref1/str1", "Hollywood Rd")),
-      ":ns/str" -> "Ben"
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> List((":db/id", 17592186045446L), (":Ref1/str1", "Hollywood Rd")),
+      ":Ns/str" -> "Ben"
     )
 
     eid.touchListQuoted ===
       """List(
         |  ":db/id" -> 17592186045445L,
-        |  ":ns/int" -> 42,
-        |  ":ns/ref1" -> List(
+        |  ":Ns/int" -> 42,
+        |  ":Ns/ref1" -> List(
         |    ":db/id" -> 17592186045446L,
-        |    ":ref1/str1" -> "Hollywood Rd"),
-        |  ":ns/str" -> "Ben")""".stripMargin
+        |    ":Ref1/str1" -> "Hollywood Rd"),
+        |  ":Ns/str" -> "Ben")""".stripMargin
 
     eid.touchListMax(3) === List(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> List((":db/id", 17592186045446L), (":ref1/str1", "Hollywood Rd")),
-      ":ns/str" -> "Ben"
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> List((":db/id", 17592186045446L), (":Ref1/str1", "Hollywood Rd")),
+      ":Ns/str" -> "Ben"
     )
     eid.touchListMax(1) === List(
       ":db/id" -> 17592186045445L,
-      ":ns/int" -> 42,
-      ":ns/ref1" -> 17592186045446L,
-      ":ns/str" -> "Ben"
+      ":Ns/int" -> 42,
+      ":Ns/ref1" -> 17592186045446L,
+      ":Ns/str" -> "Ben"
     )
 
 
     eid.touchListQuotedMax(1) ===
       """List(
         |  ":db/id" -> 17592186045445L,
-        |  ":ns/int" -> 42,
-        |  ":ns/ref1" -> 17592186045446L,
-        |  ":ns/str" -> "Ben")""".stripMargin
+        |  ":Ns/int" -> 42,
+        |  ":Ns/ref1" -> 17592186045446L,
+        |  ":Ns/str" -> "Ben")""".stripMargin
   }
 
 
@@ -102,18 +102,18 @@ class EntityAPI extends CoreSpec {
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
     // Level 1
-    eid[String](":ns/str") === Some("Ben")
-    eid[Int](":ns/int") === Some(42)
+    eid[String](":Ns/str") === Some("Ben")
+    eid[Int](":Ns/int") === Some(42)
 
     // Level 2
     // Type casting necessary to get right value type from Map[String, Any]
-    val refMap = eid[Map[String, Any]](":ns/ref1").getOrElse(Map.empty[String, Any])
-    refId[String](":ref1/str1") === Some("Hollywood Rd")
+    val refMap = eid[Map[String, Any]](":Ns/ref1").getOrElse(Map.empty[String, Any])
+    refId[String](":Ref1/str1") === Some("Hollywood Rd")
 
 
     // Non-asserted or non-existing attribute returns None
-    eid[Int](":ns/non-existing-attribute") === None
-    eid[Int](":ns/existing-but-non-asserted-attribute") === None
+    eid[Int](":Ns/non-existing-attribute") === None
+    eid[Int](":Ns/existing-but-non-asserted-attribute") === None
   }
 
 
@@ -121,13 +121,13 @@ class EntityAPI extends CoreSpec {
 
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
-    eid(":ns/str", ":ns/int", ":ns/ref1") === List(
+    eid(":Ns/str", ":Ns/int", ":Ns/ref1") === List(
       Some("Ben"),
       Some(42),
       Some(
         Map(
           ":db/id" -> 17592186045446L,
-          ":ref1/str1" -> "Hollywood Rd"
+          ":Ref1/str1" -> "Hollywood Rd"
         )
       )
     )
@@ -138,15 +138,15 @@ class EntityAPI extends CoreSpec {
     optAge: Option[Int],
     optAddress: Option[Map[String, Any]]
     ) = eid(
-      ":ns/str",
-      ":ns/int",
-      ":ns/ref1"
+      ":Ns/str",
+      ":Ns/int",
+      ":Ns/ref1"
     )
 
     val name: String = optName.getOrElse("no name")
 
     val address: Map[String, Any] = optAddress.getOrElse(Map.empty[String, Any])
-    val street : String           = address.getOrElse(":ref1/str1", "no street").asInstanceOf[String]
+    val street : String           = address.getOrElse(":Ref1/str1", "no street").asInstanceOf[String]
 
     name === "Ben"
     street === "Hollywood Rd"

@@ -57,22 +57,22 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       // lovesBen edge points to Ben
       lovesBen.touchMax(1) === Map(
         ":db/id" -> lovesBen,
-        ":loves/person" -> ben,
-        ":loves/weight" -> 7,
+        ":Loves/person" -> ben,
+        ":Loves/weight" -> 7,
         ":molecule_Meta/otherEdge" -> benLoves // To be able to find the other edge later
       )
 
       // Ben points to edge benLoves
       ben.touchMax(1) === Map(
         ":db/id" -> ben,
-        ":person/loves" -> benLoves,
-        ":person/name" -> "Ben"
+        ":Person/loves" -> benLoves,
+        ":Person/name" -> "Ben"
       )
 
       // benLoves edge is ready to point back to a base entity (Ann)
       benLoves.touchMax(1) === Map(
         ":db/id" -> benLoves,
-        ":loves/weight" -> 7,
+        ":Loves/weight" -> 7,
         ":molecule_Meta/otherEdge" -> lovesBen // To be able to find the other edge later
       )
 

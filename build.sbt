@@ -1,7 +1,7 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.17.2",
+  version := "0.18.0",
   scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",
@@ -64,31 +64,31 @@ lazy val moleculeCore = project.in(file("core"))
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
-//  .enablePlugins(MoleculePlugin)
-//  .settings(
-//    moduleName := "molecule-coretests",
-//    moleculeSchemas := Seq(
-//      "molecule/coretests/bidirectionals",
-//      "molecule/coretests/nested",
-//      "molecule/coretests/schemaDef",
-//      "molecule/coretests/util"
-//    )
-//  )
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    moduleName := "molecule-coretests",
+    moleculeSchemas := Seq(
+      "molecule/coretests/bidirectionals",
+      "molecule/coretests/nested",
+      "molecule/coretests/schemaDef",
+      "molecule/coretests/util"
+    )
+  )
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
   .settings(commonSettings ++ noPublishSettings)
   .settings(Seq(autoAPIMappings := true))
-//  .enablePlugins(MoleculePlugin)
-//  .settings(
-//    moduleName := "molecule-examples",
-//    moleculeSchemas := Seq(
-//      "molecule/examples/dayOfDatomic",
-//      "molecule/examples/gremlin",
-//      "molecule/examples/mbrainz",
-//      "molecule/examples/seattle"
-//    )
-//  )
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    moduleName := "molecule-examples",
+    moleculeSchemas := Seq(
+      "molecule/examples/dayOfDatomic",
+      "molecule/examples/gremlin",
+      "molecule/examples/mbrainz",
+      "molecule/examples/seattle"
+    )
+  )
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

@@ -11,7 +11,7 @@ class ExampleAdHoc extends MoleculeSpec {
   "example adhoc" >> {
 
     implicit val conn = recreateDbFrom(ProductsOrderSchema)
-//    implicit val conn = recreateDbFrom(GraphSchema)
+    //    implicit val conn = recreateDbFrom(GraphSchema)
 
 
     ok

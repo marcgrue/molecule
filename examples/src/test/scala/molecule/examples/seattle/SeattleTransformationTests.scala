@@ -19,7 +19,7 @@ class SeattleTransformationTests extends SeattleSpec {
       // Each attribute is modelled as an "Atom"
 
       Model(List(
-        Atom("community", "name", "String", 1, VarValue)))
+        Atom("Community", "name", "String", 1, VarValue)))
 
     } --> {
 
@@ -31,7 +31,7 @@ class SeattleTransformationTests extends SeattleSpec {
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause("a", KW("community", "name"), "b"))))
+          DataClause("a", KW("Community", "name"), "b"))))
 
     } --> {
 
@@ -39,7 +39,7 @@ class SeattleTransformationTests extends SeattleSpec {
       // The Query object is transformed to a query string
 
       """[:find  ?b
-        | :where [?a :community/name ?b]]""".stripMargin
+        | :where [?a :Community/name ?b]]""".stripMargin
     }
   }
 
@@ -49,9 +49,9 @@ class SeattleTransformationTests extends SeattleSpec {
     // Multiple attributes
     m(Community.name.url.category) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue),
-        Atom("community", "url", "String", 1, VarValue),
-        Atom("community", "category", "String", 2, VarValue))
+        Atom("Community", "name", "String", 1, VarValue),
+        Atom("Community", "url", "String", 1, VarValue),
+        Atom("Community", "category", "String", 2, VarValue))
       ) -->
       Query(
         Find(List(
@@ -59,14 +59,14 @@ class SeattleTransformationTests extends SeattleSpec {
           Var("c"),
           AggrExpr("distinct", List(), Var("d")))),
         Where(List(
-          DataClause("a", KW("community", "name"), "b"),
-          DataClause("a", KW("community", "url"), "c"),
-          DataClause("a", KW("community", "category"), "d")))
+          DataClause("a", KW("Community", "name"), "b"),
+          DataClause("a", KW("Community", "url"), "c"),
+          DataClause("a", KW("Community", "category"), "d")))
       ) -->
       """[:find  ?b ?c (distinct ?d)
-        | :where [?a :community/name ?b]
-        |        [?a :community/url ?c]
-        |        [?a :community/category ?d]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/url ?c]
+        |        [?a :Community/category ?d]]""".stripMargin
   }
 
   "Querying _by_ attribute values" >> {
@@ -74,65 +74,65 @@ class SeattleTransformationTests extends SeattleSpec {
     // Names of twitter communities
     m(Community.name.type_("twitter")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue),
-        Atom("community", "type_", "String", 1, Eq(List("twitter")), Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue),
+        Atom("Community", "type_", "String", 1, Eq(List("twitter")), Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause("a", KW("community", "name"), "b"),
-          DataClause("a", KW("community", "type"), Val(":community.type/twitter"))))
+          DataClause("a", KW("Community", "name"), "b"),
+          DataClause("a", KW("Community", "type"), Val(":Community.type/twitter"))))
       ) -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ":community.type/twitter"]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ":Community.type/twitter"]]""".stripMargin
 
 
     // Categories (many-cardinality) of the Belltown Community
     m(Community.name_("belltown").category) -->
       Model(List(
-        Atom("community", "name_", "String", 1, Eq(List("belltown"))),
-        Atom("community", "category", "String", 2, VarValue))
+        Atom("Community", "name_", "String", 1, Eq(List("belltown"))),
+        Atom("Community", "category", "String", 2, VarValue))
       ) -->
       Query(
         Find(List(
           AggrExpr("distinct", List(), Var("c")))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Val("belltown"), Empty),
-          DataClause(ImplDS, Var("a"), KW("community", "category"), Var("c"), Empty)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Val("belltown"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "category"), Var("c"), Empty)))
       ) -->
       """[:find  (distinct ?c)
-        | :where [?a :community/name "belltown"]
-        |        [?a :community/category ?c]]""".stripMargin
+        | :where [?a :Community/name "belltown"]
+        |        [?a :Community/category ?c]]""".stripMargin
 
 
     // Names of news or arts communities - transforms to a query using Rules
     m(Community.name.category_("news", "arts")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue),
-        Atom("community", "category_", "String", 2, Eq(List("news", "arts")), None))
+        Atom("Community", "name", "String", 1, VarValue),
+        Atom("Community", "category_", "String", 2, Eq(List("news", "arts")), None))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(List(), List(
-          Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("community", "category"), Val("news"), Empty))),
-          Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("community", "category"), Val("arts"), Empty)))), List(DS)),
+          Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("Community", "category"), Val("news"), Empty))),
+          Rule("rule1", List(Var("a")), List(DataClause(ImplDS, Var("a"), KW("Community", "category"), Val("arts"), Empty)))), List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
           RuleInvocation("rule1", List(Var("a")))))
       ) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/category "news"]]
-        |     [(rule1 ?a) [?a :community/category "arts"]]]
+        |  2 [[(rule1 ?a) [?a :Community/category "news"]]
+        |     [(rule1 ?a) [?a :Community/category "arts"]]]
         |)""".stripMargin
   }
 
@@ -143,54 +143,54 @@ class SeattleTransformationTests extends SeattleSpec {
     // Ref's are modelelled as "Bond"'s (between Atoms)
     m(Community.name.Neighborhood.District.region_("ne")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region_", "String", 1, Eq(List("ne")), Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region_", "String", 1, Eq(List("ne")), Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("neighborhood", "district", "district"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("district", "region"), Val(":district.region/ne"), Empty)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("Neighborhood", "district", "District"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("District", "region"), Val(":District.region/ne"), Empty)))
       ) -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
-        |        [?d :district/region ":district.region/ne"]]""".stripMargin
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
+        |        [?d :District/region ":District.region/ne"]]""".stripMargin
 
 
     // Communities and their region
     m(Community.name.Neighborhood.District.region) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region", "String", 1, EnumVal, Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region", "String", 1, EnumVal, Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"),
           Var("e2"))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("neighborhood", "district", "district"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("district", "region"), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("Neighborhood", "district", "District"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("District", "region"), Var("e"), Empty, NoBinding),
           DataClause(ImplDS, Var("e"), KW("db", "ident"), Var("e1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", List(Var("e1")), ScalarBinding(Var("e2")))))
+          Funct("name", List(Var("e1")), ScalarBinding(Var("e2")))))
       ) -->
       """[:find  ?b ?e2
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
-        |        [?d :district/region ?e]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
+        |        [?d :District/region ?e]
         |        [?e :db/ident ?e1]
-        |        [(.getName ^clojure.lang.Keyword ?e1) ?e2]]""".stripMargin
+        |        [(name ?e1) ?e2]]""".stripMargin
   }
 
 
@@ -201,65 +201,65 @@ class SeattleTransformationTests extends SeattleSpec {
     // Community input molecule awaiting some type value
     m(Community.name.type_(?)) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/"))),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/"))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2")))))
       ) -->
       """[:find  ?b
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]""".stripMargin
+        |        [(name ?c1) ?c2]]""".stripMargin
 
     // Applying a value as input
     m(Community.name.type_(?)).apply("twitter") -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":community.type/twitter")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/twitter")))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ ?c
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 :community.type/twitter
+        |  2 :Community.type/twitter
         |)""".stripMargin
 
 
     // Omit underscore to return a `type` value
     m(Community.name.`type`(?)) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
@@ -267,27 +267,27 @@ class SeattleTransformationTests extends SeattleSpec {
           Var("c2"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/"))),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/"))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2")))))
       ) -->
       """[:find  ?b ?c2
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]""".stripMargin
+        |        [(name ?c1) ?c2]]""".stripMargin
 
 
     m(Community.name.`type`(?)).apply("twitter") -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
@@ -299,17 +299,17 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2")))))
       ) -->
       """[:find  ?b ?c2
         | :in    $ ?c2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -323,8 +323,8 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name.`type`(?)).apply("facebook_page" or "twitter") -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
@@ -336,17 +336,17 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2")))))
       ) -->
       """[:find  ?b ?c2
         | :in    $ [?c2 ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -362,8 +362,8 @@ class SeattleTransformationTests extends SeattleSpec {
       //    m(Community.name.`type`(?))("facebook_page", "twitter") -->
       //    m(Community.name.`type`(?))(List("facebook_page", "twitter")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
@@ -375,17 +375,17 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2")))))
       ) -->
       """[:find  ?b ?c2
         | :in    $ [?c2 ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]]
+        |        [(name ?c1) ?c2]]
         |
         |INPUTS:
         |List(
@@ -400,37 +400,37 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name.type_(?).orgtype_(?)) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "orgtype_", "String", 1, Qm, Some(":community.orgtype/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "orgtype_", "String", 1, Qm, Some(":Community.orgtype/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/")),
-            Placeholder(Var("a"), KW("community", "orgtype", ""), Var("d2"), Some(":community.orgtype/"))),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/")),
+            Placeholder(Var("a"), KW("Community", "orgtype"), Var("d2"), Some(":Community.orgtype/"))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))),
-          DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("db", "ident", ""), Var("d1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("d1")), ScalarBinding(Var("d2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("db", "ident"), Var("d1"), Empty, NoBinding),
+          Funct("name", Seq(Var("d1")), ScalarBinding(Var("d2")))))
       ) -->
       """[:find  ?b
         | :in    $ ?c2 ?d2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/orgtype ?d]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]""".stripMargin
+        |        [(name ?d1) ?d2]]""".stripMargin
 
 
     // The following 3 notation variations transform in the same way
@@ -440,35 +440,35 @@ class SeattleTransformationTests extends SeattleSpec {
       //    m(Community.name.type_(?).orgtype_(?)).apply("email_list", "community") -->
       //    m(Community.name.type_(?).orgtype_(?)).apply(List(("email_list", "community"))) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "orgtype_", "String", 1, Qm, Some(":community.orgtype/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "orgtype_", "String", 1, Qm, Some(":Community.orgtype/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":community.type/email_list"))),
-            InVar(ScalarBinding(Var("d")), Seq(Seq(":community.orgtype/community")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/email_list"))),
+            InVar(ScalarBinding(Var("d")), Seq(Seq(":Community.orgtype/community")))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Var("d"), Empty, NoBinding)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Var("d"), Empty, NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ ?c ?d
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/orgtype ?d]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/orgtype ?d]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 :community.type/email_list
-        |  3 :community.orgtype/community
+        |  2 :Community.type/email_list
+        |  3 :Community.orgtype/community
         |)""".stripMargin
 
 
@@ -477,9 +477,9 @@ class SeattleTransformationTests extends SeattleSpec {
     // Communities of some `type` AND some `orgtype` (include input values)
     m(Community.name.`type`(?).orgtype(?)) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "orgtype", "String", 1, Qm, Some(":community.orgtype/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "orgtype", "String", 1, Qm, Some(":Community.orgtype/")))
       ) -->
       Query(
         Find(List(
@@ -488,28 +488,28 @@ class SeattleTransformationTests extends SeattleSpec {
           Var("d2"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/")),
-            Placeholder(Var("a"), KW("community", "orgtype", ""), Var("d2"), Some(":community.orgtype/"))),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/")),
+            Placeholder(Var("a"), KW("Community", "orgtype"), Var("d2"), Some(":Community.orgtype/"))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))),
-          DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("db", "ident", ""), Var("d1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("d1")), ScalarBinding(Var("d2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("db", "ident"), Var("d1"), Empty, NoBinding),
+          Funct("name", Seq(Var("d1")), ScalarBinding(Var("d2")))))
       ) -->
       """[:find  ?b ?c2 ?d2
         | :in    $ ?c2 ?d2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/orgtype ?d]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]""".stripMargin
+        |        [(name ?d1) ?d2]]""".stripMargin
 
 
     // The following 3 notation variations transform in the same way
@@ -518,9 +518,9 @@ class SeattleTransformationTests extends SeattleSpec {
     //    m(Community.name.`type`(?!).orgtype(?!)).apply(("email_list", "community"), ("website", "commercial")) -->
     m(Community.name.`type`(?).orgtype(?))(Seq(("email_list", "community"), ("website", "commercial"))) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "orgtype", "String", 1, Qm, Some(":community.orgtype/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "orgtype", "String", 1, Qm, Some(":Community.orgtype/")))
       ) -->
       Query(
         Find(List(
@@ -531,42 +531,42 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(
             Rule("rule1", Seq(Var("a")), Seq(
-              DataClause(ImplDS, Var("a"), KW("community", "type", ""), Val(":community.type/email_list"), Empty, NoBinding),
-              DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Val(":community.orgtype/community"), Empty, NoBinding))),
+              DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/email_list"), Empty, NoBinding),
+              DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Val(":Community.orgtype/community"), Empty, NoBinding))),
             Rule("rule1", Seq(Var("a")), Seq(
-              DataClause(ImplDS, Var("a"), KW("community", "type", ""), Val(":community.type/website"), Empty, NoBinding),
-              DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Val(":community.orgtype/commercial"), Empty, NoBinding)))),
+              DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/website"), Empty, NoBinding),
+              DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Val(":Community.orgtype/commercial"), Empty, NoBinding)))),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
           RuleInvocation("rule1", Seq(Var("a"))),
-          DataClause(ImplDS, Var("a"), KW("community", "orgtype", ""), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("db", "ident", ""), Var("d1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("d1")), ScalarBinding(Var("d2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("db", "ident"), Var("d1"), Empty, NoBinding),
+          Funct("name", Seq(Var("d1")), ScalarBinding(Var("d2")))))
       ) -->
       """[:find  ?b ?c2 ?d2
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
+        |        [(name ?c1) ?c2]
         |        (rule1 ?a)
-        |        [?a :community/orgtype ?d]
+        |        [?a :Community/orgtype ?d]
         |        [?d :db/ident ?d1]
-        |        [(.getName ^clojure.lang.Keyword ?d1) ?d2]]
+        |        [(name ?d1) ?d2]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
         |  2 [[(rule1 ?a)
-        |   [?a :community/type ":community.type/email_list"]
-        |   [?a :community/orgtype ":community.orgtype/community"]]
+        |   [?a :Community/type ":Community.type/email_list"]
+        |   [?a :Community/orgtype ":Community.orgtype/community"]]
         |     [(rule1 ?a)
-        |   [?a :community/type ":community.type/website"]
-        |   [?a :community/orgtype ":community.orgtype/commercial"]]]
+        |   [?a :Community/type ":Community.type/website"]
+        |   [?a :Community/orgtype ":Community.orgtype/commercial"]]]
         |)""".stripMargin
   }
 
@@ -575,47 +575,47 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name < "C") -->
       Model(List(
-        Atom("community", "name", "String", 1, Lt("C")))
+        Atom("Community", "name", "String", 1, Lt("C")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
           Funct(".compareTo ^String", List(Var("b"), Val("C")), ScalarBinding(Var("b2"))),
           Funct("<", List(Var("b2"), Val(0)), NoBinding)))
       ) -->
       """[:find  ?b
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b "C") ?b2]
         |        [(< ?b2 0)]]""".stripMargin
 
     m(Community.name < ?) -->
       Model(List(
-        Atom("community", "name", "String", 1, Lt(Qm)))
+        Atom("Community", "name", "String", 1, Lt(Qm)))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "name", ""), Var("b1"), None)),
+            Placeholder(Var("a"), KW("Community", "name"), Var("b1"), None)),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
           Funct(".compareTo ^String", Seq(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
           Funct("<", Seq(Var("b2"), Val(0)), NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b ?b1) ?b2]
         |        [(< ?b2 0)]]""".stripMargin
 
     m(Community.name < ?).apply("C") -->
       Model(List(
-        Atom("community", "name", "String", 1, Lt(Qm)))
+        Atom("Community", "name", "String", 1, Lt(Qm)))
       ) -->
       Query(
         Find(List(
@@ -623,13 +623,13 @@ class SeattleTransformationTests extends SeattleSpec {
         In(List(
           InVar(ScalarBinding(Var("b1")), List(List("C"))))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
           Funct(".compareTo ^String", List(Var("b"), Var("b1")), ScalarBinding(Var("b2"))),
           Funct("<", List(Var("b2"), Val(0)), NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        [(.compareTo ^String ?b ?b1) ?b2]
         |        [(< ?b2 0)]]
         |
@@ -645,41 +645,41 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name contains "Wallingford") -->
       Model(List(
-        Atom("community", "name", "String", 1, Fulltext(List("Wallingford"))))
+        Atom("Community", "name", "String", 1, Fulltext(List("Wallingford"))))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         Where(List(
-          Funct("fulltext", Seq(DS, KW("community", "name", ""), Val("Wallingford")), RelationBinding(List(Var("a"), Var("b"))))))
+          Funct("fulltext", Seq(DS, KW("Community", "name"), Val("Wallingford")), RelationBinding(List(Var("a"), Var("b"))))))
       ) -->
       """[:find  ?b
-        | :where [(fulltext $ :community/name "Wallingford") [[ ?a ?b ]]]]""".stripMargin
+        | :where [(fulltext $ :Community/name "Wallingford") [[ ?a ?b ]]]]""".stripMargin
 
 
     m(Community.name contains ?) -->
       Model(List(
-        Atom("community", "name", "String", 1, Fulltext(Seq(Qm))))
+        Atom("Community", "name", "String", 1, Fulltext(Seq(Qm))))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "name", ""), Var("b1"), None)),
+            Placeholder(Var("a"), KW("Community", "name"), Var("b1"), None)),
           List(),
           List(DS)),
         Where(List(
-          Funct("fulltext", Seq(DS, KW("community", "name", ""), Var("b1")), RelationBinding(List(Var("a"), Var("b"))))))
+          Funct("fulltext", Seq(DS, KW("Community", "name"), Var("b1")), RelationBinding(List(Var("a"), Var("b"))))))
       ) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [(fulltext $ :community/name ?b1) [[ ?a ?b ]]]]""".stripMargin
+        | :where [(fulltext $ :Community/name ?b1) [[ ?a ?b ]]]]""".stripMargin
 
 
     m(Community.name contains ?).apply("Wallingford") -->
       Model(List(
-        Atom("community", "name", "String", 1, Fulltext(List(Qm))))
+        Atom("Community", "name", "String", 1, Fulltext(List(Qm))))
       ) -->
       Query(
         Find(List(
@@ -690,11 +690,11 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(DS)),
         Where(List(
-          Funct("fulltext", Seq(DS, KW("community", "name", ""), Var("b1")), RelationBinding(List(Var("a"), Var("b"))))))
+          Funct("fulltext", Seq(DS, KW("Community", "name"), Var("b1")), RelationBinding(List(Var("a"), Var("b"))))))
       ) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [(fulltext $ :community/name ?b1) [[ ?a ?b ]]]]
+        | :where [(fulltext $ :Community/name ?b1) [[ ?a ?b ]]]]
         |
         |INPUTS:
         |List(
@@ -707,9 +707,9 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name.type_("website").category contains "food") -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Eq(List("website")), Some(":community.type/")),
-        Atom("community", "category", "String", 2, Fulltext(List("food")), None))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Eq(List("website")), Some(":Community.type/")),
+        Atom("Community", "category", "String", 2, Fulltext(List("food")), None))
       ) -->
       Query(
         Find(List(
@@ -719,33 +719,33 @@ class SeattleTransformationTests extends SeattleSpec {
           List(),
           List(
             Rule("rule1", Seq(Var("a")), Seq(
-              Funct("fulltext", Seq(DS(""), KW("community", "category", ""), Val("food")), RelationBinding(List(Var("a"), Var("a_1"))))))),
+              Funct("fulltext", Seq(DS(""), KW("Community", "category"), Val("food")), RelationBinding(List(Var("a"), Var("a_1"))))))),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Val(":community.type/website"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "category", ""), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/website"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "category"), Var("d"), Empty, NoBinding),
           RuleInvocation("rule1", Seq(Var("a")))))
       ) -->
       """[:find  ?b (distinct ?d)
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ":community.type/website"]
-        |        [?a :community/category ?d]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ":Community.type/website"]
+        |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?a_1 ]]]]]
+        |  2 [[(rule1 ?a) [(fulltext $ :Community/category "food") [[ ?a ?a_1 ]]]]]
         |)""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "category", "String", 2, Fulltext(List(Qm)), None))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "category", "String", 2, Fulltext(List(Qm)), None))
       ) -->
       Query(
         Find(List(
@@ -753,31 +753,31 @@ class SeattleTransformationTests extends SeattleSpec {
           AggrExpr("distinct", Seq(), Var("d")))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/")),
-            Placeholder(Var("a"), KW("community", "category", ""), Var("d1"), None)),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/")),
+            Placeholder(Var("a"), KW("Community", "category"), Var("d1"), None)),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))),
-          Funct("fulltext", Seq(DS, KW("community", "category", ""), Var("d1")), RelationBinding(List(Var("a"), Var("d"))))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
+          Funct("fulltext", Seq(DS, KW("Community", "category"), Var("d1")), RelationBinding(List(Var("a"), Var("d"))))))
       ) -->
       """[:find  ?b (distinct ?d)
         | :in    $ ?c2 ?d1
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [(fulltext $ :community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
+        |        [(name ?c1) ?c2]
+        |        [(fulltext $ :Community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?).apply("website", Set("food")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Atom("community", "category", "String", 2, Fulltext(List(Qm)), None))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Atom("Community", "category", "String", 2, Fulltext(List(Qm)), None))
       ) -->
       Query(
         Find(List(
@@ -785,29 +785,29 @@ class SeattleTransformationTests extends SeattleSpec {
           AggrExpr("distinct", Seq(), Var("d")))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":community.type/website")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/website")))),
           List(
             Rule("rule1", Seq(Var("a")), Seq(
-              Funct("fulltext", Seq(DS(""), KW("community", "category", ""), Val("food")), RelationBinding(List(Var("a"), Var("d1_1"))))))),
+              Funct("fulltext", Seq(DS(""), KW("Community", "category"), Val("food")), RelationBinding(List(Var("a"), Var("d1_1"))))))),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "category", ""), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "category"), Var("d"), Empty, NoBinding),
           RuleInvocation("rule1", Seq(Var("a")))))
       ) -->
       """[:find  ?b (distinct ?d)
         | :in    $ % ?c
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/category ?d]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [(fulltext $ :community/category "food") [[ ?a ?d1_1 ]]]]]
-        |  3 :community.type/website
+        |  2 [[(rule1 ?a) [(fulltext $ :Community/category "food") [[ ?a ?d1_1 ]]]]]
+        |  3 :Community.type/website
         |)""".stripMargin
   }
 
@@ -818,40 +818,40 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name.type_("twitter" or "facebook_page")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Eq(List("twitter", "facebook_page")), Some(":community.type/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Eq(List("twitter", "facebook_page")), Some(":Community.type/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(List(), List(
           Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("community", "type"), Val(":community.type/twitter"), Empty))),
+            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/twitter"), Empty))),
           Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("community", "type"), Val(":community.type/facebook_page"), Empty)))), List(DS)),
+            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/facebook_page"), Empty)))), List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
           RuleInvocation("rule1", List(Var("a")))))
       ) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/type ":community.type/twitter"]]
-        |     [(rule1 ?a) [?a :community/type ":community.type/facebook_page"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
+        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]]
         |)""".stripMargin
 
 
     m(Community.name.Neighborhood.District.region("ne" or "sw")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region", "String", 1, Eq(List("ne", "sw")), Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region", "String", 1, Eq(List("ne", "sw")), Some(":District.region/")))
       ) -->
       Query(
         Find(List(
@@ -859,125 +859,125 @@ class SeattleTransformationTests extends SeattleSpec {
           Var("e2"))),
         In(List(), List(
           Rule("rule1", List(Var("d")), List(
-            DataClause(ImplDS, Var("d"), KW("district", "region"), Val(":district.region/ne"), Empty))),
+            DataClause(ImplDS, Var("d"), KW("District", "region"), Val(":District.region/ne"), Empty))),
           Rule("rule1", List(Var("d")), List(
-            DataClause(ImplDS, Var("d"), KW("district", "region"), Val(":district.region/sw"), Empty)))), List(DS)),
+            DataClause(ImplDS, Var("d"), KW("District", "region"), Val(":District.region/sw"), Empty)))), List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("neighborhood", "district", "district"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("district", "region"), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("Neighborhood", "district", "District"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("District", "region"), Var("e"), Empty, NoBinding),
           DataClause(ImplDS, Var("e"), KW("db", "ident"), Var("e1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", List(Var("e1")), ScalarBinding(Var("e2"))),
+          Funct("name", List(Var("e1")), ScalarBinding(Var("e2"))),
           RuleInvocation("rule1", List(Var("d")))))
       ) -->
       """[:find  ?b ?e2
         | :in    $ %
-        | :where [?a :community/name ?b]
-        |        [?a :community/neighborhood ?c]
-        |        [?c :neighborhood/district ?d]
-        |        [?d :district/region ?e]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/neighborhood ?c]
+        |        [?c :Neighborhood/district ?d]
+        |        [?d :District/region ?e]
         |        [?e :db/ident ?e1]
-        |        [(.getName ^clojure.lang.Keyword ?e1) ?e2]
+        |        [(name ?e1) ?e2]
         |        (rule1 ?d)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?d) [?d :district/region ":district.region/ne"]]
-        |     [(rule1 ?d) [?d :district/region ":district.region/sw"]]]
+        |  2 [[(rule1 ?d) [?d :District/region ":District.region/ne"]]
+        |     [(rule1 ?d) [?d :District/region ":District.region/sw"]]]
         |)""".stripMargin
 
 
     // Social media in southern regions
     m(Community.name.type_("twitter" or "facebook_page").Neighborhood.District.region_("sw" or "s" or "se")) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Eq(List("twitter", "facebook_page")), Some(":community.type/")),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region_", "String", 1, Eq(List("sw", "s", "se")), Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Eq(List("twitter", "facebook_page")), Some(":Community.type/")),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region_", "String", 1, Eq(List("sw", "s", "se")), Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(List(), List(
           Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("community", "type"), Val(":community.type/twitter"), Empty))),
+            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/twitter"), Empty))),
           Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("community", "type"), Val(":community.type/facebook_page"), Empty))),
+            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/facebook_page"), Empty))),
 
           Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("district", "region"), Val(":district.region/sw"), Empty))),
+            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/sw"), Empty))),
           Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("district", "region"), Val(":district.region/s"), Empty))),
+            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/s"), Empty))),
           Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("district", "region"), Val(":district.region/se"), Empty)))), List(DS)),
+            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/se"), Empty)))), List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name"), Var("b"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
           RuleInvocation("rule1", List(Var("a"))),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("d"), Empty),
-          DataClause(ImplDS, Var("d"), KW("neighborhood", "district", "district"), Var("e"), Empty),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty),
+          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty),
           RuleInvocation("rule2", List(Var("e")))))
       ) -->
       """[:find  ?b
         | :in    $ %
-        | :where [?a :community/name ?b]
+        | :where [?a :Community/name ?b]
         |        (rule1 ?a)
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
         |        (rule2 ?e)]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :community/type ":community.type/twitter"]]
-        |     [(rule1 ?a) [?a :community/type ":community.type/facebook_page"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/sw"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/s"]]
-        |     [(rule2 ?e) [?e :district/region ":district.region/se"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
+        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/sw"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/s"]]
+        |     [(rule2 ?e) [?e :District/region ":District.region/se"]]]
         |)""".stripMargin
 
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region_", "String", 1, Qm, Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region_", "String", 1, Qm, Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            Placeholder(Var("a"), KW("community", "type", ""), Var("c2"), Some(":community.type/")),
-            Placeholder(Var("e"), KW("district", "region", ""), Var("f2"), Some(":district.region/"))),
+            Placeholder(Var("a"), KW("Community", "type"), Var("c2"), Some(":Community.type/")),
+            Placeholder(Var("e"), KW("District", "region"), Var("f2"), Some(":District.region/"))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("c1")), ScalarBinding(Var("c2"))),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("neighborhood", "district", "district"), Var("e"), Empty, NoBinding),
-          DataClause(ImplDS, Var("e"), KW("district", "region", ""), Var("f"), Empty, NoBinding),
-          DataClause(ImplDS, Var("f"), KW("db", "ident", ""), Var("f1"), Empty, NoBinding),
-          Funct(".getName ^clojure.lang.Keyword", Seq(Var("f1")), ScalarBinding(Var("f2")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("e"), KW("District", "region"), Var("f"), Empty, NoBinding),
+          DataClause(ImplDS, Var("f"), KW("db", "ident"), Var("f1"), Empty, NoBinding),
+          Funct("name", Seq(Var("f1")), ScalarBinding(Var("f2")))))
       ) -->
       """[:find  ?b
         | :in    $ ?c2 ?f2
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(.getName ^clojure.lang.Keyword ?c1) ?c2]
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]
+        |        [(name ?c1) ?c2]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
+        |        [?e :District/region ?f]
         |        [?f :db/ident ?f1]
-        |        [(.getName ^clojure.lang.Keyword ?f1) ?f2]]""".stripMargin
+        |        [(name ?f1) ?f2]]""".stripMargin
 
 
     m(Community.name.type_(?).Neighborhood.District.region_(?)).apply(
@@ -986,41 +986,41 @@ class SeattleTransformationTests extends SeattleSpec {
       // Seq("twitter", "facebook_page"), Seq("sw", "s", "se")
     ) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region_", "String", 1, Qm, Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region_", "String", 1, Qm, Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c")), Seq(Seq(":community.type/twitter", ":community.type/facebook_page"))),
-            InVar(CollectionBinding(Var("f")), Seq(Seq(":district.region/sw", ":district.region/s", ":district.region/se")))),
+            InVar(CollectionBinding(Var("c")), Seq(Seq(":Community.type/twitter", ":Community.type/facebook_page"))),
+            InVar(CollectionBinding(Var("f")), Seq(Seq(":District.region/sw", ":District.region/s", ":District.region/se")))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("neighborhood", "district", "district"), Var("e"), Empty, NoBinding),
-          DataClause(ImplDS, Var("e"), KW("district", "region", ""), Var("f"), Empty, NoBinding)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("e"), KW("District", "region"), Var("f"), Empty, NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ [?c ...] [?f ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
+        |        [?e :District/region ?f]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [:community.type/twitter, :community.type/facebook_page]
-        |  3 [:district.region/sw, :district.region/s, :district.region/se]
+        |  2 [:Community.type/twitter, :Community.type/facebook_page]
+        |  3 [:District.region/sw, :District.region/s, :District.region/se]
         |)""".stripMargin
 
 
@@ -1030,41 +1030,41 @@ class SeattleTransformationTests extends SeattleSpec {
       // Seq("twitter", "facebook_page"), Seq("sw", "s", "se")
     ) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "type_", "String", 1, Qm, Some(":community.type/")),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "region_", "String", 1, Qm, Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "type_", "String", 1, Qm, Some(":Community.type/")),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "region_", "String", 1, Qm, Some(":District.region/")))
       ) -->
       Query(
         Find(List(
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c")), Seq(Seq(":community.type/twitter", ":community.type/facebook_page"))),
-            InVar(CollectionBinding(Var("f")), Seq(Seq(":district.region/sw", ":district.region/s", ":district.region/se")))),
+            InVar(CollectionBinding(Var("c")), Seq(Seq(":Community.type/twitter", ":Community.type/facebook_page"))),
+            InVar(CollectionBinding(Var("f")), Seq(Seq(":District.region/sw", ":District.region/s", ":District.region/se")))),
           List(),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("community", "name", ""), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "type", ""), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("community", "neighborhood", "neighborhood"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("neighborhood", "district", "district"), Var("e"), Empty, NoBinding),
-          DataClause(ImplDS, Var("e"), KW("district", "region", ""), Var("f"), Empty, NoBinding)))
+          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("e"), KW("District", "region"), Var("f"), Empty, NoBinding)))
       ) -->
       """[:find  ?b
         | :in    $ [?c ...] [?f ...]
-        | :where [?a :community/name ?b]
-        |        [?a :community/type ?c]
-        |        [?a :community/neighborhood ?d]
-        |        [?d :neighborhood/district ?e]
-        |        [?e :district/region ?f]]
+        | :where [?a :Community/name ?b]
+        |        [?a :Community/type ?c]
+        |        [?a :Community/neighborhood ?d]
+        |        [?d :Neighborhood/district ?e]
+        |        [?e :District/region ?f]]
         |
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [:community.type/twitter, :community.type/facebook_page]
-        |  3 [:district.region/sw, :district.region/s, :district.region/se]
+        |  2 [:Community.type/twitter, :Community.type/facebook_page]
+        |  3 [:District.region/sw, :District.region/s, :District.region/se]
         |)""".stripMargin
   }
 
@@ -1079,15 +1079,16 @@ class SeattleTransformationTests extends SeattleSpec {
         Find(List(
           Var("txInstant"))),
         Where(List(
-          DataClause(ImplDS, Var("_"), KW("db.install", "attribute", ""), Var("id"), Var("tx"), NoBinding),
-          DataClause(ImplDS, Var("id"), KW("db", "ident", ""), Var("idIdent"), NoBinding, NoBinding),
+          DataClause(ImplDS, Var("_"), KW("db.install", "attribute"), Var("id"), Var("tx"), NoBinding),
+          DataClause(ImplDS, Var("id"), KW("db", "ident"), Var("idIdent"), NoBinding, NoBinding),
           Funct("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull"))),
           Funct(".matches ^String", Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")), ScalarBinding(Var("sys"))),
           Funct("=", Seq(Var("sys"), Val(false)), NoBinding),
           Funct("molecule.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs"))),
           Funct("first", Seq(Var("partNs")), ScalarBinding(Var("part"))),
           Funct("second", Seq(Var("partNs")), ScalarBinding(Var("ns"))),
-          DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInstant"), Empty, NoBinding)))
+          Funct("molecule.util.fns/live", Seq(Var("nsFull")), NoBinding),
+          DataClause(ImplDS, Var("tx"), KW("db", "txInstant"), Var("txInstant"), Empty, NoBinding)))
       ) -->
       """[:find  ?txInstant
         | :where [_ :db.install/attribute ?id ?tx]
@@ -1098,6 +1099,7 @@ class SeattleTransformationTests extends SeattleSpec {
         |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
         |        [(first ?partNs) ?part]
         |        [(second ?partNs) ?ns]
+        |        [(molecule.util.fns/live ?nsFull)]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 
@@ -1117,34 +1119,34 @@ class SeattleTransformationTests extends SeattleSpec {
         .District.name("myDistrict").region("nw")
     ) -->
       Model(List(
-        Atom("community", "name", "String", 1, Eq(List("AAA")), None),
-        Atom("community", "url", "String", 1, Eq(List("myUrl")), None),
-        Atom("community", "type", "String", 1, Eq(List("twitter")), Some(":community.type/")),
-        Atom("community", "orgtype", "String", 1, Eq(List("personal")), Some(":community.orgtype/")),
-        Atom("community", "category", "String", 2, Eq(List("my", "favorites")), None),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Atom("neighborhood", "name", "String", 1, Eq(List("myNeighborhood")), None, List()),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "name", "String", 1, Eq(List("myDistrict")), None),
-        Atom("district", "region", "String", 1, Eq(List("nw")), Some(":district.region/")))
+        Atom("Community", "name", "String", 1, Eq(List("AAA")), None),
+        Atom("Community", "url", "String", 1, Eq(List("myUrl")), None),
+        Atom("Community", "type", "String", 1, Eq(List("twitter")), Some(":Community.type/")),
+        Atom("Community", "orgtype", "String", 1, Eq(List("personal")), Some(":Community.orgtype/")),
+        Atom("Community", "category", "String", 2, Eq(List("my", "favorites")), None),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Atom("Neighborhood", "name", "String", 1, Eq(List("myNeighborhood")), None, List()),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "name", "String", 1, Eq(List("myDistrict")), None),
+        Atom("District", "region", "String", 1, Eq(List("nw")), Some(":District.region/")))
       ) -->
       //  Some things to notice:
-      //  - Enum values are prefixed with their namespace ("nw" becomes ":district.region/nw")
+      //  - Enum values are prefixed with their namespace ("nw" becomes ":District.region/nw")
       //  - Multiple values of many-cardinality attributes each get their own statement ("my" + "favorites")
       //
       //       operation            temp id                 attribute                value
       """List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  AAA                           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  myUrl                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/twitter       ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/personal   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  my                            ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  favorites                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  myNeighborhood                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  myDistrict                    ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/nw           )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/name        ,  AAA                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/url         ,  myUrl                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/type        ,  :Community.type/twitter       ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/orgtype     ,  :Community.orgtype/personal   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  my                            ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  favorites                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/neighborhood,  #db/id[:db.part/user -1000002]),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/name     ,  myNeighborhood                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/district ,  #db/id[:db.part/user -1000003]),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/name         ,  myDistrict                    ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/region       ,  :District.region/nw           )
         |)""".stripMargin
 
 
@@ -1152,16 +1154,16 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region) -->
       Model(List(
-        Atom("community", "name", "String", 1, VarValue, None),
-        Atom("community", "url", "String", 1, VarValue, None),
-        Atom("community", "type", "String", 1, EnumVal, Some(":community.type/")),
-        Atom("community", "orgtype", "String", 1, EnumVal, Some(":community.orgtype/")),
-        Atom("community", "category", "String", 2, VarValue, None),
-        Bond("community", "neighborhood", "neighborhood", 1),
-        Atom("neighborhood", "name", "String", 1, VarValue, None),
-        Bond("neighborhood", "district", "district", 1),
-        Atom("district", "name", "String", 1, VarValue, None),
-        Atom("district", "region", "String", 1, EnumVal, Some(":district.region/")))
+        Atom("Community", "name", "String", 1, VarValue, None),
+        Atom("Community", "url", "String", 1, VarValue, None),
+        Atom("Community", "type", "String", 1, EnumVal, Some(":Community.type/")),
+        Atom("Community", "orgtype", "String", 1, EnumVal, Some(":Community.orgtype/")),
+        Atom("Community", "category", "String", 2, VarValue, None),
+        Bond("Community", "neighborhood", "Neighborhood", 1),
+        Atom("Neighborhood", "name", "String", 1, VarValue, None),
+        Bond("Neighborhood", "district", "District", 1),
+        Atom("District", "name", "String", 1, VarValue, None),
+        Atom("District", "region", "String", 1, EnumVal, Some(":District.region/")))
       ) -->
       List(
         List("DDD Blogging Georgetown", "http://www.blogginggeorgetown.com/", "blog", "commercial", Set("DD cat 1", "DD cat 2"), "DD Georgetown", "Greater Duwamish", "s"),
@@ -1169,27 +1171,27 @@ class SeattleTransformationTests extends SeattleSpec {
       ) -->
       // Semantically identical to the previous transaction
       """List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/name        ,  DDD Blogging Georgetown                      ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/url         ,  http://www.blogginggeorgetown.com/           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/type        ,  :community.type/blog                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/orgtype     ,  :community.orgtype/commercial                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 1                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/category    ,  DD cat 2                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :community/neighborhood,  #db/id[:db.part/user -1000002]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/name     ,  DD Georgetown                                ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :neighborhood/district ,  #db/id[:db.part/user -1000003]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/name         ,  Greater Duwamish                             ),
-        |  List(:db/add,  #db/id[:db.part/user -1000003],  :district/region       ,  :district.region/s                           ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/name        ,  DDD Interbay District Blog                   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/url         ,  http://interbayneighborhood.neighborlogs.com/),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/type        ,  :community.type/blog                         ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/orgtype     ,  :community.orgtype/community                 ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/category    ,  DD cat 3                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000004],  :community/neighborhood,  #db/id[:db.part/user -1000005]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/name     ,  DD Interbay                                  ),
-        |  List(:db/add,  #db/id[:db.part/user -1000005],  :neighborhood/district ,  #db/id[:db.part/user -1000006]               ),
-        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/name         ,  Magnolia/Queen Anne                          ),
-        |  List(:db/add,  #db/id[:db.part/user -1000006],  :district/region       ,  :district.region/w                           )
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/name        ,  DDD Blogging Georgetown                      ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/url         ,  http://www.blogginggeorgetown.com/           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/type        ,  :Community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/orgtype     ,  :Community.orgtype/commercial                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  DD cat 1                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/category    ,  DD cat 2                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Community/neighborhood,  #db/id[:db.part/user -1000002]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/name     ,  DD Georgetown                                ),
+        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Neighborhood/district ,  #db/id[:db.part/user -1000003]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/name         ,  Greater Duwamish                             ),
+        |  List(:db/add,  #db/id[:db.part/user -1000003],  :District/region       ,  :District.region/s                           ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/name        ,  DDD Interbay District Blog                   ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/url         ,  http://interbayneighborhood.neighborlogs.com/),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/type        ,  :Community.type/blog                         ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/orgtype     ,  :Community.orgtype/community                 ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/category    ,  DD cat 3                                     ),
+        |  List(:db/add,  #db/id[:db.part/user -1000004],  :Community/neighborhood,  #db/id[:db.part/user -1000005]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :Neighborhood/name     ,  DD Interbay                                  ),
+        |  List(:db/add,  #db/id[:db.part/user -1000005],  :Neighborhood/district ,  #db/id[:db.part/user -1000006]               ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :District/name         ,  Magnolia/Queen Anne                          ),
+        |  List(:db/add,  #db/id[:db.part/user -1000006],  :District/region       ,  :District.region/w                           )
         |)""".stripMargin
   }
 
@@ -1207,12 +1209,12 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "name", "String", 1, Eq(List("belltown 2")), None),
-        Atom("community", "url", "String", 1, Eq(List("url 2")), None))
+        Atom("Community", "name", "String", 1, Eq(List("belltown 2")), None),
+        Atom("Community", "url", "String", 1, Eq(List("url 2")), None))
       ) -->
       """List(
-        |  List(:db/add,  17592186045886                ,  :community/name,  belltown 2),
-        |  List(:db/add,  17592186045886                ,  :community/url ,  url 2     )
+        |  List(:db/add,  17592186045886                ,  :Community/name,  belltown 2),
+        |  List(:db/add,  17592186045886                ,  :Community/url ,  url 2     )
         |)""".stripMargin
 
 
@@ -1225,11 +1227,11 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
+        Atom("Community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
       ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  news     ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Cool news)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  news     ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Cool news)
         |)""".stripMargin
 
 
@@ -1242,15 +1244,15 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, ReplaceValue(Seq(
+        Atom("Community", "category", "String", 2, ReplaceValue(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
       ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  Cool news        ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool news  ),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  events           ),
-        |  List(:db/add    ,  17592186045886                ,  :community/category,  Super cool events)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  Cool news        ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool news  ),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  events           ),
+        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -1260,10 +1262,10 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, AssertValue(List("extra category")), None))
+        Atom("Community", "category", "String", 2, AssertValue(List("extra category")), None))
       ) -->
       """List(
-        |  List(:db/add,  17592186045886                ,  :community/category,  extra category)
+        |  List(:db/add,  17592186045886                ,  :Community/category,  extra category)
         |)""".stripMargin
 
 
@@ -1273,10 +1275,10 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "category", "String", 2, RetractValue(List("Super cool events")), None))
+        Atom("Community", "category", "String", 2, RetractValue(List("Super cool events")), None))
       ) -->
       """List(
-        |  List(:db/retract,  17592186045886                ,  :community/category,  Super cool events)
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -1289,15 +1291,15 @@ class SeattleTransformationTests extends SeattleSpec {
     ) -->
       Model(List(
         Meta("?", "e_", "Long", Eq(List(17592186045886L))),
-        Atom("community", "name", "String", 1, Eq(List("belltown 3")), None),
-        Atom("community", "url", "String", 1, Eq(List()), None),
-        Atom("community", "category", "String", 2, Eq(List()), None))
+        Atom("Community", "name", "String", 1, Eq(List("belltown 3")), None),
+        Atom("Community", "url", "String", 1, Eq(List()), None),
+        Atom("Community", "category", "String", 2, Eq(List()), None))
       ) -->
       """List(
-        |  List(:db/add    ,  17592186045886                ,  :community/name    ,  belltown 3                    ),
-        |  List(:db/retract,  17592186045886                ,  :community/url     ,  http://www.belltownpeople.com/),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  news                          ),
-        |  List(:db/retract,  17592186045886                ,  :community/category,  events                        )
+        |  List(:db/add    ,  17592186045886                ,  :Community/name    ,  belltown 3                    ),
+        |  List(:db/retract,  17592186045886                ,  :Community/url     ,  http://www.belltownpeople.com/),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  news                          ),
+        |  List(:db/retract,  17592186045886                ,  :Community/category,  events                        )
         |)""".stripMargin
   }
 }

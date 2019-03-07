@@ -122,12 +122,12 @@ class UpdateUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuids.replace(uuid7 -> uuid8, uuid8 -> uuid8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uuids`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
           "\n__ident__uuid8")
 
       expectCompileError(
         """Ns(eid).uuids.replace(Seq(uuid7 -> uuid8, uuid8 -> uuid8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uuids`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
           "\n__ident__uuid8")
 
 
@@ -136,13 +136,13 @@ class UpdateUUID extends CoreSpec {
 
       (Ns(eid).uuids.replace(uuid7 -> uuid8, uuid8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/uuids`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uuids`:" +
         "\n" + uuid8
 
       // Conflicting new values
       (Ns(eid).uuids.replace(Seq(uuid7 -> uuid8, uuid8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/uuids`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uuids`:" +
         "\n" + uuid8
     }
 

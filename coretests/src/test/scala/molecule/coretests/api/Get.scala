@@ -26,9 +26,9 @@ class Get extends CoreSpec {
     Ns.int.getRaw.toString === "[[1], [2], [3]]"
     Ns.int.getJson ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     Ns.int.get(2) === List(1, 2)
@@ -36,8 +36,8 @@ class Get extends CoreSpec {
     Ns.int.getRaw(2).toString === "[[1], [2]]"
     Ns.int.getJson(2) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
   }
 
@@ -71,9 +71,9 @@ class Get extends CoreSpec {
     await(Ns.int.getAsyncRaw).toString === "[[1], [2], [3]]"
     await(Ns.int.getAsyncJson) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2},
-        |{"ns.int": 3}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2},
+        |{"Ns.int": 3}
         |]""".stripMargin
 
     await(Ns.int.getAsync(2)) === List(1, 2)
@@ -81,8 +81,8 @@ class Get extends CoreSpec {
     await(Ns.int.getAsyncRaw(2)).toString === "[[1], [2]]"
     await(Ns.int.getAsyncJson(2)) ===
       """[
-        |{"ns.int": 1},
-        |{"ns.int": 2}
+        |{"Ns.int": 1},
+        |{"Ns.int": 2}
         |]""".stripMargin
   }
 }

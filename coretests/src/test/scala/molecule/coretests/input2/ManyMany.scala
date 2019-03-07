@@ -913,7 +913,7 @@ class ManyMany extends CoreSpec {
 
       (m(Ns.int.ints_.<=(?).longs_(?)).apply(List(Set(1), Set(2)), List(Set(1L))).get must throwA[InputMolecule_2_Exception])
         .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
-        s"Can't apply multiple values to input attribute `:ns/ints` having expression (<, >, <=, >=, !=)"
+        s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
     }
 
 

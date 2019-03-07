@@ -35,8 +35,8 @@ class Binding extends MoleculeSpec {
 
     // Find all the Stewart/Stuart as either first name or last name
     User.e.a.v_("Stewart").get === List(
-      (johnStewart, ":user/lastName"),
-      (stewartBrand, ":user/firstName")
+      (johnStewart, ":User/lastName"),
+      (stewartBrand, ":User/firstName"),
     )
 
     // Find only the Smalley Stuarts

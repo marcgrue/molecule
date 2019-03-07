@@ -52,35 +52,35 @@ trait GenericAVET {
   * or more arguments and then add generic attributes:
   * {{{
   *   // Create AVET Index molecule with 1 entity id argument
-  *   AVET(":person/age").e.v.t.get === List(
+  *   AVET(":Person/age").e.v.t.get === List(
   *     (e1, 42, t2),
   *     (e2, 37, t5)
   *     (e3, 14, t7),
   *   )
   *
   *   // Narrow search with multiple arguments
-  *   AVET(":person/age", 42).e.t.get === List( (e1, t2) )
-  *   AVET(":person/age", 42, e1).e.v.get === List( (e1, t2) )
-  *   AVET(":person/age", 42, e1, t2).e.v.get === List( (e1, t2) )
+  *   AVET(":Person/age", 42).e.t.get === List( (e1, t2) )
+  *   AVET(":Person/age", 42, e1).e.v.get === List( (e1, t2) )
+  *   AVET(":Person/age", 42, e1, t2).e.v.get === List( (e1, t2) )
   * }}}
   *
   * The AVET Index can be filtered by a range of values between `from` (inclusive) and
   * `until` (exclusive) for an attribute:
   * {{{
-  *   AVET.range(":person/age", Some(14), Some(37)).v.e.t.get === List(
+  *   AVET.range(":Person/age", Some(14), Some(37)).v.e.t.get === List(
   *     (14, e4, t7) // 14 is included in value range
   *                  // 37 not included in value range
   *                  // 42 outside value range
   *   )
   *
   *   // If `from` is None, the range starts from the beginning
-  *   AVET.range(":person/age", None, Some(40)).v.e.t.get === List(
+  *   AVET.range(":Person/age", None, Some(40)).v.e.t.get === List(
   *     (14, e3, t7),
   *     (37, e2, t5),
   *   )
   *
   *   // If `until` is None, the range goes to the end
-  *   AVET.range(":person/age", Some(20), None).v.e.t.get === List(
+  *   AVET.range(":Person/age", Some(20), None).v.e.t.get === List(
   *     (37, e2, t5),
   *     (42, e1, t2)
   *   )
@@ -89,7 +89,7 @@ trait GenericAVET {
   * Index attributes available:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)

@@ -123,12 +123,12 @@ class UpdateURI extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uris.replace(uri7 -> uri8, uri8 -> uri8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uris`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
           "\n__ident__uri8")
 
       expectCompileError(
         """Ns(eid).uris.replace(Seq(uri7 -> uri8, uri8 -> uri8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/uris`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
           "\n__ident__uri8")
 
 
@@ -137,13 +137,13 @@ class UpdateURI extends CoreSpec {
 
       (Ns(eid).uris.replace(uri7 -> uri8, uri8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/uris`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uris`:" +
         "\nuri8"
 
       // Conflicting new values
       (Ns(eid).uris.replace(Seq(uri7 -> uri8, uri8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/uris`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uris`:" +
         "\nuri8"
     }
 

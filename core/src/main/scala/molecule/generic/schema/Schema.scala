@@ -19,7 +19,7 @@ trait Schema extends GenericNs {
   /** Attribute definition entity id. */
   final class id           [Ns, In] extends OneLong   [Ns, In] with Indexed
 
-  /** (Partition-)Namespace-prefixed attribute name (":part_Ns/attr" or ":ns/attr" if no partitions). */
+  /** (Partition-)Namespace-prefixed attribute name (":part_Ns/attr" or ":Ns/attr" if no partitions). */
   final class a            [Ns, In] extends OneString [Ns, In] with Indexed
 
   /** Partition name (if partitions are not defined it will be an empty string ""). */

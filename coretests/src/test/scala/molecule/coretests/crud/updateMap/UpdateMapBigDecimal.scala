@@ -41,14 +41,14 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
@@ -58,7 +58,7 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       (Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1x -> bigDec2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
 
@@ -66,7 +66,7 @@ class UpdateMapBigDecimal extends CoreSpec {
       // Seq
       (Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1x -> bigDec2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
     }
@@ -105,13 +105,13 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
     }
@@ -179,13 +179,13 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       (Ns(eid).bigDecMap(str1 -> bigDec1, str1 -> bigDec2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
 
       (Ns(eid).bigDecMap(Seq(str1 -> bigDec1, str1 -> bigDec2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:ns/bigDecMap`:" +
+        "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
         "\na -> " + bigDec1 +
         "\na -> " + bigDec2
     }

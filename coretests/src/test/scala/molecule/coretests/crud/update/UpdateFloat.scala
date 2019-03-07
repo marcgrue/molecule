@@ -137,12 +137,12 @@ class UpdateFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floats.replace(7f -> 8f, 8f -> 8f).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/floats`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/floats`:" +
           "\n8.0")
 
       expectCompileError(
         """Ns(eid).floats.replace(Seq(7f -> 8f, 8f -> 8f)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/floats`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/floats`:" +
           "\n8.0")
     }
 
@@ -298,12 +298,12 @@ class UpdateFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floats.replace(float7 -> float8, float8 -> float8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/floats`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/floats`:" +
           "\n__ident__float8")
 
       expectCompileError(
         """Ns(eid).floats.replace(Seq(float7 -> float8, float8 -> float8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:ns/floats`:" +
+        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/floats`:" +
           "\n__ident__float8")
 
 
@@ -312,13 +312,13 @@ class UpdateFloat extends CoreSpec {
 
       (Ns(eid).floats.replace(float7 -> float8, float8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/floats`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/floats`:" +
         "\n8.0"
 
       // Conflicting new values
       (Ns(eid).floats.replace(Seq(float7 -> float8, float8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
-        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:ns/floats`:" +
+        "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/floats`:" +
         "\n8.0"
     }
 

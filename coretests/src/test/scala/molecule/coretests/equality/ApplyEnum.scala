@@ -47,7 +47,7 @@ class ApplyEnum extends CoreSpec {
       expectCompileError(
         """m(Ns.enum("zzz"))""",
         """
-          |molecule.transform.exception.Dsl2ModelException: 'zzz' is not among available enum values of attribute :ns/enum:
+          |molecule.transform.exception.Dsl2ModelException: 'zzz' is not among available enum values of attribute :Ns/enum:
           |  enum0
           |  enum1
           |  enum2

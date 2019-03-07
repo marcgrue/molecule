@@ -49,23 +49,23 @@ trait GenericLog {
   * {{{
   *   // Data from transaction t1 until t4 (exclusive)
   *   Log(Some(t1), Some(t4)).t.e.a.v.op.get === List(
-  *     (t1, e1, ":person/name", "Ben", true),
-  *     (t1, e1, ":person/age", 41, true),
+  *     (t1, e1, ":Person/name", "Ben", true),
+  *     (t1, e1, ":Person/age", 41, true),
   *
-  *     (t2, e2, ":person/name", "Liz", true),
-  *     (t2, e2, ":person/age", 37, true),
+  *     (t2, e2, ":Person/name", "Liz", true),
+  *     (t2, e2, ":Person/age", 37, true),
   *
-  *     (t3, e1, ":person/age", 41, false),
-  *     (t3, e1, ":person/age", 42, true)
+  *     (t3, e1, ":Person/age", 41, false),
+  *     (t3, e1, ":Person/age", 42, true)
   *   )
   *
   *   // If `from` is None, the range starts from the beginning
   *   Log(None, Some(t3)).v.e.t.get === List(
-  *     (t1, e1, ":person/name", "Ben", true),
-  *     (t1, e1, ":person/age", 41, true),
+  *     (t1, e1, ":Person/name", "Ben", true),
+  *     (t1, e1, ":Person/age", 41, true),
   *
-  *     (t2, e2, ":person/name", "Liz", true),
-  *     (t2, e2, ":person/age", 37, true)
+  *     (t2, e2, ":Person/name", "Liz", true),
+  *     (t2, e2, ":Person/age", 37, true)
   *
   *     // t3 not included
   *   )
@@ -74,18 +74,18 @@ trait GenericLog {
   *   Log(Some(t2), None).v.e.t.get === List(
   *     // t1 not included
   *
-  *     (t2, e2, ":person/name", "Liz", true),
-  *     (t2, e2, ":person/age", 37, true),
+  *     (t2, e2, ":Person/name", "Liz", true),
+  *     (t2, e2, ":Person/age", 37, true),
   *
-  *     (t3, e1, ":person/age", 41, false),
-  *     (t3, e1, ":person/age", 42, true)
+  *     (t3, e1, ":Person/age", 41, false),
+  *     (t3, e1, ":Person/age", 42, true)
   *   )
   * }}}
   *
   * Log attributes available:
   *
   *  - '''`e`''' - Entity id (Long)
-  *  - '''`a`''' - Full attribute name like ":person/name" (String)
+  *  - '''`a`''' - Full attribute name like ":Person/name" (String)
   *  - '''`v`''' - Value of Datoms (Any)
   *  - '''`t`''' - Transaction pointer (Long/Int)
   *  - '''`tx`''' - Transaction entity id (Long)
