@@ -176,7 +176,7 @@ class GetHistory extends Specification {
     )
 
     // Order of attributes is free.
-    // All generic attributes always relate to the previous domain attribute (`int` here)
+    // All meta attributes always relate to the previous domain attribute (`int` here)
     Ns.str_("x").int.t.op.getHistory.sortBy(t => (t._2, t._3)) === List(
       (4, t4, true),
       (4, t5, false),
@@ -187,7 +187,7 @@ class GetHistory extends Specification {
 
   "Multiple attrs" >> {
 
-    // We _can_ combine multiple attrs with generic attributes in a history
+    // We _can_ combine multiple attrs with meta attributes in a history
     // query but then two individual attribute history "timelines" of changes
     // are unified which can become less useful:
     Ns(e1).str.t.op.int.t.op.getHistory === List(

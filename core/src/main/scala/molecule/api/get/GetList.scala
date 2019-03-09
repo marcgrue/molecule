@@ -770,7 +770,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getHistory
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/history/ manual]] for more info on generic attributes.
+    * @see [[http://www.scalamolecule.org/manual/time/history/ manual]] for more info on meta attributes.
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncList.getAsyncHistory(implicit* getAsyncHistory]] method.
     */
   def getHistory(implicit conn: Conn): List[Tpl] =

@@ -48,32 +48,33 @@ object model extends Helpers {
   trait MetaAtom extends Element {
     val ns   : String
     val attr : String
+    val tpe  : String
     val value: Value
   }
 
   case class Meta(ns: String,
                   attr: String,
-                  kind: String,
+                  tpe: String,
                   value: Value) extends MetaAtom {
-    override def toString: String = s"""Meta("$ns", "$attr", "$kind", $value)"""
+    override def toString: String = s"""Meta("$ns", "$attr", "$tpe", $value)"""
   }
 
   case class Atom(ns: String,
                   attr: String,
-                  tpeS: String,
+                  tpe: String,
                   card: Int,
                   value: Value,
                   enumPrefix: Option[String] = None,
-                  gs: Seq[Generic] = Nil,
+                  gs: Seq[MetaValue] = Nil,
                   keys: Seq[String] = Nil) extends MetaAtom {
-    override def toString: String = s"""Atom("$ns", "$attr", "$tpeS", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
+    override def toString: String = s"""Atom("$ns", "$attr", "$tpe", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
   }
 
   case class Bond(ns: String,
                   refAttr: String,
                   refNs: String = "",
                   card: Int,
-                  gs: Seq[Generic] = Nil) extends Element {
+                  gs: Seq[MetaValue] = Nil) extends Element {
     override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gs)})"""
   }
 
@@ -135,14 +136,14 @@ object model extends Helpers {
   case class MapKeys(keys: Seq[String]) extends Value {override def toString: String = s"MapKeys(${seq(keys)})"}
 
 
-  sealed trait Generic extends Value
+  sealed trait MetaValue extends Value
 
-  case object NoValue extends Generic
-  case class Id(eid: Any) extends Generic
-  case class Card(card: Int) extends Generic {override def toString: String = s"Card($card)"}
+  case object NoValue extends MetaValue
+  case class Id(eid: Any) extends MetaValue
+  case class Card(card: Int) extends MetaValue {override def toString: String = s"Card($card)"}
 
 
-  sealed trait Bidirectional extends Generic
+  sealed trait Bidirectional extends MetaValue
 
   case class BiSelfRef(card: Int) extends Bidirectional {override def toString: String = s"BiSelfRef($card)"}
   case class BiSelfRefAttr(card: Int) extends Bidirectional {override def toString: String = s"BiSelfRefAttr($card)"}

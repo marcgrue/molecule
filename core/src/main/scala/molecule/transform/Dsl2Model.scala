@@ -1,11 +1,10 @@
 package molecule.transform
 import molecule.ast.model._
 import molecule.boilerplate.attributes._
-import molecule.generic.{GenericNs, Log}
-import molecule.generic.index._
-import molecule.generic.index.{AEVT, AVET, EAVT, VAET}
-import molecule.generic.schema.Schema
 import molecule.macros.{Cast, Json}
+import molecule.meta.index.{AEVT, AVET, EAVT, VAET}
+import molecule.meta.schema.Schema
+import molecule.meta.{Log, MetaNs}
 import molecule.transform.exception.Dsl2ModelException
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -15,7 +14,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
   import c.universe._
 
-  val x = DebugMacro("Dsl2Model", 519, 511)
+  val x = DebugMacro("Dsl2Model", 901, 900)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -32,12 +31,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       List[Int => Tree]
     ) = {
 
-    val mandatoryDatomGenerics = Seq("e", "tx", "t", "txInstant", "op", "a", "v")
-    val mandatoryGenerics = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "Self")
-    val tacitGenerics = Seq("e_", "ns_", "a_", "v_", "tx_", "t_", "txInstant_", "op_")
-    val datomGenerics = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
-    val keywords = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct",
-      "median", "variance", "stddev", "rand", "sample")
+    val mandatoryDatomMeta = Seq("e", "tx", "t", "txInstant", "op", "a", "v")
+    val mandatoryMeta = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "Self")
+    val tacitMeta = Seq("e_", "ns_", "a_", "v_", "tx_", "t_", "txInstant_", "op_")
+    val datomMeta = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
+    val keywords = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample")
     def badFn(fn: TermName) = List("countDistinct", "distinct", "max", "min", "rand", "sample", "avg", "median", "stddev", "sum", "variance").contains(fn.toString())
 
     var isComposite: Boolean = false
@@ -60,8 +58,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var aggrType: String = ""
 
     var first: Boolean = true
-    // Generic namespace
-    var gns: String = "?"
+    var metaType: String = "datom"
 
     def addSpecific(castLambda: Int => Tree, tpeStr: String): Unit = {
       if (post) {
@@ -173,16 +170,16 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolve(tree: Tree): Seq[Element] = {
       if (first) {
         val p = richTree(tree)
-        if (p.tpe_ <:< typeOf[GenericNs]) p.tpe_ match {
-          case t if t <:< typeOf[Schema] => gns = "schema"
-          case t if t <:< typeOf[EAVT]   => gns = "eavt"
-          case t if t <:< typeOf[AEVT]   => gns = "aevt"
-          case t if t <:< typeOf[AVET]   => gns = "avet"
-          case t if t <:< typeOf[VAET]   => gns = "vaet"
-          case t if t <:< typeOf[Log]    => gns = "log"
+        if (p.tpe_ <:< typeOf[MetaNs]) p.tpe_ match {
+          case t if t <:< typeOf[Schema] => metaType = "schema"
+          case t if t <:< typeOf[EAVT]   => metaType = "eavt"
+          case t if t <:< typeOf[AEVT]   => metaType = "aevt"
+          case t if t <:< typeOf[AVET]   => metaType = "avet"
+          case t if t <:< typeOf[VAET]   => metaType = "vaet"
+          case t if t <:< typeOf[Log]    => metaType = "log"
         }
         first = false
-        // x(99, p.tpe_, gns)
+        // x(99, p.tpe_, metaType)
       }
 
       tree match {
@@ -251,21 +248,21 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     }
 
     def resolveMandatoryAttrOrRef(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
-      if (gns == "?" && mandatoryGenerics.contains(attrStr)) {
+      if (metaType == "datom" && mandatoryMeta.contains(attrStr)) {
         // x(111, attrStr, t.tpeS)
-        resolveMandatoryGenericAttr(prev, p, attrStr)
+        resolveMandatoryMetaAttr(t, prev, p, attrStr)
 
-      } else if (gns == "schema") {
-        resolveMandatorySchemaAttr(prev, p, attrStr)
+      } else if (metaType == "schema") {
+        resolveMandatorySchemaAttr(t, prev, p, attrStr)
 
-      } else if (gns != "?") { // Indexes
-        // x(120, gns, attrStr)
+      } else if (metaType != "datom") { // Indexes
+        // x(120, metaType, attrStr)
         if (p.isFirstNS)
           abort("Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
             "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-            s"  `conn.db.datoms(datomic.Database.${gns.toUpperCase})`"
+            s"  `conn.db.datoms(datomic.Database.${metaType.toUpperCase})`"
           )
-        resolveMandatoryGenericAttr(prev, p, attrStr)
+        resolveMandatoryMetaAttr(t, prev, p, attrStr)
 
       } else if (t.isEnum) {
         // x(131, t.tpeS)
@@ -307,8 +304,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
 
     def resolveOptionalAttr(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
-      if (gns == "schema") {
-        // x(112, gns, attrStr)
+      if (metaType == "schema") {
+        // x(112, metaType, attrStr)
         resolveOptionalSchemaAttr(t, prev, p, attrStr)
 
       } else if (t.isEnum$) {
@@ -341,11 +338,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     }
 
     def resolveTacitAttr(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
-      if (gns == "?" && tacitGenerics.contains(attrStr)) {
+      if (metaType == "datom" && tacitMeta.contains(attrStr)) {
         abort(s"Tacit `$attrStr` can only be used with an applied value i.e. `$attrStr(<value>)`")
 
-      } else if (gns == "schema") {
-        traverseElement(prev, p, Meta("schema", attrStr, attrStr, NoValue))
+      } else if (metaType == "schema") {
+        traverseElement(prev, p, Meta("Schema", attrStr, "schema", NoValue))
 
       } else if (t.isEnum) {
         traverseElement(prev, p, Atom(t.ns, t.name, t.tpeS, t.card, EnumVal, Some(t.enumPrefix), bi(tree, t)))
@@ -364,41 +361,49 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
 
-
-    def resolveMandatoryGenericAttr(prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
-      def castMeta(tpe: String, g: Generic, value: Value): Seq[Element] = {
+    def resolveMandatoryMetaAttr(t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
+      val metaNs = metaType match {
+        case "schema" => "Schema"
+        case "eavt"   => "EAVT"
+        case "aevt"   => "AEVT"
+        case "avet"   => "AVET"
+        case "vaet"   => "VAET"
+        case "log"    => "Log"
+        case _        => p.ns2
+      }
+      def castMeta(tpe: String, value: Value): Seq[Element] = {
         val tpeOrAggrTpe = if (aggrType.nonEmpty) aggrType else tpe
         addSpecific(castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
-        addJson(jsonOneAttr, tpeOrAggrTpe, gns + "." + attrStr)
-        traverseElement(prev, p, Meta(gns, attrStr, attrStr, value))
+        addJson(jsonOneAttr, tpeOrAggrTpe, metaType + "." + attrStr)
+        traverseElement(prev, p, Meta(metaNs, attrStr, metaType, value))
       }
-      // x(113, attrStr, gns)
+      // x(113, attrStr, metaType, p.ns, p.ns2)
       attrStr match {
-        case "e"    => castMeta("Long", NoValue, EntValue)
-        case "v"    => castMeta("Any", NoValue, NoValue)
-        case "a"    => castMeta("String", NoValue, NoValue)
+        case "e"    => castMeta("Long", EntValue)
+        case "v"    => castMeta("Any", NoValue)
+        case "a"    => castMeta("String", NoValue)
         case "Self" => traverseElement(prev, p, Self)
         case tx     =>
           if (prev.toString.endsWith("$"))
-            abort(s"Optional attributes (`${p.name}`) can't be followed by generic transaction attributes (`$attrStr`).")
+            abort(s"Optional attributes (`${p.name}`) can't be followed by meta transaction attributes (`$attrStr`).")
           tx match {
-            case "t"         => castMeta("Long", NoValue, NoValue)
-            case "tx"        => castMeta("Long", NoValue, NoValue)
-            case "txInstant" => castMeta("java.util.Date", NoValue, NoValue)
-            case "op"        => castMeta("Boolean", NoValue, NoValue)
+            case "t"         => castMeta("Long", NoValue)
+            case "tx"        => castMeta("Long", NoValue)
+            case "txInstant" => castMeta("java.util.Date", NoValue)
+            case "op"        => castMeta("Boolean", NoValue)
           }
       }
     }
 
 
-    def resolveMandatorySchemaAttr(prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
+    def resolveMandatorySchemaAttr(t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
       def castMeta(tpe: String): Seq[Element] = {
         val tpeOrAggrTpe = if (aggrType.nonEmpty) aggrType else tpe
         addSpecific(castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
         addJson(jsonOneAttr, tpeOrAggrTpe, "schema." + attrStr)
-        traverseElement(prev, p, Meta("schema", attrStr, attrStr, NoValue))
+        traverseElement(prev, p, Meta("Schema", attrStr, "schema", NoValue))
       }
-      // x(122, attrStr, p.ns)
+      // x(122, attrStr, p.ns, p.ns2)
       attrStr match {
         case "id"          => castMeta("Long")
         case "a"           => castMeta("String")
@@ -429,31 +434,31 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       case "unique$" =>
         addCast(castEnumOpt, t)
         addJsonCard(jsonOptOneEnum, jsonOptManyEnum, t)
-        traverseElement(prev, p, Meta("schema", attrStr, attrStr, NoValue))
+        traverseElement(prev, p, Meta("Schema", attrStr, "schema", NoValue))
 
       case optionalSchemaAttr =>
         addCast(castOptionalAttr, t)
         addJsonCard(jsonOptOneAttr, jsonOptManyAttr, t)
-        traverseElement(prev, p, Meta("schema", attrStr, attrStr, NoValue))
+        traverseElement(prev, p, Meta("Schema", attrStr, "schema", NoValue))
     }
 
 
     def resolveApply(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String, vs: Tree): Seq[Element] = {
       if (t.isFirstNS) {
-        // x(230, attrStr, gns)
+        // x(230, attrStr, metaType)
         tree match {
-          case q"$prev.$ns.apply($pkg.?)"                => traverseElement(prev, p, Meta(gns, "e_", "Long", Eq(Seq(Qm))))
-          case q"$prev.$ns.apply($eid)" if t.isBiEdge    => traverseElement(prev, p, Meta(gns, "e_", "Long", Eq(Seq(extract(eid)))))
-          case q"$prev.$ns.apply(..$eids)" if gns != "?" => traverseElement(prev, p, Meta(gns, "args_", "", Eq(resolveValues(q"Seq(..$eids)"))))
-          case q"$prev.$ns.apply(..$eids)"               => traverseElement(prev, p, Meta(gns, "e_", "Long", Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$ns.apply($pkg.?)"                         => traverseElement(prev, p, Meta(ns.toString(), "e_", metaType, Eq(Seq(Qm))))
+          case q"$prev.$ns.apply($eid)" if t.isBiEdge             => traverseElement(prev, p, Meta(ns.toString(), "e_", metaType, Eq(Seq(extract(eid)))))
+          case q"$prev.$ns.apply(..$eids)" if metaType != "datom" => traverseElement(prev, p, Meta(ns.toString(), "args_", metaType, Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$ns.apply(..$eids)"                        => traverseElement(prev, p, Meta(ns.toString(), "e_", metaType, Eq(resolveValues(q"Seq(..$eids)"))))
         }
 
-      } else if (gns == "?" && datomGenerics.contains(attrStr)) {
-        resolveApplyGeneric(prev, p, attrStr, vs)
+      } else if (metaType == "datom" && datomMeta.contains(attrStr)) {
+        resolveApplyMeta(prev, p, attrStr, vs)
 
-      } else if (gns != "?") {
-        // x(123, gns, attrStr)
-        gns match {
+      } else if (metaType != "datom") {
+        // x(123, metaType, attrStr)
+        metaType match {
           case "schema" => resolveApplySchema(t, prev, p, attrStr, vs)
 
           case "log" => abort("Log attributes not allowed to have values applied.\n" +
@@ -506,26 +511,26 @@ private[molecule] trait Dsl2Model extends Cast with Json {
                 // Aggregate
                 addSpecific(castOneAttr(aggrType), aggrType)
                 addJson(jsonOneAttr, aggrType, "schema." + attrStr)
-                traverseElement(prev, p, Meta("schema", attrStr, tpe, value))
+                traverseElement(prev, p, Meta("Schema", attrStr, "schema", value))
               } else {
                 // Clean/comparison
                 addSpecific(castOneAttr(tpe), tpe)
                 addJson(jsonOneAttr, tpe, "schema." + attrStr)
-                traverseElement(prev, p, Meta("schema", attrStr, tpe, value))
+                traverseElement(prev, p, Meta("Schema", attrStr, "schema", value))
               }
             case "tacit"     =>
               if (aggrType.isEmpty) {
-                traverseElement(prev, p, Meta("schema", attrStr, tpe, value))
+                traverseElement(prev, p, Meta("Schema", attrStr, "schema", value))
               } else {
-                abort(s"Can only apply `count` to mandatory generic attribute. Please remove underscore from `$attrStr`")
+                abort(s"Can only apply `count` to mandatory meta attribute. Please remove underscore from `$attrStr`")
               }
             case "optional"  =>
               if (aggrType.isEmpty) {
                 addCast(castOptionalApplyAttr, t)
                 addJsonCard(jsonOptOneAttr, jsonOptManyAttr, t)
-                traverseElement(prev, p, Meta("schema", attrStr, tpe, value))
+                traverseElement(prev, p, Meta("Schema", attrStr, "schema", value))
               } else {
-                abort(s"Can only apply `count` to mandatory generic attribute. Please remove `$$` from `$attrStr`")
+                abort(s"Can only apply `count` to mandatory meta attribute. Please remove `$$` from `$attrStr`")
               }
           }
         }
@@ -579,40 +584,40 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
       val element = vs match {
         case q"scala.collection.immutable.List($pkg.count)" => resolve(Fn("count"), "Int2")
-        case q"scala.collection.immutable.List($pkg.?)"     => abort("Generic input attributes not implemented.")
+        case q"scala.collection.immutable.List($pkg.?)"     => abort("Meta input attributes not implemented.")
         case q"scala.collection.immutable.List(scala.None)" => resolve(Fn("not"))
         case q"scala.collection.immutable.List($v)"         => resolve(modelValue("apply", null, v))
         case q"scala.collection.immutable.List(..$vs)"      => resolve(modelValue("apply", null, q"Seq(..$vs)"))
-        case _                                              => abort("Unexpected value applied to generic attribute: " + vs)
+        case _                                              => abort("Unexpected value applied to meta attribute: " + vs)
       }
       // x(220, p.ns, attrStr, vs, element)
       element
     }
 
-    def resolveApplyGeneric(prev: Tree, p: richTree, attrStr: String, vs: Tree) = {
+    def resolveApplyMeta(prev: Tree, p: richTree, attrStr: String, vs: Tree) = {
       def resolve(value: Value, aggrType: String = ""): Seq[Element] = {
         def casts(mandatory: Boolean, tpe: String): Seq[Element] = {
           if (prev.toString.endsWith("$"))
-            abort(s"Optional attributes (`${p.name}`) can't be followed by generic attribute (`$attrStr`).")
+            abort(s"Optional attributes (`${p.name}`) can't be followed by meta attribute (`$attrStr`).")
           if (mandatory) {
             // x(225, "aggrType: " + aggrType)
             if (aggrType.nonEmpty) {
               // Aggregate
               addSpecific(castOneAttr(aggrType), aggrType)
               addJson(jsonOneAttr, aggrType, p.ns + "." + attrStr)
-              traverseElement(prev, p, Meta(gns, attrStr, tpe, value))
+              traverseElement(prev, p, Meta(p.ns, attrStr, metaType, value))
             } else {
               // Clean/comparison
               addSpecific(castOneAttr(tpe), tpe)
               addJson(jsonOneAttr, tpe, p.ns + "." + attrStr)
-              traverseElement(prev, p, Meta(gns, attrStr, tpe, value))
+              traverseElement(prev, p, Meta(p.ns, attrStr, metaType, value))
             }
           } else {
             // Tacit
             if (aggrType.isEmpty) {
-              traverseElement(prev, p, Meta(gns, attrStr, tpe, value))
+              traverseElement(prev, p, Meta(p.ns, attrStr, metaType, value))
             } else {
-              abort(s"Can only apply `count` to mandatory generic attribute. Please remove underscore from `$attrStr`")
+              abort(s"Can only apply `count` to mandatory meta attribute. Please remove underscore from `$attrStr`")
             }
           }
         }
@@ -636,11 +641,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
       val element = vs match {
         case q"scala.collection.immutable.List($pkg.count)"            => resolve(Fn("count"), "Int2")
-        case q"scala.collection.immutable.List($pkg.?)"                => abort("Generic input attributes not implemented.")
-        case q"scala.collection.immutable.List($pkg.$fn)" if badFn(fn) => abort(s"Generic attributes only allowed to aggregate `count`. Found: `$fn`")
+        case q"scala.collection.immutable.List($pkg.?)"                => abort("Meta input attributes not implemented.")
+        case q"scala.collection.immutable.List($pkg.$fn)" if badFn(fn) => abort(s"Meta attributes only allowed to aggregate `count`. Found: `$fn`")
         case q"scala.collection.immutable.List($v)"                    => resolve(modelValue("apply", null, v))
         case q"scala.collection.immutable.List(..$vs)"                 => resolve(modelValue("apply", null, q"Seq(..$vs)"))
-        case _                                                         => abort("Unexpected value applied to generic attribute: " + vs)
+        case _                                                         => abort("Unexpected value applied to meta attribute: " + vs)
       }
       // x(220, p.ns, attrStr, vs, element)
       element
@@ -659,7 +664,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       case q"$prev.e.apply[..$types]($nested)" if !p.isRef =>
         // x(320, "e")
-        Seq(Nested(Bond("", "", "", 2), Meta("", "e", "e", EntValue) +: resolve(q"$nested")))
+        Seq(Nested(Bond("", "", "", 2), Meta("", "e", "datom", EntValue) +: resolve(q"$nested")))
 
       case q"$prev.e_.apply[..$types]($nested)" if !p.isRef =>
         // x(330, "e_")
@@ -711,17 +716,17 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       if (attrStr.head.isUpper) {
         // x(91, attrStr, value)
         if (attrStr == "AVET")
-          Meta("avet", "range", "range", value)
+          Meta("AVET", "range", "avet", value)
         else
           Atom(t.name, t.name, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
 
-      } else if (gns == "?" && datomGenerics.contains(attrStr)) {
+      } else if (metaType == "datom" && datomMeta.contains(attrStr)) {
         // x(92, attrStr, values0, value)
-        resolveOpGeneric(t, attrStr, value)
+        resolveOpDatom(t, attrStr, value)
 
-      } else if (gns != "?") {
-        // x(93, gns, attrStr)
-        gns match {
+      } else if (metaType != "datom") {
+        // x(93, metaType, attrStr)
+        metaType match {
           case "schema" => resolveOpSchema(t, attrStr, value)
         }
       } else if (t.isMapAttr) {
@@ -749,7 +754,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolveOpSchema(t: richTree, attrStr: String, value: Value) = {
       def resolve(tpe: String): Meta = {
         addAttrOrAggr(attrStr, t, tpe)
-        Meta("schema", attrStr, tpe, value)
+        Meta("Schema", attrStr, "schema", value)
       }
       attrStr match {
         case "id" | "id_"                   => resolve("Long")
@@ -773,19 +778,19 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
 
-    def resolveOpGeneric(t: richTree, attrStr: String, value: Value) = {
+    def resolveOpDatom(t: richTree, attrStr: String, value: Value) = {
       def resolve(tpe: String): Meta = {
         addAttrOrAggr(attrStr, t, tpe)
-        Meta(gns, attrStr, tpe, value)
+        Meta(t.ns, attrStr, metaType, value)
       }
       attrStr match {
         case "e" | "e_"                 => resolve("Long")
         case "a" | "a_"                 => resolve("String")
         case "v" | "v_"                 => value match {
-          case Gt(v) => abort(s"Can't compare generic values being of different types. Found: $attrStr.>($v)")
-          case Ge(v) => abort(s"Can't compare generic values being of different types. Found: $attrStr.>=($v)")
-          case Le(v) => abort(s"Can't compare generic values being of different types. Found: $attrStr.<=($v)")
-          case Lt(v) => abort(s"Can't compare generic values being of different types. Found: $attrStr.<($v)")
+          case Gt(v) => abort(s"Can't compare meta values being of different types. Found: $attrStr.>($v)")
+          case Ge(v) => abort(s"Can't compare meta values being of different types. Found: $attrStr.>=($v)")
+          case Le(v) => abort(s"Can't compare meta values being of different types. Found: $attrStr.<=($v)")
+          case Lt(v) => abort(s"Can't compare meta values being of different types. Found: $attrStr.<($v)")
           case _     => resolve("Any")
         }
         case "tx" | "tx_"               => resolve("Long")
@@ -854,7 +859,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
 
-    def bi(tree: Tree, t: richTree): Seq[Generic] = if (t.isBidirectional) {
+    def bi(tree: Tree, t: richTree): Seq[MetaValue] = if (t.isBidirectional) {
       if (t.isBiSelfRef) {
         Seq(BiSelfRef(t.refCard))
 
@@ -898,7 +903,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         throw new Dsl2ModelException("Unexpected Bidirectional: " + t)
       }
     } else {
-      Seq.empty[Generic]
+      Seq.empty[MetaValue]
     }
 
     def bi2(tree: Tree, t: richTree): Value = bi(tree, t).headOption.getOrElse(NoValue)
@@ -1173,7 +1178,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           single(value)
 
         case Apply(_, List(Select(_, TermName("$qmark")))) =>
-          // x(2, "?")
+          // x(2, "datom")
           Qm
 
         case q"Seq(..$values)" =>
@@ -1272,7 +1277,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var i: Int = 0
     var after: Boolean = false
     var hasMandatory: Boolean = false
-    var generics: Seq[String] = Nil
+    var metas: Seq[String] = Nil
     var beforeFirstAttr: Boolean = true
     var isFiltered: Boolean = false
     var nsAttrs: Map[String, String] = Map.empty[String, String]
@@ -1283,7 +1288,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       el match {
         case e if after => e match {
           // No non-tx meta attributes after TxMetaData/Nested
-          case Meta(_, attr, _, _)             => txError(s" generic attribute `$attr`")
+          case Meta(_, attr, _, _)             => txError(s" meta attribute `$attr`")
           case Atom(_, attr, _, _, _, _, _, _) => txError(s" attribute `$attr`")
           case Bond(_, refAttr, _, _, _)       => txError(s" reference `${refAttr.capitalize}`")
           case _: TxMetaData                   => // ok
@@ -1315,9 +1320,9 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
             case Atom(ns, attr, _, _, _, _, _, _) =>
               if (beforeFirstAttr) {
-                if (generics.nonEmpty)
-                  abort(s"Can't add first attribute `${a.attr}` after generic attributes (except `e` which is ok to have first). " +
-                    s"Please add generic attributes ${generics.map(g => s"`$g`").mkString(", ")} after `${a.attr}`.")
+                if (metas.nonEmpty)
+                  abort(s"Can't add first attribute `${a.attr}` after meta attributes (except `e` which is ok to have first). " +
+                    s"Please add meta attributes ${metas.map(g => s"`$g`").mkString(", ")} after `${a.attr}`.")
                 beforeFirstAttr = false
               }
               nsAttrs = nsAttrs + ((ns + "/" + clean(attr)) -> attr)
@@ -1334,13 +1339,12 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           hasMandatory = true
           beforeFirstAttr = false
 
-
         case m: Meta => {
           if (m.attr.last != '_') hasMandatory = true
-          m.ns match {
-            case "?" if mandatoryDatomGenerics.contains(m.attr) =>
+          m.tpe match {
+            case "datom" if mandatoryDatomMeta.contains(m.attr) =>
               if (beforeFirstAttr && (m.attr != "e" && m.attr != "e_"))
-                generics = generics :+ m.attr
+                metas = metas :+ m.attr
               m.value match {
                 case NoValue | EntValue | Fn(_, _) =>
                 case _                             => isFiltered = true
@@ -1404,7 +1408,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     // x(802, elements, beforeFirstAttr, isFiltered)
 
     if (beforeFirstAttr && !isFiltered)
-      abort(s"Molecule with only generic attributes and no entity id(s) applied are not allowed " +
+      abort(s"Molecule with only meta attributes and no entity id(s) applied are not allowed " +
         s"since it would cause a full scan of the whole database.")
 
     // Return checked model

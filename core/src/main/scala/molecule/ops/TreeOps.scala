@@ -2,9 +2,7 @@ package molecule.ops
 import molecule.ast.query._
 import molecule.boilerplate.attributes._
 import molecule.boilerplate.base.{FirstNS, NS}
-import molecule.expression.AttrExpressions.OptionalExpr
 import molecule.ops.exception.TreeOpsException
-import molecule.transform.exception.Dsl2ModelException
 import scala.language.existentials
 import scala.reflect.macros.blackbox
 
@@ -35,6 +33,12 @@ private[molecule] trait TreeOps extends Liftables {
     lazy val card         : Int            = at.card
     lazy val enumPrefix   : String         = at.enumPrefix
     lazy val enumPrefixOpt: Option[String] = if (isAnyEnum) Some(at.enumPrefix) else None
+
+    def ns2: String = tpe_.baseClasses.foldLeft("") {
+      case ("", s: ClassSymbol) if s.toType =:= typeOf[NS] => "NS"
+      case ("NS", ns)                                      => ns.name.toString
+      case (ns, cls)                                       => ns
+    }
 
     def isNS: Boolean = tpe_ <:< typeOf[NS]
     def isFirstNS: Boolean = tpe_ <:< typeOf[FirstNS]

@@ -65,7 +65,7 @@ trait InputMolecule extends MoleculeBase {
     val ns_ = ns + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], tacit0: Option[Boolean]): Option[Boolean] = elements.foldLeft(tacit0) {
-      case (tacit, Meta(`ns`, `attr`, _, _))                               => Some(true)
+      case (tacit, Meta(_, `attr`, `ns`, _))                               => Some(true)
       case (tacit, Atom(`ns` | `ns_`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
       case (tacit, Atom(`ns_`, `attr` | `attrK`, _, _, _, _, _, _))          => Some(true)
       case (tacit, Atom(`ns`, `attr` | `attrK`, _, _, _, _, _, _))           => Some(false)
@@ -83,7 +83,7 @@ trait InputMolecule extends MoleculeBase {
     val ns_ = ns + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], cardOpt0: Option[Int]): Option[Int] = elements.foldLeft(cardOpt0) {
-      case (cardOpt, Meta(`ns`, `attr`, _, _))                                                       => Some(2)
+      case (cardOpt, Meta(_, `attr`, `ns`, _))                                                       => Some(2)
       case (cardOpt, Atom(`ns` | `ns_`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
       case (cardOpt, Nested(_, elements2))                                                           => isTacit_(elements2, cardOpt)
       case (cardOpt, Composite(elements2))                                                           => isTacit_(elements2, cardOpt)

@@ -29,7 +29,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
     }._2
 
-    def bi(gs: Seq[Generic], card: Int) = gs.collectFirst {
+    def bi(gs: Seq[MetaValue], card: Int) = gs.collectFirst {
       case bi: Bidirectional => bi
     } getOrElse Card(card)
 
@@ -172,7 +172,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
                          a: String,
                          arg: Any,
                          prefix: Option[String],
-                         bi: Generic,
+                         bidirectional: MetaValue,
                          otherEdgeId: Option[AnyRef]): Seq[Statement] = {
 
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
@@ -678,7 +678,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case v            => Seq(Add(e, a, p(v), Card(card)))
     }
 
-    val newStmts = bi match {
+    val newStmts = bidirectional match {
       case BiSelfRef(card)             => biSelf(card)
       case BiSelfRefAttr(card)         => biSelf(card)
       case BiOtherRef(card, attr)      => biOther(card, attr)
@@ -690,8 +690,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case BiEdgePropRef(card)         => biEdgeProp(card)
       case BiTargetRef(card, attr)     => biTarget(card, attr)
       case BiTargetRefAttr(card, attr) => biTarget(card, attr)
-      case Card(card)                  =>
-        default(card)
+      case Card(card)                  => default(card)
       case other                       => throw new Model2TransactionException(
         s"""Unexpected or missing Generic `$other`:
            |e  : $e
@@ -713,7 +712,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     case ((stmts, txStmts), stmt)                     => (stmts :+ stmt, txStmts)
   }
 
-  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: Generic, composite: Any = 'e): Any = {
+  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: MetaValue, composite: Any = 'e): Any = {
     bi match {
       case BiTargetRef(_, _) => {
         val lastEdgeNs = attr.split("/").head

@@ -96,7 +96,7 @@ object QueryOps extends Helpers {
 
     def nots(e: String, a: Atom, v: String, argss: Seq[Any]): Query = {
       argss.zipWithIndex.foldLeft(q) {
-        case (q1, (set: Set[_], i)) if a.tpeS == "java.net.URI" =>
+        case (q1, (set: Set[_], i)) if a.tpe == "java.net.URI" =>
           val notClauses = set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
             val x = Var(v + "_" + (j + 1))
             Seq(
@@ -105,7 +105,7 @@ object QueryOps extends Helpers {
             )
           }
           q1.copy(wh = Where(q1.wh.clauses :+ NotJoinClauses(Seq(Var(e)), notClauses)))
-        case (q1, (set: Set[_], _))                             =>
+        case (q1, (set: Set[_], _))                            =>
           val notClauses = set.toSeq.map(arg =>
             DataClause(ImplDS, Var(e), KW(a.ns, a.attr), Val(pre(a, arg)), Empty)
           )
@@ -203,9 +203,9 @@ object QueryOps extends Helpers {
       q.copy(wh = Where(q.wh.clauses :+ NotClause(Var("id"), KW("db", attr))))
 
 
-    // Generic Datom attribute/values ..........................................
+    // Datom attribute/values ..........................................
 
-    def genericE(e: String, v: String, v1: String, singleElement: Boolean = false): Query = {
+    def datomE(e: String, v: String, v1: String, singleElement: Boolean = false): Query = {
       if (singleElement) {
         q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
@@ -232,7 +232,7 @@ object QueryOps extends Helpers {
       }
     }
 
-    def genericA(e: String, v: String, v1: String): Query = {
+    def datomA(e: String, v: String, v1: String): Query = {
       var nss = false
       q.wh.clauses.reverse.collectFirst {
         case Funct("str", Seq(Var(`v1`)), _) =>
@@ -261,7 +261,7 @@ object QueryOps extends Helpers {
       )
     }
 
-    def genericV(e: String, v: String, v1: String): Query = {
+    def datomV(e: String, v: String, v1: String): Query = {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         => q.ident(e + "_attr", v1)
@@ -281,7 +281,7 @@ object QueryOps extends Helpers {
       case (q1, arg) => q1.func(op, Seq(Var(v), Val(arg)))
     }
 
-    def genericTx(e: String, v: String, v1: String): Query = {
+    def datomTx(e: String, v: String, v1: String): Query = {
       // Ensure tx value is present
       val (hasTxV, cls0): (Int, Seq[Clause]) = q.wh.clauses.foldRight(0, Seq.empty[Clause]) {
         case (cl@DataClause(_, Var(`e`), _, _, NoBinding | Empty | Var("_"), _), (0, acc)) => (1, cl.copy(tx = Var(v + "_tx")) +: acc)
@@ -317,25 +317,25 @@ object QueryOps extends Helpers {
           .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
     }
 
-    def genericT(e: String, v: String, v1: String): Query = {
+    def datomT(e: String, v: String, v1: String): Query = {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
           q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
       } getOrElse
-        q.genericTx(e, v, v1)
+        q.datomTx(e, v, v1)
           .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
     }
 
-    def genericTxInstant(e: String, v: String, v1: String): Query = {
+    def datomTxInstant(e: String, v: String, v1: String): Query = {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
           q.where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "")
       } getOrElse
-        q.genericTx(e, v, v1)
+        q.datomTx(e, v, v1)
           .where(v + "_tx", "db", "txInstant", Var(v + "_txInstant"), "")
     }
 
-    def genericOp(e: String, v: String, v1: String): Query = {
+    def datomOp(e: String, v: String, v1: String): Query = {
       val (ok, cls0): (Int, Seq[Clause]) = q.wh.clauses.foldRight(0, Seq.empty[Clause]) {
         case (cl@DataClause(_, Var(`e`), _, _, Empty | NoBinding, NoBinding), (0, acc))  => (1, cl.copy(tx = Var("_"), op = Var(v + "_op")) +: acc)
         case (cl@DataClause(_, Var(`e`), _, _, _, NoBinding), (0, acc))                  => (1, cl.copy(op = Var(v + "_op")) +: acc)
@@ -392,7 +392,7 @@ object QueryOps extends Helpers {
       }
 
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query =
-      compareTo2(op, a.tpeS, v, qv, i)
+      compareTo2(op, a.tpe, v, qv, i)
 
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = Var(if (i > 0) v + "_" + i else v + 2)
@@ -472,7 +472,7 @@ object QueryOps extends Helpers {
         // extract value
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
-      a.tpeS match {
+      a.tpe match {
         case "String"         => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "UUID"           => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "URI"            => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
@@ -495,7 +495,7 @@ object QueryOps extends Helpers {
         // extract value
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
-      a.tpeS match {
+      a.tpe match {
         case "String"         => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "UUID"           => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "URI"            => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)

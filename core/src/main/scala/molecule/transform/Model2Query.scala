@@ -81,6 +81,8 @@ object Model2Query extends Helpers {
     }
   }
 
+  val datomMeta = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
+
   def makeAtom(model: Model, query: Query, atom: Atom, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
     val (ns, attr) = (atom.ns, atom.attr)
@@ -92,7 +94,7 @@ object Model2Query extends Helpers {
       case Atom(`prevRefNs`, _, _, _, _, _, _, _)    => (resolve(query, v, w, atom), v, w, ns, attr, "")
       case Atom(`prevAttr`, _, _, _, _, _, _, _)     => (resolve(query, v, w, atom), v, w, ns, attr, "")
       case Atom(`prevNs`, _, _, _, _, _, _, _)       => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _ if prevNs == "?"                        => (resolve(query, e, w, atom), e, w, ns, attr, "")
+      case _ if datomMeta.contains(prevAttr)         => (resolve(query, e, w, atom), e, w, ns, attr, "")
       case _                                         => (resolve(query, e, v, atom), e, v, ns, attr, "")
     }
   }
@@ -143,9 +145,9 @@ object Model2Query extends Helpers {
   def makeMeta(model: Model, query: Query, meta: Meta, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = if (prevRefNs.nonEmpty) {
     // Advance variable letters to next namespace
-    (resolve(query, v, w, meta), v, y, meta.ns, meta.attr, "")
+    (resolve(query, v, w, meta), v, y, meta.tpe, meta.attr, "")
   } else {
-    (resolve(query, e, v, meta), e, v, meta.ns, meta.attr, "")
+    (resolve(query, e, v, meta), e, v, meta.tpe, meta.attr, "")
   }
 
   def makeTxMetaData(model: Model, query0: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
@@ -164,7 +166,6 @@ object Model2Query extends Helpers {
       (query0.copy(wh = Where(cls1)), txV)
     }
 
-    //    val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, "tx", w, prevNs, prevAttr, prevRefNs)) {
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, txV, w, prevNs, prevAttr, prevRefNs)) {
       case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
     }
@@ -247,60 +248,61 @@ object Model2Query extends Helpers {
   }
 
 
-  def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.ns match {
+  //  def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.ns match {
+  def resolveMeta(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.tpe match {
     case "schema" => resolveSchema(q, meta)
-    case "?"      => resolveGeneric(q, e, meta, v, v1, v2, v3)
-    case _        => q
+    case "datom"  => resolveDatom(q, e, meta, v, v1, v2, v3)
+    case _        => q // Indexes are handled in Conn directly from Model elements
   }
 
 
   // Schema ....................................................................................
 
   def resolveSchema(q: Query, meta: Meta): Query = meta.attr match {
-    case "id"          => resolveSchemaMandatory(meta, q.schema)
-    case "a"           => resolveSchemaMandatory(meta, q.schemaA)
-    case "part"        => resolveSchemaMandatory(meta, q.schema)
-    case "nsFull"      => resolveSchemaMandatory(meta, q.schema)
-    case "ns"          => resolveSchemaMandatory(meta, q.schema)
-    case "attr"        => resolveSchemaMandatory(meta, q.schemaAttr)
-    case "tpe"         => resolveSchemaMandatory(meta, q.schemaTpe)
-    case "card"        => resolveSchemaMandatory(meta, q.schemaCard)
-    case "doc"         => resolveSchemaMandatory(meta, q.schemaDoc)
-    case "index"       => resolveSchemaMandatory(meta, q.schemaIndex)
-    case "unique"      => resolveSchemaMandatory(meta, q.schemaUnique)
-    case "fulltext"    => resolveSchemaMandatory(meta, q.schemaFulltext)
-    case "isComponent" => resolveSchemaMandatory(meta, q.schemaIsComponent)
-    case "noHistory"   => resolveSchemaMandatory(meta, q.schemaNoHistory)
-    case "enum"        => resolveSchemaMandatory(meta, q.schemaEnum)
-    case "t"           => resolveSchemaMandatory(meta, q.schemaT)
-    case "tx"          => resolveSchemaMandatory(meta, q.schema)
-    case "txInstant"   => resolveSchemaMandatory(meta, q.schemaTxInstant)
+    case "id"          => resolveSchemaMandatory(meta, q.schema, "Long")
+    case "a"           => resolveSchemaMandatory(meta, q.schemaA, "String")
+    case "part"        => resolveSchemaMandatory(meta, q.schema, "String")
+    case "nsFull"      => resolveSchemaMandatory(meta, q.schema, "String")
+    case "ns"          => resolveSchemaMandatory(meta, q.schema, "String")
+    case "attr"        => resolveSchemaMandatory(meta, q.schemaAttr, "String")
+    case "tpe"         => resolveSchemaMandatory(meta, q.schemaTpe, "String")
+    case "card"        => resolveSchemaMandatory(meta, q.schemaCard, "String")
+    case "doc"         => resolveSchemaMandatory(meta, q.schemaDoc, "String")
+    case "index"       => resolveSchemaMandatory(meta, q.schemaIndex, "Boolean")
+    case "unique"      => resolveSchemaMandatory(meta, q.schemaUnique, "String")
+    case "fulltext"    => resolveSchemaMandatory(meta, q.schemaFulltext, "Boolean")
+    case "isComponent" => resolveSchemaMandatory(meta, q.schemaIsComponent, "Boolean")
+    case "noHistory"   => resolveSchemaMandatory(meta, q.schemaNoHistory, "Boolean")
+    case "enum"        => resolveSchemaMandatory(meta, q.schemaEnum, "String")
+    case "t"           => resolveSchemaMandatory(meta, q.schemaT, "Long")
+    case "tx"          => resolveSchemaMandatory(meta, q.schema, "Long")
+    case "txInstant"   => resolveSchemaMandatory(meta, q.schemaTxInstant, "java.util.Date")
 
-    case "id_"          => resolveSchemaTacit(meta, q.schema)
-    case "a_"           => resolveSchemaTacit(meta, q.schemaA)
-    case "part_"        => resolveSchemaTacit(meta, q.schema)
-    case "nsFull_"      => resolveSchemaTacit(meta, q.schema)
-    case "ns_"          => resolveSchemaTacit(meta, q.schema)
-    case "attr_"        => resolveSchemaTacit(meta, q.schemaAttr)
-    case "tpe_"         => resolveSchemaTacit(meta, q.schemaTpe)
-    case "card_"        => resolveSchemaTacit(meta, q.schemaCard)
-    case "doc_"         => resolveSchemaTacit(meta, q.schemaDoc)
-    case "index_"       => resolveSchemaTacit(meta, q.schemaIndex)
-    case "unique_"      => resolveSchemaTacit(meta, q.schemaUnique)
-    case "fulltext_"    => resolveSchemaTacit(meta, q.schemaFulltext)
-    case "isComponent_" => resolveSchemaTacit(meta, q.schemaIsComponent)
-    case "noHistory_"   => resolveSchemaTacit(meta, q.schemaNoHistory)
-    case "enum_"        => resolveSchemaTacit(meta, q.schemaEnum)
-    case "t_"           => resolveSchemaTacit(meta, q.schemaT)
-    case "tx_"          => resolveSchemaTacit(meta, q.schema)
-    case "txInstant_"   => resolveSchemaTacit(meta, q.schemaTxInstant)
+    case "id_"          => resolveSchemaTacit(meta, q.schema, "Long")
+    case "a_"           => resolveSchemaTacit(meta, q.schemaA, "String")
+    case "part_"        => resolveSchemaTacit(meta, q.schema, "String")
+    case "nsFull_"      => resolveSchemaTacit(meta, q.schema, "String")
+    case "ns_"          => resolveSchemaTacit(meta, q.schema, "String")
+    case "attr_"        => resolveSchemaTacit(meta, q.schemaAttr, "String")
+    case "tpe_"         => resolveSchemaTacit(meta, q.schemaTpe, "String")
+    case "card_"        => resolveSchemaTacit(meta, q.schemaCard, "String")
+    case "doc_"         => resolveSchemaTacit(meta, q.schemaDoc, "String")
+    case "index_"       => resolveSchemaTacit(meta, q.schemaIndex, "Boolean")
+    case "unique_"      => resolveSchemaTacit(meta, q.schemaUnique, "String")
+    case "fulltext_"    => resolveSchemaTacit(meta, q.schemaFulltext, "Boolean")
+    case "isComponent_" => resolveSchemaTacit(meta, q.schemaIsComponent, "Boolean")
+    case "noHistory_"   => resolveSchemaTacit(meta, q.schemaNoHistory, "Boolean")
+    case "enum_"        => resolveSchemaTacit(meta, q.schemaEnum, "String")
+    case "t_"           => resolveSchemaTacit(meta, q.schemaT, "Long")
+    case "tx_"          => resolveSchemaTacit(meta, q.schema, "Long")
+    case "txInstant_"   => resolveSchemaTacit(meta, q.schemaTxInstant, "java.util.Date")
 
     case "unique$" => resolveSchemaOptionalUnique(meta, q)
     case optional  => resolveSchemaOptional(meta, q)
   }
 
-  def resolveSchemaMandatory(meta: Meta, q: Query): Query = {
-    val (v, tpe) = (meta.attr, meta.kind)
+  def resolveSchemaMandatory(meta: Meta, q: Query, tpe: String): Query = {
+    val v = meta.attr
     meta.value match {
       case NoValue                        => q.find(v)
       case Eq(args)                       => q.find(v).in(args, v)
@@ -316,8 +318,8 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveSchemaTacit(meta: Meta, q: Query): Query = {
-    val (v, tpe) = (meta.attr.init, meta.kind)
+  def resolveSchemaTacit(meta: Meta, q: Query, tpe: String): Query = {
+    val v = meta.attr.init
     meta.value match {
       case NoValue                        => q
       case Eq(args)                       => q.in(args, v)
@@ -358,78 +360,77 @@ object Model2Query extends Helpers {
   }
 
 
-  // Generic ....................................................................................
+  // Datom ....................................................................................
 
-  def resolveGeneric(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
+  def resolveDatom(q: Query, e: String, meta: Meta, v: String, v1: String, v2: String, v3: String): Query = meta.attr match {
     case "e"         =>
-      val q1 = q.genericE(e, v, v1, _model.elements.size == 1)
+      val q1 = q.datomE(e, v, v1, _model.elements.size == 1)
       val w = if (q1.wh.clauses.exists {
         case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
         case _                                                                   => false
       }) v else e
-      resolveGenericMandatory(q1, e, meta, "", w)
-    case "tx"        => resolveGenericMandatory(q.genericTx(e, v, v1), e, meta, v)
-    case "t"         => resolveGenericMandatory(q.genericT(e, v, v1), e, meta, v)
-    case "txInstant" => resolveGenericMandatory(q.genericTxInstant(e, v, v1), e, meta, v)
-    case "op"        => resolveGenericMandatory(q.genericOp(e, v, v1), e, meta, v)
-    case "a"         => resolveGenericMandatory(q.genericA(e, v, v1), e, meta, v)
+      resolveDatomMandatory(q1, e, meta, "Long", "", w)
+    case "tx"        => resolveDatomMandatory(q.datomTx(e, v, v1), e, meta, "Long", v)
+    case "t"         => resolveDatomMandatory(q.datomT(e, v, v1), e, meta, "Long", v)
+    case "txInstant" => resolveDatomMandatory(q.datomTxInstant(e, v, v1), e, meta, "java.util.Date", v)
+    case "op"        => resolveDatomMandatory(q.datomOp(e, v, v1), e, meta, "Boolean", v)
+    case "a"         => resolveDatomMandatory(q.datomA(e, v, v1), e, meta, "String", v)
     case "v"         =>
-      val q1 = q.genericV(e, v, v1)
+      val q1 = q.datomV(e, v, v1)
       val w = if (q1.wh.clauses.exists {
         case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
         case _                                                                => false
       }) v else v + "_v"
-      resolveGenericMandatory(q1, e, meta, "", w)
+      resolveDatomMandatory(q1, e, meta, "Any", "", w)
 
     case "e_"         =>
-      val q1 = q.genericE(e, v, v1)
+      val q1 = q.datomE(e, v, v1)
       val w = if (q1.wh.clauses.exists {
         case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
         case _                                                                   => false
       }) v else e
-      resolveGenericTacit(q1, e, meta, "", w)
-    case "tx_"        => resolveGenericTacit(q.genericTx(e, v, v1), e, meta, v)
-    case "t_"         => resolveGenericTacit(q.genericT(e, v, v1), e, meta, v)
-    case "txInstant_" => resolveGenericTacit(q.genericTxInstant(e, v, v1), e, meta, v)
-    case "op_"        => resolveGenericTacit(q.genericOp(e, v, v1), e, meta, v)
-    case "a_"         => resolveGenericTacit(q.genericA(e, v, v1), e, meta, v)
+      resolveDatomTacit(q1, e, meta, "Long", "", w)
+    case "tx_"        => resolveDatomTacit(q.datomTx(e, v, v1), e, meta, "Long", v)
+    case "t_"         => resolveDatomTacit(q.datomT(e, v, v1), e, meta, "Long", v)
+    case "txInstant_" => resolveDatomTacit(q.datomTxInstant(e, v, v1), e, meta, "java.util.Date", v)
+    case "op_"        => resolveDatomTacit(q.datomOp(e, v, v1), e, meta, "Boolean", v)
+    case "a_"         => resolveDatomTacit(q.datomA(e, v, v1), e, meta, "String", v)
     case "v_"         =>
-      val q1 = q.genericV(e, v, v1)
+      val q1 = q.datomV(e, v, v1)
       val w = if (q1.wh.clauses.exists {
         case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
         case _                                                                => false
       }) v else v + "_v"
-      resolveGenericTacit(q1, e, meta, "", w)
+      resolveDatomTacit(q1, e, meta, "Any", "", w)
   }
 
-  def resolveGenericMandatory(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
+  def resolveDatomMandatory(q: Query, e: String, meta: Meta, tpe: String, v0: String, w: String = ""): Query = {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr
-//    val w =
     meta.value match {
       case NoValue | EntValue => q.find(v)
       case Eq(args)           => q.find(v).in(args, v)
       case Neq(args)          => q.find(v).compareToMany2("!=", v, args)
-      case Gt(arg)            => q.find(v).compareTo2(">", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Ge(arg)            => q.find(v).compareTo2(">=", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Lt(arg)            => q.find(v).compareTo2("<", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Le(arg)            => q.find(v).compareTo2("<=", meta.kind, v, Val(arg), q.wh.clauses.length)
+      case Gt(arg)            => q.find(v).compareTo2(">", tpe, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)            => q.find(v).compareTo2(">=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)            => q.find(v).compareTo2("<", tpe, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)            => q.find(v).compareTo2("<=", tpe, v, Val(arg), q.wh.clauses.length)
       case Fn("count", _)     => q.find("count", Nil, v)
       case other              => abort("Unexpected value: " + other)
     }
   }
 
-  def resolveGenericTacit(q: Query, e: String, meta: Meta, v0: String, w: String = ""): Query = {
+  def resolveDatomTacit(q: Query, e: String, meta: Meta, tpe: String, v0: String, w: String = ""): Query = {
     val v = if (w.nonEmpty) w else v0 + "_" + meta.attr.init // skip underscore at end
     meta.value match {
       case NoValue | EntValue => q
-      case Eq(Seq(Qm))        => q.in(v, meta.ns, meta.attr, e)
-      case Eq(args)           => q.in(args, v)
-      case Neq(args)          => q.compareToMany2("!=", v, args)
-      case Gt(arg)            => q.compareTo2(">", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Ge(arg)            => q.compareTo2(">=", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Lt(arg)            => q.compareTo2("<", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case Le(arg)            => q.compareTo2("<=", meta.kind, v, Val(arg), q.wh.clauses.length)
-      case other              => abort("Unexpected value: " + other)
+      case Eq(Seq(Qm)) => q.in(v, meta.tpe, meta.attr, e)
+      case Eq(args)    => q.in(args, v)
+      case Neq(args)   => q.compareToMany2("!=", v, args)
+      case Gt(arg)     => q.compareTo2(">", tpe, v, Val(arg), q.wh.clauses.length)
+      case Ge(arg)     => q.compareTo2(">=", tpe, v, Val(arg), q.wh.clauses.length)
+      case Lt(arg)     => q.compareTo2("<", tpe, v, Val(arg), q.wh.clauses.length)
+      case Le(arg)     => q.compareTo2("<=", tpe, v, Val(arg), q.wh.clauses.length)
+      case other       => abort("Unexpected value: " + other)
     }
   }
 
@@ -704,7 +705,7 @@ object Model2Query extends Helpers {
   }
 
   def resolveEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case Qm                                          => q.findD(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                                => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -734,7 +735,7 @@ object Model2Query extends Helpers {
   }
 
   def resolveEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case Qm                                      => q.find(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                            => q.find(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -763,7 +764,7 @@ object Model2Query extends Helpers {
 
   def resolveAtomOptional2(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
@@ -775,7 +776,7 @@ object Model2Query extends Helpers {
   }
   def resolveAtomOptional1(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
@@ -789,7 +790,7 @@ object Model2Query extends Helpers {
 
   def resolveAtomTacit(q: Query, e: String, a0: Atom, v: String, v1: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case Qm                                      => q.where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                            => q.where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
@@ -822,7 +823,7 @@ object Model2Query extends Helpers {
   }
 
   def resolveAtomMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case Qm                                          => q.findD(v).where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                                => q.findD(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
@@ -857,7 +858,7 @@ object Model2Query extends Helpers {
   }
 
   def resolveAtomMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
-    val (gs, t) = (a.gs, a.tpeS)
+    val (gs, t) = (a.gs, a.tpe)
     a.value match {
       case Qm                                      => q.find(v).where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                            => q.find(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)

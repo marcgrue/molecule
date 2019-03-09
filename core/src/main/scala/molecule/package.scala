@@ -43,16 +43,16 @@ import molecule.factory._
   *     <td>Implicit macro methods `m` to instantiate molecules from custom DSL molecule constructs.</td>
   *   </tr>
   *   <tr>
-  *     <td><a href="generic/index.html">generic</a><td>
-  *     <td>Interfaces to generic information about datoms and Datomic database.</td>
-  *   </tr>
-  *   <tr>
   *     <td><a href="input/index.html">input</a><td>
   *     <td>Input molecules awaiting input.</td>
   *   </tr>
   *   <tr>
-  *     <td><a href="macro/index.html">macro</a><td>
+  *     <td><a href="macro/index.html">macros</a><td>
   *     <td style="color:#888">Internal macros generating molecule code from custom DSL molecule constructs.</td>
+  *   </tr>
+  *   <tr>
+  *     <td><a href="generic/index.html">meta</a><td>
+  *     <td>Interfaces to meta information about datoms and Datomic database.</td>
   *   </tr>
   *   <tr>
   *     <td><a href="ops/index.html">ops</a><td>

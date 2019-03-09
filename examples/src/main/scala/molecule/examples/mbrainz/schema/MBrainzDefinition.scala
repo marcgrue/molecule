@@ -25,7 +25,6 @@ object MBrainzDefinition {
     val `type`     = oneEnum('person, 'group, 'other)
     val gender     = oneEnum('male, 'female, 'other)
     val country    = one[Country]
-    //    val country    = one[Medium]
   }
 
   trait Country {

@@ -3,9 +3,9 @@ package molecule.expression
 import scala.language.higherKinds
 
 
-/** Count expression on generic attributes.
+/** Count expression on meta attributes.
   * <br><br>
-  * Apply `count` or `countDistinct` keywords to generic attributes.
+  * Apply `count` or `countDistinct` keywords to meta attributes.
   * {{{
   *   Schema.e(count).get.head === 27                  // count of all attributes in schema
   *   Schema.a(countDistinct).get.head === 23          // count of all distinct attribute names in schema

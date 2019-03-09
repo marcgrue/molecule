@@ -228,7 +228,7 @@ private[molecule] trait Liftables extends MacroHelpers {
     case BiTargetRefAttr(card, attr) => q"BiTargetRefAttr($card, $attr)"
   }
 
-  implicit val liftGeneric: c.universe.Liftable[Generic] = Liftable[Generic] {
+  implicit val liftMetaValue: c.universe.Liftable[MetaValue] = Liftable[MetaValue] {
     case NoValue                     => q"NoValue"
     case Id(eid)                     => q"Id($eid)"
     case Card(card)                  => q"Card($card)"
@@ -290,10 +290,10 @@ private[molecule] trait Liftables extends MacroHelpers {
     case MapKeys(keys)                => q"MapKeys(Seq(..$keys))"
   }
 
-  implicit val liftAtom  : c.universe.Liftable[Atom]   = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.attr}, ${a.tpeS}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
+  implicit val liftAtom  : c.universe.Liftable[Atom]   = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.attr}, ${a.tpe}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gs}), Seq(..${a.keys}))" }
   implicit val liftBond  : c.universe.Liftable[Bond]   = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gs}))" }
   implicit val liftReBond: c.universe.Liftable[ReBond] = Liftable[ReBond] { r => q"ReBond(${r.backRef}, ${r.refAttr}, ${r.refNs}, ${r.distinct}, ${r.prevVar})" }
-  implicit val liftMeta  : c.universe.Liftable[Meta]   = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.kind}, ${m.value})" }
+  implicit val liftMeta  : c.universe.Liftable[Meta]   = Liftable[Meta] { m => q"Meta(${m.ns}, ${m.attr}, ${m.tpe}, ${m.value})" }
   implicit val liftGroup : c.universe.Liftable[Nested] = Liftable[Nested] { g0 =>
     val es0: Seq[c.universe.Tree] = g0.elements map {
       case a: Atom    => q"$a"

@@ -2,10 +2,9 @@ package molecule.api
 
 import molecule.expression.{AggregateKeywords, AttrExpressions, LogicImplicits}
 import molecule.facade.Datomic
-import molecule.generic.GenericLog
-import molecule.generic.index.{GenericAVET, GenericEAVT, GenericVAET}
-import molecule.generic.index.{GenericAEVT, GenericAVET, GenericEAVT, GenericVAET}
-import molecule.generic.schema.GenericSchema
+import molecule.meta.GenericLog
+import molecule.meta.index.{GenericAEVT, GenericAVET, GenericEAVT, GenericVAET}
+import molecule.meta.schema.GenericSchema
 
 
 /** Molecule API to be imported into your project to use Molecule.
