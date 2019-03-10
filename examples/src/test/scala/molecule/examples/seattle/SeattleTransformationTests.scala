@@ -1073,7 +1073,7 @@ class SeattleTransformationTests extends SeattleSpec {
 
     m(Schema.txInstant) -->
       Model(List(
-        Meta("Schema", "txInstant", "schema", NoValue))
+        Generic("Schema", "txInstant", "schema", NoValue))
       ) -->
       Query(
         Find(List(
@@ -1208,7 +1208,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "name", "String", 1, Eq(List("belltown 2")), None),
         Atom("Community", "url", "String", 1, Eq(List("url 2")), None))
       ) -->
@@ -1226,7 +1226,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
       ) -->
       """List(
@@ -1243,7 +1243,7 @@ class SeattleTransformationTests extends SeattleSpec {
       )
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "category", "String", 2, ReplaceValue(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
@@ -1261,7 +1261,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.assert("extra category")
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "category", "String", 2, AssertValue(List("extra category")), None))
       ) -->
       """List(
@@ -1274,7 +1274,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.retract("Super cool events")
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "category", "String", 2, RetractValue(List("Super cool events")), None))
       ) -->
       """List(
@@ -1290,7 +1290,7 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 3").url().category()
     ) -->
       Model(List(
-        Meta("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
         Atom("Community", "name", "String", 1, Eq(List("belltown 3")), None),
         Atom("Community", "url", "String", 1, Eq(List()), None),
         Atom("Community", "category", "String", 2, Eq(List()), None))

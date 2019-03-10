@@ -1,7 +1,7 @@
 package molecule.api
 
 import java.util.{Date, List => jList}
-import molecule.ast.model.Meta
+import molecule.ast.model.Generic
 import molecule.ast.query.QueryExpr
 import molecule.ast.tempDb._
 import molecule.ast.transactionModel.Statement
@@ -37,7 +37,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
   def debugGet(implicit conn: Conn): Unit = {
 
     _model.elements.head match {
-      case meta@Meta("eavt" | "aevt" | "avet" | "aevt", _, _, _) =>
+      case Generic("eavt" | "aevt" | "avet" | "aevt", _, _, _) =>
         val rows = try {
           conn._index(_model)
         } catch {
@@ -58,14 +58,14 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
         var pad = 0
         def p(v: Any, i: Int) = v.toString.padTo(i, ' ') + "   "
         val n = _model.elements.tail.zipWithIndex.map {
-          case (Meta(_, "e", _, _), i)         => print(p("E", pE)); pad += pE + 3; i -> pE
-          case (Meta(_, "a", _, _), i)         => print(p("A", pA)); pad += pA + 3; i -> pA
-          case (Meta(_, "v", _, _), i)         => print(p("V", pV)); pad += pV + 3; i -> pV
-          case (Meta(_, "t", _, _), i)         => print(p("T", pT)); pad += pT + 3; i -> pT
-          case (Meta(_, "tx", _, _), i)        => print(p("Tx", pE)); pad += pE + 3; i -> pE
-          case (Meta(_, "txInstant", _, _), i) => print(p("TxInstant", pD)); pad += pD + 3; i -> pD
-          case (Meta(_, "op", _, _), i)        => print(p("Op", pT)); pad += pT + 3; i -> pT
-          case other                           => throw new MoleculeException("Unexpected element: " + other)
+          case (Generic(_, "e", _, _), i)         => print(p("E", pE)); pad += pE + 3; i -> pE
+          case (Generic(_, "a", _, _), i)         => print(p("A", pA)); pad += pA + 3; i -> pA
+          case (Generic(_, "v", _, _), i)         => print(p("V", pV)); pad += pV + 3; i -> pV
+          case (Generic(_, "t", _, _), i)         => print(p("T", pT)); pad += pT + 3; i -> pT
+          case (Generic(_, "tx", _, _), i)        => print(p("Tx", pE)); pad += pE + 3; i -> pE
+          case (Generic(_, "txInstant", _, _), i) => print(p("TxInstant", pD)); pad += pD + 3; i -> pD
+          case (Generic(_, "op", _, _), i)        => print(p("Op", pT)); pad += pT + 3; i -> pT
+          case other                              => throw new MoleculeException("Unexpected element: " + other)
         }.toMap
 
         println()

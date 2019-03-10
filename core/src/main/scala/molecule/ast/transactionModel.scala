@@ -15,7 +15,7 @@ object transactionModel {
     val e     : Any
     val a     : String
     val v     : Any
-    val meta  : MetaValue
+    val gv    : GenericValue
     val oldV: Any = null
 
     def value(v: Any): Object = (v match {
@@ -33,17 +33,17 @@ object transactionModel {
     }
   }
 
-  case class Add(e: Any, a: String, v: Any, meta: MetaValue) extends Statement {
+  case class Add(e: Any, a: String, v: Any, gv: GenericValue) extends Statement {
     val action = ":db/add"
   }
 
   // Todo: Implement in updates?
   // Current Add's let Datomic automatically create a retract datom for each new update.
-  case class Cas(e: Any, a: String, override val oldV: Any, v: Any, meta: MetaValue) extends Statement {
+  case class Cas(e: Any, a: String, override val oldV: Any, v: Any, gv: GenericValue) extends Statement {
     val action = ":db.fn/cas"
   }
 
-  case class Retract(e: Any, a: String, v: Any, meta: MetaValue = NoValue) extends Statement {
+  case class Retract(e: Any, a: String, v: Any, gv: GenericValue = NoValue) extends Statement {
     val action = ":db/retract"
   }
 
@@ -51,7 +51,7 @@ object transactionModel {
     val action = ":db.fn/retractEntity"
     val a      = ""
     val v      = ""
-    val meta   = NoValue
+    val gv     = NoValue
   }
 
   case class Eid(id: Long)

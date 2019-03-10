@@ -45,18 +45,18 @@ object model extends Helpers {
 
   trait Element
 
-  trait MetaAtom extends Element {
+  trait GenericAtom extends Element {
     val ns   : String
     val attr : String
     val tpe  : String
     val value: Value
   }
 
-  case class Meta(ns: String,
-                  attr: String,
-                  tpe: String,
-                  value: Value) extends MetaAtom {
-    override def toString: String = s"""Meta("$ns", "$attr", "$tpe", $value)"""
+  case class Generic(ns: String,
+                     attr: String,
+                     tpe: String,
+                     value: Value) extends GenericAtom {
+    override def toString: String = s"""Generic("$ns", "$attr", "$tpe", $value)"""
   }
 
   case class Atom(ns: String,
@@ -65,17 +65,17 @@ object model extends Helpers {
                   card: Int,
                   value: Value,
                   enumPrefix: Option[String] = None,
-                  gs: Seq[MetaValue] = Nil,
-                  keys: Seq[String] = Nil) extends MetaAtom {
-    override def toString: String = s"""Atom("$ns", "$attr", "$tpe", $card, $value, ${o(enumPrefix)}, ${seq(gs)}, ${seq(keys)})"""
+                  gvs: Seq[GenericValue] = Nil,
+                  keys: Seq[String] = Nil) extends GenericAtom {
+    override def toString: String = s"""Atom("$ns", "$attr", "$tpe", $card, $value, ${o(enumPrefix)}, ${seq(gvs)}, ${seq(keys)})"""
   }
 
   case class Bond(ns: String,
                   refAttr: String,
                   refNs: String = "",
                   card: Int,
-                  gs: Seq[MetaValue] = Nil) extends Element {
-    override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gs)})"""
+                  gvs: Seq[GenericValue] = Nil) extends Element {
+    override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gvs)})"""
   }
 
   case class ReBond(backRef: String,
@@ -136,14 +136,14 @@ object model extends Helpers {
   case class MapKeys(keys: Seq[String]) extends Value {override def toString: String = s"MapKeys(${seq(keys)})"}
 
 
-  sealed trait MetaValue extends Value
+  sealed trait GenericValue extends Value
 
-  case object NoValue extends MetaValue
-  case class Id(eid: Any) extends MetaValue
-  case class Card(card: Int) extends MetaValue {override def toString: String = s"Card($card)"}
+  case object NoValue extends GenericValue
+  case class Id(eid: Any) extends GenericValue
+  case class Card(card: Int) extends GenericValue {override def toString: String = s"Card($card)"}
 
 
-  sealed trait Bidirectional extends MetaValue
+  sealed trait Bidirectional extends GenericValue
 
   case class BiSelfRef(card: Int) extends Bidirectional {override def toString: String = s"BiSelfRef($card)"}
   case class BiSelfRefAttr(card: Int) extends Bidirectional {override def toString: String = s"BiSelfRefAttr($card)"}
@@ -205,7 +205,7 @@ object model extends Helpers {
     case Atom(ns, _, _, _, _, _, _, _)   => ns
     case Bond(ns, _, _, _, _)            => ns
     case Nested(Bond(ns, _, _, _, _), _) => ns
-    case Meta(ns, _, _, _)               => ns
+    case Generic(ns, _, _, _)            => ns
     case unexpected                      => throw new ModelException("Unexpected element: " + unexpected)
   }
 }

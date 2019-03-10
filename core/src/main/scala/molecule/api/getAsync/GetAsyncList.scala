@@ -389,7 +389,7 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * @group getHistory
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/history/ manual]] for more info on meta attributes.
+    * @see [[http://www.scalamolecule.org/manual/time/history/ manual]] for more info on generic attributes.
     */
   def getAsyncHistory(implicit conn: Conn): Future[List[Tpl]] =
     Future(getHistory(conn))

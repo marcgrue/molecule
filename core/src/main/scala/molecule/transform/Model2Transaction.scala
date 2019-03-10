@@ -29,7 +29,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case ((eSlot1, stmts1), element1)                                  => resolveElement(eSlot1, stmts1, element1)
     }._2
 
-    def bi(gs: Seq[MetaValue], card: Int) = gs.collectFirst {
+    def bi(gs: Seq[GenericValue], card: Int) = gs.collectFirst {
       case bi: Bidirectional => bi
     } getOrElse Card(card)
 
@@ -41,12 +41,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case (e, Atom(_, _, _, _, Eq(Seq(None)), _, _, _))                  => (e, stmts)
 
       // First
-      case ('_, Meta(_, "e" | "e_", _, EntValue))              => ('arg, stmts)
-      case ('_, Meta(_, "e" | "e_", _, Eq(Seq(id: Long))))     => (Eid(id), stmts)
-      case ('_, Meta(_, "e" | "e_", _, Eq(ids: Seq[_])))       => (Eids(ids), stmts)
-      case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs, c)))
-      case ('_, Atom(ns, name, _, c, value, prefix, gs, _)) => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs, c)))
-      case ('_, Bond(ns, refAttr, refNs, c, gs))            => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
+      case ('_, Generic(_, "e" | "e_", _, EntValue))          => ('arg, stmts)
+      case ('_, Generic(_, "e" | "e_", _, Eq(Seq(id: Long)))) => (Eid(id), stmts)
+      case ('_, Generic(_, "e" | "e_", _, Eq(ids: Seq[_])))   => (Eids(ids), stmts)
+      case ('_, Atom(ns, name, _, c, VarValue, _, gs, _))     => ('e, stmts :+ Add('tempId, s":$ns/$name", 'arg, bi(gs, c)))
+      case ('_, Atom(ns, name, _, c, value, prefix, gs, _))   => ('e, stmts :+ Add('tempId, s":$ns/$name", Values(value, prefix), bi(gs, c)))
+      case ('_, Bond(ns, refAttr, refNs, c, gs))              => ('v, stmts :+ Add('tempId, s":$ns/$refAttr", s":$refNs", bi(gs, c)))
 
       case (e, Nested(Bond(ns, refAttr, _, c, gs), elements)) =>
         val parentId = if (e == '_) 'parentId else 'e
@@ -63,9 +63,9 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         }._2
         ('ec, stmts ++ associated)
 
-      case ('ec, Meta(_, "e" | "e_", _, EntValue))          => ('arg, stmts)
-      case ('ec, Meta(_, "e" | "e_", _, Eq(Seq(id: Long)))) => (Eid(id), stmts)
-      case ('ec, Meta(_, "e" | "e_", _, Eq(ids: Seq[_])))   => (Eids(ids), stmts)
+      case ('ec, Generic(_, "e" | "e_", _, EntValue))          => ('arg, stmts)
+      case ('ec, Generic(_, "e" | "e_", _, Eq(Seq(id: Long)))) => (Eid(id), stmts)
+      case ('ec, Generic(_, "e" | "e_", _, Eq(ids: Seq[_])))   => (Eids(ids), stmts)
 
       // Entity ids applied to initial namespace
       case (eids@Eids(ids), Atom(ns, name, _, c, value@RetractValue(_), prefix, gs, _)) => (eids, stmts ++ ids.map(Retract(_, s":$ns/$name", Values(value, prefix), bi(gs, c))))
@@ -172,7 +172,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
                          a: String,
                          arg: Any,
                          prefix: Option[String],
-                         bidirectional: MetaValue,
+                         bidirectional: GenericValue,
                          otherEdgeId: Option[AnyRef]): Seq[Statement] = {
 
     def p(arg: Any) = if (prefix.isDefined) prefix.get + arg else arg
@@ -712,7 +712,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     case ((stmts, txStmts), stmt)                     => (stmts :+ stmt, txStmts)
   }
 
-  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: MetaValue, composite: Any = 'e): Any = {
+  def lastE(stmts: Seq[Statement], attr: String, nestedE: Any, bi: GenericValue, composite: Any = 'e): Any = {
     bi match {
       case BiTargetRef(_, _) => {
         val lastEdgeNs = attr.split("/").head

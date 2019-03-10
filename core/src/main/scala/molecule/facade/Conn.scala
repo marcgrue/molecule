@@ -503,8 +503,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
-    case Meta("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => _index(model)
-    case _                                                        => _query(model, query)
+    case Generic("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => _index(model)
+    case _                                                           => _query(model, query)
   }
 
   // Datalog query execution
@@ -535,7 +535,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
   // Datoms API providing direct access to indexes
   private[molecule] def _index(model: Model): jCollection[jList[AnyRef]] = {
     val (api, index, args) = model.elements.head match {
-      case Meta("EAVT", _, _, value) =>
+      case Generic("EAVT", _, _, value) =>
         ("datoms", datomic.Database.EAVT, value match {
           case Eq(Seq(e))                => Seq(e.asInstanceOf[Object])
           case Eq(Seq(e, a))             => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object])
@@ -544,7 +544,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
           case Eq(Seq(e, a, v, t))       => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
         })
 
-      case Meta("AEVT", _, _, value) =>
+      case Generic("AEVT", _, _, value) =>
         ("datoms", datomic.Database.AEVT, value match {
           case Eq(Seq(a))                => Seq(a.asInstanceOf[Object])
           case Eq(Seq(a, e))             => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object])
@@ -553,7 +553,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
           case Eq(Seq(a, e, v, t))       => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
         })
 
-      case Meta("AVET", attr, _, value) =>
+      case Generic("AVET", attr, _, value) =>
         attr match {
           case "range" =>
             ("indexRange", datomic.Database.AVET, value match {
@@ -578,7 +578,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
             })
         }
 
-      case Meta("VAET", attr, _, value) =>
+      case Generic("VAET", attr, _, value) =>
         ("datoms", datomic.Database.VAET, value match {
           case Eq(Seq(v))                => Seq(v.asInstanceOf[Object])
           case Eq(Seq(v, a))             => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object])
@@ -587,7 +587,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
           case Eq(Seq(v, a, e, t))       => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object], t.asInstanceOf[Object])
         })
 
-      case Meta("Log", _, _, value) =>
+      case Generic("Log", _, _, value) =>
         ("txRange", datomic.Database.VAET, value match {
           case Eq(Seq(from: Int, until: Int))   => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
           case Eq(Seq(from: Int, until: Long))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
@@ -620,8 +620,8 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     }
 
     val (combination, order) = model.elements.tail.foldLeft("", Seq.empty[String]) {
-      case ((comb, attrs), Meta(_, attr, _, _)) => (comb + attr, attrs :+ attr)
-      case ((comb, attrs), element)             => throw new MoleculeException("Unexpected model element: " + element)
+      case ((comb, attrs), Generic(_, attr, _, _)) => (comb + attr, attrs :+ attr)
+      case ((comb, attrs), element)                => throw new MoleculeException("Unexpected model element: " + element)
     }
 
     val adhocDb = db
