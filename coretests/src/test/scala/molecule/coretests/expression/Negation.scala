@@ -155,6 +155,20 @@ class Negation extends Base {
   }
 
 
+  "Quoting" in new CoreSetup {
+
+    Ns.int(1).str("""Hi "Ann"""").save
+
+    Ns.str.not("""Hi "Ben"""").get === List("""Hi "Ann"""")
+
+    val str2: String = """Hi "Ben""""
+    Ns.str.not(str2).get === List("""Hi "Ann"""")
+
+    Ns.int.str_.not("""Hi "Ben"""").get === List(1)
+    Ns.int.str_.not(str2).get === List(1)
+  }
+
+
   "Card many - coalesce 1 attr" in new ManySetup {
 
     // Negation of a single cardinality-many attribute value is rather useless since it

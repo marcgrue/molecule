@@ -1,8 +1,8 @@
 package molecule.coretests.crud
 
 import molecule.api.out2._
-import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.coretests.util.dsl.coreTest._
 import molecule.ops.exception.VerifyModelException
 
 class UpdateRef extends CoreSpec {

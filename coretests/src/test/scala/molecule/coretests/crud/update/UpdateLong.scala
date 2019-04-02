@@ -383,6 +383,9 @@ class UpdateLong extends CoreSpec {
       Ns(eid).longs(values).update
       Ns.longs.get.head.toList.sorted === List(long1, long2)
 
+      // Ref attributes are treated the same way
+      Ns(eid).refs1(values).update
+
       // Delete all (apply no values)
       Ns(eid).longs().update
       Ns.longs.get === List()

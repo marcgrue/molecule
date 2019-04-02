@@ -185,15 +185,13 @@ object Model2Query extends Helpers {
 
   def makeComposite(model: Model, query: Query, composite: Composite, e: String, v: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
-    val eid: String = if (query.wh.clauses.isEmpty) {
-      e
-    } else {
-      query.wh.clauses.head match {
-        case DataClause(_, Var(compositeEid), KW(ns, _, _), _, _, _) if ns != "db" => compositeEid
-        case other                                                                 =>
-          abort(s"Unexpected first clause of composite query: " + other)
-      }
+    def getFirstEid(clauses: Seq[Clause]): String = clauses.head match {
+      case DataClause(_, Var(compositeEid), KW(ns, _, _), _, _, _) if ns != "db" => compositeEid
+      case _: Funct                                                              => getFirstEid(clauses.tail)
+      case other                                                                 =>
+        abort(s"Unexpected first clause of composite query: " + other + "\n" + query.wh.clauses.mkString("\n"))
     }
+    val eid: String = if (query.wh.clauses.isEmpty) e else getFirstEid(query.wh.clauses)
 
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = composite.elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
       case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
@@ -438,7 +436,6 @@ object Model2Query extends Helpers {
 
   def resolveAtomKeyedMapOptional(q: Query, e: String, a0: Atom): Query = {
     val a = a0.copy(attr = a0.attr.slice(0, a0.attr.length - 2))
-    val gs = a.gvs
     a.value match {
       case VarValue     => q.pull(e, a)
       case Fn("not", _) => q.pull(e, a).not(e, a) // None
@@ -448,7 +445,6 @@ object Model2Query extends Helpers {
 
   def resolveAtomKeyedMapTacit(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, key: String): Query = {
     val a = a0.copy(attr = a0.attr.slice(0, a0.attr.length - 2))
-    val gs = a.gvs
     a.value match {
       case Qm => q
         .in(e, a, None, v + "Value")
@@ -502,7 +498,6 @@ object Model2Query extends Helpers {
 
   def resolveAtomKeyedMapMandatory(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, v3: String, key: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case Qm => q
         .find(v3)
@@ -577,7 +572,6 @@ object Model2Query extends Helpers {
 
   def resolveAtomMapOptional(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case VarValue           => q.pull(e, a)
       case Fn("not", _)       => q.pull(e, a).not(e, a)
@@ -589,7 +583,6 @@ object Model2Query extends Helpers {
 
   def resolveAtomMapTacit(q: Query, e: String, a0: Atom, v: String, keys: Seq[String]): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case Qm                       => q.mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
       case Fulltext(Seq(Qm))        => q.mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
@@ -620,7 +613,6 @@ object Model2Query extends Helpers {
   }
 
   def resolveAtomMapMandatory(q: Query, e: String, a: Atom, v: String, keys: Seq[String]): Query = {
-    val gs = a.gvs
     a.value match {
       case Qm                       => q.findD(v).mapIn(e, a, v).matchRegEx(v, Seq(Val("("), Var(v + "Key"), Val(")@("), Var(v + "Value"), Val(")")))
       case Fulltext(Seq(Qm))        => q.findD(v).mapIn(e, a, v).matchRegEx(v, Seq(Val(".+@("), Var(v + "Value"), Val(")")))
@@ -654,7 +646,6 @@ object Model2Query extends Helpers {
 
   def resolveEnumOptional2(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case EnumVal      => q.pullEnum(e, a)
       case Fn("not", _) => q.pullEnum(e, a).not(e, a) // None
@@ -665,7 +656,6 @@ object Model2Query extends Helpers {
 
   def resolveEnumOptional1(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case EnumVal        => q.pullEnum(e, a)
       case Fn("not", _)   => q.pullEnum(e, a).not(e, a) // None
@@ -677,7 +667,6 @@ object Model2Query extends Helpers {
 
   def resolveEnumTacit(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val gs = a.gvs
     a.value match {
       case Qm                                      => q.enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                            => q.enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -704,7 +693,6 @@ object Model2Query extends Helpers {
   }
 
   def resolveEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
-    val (gs, t) = (a.gvs, a.tpe)
     a.value match {
       case Qm                                          => q.findD(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                                => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -722,7 +710,7 @@ object Model2Query extends Helpers {
       case And(args)                                   => q.findD(v2).whereAndEnum(e, a, v, prefix, args)
       case Neq(Nil)                                    => q.findD(v2).enum(e, a, v)
       case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v2).enum(e, a, v).nots(e, a, v2, sets)
-      case Neq(arg :: Nil) if uri(t)                   => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Val(arg))
+      case Neq(arg :: Nil) if uri(a.tpe)               => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Val(arg))
       case Neq(arg :: Nil)                             => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Val(arg))
       case Neq(args)                                   => q.findD(v2).enum(e, a, v).compareToMany("!=", a, v2, args)
       case Gt(arg)                                     => q.findD(v2).enum(e, a, v).compareTo(">", a, v2, Val(arg), 1)
@@ -734,7 +722,6 @@ object Model2Query extends Helpers {
   }
 
   def resolveEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
-    val (gs, t) = (a.gvs, a.tpe)
     a.value match {
       case Qm                                      => q.find(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                            => q.find(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -763,7 +750,7 @@ object Model2Query extends Helpers {
 
   def resolveAtomOptional2(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gvs, a.tpe)
+    val t = a.tpe
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
@@ -775,7 +762,7 @@ object Model2Query extends Helpers {
   }
   def resolveAtomOptional1(q: Query, e: String, a0: Atom, v: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gvs, a.tpe)
+    val t = a.tpe
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
@@ -789,7 +776,7 @@ object Model2Query extends Helpers {
 
   def resolveAtomTacit(q: Query, e: String, a0: Atom, v: String, v1: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
-    val (gs, t) = (a.gvs, a.tpe)
+    val t = a.tpe
     a.value match {
       case Qm                                      => q.where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                            => q.where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
@@ -815,14 +802,14 @@ object Model2Query extends Helpers {
       case And(args) if a.card == 2                => q.whereAnd(e, a, v, args, u(t, v))
       case And(args)                               => q.where(e, a, Val(args.head))
       case Fn("unify", _)                          => q.where(e, a, v)
-      case Fulltext(arg :: Nil)                    => q.fulltext(e, a, v, Val(arg))
+      case Fulltext(arg :: Nil)                    => q.fulltext(e, a, v, arg.toString)
       case Fulltext(args)                          => q.where(e, a, v).orRules(e, a, args, "", true)
       case other                                   => abort(s"Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
     }
   }
 
   def resolveAtomMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
-    val (gs, t) = (a.gvs, a.tpe)
+    val t = a.tpe
     a.value match {
       case Qm                                          => q.findD(v).where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                                => q.findD(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
@@ -857,7 +844,7 @@ object Model2Query extends Helpers {
   }
 
   def resolveAtomMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
-    val (gs, t) = (a.gvs, a.tpe)
+    val t = a.tpe
     a.value match {
       case Qm                                      => q.find(v).where(e, a, v).in(e, a, None, v)
       case Neq(Seq(Qm))                            => q.find(v).where(e, a, v).compareTo("!=", a, v, Var(v1)).in(e, a, None, v1)
@@ -875,8 +862,7 @@ object Model2Query extends Helpers {
       case Eq(Nil)                                 => q.find(v).where(e, a, v).not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v).where(e, a, v).not(e, a)
       case Eq((seq: Seq[_]) :: Nil)                => q.find(v).where(e, a, v).orRules(e, a, seq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                => q.find(v).where(e, a, v).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case Eq(arg :: Nil)                          => q.find(v).where(e, a, v).compareTo("=", a, v, Val(arg))
+      case Eq(arg :: Nil)                          => q.find(v).ground(a, arg, v).where(e, a, v)
       case Eq(args)                                => q.find(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case Neq(args)                               => q.find(v).where(e, a, v).compareToMany("!=", a, v, args)
       case Gt(arg)                                 => q.find(v).where(e, a, v).compareTo(">", a, v, Val(arg))
@@ -886,7 +872,7 @@ object Model2Query extends Helpers {
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v).where(e, a, v)
       case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v).where(e, a, v).widh(e)
       case Fn(fn, _)                               => q.find(fn, Nil, v).where(e, a, v)
-      case Fulltext(arg :: Nil)                    => q.find(v).fulltext(e, a, v, Val(arg))
+      case Fulltext(arg :: Nil)                    => q.find(v).fulltext(e, a, v, arg.toString)
       case Fulltext(args)                          => q.find(v).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
       case other                                   => abort(s"Unresolved cardinality-one Atom:\nAtom   : $a\nElement: $other")
     }

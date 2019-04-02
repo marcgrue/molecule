@@ -15,7 +15,7 @@ import scala.language.implicitConversions
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation

@@ -38,6 +38,27 @@ class ApplyString extends CoreSpec {
       )
     }
 
+
+    "Quoting" in new CoreSetup {
+
+      Ns.int(1).str("""Hi "Ann"""").save
+
+      Ns.str.get === List("""Hi "Ann"""")
+      Ns.str("""Hi "Ann"""").get === List("""Hi "Ann"""")
+
+      val str: String = """Hi "Ann""""
+      Ns.str(str).get === List("""Hi "Ann"""")
+
+      Ns.int.str_("""Hi "Ann"""").get === List(1)
+      Ns.int.str_(str).get === List(1)
+
+      Ns.int.str$(Some("""Hi "Ann"""")).get === List((1, Some("""Hi "Ann"""")))
+
+      val some = Some("""Hi "Ann"""")
+      Ns.int.str$(some).get === List((1, Some("""Hi "Ann"""")))
+    }
+
+
     // OR semantics only for card-one attributes
 
     "Mandatory" in new OneSetup {

@@ -20,10 +20,11 @@ object attributes {
 
   trait RefAttr[Ns] extends Attr
 
-  trait OneRefAttr[Ns, In] extends OneRefAttrExpr[Ns, In] with RefAttr[Ns]
-  trait ManyRefAttr[Ns, In] extends ManyRefAttrExpr[Ns, In] with RefAttr[Ns]
+  trait OneRefAttr[Ns, In] extends RefAttr[Ns] with OneExpr[Ns, In, Long]
+  trait ManyRefAttr[Ns, In] extends RefAttr[Ns] with ManyExpr[Ns, In, Long]
 
   sealed trait ValueAttr[Ns, In, TT, T] extends Attr
+
 
   // Cardinality one attributes
 

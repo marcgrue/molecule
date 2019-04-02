@@ -69,6 +69,7 @@ object ModelOps {
       case a@Atom(_, _, _, _, Gt(ident), _, _, keyIdents)               => a.copy(value = Gt(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
       case a@Atom(_, _, _, _, Le(ident), _, _, keyIdents)               => a.copy(value = Le(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
       case a@Atom(_, _, _, _, Ge(ident), _, _, keyIdents)               => a.copy(value = Ge(getValues(Seq(ident)).head), keys = getKeys(keyIdents))
+      case a@Atom(_, _, _, _, Fulltext(idents), _, _, keyIdents)        => a.copy(value = Fulltext(getValues(idents)), keys = getKeys(keyIdents))
       case a@Atom(_, _, _, _, AssertValue(idents), _, _, _)             => a.copy(value = AssertValue(getValues(idents)))
       case a@Atom(_, _, _, _, RetractValue(idents), _, _, _)            => a.copy(value = RetractValue(getValues(idents)))
       case a@Atom(_, _, _, _, ReplaceValue(oldNew), _, _, _)            => a.copy(value = ReplaceValue(getValues(oldNew).asInstanceOf[Seq[(Any, Any)]]))

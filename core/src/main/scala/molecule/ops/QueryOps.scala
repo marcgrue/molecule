@@ -13,6 +13,19 @@ import molecule.util.Helpers
 /** Query operations */
 object QueryOps extends Helpers {
 
+  def esc(arg: Any) = arg match {
+    case s: String => s.replaceAll("\"", "\\\\\"")
+    case other     => other
+  }
+
+  def esc1(arg: Any) = arg.toString.replace("\"", "\\\"")
+
+  def castStr(tpe: String): String = tpe match {
+    case "Int"   => "Long"
+    case "Float" => "Double"
+    case other   => other
+  }
+
   implicit class QueryOps(q: Query) {
 
     // Find ..........................................
@@ -60,8 +73,13 @@ object QueryOps extends Helpers {
 
     // Where ..........................................
 
-    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String): Query =
-      q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty, NoBinding)))
+    def where(e: String, ns: String, attr: String, v: QueryValue, refNs: String): Query = v match {
+      case Val(arg: String) => q.copy(wh = Where(q.wh.clauses :+
+        DataClause(ImplDS, Var(e), KW(ns, attr, refNs), Val(esc1(arg)), Empty, NoBinding)))
+      case _                => q.copy(wh = Where(q.wh.clauses :+
+        DataClause(ImplDS, Var(e), KW(ns, attr, refNs), v, Empty, NoBinding)))
+    }
+
 
     def where(e: QueryValue, a: KW, v: String, txV: String = ""): Query = if (txV.nonEmpty)
       q.copy(wh = Where(q.wh.clauses :+ DataClause(ImplDS, e, a, Var(v), Var(txV))))
@@ -110,7 +128,7 @@ object QueryOps extends Helpers {
             DataClause(ImplDS, Var(e), KW(a.ns, a.attr), Val(pre(a, arg)), Empty)
           )
           q1.copy(wh = Where(q1.wh.clauses :+ NotClauses(notClauses)))
-        case _                                                  =>
+        case _                                                 =>
           throw new QueryOpsException(s"Expected Seq[Set[T]], got: " + argss)
       }
     }
@@ -218,6 +236,7 @@ object QueryOps extends Helpers {
       } else {
         q.wh.clauses.reverse.collectFirst {
           case Funct("namespace", _, _)                                                   => q
+          case Funct("molecule.util.fns/bind", _, _) /* Optional attributes */            => q
           case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q
           case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         => q.ident(e + "_attr", v1)
           case DataClause(_, Var(`e`), _, _, _, _)                                        => q
@@ -235,17 +254,17 @@ object QueryOps extends Helpers {
     def datomA(e: String, v: String, v1: String): Query = {
       var nss = false
       q.wh.clauses.reverse.collectFirst {
-        case Funct("str", Seq(Var(`v1`)), _) =>
+        case Funct("str", Seq(Var(`v1`)), _)                                            =>
           q
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
           q.func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
             .func("molecule.util.fns/live", Seq(Var(v + "_a")))
 
-        case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         =>
+        case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr" =>
           q.ident(e + "_attr", v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
             .func("molecule.util.fns/live", Seq(Var(v + "_a")))
-        case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                          =>
+        case DataClause(_, Var(`e`), KW(ns, attr, _), _, _, _)                  =>
           q.where(KW(ns, attr), KW("db", "ident"), v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
             .func("molecule.util.fns/live", Seq(Var(v + "_a")))
@@ -304,10 +323,10 @@ object QueryOps extends Helpers {
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q1
         case DataClause(_, Var(`e`), KW("?", attr, _), _, _, _) if attr == e + "_attr"  => q1
           .ident(e + "_attr", v1)
-            .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
-            .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
-            .func("!=", Seq(Var(v + "_ns"), Val("db")))
-            .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
+          .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
+          .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
+          .func("!=", Seq(Var(v + "_ns"), Val("db")))
+          .func("!=", Seq(Var(v + "_ns"), Val("fressian")))
         case DataClause(_, Var(`e`), _, _, _, _)                                        => q1
       } getOrElse
         q1.ident(e + "_attr", v1)
@@ -375,24 +394,19 @@ object QueryOps extends Helpers {
       q.func("name", Seq(Var(v1)), ScalarBinding(Var(v2)))
 
 
-    def castStr(tpe: String): String = tpe match {
-      case "Int"   => "Long"
-      case "Float" => "Double"
-      case other   => other
-    }
-
     def compareToMany[T](op: String, a: Atom, v: String, args: Seq[T]): Query =
       args.zipWithIndex.foldLeft(q) {
         case (q1, (arg: URI, i)) =>
           q1.func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
             .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(Var(v + "_" + (i + 1) + "b")))
             .func(op, Seq(Var(v + "_" + (i + 1) + "b"), Val(0)))
-        case (q1, (arg, i))      =>
-          q1.compareTo(op, a, v, Val(arg), i + 1)
+        case (q1, (arg, i))      => q1.compareTo(op, a, v, Val(arg), i + 1)
       }
 
-    def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query =
-      compareTo2(op, a.tpe, v, qv, i)
+    def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = qv match {
+      case Val(arg) if a.tpe == "String" => compareTo2(op, a.tpe, v, Val(arg.toString.replace("\"", "\\\"")), i)
+      case _                             => compareTo2(op, a.tpe, v, qv, i)
+    }
 
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w = Var(if (i > 0) v + "_" + i else v + 2)
@@ -411,7 +425,21 @@ object QueryOps extends Helpers {
       q1.func(op, Seq(w, Val(0)))
     }
 
-    def fulltext(e: String, a: Atom, v: String, qv: QueryValue): Query =
+
+    def ground(a: Atom, arg: Any, v: String): Query = a.tpe match {
+      case "String"                                        => q.func(s"""ground "${esc1(arg)}"""", Empty, v)
+      case "Int" | "Long" | "Float" | "Double" | "Boolean" => q.func(s"""ground $arg""", Empty, v)
+      case "java.util.Date"                                => q.func(s"""ground #inst "${format2(arg.asInstanceOf[Date])}"""", Empty, v)
+      case "java.util.UUID"                                => q.func(s"""ground #uuid "$arg"""", Empty, v)
+      case "java.net.URI"                                  => q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
+      case "BigInt"                                        => q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)
+      case "BigDecimal"                                    => q.func(s"""ground (java.math.BigDecimal. "$arg")""", Empty, v)
+    }
+
+    def fulltext(e: String, a: Atom, v: String, s: String): Query =
+      q.func("fulltext", Seq(DS, KW(a.ns, a.attr), Val(esc1(s))), RelationBinding(Seq(Var(e), Var(v))))
+
+    def fulltext(e: String, a: Atom, v: String, qv: Var): Query =
       q.func("fulltext", Seq(DS, KW(a.ns, a.attr), qv), RelationBinding(Seq(Var(e), Var(v))))
 
     def mappings(e: String, a: Atom, args0: Seq[(String, Any)]): Query = {
@@ -474,15 +502,15 @@ object QueryOps extends Helpers {
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
       a.tpe match {
         case "String"         => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case "UUID"           => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case "URI"            => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "Boolean"        => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "java.util.Date" => q1
           .func("java.text.SimpleDateFormat.", Seq(Val("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")), ScalarBinding(Var(v + 4)))
           .func(".format ^java.text.SimpleDateFormat", Seq(Var(v + 4), Var(v + "Value")), ScalarBinding(Var(v + 5)))
           .func(".compareTo ^String", Seq(Var(v + 3), Var(v + 5)), ScalarBinding(Var(v + 6)))
           .func(op, Seq(Var(v + 6), Val(0)))
-        case number           => q1
+        case "java.util.UUID" => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case "java.net.URI"   => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case number => q1
           .func("read-string", Seq(Var(v + 3)), ScalarBinding(Var(v + 4)))
           .func(op, Seq(Var(v + 4), Var(v + "Value")))
       }
@@ -497,14 +525,14 @@ object QueryOps extends Helpers {
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
       a.tpe match {
         case "String"         => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case "UUID"           => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case "URI"            => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "Boolean"        => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "java.util.Date" => q1
           .func("java.text.SimpleDateFormat.", Seq(Val("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")), ScalarBinding(Var(v + 3)))
           .func(".format ^java.text.SimpleDateFormat", Seq(Var(v + 3), Var(v + "Value")), ScalarBinding(Var(v + 4)))
           .func(".compareTo ^String", Seq(Var(v + 2), Var(v + 4)), ScalarBinding(Var(v + 5)))
           .func(op, Seq(Var(v + 5), Val(0)))
+        case "UUID"           => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
+        case "URI"            => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case number           => q1
           .func("read-string", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
           .func(op, Seq(Var(v + 3), Var(v + "Value")))
@@ -519,11 +547,6 @@ object QueryOps extends Helpers {
 
     def matchRegEx(v: String, regex: Seq[QueryTerm]): Query =
       q.func("str", regex, ScalarBinding(Var(v + 1))).matches(v, Var(v + 1))
-
-    def esc(arg: Any) = arg match {
-      case s: String => s.replaceAll("\"", "\\\\\"")
-      case other     => other
-    }
 
     def orRules(e: String, a: Atom, args: Seq[Any], specialV: String = "", flag: Boolean = false): Query = {
       val ruleName = "rule" + (q.i.rules.map(_.name).distinct.size + 1)

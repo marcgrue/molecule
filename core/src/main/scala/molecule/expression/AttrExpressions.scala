@@ -402,11 +402,6 @@ trait AttrExpressions {
     def retract(values: Iterable[Rem]): Ns with Attr = ???
   }
 
-  /** Expression methods of card-one ref attributes. */
-  trait OneRefAttrExpr[Ns, In] extends AttrExpr[Ns, Long]
-
-  /** Expression methods of card-many ref attributes. */
-  trait ManyRefAttrExpr[Ns, In] extends AttrExpr[Ns, Long] with ManyAttrExpr[Ns, Long, (Long, Long), Long]
 
   /** Expression methods of value attributes. */
   trait ValueAttrExpr[Ns, In, T] extends AttrExpr[Ns, T] {

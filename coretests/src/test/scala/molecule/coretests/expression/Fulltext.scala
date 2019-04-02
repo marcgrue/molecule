@@ -36,6 +36,24 @@ class Fulltext extends Base {
   }
 
 
+  "Quoting" in new CoreSetup {
+
+    Ns.int(1).str("""Hi "Ann"""").save
+
+    Ns.str.contains("Hi").get === List("""Hi "Ann"""")
+    Ns.str.contains(""""Ann"""").get === List("""Hi "Ann"""")
+
+    val needle1 = "Hi"
+    val needle2 = """"Ann""""
+    Ns.str.contains(needle1).get === List("""Hi "Ann"""")
+    Ns.str.contains(needle2).get === List("""Hi "Ann"""")
+
+    Ns.int.str_.contains("""Hi "Ann"""").get === List(1)
+    Ns.int.str_.contains(needle1).get === List(1)
+    Ns.int.str_.contains(needle2).get === List(1)
+  }
+
+
   "Card many" in new CoreSetup {
 
     Ns.int.strs insert List(

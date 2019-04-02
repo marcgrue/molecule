@@ -447,10 +447,10 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       if (t.isFirstNS) {
         // x(230, attrStr, genericType)
         tree match {
-          case q"$prev.$ns.apply($pkg.?)"                         => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(Seq(Qm))))
-          case q"$prev.$ns.apply($eid)" if t.isBiEdge             => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(Seq(extract(eid)))))
+          case q"$prev.$ns.apply($pkg.?)"                            => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(Seq(Qm))))
+          case q"$prev.$ns.apply($eid)" if t.isBiEdge                => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(Seq(extract(eid)))))
           case q"$prev.$ns.apply(..$eids)" if genericType != "datom" => traverseElement(prev, p, Generic(ns.toString(), "args_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
-          case q"$prev.$ns.apply(..$eids)"                        => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$ns.apply(..$eids)"                           => traverseElement(prev, p, Generic(ns.toString(), "e_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
         }
 
       } else if (genericType == "datom" && datomGeneric.contains(attrStr)) {
@@ -597,8 +597,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolveApplyGeneric(prev: Tree, p: richTree, attrStr: String, vs: Tree) = {
       def resolve(value: Value, aggrType: String = ""): Seq[Element] = {
         def casts(mandatory: Boolean, tpe: String): Seq[Element] = {
-          if (prev.toString.endsWith("$"))
-            abort(s"Optional attributes (`${p.name}`) can't be followed by generic attribute (`$attrStr`).")
           if (mandatory) {
             // x(225, "aggrType: " + aggrType)
             if (aggrType.nonEmpty) {
@@ -1340,7 +1338,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           beforeFirstAttr = false
 
         case g: Generic => {
-          if (g.attr.last != '_') hasMandatory = true
+          if (g.attr.last != '_')
+            hasMandatory = true
           g.tpe match {
             case "datom" if mandatoryGenericDatom.contains(g.attr) =>
               if (beforeFirstAttr && (g.attr != "e" && g.attr != "e_"))
@@ -1349,8 +1348,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
                 case NoValue | EntValue | Fn(_, _) =>
                 case _                             => isFiltered = true
               }
-            case "schema"                                       => if (g.value != EntValue) isFiltered = true
-            case _                                              => isFiltered = true // indexes
+            case "schema"                                          => if (g.value != EntValue) isFiltered = true
+            case _                                                 => isFiltered = true // indexes
           }
         }
 

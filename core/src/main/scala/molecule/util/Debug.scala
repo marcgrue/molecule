@@ -11,7 +11,7 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
 
   // Helpers ..........................................
 
-  def padS(longest: Int, str: String) = pad(longest, str.length)
+  def padS(longest: Int, str: String) = pad(longest, str.length) + "  "
   def pad(longest: Int, shorter: Int) = if (longest > shorter) " " * (longest - shorter) + " " else ""
 
 

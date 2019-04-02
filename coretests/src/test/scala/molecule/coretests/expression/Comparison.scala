@@ -210,6 +210,34 @@ class Comparison extends Base {
   }
 
 
+  "Quoting" in new CoreSetup {
+
+    Ns.int(1).str("""Hi "Ann"""").save
+
+    Ns.str.>(""""H"""").get === List("""Hi "Ann"""")
+    Ns.str.>=(""""H"""").get === List("""Hi "Ann"""")
+    Ns.str.<=(""""H"""").get === Nil
+    Ns.str.<(""""H"""").get === Nil
+
+    val str: String = """Hi "Ann""""
+    val letter = "H"
+    Ns.str.>(letter).get === List("""Hi "Ann"""")
+    Ns.str.>=(letter).get === List("""Hi "Ann"""")
+    Ns.str.<=(letter).get === Nil
+    Ns.str.<(letter).get === Nil
+
+    Ns.int.str_.>(""""H"""").get === List(1)
+    Ns.int.str_.>=(""""H"""").get === List(1)
+    Ns.int.str_.<=(""""H"""").get === Nil
+    Ns.int.str_.<(""""H"""").get === Nil
+
+    Ns.int.str_.>(letter).get === List(1)
+    Ns.int.str_.>=(letter).get === List(1)
+    Ns.int.str_.<=(letter).get === Nil
+    Ns.int.str_.<(letter).get === Nil
+  }
+
+
   "Range" in new OneSetup {
     Ns.int.insert(1, 2, 3, 4)
 

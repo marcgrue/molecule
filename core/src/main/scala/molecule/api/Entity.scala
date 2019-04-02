@@ -97,7 +97,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *
     * @group retract
     * @return List[List[Retractentity[Long]]]
-    * */
+    **/
   def getRetractTx = List(List(RetractEntity(id)))
 
   /** Debug entity transaction data of method `retract` without affecting the database.
@@ -536,6 +536,8 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
 
   // Private helper methods ...........................................................................
 
+  final protected lazy val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  final protected def format2(date: Date): String = sdf.format(date)
 
   private def format(value: Any): String = {
     val sb = new StringBuilder
@@ -543,10 +545,17 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
       val t = "  " * tabs
       var i = 0
       value match {
-        case s: String           => sb.append(s""""$s"""")
-        case l: Long             => if (l > Int.MaxValue) sb.append(s"${l}L") else sb.append(l) // Int/Long hack
-        case d: Double           => sb.append(d)
-        case s: Set[_]           =>
+        case s: String                => sb.append(s""""$s"""")
+        case l: Long                  => if (l > Int.MaxValue) sb.append(s"${l}L") else sb.append(l) // Int/Long hack
+        case d: Double                => sb.append(d)
+        case f: Float                 => sb.append(f)
+        case bi: java.math.BigInteger => sb.append(bi)
+        case bd: java.math.BigDecimal => sb.append(bd)
+        case b: Boolean               => sb.append(b)
+        case d: Date                  => sb.append(s""""${format2(d)}"""")
+        case u: UUID                  => sb.append(s""""$u"""")
+        case u: java.net.URI          => sb.append(s""""$u"""")
+        case s: Set[_]                =>
           sb.append("Set(")
           s.foreach { v =>
             if (i > 0) sb.append(s",\n$t") else sb.append(s"\n$t")
@@ -554,7 +563,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
             i += 1
           }
           sb.append(")")
-        case l: Seq[_]           =>
+        case l: Seq[_]                =>
           sb.append("List(")
           l.foreach {
             case (k, v) =>
@@ -568,7 +577,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
               i += 1
           }
           sb.append(")")
-        case m: Map[_, _]        =>
+        case m: Map[_, _]             =>
           sb.append("Map(")
           m.foreach { case (k, v) =>
             if (i > 0) sb.append(s",\n$t") else sb.append(s"\n$t")
@@ -577,10 +586,10 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
             i += 1
           }
           sb.append(")")
-        case (k: String, v: Any) =>
+        case (k: String, v: Any)      =>
           sb.append(s""""$k" -> """)
           traverse(v, tabs)
-        case other               => throw new EntityException("Unexpected element traversed in Entity#format: " + other)
+        case other                    => throw new EntityException("Unexpected element traversed in Entity#format: " + other)
       }
     }
     traverse(value, 1)
@@ -673,7 +682,16 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
 
     // :db.type/keyword
     case set: clojure.lang.PersistentHashSet if depth < maxDepth => set.asScala.toList.map(toScala(_, depth, maxDepth, tpe))
-    case set: clojure.lang.PersistentHashSet                     => set.asScala.toList.map(toScala(_, depth, maxDepth, tpe).asInstanceOf[Long]).toSet
+    case set: clojure.lang.PersistentHashSet                     => set.asScala.toList.map { value =>
+      toScala(value, depth, maxDepth, tpe) match {
+        case s: String   => s
+        case probablyRef => try {
+          probablyRef.asInstanceOf[Long]
+        } catch {
+          case e: Throwable => throw new RuntimeException(s"Couldn't cast value '$probablyRef' to Long.")
+        }
+      }
+    }.toSet
 
     // a collection
     case coll: jCollection[_] =>

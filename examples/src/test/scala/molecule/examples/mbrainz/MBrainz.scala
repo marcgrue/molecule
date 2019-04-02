@@ -64,14 +64,14 @@ class MBrainz extends MoleculeSpec {
 
     // What are the titles, artists, album names, and release years of all tracks having the word "always" in their titles?
     Release.year.name.Media.Tracks.name.contains("always").Artists.name.get(5) === List(
+      (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
       (1972, "You'll Always Be a Friend", "You'll Always Be a Friend", "Hot Chocolate"),
       (1971, "Hot Rocks 1964-1971", "You Can’t Always Get What You Want", "The Rolling Stones"),
-      (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
       (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
       (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"))
 
 
-    // How many male artists (checking enums)
+    // Gender distribution
     Artist.gender_("male").e(count).get === List(1325)
     Artist.gender_("female").e(count).get === List(309)
     Artist.gender_("other").e(count).get === List(1)
