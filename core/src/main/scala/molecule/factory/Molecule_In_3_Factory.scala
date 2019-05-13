@@ -56,10 +56,6 @@ trait Molecule_In_3_Factory2 {
     *
     * @group input3
     * @param dsl User-defined DSL structure modelling the input molecule
-    * @tparam In3_1 Internal builder pattern type
-    * @tparam In3_2 Internal builder pattern type
-    * @tparam In4_1 Internal builder pattern type
-    * @tparam In4_2 Internal builder pattern type
     * @tparam I1 Type of input attribute 1 (`age`: Int)
     * @tparam I2 Type of input attribute 2 (`score`: Int)
     * @tparam I3 Type of input attribute 3 (`flags`: Int)
@@ -90,10 +86,6 @@ trait Molecule_In_3_Factory2 {
     * }}}
     * @group input3
     * @param dsl User-defined DSL structure modelling the input molecule
-    * @tparam In3_2 Internal builder pattern type
-    * @tparam In3_3 Internal builder pattern type
-    * @tparam In4_2 Internal builder pattern type
-    * @tparam In4_3 Internal builder pattern type
     * @tparam I1 Type of input attribute 1 (`age`: Int)
     * @tparam I2 Type of input attribute 2 (`score`: Int)
     * @tparam I3 Type of input attribute 3 (`flags`: Int)

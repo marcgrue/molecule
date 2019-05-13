@@ -45,8 +45,10 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     buf.toList
   }
 
+  def getListOf[T](implicit conn: Conn): List[T] = ???
 
-  /** Get `List` of n rows as tuples matching molecule.
+
+    /** Get `List` of n rows as tuples matching molecule.
     * <br><br>
     * Only n rows are type-casted.
     * {{{

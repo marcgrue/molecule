@@ -172,7 +172,9 @@ class Friends extends MoleculeSpec {
     )
 
     // Older friends of Vadas + Vadas age
-    Person.name.age.>=(30).Friends.e_(vadas).age.debugGet
+    Person.name.age.>=(30).Friends.e_(vadas).age.get === List(
+      ("peter", 35, 27)
+    )
 
     // How many young friends does the older people have?
     Person.name.age.>=(30).Friends.e(count).age_.<(30).get === List(
@@ -197,7 +199,7 @@ class Friends extends MoleculeSpec {
         List(
           ("vadas", List("marko", "peter")),
           ("josh", List("marko")))
-        )
+      )
     )
 
     // Marko's friends and their friends (excluding marko)

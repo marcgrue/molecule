@@ -59,6 +59,20 @@ private[molecule] trait Cast extends TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrListVector[java.net.URI](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrListVector[java.util.UUID](row, $i)"
   }
+  def castAggrListVectorMany(tpe: String): Int => Tree = tpe match {
+    case "Int"            => (i: Int) => q"castAggrListVectorManyInt(row, $i)"
+    case "Long"           => (i: Int) => q"castAggrListVectorMany[Long](row, $i)"
+    case "Float"          => (i: Int) => q"castAggrListVectorManyFloat(row, $i)"
+    case "Double"         => (i: Int) => q"castAggrListVectorMany[Double](row, $i)"
+    case "String"         => (i: Int) => q"castAggrListVectorMany[String](row, $i)"
+    case "BigInt"         => (i: Int) => q"castAggrListVectorManyBigInt(row, $i)"
+    case "BigDecimal"     => (i: Int) => q"castAggrListVectorManyBigDecimal(row, $i)"
+    case "java.util.Date" => (i: Int) => q"castAggrListVectorMany[java.util.Date](row, $i)"
+    case "Boolean"        => (i: Int) => q"castAggrListVectorMany[Boolean](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrListVectorMany[java.net.URI](row, $i)"
+    case "java.util.UUID" => (i: Int) => q"castAggrListVectorMany[java.util.UUID](row, $i)"
+  }
+
   def castAggrListHashSet(tpe: String): Int => Tree = tpe match {
     case "Int"            => (i: Int) => q"castAggrListHashSetInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrListHashSet[Long](row, $i)"
@@ -72,6 +86,20 @@ private[molecule] trait Cast extends TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrListHashSet[java.net.URI](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrListHashSet[java.util.UUID](row, $i)"
   }
+  def castAggrListHashSetMany(tpe: String): Int => Tree = tpe match {
+    case "Int"            => (i: Int) => q"castAggrListHashSetManyInt(row, $i)"
+    case "Long"           => (i: Int) => q"castAggrListHashSetMany[Long](row, $i)"
+    case "Float"          => (i: Int) => q"castAggrListHashSetManyFloat(row, $i)"
+    case "Double"         => (i: Int) => q"castAggrListHashSetMany[Double](row, $i)"
+    case "String"         => (i: Int) => q"castAggrListHashSetMany[String](row, $i)"
+    case "BigInt"         => (i: Int) => q"castAggrListHashSetManyBigInt(row, $i)"
+    case "BigDecimal"     => (i: Int) => q"castAggrListHashSetManyBigDecimal(row, $i)"
+    case "java.util.Date" => (i: Int) => q"castAggrListHashSetMany[java.util.Date](row, $i)"
+    case "Boolean"        => (i: Int) => q"castAggrListHashSetMany[Boolean](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrListHashSetMany[java.net.URI](row, $i)"
+    case "java.util.UUID" => (i: Int) => q"castAggrListHashSetMany[java.util.UUID](row, $i)"
+  }
+
   def castAggrListLazySeq(tpe: String): Int => Tree = tpe match {
     case "Int"            => (i: Int) => q"castAggrListLazySeqInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrListLazySeq[Long](row, $i)"
@@ -84,6 +112,19 @@ private[molecule] trait Cast extends TreeOps {
     case "Boolean"        => (i: Int) => q"castAggrListLazySeq[Boolean](row, $i)"
     case "java.net.URI"   => (i: Int) => q"castAggrListLazySeq[java.net.URI](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrListLazySeq[java.util.UUID](row, $i)"
+  }
+  def castAggrListLazySeqMany(tpe: String): Int => Tree = tpe match {
+    case "Int"            => (i: Int) => q"castAggrListLazySeqManyInt(row, $i)"
+    case "Long"           => (i: Int) => q"castAggrListLazySeqMany[Long](row, $i)"
+    case "Float"          => (i: Int) => q"castAggrListLazySeqManyFloat(row, $i)"
+    case "Double"         => (i: Int) => q"castAggrListLazySeqMany[Double](row, $i)"
+    case "String"         => (i: Int) => q"castAggrListLazySeqMany[String](row, $i)"
+    case "BigInt"         => (i: Int) => q"castAggrListLazySeqManyBigInt(row, $i)"
+    case "BigDecimal"     => (i: Int) => q"castAggrListLazySeqManyBigDecimal(row, $i)"
+    case "java.util.Date" => (i: Int) => q"castAggrListLazySeqMany[java.util.Date](row, $i)"
+    case "Boolean"        => (i: Int) => q"castAggrListLazySeqMany[Boolean](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrListLazySeqMany[java.net.URI](row, $i)"
+    case "java.util.UUID" => (i: Int) => q"castAggrListLazySeqMany[java.util.UUID](row, $i)"
   }
 
   def castAggrInt: Int => Tree = (i: Int) => q"row.get($i).asInstanceOf[Int]"
@@ -102,6 +143,19 @@ private[molecule] trait Cast extends TreeOps {
     case "java.net.URI"   => (i: Int) => q"castOne[java.net.URI](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castOne[java.util.UUID](row, $i)"
   }
+  def castAggrMany(tpe: String): Int => Tree = tpe match {
+    case "Int"            => (i: Int) => q"castAggrManyInt(row, $i)"
+    case "Long"           => (i: Int) => q"castAggrMany[Long](row, $i)"
+    case "Float"          => (i: Int) => q"castAggrManyFloat(row, $i)"
+    case "Double"         => (i: Int) => q"castAggrMany[Double](row, $i)"
+    case "String"         => (i: Int) => q"castAggrMany[String](row, $i)"
+    case "BigInt"         => (i: Int) => q"castAggrManyBigInt(row, $i)"
+    case "BigDecimal"     => (i: Int) => q"castAggrManyBigDecimal(row, $i)"
+    case "java.util.Date" => (i: Int) => q"castAggrMany[java.util.Date](row, $i)"
+    case "Boolean"        => (i: Int) => q"castAggrMany[Boolean](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrMany[java.net.URI](row, $i)"
+    case "java.util.UUID" => (i: Int) => q"castAggrMany[java.util.UUID](row, $i)"
+  }
 
   def castAggrVector(tpe: String): Int => Tree = tpe match {
     case "Int"            => (i: Int) => q"castAggrVectorInt(row, $i)"
@@ -116,19 +170,7 @@ private[molecule] trait Cast extends TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrVector[java.net.URI](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrVector[java.util.UUID](row, $i)"
   }
-  def castAggrLazySeq(tpe: String): Int => Tree = tpe match {
-    case "Int"            => (i: Int) => q"castAggrLazySeqInt(row, $i)"
-    case "Long"           => (i: Int) => q"castAggrLazySeq[Long](row, $i)"
-    case "Float"          => (i: Int) => q"castAggrLazySeqFloat(row, $i)"
-    case "Double"         => (i: Int) => q"castAggrLazySeq[Double](row, $i)"
-    case "String"         => (i: Int) => q"castAggrLazySeq[String](row, $i)"
-    case "BigInt"         => (i: Int) => q"castAggrLazySeqBigInt(row, $i)"
-    case "BigDecimal"     => (i: Int) => q"castAggrLazySeqBigDecimal(row, $i)"
-    case "java.util.Date" => (i: Int) => q"castAggrLazySeq[java.util.Date](row, $i)"
-    case "Boolean"        => (i: Int) => q"castAggrLazySeq[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrLazySeq[java.net.URI](row, $i)"
-    case "java.util.UUID" => (i: Int) => q"castAggrLazySeq[java.util.UUID](row, $i)"
-  }
+
 
   val castOptionalAttr: richTree => Int => Tree = (t: richTree) =>
     if (t.card == 1) {

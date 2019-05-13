@@ -904,8 +904,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       Seq.empty[GenericValue]
     }
 
-    def bi2(tree: Tree, t: richTree): Value = bi(tree, t).headOption.getOrElse(NoValue)
-
     def addAttrOrAggr(attr: String, t: richTree, tpeStr: String = "", apply: Boolean = false): Unit = {
       if (standard) {
         // x(81, attr)
@@ -929,27 +927,39 @@ private[molecule] trait Dsl2Model extends Cast with Json {
               addSpecific(castAggrDouble, s"Double")
               addJson(jsonOneAttr, "Double", t.ns + "." + t.nameClean)
 
+            case "list" if t.card == 2 =>
+              addSpecific(castAggrListVectorMany(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+
             case "list" =>
               addSpecific(castAggrListVector(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+
+            case "listSet" if t.card == 2 =>
+              addSpecific(castAggrListHashSetMany(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
               addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
 
             case "listSet" =>
               addSpecific(castAggrListHashSet(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
               addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
 
+            case "listRand" if t.card == 2 =>
+              addSpecific(castAggrListLazySeqMany(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrListLazySeq, tpeStr, t.ns + "." + t.nameClean)
+
             case "listRand" =>
               addSpecific(castAggrListLazySeq(tpeStr), s"List[$tpeStr]")
               addJson(jsonAggrListLazySeq, tpeStr, t.ns + "." + t.nameClean)
-
-            case "lazySeqHead" =>
-              addSpecific(castAggrLazySeq(tpeStr), tpeStr)
-              addJson(jsonAggrLazySeq, tpeStr, t.ns + "." + t.nameClean)
 
             case "vectorHead" =>
               addSpecific(castAggrVector(tpeStr), tpeStr)
               addJson(jsonAggrVector, tpeStr, t.ns + "." + t.nameClean)
 
-            case _ =>
+            case "aggr" if t.card == 2 =>
+              addSpecific(castAggrMany(tpeStr), tpeStr)
+              addJson(jsonAggr, tpeStr, t.ns + "." + t.nameClean)
+
+            case "aggr" =>
               addSpecific(castAggr(tpeStr), tpeStr)
               addJson(jsonAggr, tpeStr, t.ns + "." + t.nameClean)
           }
@@ -1045,12 +1055,12 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case "None"                        => Fn("not")
         case "unify" if t.name.last == '_' => Fn("unify")
         case "unify"                       => abort(s"Can only unify on tacit attributes. Please add underscore to attribute: `${t.name}_(unify)`")
-        case "min"                         => standard = false; aggrType = "vectorHead"; aggr("min", Some(1))
-        case "max"                         => standard = false; aggrType = "vectorHead"; aggr("max", Some(1))
-        case "rand"                        => standard = false; aggrType = "lazySeqHead"; aggr("rand", Some(1))
+        case "min"                         => standard = false; aggrType = "aggr"; aggr("min")
+        case "max"                         => standard = false; aggrType = "aggr"; aggr("max")
+        case "rand"                        => standard = false; aggrType = "aggr"; aggr("rand")
         case "sample"                      => standard = false; aggrType = "vectorHead"; aggr("sample", Some(1))
-        case "sum"                         => standard = false; aggr("sum")
-        case "median"                      => standard = false; aggr("median")
+        case "sum"                         => standard = false; aggrType = "aggr"; aggr("sum")
+        case "median"                      => standard = false; aggrType = "aggr"; aggr("median")
         case "distinct"                    => standard = false; aggrType = "listSet"; Distinct
         case "count"                       => standard = false; aggrType = "Int"; aggr("count")
         case "countDistinct"               => standard = false; aggrType = "Int"; aggr("count-distinct")
@@ -1315,6 +1325,10 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
             case Atom(ns, attr, _, 2, Distinct, _, _, _) =>
               abort(s"`Distinct` keyword not supported for card many attributes like `:$ns/$attr` (card many values already returned as Sets of distinct values).")
+
+            case Atom(ns, attr, _, 3 | 4, Fn(fn, _), _, _, _) =>
+              if (!Seq("not", "unify").contains(fn))
+                abort("Map attributes not allowed to use `unify` or aggregate expressions.")
 
             case Atom(ns, attr, _, _, _, _, _, _) =>
               if (beforeFirstAttr) {

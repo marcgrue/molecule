@@ -1,6 +1,4 @@
 package molecule.ast
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.transform.Query2String
 import molecule.util.Helpers
 

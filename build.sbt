@@ -1,7 +1,7 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.18.3",
+  version := "0.18.4",
   scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",
@@ -18,8 +18,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     //    ,"-Ydebug"
   ),
   resolvers ++= Seq(
-    "datomic" at "http://files.datomic.com/maven", // free
-    //    "datomic" at "https://my.datomic.com/repo", // pro
+    "datomic" at "http://files.datomic.com/maven",
     "clojars" at "http://clojars.org/repo",
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots"),
@@ -29,8 +28,6 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.datomic" % "datomic-free" % "0.9.5697",
-    //    "com.datomic" % "datomic-pro" % "0.9.5783",
-    //    "com.datomic" % "client-pro" % "0.8.20",
     "org.specs2" %% "specs2-core" % "4.2.0" % "test",
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
   ),
@@ -105,6 +102,7 @@ lazy val publishSettings = Seq(
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
   credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+  credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "sonatype.sbt"),
   pomExtra :=
     <developers>
       <developer>
@@ -116,6 +114,7 @@ lazy val publishSettings = Seq(
 )
 
 lazy val noPublishSettings = Seq(
+  skip in publish := true,
   publish := ((): Unit),
   publishLocal := ((): Unit),
   publishArtifact in(Compile, packageDoc) := false,

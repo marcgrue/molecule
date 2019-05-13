@@ -49,10 +49,6 @@ trait Molecule_Factory2 {
     *
     * @group molecule
     * @param dsl User-defined DSL structure modelling the molecule
-    * @tparam Ns1   Internal builder pattern type
-    * @tparam Ns2   Internal builder pattern type
-    * @tparam In1_1 Internal builder pattern type
-    * @tparam In1_2 Internal builder pattern type
     * @tparam A     Type of output attribute 1 (`name`: String)
     * @return Molecule of arity-1 typed to first attribute (Molecule01[A])
     */
@@ -79,10 +75,6 @@ trait Molecule_Factory2 {
     *
     * @group molecule
     * @param dsl User-defined DSL structure modelling the molecule
-    * @tparam Ns2   Internal builder pattern type
-    * @tparam Ns3   Internal builder pattern type
-    * @tparam In1_2 Internal builder pattern type
-    * @tparam In1_3 Internal builder pattern type
     * @tparam A     Type of output attribute 1 (`name`: String)
     * @tparam B     Type of output attribute 2 (`age`: Int)
     * @return Molecule of arity-2 typed to two attributes (Molecule02[A, B])
