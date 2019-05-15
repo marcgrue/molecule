@@ -277,7 +277,7 @@ class LogTest extends CoreSpec {
 
     // Start - t3 (exclusive)
     // Includes all Datomic database bootstrapping and schema transactions
-    Log(None, Some(t3)).t.get.size === 397
+    Log(None, Some(t3)).t.get.size === 336
 
     // Start - end
     // Molecule disallow returning from beginning to end (the whole database!)

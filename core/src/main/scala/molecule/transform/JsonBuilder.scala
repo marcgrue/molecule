@@ -168,7 +168,7 @@ private[molecule] trait JsonBuilder extends Helpers {
 
   // Aggregates ===========================================================================================
 
-  protected def jsonAggrListVectorQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -180,7 +180,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListVector(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrList(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -192,7 +192,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListVectorToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -204,7 +204,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListVectorDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -217,7 +217,7 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
 
-  protected def jsonAggrListLazySeqQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListRandQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -229,7 +229,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListLazySeq(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListRand(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -241,7 +241,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListLazySeqToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListRandToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -253,7 +253,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     sb.append("]")
   }
 
-  protected def jsonAggrListLazySeqDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrListRandDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quote(sb, field)
     sb.append(": [")
     var subsequent = false
@@ -283,19 +283,19 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
 
-  protected def jsonAggrVectorQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrSingleSampleQuoted(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quotedPair(sb, field, row.get(i).asInstanceOf[PersistentVector].iterator.next.toString)
   }
 
-  protected def jsonAggrVector(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrSingleSample(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     pair(sb, field, row.get(i).asInstanceOf[PersistentVector].iterator.next)
   }
 
-  protected def jsonAggrVectorToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrSingleSampleToString(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     pair(sb, field, row.get(i).asInstanceOf[PersistentVector].iterator.next.toString)
   }
 
-  protected def jsonAggrVectorDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
+  protected def jsonAggrSingleSampleDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
     quotedPair(sb, field, sdf.format(row.get(i).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
   }
 

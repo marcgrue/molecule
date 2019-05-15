@@ -82,7 +82,7 @@ sbt.version=1.1.6
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.1")
 ```
 
 `build.sbt`:

@@ -117,44 +117,44 @@ class SchemaTest extends CoreSpec {
 
     "id" >> {
 
-      Schema.id.get.size === 70
+      Schema.id.get.size === 58
 
       Schema.id.get(5) === List(97, 98, 99, 100, 101)
 
       Schema.id(97).get(5) === List(97)
       Schema.id(97, 98).get(5) === List(97, 98)
 
-      Schema.id.not(97).get.size === 69
-      Schema.id.not(97, 98).get.size === 68
+      Schema.id.not(97).get.size === 57
+      Schema.id.not(97, 98).get.size === 56
 
-      Schema.id(count).get === List(70)
+      Schema.id(count).get === List(58)
 
 
       // Since all attributes have an id, a tacit `id_` makes no difference
-      Schema.id_.attr.get.size === 70
+      Schema.id_.attr.get.size === 58
       Schema.id_.attr.get(3) === List("floats", "double", "str1")
 
       // We can though filter by one or more tacit attribute ids
-      Schema.id_(97).attr.get === List("intMap")
-      Schema.id_(99, 100).attr.get === List("longMap", "longMapK")
+      Schema.id_(97).attr.get === List("longMap")
+      Schema.id_(99, 100).attr.get === List("doubleMap", "boolMap")
 
-      Schema.id_.not(97).attr.get.size === 69
-      Schema.id_.not(97, 98).attr.get.size === 68
+      Schema.id_.not(97).attr.get.size === 57
+      Schema.id_.not(97, 98).attr.get.size === 56
     }
 
 
     "a" >> {
 
-      Schema.a.get.size === 70
-      Schema.a.get(3) === List(":Ns/double", ":Ns/doubleMap", ":Ns/byteMapK")
+      Schema.a.get.size === 58
+      Schema.a.get(3) === List(":Ns/double", ":Ns/doubleMap", ":Ref2/ints2")
 
       Schema.a(":Ns/str").get === List(":Ns/str")
       Schema.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
 
-      Schema.a.not(":Ns/str").get.size === 69
-      Schema.a.not(":Ns/str", ":Ns/int").get.size === 68
+      Schema.a.not(":Ns/str").get.size === 57
+      Schema.a.not(":Ns/str", ":Ns/int").get.size === 56
 
-      Schema.a(count).get === List(70)
+      Schema.a(count).get === List(58)
 
 
       // Since all attributes have an `ident`, a tacit `ident_` makes no difference
@@ -203,7 +203,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
-      Schema.nsFull_.attr.get.size === 70
+      Schema.nsFull_.attr.get.size === 58
 
       // We can though filter by one or more tacit namespace names
       Schema.nsFull_("Ref1").attr.get.sorted === List(
@@ -241,7 +241,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
-      Schema.ns_.attr.get.size === 70
+      Schema.ns_.attr.get.size === 58
 
       // We can though filter by one or more tacit namespace names
       Schema.ns_("Ref1").attr.get.sorted === List(
@@ -265,16 +265,16 @@ class SchemaTest extends CoreSpec {
 
     "attr" >> {
 
-      Schema.attr.get.size === 70
+      Schema.attr.get.size === 58
       Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
 
       Schema.attr("str").get === List("str")
       Schema.attr("str", "int").get === List("str", "int")
 
-      Schema.attr.not("str").get.size === 69
-      Schema.attr.not("str", "int").get.size === 68
+      Schema.attr.not("str").get.size === 57
+      Schema.attr.not("str", "int").get.size === 56
 
-      Schema.attr(count).get === List(70)
+      Schema.attr(count).get === List(58)
 
 
       // Since all attributes have an attribute name, a tacit `a_` makes no difference
@@ -355,19 +355,19 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a cardinality, a tacit `card_` makes no difference
-      Schema.a.get.size === 70
-      Schema.card_.a.get.size === 70
+      Schema.a.get.size === 58
+      Schema.card_.a.get.size === 58
 
       // We can though filter by cardinality
-      Schema.card_("one").a.get.size === 36
+      Schema.card_("one").a.get.size === 24
       Schema.card_("many").a.get.size === 34
 
       // Attributes of cardinality one or many, well that's all
-      Schema.card_("one", "many").a.get.size === 70
+      Schema.card_("one", "many").a.get.size === 58
 
       // Negate tacit namespace name
       Schema.card_.not("one").a.get.size === 34 // many
-      Schema.card_.not("many").a.get.size === 36 // one
+      Schema.card_.not("many").a.get.size === 24 // one
       Schema.card_.not("one", "many").a.get.size === 0
     }
   }
@@ -413,7 +413,7 @@ class SchemaTest extends CoreSpec {
 
       // Use tacit `doc_` to filter documented attributes
       // All attributes
-      Schema.a.get.size === 70
+      Schema.a.get.size === 58
       // Documented attributes
       Schema.doc_.a.get.size === 2
 
@@ -449,24 +449,24 @@ class SchemaTest extends CoreSpec {
 
       // All attributes are indexed
       Schema.index.get === List(true) // no false
-      Schema.a.index.get.size === 70
+      Schema.a.index.get.size === 58
 
-      Schema.a.index(true).get.size === 70
+      Schema.a.index(true).get.size === 58
       Schema.a.index(false).get.size === 0
 
       Schema.a.index.not(true).get.size === 0
-      Schema.a.index.not(false).get.size === 70
+      Schema.a.index.not(false).get.size === 58
 
       // Count attribute indexing statuses (only true)
       Schema.index(count).get === List(1)
 
 
       // Using tacit `index_` is not that useful since all attributes are indexed by default
-      Schema.a.get.size === 70
-      Schema.index_.a.get.size === 70
+      Schema.a.get.size === 58
+      Schema.index_.a.get.size === 58
 
-      Schema.index_(true).a.get.size === 70
-      Schema.index_.not(false).a.get.size === 70
+      Schema.index_(true).a.get.size === 58
+      Schema.index_.not(false).a.get.size === 58
 
 
       // Get optional attribute indexing status with `index$`
@@ -523,8 +523,8 @@ class SchemaTest extends CoreSpec {
       // Get optional attribute indexing status with `index$`
       Schema.attr_("str", "str2", "int2").a.unique$.get === List(
         (":Ref2/int2", Some("value")),
-        (":Ns/str", None),
         (":Ref2/str2", Some("identity")),
+        (":Ns/str", None),
       )
 
       // Filter by applying optional attribute uniqueness status
@@ -545,7 +545,7 @@ class SchemaTest extends CoreSpec {
       )
 
       // Number of non-unique attributes
-      Schema.a.unique$(None).get.size === 70 - 2
+      Schema.a.unique$(None).get.size === 58 - 2
     }
 
 
@@ -560,24 +560,23 @@ class SchemaTest extends CoreSpec {
       // Attributes with fulltext search
       Schema.a.fulltext.get === List(
         (":Ns/strs", true),
-        (":Ns/strMapK", true),
         (":Ns/strMap", true),
         (":Ns/str", true),
       )
 
-      Schema.a.fulltext(true).get.size === 4
+      Schema.a.fulltext(true).get.size === 3
       // Option is either true or non-asserted (nil/None), never false
       Schema.a.fulltext(false).get.size === 0
 
       Schema.a.fulltext.not(true).get.size === 0
-      Schema.a.fulltext.not(false).get.size === 4
+      Schema.a.fulltext.not(false).get.size === 3
 
 
       // Filter attributes with tacit `fulltext_` option
-      Schema.fulltext_.a.get === List(":Ns/strMapK", ":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_.a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
 
-      Schema.fulltext_(true).a.get === List(":Ns/strMapK", ":Ns/strs", ":Ns/strMap", ":Ns/str")
-      Schema.fulltext_.not(false).a.get === List(":Ns/strMapK", ":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_(true).a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_.not(false).a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
 
 
       // Get optional attribute fulltext status with `fulltext$`
@@ -596,7 +595,7 @@ class SchemaTest extends CoreSpec {
       Schema.attr_("bool", "str").a.fulltext$(None).get === List((":Ns/bool", None))
 
       // Number of attributes without fulltext search
-      Schema.a.fulltext$(None).get.size === 70 - 4
+      Schema.a.fulltext$(None).get.size === 58 - 3
     }
 
 
@@ -659,7 +658,7 @@ class SchemaTest extends CoreSpec {
       Schema.attr_("bool", "refSub1").a.isComponent$(None).get === List((":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.isComponent$(None).get.size === 70 - 4
+      Schema.a.isComponent$(None).get.size === 58 - 4
     }
 
 
@@ -690,8 +689,8 @@ class SchemaTest extends CoreSpec {
 
       // Get optional attribute no-history status with `noHistory$`
       Schema.attr_("bool", "ints2").a.noHistory$.get === List(
-        (":Ref2/ints2", Some(true)),
         (":Ns/bool", None),
+        (":Ref2/ints2", Some(true)),
       )
 
       // Filter by applying optional attribute no-history status
@@ -704,7 +703,7 @@ class SchemaTest extends CoreSpec {
       Schema.attr_("bool", "ints2").a.noHistory$(None).get === List((":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.noHistory$(None).get.size === 70 - 1
+      Schema.a.noHistory$(None).get.size === 58 - 1
     }
   }
 

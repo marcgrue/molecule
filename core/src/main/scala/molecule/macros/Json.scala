@@ -69,34 +69,34 @@ private[molecule] trait Json extends TreeOps {
     case "BigDecimal"     => (i: Int) => q"jsonOptManyToString(sb, $field, row, $i)"
   }
 
-  val jsonAggrListVector : (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
-    case "Int"            => (i: Int) => q"jsonAggrListVector(sb, $field, row, $i)"
-    case "Long"           => (i: Int) => q"jsonAggrListVector(sb, $field, row, $i)"
-    case "Float"          => (i: Int) => q"jsonAggrListVector(sb, $field, row, $i)"
-    case "Double"         => (i: Int) => q"jsonAggrListVector(sb, $field, row, $i)"
-    case "String"         => (i: Int) => q"jsonAggrListVectorQuoted(sb, $field, row, $i)"
-    case "BigInt"         => (i: Int) => q"jsonAggrListVectorToString(sb, $field, row, $i)"
-    case "BigDecimal"     => (i: Int) => q"jsonAggrListVectorToString(sb, $field, row, $i)"
-    case "java.util.Date" => (i: Int) => q"jsonAggrListVectorDate(sb, $field, row, $i)"
-    case "Boolean"        => (i: Int) => q"jsonAggrListVectorToString(sb, $field, row, $i)"
-    case "java.net.URI"   => (i: Int) => q"jsonAggrListVectorQuoted(sb, $field, row, $i)"
-    case "java.util.UUID" => (i: Int) => q"jsonAggrListVectorQuoted(sb, $field, row, $i)"
+  val jsonAggrList    : (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
+    case "Int"            => (i: Int) => q"jsonAggrList(sb, $field, row, $i)"
+    case "Long"           => (i: Int) => q"jsonAggrList(sb, $field, row, $i)"
+    case "Float"          => (i: Int) => q"jsonAggrList(sb, $field, row, $i)"
+    case "Double"         => (i: Int) => q"jsonAggrList(sb, $field, row, $i)"
+    case "String"         => (i: Int) => q"jsonAggrListQuoted(sb, $field, row, $i)"
+    case "BigInt"         => (i: Int) => q"jsonAggrListToString(sb, $field, row, $i)"
+    case "BigDecimal"     => (i: Int) => q"jsonAggrListToString(sb, $field, row, $i)"
+    case "java.util.Date" => (i: Int) => q"jsonAggrListDate(sb, $field, row, $i)"
+    case "Boolean"        => (i: Int) => q"jsonAggrListToString(sb, $field, row, $i)"
+    case "java.net.URI"   => (i: Int) => q"jsonAggrListQuoted(sb, $field, row, $i)"
+    case "java.util.UUID" => (i: Int) => q"jsonAggrListQuoted(sb, $field, row, $i)"
   }
-  val jsonAggrListLazySeq: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
-    case "Int"            => (i: Int) => q"jsonAggrListLazySeq(sb, $field, row, $i)"
-    case "Long"           => (i: Int) => q"jsonAggrListLazySeq(sb, $field, row, $i)"
-    case "Float"          => (i: Int) => q"jsonAggrListLazySeq(sb, $field, row, $i)"
-    case "Double"         => (i: Int) => q"jsonAggrListLazySeq(sb, $field, row, $i)"
-    case "String"         => (i: Int) => q"jsonAggrListLazySeqQuoted(sb, $field, row, $i)"
-    case "BigInt"         => (i: Int) => q"jsonAggrListLazySeqToString(sb, $field, row, $i)"
-    case "BigDecimal"     => (i: Int) => q"jsonAggrListLazySeqToString(sb, $field, row, $i)"
-    case "java.util.Date" => (i: Int) => q"jsonAggrListLazySeqDate(sb, $field, row, $i)"
-    case "Boolean"        => (i: Int) => q"jsonAggrListLazySeqToString(sb, $field, row, $i)"
-    case "java.net.URI"   => (i: Int) => q"jsonAggrListLazySeqQuoted(sb, $field, row, $i)"
-    case "java.util.UUID" => (i: Int) => q"jsonAggrListLazySeqQuoted(sb, $field, row, $i)"
+  val jsonAggrListRand: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
+    case "Int"            => (i: Int) => q"jsonAggrListRand(sb, $field, row, $i)"
+    case "Long"           => (i: Int) => q"jsonAggrListRand(sb, $field, row, $i)"
+    case "Float"          => (i: Int) => q"jsonAggrListRand(sb, $field, row, $i)"
+    case "Double"         => (i: Int) => q"jsonAggrListRand(sb, $field, row, $i)"
+    case "String"         => (i: Int) => q"jsonAggrListRandQuoted(sb, $field, row, $i)"
+    case "BigInt"         => (i: Int) => q"jsonAggrListRandToString(sb, $field, row, $i)"
+    case "BigDecimal"     => (i: Int) => q"jsonAggrListRandToString(sb, $field, row, $i)"
+    case "java.util.Date" => (i: Int) => q"jsonAggrListRandDate(sb, $field, row, $i)"
+    case "Boolean"        => (i: Int) => q"jsonAggrListRandToString(sb, $field, row, $i)"
+    case "java.net.URI"   => (i: Int) => q"jsonAggrListRandQuoted(sb, $field, row, $i)"
+    case "java.util.UUID" => (i: Int) => q"jsonAggrListRandQuoted(sb, $field, row, $i)"
   }
 
-  val jsonAggr: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
+  val jsonAggrSingle: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
     case "Int"            => (i: Int) => q"jsonOne(sb, $field, row, $i)"
     case "Long"           => (i: Int) => q"jsonOne(sb, $field, row, $i)"
     case "Float"          => (i: Int) => q"jsonOne(sb, $field, row, $i)"
@@ -110,18 +110,18 @@ private[molecule] trait Json extends TreeOps {
     case "java.util.UUID" => (i: Int) => q"jsonOneQuoted(sb, $field, row, $i)"
   }
 
-  val jsonAggrVector : (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
-    case "Int"            => (i: Int) => q"jsonAggrVector(sb, $field, row, $i)"
-    case "Long"           => (i: Int) => q"jsonAggrVector(sb, $field, row, $i)"
-    case "Float"          => (i: Int) => q"jsonAggrVector(sb, $field, row, $i)"
-    case "Double"         => (i: Int) => q"jsonAggrVector(sb, $field, row, $i)"
-    case "String"         => (i: Int) => q"jsonAggrVectorQuoted(sb, $field, row, $i)"
-    case "BigInt"         => (i: Int) => q"jsonAggrVectorToString(sb, $field, row, $i)"
-    case "BigDecimal"     => (i: Int) => q"jsonAggrVectorToString(sb, $field, row, $i)"
-    case "java.util.Date" => (i: Int) => q"jsonAggrVectorDate(sb, $field, row, $i)"
-    case "Boolean"        => (i: Int) => q"jsonAggrVectorToString(sb, $field, row, $i)"
-    case "java.net.URI"   => (i: Int) => q"jsonAggrVectorQuoted(sb, $field, row, $i)"
-    case "java.util.UUID" => (i: Int) => q"jsonAggrVectorQuoted(sb, $field, row, $i)"
+  val jsonAggrSingleSample: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
+    case "Int"            => (i: Int) => q"jsonAggrSingleSample(sb, $field, row, $i)"
+    case "Long"           => (i: Int) => q"jsonAggrSingleSample(sb, $field, row, $i)"
+    case "Float"          => (i: Int) => q"jsonAggrSingleSample(sb, $field, row, $i)"
+    case "Double"         => (i: Int) => q"jsonAggrSingleSample(sb, $field, row, $i)"
+    case "String"         => (i: Int) => q"jsonAggrSingleSampleQuoted(sb, $field, row, $i)"
+    case "BigInt"         => (i: Int) => q"jsonAggrSingleSampleToString(sb, $field, row, $i)"
+    case "BigDecimal"     => (i: Int) => q"jsonAggrSingleSampleToString(sb, $field, row, $i)"
+    case "java.util.Date" => (i: Int) => q"jsonAggrSingleSampleDate(sb, $field, row, $i)"
+    case "Boolean"        => (i: Int) => q"jsonAggrSingleSampleToString(sb, $field, row, $i)"
+    case "java.net.URI"   => (i: Int) => q"jsonAggrSingleSampleQuoted(sb, $field, row, $i)"
+    case "java.util.UUID" => (i: Int) => q"jsonAggrSingleSampleQuoted(sb, $field, row, $i)"
   }
   val jsonAggrLazySeq: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {
     case "Int"            => (i: Int) => q"jsonAggrLazySeq(sb, $field, row, $i)"

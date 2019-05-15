@@ -919,49 +919,49 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         attr.last match {
           case '_' | '$' => abort("Only mandatory attributes are allowed to aggregate")
           case _         => aggrType match {
-            case "Int" =>
+            case "int" =>
               addSpecific(castAggrInt, s"Int")
               addJson(jsonOneAttr, "Int", t.ns + "." + t.nameClean)
 
-            case "Double" =>
+            case "double" =>
               addSpecific(castAggrDouble, s"Double")
               addJson(jsonOneAttr, "Double", t.ns + "." + t.nameClean)
 
             case "list" if t.card == 2 =>
-              addSpecific(castAggrListVectorMany(tpeStr), s"List[$tpeStr]")
-              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+              addSpecific(castAggrListMany(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "list" =>
-              addSpecific(castAggrListVector(tpeStr), s"List[$tpeStr]")
-              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+              addSpecific(castAggrList(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
-            case "listSet" if t.card == 2 =>
-              addSpecific(castAggrListHashSetMany(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
-              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+            case "listDistinct" if t.card == 2 =>
+              addSpecific(castAggrListDistinctMany(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
+              addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
-            case "listSet" =>
-              addSpecific(castAggrListHashSet(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
-              addJson(jsonAggrListVector, tpeStr, t.ns + "." + t.nameClean)
+            case "listDistinct" =>
+              addSpecific(castAggrListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
+              addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "listRand" if t.card == 2 =>
-              addSpecific(castAggrListLazySeqMany(tpeStr), s"List[$tpeStr]")
-              addJson(jsonAggrListLazySeq, tpeStr, t.ns + "." + t.nameClean)
+              addSpecific(castAggrListRandMany(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrListRand, tpeStr, t.ns + "." + t.nameClean)
 
             case "listRand" =>
-              addSpecific(castAggrListLazySeq(tpeStr), s"List[$tpeStr]")
-              addJson(jsonAggrListLazySeq, tpeStr, t.ns + "." + t.nameClean)
+              addSpecific(castAggrListRand(tpeStr), s"List[$tpeStr]")
+              addJson(jsonAggrListRand, tpeStr, t.ns + "." + t.nameClean)
 
-            case "vectorHead" =>
-              addSpecific(castAggrVector(tpeStr), tpeStr)
-              addJson(jsonAggrVector, tpeStr, t.ns + "." + t.nameClean)
+            case "singleSample" =>
+              addSpecific(castAggrSingleSample(tpeStr), tpeStr)
+              addJson(jsonAggrSingleSample, tpeStr, t.ns + "." + t.nameClean)
 
-            case "aggr" if t.card == 2 =>
-              addSpecific(castAggrMany(tpeStr), tpeStr)
-              addJson(jsonAggr, tpeStr, t.ns + "." + t.nameClean)
+            case "single" if t.card == 2 =>
+              addSpecific(castAggrSingleMany(tpeStr), tpeStr)
+              addJson(jsonAggrSingle, tpeStr, t.ns + "." + t.nameClean)
 
-            case "aggr" =>
-              addSpecific(castAggr(tpeStr), tpeStr)
-              addJson(jsonAggr, tpeStr, t.ns + "." + t.nameClean)
+            case "single" =>
+              addSpecific(castAggrSingle(tpeStr), tpeStr)
+              addJson(jsonAggrSingle, tpeStr, t.ns + "." + t.nameClean)
           }
         }
         standard = true
@@ -1055,18 +1055,18 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case "None"                        => Fn("not")
         case "unify" if t.name.last == '_' => Fn("unify")
         case "unify"                       => abort(s"Can only unify on tacit attributes. Please add underscore to attribute: `${t.name}_(unify)`")
-        case "min"                         => standard = false; aggrType = "aggr"; aggr("min")
-        case "max"                         => standard = false; aggrType = "aggr"; aggr("max")
-        case "rand"                        => standard = false; aggrType = "aggr"; aggr("rand")
-        case "sample"                      => standard = false; aggrType = "vectorHead"; aggr("sample", Some(1))
-        case "sum"                         => standard = false; aggrType = "aggr"; aggr("sum")
-        case "median"                      => standard = false; aggrType = "aggr"; aggr("median")
-        case "distinct"                    => standard = false; aggrType = "listSet"; Distinct
-        case "count"                       => standard = false; aggrType = "Int"; aggr("count")
-        case "countDistinct"               => standard = false; aggrType = "Int"; aggr("count-distinct")
-        case "avg"                         => standard = false; aggrType = "Double"; aggr("avg")
-        case "variance"                    => standard = false; aggrType = "Double"; aggr("variance")
-        case "stddev"                      => standard = false; aggrType = "Double"; aggr("stddev")
+        case "min"                         => standard = false; aggrType = "single"; aggr("min")
+        case "max"                         => standard = false; aggrType = "single"; aggr("max")
+        case "rand"                        => standard = false; aggrType = "single"; aggr("rand")
+        case "sample"                      => standard = false; aggrType = "singleSample"; aggr("sample", Some(1))
+        case "sum"                         => standard = false; aggrType = "single"; aggr("sum")
+        case "median"                      => standard = false; aggrType = "single"; aggr("median")
+        case "distinct"                    => standard = false; aggrType = "listDistinct"; Distinct
+        case "count"                       => standard = false; aggrType = "int"; aggr("count")
+        case "countDistinct"               => standard = false; aggrType = "int"; aggr("count-distinct")
+        case "avg"                         => standard = false; aggrType = "double"; aggr("avg")
+        case "variance"                    => standard = false; aggrType = "double"; aggr("variance")
+        case "stddev"                      => standard = false; aggrType = "double"; aggr("stddev")
       }
 
       def single(value: Tree) = value match {
