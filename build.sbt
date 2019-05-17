@@ -1,7 +1,9 @@
 import sbt.compilerPlugin
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
-  version := "0.18.4",
+  organizationName := "ScalaMolecule",
+  organizationHomepage := Some(url("http://www.scalamolecule.org")),
+  version := "0.18.5",
   scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",
@@ -95,22 +97,19 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
   publishArtifact in Test := false,
-  //  publishArtifact in (Compile, packageDoc) in ThisBuild := false, // suppress docs creation?
   scalacOptions in(Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value + "/src/main/scaladoc/rootdoc.txt"),
   pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
-  credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
-  credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "sonatype.sbt"),
-  pomExtra :=
-    <developers>
-      <developer>
-        <id>marcgrue</id>
-        <name>Marc Grue</name>
-        <url>http://marcgrue.com</url>
-      </developer>
-    </developers>
+  developers := List(
+    Developer(
+      id = "marcgrue",
+      name = "Marc Grue",
+      email = "marcgrue@gmail.com",
+      url = url("http://marcgrue.com")
+    )
+  )
 )
 
 lazy val noPublishSettings = Seq(

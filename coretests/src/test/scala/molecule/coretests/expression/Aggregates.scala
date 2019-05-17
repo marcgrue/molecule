@@ -480,12 +480,12 @@ class Aggregates extends CoreSpec {
   "Map attributes can't use aggregates" in new AggregateSetup {
     expectCompileError(
       "m(Ns.intMap(min))",
-      "molecule.transform.exception.Dsl2ModelException: Map attributes not allowed to use `unify` or aggregate expressions."
+      "molecule.transform.exception.Dsl2ModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
     )
 
     expectCompileError(
       """m(Ns.intMapK("a")(min))""",
-      "molecule.transform.exception.Dsl2ModelException: Map attributes not allowed to use `unify` or aggregate expressions."
+      "molecule.transform.exception.Dsl2ModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
     )
   }
 }

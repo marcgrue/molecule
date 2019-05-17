@@ -93,7 +93,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // Aggregates ===========================================================================================
 
-  protected def castAggrListInt(row: jList[_], i: Int): List[Int] = {
+  protected def castAggrOneListInt(row: jList[_], i: Int): List[Int] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var list = List.empty[Int]
     while (it.hasNext)
@@ -101,7 +101,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListFloat(row: jList[_], i: Int): List[Float] = {
+  protected def castAggrOneListFloat(row: jList[_], i: Int): List[Float] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var list = List.empty[Float]
     while (it.hasNext)
@@ -109,7 +109,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListBigInt(row: jList[_], i: Int): List[BigInt] = {
+  protected def castAggrOneListBigInt(row: jList[_], i: Int): List[BigInt] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var list = List.empty[BigInt]
     while (it.hasNext)
@@ -117,7 +117,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
+  protected def castAggrOneListBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var list = List.empty[BigDecimal]
     while (it.hasNext)
@@ -125,7 +125,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrList[T](row: jList[_], i: Int): List[T] = {
+  protected def castAggrOneList[T](row: jList[_], i: Int): List[T] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var list = List.empty[T]
     while (it.hasNext)
@@ -135,7 +135,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // card many
 
-  protected def castAggrListManyInt(row: jList[_], i: Int): List[Set[Int]] = {
+  protected def castAggrManyListInt(row: jList[_], i: Int): List[Set[Int]] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[Int]
     while (it.hasNext)
@@ -143,7 +143,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListManyFloat(row: jList[_], i: Int): List[Set[Float]] = {
+  protected def castAggrManyListFloat(row: jList[_], i: Int): List[Set[Float]] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[Float]
     while (it.hasNext)
@@ -151,7 +151,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListManyBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
+  protected def castAggrManyListBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[BigInt]
     while (it.hasNext)
@@ -159,7 +159,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListManyBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
+  protected def castAggrManyListBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[BigDecimal]
     while (it.hasNext)
@@ -167,7 +167,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListMany[T](row: jList[_], i: Int): List[Set[T]] = {
+  protected def castAggrManyList[T](row: jList[_], i: Int): List[Set[T]] = {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[T]
     while (it.hasNext)
@@ -177,7 +177,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // ------------------------------------
 
-  protected def castAggrListDistinctInt(row: jList[_], i: Int): List[Int] = {
+  protected def castAggrOneListDistinctInt(row: jList[_], i: Int): List[Int] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var list = List.empty[Int]
     while (it.hasNext)
@@ -185,7 +185,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListDistinctFloat(row: jList[_], i: Int): List[Float] = {
+  protected def castAggrOneListDistinctFloat(row: jList[_], i: Int): List[Float] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var list = List.empty[Float]
     while (it.hasNext)
@@ -193,7 +193,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListDistinctBigInt(row: jList[_], i: Int): List[BigInt] = {
+  protected def castAggrOneListDistinctBigInt(row: jList[_], i: Int): List[BigInt] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var list = List.empty[BigInt]
     while (it.hasNext)
@@ -201,7 +201,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListDistinctBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
+  protected def castAggrOneListDistinctBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var list = List.empty[BigDecimal]
     while (it.hasNext)
@@ -209,7 +209,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListDistinct[T](row: jList[_], i: Int): List[T] = {
+  protected def castAggrOneListDistinct[T](row: jList[_], i: Int): List[T] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var list = List.empty[T]
     while (it.hasNext)
@@ -219,7 +219,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // card many
 
-  protected def castAggrListDistinctManyInt(row: jList[_], i: Int): List[Set[Int]] = {
+  protected def castAggrManyListDistinctInt(row: jList[_], i: Int): List[Set[Int]] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[Int]
     while (it.hasNext)
@@ -227,7 +227,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListDistinctManyFloat(row: jList[_], i: Int): List[Set[Float]] = {
+  protected def castAggrManyListDistinctFloat(row: jList[_], i: Int): List[Set[Float]] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[Float]
     while (it.hasNext)
@@ -235,7 +235,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListDistinctManyBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
+  protected def castAggrManyListDistinctBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[BigInt]
     while (it.hasNext)
@@ -243,7 +243,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListDistinctManyBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
+  protected def castAggrManyListDistinctBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[BigDecimal]
     while (it.hasNext)
@@ -251,7 +251,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListDistinctMany[T](row: jList[_], i: Int): List[Set[T]] = {
+  protected def castAggrManyListDistinct[T](row: jList[_], i: Int): List[Set[T]] = {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[T]
     while (it.hasNext)
@@ -261,7 +261,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // ------------------------------------
 
-  protected def castAggrListRandInt(row: jList[_], i: Int): List[Int] = {
+  protected def castAggrOneListRandInt(row: jList[_], i: Int): List[Int] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var list = List.empty[Int]
     while (it.hasNext)
@@ -269,7 +269,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListRandFloat(row: jList[_], i: Int): List[Float] = {
+  protected def castAggrOneListRandFloat(row: jList[_], i: Int): List[Float] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var list = List.empty[Float]
     while (it.hasNext)
@@ -277,7 +277,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListRandBigInt(row: jList[_], i: Int): List[BigInt] = {
+  protected def castAggrOneListRandBigInt(row: jList[_], i: Int): List[BigInt] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var list = List.empty[BigInt]
     while (it.hasNext)
@@ -285,7 +285,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListRandBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
+  protected def castAggrOneListRandBigDecimal(row: jList[_], i: Int): List[BigDecimal] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var list = List.empty[BigDecimal]
     while (it.hasNext)
@@ -293,7 +293,7 @@ trait CastHelpers[Tpl] extends Helpers {
     list
   }
 
-  protected def castAggrListRand[T](row: jList[_], i: Int): List[T] = {
+  protected def castAggrOneListRand[T](row: jList[_], i: Int): List[T] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var list = List.empty[T]
     while (it.hasNext)
@@ -303,7 +303,7 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // card many
 
-  protected def castAggrListRandManyInt(row: jList[_], i: Int): List[Set[Int]] = {
+  protected def castAggrManyListRandInt(row: jList[_], i: Int): List[Set[Int]] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[Int]
     while (it.hasNext)
@@ -311,7 +311,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListRandManyFloat(row: jList[_], i: Int): List[Set[Float]] = {
+  protected def castAggrManyListRandFloat(row: jList[_], i: Int): List[Set[Float]] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[Float]
     while (it.hasNext)
@@ -319,7 +319,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListRandManyBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
+  protected def castAggrManyListRandBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[BigInt]
     while (it.hasNext)
@@ -327,7 +327,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListRandManyBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
+  protected def castAggrManyListRandBigDecimal(row: jList[_], i: Int): List[Set[BigDecimal]] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[BigDecimal]
     while (it.hasNext)
@@ -335,7 +335,7 @@ trait CastHelpers[Tpl] extends Helpers {
     List(set)
   }
 
-  protected def castAggrListRandMany[T](row: jList[_], i: Int): List[Set[T]] = {
+  protected def castAggrManyListRand[T](row: jList[_], i: Int): List[Set[T]] = {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[T]
     while (it.hasNext)
@@ -362,19 +362,19 @@ trait CastHelpers[Tpl] extends Helpers {
 
   // ------------------------------------
 
-  protected def castAggrSingleManyInt(row: jList[_], i: Int): Set[Int] =
+  protected def castAggrManySingleInt(row: jList[_], i: Int): Set[Int] =
     Set(row.get(i).asInstanceOf[jLong].toInt)
 
-  protected def castAggrSingleManyFloat(row: jList[_], i: Int): Set[Float] =
+  protected def castAggrManySingleFloat(row: jList[_], i: Int): Set[Float] =
     Set(row.get(i).asInstanceOf[jDouble].toFloat)
 
-  protected def castAggrSingleManyBigInt(row: jList[_], i: Int): Set[BigInt] =
+  protected def castAggrManySingleBigInt(row: jList[_], i: Int): Set[BigInt] =
     Set(BigInt(row.get(i).toString))
 
-  protected def castAggrSingleManyBigDecimal(row: jList[_], i: Int): Set[BigDecimal] =
+  protected def castAggrManySingleBigDecimal(row: jList[_], i: Int): Set[BigDecimal] =
     Set(BigDecimal(row.get(i).asInstanceOf[java.math.BigDecimal].toString))
 
-  protected def castAggrSingleMany[T](row: jList[_], i: Int): Set[T] =
+  protected def castAggrManySingle[T](row: jList[_], i: Int): Set[T] =
     Set(row.get(i).asInstanceOf[T])
 
 

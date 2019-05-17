@@ -928,27 +928,27 @@ private[molecule] trait Dsl2Model extends Cast with Json {
               addJson(jsonOneAttr, "Double", t.ns + "." + t.nameClean)
 
             case "list" if t.card == 2 =>
-              addSpecific(castAggrListMany(tpeStr), s"List[$tpeStr]")
+              addSpecific(castAggrManyList(tpeStr), s"List[$tpeStr]")
               addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "list" =>
-              addSpecific(castAggrList(tpeStr), s"List[$tpeStr]")
+              addSpecific(castAggrOneList(tpeStr), s"List[$tpeStr]")
               addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "listDistinct" if t.card == 2 =>
-              addSpecific(castAggrListDistinctMany(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
+              addSpecific(castAggrManyListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
               addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "listDistinct" =>
-              addSpecific(castAggrListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
+              addSpecific(castAggrOneListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
               addJson(jsonAggrList, tpeStr, t.ns + "." + t.nameClean)
 
             case "listRand" if t.card == 2 =>
-              addSpecific(castAggrListRandMany(tpeStr), s"List[$tpeStr]")
+              addSpecific(castAggrManyListRand(tpeStr), s"List[$tpeStr]")
               addJson(jsonAggrListRand, tpeStr, t.ns + "." + t.nameClean)
 
             case "listRand" =>
-              addSpecific(castAggrListRand(tpeStr), s"List[$tpeStr]")
+              addSpecific(castAggrOneListRand(tpeStr), s"List[$tpeStr]")
               addJson(jsonAggrListRand, tpeStr, t.ns + "." + t.nameClean)
 
             case "singleSample" =>
@@ -956,11 +956,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
               addJson(jsonAggrSingleSample, tpeStr, t.ns + "." + t.nameClean)
 
             case "single" if t.card == 2 =>
-              addSpecific(castAggrSingleMany(tpeStr), tpeStr)
+              addSpecific(castAggrManySingle(tpeStr), tpeStr)
               addJson(jsonAggrSingle, tpeStr, t.ns + "." + t.nameClean)
 
             case "single" =>
-              addSpecific(castAggrSingle(tpeStr), tpeStr)
+              addSpecific(castAggrOneSingle(tpeStr), tpeStr)
               addJson(jsonAggrSingle, tpeStr, t.ns + "." + t.nameClean)
           }
         }
@@ -1328,7 +1328,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
             case Atom(ns, attr, _, 3 | 4, Fn(fn, _), _, _, _) =>
               if (!Seq("not", "unify").contains(fn))
-                abort("Map attributes not allowed to use `unify` or aggregate expressions.")
+                abort("Only expression keywords `not` and `unify` can be applied to Map attributes.")
 
             case Atom(ns, attr, _, _, _, _, _, _) =>
               if (beforeFirstAttr) {

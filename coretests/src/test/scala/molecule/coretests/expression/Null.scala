@@ -31,7 +31,7 @@ class Null extends CoreSpec {
     Ns.int(emptyList).get === Nil
 
 
-    // Can't apply empty Iterable constructor or any Scala expression
+    // Can't apply empty Iterable constructor or other expressions
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
       "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +

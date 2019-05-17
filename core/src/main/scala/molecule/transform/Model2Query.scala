@@ -637,6 +637,7 @@ object Model2Query extends Helpers {
       case MapEq(pair :: Nil)       => q.findD(v).where(e, a, v).matches(v, "(" + pair._1 + ")@(" + pair._2 + ")$")
       case MapEq(pairs)             => q.findD(v).where(e, a, v).mappings(v, a, pairs)
       case And(args)                => q.findD(v).whereAnd(e, a, v, args)
+      case Fn("not", _)             => q.findD(v).where(e, a, v).not(e, a)
       case other                    => abort(s"Unresolved mapped Atom:\nAtom   : $a\nElement: $other")
     }
   }

@@ -76,7 +76,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.1.6
+sbt.version=1.2.8
 ```
 
 `project/buildinfo.sbt`:
@@ -97,13 +97,13 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.18.4",
+      "org.scalamolecule" %% "molecule" % "0.18.5",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.18.4 for Scala 2.12.8 is available at
+Molecule 0.18.5 for Scala 2.12.8 is available at
 [Sonatype](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/molecule_2.12/).
 
 
