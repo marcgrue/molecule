@@ -9,6 +9,8 @@ import molecule.input.exception.InputMoleculeException
 
 class Input1UUID extends CoreSpec {
 
+  sequential
+
   "Card one" >> {
 
     class OneSetup extends CoreSetup {

@@ -21,13 +21,8 @@ object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
   var nestedEntityVars   : List[Var]   = List.empty[Var]
-  var attrId             : String      = ""
-  var attrIdent          : String      = ""
-  var attrNs             : String      = ""
-  var attrName           : String      = ""
-  var attrValue          : String      = ""
   var _model             : Model       = null
-  val fns                              = "molecule.util.fns"
+  val fns                : String      = "molecule.util.fns"
 
   def abort(msg: String): Nothing = throw new Model2QueryException(msg)
 
@@ -36,22 +31,28 @@ object Model2Query extends Helpers {
 
     // reset on each apply
     nestedEntityClauses = Nil
-    attrId = ""
-    attrIdent = ""
-    attrNs = ""
-    attrName = ""
-    attrValue = ""
     _model = model
 
+    // Resolve elements
     val query = model.elements.foldLeft((Query(), "a", "b", "", "", "")) {
       case ((query_, e, v, prevNs, prevAttr, prevRefNs), element) => make(model, query_, element, e, v, prevNs, prevAttr, prevRefNs)
     }._1
-    if (nestedEntityClauses.isEmpty) {
-      (postProcess(model, query), None)
-    } else {
-      val query2 = postProcess(model, query)
-      (query2, Some(query2.copy(f = Find(nestedEntityVars ++ query2.f.outputs), wh = Where(query2.wh.clauses ++ nestedEntityClauses))))
+
+    // Resolve AND clauses
+    val query2 = postProcess(model, query)
+
+    // Resolve redundant `with:` variables
+    val withVars = query2.wi.variables
+    val query3 = if (withVars.isEmpty) query2 else {
+      val outVars = query2.f.outputs.collect { case Var(v) => v }
+      val nonRedundantWithVars = withVars.diff(outVars)
+      query2.copy(wi = With(nonRedundantWithVars))
     }
+
+    val optionQuery = if (nestedEntityClauses.isEmpty) None else
+      Some(query3.copy(f = Find(nestedEntityVars ++ query2.f.outputs), wh = Where(query2.wh.clauses ++ nestedEntityClauses)))
+
+    (query3, optionQuery)
   }
 
 

@@ -295,7 +295,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         // x(136, t.tpeS)
         addCast(castMandatoryAttr, t)
         addJsonCard(jsonOneAttr, jsonManyAttr, t)
-        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
+        traverseElement(prev, p, Atom(t.ns, t.name, "ref", t.card, VarValue, gvs = bi(tree, t)))
+//        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
 
       } else {
         abort("Unexpected mandatory attribute/reference: " + t)
@@ -330,7 +331,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         // x(144, t.tpeS)
         addCast(castOptionalRefAttr, t)
         addJsonCard(jsonOptOneAttr, jsonOptManyAttr, t)
-        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
+        traverseElement(prev, p, Atom(t.ns, t.name, "ref", t.card, VarValue, gvs = bi(tree, t)))
+//        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
 
       } else {
         abort("Unexpected optional attribute: " + t)
@@ -351,7 +353,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         traverseElement(prev, p, Atom(t.ns, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (t.isRefAttr) {
-        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
+        traverseElement(prev, p, Atom(t.ns, t.name, "ref", t.card, VarValue, gvs = bi(tree, t)))
+//        traverseElement(prev, p, Atom(t.ns, t.name, "Long", t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (t.isMapAttr) {
         traverseElement(prev, p, Atom(t.ns, t.name, t.tpeS, 3, VarValue, None, bi(tree, t)))

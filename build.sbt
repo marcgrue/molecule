@@ -3,7 +3,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org")),
-  version := "0.18.5",
+  version := "0.18.6",
   scalaVersion := "2.12.8",
   scalacOptions := Seq(
     "-feature",

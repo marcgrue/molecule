@@ -477,7 +477,33 @@ class Aggregates extends CoreSpec {
   }
 
 
-  "Map attributes can't use aggregates" in new AggregateSetup {
+  "count, countDistinct with entity id" in new CoreSetup {
+
+    // card-one
+
+    val e1 = Ns.int(1).save.eid
+    val e2 = Ns.int(2).save.eid
+    val e3 = Ns.int(3).save.eid
+
+    Ns.e.int(count).get === List(
+      (e1, 1),
+      (e2, 1),
+      (e3, 1)
+    )
+
+
+    // card-many
+
+    val e4 = Ns.ints(Seq(1,2)).save.eid
+    val e5 = Ns.ints(3).save.eid
+
+    Ns.e.ints(count).get === List(
+      (e4, 2),
+      (e5, 1)
+    )
+  }
+
+    "Map attributes can't use aggregates" in new AggregateSetup {
     expectCompileError(
       "m(Ns.intMap(min))",
       "molecule.transform.exception.Dsl2ModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
