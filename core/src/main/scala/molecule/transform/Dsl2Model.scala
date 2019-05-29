@@ -284,7 +284,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else if (attrStr.head == '_') {
         // x(134, t.tpeS)
-        traverseElement(prev, p, ReBond(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", ""), ""))
+        traverseElement(prev, p, ReBond(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")))
 
       } else if (t.isRef) {
         // x(135, t.tpeS, t.card, t.refCard)

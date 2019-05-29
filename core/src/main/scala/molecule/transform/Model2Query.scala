@@ -15,7 +15,7 @@ import molecule.util.{Debug, Helpers}
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 object Model2Query extends Helpers {
   val x = Debug("Model2Query", 1, 19)
 
@@ -49,6 +49,7 @@ object Model2Query extends Helpers {
       query2.copy(wi = With(nonRedundantWithVars))
     }
 
+    // Resolve nested
     val optionQuery = if (nestedEntityClauses.isEmpty) None else
       Some(query3.copy(f = Find(nestedEntityVars ++ query2.f.outputs), wh = Where(query2.wh.clauses ++ nestedEntityClauses)))
 
@@ -206,11 +207,11 @@ object Model2Query extends Helpers {
   def resolve(q: Query, e: String, v: String, element: Element): Query = {
     val (v1: String, v2: String, v3: String) = (v + 1, v + 2, v + 3)
     element match {
-      case atom: Atom                            => resolveAtom(q, e, atom, v, v1, v2, v3)
-      case Bond(ns, refAttr, refNs, _, _)        => q.ref(e, ns, refAttr, v, refNs)
-      case generic: Generic                      => resolveGeneric(q, e, generic, v, v1, v2, v3)
-      case ReBond(backRef, refAttr, refNs, _, _) => q.ref(e, backRef, refAttr, v, refNs)
-      case unresolved                            => abort("Unresolved model: " + unresolved)
+      case atom: Atom                     => resolveAtom(q, e, atom, v, v1, v2, v3)
+      case Bond(ns, refAttr, refNs, _, _) => q.ref(e, ns, refAttr, v, refNs)
+      case generic: Generic               => resolveGeneric(q, e, generic, v, v1, v2, v3)
+      case ReBond(backRef)                => q.ref(e, backRef, "", v, "")
+      case unresolved                     => abort("Unresolved model: " + unresolved)
     }
   }
 

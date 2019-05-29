@@ -116,7 +116,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case ('arg, Bond(ns, refAttr, _, c, gs))               => ('v, stmts :+ Add('arg, s":$ns/$refAttr", 'tempId, bi(gs, c)))
 
       // BackRef
-      case (_, ReBond(ns, _, _, _, _)) => ('e, stmts :+ Add('ns, s":$ns", "", NoValue))
+      case (_, ReBond(backRef)) => ('e, stmts :+ Add('ns, s":$backRef", "", NoValue))
 
       case (e, elem) => err("stmtsModel", s"Unexpected transformation:\nMODEL: $model \nPAIR: ($e, $elem)\nSTMTS: $stmts")
     }

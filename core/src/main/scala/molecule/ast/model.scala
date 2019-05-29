@@ -78,12 +78,8 @@ object model extends Helpers {
     override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gvs)})"""
   }
 
-  case class ReBond(backRef: String,
-                    refAttr: String,
-                    refNs: String = "",
-                    distinct: Boolean = false,
-                    prevVar: String = "") extends Element {
-    override def toString: String = s"""ReBond("$backRef", "$refAttr", "$refNs", $distinct, "$prevVar")"""
+  case class ReBond(backRef: String) extends Element {
+    override def toString: String = s"""ReBond("$backRef")"""
   }
 
   case class Nested(bond: Bond,
