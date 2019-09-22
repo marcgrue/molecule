@@ -10,11 +10,13 @@ import scala.reflect.macros.blackbox
 private[molecule] trait TreeOps extends Liftables {
   val c: blackbox.Context
   import c.universe._
-  //  val q = DebugMacro("TreeOps", 1, 800)
+
+  //  val zz = DebugMacro("TreeOps", 1)
+
 
   override def abort(msg: String) = throw new TreeOpsException(msg)
 
-  def firstLow(str: Any): String = str.toString.head.toLower + str.toString.tail
+  def firstLow(str: Any): String = str.toString.head.toLower.toString + str.toString.tail
 
   def clean(attr: String): String = attr.last match {
     case '_' => attr.init
@@ -26,7 +28,7 @@ private[molecule] trait TreeOps extends Liftables {
   implicit class richTree(val t: Tree) {
     lazy val tpe_         : Type           = if (t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
     lazy val at           : att            = att(t)
-    lazy val ns           : String         = at.ns.toString
+    lazy val nsFull       : String         = if (t.isFirstNS) t.symbol.name.toString else at.nsFull.toString
     lazy val name         : String         = at.toString
     lazy val nameClean    : String         = clean(at.toString)
     lazy val tpeS         : String         = at.tpeS
@@ -34,10 +36,10 @@ private[molecule] trait TreeOps extends Liftables {
     lazy val enumPrefix   : String         = at.enumPrefix
     lazy val enumPrefixOpt: Option[String] = if (isAnyEnum) Some(at.enumPrefix) else None
 
-    def ns2: String = tpe_.baseClasses.foldLeft("") {
+    def nsFull2: String = tpe_.baseClasses.foldLeft("") {
       case ("", s: ClassSymbol) if s.toType =:= typeOf[NS] => "NS"
-      case ("NS", ns)                                      => ns.name.toString
-      case (ns, cls)                                       => ns
+      case ("NS", nsFull)                                  => nsFull.name.toString
+      case (nsFull, _)                                     => nsFull
     }
 
     def isNS: Boolean = tpe_ <:< typeOf[NS]
@@ -85,9 +87,9 @@ private[molecule] trait TreeOps extends Liftables {
     def isEnum$: Boolean = tpe_ <:< weakTypeOf[Enum$[_, _]]
     def isAnyEnum: Boolean = isEnum || isEnum$
   }
-  def nsString(ns: String): String = ns
-  def nsString(ns: Tree): String = nsString(ns.symbol.name.toString)
-  def nsString(ns: Name): String = nsString(ns.decodedName.toString)
+  def nsString(nsFull: String): String = nsFull
+  def nsString(nsTree: Tree): String = nsString(nsTree.symbol.name.toString)
+  def nsString(nsName: Name): String = nsString(nsName.decodedName.toString)
 
 
   // Todo more types...
@@ -212,18 +214,18 @@ private[molecule] trait TreeOps extends Liftables {
 
   def namespaceSymbol(tree: Tree): Symbol = {
     def traverse(t: Tree): Symbol = t match {
-      case q"$a.and($b)"                               => traverse(a)
-      case q"$a.and[..$ts]($b)"                        => traverse(a)
-      case q"$a.or($b)"                                => traverse(a)
-      case q"$a.eqs($b)"                               => traverse(a)
-      case q"$a.or[..$ts]($b)"                         => traverse(a)
-      case q"TermValue.apply($a)"                      => traverse(a)
-      case q"immutable.this.List.apply[$tpe](..$a)"    => traverse(a.head)
-      case q"collection.this.Seq.apply[$tpe](..$a)"    => traverse(a.head)
-      case Select(ns, attr) if ns.tpe <:< typeOf[NS]   => ns.tpe.typeSymbol
-      case ns@Select(_, name) if ns.tpe <:< typeOf[NS] => ns.tpe.typeSymbol
-      case _                                           => (t collect {
-        case ns@Select(_, name) if ns.tpe <:< typeOf[NS] => ns.tpe.typeSymbol
+      case q"$a.and($b)  "                                     => traverse(a)
+      case q"$a.and[..$ts]($b)  "                              => traverse(a)
+      case q"$a.or($b)  "                                      => traverse(a)
+      case q"$a.eqs($b)  "                                     => traverse(a)
+      case q"$a.or[..$ts]($b)  "                               => traverse(a)
+      case q"TermValue.apply($a)  "                            => traverse(a)
+      case q"immutable.this.List.apply[$tpe](..$a)  "          => traverse(a.head)
+      case q"collection.this.Seq.apply[$tpe](..$a)  "          => traverse(a.head)
+      case Select(nsFull, attr) if nsFull.tpe <:< typeOf[NS]   => nsFull.tpe.typeSymbol
+      case nsFull@Select(_, name) if nsFull.tpe <:< typeOf[NS] => nsFull.tpe.typeSymbol
+      case _                                                   => (t collect {
+        case nsFull@Select(_, name) if nsFull.tpe <:< typeOf[NS] => nsFull.tpe.typeSymbol
       }).distinct.reverse.head
     }
 
@@ -242,7 +244,7 @@ private[molecule] trait TreeOps extends Liftables {
     }
 
     override def toString: String = {
-      val s = sym.name.toString
+      val s     = sym.name.toString
       val first = s.split("_(\\d+|In_.*)").head
       first
     }
@@ -291,7 +293,7 @@ private[molecule] trait TreeOps extends Liftables {
     }
 
     def owner: Symbol = attrType.typeSymbol.owner
-    def ns: nsp = new nsp(owner)
+    def nsFull: nsp = new nsp(owner)
 
     def name: TermName = TermName(toString)
     def fullName: String = attrType.typeSymbol.fullName
@@ -327,9 +329,9 @@ private[molecule] trait TreeOps extends Liftables {
     def isAnyEnum: Boolean = attrType <:< weakTypeOf[Enum]
 
 
-    def keyw: KW = KW(ns.toString, this.toString)
-    def kw: KW = KW(ns.toString, this.toString)
-    def kwS: String = s":$ns/$name"
+    def keyw: KW = KW(nsFull.toString, this.toString)
+    def kw: KW = KW(nsFull.toString, this.toString)
+    def kwS: String = s":$nsFull/$name"
 
     def enumValues: List[String] = {
       val attrName = if (toString.last == '_') toString.init else toString
@@ -341,15 +343,15 @@ private[molecule] trait TreeOps extends Liftables {
     }
 
     def hasEnum(enumCandidate: String): Boolean = enumValues.contains(enumCandidate)
-    def enumPrefix: String = ns.enums.size match {
+    def enumPrefix: String = nsFull.enums.size match {
       case 0 => ""
       case _ =>
-        val last = name.toString.last
+        val last  = name.toString.last
         val name0 = if (last == '_' || last == '$') name.toString.init else name
-        s":$ns.$name0/"
+        s":$nsFull.$name0/"
     }
 
-    override def toString: String = sym.name.toString.head.toLower + sym.name.toString.tail
+    override def toString: String = sym.name.toString.head.toLower.toString + sym.name.toString.tail
   }
 
   object att {

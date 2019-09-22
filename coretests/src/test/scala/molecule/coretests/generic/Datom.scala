@@ -197,9 +197,9 @@ class Datom extends CoreSpec {
     }
 
 
-    "Generic attributes before custom attribute" >> {
+    "order of attribute types" >> {
 
-      // Generic entity id attribute before first attribute ok
+      // Generic entity id first is ok
       Ns.e.int.t.get === List((e1, 3, t3), (e2, 5, t5))
 
       // Other generic attributes not allowed before first attribute
@@ -209,10 +209,16 @@ class Datom extends CoreSpec {
           "Can't add first attribute `int` after generic attributes (except `e` which is ok to have first). " +
           "Please add generic attributes `t`, `op` after `int`.")
 
-      // Add generic attributes after custom attribute instead
+      // Generic attributes after custom attribute ok
       Ns.int.t.op.get === List((5, t5, true), (3, t3, true))
-    }
 
+      // Custom attributes after generic attributes ok as long
+      // as at least one custom attr is before generic attributes
+      Ns.int.op.str.get === List(
+        (3, true, "b"),
+        (5, true, "x")
+      )
+    }
 
     "Full scan" >> {
 
@@ -284,6 +290,9 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.str1.t.get === List((5, "hello", t6))
       Ns.int.Ref1.str1.txInstant.get.toString === List((5, "hello", d6)).toString
       Ns.int.Ref1.str1.op.get === List((5, "hello", true))
+
+      // generic attr before ref
+      Ns.int.op.Ref1.str1.op.get === List((5, true, "hello", true))
     }
 
 
@@ -421,7 +430,6 @@ class Datom extends CoreSpec {
         "Generic attributes only allowed to aggregate `count`. Found: `max`")
     ok
   }
-
 
 
   "Expressions, tacit" >> {

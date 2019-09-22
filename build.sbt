@@ -1,68 +1,86 @@
-import sbt.compilerPlugin
+lazy val supportedScalaVersions = List("2.13.1", "2.12.10")
+lazy val baseFlags              = List(
+  "-feature",
+  "-language:implicitConversions",
+  "-deprecation",
+  //  "-Ymacro-annotations"
+  //  "-Xlint:deprecation"
+  //    "-Yrangepos",
+  //    "-Ystatistics",
+  //    "-Ymacro-debug-lite",
+  //    "-Xprint",
+  //    "-Ymacro-debug-verbose",
+  //    "-Yshow-trees-stringified",
+  //    "-Yshow-trees"
+  //    "-Yquasiquote-debug"
+  //    ,"-Ydebug"
+)
+
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org")),
-  version := "0.18.6",
-  scalaVersion := "2.12.8",
-  scalacOptions := Seq(
-    "-feature",
-    "-language:implicitConversions",
-    "-deprecation",
-    //    "-Yrangepos",
-    //    "-Ystatistics",
-    //    "-Ymacro-debug-lite",
-    //    "-Xprint",
-    //    "-Ymacro-debug-verbose",
-    //    "-Yshow-trees-stringified",
-    //    "-Yshow-trees"
-    //    "-Yquasiquote-debug"
-    //    ,"-Ydebug"
-  ),
+  version := "0.19.0",
+  scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 13)) => baseFlags :+ "-Ymacro-annotations"
+    case _             => baseFlags
+  }),
   resolvers ++= Seq(
-    "datomic" at "http://files.datomic.com/maven",
-    "clojars" at "http://clojars.org/repo",
+    ("datomic" at "http://files.datomic.com/maven").withAllowInsecureProtocol(true),
+    ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true),
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots"),
   ),
-  //  autoAPIMappings := true,
-  apiURL := Some(url("https://example.org/api/")),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.datomic" % "datomic-free" % "0.9.5697",
-    "org.specs2" %% "specs2-core" % "4.2.0" % "test",
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
-  ),
+    "org.specs2" %% "specs2-core" % "4.7.1" % "test"
+
+  ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 13)) => Nil
+    case _             => sbt.compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+  }),
+  unmanagedSourceDirectories in Compile ++= {
+    (unmanagedSourceDirectories in Compile).value.map { dir =>
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
+        case _             => file(dir.getPath ++ "-2.13-")
+      }
+    }
+  },
   incOptions := incOptions.value.withLogRecompileOnMacro(false)
 )
 
 
 lazy val molecule = project.in(file("."))
-  .settings(moduleName := "molecule-root")
-  .settings(commonSettings ++ noPublishSettings)
+  .settings(commonSettings ++ noPublishSettings ++ Seq(
+    moduleName := "molecule-root",
+    crossScalaVersions := Nil
+  ))
   .aggregate(moleculeCore, moleculeCoretests, moleculeExamples)
 
-
 lazy val moleculeCore = project.in(file("core"))
-  .settings(moduleName := "molecule")
-  .settings(commonSettings ++ publishSettings)
-  .settings(scalacOptions in Compile in doc ++= Seq(
-    "-diagrams",
-    "-groups",
-    "-doc-version", version.value,
-    "-doc-title", "Molecule",
-    "-sourcepath", (baseDirectory in ThisBuild).value.toString,
-    "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
-  ))
-  .enablePlugins(BuildInfoPlugin)
-  .settings(
+  .settings(commonSettings ++ publishSettings ++ Seq(
+    moduleName := "molecule",
+    crossScalaVersions := supportedScalaVersions,
+    scalacOptions in Compile in doc ++= Seq(
+      "-diagrams",
+      "-groups",
+      "-doc-version", version.value,
+      "-doc-title", "Molecule",
+      "-sourcepath", (baseDirectory in ThisBuild).value.toString,
+      "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
+    ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "moleculeBuildInfo"
-  )
+  ))
+  .enablePlugins(BuildInfoPlugin)
 
 lazy val moleculeCoretests = project.in(file("coretests"))
   .dependsOn(moleculeCore)
-  .settings(commonSettings ++ noPublishSettings)
+  .settings(commonSettings ++ noPublishSettings ++ Seq(
+    crossScalaVersions := supportedScalaVersions
+  ))
   .enablePlugins(MoleculePlugin)
   .settings(
     moduleName := "molecule-coretests",
@@ -76,8 +94,10 @@ lazy val moleculeCoretests = project.in(file("coretests"))
 
 lazy val moleculeExamples = project.in(file("examples"))
   .dependsOn(moleculeCore)
-  .settings(commonSettings ++ noPublishSettings)
-  .settings(Seq(autoAPIMappings := true))
+  .settings(commonSettings ++ noPublishSettings ++ Seq(
+    crossScalaVersions := supportedScalaVersions,
+    autoAPIMappings := true
+  ))
   .enablePlugins(MoleculePlugin)
   .settings(
     moduleName := "molecule-examples",
@@ -91,7 +111,7 @@ lazy val moleculeExamples = project.in(file("examples"))
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
-lazy val releases = "Sonatype OSS Staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+lazy val releases  = "Sonatype OSS Staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,

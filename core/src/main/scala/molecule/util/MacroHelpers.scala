@@ -72,7 +72,7 @@ private[molecule] trait MacroHelpers {
 
   object st {
     val stack = collection.mutable.LinkedHashMap[Int, Tree]()
-    def apply(i: Int, t: Tree) {
+    def apply(i: Int, t: Tree): Unit = {
       stack(i) = t
     }
     override def toString = stack.mkString("\n")

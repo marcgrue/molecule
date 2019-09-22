@@ -1,9 +1,7 @@
 package molecule.ast
-import java.util.{List => jList, Map => jMap}
-
+import java.util.{List => jList}
 import datomic.Util
 import molecule.ast.model._
-
 import scala.collection.JavaConverters._
 
 /** Datomic transaction representation and operations. */

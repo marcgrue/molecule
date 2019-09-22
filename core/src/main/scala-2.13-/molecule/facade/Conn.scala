@@ -2,9 +2,9 @@ package molecule.facade
 
 import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
-import datomic.{Database, Datom, Peer}
-import datomic.Util._
 import datomic.Peer._
+import datomic.Util._
+import datomic.{Database, Datom, Peer}
 import molecule.ast.model._
 import molecule.ast.query.{Query, QueryExpr}
 import molecule.ast.tempDb._
@@ -35,7 +35,7 @@ object Conn {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  **/
+  * */
 class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   // Temporary db for ad-hoc queries against time variation dbs
@@ -160,7 +160,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   /** Get current test/live db. Test db has preference. */
   def db: Database = if (_adhocDb.isDefined) {
-    val baseDb = _testDb.getOrElse(datomicConn.db)
+    val baseDb  = _testDb.getOrElse(datomicConn.db)
     val adhocDb = _adhocDb.get match {
       case AsOf(TxLong(t))  =>
         baseDb.asOf(t)
@@ -188,11 +188,11 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
   }
 
 
-  private[molecule] def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
+  def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
     if (_adhocDb.isDefined) {
-      val baseDb = _testDb.getOrElse(datomicConn.db)
+      val baseDb  = _testDb.getOrElse(datomicConn.db)
       val adhocDb = _adhocDb.get match {
         case AsOf(TxLong(t))  => baseDb.asOf(t)
         case AsOf(TxDate(d))  => baseDb.asOf(d)
@@ -225,12 +225,12 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     }
   }
 
-  private[molecule] def transactAsync(stmtss: Seq[Seq[Statement]])(implicit ec: ExecutionContext): Future[TxReport] = {
+  def transactAsync(stmtss: Seq[Seq[Statement]])(implicit ec: ExecutionContext): Future[TxReport] = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
     if (_adhocDb.isDefined) {
       Future {
-        val baseDb = _testDb.getOrElse(datomicConn.db)
+        val baseDb  = _testDb.getOrElse(datomicConn.db)
         val adhocDb = _adhocDb.get match {
           case AsOf(TxLong(t))  => baseDb.asOf(t)
           case AsOf(TxDate(d))  => baseDb.asOf(d)
@@ -365,7 +365,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
-    **/
+    * */
   def q(query: String, inputs: Any*): List[List[AnyRef]] = q(db, query, inputs.toSeq)
 
 
@@ -445,7 +445,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] = qRaw(db, query, inputs)
 
 
@@ -482,7 +482,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def qRaw(db: Database, query: String, inputs: Seq[Any]): jCollection[jList[AnyRef]] =
     blocking(Peer.q(query, db +: inputs.asInstanceOf[Seq[AnyRef]]: _*))
 
@@ -501,7 +501,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     * @param model [[molecule.ast.model.Model Model]] instance
     * @param query [[molecule.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
+    **/
   def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
     case Generic("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => _index(model)
     case _                                                           => _query(model, query)
@@ -509,10 +509,10 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
 
   // Datalog query execution
   private[molecule] def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]] = {
-    val p = (expr: QueryExpr) => Query2String(query).p(expr)
-    val rules = "[" + (query.i.rules map p mkString " ") + "]"
-    val adhocDb = _db.getOrElse(db)
-    val first = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
+    val p                      = (expr: QueryExpr) => Query2String(query).p(expr)
+    val rules                  = "[" + (query.i.rules map p mkString " ") + "]"
+    val adhocDb                = _db.getOrElse(db)
+    val first                  = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
     val allInputs: Seq[AnyRef] = first ++ QueryOps(query).inputs
     try {
       blocking {
@@ -521,7 +521,7 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
     } catch {
       case ex: Throwable if ex.getMessage startsWith "processing" =>
         val builder = Seq.newBuilder[String]
-        var e = ex
+        var e       = ex
         while (e.getCause != null) {
           builder += e.getMessage
           e = e.getCause

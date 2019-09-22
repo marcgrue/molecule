@@ -1,5 +1,4 @@
 package molecule.api
-
 import molecule.api.get._
 import molecule.api.getAsync._
 import molecule.ast.MoleculeBase

@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZoneId}
 import java.util.{Date, TimeZone, UUID}
 import datomic.ListenableFuture
-import molecule.ast.query.format
+import molecule.ast.query.date2datomicStr
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
 
@@ -13,41 +13,42 @@ private[molecule] trait Helpers {
   final protected object mkDate {
     def apply(year: Int, month: Int = 1, day: Int = 1): Date = {
       val localDate = LocalDate.of(year, month, day)
-      val instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant
+      val instant   = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant
       Date.from(instant)
     }
   }
 
-  final protected def format(date: Date): String = {
-    val f = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
-    f.format(date)
-  }
-  final protected lazy val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  final protected def format2(date: Date): String = sdf.format(date)
-  final protected def date(s: String): Date = sdf.parse(s)
+  final protected lazy val sdfDatomic = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
+  final protected lazy val sdf        = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+
+  protected def date2datomicStr(date: Date): String = sdfDatomic.format(date)
+  protected def date2str(date: Date): String = sdf.format(date)
+
+  protected def date(s: String): Date = sdf.parse(s)
 
   final protected def f(a: Any) = a match {
-    case date: Date => format2(date).replace("+", "\\\\+")
+    case date: Date => date2str(date).replace("+", "\\\\+")
     case other      => other
   }
   final protected def f2(a: Any) = a match {
-    case date: Date => format2(date)
+    case date: Date => date2str(date)
     case other      => other
   }
 
-
-  final protected def cast(value: Any): String = value match {
+  protected def cast(value: Any): String = value match {
     case (a, b)     => s"(${cast(a)}, ${cast(b)})"
-    case v: Long    => v + "L"
-    case v: Float   => v + "f"
-    case date: Date => "\"" + format(date) + "\""
+    case v: Long    => v.toString + "L"
+    case v: Float   => v.toString + "f"
+    case date: Date => "\"" + date2datomicStr(date) + "\""
     case v: String  => "\"" + v + "\""
     case v: UUID    => "\"" + v + "\""
     case v: URI     => "\"" + v + "\""
     case v          => v.toString
   }
+
   final protected def o(opt: Option[Any]): String = if (opt.isDefined) s"""Some(${cast(opt.get)})""" else "None"
-  final protected def seq[T](values: Seq[T]) = values.map {
+
+  final protected def seq[T](values: Seq[T]): String = values.map {
     case set: Set[_] => set.map(cast).mkString("Set(", ", ", ")")
     case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
     case (a, b)      => s"${cast(a)} -> ${cast(b)}"
@@ -96,8 +97,8 @@ private[molecule] trait Helpers {
     if (times.keys.toSeq.contains(n))
       throw new IllegalArgumentException(s"Can't use same time identifier `$n` multiple times")
 
-    val time1 = if (prev > 0) times(prev) else time0
-    val time2 = System.currentTimeMillis()
+    val time1   = if (prev > 0) times(prev) else time0
+    val time2   = System.currentTimeMillis()
     val elapsed = time2 - time1
     times += n -> time2
     val formatter = new java.text.SimpleDateFormat("HH:mm:ss.SSS", new java.util.Locale("en", "UK"))

@@ -167,18 +167,18 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
   protected def bindSeqs(query: Query, inputRaw1: Seq[I1], inputRaw2: Seq[I2]) = {
     val (input1, input2) = (inputRaw1.distinct, inputRaw2.distinct)
     val List(
-    ph1@Placeholder(_, KW(ns1, attr1, _), _, _),
-    ph2@Placeholder(_, KW(ns2, attr2, _), _, _)
+    ph1@Placeholder(_, KW(nsFull1, attr1, _), _, _),
+    ph2@Placeholder(_, KW(nsFull2, attr2, _), _, _)
     ) = query.i.inputs
 
     def resolve[T](query: Query, ph: Placeholder, input: Seq[T], ruleName: String, tacit: Boolean, expr: Boolean): Query = {
-      val Placeholder(_, KW(ns, attr, _), _, _) = ph
+      val Placeholder(_, KW(nsFull, attr, _), _, _) = ph
       input match {
         case Nil if !tacit =>
           throw new InputMolecule_2_Exception(s"Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `$attr` --> `${attr}_`")
 
         case in if expr && in.size > 1 =>
-          throw new InputMolecule_2_Exception(s"Can't apply multiple values to input attribute `:$ns/$attr` having expression (<, >, <=, >=, !=)")
+          throw new InputMolecule_2_Exception(s"Can't apply multiple values to input attribute `:$nsFull/$attr` having expression (<, >, <=, >=, !=)")
 
         case in =>
           resolveInput(query, ph, in, ruleName)
@@ -189,8 +189,8 @@ trait InputMolecule_2[I1, I2] extends InputMolecule {
     val q0 = query.copy(i = In(Seq(), query.i.rules, query.i.ds))
 
     // Resolve inputs
-    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(ns1, attr1), isExpression(ns1, attr1))
-    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(ns2, attr2), isExpression(ns2, attr2))
+    val q1 = resolve(q0, ph1, input1, "rule1", isTacit(nsFull1, attr1), isExpression(nsFull1, attr1))
+    val q2 = resolve(q1, ph2, input2, "rule2", isTacit(nsFull2, attr2), isExpression(nsFull2, attr2))
     q2
   }
 

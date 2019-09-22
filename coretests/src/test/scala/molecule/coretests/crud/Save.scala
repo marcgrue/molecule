@@ -44,8 +44,8 @@ class Save extends CoreSpec {
     Ns.str("a").save
     Ns.int(1).save
     Ns.long(1L).save
-    Ns.float(1.0f).save
-    Ns.double(1.0).save
+    Ns.float(1.1f).save
+    Ns.double(1.1).save
     Ns.bool(true).save
     Ns.date(date1).save
     Ns.uuid(uuid1).save
@@ -55,8 +55,8 @@ class Save extends CoreSpec {
     Ns.str.get.head === "a"
     Ns.int.get.head === 1
     Ns.long.get.head === 1L
-    Ns.float.get.head === 1.0f
-    Ns.double.get.head === 1.0
+    Ns.float.get.head === 1.1f
+    Ns.double.get.head === 1.1
     Ns.bool.get.head === true
     Ns.date.get.head === date1
     Ns.uuid.get.head === uuid1
@@ -78,8 +78,8 @@ class Save extends CoreSpec {
     Ns.strs("a", "b")
       .ints(1, 2)
       .longs(1L, 2L)
-      .floats(1.0f, 2.0f)
-      .doubles(1.0, 2.0)
+      .floats(1.1f, 2.2f)
+      .doubles(1.1, 2.2)
       .dates(date1, date2)
       .uuids(uuid1, uuid2)
       .uris(uri1, uri2)
@@ -89,8 +89,8 @@ class Save extends CoreSpec {
       Set("a", "b"),
       Set(1, 2),
       Set(1L, 2L),
-      Set(1.0f, 2.0f),
-      Set(1.0, 2.0),
+      Set(1.1f, 2.2f),
+      Set(1.1, 2.2),
       Set(date1, date2),
       Set(uuid1, uuid2),
       Set(uri1, uri2),
@@ -103,8 +103,8 @@ class Save extends CoreSpec {
     Ns.str("a").save
     Ns.int(1).save
     Ns.long(1L).save
-    Ns.float(1.0f).save
-    Ns.double(1.0).save
+    Ns.float(1.1f).save
+    Ns.double(1.1).save
     Ns.bool(true).save
     Ns.date(date1).save
     Ns.uuid(uuid1).save
@@ -114,8 +114,8 @@ class Save extends CoreSpec {
     Ns.str.get.head === "a"
     Ns.int.get.head === 1
     Ns.long.get.head === 1L
-    Ns.float.get.head === 1.0f
-    Ns.double.get.head === 1.0
+    Ns.float.get.head === 1.1f
+    Ns.double.get.head === 1.1
     Ns.bool.get.head === true
     Ns.date.get.head === date1
     Ns.uuid.get.head === uuid1
@@ -136,13 +136,13 @@ class Save extends CoreSpec {
       Ns.longs(2L, 3L).save
       Ns.longs.get.head === Set(1L, 2L, 3L)
 
-      Ns.floats(1.0f).save
-      Ns.floats(2.0f, 3.0f).save
-      Ns.floats.get.head === Set(1.0f, 2.0f, 3.0f)
+      Ns.floats(1.1f).save
+      Ns.floats(2.2f, 3.3f).save
+      Ns.floats.get.head === Set(1.1f, 2.2f, 3.3f)
 
-      Ns.doubles(1.0).save
-      Ns.doubles(2.0, 3.0).save
-      Ns.doubles.get.head === Set(1.0, 2.0, 3.0)
+      Ns.doubles(1.1).save
+      Ns.doubles(2.2, 3.3).save
+      Ns.doubles.get.head === Set(1.1, 2.2, 3.3)
 
       // Ns.bools not implemented...
 
@@ -304,8 +304,8 @@ class Save extends CoreSpec {
       Ns.ints(1).str$(Some("a")).save
       Ns.ints(2).int$(Some(1)).save
       Ns.ints(3).long$(Some(1L)).save
-      Ns.ints(4).float$(Some(1f)).save
-      Ns.ints(5).double$(Some(1.0)).save
+      Ns.ints(4).float$(Some(1.1f)).save
+      Ns.ints(5).double$(Some(1.1)).save
       Ns.ints(6).bool$(Some(true)).save
       Ns.ints(7).bigInt$(Some(bigInt1)).save
       Ns.ints(8).bigDec$(Some(bigDec1)).save
@@ -318,8 +318,8 @@ class Save extends CoreSpec {
       Ns.ints(1).str$(Some("a")).get.head === (Set(1), Some("a"))
       Ns.ints(2).int$(Some(1)).get.head === (Set(2), Some(1))
       Ns.ints(3).long$(Some(1L)).get.head === (Set(3), Some(1L))
-      Ns.ints(4).float$(Some(1f)).get.head === (Set(4), Some(1f))
-      Ns.ints(5).double$(Some(1.0)).get.head === (Set(5), Some(1.0))
+      Ns.ints(4).float$(Some(1.1f)).get.head === (Set(4), Some(1.1f))
+      Ns.ints(5).double$(Some(1.1)).get.head === (Set(5), Some(1.1))
       Ns.ints(6).bool$(Some(true)).get.head === (Set(6), Some(true))
       Ns.ints(7).bigInt$(Some(bigInt1)).get.head === (Set(7), Some(bigInt1))
       Ns.ints(8).bigDec$(Some(bigDec1)).get.head === (Set(8), Some(bigDec1))
@@ -379,8 +379,8 @@ class Save extends CoreSpec {
       Ns.int(11).strs$(Some(Set("a", "b"))).save
       Ns.int(12).ints$(Some(Set(1, 2))).save
       Ns.int(13).longs$(Some(Set(1L, 2L))).save
-      Ns.int(14).floats$(Some(Set(1f, 2f))).save
-      Ns.int(15).doubles$(Some(Set(1.0, 2.0))).save
+      Ns.int(14).floats$(Some(Set(1.1f, 2.2f))).save
+      Ns.int(15).doubles$(Some(Set(1.1, 2.2))).save
       Ns.int(16).bools$(Some(Set(true, false))).save
       Ns.int(17).bigInts$(Some(Set(bigInt1, bigInt2))).save
       Ns.int(18).bigDecs$(Some(Set(bigDec1, bigDec2))).save
@@ -393,8 +393,8 @@ class Save extends CoreSpec {
       Ns.int(11).strs$(Some(Set("a", "b"))).get.head === (11, Some(Set("a", "b")))
       Ns.int(12).ints$(Some(Set(1, 2))).get.head === (12, Some(Set(1, 2)))
       Ns.int(13).longs$(Some(Set(1L, 2L))).get.head === (13, Some(Set(1L, 2L)))
-      Ns.int(14).floats$(Some(Set(1f, 2f))).get.head === (14, Some(Set(1f, 2f)))
-      Ns.int(15).doubles$(Some(Set(1.0, 2.0))).get.head === (15, Some(Set(1.0, 2.0)))
+      Ns.int(14).floats$(Some(Set(1.1f, 2.2f))).get.head === (14, Some(Set(1.1f, 2.2f)))
+      Ns.int(15).doubles$(Some(Set(1.1, 2.2))).get.head === (15, Some(Set(1.1, 2.2)))
       Ns.int(16).bools$(Some(Set(true, false))).get.head === (16, Some(Set(true, false)))
       Ns.int(17).bigInts$(Some(Set(bigInt1, bigInt2))).get.head === (17, Some(Set(bigInt1, bigInt2)))
       Ns.int(18).bigDecs$(Some(Set(bigDec1, bigDec2))).get.head === (18, Some(Set(bigDec1, bigDec2)))

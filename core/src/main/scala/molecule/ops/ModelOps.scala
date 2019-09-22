@@ -12,7 +12,7 @@ object ModelOps {
     case m: Map[_, _] => m.toSeq map convert
     case (k, v)       => (convert(k), convert(v))
     case Some(v)      => convert(v)
-    case f: Float     => f.toDouble
+    case f: Float     => f.toString.toDouble
     case unchanged    => unchanged
   }
 
@@ -82,7 +82,7 @@ object ModelOps {
       case g@Generic(_, _, _, Gt(ident))                                => g.copy(value = Gt(getValues(Seq(ident)).head))
       case g@Generic(_, _, _, Le(ident))                                => g.copy(value = Le(getValues(Seq(ident)).head))
       case g@Generic(_, _, _, Ge(ident))                                => g.copy(value = Ge(getValues(Seq(ident)).head))
-      case Nested(ns, nestedElements)                                   => Nested(ns, resolve(nestedElements))
+      case Nested(bond, nestedElements)                                 => Nested(bond, resolve(nestedElements))
       case Composite(compositeElements)                                 => Composite(resolve(compositeElements))
       case TxMetaData(txElements)                                       => TxMetaData(resolve(txElements))
       case other                                                        => other

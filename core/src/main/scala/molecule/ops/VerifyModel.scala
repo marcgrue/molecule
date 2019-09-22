@@ -14,7 +14,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case "update" => verifyUpdate()
   }
 
-  private def verifySave() {
+  private def verifySave(): Unit = {
     unexpectedAppliedId
     noGenericsInTail
     noTacitAttrs
@@ -25,7 +25,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     edgeComplete
   }
 
-  private def verifyInsert() {
+  private def verifyInsert(): Unit = {
     unexpectedAppliedId
     noGenericsInTail
     onlyTacitTxAttrs
@@ -35,7 +35,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     edgeComplete
   }
 
-  private def verifyUpdate() {
+  private def verifyUpdate(): Unit = {
     update_onlyOneNs
     missingAppliedId
     onlyAtomsWithValue
@@ -50,7 +50,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   //  living_Person.knows(Nil).update
   //  living_Person.knows(count).debugUpdate
 
-  private def err(method: String, msg: String) = {
+  private def err(method: String, msg: String): Nothing = {
     throw new VerifyModelException(s"[$method]  $msg")
   }
 
@@ -59,13 +59,13 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     if (ns.contains('_')) ns else ns.capitalize
   }
 
-  private def Ns(ns: String): String = if (ns.contains('_')) ns else ns.capitalize
+  private def Ns(nsFull: String): String = if (nsFull.contains('_')) nsFull else nsFull.capitalize
 
   // Avoid mixing insert/update style
   private def unexpectedAppliedId: Element = model.elements.head match {
-    case Generic(_, "e" | "e_", _, Eq(List(eid))) => err("unexpectedAppliedId",
+    case Generic(_, "e" | "e_", _, Eq(List(_))) => err("unexpectedAppliedId",
       s"""Applying an eid is only allowed for updates.""")
-    case ok                                       => ok
+    case ok                                     => ok
   }
   private def missingAppliedId: Boolean = model.elements.head match {
     case Generic(_, "e" | "e_", _, Eq(List(eid))) =>
@@ -74,7 +74,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case Composite(elements)                      => elements.head match {
       case Generic(_, "e" | "e_", _, Eq(eids)) => true
     }
-    case Atom(ns, _, _, _, _, _, _, _)            => err("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(ns)}(<eid>)...`")
+    case Atom(nsFull, _, _, _, _, _, _, _)        => err("missingAppliedId", s"Update molecule should start with an applied id: `${Ns(nsFull)}(<eid>)...`")
   }
   private def onlyAtomsWithValue = model.elements.foreach {
     case a: Atom => a.value match {
@@ -95,10 +95,10 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
   private def onlyTacitTxAttrs: Seq[Option[Nothing]] = model.elements.collect {
     case TxMetaData(es) => es.collectFirst {
-      case Atom(ns, attr, _, _, _, _, _, _) if !attr.endsWith("_") =>
+      case Atom(nsFull, attr, _, _, _, _, _, _) if !attr.endsWith("_") =>
         val attrClean = if (attr.endsWith("$")) attr.init else attr
         err("onlyTacitTxAttrs",
-          s"For inserts, tx meta data can only be applied to tacit attributes, like: `${ns.capitalize}.${attrClean}_(<metadata>)`")
+          s"For inserts, tx meta data can only be applied to tacit attributes, like: `${nsFull.capitalize}.${attrClean}_(<metadata>)`")
     }
   }
 
@@ -112,7 +112,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     detectTacitAttrs(model.elements)
   }
 
-  private def missingAttrInStartEnd {
+  private def missingAttrInStartEnd: Unit = {
     model.elements.foldLeft(Seq[Element]()) {
       case (attrs, e) => e match {
         case a: Atom if a.attr.last != '$'         => attrs :+ a
@@ -132,13 +132,13 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     missingAttrInEnd(model.elements)
   }
 
-  private def noConflictingCardOneValues {
+  private def noConflictingCardOneValues: Unit = {
     def catchConflictingCardOneValues(elements: Seq[Element]): Unit = elements.collectFirst {
-      case Atom(ns, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => err("noConflictingCardOneValues",
+      case Atom(nsFull, attr, _, 1, Eq(vs), _, _, _) if vs.length > 1 => err("noConflictingCardOneValues",
         s"""Can't $op multiple values for cardinality-one attribute:
-           |  ${Ns(ns)} ... $attr(${vs.mkString(", ")})""".stripMargin)
-      case Nested(ref, es)                                        => catchConflictingCardOneValues(es)
-      case Composite(es)                                          => catchConflictingCardOneValues(es)
+           |  ${Ns(nsFull)} ... $attr(${vs.mkString(", ")})""".stripMargin)
+      case Nested(_, es)                                              => catchConflictingCardOneValues(es)
+      case Composite(es)                                              => catchConflictingCardOneValues(es)
     }
     catchConflictingCardOneValues(model.elements)
   }
@@ -156,7 +156,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     case c: Composite                       => err("update_onlyOneNs", op.capitalize + " molecules can't be composites.")
   }
 
-  private def noNested {
+  private def noNested: Unit = {
     def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
       case n: Nested     => err("noNested", s"Nested data structures not allowed in $op molecules")
       case Composite(es) => checkNested(es)
@@ -165,14 +165,14 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   }
 
   // Todo: Might be possible to implement if we control that the molecule doesn't build further out
-  private def noEdgePropRefs = model.elements.collectFirst {
-    case Bond(ns, refAttr, _, _, Seq(BiEdgePropRef(_))) => err("noEdgePropRefs",
+  private def noEdgePropRefs: Option[Unit] = model.elements.collectFirst {
+    case Bond(_, refAttr, _, _, Seq(BiEdgePropRef(_))) => err("noEdgePropRefs",
       s"Building on to another namespace from a property edge of a $op molecule not allowed. " +
         s"Please create the referenced entity sepearately and apply the created ids to a ref attr instead, like `.$refAttr(<refIds>)`")
   }
 
 
-  private def noNestedEdgesWithoutTarget {
+  private def noNestedEdgesWithoutTarget: Unit = {
     def checkNested(elements: Seq[Element]): Unit = elements.collectFirst {
 
       case Nested(Bond(baseNs, _, refNs, _, Seq(BiEdgeRef(_, _))), es)
@@ -187,7 +187,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
   }
 
 
-  private def edgeComplete {
+  private def edgeComplete: Unit = {
     /*
       In order to maintain data consistency for bidirectional edges we need to ensure
       that no edge is connected to only the base or target entity.
@@ -197,7 +197,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
     def missingBase(elements: Seq[Element]): Unit = {
 
-      def hasBase(es: Seq[Element], edgeNs: String) = elements.collectFirst {
+      def hasBase(es: Seq[Element], edgeNs: String): Option[Boolean] = elements.collectFirst {
         // Base.attr.Edge ...
         case Bond(_, _, edgeNs1, _, Seq(BiEdgeRef(_, _))) if edgeNs1 == edgeNs => true
         // Base.attr.edge ...
@@ -207,7 +207,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
     def missingTarget(elements: Seq[Element]): Unit = {
 
-      def hasTarget(es: Seq[Element], edgeNs: String) = elements.collectFirst {
+      def hasTarget(es: Seq[Element], edgeNs: String): Option[Boolean] = elements.collectFirst {
         // ... TargetNs
         case Bond(edgeNs1, _, _, _, Seq(BiTargetRef(_, _))) if edgeNs1 == edgeNs => true
         // ... targetAttr
@@ -216,7 +216,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
 
       elements.collectFirst {
         // Base.attr.Edge ..?
-        case Bond(baseNs, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
+        case Bond(_, _, edgeNs, _, Seq(BiEdgeRef(_, _))) => hasTarget(elements, edgeNs) getOrElse
           err("edgeComplete", s"Missing target namespace after edge namespace `${Ns(edgeNs)}`.")
 
         // Edge.prop ..?
@@ -227,13 +227,13 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
     }
 
     model.elements.head match {
-      case Generic(ns, "e_", "e", Eq(List(eid))) => // BiEdge
-      case checkNext                             => missingTarget(model.elements)
+      case Generic(_, "e_", "e", Eq(List(eid))) => // BiEdge
+      case checkNext                            => missingTarget(model.elements)
     }
   }
 
 
-  private def update_edgeComplete {
+  private def update_edgeComplete: Unit = {
     def missingTarget(elements: Seq[Element]): Unit = {
 
       // Ok if target Ns is present - then we are updating with a new edge to a new/existing target entity.
@@ -241,7 +241,7 @@ private[molecule] case class VerifyModel(model: Model, op: String) {
         // ... TargetNs
         case Bond(edgeNs1, _, _, _, Seq(BiTargetRef(_, _))) if edgeNs1 == edgeNs => true
         // ... targetAttr
-        case Atom(edgeNs1, _, _, _, _, _, Seq(BiTargetRefAttr(_, attr)), _) if edgeNs1 == edgeNs => true
+        case Atom(edgeNs1, _, _, _, _, _, Seq(BiTargetRefAttr(_, _)), _) if edgeNs1 == edgeNs => true
       }
 
       elements.collectFirst {

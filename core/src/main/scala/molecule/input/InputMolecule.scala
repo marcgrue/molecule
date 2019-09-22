@@ -61,47 +61,47 @@ trait InputMolecule extends MoleculeBase {
 
   protected def pre[T](enumPrefix: Option[String], arg: T): Any = if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
 
-  protected def isTacit(ns: String, attr: String): Boolean = {
-    val ns_ = ns + "_"
+  protected def isTacit(nsFull: String, attr: String): Boolean = {
+    val nsFull_                = nsFull + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], tacit0: Option[Boolean]): Option[Boolean] = elements.foldLeft(tacit0) {
-      case (tacit, Generic(_, `attr`, `ns`, _))                              => Some(true)
-      case (tacit, Atom(`ns` | `ns_`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
-      case (tacit, Atom(`ns_`, `attr` | `attrK`, _, _, _, _, _, _))          => Some(true)
-      case (tacit, Atom(`ns`, `attr` | `attrK`, _, _, _, _, _, _))           => Some(false)
-      case (tacit, Nested(_, elements2))                                     => isTacit_(elements2, tacit)
-      case (tacit, Composite(elements2))                                     => isTacit_(elements2, tacit)
-      case (tacit, _)                                                        => tacit
+      case (tacit, Generic(_, `attr`, `nsFull`, _))                                  => Some(true)
+      case (tacit, Atom(`nsFull` | `nsFull_`, `attr_` | `attrK_`, _, _, _, _, _, _)) => Some(true)
+      case (tacit, Atom(`nsFull_`, `attr` | `attrK`, _, _, _, _, _, _))              => Some(true)
+      case (tacit, Atom(`nsFull`, `attr` | `attrK`, _, _, _, _, _, _))               => Some(false)
+      case (tacit, Nested(_, elements2))                                             => isTacit_(elements2, tacit)
+      case (tacit, Composite(elements2))                                             => isTacit_(elements2, tacit)
+      case (tacit, _)                                                                => tacit
     }
     isTacit_(_model.elements, None) match {
       case Some(result) => result
-      case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$ns/$attr` in model:\n" + _model)
+      case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$nsFull/$attr` in model:\n" + _model)
     }
   }
 
-  protected def cardinality(ns: String, attr: String): Int = {
-    val ns_ = ns + "_"
+  protected def cardinality(nsFull: String, attr: String): Int = {
+    val nsFull_                = nsFull + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
     def isTacit_(elements: Seq[Element], cardOpt0: Option[Int]): Option[Int] = elements.foldLeft(cardOpt0) {
-      case (cardOpt, Generic(_, `attr`, `ns`, _))                                                    => Some(2)
-      case (cardOpt, Atom(`ns` | `ns_`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
-      case (cardOpt, Nested(_, elements2))                                                           => isTacit_(elements2, cardOpt)
-      case (cardOpt, Composite(elements2))                                                           => isTacit_(elements2, cardOpt)
-      case (cardOpt, e)                                                                              => cardOpt
+      case (cardOpt, Generic(_, `attr`, `nsFull`, _))                                                        => Some(2)
+      case (cardOpt, Atom(`nsFull` | `nsFull_`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
+      case (cardOpt, Nested(_, elements2))                                                                   => isTacit_(elements2, cardOpt)
+      case (cardOpt, Composite(elements2))                                                                   => isTacit_(elements2, cardOpt)
+      case (cardOpt, e)                                                                                      => cardOpt
     }
     isTacit_(_model.elements, None) match {
       case Some(result) => result
-      case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$ns/$attr` in model:\n" + _model)
+      case None         => throw new InputMoleculeException(s"Couldn't find atom of attribute `:$nsFull/$attr` in model:\n" + _model)
     }
   }
 
-  protected def isExpression(ns: String, attr: String): Boolean = {
+  protected def isExpression(nsFull: String, attr: String): Boolean = {
     val attr_ = attr + "_"
     def isExpression_(elements: Seq[Element], isExpression: Boolean): Boolean = elements.foldLeft(isExpression) {
-      case (expr, Atom(`ns`, `attr` | `attr_`, _, _, Neq(_) | Lt(_) | Gt(_) | Le(_) | Ge(_) | Fulltext(_), _, _, _)) => true
-      case (expr, Nested(_, elements2))                                                                              => isExpression_(elements2, expr)
-      case (expr, Composite(elements2))                                                                              => isExpression_(elements2, expr)
-      case (expr, _)                                                                                                 => expr
+      case (expr, Atom(`nsFull`, `attr` | `attr_`, _, _, Neq(_) | Lt(_) | Gt(_) | Le(_) | Ge(_) | Fulltext(_), _, _, _)) => true
+      case (expr, Nested(_, elements2))                                                                                  => isExpression_(elements2, expr)
+      case (expr, Composite(elements2))                                                                                  => isExpression_(elements2, expr)
+      case (expr, _)                                                                                                     => expr
     }
     isExpression_(_model.elements, false)
   }
@@ -119,8 +119,8 @@ trait InputMolecule extends MoleculeBase {
       case ((found, v, acc), otherClause) => (found, v, acc :+ otherClause)
     }
     if (found) newClauses else {
-      val KW(ns, attr, _) = kw
-      throw new InputMoleculeException(s"Couldn't find input attribute `:$ns/$attr` placeholder variable `$v0` to be null among clauses:\n" + clauses.mkString("\n"))
+      val KW(nsFull, attr, _) = kw
+      throw new InputMoleculeException(s"Couldn't find input attribute `:$nsFull/$attr` placeholder variable `$v0` to be null among clauses:\n" + clauses.mkString("\n"))
     }
   }
 
@@ -128,7 +128,7 @@ trait InputMolecule extends MoleculeBase {
     case value: java.net.URI =>
       val uriVar = Var(e + "_uri" + i)
       Seq(
-        Funct( s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(uriVar)),
+        Funct(s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(uriVar)),
         DataClause(ImplDS, Var(e), kw, uriVar, Empty, NoBinding)
       )
     case value               => Seq(
@@ -150,8 +150,8 @@ trait InputMolecule extends MoleculeBase {
   }
 
   protected def resolveInput[T](query: Query, ph: Placeholder, inputs: Seq[T], ruleName: String = "rule1", unifyRule: Boolean = false): Query = {
-    val Placeholder(e@Var(e_), kw@KW(ns, attr, _), v@Var(w), prefix) = ph
-    val card = cardinality(ns, attr)
+    val Placeholder(e@Var(e_), kw@KW(nsFull, attr, _), v@Var(w), prefix) = ph
+    val card                                                             = cardinality(nsFull, attr)
 
     // Mapped key attributes
     if (card == 4) {
@@ -161,11 +161,11 @@ trait InputMolecule extends MoleculeBase {
         query.copy(i = In(Seq(InVar(CollectionBinding(v), Seq(values.flatten))), query.i.rules, query.i.ds))
       } else if (values.nonEmpty && values.head.size > 1) {
         val In(List(Placeholder(_, kw, v, _)), _, _) = query.i
-        val (e, newClauses) = query.wh.clauses.foldLeft(null: QueryValue, Seq.empty[Clause]) {
+        val (e, newClauses)                          = query.wh.clauses.foldLeft(null: QueryValue, Seq.empty[Clause]) {
           case ((_, acc), DataClause(_, e, _, `v`, _, _)) => (e, acc :+ RuleInvocation(ruleName, List(e)))
           case ((e, acc), other)                          => (e, acc :+ other)
         }
-        val rules = values.head.map(value =>
+        val rules                                    = values.head.map(value =>
           Rule(ruleName, List(e), List(DataClause(ImplDS, e, kw, Val(value), Empty, NoBinding)))
         )
         query.copy(i = In(Nil, rules, query.i.ds), wh = Where(newClauses))
@@ -179,7 +179,7 @@ trait InputMolecule extends MoleculeBase {
 
       val v_ = w.filter(_.isLetter)
       def inGroup(v: String) = v.filter(_.isLetter) == v_
-      val tacit = isTacit(ns, attr)
+      val tacit = isTacit(nsFull, attr)
 
       val (before, clauses, after) = query.wh.clauses.foldLeft(Seq.empty[Clause], Seq.empty[Clause], Seq.empty[Clause]) {
         case ((bef, cur, aft), cl@DataClause(_, `e`, `kw`, `v`, _, _))                  => (bef, cur :+ cl, aft)
@@ -199,14 +199,14 @@ trait InputMolecule extends MoleculeBase {
         case set: Set[_]                => Seq(set.toSeq)
         case arg                        => Seq(Seq(arg))
       }
-      val args: Seq[Any] = inputs.flatMap {
+      val args : Seq[Any]    = inputs.flatMap {
         case map: Map[_, _] => throw new InputMoleculeException("Unexpected Map input: " + map)
         case set: Set[_]    => set.toSeq
         case arg            => Seq(arg)
       }
-      val nil = deepNil(args)
-      val one = args.size == 1
-      val uri = if (nil) false else args.head.isInstanceOf[URI]
+      val nil                = deepNil(args)
+      val one                = args.size == 1
+      val uri                = if (nil) false else args.head.isInstanceOf[URI]
 
       val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) = card match {
 
@@ -360,7 +360,7 @@ trait InputMolecule extends MoleculeBase {
 
         case 1 => clauses match {
 
-          case Nil if ns == "ns" && attr == "?" => (Nil, Nil, Seq(Funct("=", Seq(v, Val(args.head)), NoBinding)))
+          case Nil if nsFull == "ns" && attr == "?" => (Nil, Nil, Seq(Funct("=", Seq(v, Val(args.head)), NoBinding)))
 
           // Neq(Seq(Qm))
           case Seq(dc, _, Funct("!=", _, _)) if nil                                       => (Nil, Nil, Seq(dc))
@@ -404,7 +404,7 @@ trait InputMolecule extends MoleculeBase {
       }
 
       val (newRules2, newClauses2): (Seq[Rule], Seq[Clause]) = if (unifyRule && newRules.size == 1 && argss.size == 1) {
-        val curRules = query.i.rules.collect {
+        val curRules    = query.i.rules.collect {
           case r@Rule(`ruleName`, _, _) => r
         }
         val newClauses0 = before ++ newClauses ++ after

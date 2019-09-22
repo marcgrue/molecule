@@ -46,20 +46,20 @@ object model extends Helpers {
   trait Element
 
   trait GenericAtom extends Element {
-    val ns   : String
-    val attr : String
-    val tpe  : String
-    val value: Value
+    val nsFull: String
+    val attr  : String
+    val tpe   : String
+    val value : Value
   }
 
-  case class Generic(ns: String,
+  case class Generic(nsFull: String,
                      attr: String,
                      tpe: String,
                      value: Value) extends GenericAtom {
-    override def toString: String = s"""Generic("$ns", "$attr", "$tpe", $value)"""
+    override def toString: String = s"""Generic("$nsFull", "$attr", "$tpe", $value)"""
   }
 
-  case class Atom(ns: String,
+  case class Atom(nsFull: String,
                   attr: String,
                   tpe: String,
                   card: Int,
@@ -67,15 +67,15 @@ object model extends Helpers {
                   enumPrefix: Option[String] = None,
                   gvs: Seq[GenericValue] = Nil,
                   keys: Seq[String] = Nil) extends GenericAtom {
-    override def toString: String = s"""Atom("$ns", "$attr", "$tpe", $card, $value, ${o(enumPrefix)}, ${seq(gvs)}, ${seq(keys)})"""
+    override def toString: String = s"""Atom("$nsFull", "$attr", "$tpe", $card, $value, ${o(enumPrefix)}, ${seq(gvs)}, ${seq(keys)})"""
   }
 
-  case class Bond(ns: String,
+  case class Bond(nsFull: String,
                   refAttr: String,
                   refNs: String = "",
                   card: Int,
                   gvs: Seq[GenericValue] = Nil) extends Element {
-    override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${seq(gvs)})"""
+    override def toString: String = s"""Bond("$nsFull", "$refAttr", "$refNs", $card, ${seq(gvs)})"""
   }
 
   case class ReBond(backRef: String) extends Element {
@@ -198,11 +198,11 @@ object model extends Helpers {
 
 
   def curNs(e: Element) = e match {
-    case Atom(ns, _, _, _, _, _, _, _)   => ns
-    case Bond(ns, _, _, _, _)            => ns
-    case Nested(Bond(ns, _, _, _, _), _) => ns
-    case Generic(ns, _, _, _)            => ns
-    case unexpected                      => throw new ModelException("Unexpected element: " + unexpected)
+    case Atom(nsFull, _, _, _, _, _, _, _)   => nsFull
+    case Bond(nsFull, _, _, _, _)            => nsFull
+    case Nested(Bond(nsFull, _, _, _, _), _) => nsFull
+    case Generic(nsFull, _, _, _)            => nsFull
+    case unexpected                          => throw new ModelException("Unexpected element: " + unexpected)
   }
 }
 

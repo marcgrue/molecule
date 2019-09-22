@@ -29,6 +29,13 @@ class UpdateFloat extends CoreSpec {
       Ns.float.get === List()
 
 
+      // decimals with correct precision
+      val e2 = Ns.float(2.3f).save.eid
+      Ns(e2).float.get.head === 2.3f
+
+      Ns(e2).float(2.6f).update
+      Ns(e2).float.get.head === 2.6f
+
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).float(2f, 3f).update must throwA[VerifyModelException])

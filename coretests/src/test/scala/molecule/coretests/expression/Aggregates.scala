@@ -94,7 +94,7 @@ class Aggregates extends CoreSpec {
   "avg" in new AggregateSetup {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
-    Ns.float(avg).get.head === 2.200000007947286 // Double value is returned. Use double attr for precision
+    Ns.float(avg).get.head === 2.2
     Ns.double(avg).get.head === 2.2
   }
 
@@ -102,7 +102,7 @@ class Aggregates extends CoreSpec {
   "variance" in new AggregateSetup {
     Ns.int(variance).get.head === 0.6666666666666666
     Ns.long(variance).get.head === 0.6666666666666666
-    Ns.float(variance).get.head === 0.806666614214581 // Double value is returned. Use double attr for precision
+    Ns.float(variance).get.head === 0.8066666666666665
     Ns.double(variance).get.head === 0.8066666666666665
   }
 
@@ -110,7 +110,7 @@ class Aggregates extends CoreSpec {
   "stddev" in new AggregateSetup {
     Ns.int(stddev).get.head === 0.816496580927726
     Ns.long(stddev).get.head === 0.816496580927726
-    Ns.float(stddev).get.head === 0.8981462098203059 // Double value is returned. Use double attr for precision
+    Ns.float(stddev).get.head === 0.8981462390204986
     Ns.double(stddev).get.head === 0.8981462390204986
   }
 

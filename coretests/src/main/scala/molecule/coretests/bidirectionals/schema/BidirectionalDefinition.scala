@@ -39,9 +39,9 @@ object BidirectionalDefinition {
 
     // Edge properties
     val weight          = oneInt
-    val howWeMet        = oneEnum('inSchool, 'atWork, 'throughFriend)
+    val howWeMet        = oneEnum("inSchool", "atWork", "throughFriend")
     val commonInterests = manyString
-    val commonLicences  = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+    val commonLicences  = manyEnum("climbing", "diving", "parachuting", "flying")
     val commonScores    = mapInt
     val coreQuality     = one[Quality]
     val inCommon        = many[Quality]
@@ -55,9 +55,9 @@ object BidirectionalDefinition {
 
     // Edge properties
     val weight          = oneInt
-    val howWeMet        = oneEnum('inSchool, 'atWork, 'throughFriend)
+    val howWeMet        = oneEnum("inSchool", "atWork", "throughFriend")
     val commonInterests = manyString
-    val commonLicences  = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+    val commonLicences  = manyEnum("climbing", "diving", "parachuting", "flying")
     val commonScores    = mapInt
     val coreQuality     = one[Quality]
     val inCommon        = many[Quality]
@@ -76,9 +76,9 @@ object BidirectionalDefinition {
 
     // Edge properties
     val weight          = oneInt
-    val howWeMet        = oneEnum('inSchool, 'atWork, 'throughFriend)
+    val howWeMet        = oneEnum("inSchool", "atWork", "throughFriend")
     val commonInterests = manyString
-    val commonLicences  = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+    val commonLicences  = manyEnum("climbing", "diving", "parachuting", "flying")
     val commonScores    = mapInt
     val coreQuality     = one[Quality]
     val inCommon        = many[Quality]
@@ -94,9 +94,9 @@ object BidirectionalDefinition {
 
     // Edge properties
     val weight          = oneInt
-    val howWeMet        = oneEnum('inSchool, 'atWork, 'throughFriend)
+    val howWeMet        = oneEnum("inSchool", "atWork", "throughFriend")
     val commonInterests = manyString
-    val commonLicences  = manyEnum('climbing, 'diving, 'parachuting, 'flying)
+    val commonLicences  = manyEnum("climbing", "diving", "parachuting", "flying")
     val commonScores    = mapInt
     val coreQuality     = one[Quality]
     val inCommon        = many[Quality]

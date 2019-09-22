@@ -16,7 +16,7 @@ object CoreTestDefinition {
     val date    = oneDate
     val uuid    = oneUUID
     val uri     = oneURI
-    val enum    = oneEnum('enum0, 'enum1, 'enum2, 'enum3, 'enum4, 'enum5, 'enum6, 'enum7, 'enum8, 'enum9)
+    val enum    = oneEnum("enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9")
     val byte    = oneByte
     val parent  = one[Ns]
     val ref1    = one[Ref1]
@@ -33,7 +33,7 @@ object CoreTestDefinition {
     val dates    = manyDate
     val uuids    = manyUUID
     val uris     = manyURI
-    val enums    = manyEnum('enum0, 'enum1, 'enum2, 'enum3, 'enum4, 'enum5, 'enum6, 'enum7, 'enum8, 'enum9)
+    val enums    = manyEnum("enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9")
     val bytes    = manyByte
     val parents  = many[Ns]
     val refs1    = many[Ref1]
@@ -56,7 +56,7 @@ object CoreTestDefinition {
   trait Ref1 {
     val str1    = oneString
     val int1    = oneInt
-    val enum1   = oneEnum('enum10, 'enum11, 'enum12)
+    val enum1   = oneEnum("enum10", "enum11", "enum12")
     val ref2    = one[Ref2]
     val refSub2 = one[Ref2].isComponent
 
@@ -69,7 +69,7 @@ object CoreTestDefinition {
   trait Ref2 {
     val str2  = oneString.uniqueIdentity
     val int2  = oneInt.uniqueValue
-    val enum2 = oneEnum('enum20, 'enum21, 'enum22)
+    val enum2 = oneEnum("enum20", "enum21", "enum22")
     val strs2 = manyString
     val ints2 = manyInt.noHistory
   }

@@ -14,6 +14,18 @@ class Fulltext extends Base {
     Ns.str.contains("The").get === List()
     Ns.str.contains("Ten").get === List("Ten slow monkeys")
 
+    /*
+    Non-indexed words:
+
+    "a", "an", "and", "are", "as", "at", "be", "but", "by",
+    "for", "if", "in", "into", "is", "it",
+    "no", "not", "of", "on", "or", "such",
+    "that", "the", "their", "then", "there", "these",
+    "they", "this", "to", "was", "will", "with"
+
+    See https://docs.datomic.com/on-prem/schema.html
+    */
+
     // Only full words counted
     Ns.str.contains("jumps").get === List("The quick fox jumps")
     Ns.str.contains("jump").get === List()
@@ -76,8 +88,8 @@ class Fulltext extends Base {
     Ns.strs.contains("slow").get === List(Set("The quick fox jumps", "Ten slow monkeys", "lorem ipsum", "Going slow"))
     Ns.strs.contains("fox", "slow").get === List(Set("The quick fox jumps", "Ten slow monkeys"))
 
-    Ns.int.strs_.contains("fox").get ===        List(1)
-    Ns.int.strs_.contains("slow").get ===        List(1, 2)
+    Ns.int.strs_.contains("fox").get === List(1)
+    Ns.int.strs_.contains("slow").get === List(1, 2)
     Ns.int.strs_.contains("fox", "slow").get === List(1)
   }
 }

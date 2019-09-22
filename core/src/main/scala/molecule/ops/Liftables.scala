@@ -56,7 +56,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case s: HashSet[_] => q"Set(..${s map any})"
       case emptySet      => q"Set()"
     }
-    case q"scala.None"                 => q"None"
+    case q"scala.None   "              => q"None"
     case null                          => q"null"
     case other                         =>
       abort("Can't lift unexpected Any type: " + other.getClass +
@@ -104,15 +104,15 @@ private[molecule] trait Liftables extends MacroHelpers {
 
   implicit val liftVar   : c.universe.Liftable[Var]  = Liftable[Var] { v => q"Var(${v.v})" }
   implicit val liftVal   : c.universe.Liftable[Val]  = Liftable[Val] { value => q"Val(${value.v})" }
-  implicit val liftAttrKW: c.universe.Liftable[KW]   = Liftable[KW] { kw => q"KW(${kw.ns}, ${kw.attr}, ${kw.refNs})" }
+  implicit val liftAttrKW: c.universe.Liftable[KW]   = Liftable[KW] { kw => q"KW(${kw.nsFull}, ${kw.attr}, ${kw.refNs})" }
   implicit val liftWith  : c.universe.Liftable[With] = Liftable[With] { widh => q"With(Seq(..${widh.variables}))" }
 
   implicit val liftQueryValue: c.universe.Liftable[QueryValue] = Liftable[QueryValue] {
-    case KW(ns, attr, refNs)           => q"KW($ns, $attr, $refNs)"
-    case Var(sym)                      => q"Var($sym)"
-    case Val(v)                        => q"Val($v)"
-    case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
-    case NoVal                         => q"NoVal"
+    case KW(nsFull, attr, refNs)           => q"KW($nsFull, $attr, $refNs)"
+    case Var(sym)                          => q"Var($sym)"
+    case Val(v)                            => q"Val($v)"
+    case Pull(e, nsFull, attr, enumPrefix) => q"Pull($e, $nsFull, $attr, $enumPrefix)"
+    case NoVal                             => q"NoVal"
   }
 
   implicit val liftDataSource: c.universe.Liftable[DataSource] = Liftable[DataSource] {
@@ -122,23 +122,23 @@ private[molecule] trait Liftables extends MacroHelpers {
   }
 
   implicit val liftQueryTerm: c.universe.Liftable[QueryTerm] = Liftable[QueryTerm] {
-    case KW(ns, attr, refNs) => q"KW($ns, $attr, $refNs)"
-    case Empty               => q"Empty"
-    case NoBinding           => q"NoBinding"
-    case Var(sym)            => q"Var($sym)"
-    case Val(v)              => q"Val($v)"
-    case DS(name)            => q"DS($name)"
-    case DS                  => q"DS"
-    case ImplDS              => q"ImplDS"
-    case t                   => abort("Can't lift query term: " + t)
+    case KW(nsFull, attr, refNs) => q"KW($nsFull, $attr, $refNs)"
+    case Empty                   => q"Empty"
+    case NoBinding               => q"NoBinding"
+    case Var(sym)                => q"Var($sym)"
+    case Val(v)                  => q"Val($v)"
+    case DS(name)                => q"DS($name)"
+    case DS                      => q"DS"
+    case ImplDS                  => q"ImplDS"
+    case t                       => abort("Can't lift query term: " + t)
   }
 
   implicit val liftOutput: c.universe.Liftable[Output] = Liftable[Output] {
-    case Var(sym)                      => q"Var($sym)"
-    case Val(v)                        => q"Val($v)"
-    case AggrExpr(fn, args, v)         => q"AggrExpr($fn, Seq(..$args), $v)"
-    case Pull(e, ns, attr, enumPrefix) => q"Pull($e, $ns, $attr, $enumPrefix)"
-    case NoVal                         => q"NoVal"
+    case Var(sym)                          => q"Var($sym)"
+    case Val(v)                            => q"Val($v)"
+    case AggrExpr(fn, args, v)             => q"AggrExpr($fn, Seq(..$args), $v)"
+    case Pull(e, nsFull, attr, enumPrefix) => q"Pull($e, $nsFull, $attr, $enumPrefix)"
+    case NoVal                             => q"NoVal"
   }
   implicit val liftFind  : c.universe.Liftable[Find]   = Liftable[Find] { find => q"Find(Seq(..${find.outputs}))" }
 
@@ -167,7 +167,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case cl: NotClause      => q"$cl"
       case cl: RuleInvocation => q"$cl"
       case cl: Funct          => q"$cl"
-      case q"$e"              => e
+      case q"$e "             => e
     }
     q"NotClauses(Seq(..$clauses))"
   }
@@ -178,7 +178,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case cl: NotClause      => q"$cl"
       case cl: RuleInvocation => q"$cl"
       case cl: Funct          => q"$cl"
-      case q"$e"              => e
+      case q"$e "             => e
     }
     q"NotJoinClauses(Seq(..${notJoinClauses.nonUnifyingVars}), Seq(..$clauses))"
   }
@@ -290,10 +290,10 @@ private[molecule] trait Liftables extends MacroHelpers {
     case MapKeys(keys)                => q"MapKeys(Seq(..$keys))"
   }
 
-  implicit val liftAtom   : c.universe.Liftable[Atom]    = Liftable[Atom] { a => q"Atom(${a.ns}, ${a.attr}, ${a.tpe}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gvs}), Seq(..${a.keys}))" }
-  implicit val liftBond   : c.universe.Liftable[Bond]    = Liftable[Bond] { b => q"Bond(${b.ns}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gvs}))" }
+  implicit val liftAtom   : c.universe.Liftable[Atom]    = Liftable[Atom] { a => q"Atom(${a.nsFull}, ${a.attr}, ${a.tpe}, ${a.card}, ${a.value}, ${a.enumPrefix}, Seq(..${a.gvs}), Seq(..${a.keys}))" }
+  implicit val liftBond   : c.universe.Liftable[Bond]    = Liftable[Bond] { b => q"Bond(${b.nsFull}, ${b.refAttr}, ${b.refNs}, ${b.card}, Seq(..${b.gvs}))" }
   implicit val liftReBond : c.universe.Liftable[ReBond]  = Liftable[ReBond] { r => q"ReBond(${r.backRef})" }
-  implicit val liftGeneric: c.universe.Liftable[Generic] = Liftable[Generic] { m => q"Generic(${m.ns}, ${m.attr}, ${m.tpe}, ${m.value})" }
+  implicit val liftGeneric: c.universe.Liftable[Generic] = Liftable[Generic] { m => q"Generic(${m.nsFull}, ${m.attr}, ${m.tpe}, ${m.value})" }
   implicit val liftGroup  : c.universe.Liftable[Nested]  = Liftable[Nested] { n0 =>
     val es0: Seq[c.universe.Tree] = n0.elements map {
       case a: Atom    => q"$a"
@@ -362,7 +362,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case r: ReBond  => q"$r"
       case Self       => q"Self"
       case g: Generic => q"$g"
-      case q"$e"      => e
+      case q"$e "     => e
     }
     q"TxMetaData(Seq(..$es))"
   }
@@ -374,7 +374,7 @@ private[molecule] trait Liftables extends MacroHelpers {
       case r: ReBond  => q"$r"
       case Self       => q"Self"
       case g: Generic => q"$g"
-      case q"$e"      => e
+      case q"$e "     => e
     }
     q"Composite(Seq(..$es))"
   }
@@ -394,15 +394,15 @@ private[molecule] trait Liftables extends MacroHelpers {
   }
 
   implicit val liftElement: c.universe.Liftable[Element] = Liftable[Element] {
-    case Atom(ns, attr, tpeS, card, value, enumPrefix, gs, keys) => q"Atom($ns, $attr, $tpeS, $card, $value, $enumPrefix, Seq(..$gs), Seq(..$keys))"
-    case Bond(ns, refAttr, refNs, card, gs)                      => q"Bond($ns, $refAttr, $refNs, $card, Seq(..$gs))"
-    case ReBond(backRef)                                         => q"ReBond($backRef)"
-    case Self                                                    => q"Self"
-    case Nested(ref, elements)                                   => q"Nested($ref, $elements)"
-    case Generic(ns, attr, kind, value)                          => q"Generic($ns, $attr, $kind, $value)"
-    case TxMetaData(elements)                                    => q"TxMetaData($elements)"
-    case Composite(elements)                                     => q"Composite($elements)"
-    case EmptyElement                                            => q"EmptyElement"
+    case Atom(nsFull, attr, tpeS, card, value, enumPrefix, gs, keys) => q"Atom($nsFull, $attr, $tpeS, $card, $value, $enumPrefix, Seq(..$gs), Seq(..$keys))"
+    case Bond(nsFull, refAttr, refNs, card, gs)                      => q"Bond($nsFull, $refAttr, $refNs, $card, Seq(..$gs))"
+    case ReBond(backRef)                                             => q"ReBond($backRef)"
+    case Self                                                        => q"Self"
+    case Nested(ref, elements)                                       => q"Nested($ref, $elements)"
+    case Generic(nsFull, attr, kind, value)                          => q"Generic($nsFull, $attr, $kind, $value)"
+    case TxMetaData(elements)                                        => q"TxMetaData($elements)"
+    case Composite(elements)                                         => q"Composite($elements)"
+    case EmptyElement                                                => q"EmptyElement"
   }
 
   implicit val liftModel: c.universe.Liftable[Model] = Liftable[Model] { model => q"Model(Seq(..${model.elements}))" }

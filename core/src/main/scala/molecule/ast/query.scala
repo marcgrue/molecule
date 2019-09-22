@@ -44,7 +44,7 @@ object query extends Helpers {
       val in = if (i.inputs.isEmpty && i.rules.isEmpty) "" else "\n  In(" +
         "\n    List(" + (if (i.inputs.isEmpty) ")," else i.inputs.mkString("\n      ", ",\n      ", "),")) +
         "\n    List(" + (if (i.rules.isEmpty) ")," else i.rules.mkString("\n      ", ",\n      ", "),")) +
-        "\n    List(" + (if (i.ds.size == 1) i.ds.head + "))," else i.ds.mkString("\n      ", ",\n      ", ")),"))
+        "\n    List(" + (if (i.ds.size == 1) i.ds.head.toString + "))," else i.ds.mkString("\n      ", ",\n      ", ")),"))
       s"""|Query(
           |  Find(List(
           |    ${f.outputs.mkString(sep)})),$widh$in
@@ -68,8 +68,8 @@ object query extends Helpers {
 
   sealed trait QueryValue extends QueryTerm
 
-  case class KW(ns: String, attr: String, refNs: String = "") extends QueryValue {
-    override def toString: String = s"""KW("$ns", "$attr", "$refNs")"""
+  case class KW(nsFull: String, attr: String, refNs: String = "") extends QueryValue {
+    override def toString: String = s"""KW("$nsFull", "$attr", "$refNs")"""
   }
   case class Var(v: String) extends QueryValue with Output {
     override def toString: String = s"""Var("$v")"""
@@ -77,8 +77,8 @@ object query extends Helpers {
   case class Val(v: Any) extends QueryValue with Output {
     override def toString: String = s"""Val(${cast(v)})"""
   }
-  case class Pull(e: String, ns: String, attr: String, enumPrefix: Option[String] = None) extends QueryValue with Output {
-    override def toString: String = s"""Pull("$e", "$ns", "$attr", ${o(enumPrefix)})"""
+  case class Pull(e: String, nsFull: String, attr: String, enumPrefix: Option[String] = None) extends QueryValue with Output {
+    override def toString: String = s"""Pull("$e", "$nsFull", "$attr", ${o(enumPrefix)})"""
   }
   case object NoVal extends QueryValue with Output
 

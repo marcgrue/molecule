@@ -8,6 +8,7 @@ import molecule.facade.Conn
 import molecule.input.InputMolecule
 import molecule.ops.QueryOps._
 import molecule.transform.{Model2Transaction, Query2String}
+import org.specs2.matcher.MatchResult
 import org.specs2.mutable._
 import scala.concurrent.{Await, Awaitable}
 import scala.concurrent.duration.Duration
@@ -17,7 +18,7 @@ import scala.concurrent.duration._
 
 trait MoleculeSpec extends Specification {
 
-  def typed[T](t: => T) {}
+  def typed[T](t: => T): Unit = {}
 
   def await[T](atMost: Duration)(awaitable: Awaitable[T]): T =
     Await.result(awaitable, atMost)
@@ -31,26 +32,26 @@ trait MoleculeSpec extends Specification {
 
   def formatTx(tx: Seq[Statement]) = {
     val longestAction = tx.map(stmt => stmt.action.length).max
-    val longestAttr = tx.map(stmt => stmt.a.toString.length).max
-    val longestValue = tx.map(stmt => stmt.v.toString.length).max
+    val longestAttr   = tx.map(stmt => stmt.a.toString.length).max
+    val longestValue  = tx.map(stmt => stmt.v.toString.length).max
 
     // Increment temporary ids in a controlled way so that we can test
-    val ids = tx.foldLeft(Map[String, String]()) { case (idStmts, stmt) =>
+    val ids: Map[String, String] = tx.foldLeft(Map.empty[String, String]) { case (idStmts, stmt) =>
       val rawId = stmt.e.toString
       rawId match {
         case r"#db/id\[:db.part/user -\d{7}\]" =>
-          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> ("#db/id[:db.part/user -" + (1000001 + idStmts.size) + "]"))
-        case r"#db/id\[:db.part/tx -\d{7}\]" =>
-          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> ("#db/id[:db.part/tx   -" + (1000001 + idStmts.size) + "]"))
-        case r"(\d{14})$id" =>
-          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> (id + "                "))
-        case r"#db/id\[:(\w+)$part -\d{7}\]" =>
-          if (idStmts.contains(rawId)) idStmts else idStmts + (rawId -> (s"#db/id[:$part -" + (1000001 + idStmts.size) + "]"))
-        case other                             => idStmts + (other.toString -> other.toString)
+          if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> ("#db/id[:db.part/user -" + (1000001 + idStmts.size) + "]"))
+        case r"#db/id\[:db.part/tx -\d{7}\]"   =>
+          if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> ("#db/id[:db.part/tx   -" + (1000001 + idStmts.size) + "]"))
+        case r"(\d{14})$id"                    =>
+          if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> (id + "                "))
+        case r"#db/id\[:(\w+)$part -\d{7}\]"   =>
+          if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> (s"#db/id[:$part -" + (1000001 + idStmts.size) + "]"))
+        case other                             => idStmts ++ Map(other.toString -> other.toString)
       }
     }
-    val tx2 = tx.map { stmt =>
-      val newId = ids.getOrElse(stmt.e.toString, throw new MoleculeSpecException("missing stmt id"))
+    val tx2                      = tx.map { stmt =>
+      val newId    = ids.getOrElse(stmt.e.toString, throw new MoleculeSpecException("missing stmt id"))
       val newValue = ids.getOrElse(stmt.v.toString, stmt.v.toString)
       List(
         stmt.action + " " * (longestAction - stmt.action.toString.length),
@@ -64,17 +65,17 @@ trait MoleculeSpec extends Specification {
   }
 
   def formatInputs(query: Query) = {
-    val rules = if (query.i.rules.isEmpty) ""
+    val rules     = if (query.i.rules.isEmpty) ""
     else {
       val p = (expr: QueryExpr) => Query2String(query).p(expr)
       query.i.rules map p mkString("[", "\n     ", "]")
     }
-    val first = if (query.i.rules.isEmpty) Seq("datomic.db.Db@xxx") else Seq("datomic.db.Db@xxx", rules)
+    val first     = if (query.i.rules.isEmpty) Seq("datomic.db.Db@xxx") else Seq("datomic.db.Db@xxx", rules)
     val allInputs = first ++ query.inputs
     if (allInputs.size == 1)
       ""
     else
-      "\n\nINPUTS:" + allInputs.zipWithIndex.map(e => (e._2 + 1) + " " + e._1).mkString("\nList(\n  ", "\n  ", "\n)")
+      "\n\nINPUTS:" + allInputs.zipWithIndex.map(e => s"${e._2 + 1} ${e._1}").mkString("\nList(\n  ", "\n  ", "\n)")
   }
 
   implicit class dsl2model2query2string(molecule: MoleculeBase)(implicit conn: Conn) {
@@ -134,7 +135,13 @@ trait MoleculeSpec extends Specification {
     }
   }
 
-  def testUpdateMolecule(molecule: MoleculeBase)(implicit conn: Conn) = new {
+  def testUpdateMolecule(molecule: MoleculeBase)(implicit conn: Conn): Any {
+    def -->(txString: String): MatchResult[Any]
+
+    def -->(model: Model): Any {
+      def -->(txString: String): MatchResult[Any]
+    }
+  } = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {
@@ -149,7 +156,13 @@ trait MoleculeSpec extends Specification {
     }
   }
 
-  def testInsertMolecule(molecule: MoleculeBase, ids: Seq[Long] = Seq())(implicit conn: Conn) = new {
+  def testInsertMolecule(molecule: MoleculeBase, ids: Seq[Long] = Seq())(implicit conn: Conn): Object {
+    def -->(txString: String): MatchResult[Any]
+
+    def -->(model: Model): Object {
+      def -->(txString: String): MatchResult[Any]
+    }
+  } = new {
     def -->(model: Model) = new {
       molecule._model === model
       def -->(txString: String) = {

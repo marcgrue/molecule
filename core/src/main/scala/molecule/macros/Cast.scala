@@ -1,6 +1,5 @@
 package molecule.macros
 import molecule.ops.TreeOps
-import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 

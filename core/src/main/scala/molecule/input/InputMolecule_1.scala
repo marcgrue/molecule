@@ -41,10 +41,10 @@ trait InputMolecule_1[I1] extends InputMolecule {
       // Mapped attributes
       case 2 => {
         val inVars = query.i.inputs.collect { case Placeholder(_, _, v, _) => v }
-        val Placeholder(_, KW(ns, attr, _), _, _) = query.i.inputs.head
+        val Placeholder(_, KW(nsFull, attr, _), _, _) = query.i.inputs.head
         val values = inputs.flatMap {
           case map: Map[_, _] => map.toSeq.map { case (k, v) => Seq(k, v) }
-          case other          => throw new InputMolecule_1_Exception(s"Unexpected input for mapped attribute `:$ns/$attr`: " + other)
+          case other          => throw new InputMolecule_1_Exception(s"Unexpected input for mapped attribute `:$nsFull/$attr`: " + other)
         }
         query.copy(i = In(Seq(InVar(RelationBinding(inVars), values)), query.i.rules, query.i.ds))
       }

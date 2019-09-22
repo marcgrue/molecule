@@ -43,8 +43,8 @@ object Model2Query extends Helpers {
 
     // Resolve redundant `with:` variables
     val withVars = query2.wi.variables
-    val query3 = if (withVars.isEmpty) query2 else {
-      val outVars = query2.f.outputs.collect { case Var(v) => v }
+    val query3   = if (withVars.isEmpty) query2 else {
+      val outVars              = query2.f.outputs.collect { case Var(v) => v }
       val nonRedundantWithVars = withVars.diff(outVars)
       query2.copy(wi = With(nonRedundantWithVars))
     }
@@ -87,57 +87,58 @@ object Model2Query extends Helpers {
 
   def makeAtom(model: Model, query: Query, atom: Atom, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
-    val (ns, attr) = (atom.ns, atom.attr)
+    val (nsFull, attr) = (atom.nsFull, atom.attr)
     atom match {
-      case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(model, query, atom, ns, attr, e, v, w, prevNs)
-      case Atom(_, _, "a", _, _, _, _, _)            => (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case Atom(_, _, "ns", _, _, _, _, _)           => (resolve(query, e, v, atom), e, w, ns, attr, "")
-      case _ if prevRefNs == "IndexVal"              => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    => (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevAttr`, _, _, _, _, _, _, _)     => (resolve(query, v, w, atom), v, w, ns, attr, "")
-      case Atom(`prevNs`, _, _, _, _, _, _, _)       => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _ if datomGeneric.contains(prevAttr)      => (resolve(query, e, w, atom), e, w, ns, attr, "")
-      case _                                         => (resolve(query, e, v, atom), e, v, ns, attr, "")
+      case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(model, query, atom, nsFull, attr, e, v, w, prevNs)
+      case Atom(_, _, "a", _, _, _, _, _)            => (resolve(query, e, v, atom), e, w, nsFull, attr, "")
+      case Atom(_, _, "ns", _, _, _, _, _)           => (resolve(query, e, v, atom), e, w, nsFull, attr, "")
+      case _ if prevRefNs == "IndexVal"              => (resolve(query, e, w, atom), e, w, nsFull, attr, "")
+      case Atom(`prevRefNs`, _, _, _, _, _, _, _)    => (resolve(query, v, w, atom), v, w, nsFull, attr, "")
+      case Atom(`prevAttr`, _, _, _, _, _, _, _)     => (resolve(query, v, w, atom), v, w, nsFull, attr, "")
+      case Atom(`prevNs`, _, _, _, _, _, _, _)       => (resolve(query, e, w, atom), e, w, nsFull, attr, "")
+      case _ if datomGeneric.contains(prevAttr)      => (resolve(query, e, w, atom), e, w, nsFull, attr, "")
+      case _                                         => (resolve(query, e, v, atom), e, v, nsFull, attr, "")
     }
   }
 
   def makeBond(model: Model, query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = bond match {
-    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional) => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, refAttr, refNs, _, _)                    => (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
-    case Bond(`prevAttr`, refAttr, refNs, _, _)                  => (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
-    case Bond(`prevRefNs`, refAttr, refNs, _, _)                 => (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
-    case Bond(ns, refAttr, refNs, _, _)                          => (resolve(query, e, v, bond), e, v, ns, refAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional)               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, refAttr, refNs, _, _)                                  => (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
+    case Bond(`prevAttr`, refAttr, refNs, _, _)                                => (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
+    case Bond(`prevRefNs`, refAttr, refNs, _, _)                               => (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
+    case Bond(nsFull, refAttr, refNs, _, _) if datomGeneric.contains(prevAttr) => (resolve(query, e, w, bond), e, w, nsFull, refAttr, refNs)
+    case Bond(nsFull, refAttr, refNs, _, _)                                    => (resolve(query, e, v, bond), e, v, nsFull, refAttr, refNs)
   }
 
-  def makeAtomUnify(model: Model, query: Query, a: Atom, ns: String, attr: String, e: String, v: String, w: String, prevNs: String)
+  def makeAtomUnify(model: Model, query: Query, a: Atom, nsFull: String, attr: String, e: String, v: String, w: String, prevNs: String)
   : (Query, String, String, String, String, String) = {
     val attr1 = if (attr.last == '_') attr.init else attr
     // Find previous matching value that we want to unify with (from an identical attribute)
     query.wh.clauses.reverse.collectFirst {
       // Having a value var to unify with
-      case dc@DataClause(_, _, KW(ns0, attr0, _), Var(v0), _, _) if ns0 == ns && attr0 == attr1 => ns match {
-        case `prevNs` => (resolve(query, e, v0, a), e, v, ns, attr, "")
-        case _        => (resolve(query, v, v0, a), v, v, ns, attr, "")
+      case DataClause(_, _, KW(ns0, attr0, _), Var(v0), _, _) if ns0 == nsFull && attr0 == attr1 => nsFull match {
+        case `prevNs` => (resolve(query, e, v0, a), e, v, nsFull, attr, "")
+        case _        => (resolve(query, v, v0, a), v, v, nsFull, attr, "")
       }
 
       // Missing value var to unify with
-      case dc@DataClause(_, _, KW(ns0, attr0, _), _, _, _) if ns0 == ns && attr0 == attr1 =>
+      case dc@DataClause(_, _, KW(ns0, attr0, _), _, _, _) if ns0 == nsFull && attr0 == attr1 =>
         // Add initial clause to have a var to unify with
         val initialClause = dc.copy(v = Var(w))
-        val newWhere = query.wh.copy(clauses = query.wh.clauses :+ initialClause)
-        (resolve(query.copy(wh = newWhere), v, w, a), v, w, ns, attr, "")
+        val newWhere      = query.wh.copy(clauses = query.wh.clauses :+ initialClause)
+        (resolve(query.copy(wh = newWhere), v, w, a), v, w, nsFull, attr, "")
     } getOrElse {
-      abort(s"Can't find previous attribute matching unifying attribute `$ns.$attr` in query so far:\n$query\nATOM: $a")
+      abort(s"Can't find previous attribute matching unifying attribute `$nsFull.$attr` in query so far:\n$query\nATOM: $a")
     }
   }
 
   def makeReBond(model: Model, query: Query, rb: ReBond, v: String)
   : (Query, String, String, String, String, String) = {
-    val backRef = rb.backRef
+    val backRef  = rb.backRef
     val backRefE = query.wh.clauses.reverse.collectFirst {
-      case DataClause(_, Var(backE), a, Var(_), _, _) if a.ns == backRef => backE
+      case DataClause(_, Var(backE), a, Var(_), _, _) if a.nsFull == backRef => backE
     } getOrElse {
       abort(s"Can't find back reference namespace `$backRef` in query so far:\n$model\n---------\n$query\n---------\n$rb")
     }
@@ -176,9 +177,9 @@ object Model2Query extends Helpers {
 
   def makeNested(model: Model, query: Query, nested: Nested, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
-    val Nested(b@Bond(ns, _, _, _, _), elements) = nested
-    val (e2, elements2) = if (ns == "") (e, elements) else (w, b +: elements)
-    val (q2, _, v2, ns2, attr2, refNs2) = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
+    val Nested(b@Bond(nsFull, _, _, _, _), elements) = nested
+    val (e2, elements2)                              = if (nsFull == "") (e, elements) else (w, b +: elements)
+    val (q2, _, v2, ns2, attr2, refNs2)              = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
       case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
         make(model, query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
     }
@@ -188,9 +189,9 @@ object Model2Query extends Helpers {
   def makeComposite(model: Model, query: Query, composite: Composite, e: String, v: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
     def getFirstEid(clauses: Seq[Clause]): String = clauses.head match {
-      case DataClause(_, Var(compositeEid), KW(ns, _, _), _, _, _) if ns != "db" => compositeEid
-      case _: Funct                                                              => getFirstEid(clauses.tail)
-      case other                                                                 =>
+      case DataClause(_, Var(compositeEid), KW(nsFull, _, _), _, _, _) if nsFull != "db" => compositeEid
+      case _: Funct                                                                      => getFirstEid(clauses.tail)
+      case other                                                                         =>
         abort(s"Unexpected first clause of composite query: " + other + "\n" + query.wh.clauses.mkString("\n"))
     }
     val eid: String = if (query.wh.clauses.isEmpty) e else getFirstEid(query.wh.clauses)
@@ -207,11 +208,11 @@ object Model2Query extends Helpers {
   def resolve(q: Query, e: String, v: String, element: Element): Query = {
     val (v1: String, v2: String, v3: String) = (v + 1, v + 2, v + 3)
     element match {
-      case atom: Atom                     => resolveAtom(q, e, atom, v, v1, v2, v3)
-      case Bond(ns, refAttr, refNs, _, _) => q.ref(e, ns, refAttr, v, refNs)
-      case generic: Generic               => resolveGeneric(q, e, generic, v, v1, v2, v3)
-      case ReBond(backRef)                => q.ref(e, backRef, "", v, "")
-      case unresolved                     => abort("Unresolved model: " + unresolved)
+      case atom: Atom                         => resolveAtom(q, e, atom, v, v1, v2, v3)
+      case Bond(nsFull, refAttr, refNs, _, _) => q.ref(e, nsFull, refAttr, v, refNs)
+      case generic: Generic                   => resolveGeneric(q, e, generic, v, v1, v2, v3)
+      case ReBond(backRef)                    => q.ref(e, backRef, "", v, "")
+      case unresolved                         => abort("Unresolved model: " + unresolved)
     }
   }
 
@@ -364,7 +365,7 @@ object Model2Query extends Helpers {
   def resolveDatom(q: Query, e: String, g: Generic, v: String, v1: String, v2: String, v3: String): Query = g.attr match {
     case "e"         =>
       val q1 = q.datomE(e, v, v1, _model.elements.size == 1)
-      val w = if (q1.wh.clauses.exists {
+      val w  = if (q1.wh.clauses.exists {
         case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
         case _                                                                   => false
       }) v else e
@@ -376,7 +377,7 @@ object Model2Query extends Helpers {
     case "a"         => resolveDatomMandatory(q.datomA(e, v, v1), e, g, "String", v)
     case "v"         =>
       val q1 = q.datomV(e, v, v1)
-      val w = if (q1.wh.clauses.exists {
+      val w  = if (q1.wh.clauses.exists {
         case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
         case _                                                                => false
       }) v else v + "_v"
@@ -384,7 +385,7 @@ object Model2Query extends Helpers {
 
     case "e_"         =>
       val q1 = q.datomE(e, v, v1)
-      val w = if (q1.wh.clauses.exists {
+      val w  = if (q1.wh.clauses.exists {
         case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
         case _                                                                   => false
       }) v else e
@@ -396,7 +397,7 @@ object Model2Query extends Helpers {
     case "a_"         => resolveDatomTacit(q.datomA(e, v, v1), e, g, "String", v)
     case "v_"         =>
       val q1 = q.datomV(e, v, v1)
-      val w = if (q1.wh.clauses.exists {
+      val w  = if (q1.wh.clauses.exists {
         case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
         case _                                                                => false
       }) v else v + "_v"
@@ -763,7 +764,7 @@ object Model2Query extends Helpers {
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
-      case Eq(arg :: Nil) if uri(t) => q.findD(v).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
+      case Eq(arg :: Nil) if uri(t) => q.findD(v).func(s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
       case Eq(arg :: Nil)           => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                 => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case other                    => abort("Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
@@ -775,7 +776,7 @@ object Model2Query extends Helpers {
     a.value match {
       case VarValue                 => q.pull(e, a)
       case Fn("not", _)             => q.pull(e, a).not(e, a) // None
-      case Eq(arg :: Nil) if uri(t) => q.find(v).func( s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
+      case Eq(arg :: Nil) if uri(t) => q.find(v).func(s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
       case Eq(arg :: Nil)           => q.find(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                 => q.find(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case other                    => abort("Unresolved optional cardinality-one Atom$:\nAtom$   : " + s"$a0\nElement: $other")
@@ -800,7 +801,7 @@ object Model2Query extends Helpers {
       case Eq((set: Set[_]) :: Nil) if set.isEmpty => q.not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.not(e, a)
       case Eq((set: Set[_]) :: Nil)                => q.whereAnd(e, a, v, set.toSeq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                => q.where(e, a, v).func( s"""ground (java.net.URI. "$arg")""", Empty, v)
+      case Eq(arg :: Nil) if uri(t)                => q.where(e, a, v).func(s"""ground (java.net.URI. "$arg")""", Empty, v)
       case Eq(arg :: Nil)                          => q.where(e, a, Val(arg))
       case Eq(args)                                => q.orRules(e, a, args, u(t, v))
       case Neq(args)                               => q.where(e, a, v).compareToMany("!=", a, v, args)
@@ -833,7 +834,7 @@ object Model2Query extends Helpers {
       case Eq((set: Set[_]) :: Nil) if set.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
       case Eq((set: Set[_]) :: Nil)                    => q.findD(v).whereAnd(e, a, v, set.toSeq, u(t, v))
-      case Eq(arg :: Nil) if uri(t)                    => q.findD(v).where(e, a, v).where(e, a, v + "_uri").func( s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
+      case Eq(arg :: Nil) if uri(t)                    => q.findD(v).where(e, a, v).where(e, a, v + "_uri").func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
       case Eq(arg :: Nil)                              => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                                    => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case Neq(Nil)                                    => q.findD(v).where(e, a, v)
@@ -868,7 +869,7 @@ object Model2Query extends Helpers {
       case VarValue                                => q.find(v).where(e, a, v)
       case NoValue                                 => q.find(NoVal).where(e, a, v)
       case Distinct                                => q.find("distinct", Nil, v).where(e, a, v).widh(e)
-      case BackValue(backNs)                       => q.find(e).where(v, a.ns, a.attr, Var(e), backNs)
+      case BackValue(backNs)                       => q.find(e).where(v, a.nsFull, a.attr, Var(e), backNs)
       case Fn("not", _)                            => q.find(v).where(e, a, v).not(e, a)
       case Eq(Nil)                                 => q.find(v).where(e, a, v).not(e, a)
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.find(v).where(e, a, v).not(e, a)
@@ -897,7 +898,7 @@ object Model2Query extends Helpers {
   def u(t: String, v: String): String = if (t.contains("java.net.URI")) v else ""
 
   def nextChar(str: String, inc: Int): String = {
-    val chars = str.toCharArray
+    val chars      = str.toCharArray
     val (pre, cur) = if (chars.size == 2) (chars.head, chars.last) else ('-', chars.head)
     (pre, cur, inc) match {
       case (_, _, i) if i > 2 => abort("Can't increment more than 2")
@@ -924,12 +925,12 @@ object Model2Query extends Helpers {
       abort("For now, only 1 And-expression can be used. Found: " + andAtoms)
 
     if (andAtoms.size == 1) {
-      val clauses = q.wh.clauses
-      val andAtom = andAtoms.head
-      val Atom(ns, attr0, _, card, And(andValues), _, _, _) = andAtom
-      val attr = if (attr0.last == '_') attr0.init else attr0
-      val unifyAttrs = model.elements.collect {
-        case a@Atom(ns1, attr1, _, _, _, _, _, _) if a != andAtom => (ns1, if (attr1.last == '_') attr1.init else attr1)
+      val clauses                                               = q.wh.clauses
+      val andAtom                                               = andAtoms.head
+      val Atom(nsFull, attr0, _, card, And(andValues), _, _, _) = andAtom
+      val attr                                                  = if (attr0.last == '_') attr0.init else attr0
+      val unifyAttrs                                            = model.elements.collect {
+        case a@Atom(nsFull1, attr1, _, _, _, _, _, _) if a != andAtom => (nsFull1, if (attr1.last == '_') attr1.init else attr1)
       }
 
       // The first arg is already modelled in the query
@@ -945,7 +946,7 @@ object Model2Query extends Helpers {
           case Rule(name, args, cls) => Rule(name, args map queryValue, cls flatMap clause)
           case InVar(b, argss)       => InVar(binding(b), argss)
           case qv: QueryValue        => queryValue(qv)
-          case other                 => qt
+          case _                     => qt
         }
         def binding(b: Binding): Binding = b match {
           case ScalarBinding(v)     => ScalarBinding(vi(v))
@@ -959,14 +960,14 @@ object Model2Query extends Helpers {
           case other          => makeSelfJoinClauses(other)
         }
         def dataClauses(dc: DataClause): Seq[Clause] = dc match {
-          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), Var(v), tx, op) if (ns, attr) == (ns2, attr2) && card == 3 =>
+          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), Var(v), tx, op) if (nsFull, attr) == (ns2, attr2) && card == 3 =>
             // Add next And-value
             Seq(
               DataClause(ds, vi(e), a, Var(v + "_" + i), queryTerm(tx), queryTerm(op)),
               Funct(".matches ^String", List(Var(v + "_" + i), Val(".+@(" + andValue + ")$")), NoBinding)
             )
 
-          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), _, tx, op) if (ns, attr) == (ns2, attr2) =>
+          case DataClause(ds, e@Var(_), a@KW(ns2, attr2, _), _, tx, op) if (nsFull, attr) == (ns2, attr2) =>
             // Add next And-value
             Seq(DataClause(ds, vi(e), a, Val(andValue), queryTerm(tx), queryTerm(op)))
 
@@ -979,7 +980,7 @@ object Model2Query extends Helpers {
             Seq(DataClause(ds, vi(e), a, queryValue(v), queryTerm(tx), queryTerm(op)))
         }
         def makeSelfJoinClauses(expr: QueryExpr): Seq[Clause] = expr match {
-          case dc@DataClause(ds, e, a, v, tx, op)                  => dataClauses(dc)
+          case dc: DataClause                                      => dataClauses(dc)
           case RuleInvocation(name, args)                          => Seq(RuleInvocation(name, args map queryTerm))
           case Funct(".startsWith ^String", List(_, _), NoBinding) => Nil
           case Funct(".matches ^String", List(_, _), NoBinding)    => Nil

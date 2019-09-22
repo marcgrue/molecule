@@ -250,7 +250,8 @@ trait AttrExpressions {
       * @param moreValues Optional additional negated attribute values
       * @return Filtered molecule
       */
-    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
+//    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
+    def !=(value: T, moreValues: T*): Ns with Attr = ???
 
     /** Match attribute values different from applied value.
       * {{{
@@ -266,7 +267,7 @@ trait AttrExpressions {
       * @param value Negated attribute value
       * @return Filtered molecule
       */
-    def !=(value: T): Ns with Attr = ??? // Hack to satisfy intellij inference
+//    def !=(value: T): Ns with Attr = ??? // Hack to satisfy intellij inference
 
 
     /** Match attribute values different from applied Iterable of values.
@@ -469,7 +470,6 @@ trait AttrExpressions {
       * @param value Input marker `?` for equality match
       * @return Input molecule
       */
-//    def apply(value: molecule.api.core.?): In with Attr = ???
     def apply(value: ??): In with Attr = ???
 
 

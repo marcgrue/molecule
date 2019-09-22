@@ -11,7 +11,7 @@ import molecule.ops.QueryOps._
 import molecule.ops.VerifyModel
 import molecule.transform._
 import molecule.util.Debug
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 /** Debug methods
@@ -56,7 +56,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
              |     """.stripMargin)
 
         var pad = 0
-        def p(v: Any, i: Int) = v.toString.padTo(i, ' ') + "   "
+        def p(v: Any, i: Int): String = v.toString.padTo(i, ' ') + "   "
         val n = _model.elements.tail.zipWithIndex.map {
           case (Generic(_, "e", _, _), i)         => print(p("E", pE)); pad += pE + 3; i -> pE
           case (Generic(_, "a", _, _), i)         => print(p("A", pA)); pad += pA + 3; i -> pA
@@ -100,8 +100,8 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
           case ex: Throwable => throw new QueryException(ex, _model, _query, allInputs, p)
         }
         val rulesOut: String = if (_query.i.rules.isEmpty) "none\n\n" else "[\n " + _query.i.rules.map(Query2String(_query).p(_)).mkString("\n ") + "\n]\n\n"
-        val inputs: String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1).mkString("\n") + "\n\n"
-        val outs: String = rows.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1).mkString("\n")
+        val inputs: String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}").mkString("\n") + "\n\n"
+        val outs: String = rows.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}").mkString("\n")
         println(
           "\n--------------------------------------------------------------------------\n" +
             _model + "\n\n" +
@@ -159,7 +159,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param date
-    * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.facade.Conn Conn]] value in scsope
     */
   def debugGetAsOf(date: Date)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxDate(date))))
 
@@ -228,7 +228,8 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * @param conn        Implicit [[molecule.facade.Conn Conn]] value in scope
     */
   def debugGetWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
-    debugGet(conn.usingTempDb(With(seqAsJavaListConverter(txMolecules.flatten.flatten.map(_.toJava)).asJava)))
+    debugGet(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+//    debugGet(conn.usingTempDb(With(seqAsJavaListConverter(txMolecules.flatten.flatten.map(_.toJava)).asJava)))
     txMolecules.zipWithIndex foreach { case (stmts, i) =>
       Debug(s"Statements, transaction molecule ${i + 1}:", 1)(i + 1, stmts)
     }
@@ -282,7 +283,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
     * @return Unit
     */
-  def debugSave(implicit conn: Conn) {
+  def debugSave(implicit conn: Conn): Unit = {
     VerifyModel(_model, "save")
     val transformer = Model2Transaction(conn, _model)
     val stmts = try {
@@ -297,7 +298,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
   }
 
 
-  protected def _debugInsert(conn: Conn, dataRows: Iterable[Seq[Any]]) {
+  protected def _debugInsert(conn: Conn, dataRows: Iterable[Seq[Any]]): Unit = {
     val transformer = Model2Transaction(conn, _model)
     val data = untupled(dataRows)
     val stmtss = try {
@@ -322,7 +323,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * @param conn Implicit [[molecule.facade.Conn Conn]] value in scope
     * @return
     */
-  def debugUpdate(implicit conn: Conn) {
+  def debugUpdate(implicit conn: Conn): Unit = {
     VerifyModel(_model, "update")
     val transformer = Model2Transaction(conn, _model)
     val stmts = try {

@@ -5,7 +5,6 @@ import clojure.lang.Keyword
 import datomic.Connection.TEMPIDS
 import datomic.db.Datum
 import datomic.{Database, _}
-import molecule.ast.model.NoValue
 import molecule.ast.transactionModel.{Statement, _}
 import molecule.util.Debug
 import scala.collection.JavaConverters._

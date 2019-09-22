@@ -28,8 +28,8 @@ case class Query2String(q: Query) extends Helpers {
     case in@In(_, _, _)                                   => mkIn(in, false)
     case Where(clauses)                                   => ":where " + (clauses map p mkString " ")
     case KW("?", attr, _)                                 => s"?$attr"
-    case KW(ns, "?", _)                                   => s"?$ns"
-    case KW(ns, attr, _)                                  => s":$ns/$attr"
+    case KW(nsFull, "?", _)                               => s"?$nsFull"
+    case KW(nsFull, attr, _)                              => s":$nsFull/$attr"
     case AggrExpr(fn, args, v)                            => s"($fn " + ((args :+ p(v)) mkString " ") + ")"
     case Var("?")                                         => "?"
     case Var("_")                                         => "_"
@@ -44,11 +44,11 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: BigInt)                                   => s"(biginteger $v)"
     case Val(v: BigDecimal) if v.toString().contains(".") => v.toString + "M"
     case Val(v: BigDecimal)                               => v.toString + ".0M"
-    case Val(date: Date)                                  => format(date)
+    case Val(date: Date)                                  => date2datomicStr(date)
     case Val(v: UUID)                                     => "#uuid \"" + v + "\""
     case Val(v)                                           => "\"" + v + "\""
-    case Pull(e, ns, attr, Some(prefix))                  => s"(pull ?$e [{:$ns/$attr [:db/ident]}])"
-    case Pull(e, ns, attr, _)                             => s"(pull ?$e [:$ns/$attr])"
+    case Pull(e, nsFull, attr, Some(prefix))              => s"(pull ?$e [{:$nsFull/$attr [:db/ident]}])"
+    case Pull(e, nsFull, attr, _)                         => s"(pull ?$e [:$nsFull/$attr])"
     case NoVal                                            => ""
     case DS(name)                                         => "$" + name
     case DS                                               => "$"
@@ -97,7 +97,7 @@ case class Query2String(q: Query) extends Helpers {
   }
 
   def multiLine(maxLength: Int = 30): String = {
-    val queryString = p(q)
+    val queryString         = p(q)
     val (firstParts, where) = (List(p(q.f), p(q.wi), p(q.i)).filter(_.trim.nonEmpty), p(q.wh))
     if (queryString.length > maxLength) {
       firstParts.mkString("[", "\n ", "\n ") +

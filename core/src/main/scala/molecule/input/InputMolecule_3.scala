@@ -269,13 +269,13 @@ trait InputMolecule_3[I1, I2, I3] extends InputMolecule {
     ) = query.i.inputs
 
     def resolve[T](query: Query, ph: Placeholder, input: Seq[T], ruleName: String, tacit: Boolean, expr: Boolean): Query = {
-      val Placeholder(_, KW(ns, attr, _), _, _) = ph
+      val Placeholder(_, KW(nsFull, attr, _), _, _) = ph
       input match {
         case Nil if !tacit =>
           throw new InputMolecule_3_Exception(s"Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `$attr` --> `${attr}_`")
 
         case in if expr && in.size > 1 =>
-          throw new InputMolecule_3_Exception(s"Can't apply multiple values to input attribute `:$ns/$attr` having expression (<, >, <=, >=, !=)")
+          throw new InputMolecule_3_Exception(s"Can't apply multiple values to input attribute `:$nsFull/$attr` having expression (<, >, <=, >=, !=)")
 
         case in =>
           resolveInput(query, ph, in, ruleName)

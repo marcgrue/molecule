@@ -15,7 +15,10 @@ class TxMetaData extends CoreSpec {
 
       // `tx` being tacit or mandatory has same effect
       // tx meta attributes can be in any mode
-      val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
+      val txR = Ns.int(1).Tx(Ns.str_("str tacit")).save
+      val tx1 = txR.tx
+      val t1 = txR.t
+//      val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
       val tx2 = Ns.int(2).Tx(Ns.str("str mandatory")).save.tx
       val tx3 = Ns.int(3).Tx(Ns.str("attr mandatory")).save.tx
       val tx4 = Ns.int(4).Tx(Ns.str_("attr tacit")).save.tx
@@ -31,6 +34,7 @@ class TxMetaData extends CoreSpec {
         (5, Some("attr optional with value")),
         (6, None) // attr optional without value
       )
+
 
       // Mandatory tx meta data
       Ns.int.Tx(Ns.str).get.sortBy(_._1) === List(
@@ -62,6 +66,9 @@ class TxMetaData extends CoreSpec {
         (5, tx5, Some("attr optional with value")),
         (6, tx6, None) // attr optional without value
       )
+//      Log(Some(tx1), Some(tx1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
+      Log(Some(t1), Some(t1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
+
     }
 
 

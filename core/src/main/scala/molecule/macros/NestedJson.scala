@@ -55,7 +55,7 @@ private[molecule] trait NestedJson[OuterTpl] extends NestedTuples[OuterTpl] with
     for (lvl <- 0 to 6) {firstJsonObjects(lvl) = true}
   }
 
-  def branch(level: Int, sb: StringBuilder, branchPairs: => StringBuilder, refAttr: String, leaf: StringBuilder, post: => StringBuilder = StringBuilder.newBuilder): StringBuilder = {
+  def branch(level: Int, sb: StringBuilder, branchPairs: => StringBuilder, refAttr: String, leaf: StringBuilder, post: => StringBuilder = new StringBuilder()): StringBuilder = {
     // Reset sub levels
     for (lvl <- (level + 1) to 6) {firstJsonObjects(lvl) = true}
     if (firstJsonObjects(level)) {

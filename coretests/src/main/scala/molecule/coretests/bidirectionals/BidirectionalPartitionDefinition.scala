@@ -64,17 +64,17 @@
 //
 //      //      val noGood = oneBi[BidirectionalPartitionDefinition.partitionA.Person.noGood.type]
 //      //        [error] (moleculeCoretest/compile:managedSources) Bidirectional reference `noGood` in `Person`
-//      //                of BidirectionalPartitionDefinition.scala is a self-reference and don't need to have the attribute name specified. This is enough:
+//      //                of BidirectionalPartitionDefinition.scala is a self-reference and don"t" need to have the attribute name specified. This is enough:
 //      //        [error]   val noGood = oneBi[Person]
 //
 //      //      val noGood = oneBi[partitionA.Person.noGood.type]
 //      //        [error] (moleculeCoretest/compile:managedSources) Bidirectional reference `noGood` in `Person`
-//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn't need to have the attribute name specified. This is enough:
+//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn"t" need to have the attribute name specified. This is enough:
 //      //        [error]   val noGood = oneBi[Person]
 //
 //      //      val noGood = oneBi[Person.noGood.type]
 //      //        [error] (moleculeCoretest/compile:managedSources) Bidirectional reference `noGood` in `Person`
-//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn't need to have the attribute name specified. This is enough:
+//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn"t" need to have the attribute name specified. This is enough:
 //      //        [error]   val noGood = oneBi[Person]
 //
 //      //      val noGood = oneBi[noGood.type]
@@ -95,12 +95,12 @@
 //
 //      //            val noGood = oneBi[partitionA.Knows.revRefAttr.type]
 //      //        [error] (moleculeCoretest/compile:managedSources) Bidirectional reference `noGood` in `Person`
-//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn't need to have the attribute name specified. This is enough:
+//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn"t" need to have the attribute name specified. This is enough:
 //      //        [error]   val noGood = oneBi[Person]
 //
 //      //      val noGood = oneBi[Knows.revRefAttr.type]
 //      //        [error] (moleculeCoretest/compile:managedSources) Bidirectional reference `noGood` in `Person`
-//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn't need to have the attribute name specified. This is enough:
+//      //                of BidirectionalPartitionDefinition.scala is a self-reference and doesn"t" need to have the attribute name specified. This is enough:
 //      //        [error]   val noGood = oneBi[Person]
 //
 //      //      val noGood = oneBi[noGood.type]
