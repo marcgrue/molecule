@@ -54,7 +54,7 @@ class Attributes extends CoreSpec {
 
     Ns.date.getJson ===
       s"""[
-         |{"Ns.date": "1970-01-01T01:00:01.000+01:00"}
+         |{"Ns.date": "2001-07-01"}
          |]""".stripMargin
 
     Ns.uuid.getJson ===
@@ -122,7 +122,7 @@ class Attributes extends CoreSpec {
 
     Ns.dates.getJson ===
       s"""[
-         |{"Ns.dates": ["1970-01-01T01:00:01.000+01:00", "1970-01-01T01:00:02.000+01:00"]}
+         |{"Ns.dates": ["2001-07-01", "2002-01-01"]}
          |]""".stripMargin
 
     Ns.uuids.getJson ===
@@ -198,7 +198,7 @@ class Attributes extends CoreSpec {
 
     Ns.dateMap.getJson ===
       s"""[
-         |{"Ns.dateMap": {"b": "1970-01-01T01:00:02.000+01:00", "a": "1970-01-01T01:00:01.000+01:00"}}
+         |{"Ns.dateMap": {"a": "2001-07-01", "b": "2002-01-01"}}
          |]""".stripMargin
 
     Ns.uuidMap.getJson ===
@@ -279,7 +279,7 @@ class Attributes extends CoreSpec {
     Ns.int(7).date$.getJson ===
       s"""[
          |{"Ns.int": 7, "Ns.date": null},
-         |{"Ns.int": 7, "Ns.date": "1970-01-01T01:00:02.000+01:00"}
+         |{"Ns.int": 7, "Ns.date": "2002-01-01"}
          |]""".stripMargin
 
     Ns.int(8).uuid$.getJson ===
@@ -369,7 +369,7 @@ class Attributes extends CoreSpec {
     Ns.int(7).dates$.getJson ===
       s"""[
          |{"Ns.int": 7, "Ns.dates": null},
-         |{"Ns.int": 7, "Ns.dates": ["1970-01-01T01:00:01.000+01:00", "1970-01-01T01:00:02.000+01:00"]}
+         |{"Ns.int": 7, "Ns.dates": ["2001-07-01", "2002-01-01"]}
          |]""".stripMargin
 
     Ns.int(8).uuids$.getJson ===
@@ -457,7 +457,7 @@ class Attributes extends CoreSpec {
     Ns.int(7).dateMap$.getJson ===
       s"""[
          |{"Ns.int": 7, "Ns.dateMap": null},
-         |{"Ns.int": 7, "Ns.dateMap": {"a": "1970-01-01T01:00:01.000+01:00", "b": "1970-01-01T01:00:02.000+01:00"}}
+         |{"Ns.int": 7, "Ns.dateMap": {"a": "2001-07-01", "b": "2002-01-01"}}
          |]""".stripMargin
 
     Ns.int(8).uuidMap$.getJson ===

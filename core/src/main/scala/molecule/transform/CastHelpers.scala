@@ -727,7 +727,7 @@ trait CastHelpers[Tpl] extends Helpers {
     var vs = new Array[String](2)
     while (it.hasNext) {
       vs = it.next.toString.split("@", 2)
-      map = map + (vs(0) -> date(vs(1)))
+      map = map + (vs(0) -> str2date(vs(1)))
     }
     map
   }
@@ -865,7 +865,7 @@ trait CastHelpers[Tpl] extends Helpers {
     var vs = new Array[String](2)
     while (it.hasNext) {
       vs = it.next.toString.split("@", 2)
-      map = map + (vs(0) -> date(vs(1)))
+      map = map + (vs(0) -> str2date(vs(1)))
     }
     Some(map)
   }
@@ -1011,7 +1011,7 @@ trait CastHelpers[Tpl] extends Helpers {
     var vs = new Array[String](2)
     while (it.hasNext) {
       vs = it.next.toString.split("@", 2)
-      map = map + (vs(0) -> date(vs(1)))
+      map = map + (vs(0) -> str2date(vs(1)))
     }
     Some(map)
   }

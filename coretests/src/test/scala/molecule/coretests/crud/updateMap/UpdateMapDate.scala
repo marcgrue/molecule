@@ -60,16 +60,16 @@ class UpdateMapDate extends CoreSpec {
       (Ns(eid).dateMap.assert(str1 -> date1, str1x -> date2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
-        "\na -> Thu Jan 01 01:00:01 CET 1970" +
-        "\na -> Thu Jan 01 01:00:02 CET 1970"
+        "\na -> Sun Jul 01 00:00:00 CEST 2001" +
+        "\na -> Tue Jan 01 00:00:00 CET 2002"
 
 
       // Seq
       (Ns(eid).dateMap.assert(Seq(str1 -> date1, str1x -> date2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
-        "\na -> Thu Jan 01 01:00:01 CET 1970" +
-        "\na -> Thu Jan 01 01:00:02 CET 1970"
+        "\na -> Sun Jul 01 00:00:00 CEST 2001" +
+        "\na -> Tue Jan 01 00:00:00 CET 2002"
     }
 
 
@@ -182,16 +182,16 @@ class UpdateMapDate extends CoreSpec {
       (Ns(eid).dateMap(str1 -> date1, str1 -> date2).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
-        "\na -> Thu Jan 01 01:00:01 CET 1970" +
-        "\na -> Thu Jan 01 01:00:02 CET 1970"
+        "\na -> Sun Jul 01 00:00:00 CEST 2001" +
+        "\na -> Tue Jan 01 00:00:00 CET 2002"
 
 
       // Seq
       (Ns(eid).dateMap(Seq(str1 -> date1, str1 -> date2)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
-        "\na -> Thu Jan 01 01:00:01 CET 1970" +
-        "\na -> Thu Jan 01 01:00:02 CET 1970"
+        "\na -> Sun Jul 01 00:00:00 CEST 2001" +
+        "\na -> Tue Jan 01 00:00:00 CET 2002"
     }
   }
 }

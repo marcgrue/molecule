@@ -23,10 +23,6 @@ class Datom extends CoreSpec {
   // Create new db from schema
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
-  // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
-  // the wall clock time since Date's are a bit unreliable for precision.
-
-
   // First entity
 
   val txR1 = Ns.str("a").int(1).save
@@ -106,8 +102,7 @@ class Datom extends CoreSpec {
       Ns(e1).t.get === List(t2, t3)
 
       // Transaction wall clock time as Date
-      // (Date formatting sucks)
-      Ns(e1).txInstant.get.toString === List(d2, d3).toString
+      Ns(e1).txInstant.get.sorted === List(d2, d3)
 
       // Transaction operation: true: assert, false: retract
       Ns(e1).op.get === List(true)
@@ -378,16 +373,16 @@ class Datom extends CoreSpec {
     Ns.int_.t(count).get === List(2)
 
     Ns.txInstant(d2).get === List(d2)
-    Ns.txInstant(d2, d3).get.toString === List(d2, d3).toString
-    Ns.txInstant.not(d2).get.toString === List(d6, d4, d5, d3, d7).toString
-    Ns.txInstant.not(d2, d3).get.toString === List(d4, d5, d6, d7).toString
-    Ns.txInstant.>(d3).get.toString === List(d4, d5, d6, d7).toString
-    Ns.txInstant.>=(d3).get.toString === List(d3, d4, d5, d6, d7).toString
-    Ns.txInstant.<=(d3).get.toString === List(d2, d3).toString
-    Ns.txInstant.<=(d3).getHistory.sorted.toString === List(d1, d2, d3).toString
-    Ns.txInstant.<(d3).get.toString === List(d2).toString
+    Ns.txInstant(d2, d3).get.sorted === List(d2, d3)
+    Ns.txInstant.not(d2).get.sorted === List(d3, d4, d5, d6, d7)
+    Ns.txInstant.not(d2, d3).get.sorted === List(d4, d5, d6, d7)
+    Ns.txInstant.>(d3).get.sorted === List(d4, d5, d6, d7)
+    Ns.txInstant.>=(d3).get.sorted === List(d3, d4, d5, d6, d7)
+    Ns.txInstant.<=(d3).get.sorted === List(d2, d3)
+    Ns.txInstant.<=(d3).getHistory.sorted === List(d1, d2, d3)
+    Ns.txInstant.<(d3).get.sorted === List(d2)
     // Range of transaction entity ids
-    Ns.txInstant_.>(d2).txInstant.<=(d4).get.toString === List(d3, d4).toString
+    Ns.txInstant_.>(d2).txInstant.<=(d4).get.sorted === List(d3, d4)
     Ns.int_.txInstant(count).get === List(2)
 
     // No current datoms are retracted

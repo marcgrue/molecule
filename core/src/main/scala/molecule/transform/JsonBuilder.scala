@@ -96,7 +96,7 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
   protected def jsonOneDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
-    quotedPair(sb, field, sdf.format(row.get(i).asInstanceOf[Date]))
+    quotedPair(sb, field, date2str(row.get(i).asInstanceOf[Date]))
   }
 
   protected def jsonOneAny(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = row.get(i) match {
@@ -106,7 +106,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     case value: Boolean        => pair(sb, field, value)
     case value: Long           => pair(sb, field, value)
     case value: Double         => pair(sb, field, value)
-    case value: java.util.Date => quotedPair(sb, field, sdf.format(value))
+    case value: java.util.Date => quotedPair(sb, field, date2str(value))
     case value: java.util.UUID => quotedPair(sb, field, value.toString)
     case value: java.net.URI   => quotedPair(sb, field, value.toString)
     case value: BigInt         => pair(sb, field, value)
@@ -160,7 +160,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     val it = row.get(i).asInstanceOf[PersistentHashSet].iterator
     while (it.hasNext) {
       if (subsequent) sb.append(", ") else subsequent = true
-      quote(sb, sdf.format(it.next.asInstanceOf[Date]))
+      quote(sb, date2str(it.next.asInstanceOf[Date]))
     }
     sb.append("]")
   }
@@ -211,7 +211,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     val it = row.get(i).asInstanceOf[PersistentVector].iterator
     while (it.hasNext) {
       if (subsequent) sb.append(", ") else subsequent = true
-      quote(sb, sdf.format(it.next.asInstanceOf[Date]))
+      quote(sb, date2str(it.next.asInstanceOf[Date]))
     }
     sb.append("]")
   }
@@ -260,7 +260,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     val it = row.get(i).asInstanceOf[LazySeq].iterator
     while (it.hasNext) {
       if (subsequent) sb.append(", ") else subsequent = true
-      quote(sb, sdf.format(it.next.asInstanceOf[Date]))
+      quote(sb, date2str(it.next.asInstanceOf[Date]))
     }
     sb.append("]")
   }
@@ -279,7 +279,7 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
   protected def jsonAggrDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
-    quotedPair(sb, field, sdf.format(row.get(i).asInstanceOf[Date]))
+    quotedPair(sb, field, date2str(row.get(i).asInstanceOf[Date]))
   }
 
 
@@ -296,7 +296,7 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
   protected def jsonAggrSingleSampleDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
-    quotedPair(sb, field, sdf.format(row.get(i).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
+    quotedPair(sb, field, date2str(row.get(i).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
   }
 
 
@@ -313,7 +313,7 @@ private[molecule] trait JsonBuilder extends Helpers {
   }
 
   protected def jsonAggrLazySeqDate(sb: StringBuilder, field: String, row: jList[_], i: Int): StringBuilder = {
-    quotedPair(sb, field, sdf.format(row.get(i).asInstanceOf[LazySeq].iterator.next.asInstanceOf[Date]))
+    quotedPair(sb, field, date2str(row.get(i).asInstanceOf[LazySeq].iterator.next.asInstanceOf[Date]))
   }
 
 
@@ -351,7 +351,7 @@ private[molecule] trait JsonBuilder extends Helpers {
     if (value == null) {
       pair(sb, field, "null")
     } else {
-      quotedPair(sb, field, sdf.format(value.asInstanceOf[jMap[String, AnyRef]].values.iterator.next))
+      quotedPair(sb, field, date2str(value.asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[Date]))
     }
   }
 
@@ -421,7 +421,7 @@ private[molecule] trait JsonBuilder extends Helpers {
       val it = value.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
       while (it.hasNext) {
         if (subsequent) sb.append(", ") else subsequent = true
-        quote(sb, sdf.format(it.next.asInstanceOf[Date]))
+        quote(sb, date2str(it.next.asInstanceOf[Date]))
       }
       sb.append("]")
     }
@@ -502,7 +502,7 @@ private[molecule] trait JsonBuilder extends Helpers {
       vs = it.next.toString.split("@", 2)
       quote(sb, vs(0))
       sb.append(": ")
-      quote(sb, sdf.format(sdf.parse(vs(1))))
+      quote(sb, vs(1))
     }
     sb.append("}")
   }
@@ -567,7 +567,7 @@ private[molecule] trait JsonBuilder extends Helpers {
         vs = it.next.toString.split("@", 2)
         quote(sb, vs(0))
         sb.append(": ")
-        quote(sb, sdf.format(sdf.parse(vs(1))))
+        quote(sb, vs(1))
       }
       sb.append("}")
     }

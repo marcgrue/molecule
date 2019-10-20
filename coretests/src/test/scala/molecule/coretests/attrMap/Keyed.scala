@@ -69,9 +69,9 @@ class Keyed extends Base {
 
 
     val en_date1_date3 = List(
-      (1, date1),
+      (3, date3),
       (2, date1),
-      (3, date3)
+      (1, date1),
     )
     Ns.int.dateMapK("en")(date1 or date3).get === en_date1_date3
     Ns.int.dateMapK("en")(date1, date3).get === en_date1_date3
@@ -121,9 +121,9 @@ class Keyed extends Base {
 
 
     Ns.int.dateMapK("en|da")(date3).get === List(
-      (4, date3),
-      (3, date3),
       (1, date3),
+      (3, date3),
+      (4, date3),
     )
     Ns.int.dateMapK_("en|da")(date3).get === List(1, 3, 4)
   }
@@ -155,11 +155,11 @@ class Keyed extends Base {
 
 
     val en_da_date1_date3 = List(
-      (1, date1),
-      (2, date1),
-      (4, date3),
-      (3, date3),
       (1, date3),
+      (3, date3),
+      (4, date3),
+      (2, date1),
+      (1, date1),
     )
     Ns.int.dateMapK("en|da")(date1 or date3).get === en_da_date1_date3
     Ns.int.dateMapK_("en|da")(date1 or date3).get === List(1, 2, 3, 4)
@@ -204,22 +204,22 @@ class Keyed extends Base {
 
 
     Ns.int.dateMapK("en|da").>(date2).get === List(
-      (4, date3),
-      (3, date3),
       (1, date3),
+      (3, date3),
+      (4, date3),
     )
     Ns.int.dateMapK("en|da").>=(date2).get === List(
-      (4, date3),
-      (3, date3),
       (1, date3),
+      (3, date3),
+      (4, date3),
     )
     Ns.int.dateMapK("en|da").<=(date2).get === List(
-      (1, date1),
       (2, date1),
+      (1, date1),
     )
     Ns.int.dateMapK("en|da").<(date2).get === List(
-      (1, date1),
       (2, date1),
+      (1, date1),
     )
 
     Ns.int.dateMapK_("en|da").>(date2).get === List(1, 3, 4)

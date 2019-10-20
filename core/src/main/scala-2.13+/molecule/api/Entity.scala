@@ -8,7 +8,7 @@ import molecule.ast.transactionModel.RetractEntity
 import molecule.facade.{Conn, TxReport}
 import molecule.ops.VerifyModel
 import molecule.transform.Model2Transaction
-import molecule.util.Debug
+import molecule.util.{DateHandling, Debug}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.jdk.CollectionConverters._
 import scala.language.{existentials, higherKinds}
@@ -30,7 +30,7 @@ import scala.language.{existentials, higherKinds}
   * @param conn   Implicit [[molecule.facade.Conn Conn]] in scope
   * @param id     Entity id of type Object
   */
-class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
+class Entity(entity: datomic.Entity, conn: Conn, id: Object) extends DateHandling {
 
   // Entity retraction =======================================================================
 
@@ -96,7 +96,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
     *
     * @group retract
     * @return List[List[Retractentity[Long]]]
-    * */
+    **/
   def getRetractTx: List[List[RetractEntity]] = List(List(RetractEntity(id)))
 
   /** Debug entity transaction data of method `retract` without affecting the database.
@@ -535,9 +535,6 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
 
   // Private helper methods ...........................................................................
 
-  final protected lazy val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  final protected def format2(date: Date): String = sdf.format(date)
-
   private def format(value: Any): String = {
     val sb = new StringBuilder
     def traverse(value: Any, tabs: Int): Unit = {
@@ -551,7 +548,7 @@ class Entity(entity: datomic.Entity, conn: Conn, id: Object) {
         case bi: java.math.BigInteger => sb.append(bi)
         case bd: java.math.BigDecimal => sb.append(bd)
         case b: Boolean               => sb.append(b)
-        case d: Date                  => sb.append(s""""${format2(d)}"""")
+        case d: Date                  => sb.append(s""""${date2str(d)}"""")
         case u: UUID                  => sb.append(s""""$u"""")
         case u: java.net.URI          => sb.append(s""""$u"""")
         case s: Set[_]                =>

@@ -208,7 +208,7 @@ class EntityAPI extends CoreSpec {
     e6.touchList === List(":db/id" -> e6, ":Ns/boolMap" -> List("b@false", "a@true"))
 
     val e7 = Ns.dateMap("a" -> date1, "b" -> date2).save.eid
-    e7.touchList === List(":db/id" -> e7, ":Ns/dateMap" -> List("b@1970-01-01T01:00:02.000+01:00", "a@1970-01-01T01:00:01.000+01:00"))
+    e7.touchList === List(":db/id" -> e7, ":Ns/dateMap" -> List("a@2001-07-01", "b@2002-01-01"))
 
 
     // Order of sub values not guaranteed
@@ -266,11 +266,12 @@ class EntityAPI extends CoreSpec {
       )
     )
 
-    // Type ascription is still unchecked since it is eliminated by erasure so compile warnings are emitted
+    // Type ascription is still unchecked since it is eliminated by erasure
+    // so we compress compile warnings emitted
     val List(
-    optName: Option[String],
-    optAge: Option[Int],
-    optAddress: Option[Map[String, Any]]
+    optName: Option[String] @unchecked,
+    optAge: Option[Int] @unchecked,
+    optAddress: Option[Map[String, Any]] @unchecked
     ) = eid(
       ":Ns/str",
       ":Ns/int",

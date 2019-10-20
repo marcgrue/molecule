@@ -143,12 +143,6 @@ class KeysValues extends Base {
     Ns.int.dateMap_.k(en_da)(date3).get === List(1, 3, 4)
   }
 
-//  List(
-//    (1,Map(en -> Thu Jan 01 01:00:05 CET 1970)),
-//  (2,Map(da -> Thu Jan 01 01:00:05 CET 1970, en -> Thu Jan 01 01:00:05 CET 1970))) != List(
-//    (1,Map(da -> Thu Jan 01 01:00:15 CET 1970)),
-//  (3,Map(en -> Thu Jan 01 01:00:15 CET 1970, da -> Thu Jan 01 01:00:15 CET 1970)),
-//  (4,Map(da -> Thu Jan 01 01:00:15 CET 1970)))
 
   "Multiple keys, multiple values" in new Setup {
 

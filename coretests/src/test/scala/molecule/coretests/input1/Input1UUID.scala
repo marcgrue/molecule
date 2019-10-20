@@ -333,11 +333,11 @@ class Input1UUID extends CoreSpec {
       ">" in new ManySetup {
         val inputMolecule = m(Ns.uuid.uuids.>(?))
 
-        inputMolecule(Nil).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
-        inputMolecule(List(Set[UUID]())).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(Nil).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set[UUID]())).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
         // (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
-        inputMolecule(List(Set(uuid2))).get === List((uuid2, Set(uuid3)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid2, Set(uuid3)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
         (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
           .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
@@ -352,11 +352,11 @@ class Input1UUID extends CoreSpec {
       ">=" in new ManySetup {
         val inputMolecule = m(Ns.uuid.uuids.>=(?))
 
-        inputMolecule(Nil).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
-        inputMolecule(List(Set[UUID]())).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(Nil).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set[UUID]())).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
         // (uuid2, uuid4), (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
-        inputMolecule(List(Set(uuid2))).get === List((uuid1, Set(uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid1, Set(uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
         (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
           .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
@@ -371,8 +371,8 @@ class Input1UUID extends CoreSpec {
       "<" in new ManySetup {
         val inputMolecule = m(Ns.uuid.uuids.<(?))
 
-        inputMolecule(Nil).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
-        inputMolecule(List(Set[UUID]())).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(Nil).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set[UUID]())).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
         inputMolecule(List(Set(uuid2))).get === List((uuid1, Set(uuid1)))
 
@@ -389,10 +389,10 @@ class Input1UUID extends CoreSpec {
       "<=" in new ManySetup {
         val inputMolecule = m(Ns.uuid.uuids.<=(?))
 
-        inputMolecule(Nil).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
-        inputMolecule(List(Set[UUID]())).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(Nil).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
+        inputMolecule(List(Set[UUID]())).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
-        inputMolecule(List(Set(uuid2))).get === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid2)))
+        inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid2)))
 
         (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
           .message === "Got the exception molecule.input.exception.InputMoleculeException: " +

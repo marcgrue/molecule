@@ -389,4 +389,28 @@ class OptionalValues extends CoreSpec {
     val noEnums = Option.empty[Set[String]]
     m(Ns.int(4).enums$(noEnums)).get === List((4, None))
   }
+
+
+  "Allowing duplicate optional attributes" in new CoreSetup {
+    Ns.str.int$ insert List(
+      ("a", Some(1)),
+      ("b", None)
+    )
+
+    // Normally this would not make sense but we use it in MoleculeAdmin
+    // to retrieve a duplicate column of values to edit.
+    Ns.str.int$.int$.get === List(
+      ("a", Some(1), Some(1)),
+      ("b", None, None)
+    )
+    Ns.str.int$.int.get === List(
+      ("a", Some(1), 1)
+    )
+    Ns.str.int.int$.get === List(
+      ("a", 1, Some(1))
+    )
+    Ns.str.int.int.get === List(
+      ("a", 1, 1)
+    )
+  }
 }

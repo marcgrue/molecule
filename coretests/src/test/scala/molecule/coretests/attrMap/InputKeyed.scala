@@ -172,26 +172,26 @@ class InputKeyed extends Base {
     // Date
 
     m(Ns.int.dateMapK(".*").>(?))(date2).get === List(
-      (4, date3),
-      (3, date3),
-      (2, date3),
       (1, date3),
+      (2, date3),
+      (3, date3),
+      (4, date3),
     )
     m(Ns.int.dateMapK(".*").>=(?))(date2).get === List(
-      (4, date3),
-      (3, date3),
-      (2, date3),
       (1, date3),
+      (2, date3),
+      (3, date3),
+      (4, date3),
       (2, date2),
     )
     m(Ns.int.dateMapK(".*").<=(?))(date2).get === List(
-      (1, date1),
       (2, date1),
+      (1, date1),
       (2, date2),
     )
     m(Ns.int.dateMapK(".*").<(?))(date2).get === List(
-      (1, date1),
       (2, date1),
+      (1, date1),
     )
 
     m(Ns.int.dateMapK_(".*").>(?))(date2).get === List(1, 2, 3, 4)

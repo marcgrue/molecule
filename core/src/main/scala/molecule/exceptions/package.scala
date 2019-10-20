@@ -28,7 +28,7 @@ package object exceptions {
                        chain: Seq[String] = Nil) extends MoleculeException(
     s"""
        |#############################################################################
-       |Query failed with cause: ${ex.getMessage}${if(chain.nonEmpty) "\nin processing chain:\n" + chain.mkString("[", ";\n", "]")}
+       |Query failed with cause: $ex${if(chain.nonEmpty) "\nin processing chain:\n" + chain.mkString("[", ";\n", "]")}
        |
        |$model
        |

@@ -98,13 +98,13 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.19.0",
+      "org.scalamolecule" %% "molecule" % "0.19.1",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.19.0 cross-compilations available at maven central for Scala 
+Molecule 0.19.1 cross-compilations available at maven central for Scala 
 [2.13.1](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.13.1/) and
 [2.12.10](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.12.10/).
 

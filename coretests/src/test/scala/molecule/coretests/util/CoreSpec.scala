@@ -6,21 +6,21 @@ import java.util.Date
 import java.util.UUID._
 import molecule.api.core._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.util.MoleculeSpec
+import molecule.util.{DateHandling, MoleculeSpec}
 import org.specs2.specification.Scope
+import scala.util.Random
 
-class CoreSpec extends MoleculeSpec {
+class CoreSpec extends MoleculeSpec with DateHandling {
 
   class CoreSetup extends Scope {
     // Empty db for each test
     implicit val conn = recreateDbFrom(CoreTestSchema)
   }
 
-  def da(s: Int): Date = {
-    val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    val date = new Date(1000L * s)
-    val dateStr = sdf.format(date)
-    sdf.parse(dateStr)
+  def da(i: Int): Date = {
+    // Alternate between winter/summer time to test daylight savings too
+    val month = i % 2 * 6 + 1
+    str2date((2000 + i).toString + "-" + month)
   }
   def uu = randomUUID()
   def ur(i: Int) = new URI("uri" + i)

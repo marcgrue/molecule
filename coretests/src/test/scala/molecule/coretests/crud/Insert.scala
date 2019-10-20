@@ -601,8 +601,8 @@ class Insert extends CoreSpec {
       )
 
       Ns.date.longs$.get === List(
+        (date2, Some(Set(20L, 21L))),
         (date1, None),
-        (date2, Some(Set(20L, 21L)))
       )
 
       Ns.date.longs.get === List(

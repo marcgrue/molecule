@@ -20,7 +20,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org")),
-  version := "0.19.0",
+  version := "0.19.1",
   scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 13)) => baseFlags :+ "-Ymacro-annotations"
     case _             => baseFlags
@@ -33,6 +33,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    //    "com.datomic" % "datomic-free" % "0.9.5703.21",
     "com.datomic" % "datomic-free" % "0.9.5697",
     "org.specs2" %% "specs2-core" % "4.7.1" % "test"
 

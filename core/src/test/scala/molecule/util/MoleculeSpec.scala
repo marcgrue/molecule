@@ -16,7 +16,7 @@ import scala.language.postfixOps
 import scala.concurrent.duration._
 
 
-trait MoleculeSpec extends Specification {
+trait MoleculeSpec extends Specification with RegexMatching {
 
   def typed[T](t: => T): Unit = {}
 
@@ -26,9 +26,6 @@ trait MoleculeSpec extends Specification {
   def await[T](awaitable: Awaitable[T]): T =
     Await.result(awaitable, 10.seconds)
 
-  implicit class Regex(sc: StringContext) {
-    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
-  }
 
   def formatTx(tx: Seq[Statement]) = {
     val longestAction = tx.map(stmt => stmt.action.length).max

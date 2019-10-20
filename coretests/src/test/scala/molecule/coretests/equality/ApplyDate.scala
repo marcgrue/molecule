@@ -26,22 +26,22 @@ class ApplyDate extends CoreSpec     {
       // Varargs
       Ns.date.apply(date1).get === List(date1)
       Ns.date.apply(date2).get === List(date2)
-      Ns.date.apply(date1, date2).get === List(date1, date2)
+      Ns.date.apply(date1, date2).get === List(date2, date1)
 
       // `or`
-      Ns.date.apply(date1 or date2).get === List(date1, date2)
-      Ns.date.apply(date1 or date2 or date3).get === List(date1, date3, date2)
+      Ns.date.apply(date1 or date2).get === List(date2, date1)
+      Ns.date.apply(date1 or date2 or date3).get === List(date2, date1, date3)
 
       // Seq
       Ns.date.apply().get === Nil
       Ns.date.apply(Nil).get === Nil
       Ns.date.apply(List(date1)).get === List(date1)
       Ns.date.apply(List(date2)).get === List(date2)
-      Ns.date.apply(List(date1, date2)).get === List(date1, date2)
-      Ns.date.apply(List(date1), List(date2)).get === List(date1, date2)
-      Ns.date.apply(List(date1, date2), List(date3)).get === List(date1, date3, date2)
-      Ns.date.apply(List(date1), List(date2, date3)).get === List(date1, date3, date2)
-      Ns.date.apply(List(date1, date2, date3)).get === List(date1, date3, date2)
+      Ns.date.apply(List(date1, date2)).get === List(date2, date1)
+      Ns.date.apply(List(date1), List(date2)).get === List(date2, date1)
+      Ns.date.apply(List(date1, date2), List(date3)).get === List(date2, date1, date3)
+      Ns.date.apply(List(date1), List(date2, date3)).get === List(date2, date1, date3)
+      Ns.date.apply(List(date1, date2, date3)).get === List(date2, date1, date3)
     }
 
 

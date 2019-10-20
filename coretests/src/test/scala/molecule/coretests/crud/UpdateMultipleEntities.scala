@@ -14,33 +14,33 @@ class UpdateMultipleEntities extends CoreSpec {
     // Update multiple entities asynchronously and return Future[TxReport]
     // Calls Datomic's transactAsync API
 
-// Initial data
-Ns.str.int insertAsync List(
-  ("a", 1),
-  ("b", 2),
-  ("c", 3),
-  ("d", 4)
-) map { tx => // tx report from successful insert transaction
-  // 4 inserted entities
-  val List(a, b, c, d) = tx.eids
-  Ns.int.get === List(
-    ("a", 1),
-    ("b", 2),
-    ("c", 3),
-    ("d", 4)
-  )
-
-  // Update multiple entities asynchronously
-  Ns(a, b).int(5).updateAsync.map { tx2 => // tx report from successful update transaction
-    // Current data
-    Ns.int.get.sorted === List(
-      ("a", 5),
-      ("b", 5),
+    // Initial data
+    Ns.str.int insertAsync List(
+      ("a", 1),
+      ("b", 2),
       ("c", 3),
       ("d", 4)
-    )
-  }
-}
+    ) map { tx => // tx report from successful insert transaction
+      // 4 inserted entities
+      val List(a, b, c, d) = tx.eids
+      Ns.int.get === List(
+        ("a", 1),
+        ("b", 2),
+        ("c", 3),
+        ("d", 4)
+      )
+
+      // Update multiple entities asynchronously
+      Ns(a, b).int(5).updateAsync.map { tx2 => // tx report from successful update transaction
+        // Current data
+        Ns.int.get.sorted === List(
+          ("a", 5),
+          ("b", 5),
+          ("c", 3),
+          ("d", 4)
+        )
+      }
+    }
 
     // For brevity, the synchronous equivalent `update` is used in the following tests
   }

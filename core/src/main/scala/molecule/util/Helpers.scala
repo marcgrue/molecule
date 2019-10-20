@@ -1,14 +1,13 @@
 package molecule.util
 import java.net.URI
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.{Date, TimeZone, UUID}
+import java.time._
+import java.time.format.DateTimeFormatter
+import java.util.{Date, UUID}
 import datomic.ListenableFuture
-import molecule.ast.query.date2datomicStr
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
 
-private[molecule] trait Helpers {
+private[molecule] trait Helpers extends DateHandling {
 
   final protected object mkDate {
     def apply(year: Int, month: Int = 1, day: Int = 1): Date = {
@@ -18,20 +17,9 @@ private[molecule] trait Helpers {
     }
   }
 
-  final protected lazy val sdfDatomic = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
-  final protected lazy val sdf        = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
-  protected def date2datomicStr(date: Date): String = sdfDatomic.format(date)
-  protected def date2str(date: Date): String = sdf.format(date)
-
-  protected def date(s: String): Date = sdf.parse(s)
-
+  // Uniform Date formatting to allow text comparisons
   final protected def f(a: Any) = a match {
     case date: Date => date2str(date).replace("+", "\\\\+")
-    case other      => other
-  }
-  final protected def f2(a: Any) = a match {
-    case date: Date => date2str(date)
     case other      => other
   }
 
@@ -39,7 +27,7 @@ private[molecule] trait Helpers {
     case (a, b)     => s"(${cast(a)}, ${cast(b)})"
     case v: Long    => v.toString + "L"
     case v: Float   => v.toString + "f"
-    case date: Date => "\"" + date2datomicStr(date) + "\""
+    case date: Date => "\"" + date2str(date) + "\""
     case v: String  => "\"" + v + "\""
     case v: UUID    => "\"" + v + "\""
     case v: URI     => "\"" + v + "\""
@@ -101,9 +89,9 @@ private[molecule] trait Helpers {
     val time2   = System.currentTimeMillis()
     val elapsed = time2 - time1
     times += n -> time2
-    val formatter = new java.text.SimpleDateFormat("HH:mm:ss.SSS", new java.util.Locale("en", "UK"))
-    formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
-    println(s"TIME $n: " + formatter.format(new java.util.Date(elapsed)))
+    val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+    val d = LocalDateTime.ofInstant(Instant.ofEpochMilli(elapsed), ZoneOffset.UTC)
+    println(s"TIME $n: " + formatter.format(d))
     time0 = System.currentTimeMillis()
   }
 

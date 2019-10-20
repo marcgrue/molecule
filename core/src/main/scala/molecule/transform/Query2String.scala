@@ -44,7 +44,7 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: BigInt)                                   => s"(biginteger $v)"
     case Val(v: BigDecimal) if v.toString().contains(".") => v.toString + "M"
     case Val(v: BigDecimal)                               => v.toString + ".0M"
-    case Val(date: Date)                                  => date2datomicStr(date)
+    case Val(date: Date)                                  => "#inst \"" + date2datomicStr(date) + "\""
     case Val(v: UUID)                                     => "#uuid \"" + v + "\""
     case Val(v)                                           => "\"" + v + "\""
     case Pull(e, nsFull, attr, Some(prefix))              => s"(pull ?$e [{:$nsFull/$attr [:db/ident]}])"

@@ -303,7 +303,7 @@ private[molecule] trait Cast extends TreeOps {
     case "Float"          => (i: Int) => q"row.get($i).toString.toFloat"
     case "Double"         => (i: Int) => q"row.get($i).toString.toDouble"
     case "Boolean"        => (i: Int) => q"row.get($i).toString.toBoolean"
-    case "java.util.Date" => (i: Int) => q"date(row.get($i).toString)"
+    case "java.util.Date" => (i: Int) => q"molecule.util.fns.str2date(row.get($i).toString)"
     case "java.util.UUID" => (i: Int) => q"java.util.UUID.fromString(row.get($i).toString)"
     case "java.net.URI"   => (i: Int) => q"new java.net.URI(row.get($i).toString)"
     case "BigInt"         => (i: Int) => q"BigInt(row.get($i).toString)"

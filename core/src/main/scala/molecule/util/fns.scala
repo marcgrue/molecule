@@ -1,13 +1,12 @@
 package molecule.util
-import java.text.SimpleDateFormat
-import java.util.{Date, List => jList}
-import datomic.{Database, Util}
+import java.util.Date
 
-object fns {
+object fns extends DateHandling {
 
   def bind[T](v: T): T = v
 
-  def date(s: String): Date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(s)
+  def str2date(s: String): Date = super.str2date(s)
+  def date2str(d: Date): String = super.date2str(d)
 
   def partNs(v: String): Array[String] = v.split("_") match {
     case Array(ns)       => Array("db.part/user", ns)

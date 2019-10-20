@@ -13,9 +13,8 @@ import molecule.exceptions._
 import molecule.ops.QueryOps._
 import molecule.transform.Query2String
 import molecule.util.Helpers
-import scala.jdk.CollectionConverters._
-
 import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 /** Factory methods to create facade to Datomic Connection. */
@@ -417,14 +416,6 @@ class Conn(val datomicConn: datomic.Connection) extends Helpers {
           case other                               => other
         }
       )
-
-//    collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList
-//      .map(asScalaBufferConverter(_).asScala.toList
-//        .map {
-//          case set: clojure.lang.PersistentHashSet => asScalaSetConverter(set).asScala.toSet
-//          case other                               => other
-//        }
-//      )
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.
