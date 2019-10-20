@@ -55,10 +55,10 @@ queries are ready to fire.
    
 ## Getting started
 
-- [Introduction](http://scalamolecule.org/home/introduction) to Datomic/Molecule
-- [Getting started](http://scalamolecule.org/manual/getting-started): define a schema and create a new Datomic database
-- [Populate Database](http://scalamolecule.org/manual/insert): populate a Datomic database with Molecule
-- [Molecule Seattle tutorial](http://scalamolecule.org/tutorials/seattle) examples of using Molecule
+- [Introduction](http://www.scalamolecule.org/manual/quick-start/introduction/) to Datomic/Molecule
+- [Quick-start](http://www.scalamolecule.org/manual/): define a schema and create a new Datomic database
+- [Setup](http://www.scalamolecule.org/manual/setup/): populate a Datomic database with Molecule
+- [Molecule Seattle tutorial](http://www.scalamolecule.org/resources/tutorials/seattle/) examples of using Molecule
 
 
 ## Try demo project
@@ -105,8 +105,8 @@ lazy val yourProject = project.in(file("app"))
   )
 ```
 Molecule 0.19.1 cross-compilations available at maven central for Scala 
-[2.13.1](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.13.1/) and
-[2.12.10](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.12.10/).
+[2.13.1](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.13/) and
+[2.12.10](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.12/).
 
 
 #### Author
