@@ -126,12 +126,12 @@ class UpdateBigDecimal extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigDecs.replace(bigDec7 -> bigDec8, bigDec8 -> bigDec8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
           "\n__ident__bigDec8")
 
       expectCompileError(
         """Ns(eid).bigDecs.replace(Seq(bigDec7 -> bigDec8, bigDec8 -> bigDec8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/bigDecs`:" +
           "\n__ident__bigDec8")
 
 

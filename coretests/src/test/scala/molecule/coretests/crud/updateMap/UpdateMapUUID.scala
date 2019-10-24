@@ -42,14 +42,14 @@ class UpdateMapUUID extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uuidMap.assert(str1 -> uuid1, str1 -> uuid2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
@@ -106,13 +106,13 @@ class UpdateMapUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(str1 -> uuid1, str1 -> uuid2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
     }
@@ -195,13 +195,13 @@ class UpdateMapUUID extends CoreSpec {
 
 //      expectCompileError(
 //        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
-//        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+//        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
 //
 //      expectCompileError(
 //        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-//        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+//        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
     }

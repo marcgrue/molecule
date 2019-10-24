@@ -41,14 +41,14 @@ class UpdateMapBigDecimal extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigDecMap.assert(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigDecMap.assert(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
@@ -105,13 +105,13 @@ class UpdateMapBigDecimal extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(str1 -> bigDec1, str1 -> bigDec2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
 
       expectCompileError(
         """Ns(eid).bigDecMap.replace(Seq(str1 -> bigDec1, str1 -> bigDec2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigDecMap`:" +
           "\n__ident__str1 -> __ident__bigDec1" +
           "\n__ident__str1 -> __ident__bigDec2")
     }

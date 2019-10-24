@@ -359,12 +359,12 @@ class OptionalValues extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str$)",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.ops.exception.VerifyRawModelException: " +
         "Molecule has only optional attributes. Please add one or more mandatory/tacit attributes.")
 
     expectCompileError(
       "m(Ns.str$.int$)",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.ops.exception.VerifyRawModelException: " +
         "Molecule has only optional attributes. Please add one or more mandatory/tacit attributes.")
   }
 

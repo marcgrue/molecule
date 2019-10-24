@@ -200,7 +200,7 @@ class Datom extends CoreSpec {
       // Other generic attributes not allowed before first attribute
       expectCompileError(
         "Ns.t.op.int.get",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.ops.exception.VerifyRawModelException: " +
           "Can't add first attribute `int` after generic attributes (except `e` which is ok to have first). " +
           "Please add generic attributes `t`, `op` after `int`.")
 
@@ -221,7 +221,7 @@ class Datom extends CoreSpec {
       // cause a full scan of the whole database and is not allowed
       expectCompileError(
         "Ns.e.a.v.t.get",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.ops.exception.VerifyRawModelException: " +
           "Molecule with only generic attributes and no entity id(s) applied are not allowed since " +
           "it would cause a full scan of the whole database.")
 
@@ -235,7 +235,7 @@ class Datom extends CoreSpec {
       // Count also involves full scan if no other attribute is present
       expectCompileError(
         "Ns.e(count).get",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.ops.exception.VerifyRawModelException: " +
           "Molecule with only generic attributes and no entity id(s) applied are not allowed since " +
           "it would cause a full scan of the whole database.")
 

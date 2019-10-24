@@ -1,3 +1,6 @@
+
+import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
+
 lazy val supportedScalaVersions = List("2.13.1", "2.12.10")
 lazy val baseFlags              = List(
   "-feature",
@@ -5,22 +8,25 @@ lazy val baseFlags              = List(
   "-deprecation",
   //  "-Ymacro-annotations"
   //  "-Xlint:deprecation"
-  //    "-Yrangepos",
-  //    "-Ystatistics",
-  //    "-Ymacro-debug-lite",
-  //    "-Xprint",
-  //    "-Ymacro-debug-verbose",
-  //    "-Yshow-trees-stringified",
-  //    "-Yshow-trees"
-  //    "-Yquasiquote-debug"
-  //    ,"-Ydebug"
+  //  "-Yrangepos",
+  //  "-Ystatistics",
+  //  "-Ymacro-debug-lite",
+  //  "-Xprint",
+  //  "-Ymacro-debug-verbose",
+  //  "-Yshow-trees-stringified",
+  //  "-Yshow-trees",
+  //  "-Yquasiquote-debug",
+  //  "-Ydebug",
 )
 
-lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
+lazy val baseSettings = Defaults.coreDefaultSettings ++ Seq(
+  version := "0.20.0",
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
-  organizationHomepage := Some(url("http://www.scalamolecule.org")),
-  version := "0.19.1",
+  organizationHomepage := Some(url("http://www.scalamolecule.org"))
+)
+
+lazy val jvmSettings = baseSettings ++ Seq(
   scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 13)) => baseFlags :+ "-Ymacro-annotations"
     case _             => baseFlags
@@ -33,7 +39,6 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    //    "com.datomic" % "datomic-free" % "0.9.5703.21",
     "com.datomic" % "datomic-free" % "0.9.5697",
     "org.specs2" %% "specs2-core" % "4.7.1" % "test"
 
@@ -54,61 +59,96 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
 
 
 lazy val molecule = project.in(file("."))
-  .settings(commonSettings ++ noPublishSettings ++ Seq(
+  .settings(noPublishSettings ++ Seq(
     moduleName := "molecule-root",
     crossScalaVersions := Nil
   ))
-  .aggregate(moleculeCore, moleculeCoretests, moleculeExamples)
+  .aggregate(moleculeCoreJVM, moleculeCoretests, moleculeExamples)
 
-lazy val moleculeCore = project.in(file("core"))
-  .settings(commonSettings ++ publishSettings ++ Seq(
-    moduleName := "molecule",
-    crossScalaVersions := supportedScalaVersions,
-    scalacOptions in Compile in doc ++= Seq(
-      "-diagrams",
-      "-groups",
-      "-doc-version", version.value,
-      "-doc-title", "Molecule",
-      "-sourcepath", (baseDirectory in ThisBuild).value.toString,
-      "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
-    ),
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "moleculeBuildInfo"
-  ))
-  .enablePlugins(BuildInfoPlugin)
 
-lazy val moleculeCoretests = project.in(file("coretests"))
-  .dependsOn(moleculeCore)
-  .settings(commonSettings ++ noPublishSettings ++ Seq(
-    crossScalaVersions := supportedScalaVersions
-  ))
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-coretests",
-    moleculeSchemas := Seq(
-      "molecule/coretests/bidirectionals",
-      "molecule/coretests/nested",
-      "molecule/coretests/schemaDef",
-      "molecule/coretests/util"
+lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("core"))
+  .settings(baseSettings ++
+    //    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
+    publishSettings ++ // make docs for publishSigned
+    Seq(
+      moduleName := "molecule",
+      crossScalaVersions := supportedScalaVersions,
+      scalacOptions in Compile in doc ++= Seq(
+        "-diagrams",
+        "-groups",
+        "-doc-version", version.value,
+        "-doc-title", "Molecule",
+        "-sourcepath", (baseDirectory in ThisBuild).value.toString,
+        "-doc-source-url", s"https://github.com/scalamolecule/molecule/tree/master€{FILE_PATH}.scala#L1"
+      ),
+      buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+      buildInfoPackage := "moleculeBuildInfo",
     )
   )
+  .enablePlugins(BuildInfoPlugin)
+  .jvmSettings(jvmSettings)
+
+  /*mai
+    Publishing instructions:
+
+    Delete previous ivy cached build files before publishing locally
+    > del ~/.ivy2/local/org.scalamolecule/molecule*
+
+    `.enablePlugins(ScalaJSPlugin)` un-commented:
+    > sbt +publishLocal // produces sjs build files (for %%% refs) 2.12/2.13
+    > sbt publishLocal  // produces sjs build files (for %%% refs) 2.12
+
+    `.enablePlugins(ScalaJSPlugin)` commented out:
+    > sbt +publishLocal // produces scala build files (for %% refs) 2.12/2.13
+    > sbt publishLocal  // produces scala build files (for %% refs) 2.12
+
+    > sbt [+]publishSigned for publishing to nexus/maven
+   */
+//  .enablePlugins(ScalaJSPlugin)
+
+
+lazy val moleculeCoreJVM = moleculeCore.jvm
+
+lazy val moleculeCoreJS = moleculeCore.js
+
+
+lazy val moleculeCoretests = project.in(file("coretests"))
+  .dependsOn(moleculeCoreJVM)
+  .settings(jvmSettings ++ noPublishSettings ++ Seq(
+    crossScalaVersions := supportedScalaVersions
+  ))
+// Un-comment to re-create molecule lib jars if schemas change
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-coretests",
+//    moleculeSchemas := Seq(
+//      "molecule/coretests/bidirectionals",
+//      "molecule/coretests/nested",
+//      "molecule/coretests/schemaDef",
+//      "molecule/coretests/util"
+//    )
+//  )
+
 
 lazy val moleculeExamples = project.in(file("examples"))
-  .dependsOn(moleculeCore)
-  .settings(commonSettings ++ noPublishSettings ++ Seq(
+  .dependsOn(moleculeCoreJVM)
+  .settings(jvmSettings ++ noPublishSettings ++ Seq(
     crossScalaVersions := supportedScalaVersions,
     autoAPIMappings := true
   ))
-  .enablePlugins(MoleculePlugin)
-  .settings(
-    moduleName := "molecule-examples",
-    moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/gremlin",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
-    )
-  )
+// Un-comment to re-create molecule lib jars if schemas change
+//  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    moduleName := "molecule-examples",
+//    moleculeSchemas := Seq(
+//      "molecule/examples/dayOfDatomic",
+//      "molecule/examples/gremlin",
+//      "molecule/examples/mbrainz",
+//      "molecule/examples/seattle"
+//    )
+//  )
 
 
 lazy val snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -133,11 +173,31 @@ lazy val publishSettings = Seq(
   )
 )
 
+lazy val publishSettingsWithoutDoc = Seq(
+  publishMavenStyle := true,
+  publishTo := (if (isSnapshot.value) Some(snapshots) else Some(releases)),
+  publishArtifact in Test := false,
+  sources in doc := Seq.empty,
+  publishArtifact in packageDoc := false,
+  pomIncludeRepository := (_ => false),
+  homepage := Some(url("http://scalamolecule.org")),
+  licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
+  developers := List(
+    Developer(
+      id = "marcgrue",
+      name = "Marc Grue",
+      email = "marcgrue@gmail.com",
+      url = url("http://marcgrue.com")
+    )
+  )
+)
+
 lazy val noPublishSettings = Seq(
   skip in publish := true,
   publish := ((): Unit),
   publishLocal := ((): Unit),
   publishArtifact in(Compile, packageDoc) := false,
-  publishArtifact in packageDoc := false,
+  //  publishArtifact in packageDoc := false,
   sources in(Compile, doc) := Seq.empty
 )

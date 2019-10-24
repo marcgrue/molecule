@@ -65,14 +65,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert("str1" -> 1, "str1" -> 2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq("str1" -> 1, "str1" -> 2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
     }
@@ -111,13 +111,13 @@ class UpdateMapInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).intMap.replace("str1" -> 1, "str1" -> 2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
       expectCompileError(
         """Ns(eid).intMap.replace(Seq("str1" -> 1, "str1" -> 2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\nstr1 -> 1" +
           "\nstr1 -> 2")
 
@@ -239,14 +239,14 @@ class UpdateMapInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).intMap.assert(str1 -> int1, str1 -> int2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
       // Seq
       expectCompileError(
         """Ns(eid).intMap.assert(Seq(str1 -> int1, str1 -> int2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
@@ -303,13 +303,13 @@ class UpdateMapInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).intMap.replace(str1 -> int1, str1 -> int2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
 
       expectCompileError(
         """Ns(eid).intMap.replace(Seq(str1 -> int1, str1 -> int2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/intMap`:" +
           "\n__ident__str1 -> __ident__int1" +
           "\n__ident__str1 -> __ident__int2")
     }

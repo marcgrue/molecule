@@ -42,14 +42,14 @@ class UpdateMapDate extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).dateMap.assert(str1 -> date1, str1 -> date2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
 
       // Seq
       expectCompileError(
         """Ns(eid).dateMap.assert(Seq(str1 -> date1, str1 -> date2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
 
@@ -106,13 +106,13 @@ class UpdateMapDate extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).dateMap.replace(str1 -> date1, str1 -> date2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
 
       expectCompileError(
         """Ns(eid).dateMap.replace(Seq(str1 -> date1, str1 -> date2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
           "\n__ident__str1 -> __ident__date1" +
           "\n__ident__str1 -> __ident__date2")
     }

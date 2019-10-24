@@ -122,12 +122,12 @@ class UpdateUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuids.replace(uuid7 -> uuid8, uuid8 -> uuid8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
           "\n__ident__uuid8")
 
       expectCompileError(
         """Ns(eid).uuids.replace(Seq(uuid7 -> uuid8, uuid8 -> uuid8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/uuids`:" +
           "\n__ident__uuid8")
 
 

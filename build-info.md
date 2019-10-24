@@ -1,0 +1,4 @@
+
+> sbt
+> moleculeCoreJS/fastOptJS
+> 

@@ -122,12 +122,12 @@ class UpdateDate extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).dates.replace(date7 -> date8, date8 -> date8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
       expectCompileError(
         """Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> date8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
 

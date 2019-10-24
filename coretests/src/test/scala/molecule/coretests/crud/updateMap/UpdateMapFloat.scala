@@ -41,14 +41,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert("str1" -> 1f, "str1" -> 2f).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -87,13 +87,13 @@ class UpdateMapFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floatMap.replace("str1" -> 1f, "str1" -> 2f).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
 
       expectCompileError(
         """Ns(eid).floatMap.replace(Seq("str1" -> 1f, "str1" -> 2f)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\nstr1 -> 1.0" +
           "\nstr1 -> 2.0")
     }
@@ -208,14 +208,14 @@ class UpdateMapFloat extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).floatMap.assert(str1 -> float1, str1 -> float2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
       // Seq
       expectCompileError(
         """Ns(eid).floatMap.assert(Seq(str1 -> float1, str1 -> float2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
@@ -272,13 +272,13 @@ class UpdateMapFloat extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).floatMap.replace(str1 -> float1, str1 -> float2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
 
       expectCompileError(
         """Ns(eid).floatMap.replace(Seq(str1 -> float1, str1 -> float2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/floatMap`:" +
           "\n__ident__str1 -> __ident__float1" +
           "\n__ident__str1 -> __ident__float2")
     }

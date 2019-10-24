@@ -126,12 +126,12 @@ class UpdateBigInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigInts.replace(bigInt7 -> bigInt8, bigInt8 -> bigInt8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigInts`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/bigInts`:" +
           "\n__ident__bigInt8")
 
       expectCompileError(
         """Ns(eid).bigInts.replace(Seq(bigInt7 -> bigInt8, bigInt8 -> bigInt8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/bigInts`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/bigInts`:" +
           "\n__ident__bigInt8")
 
 

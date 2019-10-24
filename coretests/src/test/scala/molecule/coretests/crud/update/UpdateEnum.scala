@@ -143,12 +143,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace("enum7" -> "enum8", "enum8" -> "enum8").update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq("enum7" -> "enum8", "enum8" -> "enum8")).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
     }
 
@@ -300,12 +300,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace(enum7 -> enum8, enum8 -> enum8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> enum8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
 

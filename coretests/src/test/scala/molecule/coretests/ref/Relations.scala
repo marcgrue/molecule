@@ -191,11 +191,11 @@ class Relations extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str.refs1.Refs1.int1)",
-      "molecule.transform.exception.Dsl2ModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
+      "molecule.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
 
     expectCompileError(
       "m(Ns.refs1.str.Refs1.int1)",
-      "molecule.transform.exception.Dsl2ModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
+      "molecule.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
   }
 
   "Molecule has to end with attribute" >> {
@@ -203,7 +203,7 @@ class Relations extends CoreSpec {
     "Ending with ref" in new CoreSetup {
       expectCompileError(
         "m(Ns.str.Ref1)",
-        "molecule.transform.exception.Dsl2ModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
 
@@ -211,7 +211,7 @@ class Relations extends CoreSpec {
 
       expectCompileError(
         "m(Ns.str.Refs1)",
-        "molecule.transform.exception.Dsl2ModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
   }

@@ -176,12 +176,12 @@ class UpdateInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).ints.replace(7 -> 8, 8 -> 8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
           "\n8")
 
       expectCompileError(
         """Ns(eid).ints.replace(Seq(7 -> 8, 8 -> 8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
           "\n8")
     }
 
@@ -337,12 +337,12 @@ class UpdateInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).ints.replace(int7 -> int8, int8 -> int8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
           "\n__ident__int8")
 
       expectCompileError(
         """Ns(eid).ints.replace(Seq(int7 -> int8, int8 -> int8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/ints`:" +
           "\n__ident__int8")
 
 

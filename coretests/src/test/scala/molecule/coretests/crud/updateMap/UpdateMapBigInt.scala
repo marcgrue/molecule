@@ -41,14 +41,14 @@ class UpdateMapBigInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
@@ -105,13 +105,13 @@ class UpdateMapBigInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigIntMap.replace(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
       expectCompileError(
         """Ns(eid).bigIntMap.replace(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
     }

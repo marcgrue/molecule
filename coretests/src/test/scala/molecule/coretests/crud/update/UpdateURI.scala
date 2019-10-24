@@ -123,12 +123,12 @@ class UpdateURI extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uris.replace(uri7 -> uri8, uri8 -> uri8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
           "\n__ident__uri8")
 
       expectCompileError(
         """Ns(eid).uris.replace(Seq(uri7 -> uri8, uri8 -> uri8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/uris`:" +
           "\n__ident__uri8")
 
 

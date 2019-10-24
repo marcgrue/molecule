@@ -137,12 +137,12 @@ class UpdateDouble extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).doubles.replace(7.0 -> 8.0, 8.0 -> 8.0).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
           "\n8.0")
 
       expectCompileError(
         """Ns(eid).doubles.replace(Seq(7.0 -> 8.0, 8.0 -> 8.0)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
           "\n8.0")
     }
 
@@ -298,12 +298,12 @@ class UpdateDouble extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).doubles.replace(double7 -> double8, double8 -> double8).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
           "\n__ident__double8")
 
       expectCompileError(
         """Ns(eid).doubles.replace(Seq(double7 -> double8, double8 -> double8)).update""",
-        "molecule.transform.exception.Dsl2ModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
+        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/doubles`:" +
           "\n__ident__double8")
 
 
