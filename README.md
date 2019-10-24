@@ -86,7 +86,7 @@ sbt.version=1.3.2
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.2")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.3")
 ```
 
 `build.sbt`:
@@ -122,7 +122,7 @@ an example of how Molecule is used both on the server and client side.
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.2")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.3")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.29")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.6.1")
 ```

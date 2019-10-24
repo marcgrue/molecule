@@ -30,7 +30,6 @@ import molecule.generic.schema.GenericSchema
   * }}}
   * For brevity, arity 3-22 interfaces and empty companion traits are left ungrouped.
   * */
-
 private[molecule] trait core extends Datomic
   with AttrExpressions
   with AggregateKeywords
