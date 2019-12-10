@@ -15,13 +15,16 @@ import molecule.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
   var nestedEntityVars   : List[Var]   = List.empty[Var]
+  var nestedLevel        : Int         = 1
   var _model             : Model       = null
   val fns                : String      = "molecule.util.fns"
+  val datomGeneric                     =
+    Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
 
   def abort(msg: String): Nothing = throw new Model2QueryException(msg)
 
@@ -30,6 +33,7 @@ object Model2Query extends Helpers {
 
     // reset on each apply
     nestedEntityClauses = Nil
+    nestedLevel = 1
     _model = model
 
     // Resolve elements
@@ -68,21 +72,21 @@ object Model2Query extends Helpers {
       case g: Generic             => makeGeneric(model, query, g, e, v, w, y, prevNs, prevAttr, prevRefNs)
       case txMetaData: TxMetaData => makeTxMetaData(model, query, txMetaData, w, prevNs, prevAttr, prevRefNs)
       case nested: Nested         =>
-        if (nestedEntityClauses.isEmpty) {
-          nestedEntityVars = List(Var("sort0"))
-          nestedEntityClauses = List(Funct(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var("sort0"))))
+        if (!nested.bond.refAttr.endsWith("$")) {
+          if (nestedEntityClauses.isEmpty) {
+            nestedEntityVars = List(Var("sort0"))
+            nestedEntityClauses = List(Funct(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var("sort0"))))
+          }
+          // Next level
+          nestedEntityVars = nestedEntityVars :+ Var("sort" + nestedEntityClauses.size)
+          nestedEntityClauses = nestedEntityClauses :+ Funct(s"$fns/bind", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
         }
-        // Next level
-        nestedEntityVars = nestedEntityVars :+ Var("sort" + nestedEntityClauses.size)
-        nestedEntityClauses = nestedEntityClauses :+ Funct(s"$fns/bind", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
         makeNested(model, query, nested, e, v, w, prevNs, prevAttr, prevRefNs)
       case composite: Composite   => makeComposite(model, query, composite, e, v, prevNs, prevAttr, prevRefNs)
       case Self                   => (query, w, y, prevNs, prevAttr, prevRefNs)
       case other                  => abort("Unresolved query variables from model: " + (other, e, v, prevNs, prevAttr, prevRefNs))
     }
   }
-
-  val datomGeneric = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
 
   def makeAtom(model: Model, query: Query, atom: Atom, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
@@ -176,13 +180,42 @@ object Model2Query extends Helpers {
 
   def makeNested(model: Model, query: Query, nested: Nested, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
-    val Nested(b@Bond(nsFull, _, _, _, _), elements) = nested
-    val (e2, elements2)                              = if (nsFull == "") (e, elements) else (w, b +: elements)
-    val (q2, _, v2, ns2, attr2, refNs2)              = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
-      case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
-        make(model, query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+    val Nested(b@Bond(nsFull, refAttr, _, _, _), elements) = nested
+    if (refAttr.endsWith("$")) {
+      // Optional nested values - pull
+
+      // Recursively resolve nested pull structure right here
+      def getNestedAttrs(elements: Seq[Element]): Seq[PullAttrSpec] = {
+        elements.map {
+          case Atom(nsFull1, attr, _, _, _, None, _, _) if attr.endsWith("$") => PullAttr(nsFull1, clean(attr), true)
+          case Atom(nsFull1, attr, _, _, _, None, _, _)                       => PullAttr(nsFull1, attr, false)
+          case Atom(nsFull1, attr, _, _, _, _, _, _) if attr.endsWith("$")    => PullEnum(nsFull1, clean(attr), true)
+          case Atom(nsFull1, attr, _, _, _, _, _, _)                          => PullEnum(nsFull1, attr, false)
+
+          case Nested(Bond(_, refAttr1, _, _, _), _) if !refAttr1.endsWith("$") =>
+            throw new Model2QueryException("Optional nested can only nest further optional nested sub molecules")
+
+          case Nested(Bond(nsFull1, refAttr1, _, _, _), elements1) =>
+            nestedLevel += 1
+            NestedAttrs(nestedLevel, nsFull1, clean(refAttr1), getNestedAttrs(elements1))
+        }
+      }
+      val pullScalar = e + "__" + query.f.outputs.length
+      val pullNested = PullNested(pullScalar, NestedAttrs(nestedLevel, nsFull, clean(refAttr), getNestedAttrs(elements)))
+      val find2      = query.f.copy(outputs = query.f.outputs :+ pullNested)
+      val q2         = query
+        .copy(f = find2)
+        .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
+      (q2, "", "", "", "", "")
+    } else {
+      // Mandatory nested values - where clauses
+      val (e2, elements2)                 = if (nsFull == "") (e, elements) else (w, b +: elements)
+      val (q2, _, v2, ns2, attr2, refNs2) = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
+        case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
+          make(model, query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+      }
+      (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
     }
-    (q2, e2, nextChar(v2, 1), ns2, attr2, refNs2)
   }
 
   def makeComposite(model: Model, query: Query, composite: Composite, e: String, v: String, prevNs: String, prevAttr: String, prevRefNs: String)

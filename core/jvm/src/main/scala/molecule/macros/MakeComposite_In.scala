@@ -13,7 +13,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
     val OutMoleculeTpe = molecule_o(OutTypes.size)
     val inputMolecule = TypeName(c.freshName("compositeInputMolecule$"))
     val outMolecule = TypeName(c.freshName("compositeOutMolecule$"))
-    val (model0, _, casts, _, _, hasVariables, _, _, _) = getModel(dsl)
+    val (model0, _, casts, _, _, hasVariables, _, _, _, _) = getModel(dsl)
 
     // Methods for applying separate lists of input
     val applySeqs = InTypes match {

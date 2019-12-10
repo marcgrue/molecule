@@ -10,9 +10,7 @@ private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]
   // Lazily re-use nested list
   final override def getIterable(implicit conn: Conn): Iterable[OuterTpl] = get(conn)
 
-  val levels = if(_nestedQuery.isDefined)
-    _nestedQuery.get.f.outputs.size - _query.f.outputs.size
-  else 0
+  val levels = _nestedQuery.fold(0)(_.f.outputs.size - _query.f.outputs.size)
 
   protected def castBranch0(row: jList[AnyRef], leaf: List[Any]): OuterTpl = ???
   protected def castBranch1(row: jList[AnyRef], leaf: List[Any]): Any = ???

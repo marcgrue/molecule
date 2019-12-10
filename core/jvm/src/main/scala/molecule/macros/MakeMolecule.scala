@@ -11,7 +11,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
   private[this] final def generateMolecule(dsl: Tree, OutTypes: Type*): Tree = {
     val OutMoleculeTpe: Tree = molecule_o(OutTypes.size)
     val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons) = getModel(dsl)
+    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons, isNestedPull) = getModel(dsl)
 
     if (casts.size == 1) {
       if (hasVariables) {
@@ -30,6 +30,29 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.ast.model._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
             final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+            final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+          }
+          new $outMolecule
+        """
+      }
+
+    } else if(isNestedPull) {
+      if (hasVariables) {
+        q"""
+          import molecule.ast.model._
+          import molecule.ops.ModelOps._
+          final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
+          final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.transform.Model2Query(_resolvedModel)) {
+            final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+            final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+          }
+          new $outMolecule
+        """
+      } else {
+        q"""
+          import molecule.ast.model._
+          final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
+            ..${castNestedRows(casts, OutTypes)}
             final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
           }
           new $outMolecule

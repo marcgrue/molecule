@@ -227,7 +227,6 @@ object model extends Helpers {
   }.mkString("Seq(", ", ", ")")
 
   final protected def tv(tpe: String, value: Value): String = {
-    println("value: " + value)
     value match {
       case VarValue                              => "VarValue"
       case Eq(Nil)                               => s"Eq(Seq())"

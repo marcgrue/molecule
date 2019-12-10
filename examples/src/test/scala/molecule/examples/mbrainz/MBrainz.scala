@@ -8,7 +8,7 @@ import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
 /*
-  Download free Datomic verson to your machine and download the mbrainz-sample data set (see links below)
+  Download free Datomic version to your machine and download the mbrainz-sample data set (see links below)
 
   Start Datomic transactor first (replace first part of path to where you have the datomic download):
 

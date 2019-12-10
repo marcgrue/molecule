@@ -35,10 +35,10 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncList.getAsync(implicit* getAsync]] method.
     */
-  def get(implicit conn: Conn): List[Tpl] ={
+  def get(implicit conn: Conn): List[Tpl] = {
     val jColl = conn.query(_model, _query)
-    val it = jColl.iterator
-    val buf = new ListBuffer[Tpl]
+    val it    = jColl.iterator
+    val buf   = new ListBuffer[Tpl]
     while (it.hasNext) {
       buf += castRow(it.next)
     }
@@ -48,7 +48,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
   def getListOf[T](implicit conn: Conn): List[T] = ???
 
 
-    /** Get `List` of n rows as tuples matching molecule.
+  /** Get `List` of n rows as tuples matching molecule.
     * <br><br>
     * Only n rows are type-casted.
     * {{{
@@ -69,14 +69,14 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     get(conn)
   } else {
     val jColl = conn.query(_model, _query)
-    val size = jColl.size
-    val max = if (size < n) size else n
+    val size  = jColl.size
+    val max   = if (size < n) size else n
     if (max == 0) {
       List.empty[Tpl]
     } else {
-      val it = jColl.iterator
+      val it  = jColl.iterator
       val buf = new ListBuffer[Tpl]
-      var i = 0
+      var i   = 0
       while (it.hasNext && i < max) {
         buf += castRow(it.next)
         i += 1
@@ -238,7 +238,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport)* getAsyncAsOf]] method.
-    * */
+    **/
   def getAsOf(tx: molecule.facade.TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
@@ -288,7 +288,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncAsOf]] method.
-    * */
+    **/
   def getAsOf(tx: molecule.facade.TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
@@ -661,8 +661,8 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     *     ("Ben", "sushi")
     *   )
     * }}}
-    * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     *
+    * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     * @group getWith
     * @param n           Int Number of rows returned
     * @param txMolecules Transaction statements from applied Molecules with test data

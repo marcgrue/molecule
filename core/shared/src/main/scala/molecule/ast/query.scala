@@ -1,4 +1,6 @@
 package molecule.ast
+import molecule.ast.model.{Composite, Element, Nested, TxMetaData}
+import molecule.ast.query.Output
 import molecule.transform.Query2String
 import molecule.util.Helpers
 
@@ -33,15 +35,15 @@ object query extends Helpers {
     def datalog: String = datalog(30)
     def rules: String = if (i.rules.isEmpty) "none\n\n" else "[\n " + i.rules.map(Query2String(this).p(_)).mkString("\n ") + "\n]"
     def debug: String =
-    s"""$datalog
-       |
-       |RULES: $rules
-       |""".stripMargin
+      s"""$datalog
+         |
+         |RULES: $rules
+         |""".stripMargin
 
     override def toString: String = {
-      val sep = ",\n    "
+      val sep  = ",\n    "
       val widh = if (wi.variables.isEmpty) "" else wi.variables.mkString("\n  With(List(\n    ", sep, ")),")
-      val in = if (i.inputs.isEmpty && i.rules.isEmpty) "" else "\n  In(" +
+      val in   = if (i.inputs.isEmpty && i.rules.isEmpty) "" else "\n  In(" +
         "\n    List(" + (if (i.inputs.isEmpty) ")," else i.inputs.mkString("\n      ", ",\n      ", "),")) +
         "\n    List(" + (if (i.rules.isEmpty) ")," else i.rules.mkString("\n      ", ",\n      ", "),")) +
         "\n    List(" + (if (i.ds.size == 1) i.ds.head.toString + "))," else i.ds.mkString("\n      ", ",\n      ", ")),"))
@@ -77,9 +79,42 @@ object query extends Helpers {
   case class Val(v: Any) extends QueryValue with Output {
     override def toString: String = s"""Val(${cast(v)})"""
   }
+
+  sealed trait PullAttrSpec extends QueryValue with Output
+  case class PullAttr(nsFull: String, attr: String, opt: Boolean) extends PullAttrSpec {
+    override def toString: String = s"""PullAttr("$nsFull", "$attr", $opt)"""
+  }
+  case class PullEnum(nsFull: String, attr: String, opt: Boolean) extends PullAttrSpec {
+    override def toString: String = s"""PullEnum("$nsFull", "$attr", $opt)"""
+  }
+  case class NestedAttrs(
+    level: Int,
+    nsFull: String,
+    attr: String,
+    attrSpecs: Seq[PullAttrSpec]
+  ) extends PullAttrSpec {
+    override def toString: String = {
+      def draw(elements: Seq[PullAttrSpec], indent: Int): Seq[String] = {
+        val s = "  " * indent
+        elements map {
+          case NestedAttrs(level, nsFull, attr, attrSpecs) =>
+            s"""$s  NestedAttrs($level, "$nsFull", "$attr", Seq(""" + "\n" +
+              draw(attrSpecs, indent + 1).mkString(s",\n") + "))"
+          case other                                =>
+            s"$s  $other"
+        }
+      }
+      s"""NestedAttrs($level, "$nsFull", "$attr", Seq(""" + "\n" + draw(attrSpecs, 3).mkString(",\n") + "))"
+    }
+  }
+
+  case class PullNested(e: String, nestedAttrs: NestedAttrs) extends QueryValue with Output {
+    override def toString: String = s"""PullNested("$e",""" + "\n      " + nestedAttrs + ")"
+  }
   case class Pull(e: String, nsFull: String, attr: String, enumPrefix: Option[String] = None) extends QueryValue with Output {
     override def toString: String = s"""Pull("$e", "$nsFull", "$attr", ${o(enumPrefix)})"""
   }
+
   case object NoVal extends QueryValue with Output
 
 
@@ -132,10 +167,10 @@ object query extends Helpers {
   sealed trait ExpressionClause extends Clause
   case class Funct(name: String, ins: Seq[QueryTerm], outs: Binding) extends ExpressionClause {
     override def toString: String =
-      if(name.contains("\""))
-      s"""Funct(\"\"\"$name\"\"\", ${seq(ins)}, $outs)"""
-    else
-      s"""Funct("$name", ${seq(ins)}, $outs)"""
+      if (name.contains("\""))
+        s"""Funct(\"\"\"$name\"\"\", ${seq(ins)}, $outs)"""
+      else
+        s"""Funct("$name", ${seq(ins)}, $outs)"""
   }
 
 

@@ -14,7 +14,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
     val OutMoleculeTpe = molecule_o(OutTypes.size)
     val inputMolecule = TypeName(c.freshName("inputMolecule$"))
     val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons) = getModel(dsl)
+    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables, postTypes, postCasts, postJsons, isNestedPull) = getModel(dsl)
     val flat = casts.size == 1
 
     // Methods for applying separate lists of input

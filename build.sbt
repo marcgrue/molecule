@@ -20,7 +20,7 @@ lazy val baseFlags              = List(
 )
 
 lazy val baseSettings = Defaults.coreDefaultSettings ++ Seq(
-  version := "0.20.0",
+  version := "0.20.1",
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org"))
@@ -70,8 +70,8 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("core"))
   .settings(baseSettings ++
-    //    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
-    publishSettings ++ // make docs for publishSigned
+        publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
+//    publishSettings ++ // make docs for publishSigned
     Seq(
       moduleName := "molecule",
       crossScalaVersions := supportedScalaVersions,
@@ -90,17 +90,17 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin)
   .jvmSettings(jvmSettings)
 
-  /*mai
+  /*
     Publishing instructions:
 
     Delete previous ivy cached build files before publishing locally
     > del ~/.ivy2/local/org.scalamolecule/molecule*
 
-    `.enablePlugins(ScalaJSPlugin)` un-commented:
+    `.enablePlugins(ScalaJSPlugin)` un-commented (active):
     > sbt +publishLocal // produces sjs build files (for %%% refs) 2.12/2.13
     > sbt publishLocal  // produces sjs build files (for %%% refs) 2.12
 
-    `.enablePlugins(ScalaJSPlugin)` commented out:
+    `.enablePlugins(ScalaJSPlugin)` commented (inactive):
     > sbt +publishLocal // produces scala build files (for %% refs) 2.12/2.13
     > sbt publishLocal  // produces scala build files (for %% refs) 2.12
 
@@ -123,6 +123,7 @@ lazy val moleculeCoretests = project.in(file("coretests"))
 //  .enablePlugins(MoleculePlugin)
 //  .settings(
 //    moduleName := "molecule-coretests",
+//    moleculeMakeJars := true,
 //    moleculeSchemas := Seq(
 //      "molecule/coretests/bidirectionals",
 //      "molecule/coretests/nested",
@@ -142,6 +143,7 @@ lazy val moleculeExamples = project.in(file("examples"))
 //  .enablePlugins(MoleculePlugin)
 //  .settings(
 //    moduleName := "molecule-examples",
+//    moleculeMakeJars := true,
 //    moleculeSchemas := Seq(
 //      "molecule/examples/dayOfDatomic",
 //      "molecule/examples/gremlin",
@@ -198,6 +200,5 @@ lazy val noPublishSettings = Seq(
   publish := ((): Unit),
   publishLocal := ((): Unit),
   publishArtifact in(Compile, packageDoc) := false,
-  //  publishArtifact in packageDoc := false,
   sources in(Compile, doc) := Seq.empty
 )

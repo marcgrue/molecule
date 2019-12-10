@@ -3,7 +3,7 @@ package molecule.ops
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.ast.model._
-import molecule.ast.query._
+import molecule.ast.query.{NestedAttrs, _}
 import molecule.ops.exception.LiftablesException
 import molecule.util.MacroHelpers
 import scala.collection.immutable.HashSet
@@ -106,11 +106,26 @@ private[molecule] trait Liftables extends MacroHelpers {
   implicit val liftWith  : c.universe.Liftable[With] = Liftable[With] { widh => q"With(Seq(..${widh.variables}))" }
 
   implicit val liftQueryValue: c.universe.Liftable[QueryValue] = Liftable[QueryValue] {
-    case KW(nsFull, attr, refNs)           => q"KW($nsFull, $attr, $refNs)"
-    case Var(sym)                          => q"Var($sym)"
-    case Val(v)                            => q"Val($v)"
-    case Pull(e, nsFull, attr, enumPrefix) => q"Pull($e, $nsFull, $attr, $enumPrefix)"
-    case NoVal                             => q"NoVal"
+    case KW(nsFull, attr, refNs)                     => q"KW($nsFull, $attr, $refNs)"
+    case Var(sym)                                    => q"Var($sym)"
+    case Val(v)                                      => q"Val($v)"
+    case Pull(e, nsFull, attr, enumPrefix)           => q"Pull($e, $nsFull, $attr, $enumPrefix)"
+    case PullAttr(nsFull, attr, opt)                 => q"PullAttr($nsFull, $attr, $opt)"
+    case PullEnum(nsFull, attr, opt)                 => q"PullEnum($nsFull, $attr, $opt)"
+    case NestedAttrs(level, nsFull, attr, attrSpecs) => q"NestedAttrs($level, $nsFull, $attr, Seq(..$attrSpecs))"
+    case PullNested(e, nestedAttrs)                  => q"PullNested($e, $nestedAttrs)"
+    case NoVal                                       => q"NoVal"
+  }
+
+  implicit val liftNestedAttrs: c.universe.Liftable[NestedAttrs] =
+    Liftable[NestedAttrs] { nestedAttrs =>
+      q"NestedAttrs(${nestedAttrs.level}, ${nestedAttrs.nsFull}, ${nestedAttrs.attr}, Seq(..${nestedAttrs.attrSpecs}))"
+    }
+
+  implicit val liftPullAttrSpec: c.universe.Liftable[PullAttrSpec] = Liftable[PullAttrSpec] {
+    case PullAttr(nsFull, attr, opt)                 => q"PullAttr($nsFull, $attr, $opt)"
+    case PullEnum(nsFull, attr, opt)                 => q"PullEnum($nsFull, $attr, $opt)"
+    case NestedAttrs(level, nsFull, attr, attrSpecs) => q"NestedAttrs($level, $nsFull, $attr, Seq(..$attrSpecs))"
   }
 
   implicit val liftDataSource: c.universe.Liftable[DataSource] = Liftable[DataSource] {
@@ -132,11 +147,15 @@ private[molecule] trait Liftables extends MacroHelpers {
   }
 
   implicit val liftOutput: c.universe.Liftable[Output] = Liftable[Output] {
-    case Var(sym)                          => q"Var($sym)"
-    case Val(v)                            => q"Val($v)"
-    case AggrExpr(fn, args, v)             => q"AggrExpr($fn, Seq(..$args), $v)"
-    case Pull(e, nsFull, attr, enumPrefix) => q"Pull($e, $nsFull, $attr, $enumPrefix)"
-    case NoVal                             => q"NoVal"
+    case Var(sym)                                    => q"Var($sym)"
+    case Val(v)                                      => q"Val($v)"
+    case AggrExpr(fn, args, v)                       => q"AggrExpr($fn, Seq(..$args), $v)"
+    case Pull(e, nsFull, attr, enumPrefix)           => q"Pull($e, $nsFull, $attr, $enumPrefix)"
+    case PullNested(e, nestedAttrs)                  => q"PullNested($e, $nestedAttrs)"
+    case PullAttr(nsFull, attr, opt)                 => q"PullAttr($nsFull, $attr, $opt)"
+    case PullEnum(nsFull, attr, opt)                 => q"PullEnum($nsFull, $attr, $opt)"
+    case NestedAttrs(level, nsFull, attr, attrSpecs) => q"NestedAttrs($level, $nsFull, $attr, Seq(..$attrSpecs))"
+    case NoVal                                       => q"NoVal"
   }
   implicit val liftFind  : c.universe.Liftable[Find]   = Liftable[Find] { find => q"Find(Seq(..${find.outputs}))" }
 

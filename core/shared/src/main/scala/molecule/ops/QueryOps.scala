@@ -44,13 +44,15 @@ object QueryOps extends Helpers with JavaUtil {
     // Pull ..........................................
 
     def pull(e: String, atom: Atom): Query = {
-      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
+//      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
+      val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr)))
         .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
     }
 
     def pullEnum(e: String, atom: Atom): Query = {
-      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
+//      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
+      val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr, atom.enumPrefix)))
         .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
     }

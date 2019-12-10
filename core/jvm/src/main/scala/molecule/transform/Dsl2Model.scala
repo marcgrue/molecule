@@ -4,7 +4,7 @@ import molecule.boilerplate.attributes._
 import molecule.generic.index.{AEVT, AVET, EAVT, VAET}
 import molecule.generic.schema.Schema
 import molecule.generic.{GenericNs, Log}
-import molecule.macros.{Cast, Json}
+import molecule.macros.{Cast, CastNested, Json}
 import molecule.ops.VerifyRawModel
 import molecule.transform.exception.Dsl2ModelException
 import scala.language.experimental.macros
@@ -29,22 +29,24 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       Boolean,
       List[Tree],
       List[Int => Tree],
-      List[Int => Tree]
+      List[Int => Tree],
+      Boolean,
     ) = {
 
-    val mandatoryGeneric      = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "Self")
-    val tacitGeneric          = Seq("e_", "ns_", "a_", "v_", "tx_", "t_", "txInstant_", "op_")
-    val datomGeneric          = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
-    val keywords              = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample")
+    val mandatoryGeneric = Seq("e", "tx", "t", "txInstant", "op", "a", "v", "Self")
+    val tacitGeneric     = Seq("e_", "ns_", "a_", "v_", "tx_", "t_", "txInstant_", "op_")
+    val datomGeneric     = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
+    val keywords         = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample")
     def badFn(fn: TermName) = List("countDistinct", "distinct", "max", "min", "rand", "sample", "avg", "median", "stddev", "sum", "variance").contains(fn.toString())
 
     var isComposite             : Boolean = false
     var collectCompositeElements: Boolean = false
 
-    var post     : Boolean           = true
-    var postTypes: List[Tree]        = List.empty[Tree]
-    var postCasts: List[Int => Tree] = List.empty[Int => Tree]
-    var postJsons: List[Int => Tree] = List.empty[Int => Tree]
+    var post       : Boolean           = true
+    var nestedLevel: Int               = 0
+    var postTypes  : List[Tree]        = List.empty[Tree]
+    var postCasts  : List[Int => Tree] = List.empty[Int => Tree]
+    var postJsons  : List[Int => Tree] = List.empty[Int => Tree]
 
     var types         : List[List[Tree]]                                        = List(List.empty[Tree])
     var casts         : List[List[Int => Tree]]                                 = List(List.empty[Int => Tree])
@@ -60,6 +62,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     var first      : Boolean = true
     var genericType: String  = "datom"
 
+    var isNestedPull = false
+
     def addSpecific(castLambda: Int => Tree, tpeStr: String): Unit = {
       if (post) {
         postTypes = tq"${TypeName(tpeStr)}" +: postTypes
@@ -70,24 +74,37 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       }
     }
 
-    def addCast(castLambda: richTree => Int => Tree, t: richTree): Unit = if (t.name.last != '_') {
-      val tpe = if (t.name.last == '$') t.card match {
-        case 1 => tq"Option[${TypeName(t.tpeS)}]"
-        case 2 => tq"Option[Set[${TypeName(t.tpeS)}]]"
-        case 3 => tq"Option[Map[String, ${TypeName(t.tpeS)}]]"
-        case 4 => tq"Option[${TypeName(t.tpeS)}]"
-      } else t.card match {
-        case 1 => tq"${TypeName(t.tpeS)}"
-        case 2 => tq"Set[${TypeName(t.tpeS)}]"
-        case 3 => tq"Map[String, ${TypeName(t.tpeS)}]"
-        case 4 => tq"${TypeName(t.tpeS)}"
-      }
-      if (post) {
-        postTypes = tpe +: postTypes
-        postCasts = castLambda(t) +: postCasts
-      } else {
-        types = (tpe :: types.head) +: types.tail
-        casts = (castLambda(t) :: casts.head) +: casts.tail
+    def addCast(
+      castLambda: richTree => Int => Tree,
+      t: richTree,
+      castLambdaNested: Option[richTree => Int => Tree] = None
+    ): Unit = {
+      if(nestedLevel > 0 && castLambdaNested.isEmpty)
+        abort("Missing nested lambda")
+
+      if (t.name.last != '_') {
+        val tpe                            = if (t.name.last == '$')
+          t.card match {
+            case 1 => tq"Option[${TypeName(t.tpeS)}]"
+            case 2 => tq"Option[Set[${TypeName(t.tpeS)}]]"
+            case 3 => tq"Option[Map[String, ${TypeName(t.tpeS)}]]"
+            case 4 => tq"Option[${TypeName(t.tpeS)}]"
+          }
+        else
+          t.card match {
+            case 1 => tq"${TypeName(t.tpeS)}"
+            case 2 => tq"Set[${TypeName(t.tpeS)}]"
+            case 3 => tq"Map[String, ${TypeName(t.tpeS)}]"
+            case 4 => tq"${TypeName(t.tpeS)}"
+          }
+        val lambda: Int => Tree = castLambdaNested.fold(castLambda(t))(_(t))
+        if (post) {
+          postTypes = tpe +: postTypes
+          postCasts = lambda +: postCasts
+        } else {
+          types = (tpe :: types.head) +: types.tail
+          casts = (lambda :: casts.head) +: casts.tail
+        }
       }
     }
 
@@ -201,7 +218,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
         case q"$prev.$manyRef.*[..$types]($nested)" =>
           x(500, manyRef)
-          resolveNested(prev, richTree(prev), manyRef, nested)
+          resolveNested(prev, richTree(prev), manyRef, nested, false)
+
+        case q"$prev.$manyRef.*?[..$types]($nested)" =>
+          x(501, manyRef)
+          resolveOptNested(prev, richTree(prev), manyRef, nested, true)
 
         case q"$prev.+[..$types]($subComposite)" =>
           x(600, prev)
@@ -277,9 +298,10 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, 3, VarValue, None, bi(tree, t)))
 
       } else if (t.isValueAttr) {
-        addCast(castMandatoryAttr, t)
+        val nestedCast = if (nestedLevel > 0) Some(castNestedMandatoryAttr) else None
+        addCast(castMandatoryAttr, t, nestedCast)
         addJsonCard(jsonOneAttr, jsonManyAttr, t)
-        x(133, t.tpeS, jsons, postJsons, tempJsons)
+        x(133, t.tpeS, jsons, postJsons, tempJsons, nestedLevel)
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (attrStr.head == '_') {
@@ -322,7 +344,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, 3, VarValue, None, bi(tree, t)))
 
       } else if (t.isValueAttr$) {
-        addCast(castOptionalAttr, t)
+        val nestedCast = if (nestedLevel > 0) Some(castNestedOptionalAttr) else None
+        addCast(castOptionalAttr, t, nestedCast)
         addJsonCard(jsonOptOneAttr, jsonOptManyAttr, t)
         x(143, t.tpeS, types, postTypes)
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
@@ -674,11 +697,11 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       case q"$prev.$manyRef.apply[..$types]($nested)" if !q"$prev.$manyRef".isRef =>
         x(340, manyRef, nested)
-        Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", manyRef.toString, q"$nested")))
+        Seq(Nested(Bond("", "", "", 2), nestedElements(q"$prev.$manyRef", manyRef.toString, q"$nested", false)))
 
       case q"$prev.$manyRef.apply[..$types]($nested)" =>
         x(350, manyRef, nested)
-        traverseElement(prev, p, nested1(prev, p, manyRef, nested))
+        traverseElement(prev, p, nested1(prev, p, manyRef, nested, false))
     }
 
 
@@ -803,7 +826,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     }
 
 
-    def resolveNested(prev: Tree, p: richTree, manyRef: TermName, nested: Tree): Seq[Element] = {
+    def resolveNested(prev: Tree, p: richTree, manyRef: TermName, nested: Tree, optional: Boolean): Seq[Element] = {
       x(521, jsons, tempJsons, post, postJsons)
       // From now on, elements are part of nested structure
       // Transfer any tempJson lambdas to postJson lambdas
@@ -811,7 +834,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       post = false
       // Add nested elements on current level
       x(522, jsons, tempJsons, post, postJsons)
-      val nestedElement = nested1(prev, p, manyRef, q"$nested")
+      val nestedElement = nested1(prev, p, manyRef, q"$nested", optional)
       // Start new level
       types = List.empty[Tree] :: types
       casts = List.empty[Int => Tree] :: casts
@@ -820,7 +843,26 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       traverseElement(prev, p, nestedElement)
     }
 
-    def nested1(prev: Tree, p: richTree, manyRef: TermName, nestedTree: Tree) = {
+    def resolveOptNested(prev: Tree, p: richTree, manyRef: TermName, nested: Tree, optional: Boolean): Seq[Element] = {
+      x(524, jsons, tempJsons, post, postJsons)
+      // From now on, elements are part of nested structure
+      // Transfer any tempJson lambdas to postJson lambdas
+      addJsonLambdas
+      post = false
+      nestedLevel += 1
+      // Add nested elements on current level
+      x(525, jsons, tempJsons, post, postJsons)
+      val nestedElement = nested1(prev, p, manyRef, q"$nested", optional)
+      nestedLevel -= 1
+      // Start new level
+      types = List.empty[Tree] :: types
+      casts = List.empty[Int => Tree] :: casts
+      jsons = List.empty[Int => Tree] :: jsons
+      x(526, nestedElement, jsons, tempJsons, post, postJsons)
+      traverseElement(prev, p, nestedElement)
+    }
+
+    def nested1(prev: Tree, p: richTree, manyRef: TermName, nestedTree: Tree, optional: Boolean) = {
       val refNext  = q"$prev.$manyRef".refNext
       val parentNs = prev match {
         case q"$pre.apply($value)" if p.isMapAttrK      => new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
@@ -832,18 +874,21 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case _ if p.isRef                               => p.refNext
         case _                                          => p.name.capitalize
       }
+      isNestedPull = optional
+      val opt = if (optional) "$" else ""
       x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, jsons, tempJsons, post, postJsons)
       val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
       nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
-      val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
+      val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree, optional)
       addJsonLambdas
       x(511, nsFull, nestedRefAttrs, nestedElems, jsons, tempJsons, post, postJsons)
-      Nested(Bond(nsFull, refAttr, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
+      Nested(Bond(nsFull, refAttr + opt, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
     }
 
-    def nestedElements(manyRef: Tree, refNext: String, nested: Tree): Seq[Element] = {
+    def nestedElements(manyRef: Tree, refNext: String, nested: Tree, optional: Boolean): Seq[Element] = {
       val nestedElements = resolve(nested)
       val nestedNs       = curNs(nestedElements.head)
+      isNestedPull = optional
       if (refNext != nestedNs) {
         // Find refs in `manyRef` namespace and match the target type with the first namespace of the first nested element
         val refs             = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
@@ -853,7 +898,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
           nestedElements
         } else if (refPairsFiltered.size == 1) {
           val (refAttr, refNs) = refPairsFiltered.head
-          Bond(refNext, firstLow(refAttr), refNs.toString, 2, bi(manyRef, richTree(manyRef))) +: nestedElements
+          val opt              = if (optional) "$" else ""
+          Bond(refNext, firstLow(refAttr) + opt, refNs.toString, 2, bi(manyRef, richTree(manyRef))) +: nestedElements
         } else
           abort(s"`$manyRef` has more than one ref pointing to `$nestedNs`:\n${refPairs.mkString("\n")}")
       } else {
@@ -1268,13 +1314,16 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       postCasts = Nil
       postJsons = Nil
     }
-    x(801, elements)
+    //    x(801, elements)
+    //    x(801, elements, types, casts, jsons)
+    x(801, elements, types, casts, jsons, nestedRefAttrs, hasVariables,
+      postTypes, postCasts, postJsons, post)
 
     // Return checked model
     (
       Model(VerifyRawModel(elements, false)),
       types, casts, jsons, nestedRefAttrs, hasVariables,
-      postTypes, postCasts, postJsons
+      postTypes, postCasts, postJsons, isNestedPull
     )
   }
 }
