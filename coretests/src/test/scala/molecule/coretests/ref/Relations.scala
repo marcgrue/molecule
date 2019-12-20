@@ -146,7 +146,7 @@ class Relations extends CoreSpec {
       ("b", 2))
 
     // Ok to ask for an optional referenced value
-    m(Ns.str.Ref1.int1$).get === List(
+    m(Ns.str.Ref1.int1$).get.sortBy(_._1) === List(
       ("a", Some(1)),
       ("b", Some(2)))
 

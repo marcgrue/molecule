@@ -1,11 +1,11 @@
-package molecule.coretests.ref
+package molecule.coretests.ref.nested
 
 import molecule.api.out3._
 import molecule.coretests.nested.dsl.nested._
 import molecule.coretests.nested.schema.NestedSchema
 import org.specs2.mutable.Specification
 
-class NestedTuples extends Specification {
+class NestedBranches extends Specification {
   sequential
 
   def branchA[T](leafs: Seq[T]): (Int, String, Seq[T]) = (1, "a", leafs)

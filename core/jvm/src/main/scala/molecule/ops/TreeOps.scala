@@ -11,8 +11,6 @@ private[molecule] trait TreeOps extends Liftables {
   val c: blackbox.Context
   import c.universe._
 
-  //  val zz = DebugMacro("TreeOps", 1)
-
 
   override def abort(msg: String) = throw new TreeOpsException(msg)
 
@@ -24,8 +22,8 @@ private[molecule] trait TreeOps extends Liftables {
     case _   => attr
   }
 
-
   implicit class richTree(val t: Tree) {
+    //    val zz = DebugMacro("TreeOps", 1)
     lazy val tpe_         : Type           = if (t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
     lazy val at           : att            = att(t)
     lazy val nsFull       : String         = if (t.isFirstNS) t.symbol.name.toString else at.nsFull.toString
@@ -355,7 +353,12 @@ private[molecule] trait TreeOps extends Liftables {
   }
 
   object att {
-    def apply(attr: Tree): att = new att(c.typecheck(attr).symbol)
+    def apply(tree: Tree): att = tree match {
+      case q"$prev.apply(..$vs)"          => new att(c.typecheck(prev).symbol)
+      case q"$prev.apply[..$tpes](..$vs)" => new att(c.typecheck(prev).symbol)
+      case q"$prev.$op(..$vs)"            => new att(c.typecheck(prev).symbol)
+      case t                              => new att(c.typecheck(t).symbol)
+    }
     def apply(ts: TermSymbol): att = new att(ts)
     def apply(tpe: Type): att = new att(tpe.typeSymbol)
   }

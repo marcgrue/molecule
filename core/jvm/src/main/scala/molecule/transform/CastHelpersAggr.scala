@@ -12,7 +12,7 @@ import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpersAggr[Tpl] extends CastHelpersNested[Tpl] {
+trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
 
   // card one
 

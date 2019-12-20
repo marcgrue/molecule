@@ -255,11 +255,11 @@ class Save extends CoreSpec {
 
     val address = Ns.str("273 Broadway").Ref1.int1(10700).str1("New York").Ref2.str2("USA").save.eid
     address.touch === Map(
-      ":db/id" -> 17592186045445L,
+      ":db/id" -> 17592186045454L,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045446L,
+        ":db/id" -> 17592186045455L,
         ":Ref1/int1" -> 10700,
-        ":Ref1/ref2" -> Map(":db/id" -> 17592186045447L, ":Ref2/str2" -> "USA"),
+        ":Ref1/ref2" -> Map(":db/id" -> 17592186045456L, ":Ref2/str2" -> "USA"),
         ":Ref1/str1" -> "New York"),
       ":Ns/str" -> "273 Broadway")
 

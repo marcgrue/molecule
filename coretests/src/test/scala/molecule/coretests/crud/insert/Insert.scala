@@ -1,44 +1,14 @@
-package molecule.coretests.crud
+package molecule.coretests.crud.insert
 
 import molecule.api.out10._
-import molecule.api.out4.recreateDbFrom
-import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.coretests.util.schema.CoreTestSchema
+import molecule.coretests.util.dsl.coreTest._
 import molecule.facade.TxReport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 class Insert extends CoreSpec {
-
-
-  "Async insert" in new CoreSetup {
-
-    // Insert single row of data with individual args
-    val singleInsertFuture: Future[TxReport] = Ns.str.int.insertAsync("Ann", 28)
-
-    // Insert Iterable of multiple rows of data
-    val multipleInsertFuture: Future[TxReport] = Ns.str.int insertAsync List(
-      ("Ben", 42),
-      ("Liz", 37))
-
-    for {
-      _ <- singleInsertFuture
-      _ <- multipleInsertFuture
-      result <- Ns.str.int.getAsync
-    } yield {
-      // Both inserts applied
-      result === List(
-        ("Ann", 28),
-        ("Ben", 42),
-        ("Liz", 37)
-      )
-    }
-
-    // For brevity, the synchronous equivalent `insert` is used in the following tests
-  }
-
 
   "Single attribute" >> {
 
@@ -286,278 +256,7 @@ class Insert extends CoreSpec {
   }
 
 
-  "Relationships" >> {
-
-    "Basics" in new CoreSetup {
-
-      // Asserting a fact in the `Ref1` namespace is the same as creating
-      // one in the `Ns` namespace (no references between the two are made):
-
-      val a0 = Ns.str.insert("a0").eid
-      a0.touch === Map(
-        ":db/id" -> 17592186045445L,
-        ":Ns/str" -> "a0")
-
-      val b0 = Ref1.str1.insert("b0").eid
-      b0.touch === Map(
-        ":db/id" -> 17592186045447L,
-        ":Ref1/str1" -> "b0")
-
-      // If we also assert a fact in `Ns` we will get an entity with
-      // a :Ns/str assertion ("a0") of namespace `Ns` and a reference to an entity
-      // with another :Ref1/str assertion ("b1") in namespace `Ref1`:
-
-      val a0b1 = Ns.str.Ref1.str1.insert("a0", "b1").eid
-      a0b1.touch === Map(
-        ":db/id" -> 17592186045449L,
-        ":Ns/str" -> "a0",
-        ":Ns/ref1" -> Map(
-          ":db/id" -> 17592186045450L,
-          ":Ref1/str1" -> "b1")
-      )
-
-
-      // We can expand our graph one level deeper
-
-      val a0b1c2 = Ns.str.Ref1.str1.Ref2.str2.insert("a0", "b1", "c2").eid
-      a0b1c2.touch === Map(
-        ":db/id" -> 17592186045452L,
-        ":Ns/ref1" -> Map(
-          ":db/id" -> 17592186045453L,
-          ":Ref1/ref2" -> Map(
-            ":db/id" -> 17592186045454L,
-            ":Ref2/str2" -> "c2"),
-          ":Ref1/str1" -> "b1"),
-        ":Ns/str" -> "a0"
-      )
-
-
-      // We can limit the depth of the retrieved graph
-
-      a0b1c2.touchMax(3) === Map(
-        ":db/id" -> 17592186045452L,
-        ":Ns/ref1" -> Map(
-          ":db/id" -> 17592186045453L,
-          ":Ref1/ref2" -> Map(
-            ":db/id" -> 17592186045454L,
-            ":Ref2/str2" -> "c2"),
-          ":Ref1/str1" -> "b1"),
-        ":Ns/str" -> "a0"
-      )
-
-      a0b1c2.touchMax(2) === Map(
-        ":db/id" -> 17592186045452L,
-        ":Ns/ref1" -> Map(
-          ":db/id" -> 17592186045453L,
-          ":Ref1/ref2" -> 17592186045454L,
-          ":Ref1/str1" -> "b1"),
-        ":Ns/str" -> "a0"
-      )
-
-      a0b1c2.touchMax(1) === Map(
-        ":db/id" -> 17592186045452L,
-        ":Ns/ref1" -> 17592186045453L,
-        ":Ns/str" -> "a0"
-      )
-
-      // Use `touchQ` to generate a quoted graph that you can paste into your tests
-      a0b1c2.touchQuotedMax(1) ===
-        """Map(
-          |  ":db/id" -> 17592186045452L,
-          |  ":Ns/ref1" -> 17592186045453L,
-          |  ":Ns/str" -> "a0")""".stripMargin
-    }
-
-
-    "Multiple values across namespaces" in new CoreSetup {
-
-      Ns.str.int.Ref1.str1.int1.Ref2.str2.int2.insert("a0", 0, "b1", 1, "c2", 2)
-      Ns.str.int.Ref1.str1.int1.Ref2.str2.int2.get.head === ("a0", 0, "b1", 1, "c2", 2)
-
-      Ns.strs.ints.Ref1.strs1.ints1.Ref2.strs2.ints2.insert(Set("a0"), Set(0), Set("b1"), Set(1), Set("c2"), Set(2))
-      Ns.strs.ints.Ref1.strs1.ints1.Ref2.strs2.ints2.get.head === (Set("a0"), Set(0), Set("b1"), Set(1), Set("c2"), Set(2))
-
-      // Address example
-      val address = Ns.str.Ref1.int1.str1.Ref2.str2.insert("273 Broadway", 10700, "New York", "USA").eid
-      address.touch === Map(
-        ":db/id" -> 17592186045453L,
-        ":Ns/ref1" -> Map(
-          ":db/id" -> 17592186045454L,
-          ":Ref1/int1" -> 10700,
-          ":Ref1/ref2" -> Map(":db/id" -> 17592186045455L, ":Ref2/str2" -> "USA"),
-          ":Ref1/str1" -> "New York"),
-        ":Ns/str" -> "273 Broadway")
-
-      // We can even create chains of relationships without having intermediate attribute values
-      Ns.str.Ref1.Ref2.int2.insert("a", 1)
-      Ns.str.Ref1.Ref2.int2.get.head === ("a", 1)
-    }
-
-
-    "Optional values" in new CoreSetup {
-
-      Ns.str.Ref1.str1$.Ref2.int2 insert List(
-        ("a", Some("aa"), 1),
-        ("b", None, 2)
-      )
-
-      Ns.str.Ref1.str1$.Ref2.int2.get === List(
-        ("b", None, 2),
-        ("a", Some("aa"), 1)
-      )
-      Ns.str.Ref1.str1.Ref2.int2.get === List(
-        ("a", "aa", 1)
-      )
-    }
-
-
-    "Card many references" in new CoreSetup {
-
-      val id = Ns.int.Refs1.str1.insert(42, "r").eid
-      id.touch === Map(
-        ":db/id" -> 17592186045445L,
-        ":Ns/refs1" -> List(// <-- notice we have a list of references now (with one ref here)
-          Map(":db/id" -> 17592186045446L, ":Ref1/str1" -> "r")),
-        ":Ns/int" -> 42
-      )
-
-
-      // Note that applying multiple values creates multiple base entities with a
-      // reference to each new `:Ref1/str` assertion, so that we get the following:
-
-      val List(id1, ref1, id2, ref2) = Ns.int.Refs1.str1.insert.apply(Seq((1, "r"), (2, "s"))).eids
-      id1.touch === Map(
-        ":db/id" -> id1,
-        ":Ns/refs1" -> List(
-          Map(":db/id" -> ref1, ":Ref1/str1" -> "r")),
-        ":Ns/int" -> 1
-      )
-      id2.touch === Map(
-        ":db/id" -> id2,
-        ":Ns/refs1" -> List(
-          Map(":db/id" -> ref2, ":Ref1/str1" -> "s")),
-        ":Ns/int" -> 2
-      )
-    }
-
-
-    "Sub-molecules" in new CoreSetup {
-
-      // If we want to create two references from the same base entity we
-      // can us "group" notation `*` after our cardinality-many reference
-      // and then define what sub-attributes we want to add.
-
-      // Note that the "sub-molecule" we apply is treated as a single type
-      // - when more than 1 attribute, like a tuple.
-
-      Ns.Refs1.*(Ref1.str1).insert(List("r1", "r2")).eid.touch === Map(
-        ":db/id" -> 17592186045445L,
-        ":Ns/refs1" -> List(
-          Map(":db/id" -> 17592186045446L, ":Ref1/str1" -> "r1"),
-          Map(":db/id" -> 17592186045447L, ":Ref1/str1" -> "r2")
-        ))
-
-      // Like the classical order/products example
-      // Note how our "sub-molecule" `Ref1.int.str` is regarded as
-      // one type `Seq[(Int, String)]` by the outer molecule
-      m(Ns.str.Refs1 * Ref1.int1.str1).debugInsert("order", List((4, "product1"), (7, "product2")))
-      val order = m(Ns.str.Refs1 * Ref1.int1.str1).insert("order", List((4, "product1"), (7, "product2"))).eid
-      order.touch === Map(
-        ":db/id" -> 17592186045449L,
-        ":Ns/refs1" -> List(
-          Map(":db/id" -> 17592186045450L, ":Ref1/int1" -> 4, ":Ref1/str1" -> "product1"),
-          Map(":db/id" -> 17592186045451L, ":Ref1/int1" -> 7, ":Ref1/str1" -> "product2")
-        ),
-        ":Ns/str" -> "order")
-    }
-  }
-
-
-  "Insert-molecule (2-step insertion)" >> {
-
-    "Card one" in new CoreSetup {
-
-      // 1. Define "Insert-molecule"
-      val insertStr = Ns.str.insert
-
-      // 2. Re-use Insert-molecule to insert values
-      insertStr("a")
-      insertStr("b")
-      insertStr("c")
-
-      Ns.str.get.sorted === List("a", "b", "c")
-
-
-      val insertAll = Ns.str.int.long.float.double.bool.date.uuid.uri.enum.insert
-
-      // Var-arg for single entity
-      insertAll(" ", 0, 0L, 0.0f, 0.0, false, date0, uuid0, uri0, "enum0")
-
-      // List of tuples for multiple entities
-      insertAll(List(
-        ("a", 1, 1L, 1.0f, 1.0, true, date1, uuid1, uri1, "enum1"),
-        ("b", 2, 2L, 2.0f, 2.0, false, date2, uuid2, uri2, "enum2")
-      ))
-
-      Ns.str.int.long.float.double.bool.date.uuid.uri.enum.get.sortBy(_._1) === List(
-        (" ", 0, 0L, 0.0f, 0.0, false, date0, uuid0, uri0, "enum0"),
-        ("a", 1, 1L, 1.0f, 1.0, true, date1, uuid1, uri1, "enum1"),
-        ("b", 2, 2L, 2.0f, 2.0, false, date2, uuid2, uri2, "enum2")
-      )
-    }
-
-
-    "Card many" in new CoreSetup {
-
-      // 1. Define "Insert-molecule"
-      val insertStrs = Ns.strs.insert
-
-      // 2. Re-use Insert-molecule to insert values
-      insertStrs(Set("a"))
-      insertStrs(Set("b", "c"))
-
-      Ns.strs.get.head === Set("a", "b", "c")
-
-
-      val insertAlls = Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.insert
-
-      insertAlls(Set(" "), Set(0), Set(0L), Set(0.0f), Set(0.0), Set(date0), Set(uuid0), Set(uri0), Set("enum0"))
-      insertAlls(List(
-        (Set("a"), Set(1), Set(1L), Set(1.0f), Set(1.0), Set(date1), Set(uuid1), Set(uri1), Set("enum1")),
-        (Set("b"), Set(2), Set(2L), Set(2.0f), Set(2.0), Set(date2), Set(uuid2), Set(uri2), Set("enum2"))
-      ))
-
-      Ns.strs.ints.longs.floats.doubles.dates.uuids.uris.enums.get.head === (
-        Set("a", "b", " "),
-        Set(0, 1, 2),
-        Set(0L, 1L, 2L),
-        Set(0.0f, 2.0f, 1.0f),
-        Set(0.0, 2.0, 1.0),
-        Set(date0, date1, date2),
-        Set(uuid0, uuid1, uuid2),
-        Set(uri0, uri1, uri2),
-        Set("enum1", "enum0", "enum2"))
-    }
-
-
-    "Relationships" in new CoreSetup {
-
-      // 1. Define Input-molecule
-      val insertAddress = Ns.str.Ref1.int1.str1.Ref2.str2.insert
-
-      // 2. Insert data using input molecule as template
-      insertAddress("273 Broadway", 10700, "New York", "USA")
-      insertAddress("2054, 5th Ave", 10800, "New York", "USA")
-
-      Ns.str.Ref1.int1.str1.Ref2.str2.get === List(
-        ("2054, 5th Ave", 10800, "New York", "USA"),
-        ("273 Broadway", 10700, "New York", "USA")
-      )
-    }
-  }
-
-
-  "Optional inserts" >> {
+  "Optional values" >> {
 
     "Card one attrs" in new CoreSetup {
 
@@ -601,8 +300,8 @@ class Insert extends CoreSpec {
       )
 
       Ns.date.longs$.get === List(
-        (date2, Some(Set(20L, 21L))),
         (date1, None),
+        (date2, Some(Set(20L, 21L))),
       )
 
       Ns.date.longs.get === List(
@@ -611,7 +310,8 @@ class Insert extends CoreSpec {
     }
   }
 
-  "Additional inserts/upserts" in new CoreSetup {
+
+  ">22 inserts/upserts" in new CoreSetup {
 
     // If we need to insert more than 22 facts for a single namespace
     // we can start asserting those 22 facts, then use the returned eid

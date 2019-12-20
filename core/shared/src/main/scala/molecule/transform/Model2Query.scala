@@ -184,28 +184,39 @@ object Model2Query extends Helpers {
     if (refAttr.endsWith("$")) {
       // Optional nested values - pull
 
-      // Recursively resolve nested pull structure right here
+      def optTac(attr: String): Boolean = attr.endsWith("$") || attr.endsWith("_")
+
+      // Recursively resolve whole nested pull structure here
       def getNestedAttrs(elements: Seq[Element]): Seq[PullAttrSpec] = {
-        elements.map {
-          case Atom(nsFull1, attr, _, _, _, None, _, _) if attr.endsWith("$") => PullAttr(nsFull1, clean(attr), true)
-          case Atom(nsFull1, attr, _, _, _, None, _, _)                       => PullAttr(nsFull1, attr, false)
-          case Atom(nsFull1, attr, _, _, _, _, _, _) if attr.endsWith("$")    => PullEnum(nsFull1, clean(attr), true)
-          case Atom(nsFull1, attr, _, _, _, _, _, _)                          => PullEnum(nsFull1, attr, false)
+        elements.foldLeft(Seq.empty[PullAttrSpec], elements) {
+          // Abort recursion when done on this level
+          case ((acc, Nil), _) => (acc, Nil)
 
-          case Nested(Bond(_, refAttr1, _, _, _), _) if !refAttr1.endsWith("$") =>
-            throw new Model2QueryException("Optional nested can only nest further optional nested sub molecules")
+          // Nested attributes
+          case ((acc, rem), Atom(nsFull1, attr, _, _, _, None, _, _)) if optTac(attr) => (acc :+ PullAttr(nsFull1, clean(attr), true), rem.tail)
+          case ((acc, rem), Atom(nsFull1, attr, _, _, _, None, _, _))                 => (acc :+ PullAttr(nsFull1, attr, false), rem.tail)
+          case ((acc, rem), Atom(nsFull1, attr, _, _, _, _, _, _)) if optTac(attr)    => (acc :+ PullEnum(nsFull1, clean(attr), true), rem.tail)
+          case ((acc, rem), Atom(nsFull1, attr, _, _, _, _, _, _))                    => (acc :+ PullEnum(nsFull1, attr, false), rem.tail)
 
-          case Nested(Bond(nsFull1, refAttr1, _, _, _), elements1) =>
+          // Card 1 ref within nested structure is represented as a nested structure itself
+          case ((acc, rem), Bond(prevNs, refAttr, _, _, _)) =>
             nestedLevel += 1
-            NestedAttrs(nestedLevel, nsFull1, clean(refAttr1), getNestedAttrs(elements1))
+            (acc :+ NestedAttrs(nestedLevel, prevNs, clean(refAttr), getNestedAttrs(rem.tail)), Nil)
+
+          // Always last
+          case ((acc, _), Nested(Bond(nsFull1, refAttr1, _, _, _), elements1)) =>
+            nestedLevel += 1
+            (acc :+ NestedAttrs(nestedLevel, nsFull1, clean(refAttr1), getNestedAttrs(elements1)), Nil)
         }
-      }
-      val pullScalar = e + "__" + query.f.outputs.length
+        }._1
+
+      val nestedE    = if (model.elements.init.last.isInstanceOf[Bond]) v else e
+      val pullScalar = nestedE + "__" + query.f.outputs.length
       val pullNested = PullNested(pullScalar, NestedAttrs(nestedLevel, nsFull, clean(refAttr), getNestedAttrs(elements)))
       val find2      = query.f.copy(outputs = query.f.outputs :+ pullNested)
       val q2         = query
         .copy(f = find2)
-        .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
+        .func("molecule.util.fns/bind", Seq(Var(nestedE)), ScalarBinding(Var(pullScalar)))
       (q2, "", "", "", "", "")
     } else {
       // Mandatory nested values - where clauses

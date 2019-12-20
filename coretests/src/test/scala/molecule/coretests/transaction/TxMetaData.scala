@@ -344,27 +344,27 @@ class TxMetaData extends CoreSpec {
     // History without tx meta data
     Ns(e).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1028, true), // 1 asserted (save)
+      (1, 1037, true), // 1 asserted (save)
 
       // tx 2
-      (1, 1030, false), // 1 retracted
-      (2, 1030, true), // 2 asserted (update)
+      (1, 1039, false), // 1 retracted
+      (2, 1039, true), // 2 asserted (update)
 
       // tx 3
-      (2, 1031, false), // 2 retracted
-      (3, 1031, true) // 3 asserted (update)
+      (2, 1040, false), // 2 retracted
+      (3, 1040, true) // 3 asserted (update)
     )
 
     // History with tx meta data
     Ns(e).int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1028, true, "a"), // 1 asserted (save)
+      (1, 1037, true, "a"), // 1 asserted (save)
 
       // (tx2 has no tx meta data)
 
       // tx 3
-      (2, 1031, false, "b"), // 2 retracted
-      (3, 1031, true, "b") // 3 asserted (update)
+      (2, 1040, false, "b"), // 2 retracted
+      (3, 1040, true, "b") // 3 asserted (update)
     )
   }
 
@@ -379,7 +379,7 @@ class TxMetaData extends CoreSpec {
     // What was retracted and with what tx meta data
     Ns.e.int.t.op.Tx(Ns.str).getHistory === List(
       // 1 was retracted with tx meta data "meta"
-      (e, 1, 1030, false, "meta")
+      (e, 1, 1039, false, "meta")
     )
   }
 
@@ -406,13 +406,13 @@ class TxMetaData extends CoreSpec {
 
     // History with transaction data
     Ns.int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1028, true, "a"),
-      (2, 1028, true, "a"),
-      (3, 1028, true, "a"),
+      (1, 1037, true, "a"),
+      (2, 1037, true, "a"),
+      (3, 1037, true, "a"),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1032, false, "b"),
-      (2, 1032, false, "b")
+      (1, 1041, false, "b"),
+      (2, 1041, false, "b")
     )
 
     // Entities and int values that were retracted with tx meta data "b"
@@ -436,13 +436,13 @@ class TxMetaData extends CoreSpec {
 
     // History with transaction data
     Ns.int.t.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1028, true, "a", 7),
-      (2, 1028, true, "a", 7),
-      (3, 1028, true, "a", 7),
+      (1, 1037, true, "a", 7),
+      (2, 1037, true, "a", 7),
+      (3, 1037, true, "a", 7),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1033, false, "b", 8),
-      (2, 1033, false, "b", 8)
+      (1, 1042, false, "b", 8),
+      (2, 1042, false, "b", 8)
     )
 
     // Entities and int values that was retracted in tx "b"

@@ -181,7 +181,7 @@ class LogTest extends CoreSpec {
   "Args" >> {
 
     // t1 - tx2 as static values
-    Log(Some(1028), Some(13194139534342L)).t.e.a.v.op.get === List(
+    Log(Some(1037), Some(13194139534351L)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
       (t1, e1, ":Ns/str", "a", true),
       (t1, e1, ":Ns/int", 1, true)
@@ -277,7 +277,7 @@ class LogTest extends CoreSpec {
 
     // Start - t3 (exclusive)
     // Includes all Datomic database bootstrapping and schema transactions
-    Log(None, Some(t3)).t.get.size === 336
+    Log(None, Some(t3)).t.get.size === 425
 
     // Start - end
     // Molecule disallow returning from beginning to end (the whole database!)

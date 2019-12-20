@@ -107,10 +107,6 @@ class UpdateMapInt extends CoreSpec {
       Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 5, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
 
 
-      // Missing old value has no effect. The new value is inserted (upsert semantics)
-      Ns(eid).intMap.replace("str9" -> 9).update
-      Ns.intMap.get.head.toList.sorted === List("str1" -> 1, "str2" -> 2, "str3" -> 6, "str4" -> 7, "str5" -> 8, "str6" -> 8)
-
       // Can't replace pairs with duplicate keys
 
       expectCompileError(

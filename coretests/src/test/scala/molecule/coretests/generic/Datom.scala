@@ -109,14 +109,14 @@ class Datom extends CoreSpec {
 
       // Core 5 Datom values (quintuplets)
       Ns(e1).e.a.v.tx.op.get === List(
-        (e1, ":Ns/int", 3, tx3, true),
         (e1, ":Ns/str", "b", tx2, true),
+        (e1, ":Ns/int", 3, tx3, true),
       )
 
       // Generic attributes can be added in any order
       Ns(e1).v.t.e.op.tx.a.get === List(
-        ("b", 1030, e1, true, tx2, ":Ns/str"),
-        (3, 1031, e1, true, tx3, ":Ns/int")
+        ("b", 1039, e1, true, tx2, ":Ns/str"),
+        (3, 1040, e1, true, tx3, ":Ns/int")
       )
     }
 
@@ -134,12 +134,12 @@ class Datom extends CoreSpec {
 
     "History" >> {
       Ns(e1, e2).e.t.a.v.op.getHistory.sortBy(t => (t._1, t._2)) === List(
-        (e1, t1, ":Ns/int", 1, true),
         (e1, t1, ":Ns/str", "a", true),
-        (e1, t2, ":Ns/str", "b", true),
+        (e1, t1, ":Ns/int", 1, true),
         (e1, t2, ":Ns/str", "a", false),
-        (e1, t3, ":Ns/int", 3, true),
+        (e1, t2, ":Ns/str", "b", true),
         (e1, t3, ":Ns/int", 1, false),
+        (e1, t3, ":Ns/int", 3, true),
 
         (e2, t4, ":Ns/int", 4, true),
         (e2, t4, ":Ns/str", "x", true),
@@ -195,7 +195,10 @@ class Datom extends CoreSpec {
     "order of attribute types" >> {
 
       // Generic entity id first is ok
-      Ns.e.int.t.get === List((e1, 3, t3), (e2, 5, t5))
+      Ns.e.int.t.get.sorted === List(
+        (e1, 3, t3),
+        (e2, 5, t5),
+      )
 
       // Other generic attributes not allowed before first attribute
       expectCompileError(
@@ -205,7 +208,10 @@ class Datom extends CoreSpec {
           "Please add generic attributes `t`, `op` after `int`.")
 
       // Generic attributes after custom attribute ok
-      Ns.int.t.op.get === List((5, t5, true), (3, t3, true))
+      Ns.int.t.op.get === List(
+        (3, t3, true),
+        (5, t5, true),
+      )
 
       // Custom attributes after generic attributes ok as long
       // as at least one custom attr is before generic attributes
@@ -228,8 +234,8 @@ class Datom extends CoreSpec {
       // Any filter will prevent a full scan
 
       Ns.e.a(":Ns/str").v.t.get === List(
-        (e1, ":Ns/str", "b", 1030),
-        (e2, ":Ns/str", "x", 1032)
+        (e1, ":Ns/str", "b", 1039),
+        (e2, ":Ns/str", "x", 1041)
       )
 
       // Count also involves full scan if no other attribute is present
@@ -304,12 +310,12 @@ class Datom extends CoreSpec {
   "Expressions, mandatory" >> {
 
     Ns.e(e1).get === List(e1)
-    Ns.e(e1, e2).get === List(e1, e2)
-    Ns.e.not(e1).get === List(e2, r1)
+    Ns.e(e1, e2).get.sorted === List(e1, e2)
+    Ns.e.not(e1).get.sorted === List(e2, r1)
     Ns.e.not(e1, e2).get === List(r1)
     Ns.e.>(e1).get === List(e2, r1)
-    Ns.e.>=(e1).get === List(e1, e2, r1)
-    Ns.e.<=(e2).get === List(e1, e2)
+    Ns.e.>=(e1).get.sorted === List(e1, e2, r1)
+    Ns.e.<=(e2).get.sorted === List(e1, e2)
     Ns.e.<(e2).get === List(e1)
 
     // Only `e` before first custom attribute is allowed
@@ -333,43 +339,43 @@ class Datom extends CoreSpec {
     Ns.v("hello").get === List("hello")
     Ns.v("non-existing value").get === Nil
     Ns.v(3, "b").get === List("b", 3)
-    Ns.v.not(3).get === List("b", 5, "x", "hello", r1)
-    Ns.v.not(3, "b").get === List(5, "x", "hello", r1)
+    Ns.v.not(3).get === List("b", 5, r1, "x", "hello")
+    Ns.v.not(3, "b").get === List(5, r1, "x", "hello")
     expectCompileError(
       """m(Ns.v.>(3))""",
       "molecule.transform.exception.Dsl2ModelException: " +
         "Can't compare generic values being of different types. Found: v.>(3)")
 
     Ns.tx(tx3).get === List(tx3)
-    Ns.tx(tx3, tx5).get === List(tx3, tx5)
+    Ns.tx(tx3, tx5).get === List(tx5, tx3)
 
     // Note that no current datoms remains from tx1
-    Ns.tx.not(tx3).get === List(tx2, tx4, tx5, tx6, tx7)
+    Ns.tx.not(tx3).get.sorted === List(tx2, tx4, tx5, tx6, tx7)
 
     // If we ask the history database though, tx1 will show up too
-    Ns.tx.not(tx3).getHistory === List(tx1, tx2, tx4, tx5, tx6, tx7)
+    Ns.tx.not(tx3).getHistory.sorted === List(tx1, tx2, tx4, tx5, tx6, tx7)
 
-    Ns.tx.not(tx3, tx5).get === List(tx2, tx4, tx6, tx7)
-    Ns.tx.>(tx3).get === List(tx4, tx5, tx6, tx7)
-    Ns.tx.>=(tx3).get === List(tx3, tx4, tx5, tx6, tx7)
-    Ns.tx.<=(tx3).get === List(tx2, tx3) // excludes tx1 per explanation above
-    Ns.tx.<=(tx3).getHistory === List(tx1, tx2, tx3) // includes tx1 too per explanation above
+    Ns.tx.not(tx3, tx5).get.sorted === List(tx2, tx4, tx6, tx7)
+    Ns.tx.>(tx3).get.sorted === List(tx4, tx5, tx6, tx7)
+    Ns.tx.>=(tx3).get.sorted === List(tx3, tx4, tx5, tx6, tx7)
+    Ns.tx.<=(tx3).get.sorted === List(tx2, tx3) // excludes tx1 per explanation above
+    Ns.tx.<=(tx3).getHistory.sorted === List(tx1, tx2, tx3) // includes tx1 too per explanation above
     Ns.tx.<(tx3).get === List(tx2)
     // Range of transaction entity ids
-    Ns.tx_.>(tx2).tx.<=(tx4).get === List(tx3, tx4)
+    Ns.tx_.>(tx2).tx.<=(tx4).get.sorted === List(tx3, tx4)
     Ns.int_.tx(count).get === List(2)
 
     Ns.t(t3).get === List(t3)
-    Ns.t(t3, t5).get === List(t3, t5)
-    Ns.t.not(t3).get === List(t2, t4, t5, t6, t7)
-    Ns.t.not(t3, t5).get === List(t2, t4, t6, t7)
-    Ns.t.>(t3).get === List(t4, t5, t6, t7)
-    Ns.t.>=(t3).get === List(t3, t4, t5, t6, t7)
-    Ns.t.<=(t3).get === List(t2, t3)
-    Ns.t.<=(t3).getHistory === List(t1, t2, t3)
+    Ns.t(t3, t5).get.sorted === List(t3, t5)
+    Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
+    Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
+    Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
+    Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
+    Ns.t.<=(t3).get.sorted === List(t2, t3)
+    Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
     Ns.t.<(t3).get === List(t2)
     // Range of transaction t's
-    Ns.t_.>(t2).t.<=(t4).get === List(t3, t4)
+    Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
     Ns.int_.t(count).get === List(2)
 
     Ns.txInstant(d2).get === List(d2)

@@ -117,48 +117,48 @@ class SchemaTest extends CoreSpec {
 
     "id" >> {
 
-      Schema.id.get.size === 58
+      Schema.id.get.size === 74
 
       Schema.id.get(5) === List(97, 98, 99, 100, 101)
 
       Schema.id(97).get(5) === List(97)
       Schema.id(97, 98).get(5) === List(97, 98)
 
-      Schema.id.not(97).get.size === 57
-      Schema.id.not(97, 98).get.size === 56
+      Schema.id.not(97).get.size === 73
+      Schema.id.not(97, 98).get.size === 72
 
-      Schema.id(count).get === List(58)
+      Schema.id(count).get === List(74)
 
 
       // Since all attributes have an id, a tacit `id_` makes no difference
-      Schema.id_.attr.get.size === 58
+      Schema.id_.attr.get.size === 72
       Schema.id_.attr.get(3) === List("floats", "double", "str1")
 
       // We can though filter by one or more tacit attribute ids
       Schema.id_(97).attr.get === List("longMap")
       Schema.id_(99, 100).attr.get === List("doubleMap", "boolMap")
 
-      Schema.id_.not(97).attr.get.size === 57
-      Schema.id_.not(97, 98).attr.get.size === 56
+      Schema.id_.not(97).attr.get.size === 71
+      Schema.id_.not(97, 98).attr.get.size === 70
     }
 
 
     "a" >> {
 
-      Schema.a.get.size === 58
+      Schema.a.get.size === 74
       Schema.a.get(3) === List(":Ns/double", ":Ns/doubleMap", ":Ref2/ints2")
 
       Schema.a(":Ns/str").get === List(":Ns/str")
       Schema.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
 
-      Schema.a.not(":Ns/str").get.size === 57
-      Schema.a.not(":Ns/str", ":Ns/int").get.size === 56
+      Schema.a.not(":Ns/str").get.size === 73
+      Schema.a.not(":Ns/str", ":Ns/int").get.size === 72
 
-      Schema.a(count).get === List(58)
+      Schema.a(count).get === List(74)
 
 
       // Since all attributes have an `ident`, a tacit `ident_` makes no difference
-      Schema.a_.ns.get.size === 3
+      Schema.a_.ns.get.size === 5
 
       // We can though filter by one or more tacit ident names
       Schema.a_(":Ns/str").ns.get.sorted === List("Ns")
@@ -168,11 +168,18 @@ class SchemaTest extends CoreSpec {
 
       // Negate tacit ident value
       // Note though that since other attributes than `str` exist, the namespace is still returned
-      Schema.a_.not(":Ref2/int2").ns.get.sorted === List("Ns", "Ref1", "Ref2")
+      Schema.a_.not(":Ref2/int2").ns.get.sorted === List("Ns", "Ref1", "Ref2", "Ref3", "Ref4")
 
       // If we exclude all attributes in a namespace, it won't be returned
-      Schema.a_.not(":Ref2/int2", ":Ref2/enum2", ":Ref2/strs2", ":Ref2/str2", ":Ref2/ints2")
-        .ns.get.sorted === List("Ns", "Ref1")
+      Schema.a_.not(
+        ":Ref2/str2",
+        ":Ref2/int2",
+        ":Ref2/enum2",
+        ":Ref2/strs2",
+        ":Ref2/ints2",
+        ":Ref2/ref3",
+        ":Ref2/refs3",
+      ).ns.get.sorted === List("Ns", "Ref1", "Ref3", "Ref4")
     }
 
 
@@ -191,94 +198,128 @@ class SchemaTest extends CoreSpec {
       // - when partitions are defined: concatenates `part` + `ns`
       // - when partitions are not defined: `ns` starting with lower case letter
 
-      Schema.nsFull.get === List("Ns", "Ref2", "Ref1")
+      Schema.nsFull.get === List("Ns", "Ref4", "Ref2", "Ref3", "Ref1")
 
       Schema.nsFull("Ref1").get === List("Ref1")
       Schema.nsFull("Ref1", "Ref2").get === List("Ref2", "Ref1")
 
-      Schema.nsFull.not("Ref1").get === List("Ns", "Ref2")
-      Schema.nsFull.not("Ref1", "Ref2").get === List("Ns")
+      Schema.nsFull.not("Ref1").get.sorted === List("Ns", "Ref2", "Ref3", "Ref4")
+      Schema.nsFull.not("Ref1", "Ref2").get.sorted === List("Ns", "Ref3", "Ref4")
 
-      Schema.nsFull(count).get === List(3)
+      Schema.nsFull(count).get === List(5)
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
-      Schema.nsFull_.attr.get.size === 58
+      Schema.nsFull_.attr.get.size === 72
 
       // We can though filter by one or more tacit namespace names
       Schema.nsFull_("Ref1").attr.get.sorted === List(
-        "enum1", "int1", "ints1", "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
+        "enum1", "enums1", "int1", "intMap1", "ints1",
+        "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
       )
 
       // Attributes in namespace "Ref1" or "Ref2"
       Schema.nsFull_("Ref1", "Ref2").attr.get.sorted === List(
-        "enum1", "enum2", "int1", "int2", "ints1", "ints2", "ref2", "refSub2", "refs2", "refsSub2", "str1", "str2", "strs1", "strs2"
+        "enum1", "enum2", "enums1", "int1", "int2", "intMap1", "ints1",
+        "ints2", "ref2", "ref3", "refSub2", "refs2", "refs3", "refsSub2",
+        "str1", "str2", "strs1", "strs2"
       )
 
       // Negate tacit namespace name
       Schema.nsFull_.not("Ns").attr.get.sorted === List(
-        "enum1", "enum2", "int1", "int2", "ints1", "ints2", "ref2", "refSub2", "refs2", "refsSub2", "str1", "str2", "strs1", "strs2"
+        "enum1", "enum2", "enum3", "enum4", "enums1",
+        "int1", "int2", "int3", "int4", "intMap1",
+        "ints1", "ints2", "ints3", "ints4",
+        "ref2", "ref3", "refSub2",
+        "refs2", "refs3", "refsSub2",
+        "str1", "str2", "str3", "str4",
+        "strs1", "strs2", "strs3", "strs4"
       )
       Schema.nsFull_.not("Ns", "Ref2").attr.get.sorted === List(
-        "enum1", "int1", "ints1", "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
+        "enum1", "enum3", "enum4", "enums1",
+        "int1", "int3", "int4", "intMap1",
+        "ints1", "ints3", "ints4",
+        "ref2", "ref3", "refSub2",
+        "refs2", "refs3", "refsSub2",
+        "str1", "str3", "str4",
+        "strs1", "strs3", "strs4"
       )
     }
 
 
     "ns" >> {
 
-      Schema.ns.get === List("Ns", "Ref2", "Ref1")
+      Schema.ns.get === List("Ns", "Ref4", "Ref2", "Ref3", "Ref1")
 
-      Schema.nsFull.get === List("Ns", "Ref2", "Ref1")
+      Schema.nsFull.get === List("Ns", "Ref4", "Ref2", "Ref3", "Ref1")
 
       Schema.ns("Ref1").get === List("Ref1")
       Schema.ns("Ref1", "Ref2").get === List("Ref2", "Ref1")
 
-      Schema.ns.not("Ref1").get === List("Ns", "Ref2")
-      Schema.ns.not("Ref1", "Ref2").get === List("Ns")
+      Schema.ns.not("Ref1").get.sorted === List("Ns", "Ref2", "Ref3", "Ref4")
+      Schema.ns.not("Ref1", "Ref2").get.sorted === List("Ns", "Ref3", "Ref4")
 
-      Schema.ns(count).get === List(3)
+      Schema.ns(count).get === List(5)
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
-      Schema.ns_.attr.get.size === 58
+      Schema.ns_.attr.get.size === 72
 
       // We can though filter by one or more tacit namespace names
       Schema.ns_("Ref1").attr.get.sorted === List(
-        "enum1", "int1", "ints1", "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
+        "enum1", "enums1", "int1", "intMap1", "ints1",
+        "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
       )
 
       // Attributes in namespace "Ref1" or "Ref2"
       Schema.ns_("Ref1", "Ref2").attr.get.sorted === List(
-        "enum1", "enum2", "int1", "int2", "ints1", "ints2", "ref2", "refSub2", "refs2", "refsSub2", "str1", "str2", "strs1", "strs2"
+        "enum1", "enum2", "enums1",
+        "int1", "int2", "intMap1",
+        "ints1", "ints2",
+        "ref2", "ref3", "refSub2",
+        "refs2", "refs3", "refsSub2",
+        "str1", "str2",
+        "strs1", "strs2"
       )
 
       // Negate tacit namespace name
       Schema.ns_.not("Ns").attr.get.sorted === List(
-        "enum1", "enum2", "int1", "int2", "ints1", "ints2", "ref2", "refSub2", "refs2", "refsSub2", "str1", "str2", "strs1", "strs2"
+        "enum1", "enum2", "enum3", "enum4", "enums1",
+        "int1", "int2", "int3", "int4", "intMap1",
+        "ints1", "ints2", "ints3", "ints4",
+        "ref2", "ref3", "refSub2",
+        "refs2", "refs3", "refsSub2",
+        "str1", "str2", "str3", "str4",
+        "strs1", "strs2", "strs3", "strs4"
       )
       Schema.ns_.not("Ns", "Ref2").attr.get.sorted === List(
-        "enum1", "int1", "ints1", "ref2", "refSub2", "refs2", "refsSub2", "str1", "strs1"
+        "enum1", "enum3", "enum4", "enums1",
+        "int1", "int3", "int4", "intMap1",
+        "ints1", "ints3", "ints4",
+        "ref2", "ref3", "refSub2",
+        "refs2", "refs3", "refsSub2",
+        "str1", "str3", "str4",
+        "strs1", "strs3", "strs4"
       )
     }
 
 
     "attr" >> {
 
-      Schema.attr.get.size === 58
+      Schema.attr.get.size === 72
       Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
 
       Schema.attr("str").get === List("str")
       Schema.attr("str", "int").get === List("str", "int")
 
-      Schema.attr.not("str").get.size === 57
-      Schema.attr.not("str", "int").get.size === 56
+      Schema.attr.not("str").get.size === 71
+      Schema.attr.not("str", "int").get.size === 70
 
-      Schema.attr(count).get === List(58)
+      Schema.attr(count).get === List(72)
 
 
       // Since all attributes have an attribute name, a tacit `a_` makes no difference
-      Schema.attr_.ns.get.size === 3
+      Schema.attr_.ns.get.size === 5
 
       // We can though filter by one or more tacit attribute names
       Schema.attr_("str").ns.get.sorted === List("Ns")
@@ -288,10 +329,18 @@ class SchemaTest extends CoreSpec {
 
       // Negate tacit attribute name
       // Note though that since other attributes than `str` exist, the namespace is still returned
-      Schema.attr_.not("int2").ns.get.sorted === List("Ns", "Ref1", "Ref2")
+      Schema.attr_.not("int2").ns.get.sorted === List("Ns", "Ref1", "Ref2", "Ref3", "Ref4")
 
       // If we exclude all attributes in a namespace, it won't be returned
-      Schema.attr_.not("int2", "enum2", "strs2", "str2", "ints2").ns.get.sorted === List("Ns", "Ref1")
+      Schema.attr_.not(
+        "str2",
+        "int2",
+        "enum2",
+        "strs2",
+        "ints2",
+        "ref3",
+        "refs3",
+      ).ns.get.sorted === List("Ns", "Ref1", "Ref3", "Ref4")
     }
 
 
@@ -304,37 +353,43 @@ class SchemaTest extends CoreSpec {
       // Molecule transparently converts back and forth so that application code only have to consider the Scala type.
 
       Schema.tpe.get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long", "uri", "uuid", "bigint", "boolean", "instant"
+        "ref", "bigdec", "string", "bytes", "double", "long",
+        "uri", "uuid", "bigint", "boolean", "instant"
       )
 
       Schema.tpe("string").get === List("string")
       Schema.tpe("string", "long").get === List("string", "long")
 
       Schema.tpe.not("instant").get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long", "uri", "uuid", "bigint", "boolean"
+        "ref", "bigdec", "string", "bytes", "double", "long",
+        "uri", "uuid", "bigint", "boolean"
       )
       Schema.tpe.not("instant", "boolean").get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long", "uri", "uuid", "bigint"
+        "ref", "bigdec", "string", "bytes", "double", "long",
+        "uri", "uuid", "bigint"
       )
 
       Schema.tpe(count).get === List(11)
 
 
       // Since all attributes have a value type, a tacit `tpe_` makes no difference
-      Schema.ns.get.size === 3
-      Schema.tpe_.ns.get.size === 3
+      Schema.ns.get.size === 5
+      Schema.tpe_.ns.get.size === 5
 
       // We can though filter by one or more tacit value types
-      Schema.tpe_("string").ns.get.sorted === List("Ns", "Ref1", "Ref2")
+      Schema.tpe_("string").ns.get.sorted === List(
+        "Ns", "Ref1", "Ref2", "Ref3", "Ref4")
       // Only namespace `ns` has attributes of type Boolean
       Schema.tpe_("boolean").ns.get.sorted === List("Ns")
 
       // Namespaces with attributes of type string or long
-      Schema.tpe_("string", "long").ns.get.sorted === List("Ns", "Ref1", "Ref2")
+      Schema.tpe_("string", "long").ns.get.sorted === List(
+        "Ns", "Ref1", "Ref2", "Ref3", "Ref4")
 
       // Negate tacit attribute type
       // Note though that since other attributes have other types, the namespace is still returned
-      Schema.tpe_.not("string").ns.get.sorted === List("Ns", "Ref1", "Ref2")
+      Schema.tpe_.not("string").ns.get.sorted === List(
+        "Ns", "Ref1", "Ref2", "Ref3", "Ref4")
 
       // If we exclude all attribute types in a namespace, it won't be returned
       Schema.tpe_.not("string", "long", "ref").ns.get.sorted === List("Ns")
@@ -355,19 +410,19 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a cardinality, a tacit `card_` makes no difference
-      Schema.a.get.size === 58
-      Schema.card_.a.get.size === 58
+      Schema.a.get.size === 74
+      Schema.card_.a.get.size === 74
 
       // We can though filter by cardinality
-      Schema.card_("one").a.get.size === 24
-      Schema.card_("many").a.get.size === 34
+      Schema.card_("one").a.get.size === 32
+      Schema.card_("many").a.get.size === 42
 
       // Attributes of cardinality one or many, well that's all
-      Schema.card_("one", "many").a.get.size === 58
+      Schema.card_("one", "many").a.get.size === 74
 
       // Negate tacit namespace name
-      Schema.card_.not("one").a.get.size === 34 // many
-      Schema.card_.not("many").a.get.size === 24 // one
+      Schema.card_.not("one").a.get.size === 42 // many
+      Schema.card_.not("many").a.get.size === 32 // one
       Schema.card_.not("one", "many").a.get.size === 0
     }
   }
@@ -389,9 +444,11 @@ class SchemaTest extends CoreSpec {
       )
 
       // Filtering by a complete `doc_` is probably not that useful
-      Schema.doc("Card one Int attribute").get === List("Card one Int attribute")
+      Schema.doc("Card one Int attribute").get === List(
+        "Card one Int attribute")
       // .. likely the same for negation
-      Schema.doc.not("Card one String attribute").get === List("Card one Int attribute")
+      Schema.doc.not("Card one String attribute").get === List(
+        "Card one Int attribute")
 
       // Instead, use fulltext search for a whole word in doc texts
       Schema.doc.contains("Int").get === List(
@@ -413,7 +470,7 @@ class SchemaTest extends CoreSpec {
 
       // Use tacit `doc_` to filter documented attributes
       // All attributes
-      Schema.a.get.size === 58
+      Schema.a.get.size === 74
       // Documented attributes
       Schema.doc_.a.get.size === 2
 
@@ -449,24 +506,24 @@ class SchemaTest extends CoreSpec {
 
       // All attributes are indexed
       Schema.index.get === List(true) // no false
-      Schema.a.index.get.size === 58
+      Schema.a.index.get.size === 74
 
-      Schema.a.index(true).get.size === 58
+      Schema.a.index(true).get.size === 74
       Schema.a.index(false).get.size === 0
 
       Schema.a.index.not(true).get.size === 0
-      Schema.a.index.not(false).get.size === 58
+      Schema.a.index.not(false).get.size === 74
 
       // Count attribute indexing statuses (only true)
       Schema.index(count).get === List(1)
 
 
       // Using tacit `index_` is not that useful since all attributes are indexed by default
-      Schema.a.get.size === 58
-      Schema.index_.a.get.size === 58
+      Schema.a.get.size === 74
+      Schema.index_.a.get.size === 74
 
-      Schema.index_(true).a.get.size === 58
-      Schema.index_.not(false).a.get.size === 58
+      Schema.index_(true).a.get.size === 74
+      Schema.index_.not(false).a.get.size === 74
 
 
       // Get optional attribute indexing status with `index$`
@@ -522,8 +579,8 @@ class SchemaTest extends CoreSpec {
 
       // Get optional attribute indexing status with `index$`
       Schema.attr_("str", "str2", "int2").a.unique$.get === List(
-        (":Ref2/int2", Some("value")),
         (":Ref2/str2", Some("identity")),
+        (":Ref2/int2", Some("value")),
         (":Ns/str", None),
       )
 
@@ -545,7 +602,7 @@ class SchemaTest extends CoreSpec {
       )
 
       // Number of non-unique attributes
-      Schema.a.unique$(None).get.size === 58 - 2
+      Schema.a.unique$(None).get.size === 74 - 2
     }
 
 
@@ -573,10 +630,13 @@ class SchemaTest extends CoreSpec {
 
 
       // Filter attributes with tacit `fulltext_` option
-      Schema.fulltext_.a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_.a.get === List(
+        ":Ns/strs", ":Ns/strMap", ":Ns/str")
 
-      Schema.fulltext_(true).a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
-      Schema.fulltext_.not(false).a.get === List(":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_(true).a.get === List(
+        ":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_.not(false).a.get === List(
+        ":Ns/strs", ":Ns/strMap", ":Ns/str")
 
 
       // Get optional attribute fulltext status with `fulltext$`
@@ -587,15 +647,19 @@ class SchemaTest extends CoreSpec {
 
       // Filter by applying optional attribute fulltext search status
       val some = Some(true)
-      Schema.attr_("bool", "str").a.fulltext$(some).get === List((":Ns/str", Some(true)))
-      Schema.attr_("bool", "str").a.fulltext$(Some(true)).get === List((":Ns/str", Some(true)))
+      Schema.attr_("bool", "str").a.fulltext$(some).get === List(
+        (":Ns/str", Some(true)))
+      Schema.attr_("bool", "str").a.fulltext$(Some(true)).get === List(
+        (":Ns/str", Some(true)))
 
       val none = None
-      Schema.attr_("bool", "str").a.fulltext$(none).get === List((":Ns/bool", None))
-      Schema.attr_("bool", "str").a.fulltext$(None).get === List((":Ns/bool", None))
+      Schema.attr_("bool", "str").a.fulltext$(none).get === List(
+        (":Ns/bool", None))
+      Schema.attr_("bool", "str").a.fulltext$(None).get === List(
+        (":Ns/bool", None))
 
       // Number of attributes without fulltext search
-      Schema.a.fulltext$(None).get.size === 58 - 3
+      Schema.a.fulltext$(None).get.size === 74 - 3
     }
 
 
@@ -650,15 +714,19 @@ class SchemaTest extends CoreSpec {
 
       // Filter by applying optional attribute component status
       val some = Some(true)
-      Schema.attr_("bool", "refSub1").a.isComponent$(some).get === List((":Ns/refSub1", Some(true)))
-      Schema.attr_("bool", "refSub1").a.isComponent$(Some(true)).get === List((":Ns/refSub1", Some(true)))
+      Schema.attr_("bool", "refSub1").a.isComponent$(some).get === List(
+        (":Ns/refSub1", Some(true)))
+      Schema.attr_("bool", "refSub1").a.isComponent$(Some(true)).get === List(
+        (":Ns/refSub1", Some(true)))
 
       val none = None
-      Schema.attr_("bool", "refSub1").a.isComponent$(none).get === List((":Ns/bool", None))
-      Schema.attr_("bool", "refSub1").a.isComponent$(None).get === List((":Ns/bool", None))
+      Schema.attr_("bool", "refSub1").a.isComponent$(none).get === List(
+        (":Ns/bool", None))
+      Schema.attr_("bool", "refSub1").a.isComponent$(None).get === List(
+        (":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.isComponent$(None).get.size === 58 - 4
+      Schema.a.isComponent$(None).get.size === 74 - 4
     }
 
 
@@ -689,21 +757,25 @@ class SchemaTest extends CoreSpec {
 
       // Get optional attribute no-history status with `noHistory$`
       Schema.attr_("bool", "ints2").a.noHistory$.get === List(
-        (":Ns/bool", None),
         (":Ref2/ints2", Some(true)),
+        (":Ns/bool", None),
       )
 
       // Filter by applying optional attribute no-history status
       val some = Some(true)
-      Schema.attr_("bool", "ints2").a.noHistory$(some).get === List((":Ref2/ints2", Some(true)))
-      Schema.attr_("bool", "ints2").a.noHistory$(Some(true)).get === List((":Ref2/ints2", Some(true)))
+      Schema.attr_("bool", "ints2").a.noHistory$(some).get === List(
+        (":Ref2/ints2", Some(true)))
+      Schema.attr_("bool", "ints2").a.noHistory$(Some(true)).get === List(
+        (":Ref2/ints2", Some(true)))
 
       val none = None
-      Schema.attr_("bool", "ints2").a.noHistory$(none).get === List((":Ns/bool", None))
-      Schema.attr_("bool", "ints2").a.noHistory$(None).get === List((":Ns/bool", None))
+      Schema.attr_("bool", "ints2").a.noHistory$(none).get === List(
+        (":Ns/bool", None))
+      Schema.attr_("bool", "ints2").a.noHistory$(None).get === List(
+        (":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.noHistory$(None).get.size === 58 - 1
+      Schema.a.noHistory$(None).get.size === 74 - 1
     }
   }
 
@@ -718,16 +790,23 @@ class SchemaTest extends CoreSpec {
     )
 
     // All enums grouped by ident
-    Schema.a.enum.get.groupBy(_._1).map(g => g._1 -> g._2.map(_._2).sorted) === Map(
-      ":Ns/enum" -> List("enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9"),
-      ":Ns/enums" -> List("enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9"),
+    Schema.a.enum.get.groupBy(_._1).map(g => g._1 -> g._2.map(_._2).sorted)
+      .toList.sortBy(_._1) === List(
+      ":Ns/enum" -> List("enum0", "enum1", "enum2", "enum3", "enum4",
+        "enum5", "enum6", "enum7", "enum8", "enum9"),
+      ":Ns/enums" -> List("enum0", "enum1", "enum2", "enum3", "enum4",
+        "enum5", "enum6", "enum7", "enum8", "enum9"),
       ":Ref1/enum1" -> List("enum10", "enum11", "enum12"),
+      ":Ref1/enums1" -> List("enum10", "enum11", "enum12"),
       ":Ref2/enum2" -> List("enum20", "enum21", "enum22"),
+      ":Ref3/enum3" -> List("enum30", "enum31", "enum32"),
+      ":Ref4/enum4" -> List("enum40", "enum41", "enum42"),
     )
 
     // Enums of a specific attribute
     Schema.a_(":Ns/enum").enum.get.sorted === List(
-      "enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9"
+      "enum0", "enum1", "enum2", "enum3", "enum4",
+      "enum5", "enum6", "enum7", "enum8", "enum9"
     )
 
 
@@ -744,13 +823,15 @@ class SchemaTest extends CoreSpec {
     )
 
     // How many enums in total (duplicate enum values coalesce)
-    Schema.enum(count).get === List(16)
+    Schema.enum(count).get === List(22)
 
     // Enums per namespace
     Schema.ns.enum(count).get === List(
       ("Ns", 10),
       ("Ref1", 3),
       ("Ref2", 3),
+      ("Ref3", 3),
+      ("Ref4", 3),
     )
 
     // Enums per namespace per attribute
@@ -758,28 +839,38 @@ class SchemaTest extends CoreSpec {
       ("Ns", "enum", 10),
       ("Ns", "enums", 10),
       ("Ref1", "enum1", 3),
+      ("Ref1", "enums1", 3),
       ("Ref2", "enum2", 3),
+      ("Ref3", "enum3", 3),
+      ("Ref4", "enum4", 3),
     )
 
 
     // Attributes with some enum value
-    Schema.a.enum_("enum0").get.sorted === List(":Ns/enum", ":Ns/enums")
-    Schema.a.enum_("enum0", "enum1").get.sorted === List(":Ns/enum", ":Ns/enums")
+    Schema.a.enum_("enum0").get.sorted === List(
+      ":Ns/enum", ":Ns/enums")
+    Schema.a.enum_("enum0", "enum1").get.sorted === List(
+      ":Ns/enum", ":Ns/enums")
 
 
     // Excluding one enum value will still match the other values
-    Schema.a.enum_.not("enum0").get === List(
-      ":Ns/enums",
-      ":Ref2/enum2",
+    Schema.a.enum_.not("enum0").get.sorted === List(
       ":Ns/enum",
+      ":Ns/enums",
       ":Ref1/enum1",
+      ":Ref1/enums1",
+      ":Ref2/enum2",
+      ":Ref3/enum3",
+      ":Ref4/enum4",
     )
 
     // If we exclude all enum values of an attribute it won't be returned
-    Schema.a.enum_.not("enum10", "enum11", "enum12").get === List(
+    Schema.a.enum_.not("enum10", "enum11", "enum12").get.sorted === List(
+      ":Ns/enum",
       ":Ns/enums",
       ":Ref2/enum2",
-      ":Ns/enum",
+      ":Ref3/enum3",
+      ":Ref4/enum4",
     )
   }
 

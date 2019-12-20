@@ -113,7 +113,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
   else
     (i: Int) => q"castOptManyRefAttr(row, $i)"
 
-  def castEnum(t: richTree): Int => Tree = if (t.card == 1)
+  val castEnum: richTree => Int => Tree = (t: richTree) => if (t.card == 1)
     (i: Int) => q"row.get($i).asInstanceOf[String]"
   else
     (i: Int) => q"castMany[String](row, $i)"

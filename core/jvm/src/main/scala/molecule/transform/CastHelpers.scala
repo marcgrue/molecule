@@ -332,7 +332,10 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOptOneRefAttr(row: jList[_], i: Int): Option[Long] = if (row.get(i) == null) {
     Option.empty[Long]
   } else {
-    Some(row.get(i).asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jLong].toLong)
+    Some(row.get(i)
+      .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next
+      .asInstanceOf[jMap[_, _]].values.iterator.next
+      .asInstanceOf[jLong].toLong)
   }
 
   protected def castOptManyRefAttr(row: jList[_], i: Int): Option[Set[Long]] = if (row.get(i) == null) {

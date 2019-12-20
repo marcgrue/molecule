@@ -57,9 +57,10 @@ case class Query2String(q: Query) extends Helpers {
     case NestedAttrs(level, nsFull, attr, attrSpecs)         =>
       val sp = "  " * (5 + level)
       s"""{(:$nsFull/$attr :limit nil :default "__none__") [""" + s"\n$sp${attrSpecs map p mkString s"\n$sp"}]}"
+//    case PullAttr(nsFull, attr, _)                    => s"""(:$nsFull/$attr :default "__none__")"""
     case PullAttr(nsFull, attr, true)                    => s"""(:$nsFull/$attr :default "__none__")"""
     case PullAttr(nsFull, attr, _)                       => s""":$nsFull/$attr"""
-    case PullEnum(nsFull, attr, true)                    => s"""({:$nsFull/$attr [:db/ident]} :default "__none__")"""
+    case PullEnum(nsFull, attr, true)                    => s"""{(:$nsFull/$attr :default "__none__") [:db/ident]}"""
     case PullEnum(nsFull, attr, _)                       => s"""{:$nsFull/$attr [:db/ident]}"""
     case NoVal                                           => ""
     case DS(name)                                        => "$" + name

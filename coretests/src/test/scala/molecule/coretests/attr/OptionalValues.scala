@@ -204,10 +204,11 @@ class OptionalValues extends CoreSpec {
 
       // We don't have to retrieve the attribute values in the same order as inserted
       Ns.int$.str.long$.get === List(
+        (None, "b", Some(20L)),
+        (Some(1), "a", Some(10L)),
         (None, "d", None),
         (Some(3), "c", None),
-        (None, "b", Some(20L)),
-        (Some(1), "a", Some(10L)))
+      )
     }
   }
 
@@ -221,19 +222,21 @@ class OptionalValues extends CoreSpec {
 
       // Now there's a ref from entity with "b" to entity with "b1"
       Ns.str.Ref1.str1.int1$.get === List(
-        ("a", "a1", Some(11)),
-        ("b", "b1", None))
+        ("b", "b1", None),
+        ("a", "a1", Some(11))
+      )
     }
 
     "Ref attribute can be optional (2)" in new CoreSetup {
       Ns.str.Ref1.str1$.int1 insert List(
         ("a", None, 11),
-        ("b", Some("b1"), 21))
+        ("b", Some("b1"), 21),
+      )
 
       Ns.str.Ref1.str1$.int1.get === List(
+        ("b", Some("b1"), 21),
         ("a", None, 11),
-        ("b", Some("b1"), 21))
-      ok
+      )
     }
 
     "Nested attribute can be optional" in new CoreSetup {
@@ -250,11 +253,13 @@ class OptionalValues extends CoreSpec {
     "Ref enum" in new CoreSetup {
       Ns.str.Ref1.str1.enum1$ insert List(
         ("a", "a1", Some("enum10")),
-        ("b", "b1", None))
+        ("b", "b1", None)
+      )
 
       Ns.str.Ref1.str1.enum1$.get === List(
-        ("a", "a1", Some("enum10")),
-        ("b", "b1", None))
+        ("b", "b1", None),
+        ("a", "a1", Some("enum10"))
+      )
     }
 
     "Nested enum" in new CoreSetup {
@@ -277,8 +282,9 @@ class OptionalValues extends CoreSpec {
         ("b", Some("b1"), 21, "b2", None))
 
       Ns.str.Ref1.str1$.int1.Ref2.str2.int2$.get === List(
-        ("b", Some("b1"), 21, "b2", None),
-        ("a", None, 11, "a2", Some(12)))
+        ("a", None, 11, "a2", Some(12)),
+        ("b", Some("b1"), 21, "b2", None)
+      )
     }
 
     "Nested" in new CoreSetup {

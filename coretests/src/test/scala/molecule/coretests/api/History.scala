@@ -19,9 +19,9 @@ class History extends CoreSpec {
   "History" >> {
 
     Ns(e).int.t.op.getHistory.sortBy(t => (t._2, t._3)) === List(
-      (1, 1028, true),
-      (1, 1030, false),
-      (2, 1030, true)
+      (1, 1037, true),
+      (1, 1039, false),
+      (2, 1039, true)
     )
   }
 }

@@ -62,8 +62,11 @@ object CoreTestDefinition {
 
     val strs1    = manyString
     val ints1    = manyInt
+    val enums1   = manyEnum("enum10", "enum11", "enum12")
     val refs2    = many[Ref2]
     val refsSub2 = many[Ref2].isComponent
+
+    val intMap1 = mapInt
   }
 
   trait Ref2 {
@@ -72,5 +75,25 @@ object CoreTestDefinition {
     val enum2 = oneEnum("enum20", "enum21", "enum22")
     val strs2 = manyString
     val ints2 = manyInt.noHistory
+    val ref3  = one[Ref3]
+    val refs3 = many[Ref3]
+  }
+
+  trait Ref3 {
+    val str3  = oneString
+    val int3  = oneInt
+    val enum3 = oneEnum("enum30", "enum31", "enum32")
+    val strs3 = manyString
+    val ints3 = manyInt
+    val ref3  = one[Ref3]
+    val refs3 = many[Ref3]
+  }
+
+  trait Ref4 {
+    val str4  = oneString
+    val int4  = oneInt
+    val enum4 = oneEnum("enum40", "enum41", "enum42")
+    val strs4 = manyString
+    val ints4 = manyInt
   }
 }

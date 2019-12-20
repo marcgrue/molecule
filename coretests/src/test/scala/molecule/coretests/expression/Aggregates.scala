@@ -79,7 +79,7 @@ class Aggregates extends CoreSpec {
     Ns.int(sum).get.head === (1 + 2 + 3)
     Ns.long(sum).get.head === 6L
     Ns.float(sum).get.head === 6.6f
-    Ns.double(sum).get.head === 6.6000000000000005 // Datomic fault?
+    Ns.double(sum).get.head === 6.6
   }
 
 
@@ -94,8 +94,8 @@ class Aggregates extends CoreSpec {
   "avg" in new AggregateSetup {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
-    Ns.float(avg).get.head === 2.2
-    Ns.double(avg).get.head === 2.2
+    Ns.float(avg).get.head === 2.1999999999999997 // datomic precision
+    Ns.double(avg).get.head === 2.1999999999999997 // datomic precision
   }
 
 

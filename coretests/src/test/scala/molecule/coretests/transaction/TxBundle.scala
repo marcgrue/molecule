@@ -44,8 +44,8 @@ class TxBundle extends CoreSpec {
     ) must throwA[java.util.concurrent.ExecutionException]).message ===
       "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
         ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
-        "{:d1 [17592186045447 :Ns/int 31 13194139534348 true],\n" +
-        " :d2 [17592186045447 :Ns/int 32 13194139534348 true]}\n"
+        "{:d1 [17592186045456 :Ns/int 31 13194139534357 true],\n" +
+        " :d2 [17592186045456 :Ns/int 32 13194139534357 true]}\n"
   }
 
 
@@ -87,34 +87,34 @@ class TxBundle extends CoreSpec {
     //            tx datoms from dbAfter (op - tx id - entity - attribute - value)
     //            (minus added to help indicate retractions)
     /*
-      ## 1 ## TxReport
-      ========================================================================
-      1          ArrayBuffer(
-        1          List(
-          1          :db.fn/retractEntity   17592186045445)
-        2          List(
-          1          :db/add       #db/id[:db.part/user -1000247]     :Ns/int          4           Card(1))
-        3          List(
-          1          :db/add       #db/id[:db.part/user -1000252]     :Ns/int          5           Card(1))
-        4          List(
-          1          :db/add       #db/id[:db.part/user -1000253]     :Ns/int          6           Card(1))
-        5          List(
-          1          :db/add       17592186045446                     :Ns/int          20          Card(1)))
-      ------------------------------------------------
-      2          List(
-        1    1     added: true ,   t: 13194139534345,   e: 13194139534345,   a: 50,   v: Wed Nov 14 23:38:15 CET 2018
+## 1 ## TxReport
+================================================================================================================
+1          ArrayBuffer(
+  1          List(
+    1          :db.fn/retractEntity     17592186045454)
+  2          List(
+    1          :db/add      #db/id[:db.part/user -1000267]     :Ns/int                4)
+  3          List(
+    1          :db/add      #db/id[:db.part/user -1000271]     :Ns/int                5)
+  4          List(
+    1          :db/add      #db/id[:db.part/user -1000274]     :Ns/int                6)
+  5          List(
+    1          :db/add      17592186045455                     :Ns/int                20))
+----------------------------------------------------------------------------------------------------------------
+2          List(
+  1    1     added: true ,   t: 13194139534354,   e: 13194139534354,   a: 50,   v: Thu Dec 19 20:34:15 CET 2019
 
-        2    2     added: false,  -t: 13194139534345,  -e: 17592186045445,  -a: 64,  -v: 1
+  2    2     added: false,  -t: 13194139534354,  -e: 17592186045454,  -a: 64,  -v: 1
 
-        3    3     added: true ,   t: 13194139534345,   e: 17592186045450,   a: 64,   v: 4
+  3    3     added: true ,   t: 13194139534354,   e: 17592186045459,   a: 64,   v: 4
 
-        4    4     added: true ,   t: 13194139534345,   e: 17592186045451,   a: 64,   v: 5
+  4    4     added: true ,   t: 13194139534354,   e: 17592186045460,   a: 64,   v: 5
 
-        5    5     added: true ,   t: 13194139534345,   e: 17592186045452,   a: 64,   v: 6
+  5    5     added: true ,   t: 13194139534354,   e: 17592186045461,   a: 64,   v: 6
 
-        6    6     added: true ,   t: 13194139534345,   e: 17592186045446,   a: 64,   v: 20
-             7     added: false,  -t: 13194139534345,  -e: 17592186045446,  -a: 64,  -v: 2)
-      ========================================================================
+  6    6     added: true ,   t: 13194139534354,   e: 17592186045455,   a: 64,   v: 20
+       7     added: false,  -t: 13194139534354,  -e: 17592186045455,  -a: 64,  -v: 2)
+================================================================================================================
     */
 
     // Live data unchanged

@@ -191,15 +191,15 @@ class GetHistory extends Specification {
     // query but then two individual attribute history "timelines" of changes
     // are unified which can become less useful:
     Ns(e1).str.t.op.int.t.op.getHistory === List(
-      ("a", 1030, false, 1, 1031, false),
-      ("b", 1030, true, 1, 1028, true),
-      ("a", 1028, true, 1, 1028, true),
-      ("b", 1030, true, 2, 1031, true),
-      ("b", 1030, true, 1, 1031, false),
-      ("a", 1028, true, 1, 1031, false),
-      ("a", 1030, false, 2, 1031, true),
-      ("a", 1030, false, 1, 1028, true),
-      ("a", 1028, true, 2, 1031, true)
+      ("a", 1037, true, 1, 1037, true),
+      ("b", 1039, true, 1, 1037, true),
+      ("a", 1039, false, 1, 1040, false),
+      ("b", 1039, true, 2, 1040, true),
+      ("a", 1037, true, 1, 1040, false),
+      ("b", 1039, true, 1, 1040, false),
+      ("a", 1039, false, 2, 1040, true),
+      ("a", 1039, false, 1, 1037, true),
+      ("a", 1037, true, 2, 1040, true)
     )
   }
 
@@ -211,18 +211,18 @@ class GetHistory extends Specification {
 
     // All attribute assertions/retractions of entity e1
     Ns(e1).a.v.t.op.getHistory.sortBy(t => (t._3, t._4)) === List(
-      (":Ns/str", "a", t1, true),
       (":Ns/int", 1, t1, true),
+      (":Ns/str", "a", t1, true),
       (":Ns/str", "a", t2, false),
       (":Ns/str", "b", t2, true),
       (":Ns/int", 1, t3, false),
-      (":Ns/int", 2, t3, true)
+      (":Ns/int", 2, t3, true),
     )
 
     // All attribute assertions of entity e1
     Ns(e1).a.v.t.op(true).getHistory.sortBy(t => (t._3, t._4)) === List(
-      (":Ns/str", "a", t1, true),
       (":Ns/int", 1, t1, true),
+      (":Ns/str", "a", t1, true),
       (":Ns/str", "b", t2, true),
       (":Ns/int", 2, t3, true)
     )

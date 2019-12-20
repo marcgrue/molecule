@@ -25,26 +25,26 @@ class GetAsOf extends CoreSpec {
 
     // See history of Ben
     Ns(ben).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
-      (42, 1028, true), // Insert:  42 asserted
-      (42, 1031, false), // Update:  42 retracted
-      (43, 1031, true), //          43 asserted
-      (43, 1032, false) // Retract: 43 retracted
+      (42, 1037, true), // Insert:  42 asserted
+      (42, 1040, false), // Update:  42 retracted
+      (43, 1040, true), //          43 asserted
+      (43, 1041, false) // Retract: 43 retracted
     )
 
     // Data after insertion
-    Ns.str.int.getAsOf(1028) === List(
+    Ns.str.int.getAsOf(1037) === List(
       ("Liz", 37),
       ("Ben", 42)
     )
 
     // Data after update
-    Ns.str.int.getAsOf(1031) === List(
+    Ns.str.int.getAsOf(1040) === List(
       ("Liz", 37),
       ("Ben", 43) // Ben now 43
     )
 
     // Data after retraction
-    Ns.str.int.getAsOf(1032) === List(
+    Ns.str.int.getAsOf(1041) === List(
       ("Liz", 37) // Ben gone
     )
   }

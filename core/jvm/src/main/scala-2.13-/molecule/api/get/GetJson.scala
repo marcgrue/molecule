@@ -2,9 +2,11 @@ package molecule.api.get
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.ast.MoleculeBase
+import molecule.ast.model.{Bond, Nested}
 import molecule.ast.tempDb._
 import molecule.ast.transactionModel.Statement
 import molecule.facade.Conn
+import molecule.macros.exception.NestedJsonException
 import molecule.transform.JsonBuilder
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -789,13 +791,20 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
   // The `row2json` doing the heavy lifting is materialized by macros when `molecule.api.json._` is imported
   // Composite molecules override this method to use `getJsonComposite` (see below) instead.
   protected def getJsonFlat(conn: Conn, n: Int): String = {
+    if (
+      _model.elements.exists {
+        case Nested(Bond(_, refAttr, _, _, _), _) if refAttr.endsWith("$") => true
+        case _                                                             => false
+      }
+    ) throw new NestedJsonException("Optional nested data as json not implemented")
+
     val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
     if (jColl.size == 0) {
       ""
     } else {
       var subsequent = false
-      val it = jColl.iterator()
-      val sb = new StringBuilder("[")
+      val it         = jColl.iterator()
+      val sb         = new StringBuilder("[")
       if (n == -1) {
         // All
         while (it.hasNext) {
@@ -828,15 +837,14 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
   }
 
 
-  //
   protected def getJsonComposite(conn: Conn, n: Int): String = {
     val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
     if (jColl.size == 0) {
       ""
     } else {
       var subsequent = false
-      val it = jColl.iterator()
-      val sb = new StringBuilder("[")
+      val it         = jColl.iterator()
+      val sb         = new StringBuilder("[")
       if (n == -1) {
         // All
         while (it.hasNext) {

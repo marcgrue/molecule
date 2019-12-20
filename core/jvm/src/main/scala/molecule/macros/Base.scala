@@ -1,6 +1,7 @@
 package molecule.macros
 import molecule.ast.model._
 import molecule.transform.Dsl2Model
+import scala.collection.immutable
 import scala.collection.mutable.ListBuffer
 import scala.reflect.macros.blackbox
 
@@ -88,69 +89,124 @@ private[molecule] trait Base extends Dsl2Model {
     buf
   }
 
-  def topLevel(fns: List[List[Int => Tree]]): List[Tree] = fns.head.zipWithIndex.map {
-    case (fn, i) => fn(i)
-  }
+  def topLevel(casts: List[List[Int => Tree]]): List[Tree] =
+    casts.head.zipWithIndex.map {
+      case (cast, i) => cast(i)
+    }
 
-  def topLevelJson(fns: List[List[Int => Tree]]): List[Tree] = fns.head.zipWithIndex.flatMap {
-    case (fn, 0) => Seq(fn(0))
-    case (fn, i) => Seq(q"""sb.append(", ")""", fn(i))
-  }
+  def topLevelJson(casts: List[List[Int => Tree]]): List[Tree] =
+    casts.head.zipWithIndex.flatMap {
+      case (cast, 0) => Seq(cast(0))
+      case (cast, i) => Seq(q"""sb.append(", ")""", cast(i))
+    }
 
 
   // Optional nested -----------------------------------------------------------
 
-  def castNestedRows(casts: List[List[Int => Tree]], OutTypes: Seq[Type]): Tree = {
+  def castOptNestedRows(
+    levelCasts: List[List[Int => Tree]],
+    OutTypes: Seq[Type],
+    optNestedRefIndexes: Map[Int, List[Int]],
+    optNestedTacitIndexes: Map[Int, List[Int]],
+  ): Tree = {
+    def getLambdas(casts: List[Int => Tree], level: Int): List[Tree] = {
+      casts.zipWithIndex.foldLeft(0, List.empty[Tree], 0) {
+        case ((0, acc, _), (cast, i))
+          if optNestedRefIndexes.keySet.contains(level) &&
+            optNestedRefIndexes(level).contains(i)  => (1, acc :+ cast(level * 100 + i), i)
+        case ((0, acc, 0), (cast, i)) if level == 0 => (0, acc :+ cast(i), 0)
+        case ((0, acc, 0), (cast, _))               => (0, acc :+ cast(0), 0)
+        case ((1, acc, refIndex), (cast, _))        => (1, acc :+ cast(level * 100 + refIndex), refIndex)
+      }._2
+    }
 
-    def getLambdas(castGroup: List[Int => Tree]): List[Tree] =
-      castGroup.zipWithIndex.map {
-        case (lambda, i) => lambda(i)
-      }
+    val lastLevel = levelCasts.length - 1
+    val lambdas   = levelCasts.zipWithIndex.foldLeft(List.empty[Tree]) {
+      case (acc, (_, 0))         => acc
+      case (acc, (casts, level)) =>
+        val nested_x = TermName("nested_" + level)
+        val nested_y = TermName("nested_" + (level + 1))
 
-    val last    = casts.length - 1
-    val lambdas = casts.zipWithIndex.foldLeft(List.empty[Tree]) {
-      case (acc, (_, 0)) => acc
-
-      case (acc, (castGroup, 1)) =>
-        val subTuple = if (last == 1)
-          q"(..${getLambdas(castGroup)})"
-        else
-          q"(..${getLambdas(castGroup)}, nested_2(it.next))"
-
-        q"""
-          private val nested_1 = (subData: Any) => subData match {
-            case null => List.empty[Any]
-            case v    => {
-              val sub = v.asInstanceOf[PersistentArrayMap].iterator.next
-                .asInstanceOf[MapEntry].getValue
-                .asInstanceOf[PersistentVector].iterator()
-              var subTuples = List.empty[Any]
-              while (sub.hasNext) {
-                val it = sub.next.asInstanceOf[PersistentArrayMap].valIterator()
-                subTuples = subTuples :+ $subTuple
-              }
-              subTuples
-            }
+        val iterators = if (!optNestedRefIndexes.keySet.contains(level)) {
+          q"val it0 = sub.next.asInstanceOf[PersistentArrayMap].valIterator()"
+        } else {
+          val extraIterators = optNestedRefIndexes(level).map { refIndex =>
+            val itX = TermName("it" + (level * 100 + refIndex))
+            q"""
+               lazy val $itX = {
+                 val valueMap = it0.next.asInstanceOf[PersistentArrayMap]
+//                 println("valueMap: " + valueMap)
+                 if (${casts.size} != $refIndex + valueMap.size)
+                   throw new RuntimeException("Missing value in: " + valueMap)
+                 valueMap.valIterator()
+               }
+             """
           }
-         """ :: acc
+          q"""
+            val vs0 = sub.next.asInstanceOf[PersistentArrayMap]
+//            println("vs0        : " + vs0)
+            val it0 = vs0.valIterator()
+            ..$extraIterators
+           """
+        }
 
-      case (acc, (castGroup, i)) =>
-        val nested_x = TermName("nested_" + i)
-        val nested_y = TermName("nested_" + (i + 1))
-        val subTuple = if (last == i)
-          q"(..${getLambdas(castGroup)})"
+        val subTuple = if (lastLevel == level)
+          q"(..${getLambdas(casts, level)})"
         else
-          q"(..${getLambdas(castGroup)}, $nested_y(it.next))"
+          q"(..${getLambdas(casts, level)}, $nested_y(it0.next))"
+
+        val addTuple = {
+          if (!optNestedTacitIndexes.keySet.contains(level)) {
+            q"subTuples :+ $subTuple"
+          } else {
+            val tacitIndexes: List[Int] = optNestedTacitIndexes(level)
+            val (checks, outputs)       = casts.zipWithIndex.foldLeft(
+              Seq.empty[Tree], Seq.empty[Tree]
+            ) {
+              case ((checks, outputs), (_, i)) if tacitIndexes.contains(i) =>
+                (checks :+ q"t.${TermName(s"_${i + 1}")}", outputs)
+
+              case ((checks, outputs), (_, i)) =>
+                (checks, outputs :+ q"t.${TermName(s"_${i + 1}")}")
+            }
+            q"""
+              val t = $subTuple
+//              println("tuple: " + t)
+              if (Seq(..$checks).forall(_.nonEmpty))
+                subTuples :+ (..$outputs)
+              else
+                subTuples
+             """
+          }
+        }
+
+        val (none, subIterator) = if (level == 1)
+          (q"null",
+            q"""
+              v.asInstanceOf[PersistentArrayMap].iterator.next
+              .asInstanceOf[MapEntry].getValue
+              .asInstanceOf[PersistentVector].iterator()
+             """)
+        else
+          (q""""__none__"""",
+            q"v.asInstanceOf[PersistentVector].iterator()")
 
         q"""
           private val $nested_x = (subData: Any) => subData match {
-            case "__none__" => List.empty[Any]
-            case v          => {
-              val sub = v.asInstanceOf[PersistentVector].iterator()
+            case $none => List.empty[Any]
+            case v     => {
+              val sub = $subIterator
               var subTuples = List.empty[Any]
               while (sub.hasNext) {
-                val it = sub.next.asInstanceOf[PersistentArrayMap].valIterator()
-                subTuples = subTuples :+ $subTuple
+                ..$iterators
+                subTuples = try {
+                  ..$addTuple
+                } catch {
+                  case e: Throwable =>
+                    // Discard non-matching tuple on this level
+//                    println("Discarded value - " + e)
+                    subTuples
+                }
               }
               subTuples
             }
@@ -158,21 +214,25 @@ private[molecule] trait Base extends Dsl2Model {
          """ :: acc
     }
 
-    q"""
-      import clojure.lang.{Keyword, LazySeq, MapEntry, PersistentArrayMap, PersistentHashSet, PersistentVector}
-      import java.util.{Date, UUID, List => jList, Map => jMap, Iterator => jIterator}
+    val tree =
+      q"""
+        import clojure.lang.{Keyword, LazySeq, MapEntry, PersistentArrayMap, PersistentHashSet, PersistentVector}
+        import java.net.URI
+        import java.util.{Date, UUID, List => jList, Map => jMap, Iterator => jIterator}
 
-      ..$lambdas
+        ..$lambdas
 
-      // Attributes before nested processed with normal lambdas using jList data
-      private val nested_0 = (row: jList[AnyRef]) => (
-        ..${getLambdas(casts.head)},
-        nested_1(row.get(${casts.head.length}))
-      )
+        // Attributes before nested processed with normal lambdas using jList data
+        private val nested_0 = (row: jList[AnyRef]) => (
+          ..${getLambdas(levelCasts.head, 0)},
+          nested_1(row.get(${levelCasts.head.length}))
+        )
 
-      final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) =
-        nested_0(row).asInstanceOf[(..$OutTypes)]
-     """
+        final override def castRow(row: jList[AnyRef]): (..$OutTypes) =
+          nested_0(row).asInstanceOf[(..$OutTypes)]
+       """
+    //    println(tree)
+    tree
   }
 
 

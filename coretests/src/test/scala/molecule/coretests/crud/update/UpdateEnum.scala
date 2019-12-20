@@ -125,7 +125,7 @@ class UpdateEnum extends CoreSpec {
       (Ns(eid).enums.replace("x" -> "enum9").update must throwA[ExecutionException])
         .message === "Got the exception java.util.concurrent.ExecutionException: " +
         "java.lang.IllegalArgumentException: :db.error/not-an-entity " +
-        """Unable to resolve entity: :Ns.enums/x in datom [17592186045445 ":Ns/enums" ":Ns.enums/x"]""".stripMargin
+        """Unable to resolve entity: :Ns.enums/x in datom [17592186045454 ":Ns/enums" ":Ns.enums/x"]""".stripMargin
 
 
       Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")

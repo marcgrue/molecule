@@ -240,9 +240,9 @@ class Attributes extends CoreSpec {
 
     Ns.int(1).str$.getJson ===
       """[
+        |{"Ns.int": 1, "Ns.str": "c"},
         |{"Ns.int": 1, "Ns.str": null},
-        |{"Ns.int": 1, "Ns.str": ""},
-        |{"Ns.int": 1, "Ns.str": "c"}
+        |{"Ns.int": 1, "Ns.str": ""}
         |]""".stripMargin
 
     Ns.long(2L).int$.getJson ===
@@ -362,8 +362,8 @@ class Attributes extends CoreSpec {
     // OBS!: Sets of booleans truncate to one value!
     Ns.int(6).bools$.getJson ===
       """[
-        |{"Ns.int": 6, "Ns.bools": [true]},
-        |{"Ns.int": 6, "Ns.bools": null}
+        |{"Ns.int": 6, "Ns.bools": null},
+        |{"Ns.int": 6, "Ns.bools": [true]}
         |]""".stripMargin
 
     Ns.int(7).dates$.getJson ===
@@ -450,8 +450,8 @@ class Attributes extends CoreSpec {
 
     Ns.int(6).boolMap$.getJson ===
       """[
-        |{"Ns.int": 6, "Ns.boolMap": {"a": true, "b": false}},
-        |{"Ns.int": 6, "Ns.boolMap": null}
+        |{"Ns.int": 6, "Ns.boolMap": null},
+        |{"Ns.int": 6, "Ns.boolMap": {"a": true, "b": false}}
         |]""".stripMargin
 
     Ns.int(7).dateMap$.getJson ===
@@ -474,8 +474,8 @@ class Attributes extends CoreSpec {
 
     Ns.int(11).bigIntMap$.getJson ===
       s"""[
-         |{"Ns.int": 11, "Ns.bigIntMap": null},
-         |{"Ns.int": 11, "Ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}}
+         |{"Ns.int": 11, "Ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}},
+         |{"Ns.int": 11, "Ns.bigIntMap": null}
          |]""".stripMargin
 
     Ns.int(12).bigDecMap$.getJson ===

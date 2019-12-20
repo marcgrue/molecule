@@ -5,22 +5,11 @@ lazy val supportedScalaVersions = List("2.13.1", "2.12.10")
 lazy val baseFlags              = List(
   "-feature",
   "-language:implicitConversions",
-  "-deprecation",
-  //  "-Ymacro-annotations"
-  //  "-Xlint:deprecation"
-  //  "-Yrangepos",
-  //  "-Ystatistics",
-  //  "-Ymacro-debug-lite",
-  //  "-Xprint",
-  //  "-Ymacro-debug-verbose",
-  //  "-Yshow-trees-stringified",
-  //  "-Yshow-trees",
-  //  "-Yquasiquote-debug",
-  //  "-Ydebug",
+  "-deprecation"
 )
 
 lazy val baseSettings = Defaults.coreDefaultSettings ++ Seq(
-  version := "0.20.1",
+  version := "0.21.0",
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org"))
@@ -70,8 +59,8 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("core"))
   .settings(baseSettings ++
-        publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
-//    publishSettings ++ // make docs for publishSigned
+//        publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
+    publishSettings ++ // make docs for publishSigned
     Seq(
       moduleName := "molecule",
       crossScalaVersions := supportedScalaVersions,
@@ -106,7 +95,7 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
 
     > sbt [+]publishSigned for publishing to nexus/maven
    */
-//  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin)
 
 
 lazy val moleculeCoreJVM = moleculeCore.jvm

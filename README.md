@@ -48,9 +48,7 @@ Molecule offers both a synchronous and an asynchronous API for all query getters
 Molecule transform "molecules" like `Person.name.age.get` to [Datalog](https://docs.datomic.com/on-prem/query.html) queries 
 for Datomic. The returned untyped data from Datomic is then casted by Molecule to the expected Scala type.
 
-All queries are prepared at compile time by macros. So there is no overhead at runtime when running the queries. All
-queries are ready to fire.
-
+All queries are prepared at compile time by macros. So there is no overhead at runtime when running the queries.
 
    
 ## Getting started
@@ -80,13 +78,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.3.2
+sbt.version=1.3.5
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.3")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.4")
 ```
 
 `build.sbt`:
@@ -101,15 +99,15 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.20.0",
+      "org.scalamolecule" %% "molecule" % "0.21.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule 0.20.0 cross-compilations available at maven central for Scala 
-[2.13.1](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.13/) and
-[2.12.10](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.12/).
+Molecule cross-compilations available at maven central for Scala 
+[2.13](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.13/) and
+[2.12](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.12/).
 
 
 ## Molecule in Scala.js project
@@ -122,8 +120,8 @@ an example of how Molecule is used both on the server and client side.
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.3")
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.29")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.4")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.31")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.6.1")
 ```
 
@@ -144,7 +142,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.20.0",
+      "org.scalamolecule" %% "molecule" % "0.21.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -153,7 +151,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.20.0")
+      ("org.scalamolecule" %%% "molecule" % "0.21.0")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -162,6 +160,9 @@ lazy val yourProjectJS = yourProject.js
 Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not 
 compiled to javascript).
 
+Molecule js-transpiled cross-compilations available at maven central for Scala 
+[2.13](https://repo1.maven.org/maven2/org/scalamolecule/molecule_sjs0.6_2.13/) and
+[2.12](https://repo1.maven.org/maven2/org/scalamolecule/molecule_sjs0.6_2.12/).
 
 #### Author
 Marc Grue

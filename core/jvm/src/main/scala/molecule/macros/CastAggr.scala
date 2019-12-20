@@ -3,7 +3,7 @@ package molecule.macros
 import molecule.ops.TreeOps
 import scala.reflect.macros.blackbox
 
-private[molecule] trait CastAggr extends CastNested with TreeOps {
+private[molecule] trait CastAggr extends CastOptNested with TreeOps {
   val c: blackbox.Context
   import c.universe._
 

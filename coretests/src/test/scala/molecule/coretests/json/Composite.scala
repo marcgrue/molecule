@@ -145,8 +145,8 @@ class Composite extends CoreSpec {
 
     m(Ref2.int2.str2 + Ns.refs1).getJson ===
       """[
-        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.refs1": [17592186045446]}],
-        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.refs1": [17592186045448]}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.refs1": [17592186045455]}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.refs1": [17592186045457]}]
         |]""".stripMargin
   }
 }
