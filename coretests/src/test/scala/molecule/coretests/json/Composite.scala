@@ -132,10 +132,10 @@ class Composite extends CoreSpec {
 
 
   "Card-many ref - one value 2" in new CoreSetup {
-    Ref2.int2.str2 + Ns.Refs1.int1 insert Seq(
+    val List(_, r1a, _, r1b) = Ref2.int2.str2 + Ns.Refs1.int1 insert Seq(
       ((1, "a"), 11),
       ((2, "b"), 22)
-    )
+    ) eids
 
     m(Ref2.int2.str2 + Ns.Refs1.int1).getJson ===
       """[
@@ -144,9 +144,9 @@ class Composite extends CoreSpec {
         |]""".stripMargin
 
     m(Ref2.int2.str2 + Ns.refs1).getJson ===
-      """[
-        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.refs1": [17592186045455]}],
-        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.refs1": [17592186045457]}]
-        |]""".stripMargin
+      s"""[
+         |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ns.refs1": [$r1a]}],
+         |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ns.refs1": [$r1b]}]
+         |]""".stripMargin
   }
 }

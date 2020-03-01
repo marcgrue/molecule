@@ -30,13 +30,14 @@ trait Datomic {
     * @return [[molecule.facade.Conn Conn]]
     */
   def recreateDbFrom(schema: SchemaTransaction, identifier: String = "", protocol: String = "mem"): Conn = {
-    val id = if (identifier == "") randomUUID() else identifier
+    val id  = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {
       Peer.deleteDatabase(uri)
       Peer.createDatabase(uri)
       val datomicConn = Peer.connect(uri)
-      datomicConn.transact(schema.partitions)
+      if (schema.partitions.size() > 0)
+        datomicConn.transact(schema.partitions)
       datomicConn.transact(schema.namespaces)
       Conn(datomicConn)
     } catch {
@@ -58,7 +59,7 @@ trait Datomic {
     * @return [[molecule.facade.Conn Conn]]
     */
   def recreateDbFromRaw(schemaData: java.util.List[_], identifier: String = "", protocol: String = "mem"): Conn = {
-    val id = if (identifier == "") randomUUID() else identifier
+    val id  = if (identifier == "") randomUUID() else identifier
     val uri = s"datomic:$protocol://$id"
     try {
       Peer.deleteDatabase(uri)
@@ -77,7 +78,7 @@ trait Datomic {
   /** Transact schema from auto-generated schema transaction data.
     *
     * @group database
-    * @param schema     sbt-plugin auto-generated Transaction file path.to.schema.YourDomainSchema
+    * @param schema sbt-plugin auto-generated Transaction file path.to.schema.YourDomainSchema
     * @param identifier
     * @param protocol
     * @return
@@ -86,7 +87,8 @@ trait Datomic {
     val uri = s"datomic:$protocol://$identifier"
     try {
       val datomicConn = Peer.connect(uri)
-      datomicConn.transact(schema.partitions)
+      if (schema.partitions.size() > 0)
+        datomicConn.transact(schema.partitions)
       datomicConn.transact(schema.namespaces)
       Conn(datomicConn)
     } catch {

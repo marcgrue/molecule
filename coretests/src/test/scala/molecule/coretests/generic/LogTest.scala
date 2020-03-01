@@ -5,6 +5,7 @@ import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.exceptions.MoleculeException
+import molecule.facade.TxReport
 import molecule.util.expectCompileError
 
 
@@ -20,8 +21,8 @@ class LogTest extends CoreSpec {
 
   // First entity
 
-  val txR1 = Ns.str("a").int(1).save
-  val tx1  = txR1.tx
+  val txR1: TxReport = Ns.str("a").int(1).save
+  val tx1            = txR1.tx
   val e1   = txR1.eid
   val t1   = txR1.t
   val d1   = txR1.inst
@@ -180,13 +181,6 @@ class LogTest extends CoreSpec {
 
   "Args" >> {
 
-    // t1 - tx2 as static values
-    Log(Some(1037), Some(13194139534351L)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
-
     // t - t
     Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
@@ -277,7 +271,7 @@ class LogTest extends CoreSpec {
 
     // Start - t3 (exclusive)
     // Includes all Datomic database bootstrapping and schema transactions
-    Log(None, Some(t3)).t.get.size === 425
+    Log(None, Some(t3)).t.get.size === 424
 
     // Start - end
     // Molecule disallow returning from beginning to end (the whole database!)

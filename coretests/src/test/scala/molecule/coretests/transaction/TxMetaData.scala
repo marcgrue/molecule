@@ -17,8 +17,8 @@ class TxMetaData extends CoreSpec {
       // tx meta attributes can be in any mode
       val txR = Ns.int(1).Tx(Ns.str_("str tacit")).save
       val tx1 = txR.tx
-      val t1 = txR.t
-//      val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
+      val t1  = txR.t
+      //      val tx1 = Ns.int(1).Tx(Ns.str_("str tacit")).save.tx
       val tx2 = Ns.int(2).Tx(Ns.str("str mandatory")).save.tx
       val tx3 = Ns.int(3).Tx(Ns.str("attr mandatory")).save.tx
       val tx4 = Ns.int(4).Tx(Ns.str_("attr tacit")).save.tx
@@ -66,7 +66,7 @@ class TxMetaData extends CoreSpec {
         (5, tx5, Some("attr optional with value")),
         (6, tx6, None) // attr optional without value
       )
-//      Log(Some(tx1), Some(tx1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
+      //      Log(Some(tx1), Some(tx1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
       Log(Some(t1), Some(t1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
 
     }
@@ -344,27 +344,27 @@ class TxMetaData extends CoreSpec {
     // History without tx meta data
     Ns(e).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1037, true), // 1 asserted (save)
+      (1, 1036, true), // 1 asserted (save)
 
       // tx 2
-      (1, 1039, false), // 1 retracted
-      (2, 1039, true), // 2 asserted (update)
+      (1, 1038, false), // 1 retracted
+      (2, 1038, true), // 2 asserted (update)
 
       // tx 3
-      (2, 1040, false), // 2 retracted
-      (3, 1040, true) // 3 asserted (update)
+      (2, 1039, false), // 2 retracted
+      (3, 1039, true) // 3 asserted (update)
     )
 
     // History with tx meta data
     Ns(e).int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1037, true, "a"), // 1 asserted (save)
+      (1, 1036, true, "a"), // 1 asserted (save)
 
       // (tx2 has no tx meta data)
 
       // tx 3
-      (2, 1040, false, "b"), // 2 retracted
-      (3, 1040, true, "b") // 3 asserted (update)
+      (2, 1039, false, "b"), // 2 retracted
+      (3, 1039, true, "b") // 3 asserted (update)
     )
   }
 
@@ -379,7 +379,7 @@ class TxMetaData extends CoreSpec {
     // What was retracted and with what tx meta data
     Ns.e.int.t.op.Tx(Ns.str).getHistory === List(
       // 1 was retracted with tx meta data "meta"
-      (e, 1, 1039, false, "meta")
+      (e, 1, 1038, false, "meta")
     )
   }
 
@@ -406,13 +406,13 @@ class TxMetaData extends CoreSpec {
 
     // History with transaction data
     Ns.int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1037, true, "a"),
-      (2, 1037, true, "a"),
-      (3, 1037, true, "a"),
+      (1, 1036, true, "a"),
+      (2, 1036, true, "a"),
+      (3, 1036, true, "a"),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1041, false, "b"),
-      (2, 1041, false, "b")
+      (1, 1040, false, "b"),
+      (2, 1040, false, "b")
     )
 
     // Entities and int values that were retracted with tx meta data "b"
@@ -436,13 +436,13 @@ class TxMetaData extends CoreSpec {
 
     // History with transaction data
     Ns.int.t.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1037, true, "a", 7),
-      (2, 1037, true, "a", 7),
-      (3, 1037, true, "a", 7),
+      (1, 1036, true, "a", 7),
+      (2, 1036, true, "a", 7),
+      (3, 1036, true, "a", 7),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1042, false, "b", 8),
-      (2, 1042, false, "b", 8)
+      (1, 1041, false, "b", 8),
+      (2, 1041, false, "b", 8)
     )
 
     // Entities and int values that was retracted in tx "b"
@@ -460,6 +460,44 @@ class TxMetaData extends CoreSpec {
     Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(_._2) === List(
       (e1, 1, false, "b"),
       (e2, 2, false, "b")
+    )
+  }
+
+
+  "Save tx meta ref with multiple attrs" in new CoreSetup {
+    Ns.int(1).Tx(Ns.str("a").Ref1.str1("b").int1(2)).save
+
+    Ns.int.Tx(Ns.str.Ref1.str1.int1).get === List(
+      (1, "a", "b", 2)
+    )
+  }
+
+  "Save multiple tx meta refs with multiple attrs" in new CoreSetup {
+    Ns.int(1).Tx(Ns.str("a").Ref1.str1("b").int1(2).Ref2.str2("c").int2(3)).save
+
+    Ns.int.Tx(Ns.str.Ref1.str1.int1.Ref2.str2.int2).get === List(
+      (1, "a", "b", 2, "c", 3)
+    )
+  }
+
+
+  "Insert tx meta ref with multiple attrs" in new CoreSetup {
+    Ns.int.Tx(Ns.str_("a").Ref1.str1_("b").int1_(7)) insert List(1, 2, 3)
+
+    Ns.int.Tx(Ns.str.Ref1.str1.int1).get.sortBy(_._1) === List(
+      (1, "a", "b", 7),
+      (2, "a", "b", 7),
+      (3, "a", "b", 7)
+    )
+  }
+
+  "Insert multiple tx meta refs with multiple attrs" in new CoreSetup {
+    Ns.int.Tx(Ns.str_("a").Ref1.str1_("b").int1_(7).Ref2.str2_("c").int2_(8)) insert List(1, 2, 3)
+
+    Ns.int.Tx(Ns.str.Ref1.str1.int1.Ref2.str2.int2).get.sortBy(_._1) === List(
+      (1, "a", "b", 7, "c", 8),
+      (2, "a", "b", 7, "c", 8),
+      (3, "a", "b", 7, "c", 8)
     )
   }
 }

@@ -19,7 +19,7 @@ import scala.language.implicitConversions
 case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation
-  var asN   = false
+  var asN = false
 
   def p(expr: QueryExpr): String = expr match {
     case Query(find, widh, in, where)                    => pp(find, widh, in, where)
@@ -49,19 +49,18 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: String) if v.startsWith("__n__")         => v.drop(5) /* JS number hack */
     case Val(v)                                          => "\"" + v + "\""
     case Pull(e, nsFull, attr, Some(_))                  => s"(pull ?$e [{:$nsFull/$attr [:db/ident]}])"
-    case Pull(e, nsFull, attr, _)                        => s"(pull ?$e [:$nsFull/$attr])"
+    case Pull(e, nsFull, attr, _)                        => s"(pull ?$e [(limit :$nsFull/$attr nil)])"
     case PullNested(e, nestedAttrs)                      => s"\n        (pull ?$e [\n          ${p(nestedAttrs)}])"
     case NestedAttrs(1, nsFull, attr, attrSpecs)         =>
       val sp = "  " * 6
       s"""{(:$nsFull/$attr :limit nil) [""" + s"\n$sp${attrSpecs map p mkString s"\n$sp"}]}"
-    case NestedAttrs(level, nsFull, attr, attrSpecs)         =>
+    case NestedAttrs(level, nsFull, attr, attrSpecs)     =>
       val sp = "  " * (5 + level)
       s"""{(:$nsFull/$attr :limit nil :default "__none__") [""" + s"\n$sp${attrSpecs map p mkString s"\n$sp"}]}"
-//    case PullAttr(nsFull, attr, _)                    => s"""(:$nsFull/$attr :default "__none__")"""
-    case PullAttr(nsFull, attr, true)                    => s"""(:$nsFull/$attr :default "__none__")"""
-    case PullAttr(nsFull, attr, _)                       => s""":$nsFull/$attr"""
-    case PullEnum(nsFull, attr, true)                    => s"""{(:$nsFull/$attr :default "__none__") [:db/ident]}"""
-    case PullEnum(nsFull, attr, _)                       => s"""{:$nsFull/$attr [:db/ident]}"""
+    case PullAttr(nsFull, attr, true)                    => s"""(:$nsFull/$attr :limit nil :default "__none__")"""
+    case PullAttr(nsFull, attr, _)                       => s"""(:$nsFull/$attr :limit nil)"""
+    case PullEnum(nsFull, attr, true)                    => s"""{(:$nsFull/$attr :limit nil :default "__none__") [:db/ident]}"""
+    case PullEnum(nsFull, attr, _)                       => s"""{(:$nsFull/$attr :limit nil) [:db/ident]}"""
     case NoVal                                           => ""
     case DS(name)                                        => "$" + name
     case DS                                              => "$"
@@ -91,7 +90,7 @@ case class Query2String(q: Query) extends Helpers {
 
   def s(str: String) = "?" + str
 
-  def mkIn(in: In, bracket: Boolean) = {
+  def mkIn(in: In, bracket: Boolean): String = {
     val (l, r) = if (bracket) (":in    [ ", " ]") else (":in    ", "")
     if (in.inputs.isEmpty && in.rules.isEmpty) ""
     else
@@ -112,9 +111,17 @@ case class Query2String(q: Query) extends Helpers {
   }
 
   def multiLine(maxLength: Int = 30): String = {
-    val queryString         = p(q)
-    val (firstParts, where) = (List(p(q.f), p(q.wi), p(q.i)).filter(_.trim.nonEmpty), p(q.wh))
-    val str                 = if (queryString.length > maxLength) {
+    val queryString = p(q)
+    lazy val outputs    = q.f.outputs.zipWithIndex.foldLeft("", 0) {
+      case ((acc, _), (pull: Pull, 0)) => (acc + " " + p(pull), 1)
+      case ((acc, _), (pull: Pull, _)) => (acc + "\n        " + p(pull), 1)
+      case ((acc, 1), (o, _))          => (acc + "\n        " + p(o), 0)
+      case ((acc, 0), (o, _))          => (acc + " " + p(o), 0)
+    }._1
+    lazy val finds      = ":find " + outputs
+    lazy val firstParts = List(finds, p(q.wi), p(q.i)).filter(_.trim.nonEmpty)
+    lazy val where      = p(q.wh)
+    val str = if (queryString.length > maxLength) {
       firstParts.mkString("[", "\n ", "\n ") +
         (if (where.length > maxLength)
           q.wh.clauses.map(p).mkString(":where ", "\n        ", "")

@@ -68,7 +68,7 @@ class Eid extends Base {
     Ns.e_(e1, e2).int.get === List(1, 2)
 
     val e23 = Seq(e2, e3)
-    Ns.e(e23).int.get === List((e2, 2), (e3, 3))
+    Ns.e(e23).int.get === List((e3, 3), (e2, 2))
     Ns.e_(e23).int.get === List(2, 3)
   }
 

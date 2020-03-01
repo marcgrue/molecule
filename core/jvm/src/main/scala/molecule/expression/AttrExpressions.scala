@@ -18,14 +18,15 @@ import molecule.boilerplate.attributes.Attr
   *   Person.name(?)                           // initiate input molecules awaiting input at runtime
   *   Person.name(unify)                       // Unify attributes in self-joins
   * }}}
+  *
   * @see Manual: [[http://www.scalamolecule.org/manual/attributes/expressions/ expressions]],
   *      [[http://www.scalamolecule.org/manual/attributes/aggregates/ aggregates]],
   *      [[http://www.scalamolecule.org/manual/attributes/parameterized/ input molecules]],
   *      [[http://www.scalamolecule.org/manual/relationships/self-join/ self-join]]
-  *     | Tests: [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/expression expressions]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input1String.scala#L1 input1]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input2.scala#L1 input2]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input3.scala#L1 input3]]
+  *      | Tests: [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/expression expressions]],
+  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input1String.scala#L1 input1]],
+  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input2.scala#L1 input2]],
+  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input3.scala#L1 input3]]
   * @groupname attrMarker Attribute markers
   * @groupdesc attrMarker Markers applied to attributes that change the semantics of the attribute/molecule.
   * @groupprio attrMarker 20
@@ -51,7 +52,7 @@ trait AttrExpressions {
     * @note Data can only be retrieved from input molecules once they have been resolved with input.<br>
     *       Input molecule queries are cached and optimized by Datomic.
     * @group attrMarker
-    **/
+    * */
   trait ?
 
   // Avoiding overload via core.? import
@@ -77,7 +78,7 @@ trait AttrExpressions {
     * }}}
     *
     * @group attrMarker
-    **/
+    * */
   trait unify
 
 
@@ -126,7 +127,7 @@ trait AttrExpressions {
       * @param moreValues Optional additional attribute values to be matched
       * @return Filtered molecule
       */
-    def  apply(value: T, moreValues: T*): Ns with Attr = ???
+    def apply(value: T, moreValues: T*): Ns with Attr = ???
 
     /** Match one or more Iterables of attribute values.
       * <br><br>
@@ -251,23 +252,23 @@ trait AttrExpressions {
       * @return Filtered molecule
       */
     def !=(value: T, moreValues: T*): Ns with Attr = ???
-//    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
+    //    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
 
-//    /** Match attribute values different from applied value.
-//      * {{{
-//      *   Person.name.get === List("Ben", "Liz", "Joe")
-//      *
-//      *   // Negate value
-//      *   Person.name.!=("Ben").get === List("Liz", "Joe")
-//      *
-//      *   // same as
-//      *   Person.name.not("Ben").get === List("Liz", "Joe")
-//      * }}}
-//      *
-//      * @param value Negated attribute value
-//      * @return Filtered molecule
-//      */
-//    def !=(value: T): Ns with Attr = ??? // Hack to satisfy intellij inference
+    //    /** Match attribute values different from applied value.
+    //      * {{{
+    //      *   Person.name.get === List("Ben", "Liz", "Joe")
+    //      *
+    //      *   // Negate value
+    //      *   Person.name.!=("Ben").get === List("Liz", "Joe")
+    //      *
+    //      *   // same as
+    //      *   Person.name.not("Ben").get === List("Liz", "Joe")
+    //      * }}}
+    //      *
+    //      * @param value Negated attribute value
+    //      * @return Filtered molecule
+    //      */
+    //    def !=(value: T): Ns with Attr = ??? // Hack to satisfy intellij inference
 
 
     /** Match attribute values different from applied Iterable of values.
@@ -401,6 +402,9 @@ trait AttrExpressions {
       * @return Molecule to be updated
       */
     def retract(values: Iterable[Rem]): Ns with Attr = ???
+
+    // todo?
+    //    def retract(values: ??): In with Attr = ???
   }
 
 
@@ -657,11 +661,11 @@ trait AttrExpressions {
 
     def not(set: Set[T]): Ns with Attr = ???
     def not(set: Set[T], set2: Set[T], moreSets: Set[T]*): Ns with Attr = ???
-    def not(sets: Seq[Set[T]])             : Ns with Attr = ???
+    def not(sets: Seq[Set[T]]): Ns with Attr = ???
 
     def !=(set: Set[T]): Ns with Attr = ???
     def !=(set: Set[T], set2: Set[T], moreSets: Set[T]*): Ns with Attr = ???
-    def !=(sets: Seq[Set[T]])             : Ns with Attr = ???
+    def !=(sets: Seq[Set[T]]): Ns with Attr = ???
   }
 
 
@@ -1194,7 +1198,7 @@ trait AttrExpressions {
       *       "no", "not", "of", "on", "or", "such",
       *       "that", "the", "their", "then", "there", "these",
       *       "they", "this", "to", "was", "will", "with"
-      * @param word     Search word
+      * @param word      Search word
       * @param moreWords Optional additional search words
       * @return Filtered molecule
       */

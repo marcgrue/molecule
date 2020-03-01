@@ -7,6 +7,7 @@ import molecule.coretests.util.dsl.coreTest._
 
 class InsertRelated extends CoreSpec {
 
+
   "Basics" in new CoreSetup {
 
     // Asserting a fact in the `Ref1` namespace is the same as creating
@@ -14,37 +15,38 @@ class InsertRelated extends CoreSpec {
 
     val a0 = Ns.str.insert("a0").eid
     a0.touch === Map(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> a0,
       ":Ns/str" -> "a0")
 
     val b0 = Ref1.str1.insert("b0").eid
     b0.touch === Map(
-      ":db/id" -> 17592186045456L,
+      ":db/id" -> b0,
       ":Ref1/str1" -> "b0")
 
     // If we also assert a fact in `Ns` we will get an entity with
     // a :Ns/str assertion ("a0") of namespace `Ns` and a reference to an entity
     // with another :Ref1/str assertion ("b1") in namespace `Ref1`:
 
-    val a0b1 = Ns.str.Ref1.str1.insert("a0", "b1").eid
-    a0b1.touch === Map(
-      ":db/id" -> 17592186045458L,
+    val List(a0ref, b1ref) = Ns.str.Ref1.str1.insert("a0", "b1").eids
+    a0ref.touch === Map(
+      ":db/id" -> a0ref,
       ":Ns/str" -> "a0",
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045459L,
+        ":db/id" -> b1ref,
         ":Ref1/str1" -> "b1")
     )
 
 
     // We can expand our graph one level deeper
+    val List(a0refs, b1ref1, c2ref2) =
+      Ns.str.Ref1.str1.Ref2.str2.insert("a0", "b1", "c2").eids
 
-    val a0b1c2 = Ns.str.Ref1.str1.Ref2.str2.insert("a0", "b1", "c2").eid
-    a0b1c2.touch === Map(
-      ":db/id" -> 17592186045461L,
+    a0refs.touch === Map(
+      ":db/id" -> a0refs,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045462L,
+        ":db/id" -> b1ref1,
         ":Ref1/ref2" -> Map(
-          ":db/id" -> 17592186045463L,
+          ":db/id" -> c2ref2,
           ":Ref2/str2" -> "c2"),
         ":Ref1/str1" -> "b1"),
       ":Ns/str" -> "a0"
@@ -53,38 +55,38 @@ class InsertRelated extends CoreSpec {
 
     // We can limit the depth of the retrieved graph
 
-    a0b1c2.touchMax(3) === Map(
-      ":db/id" -> 17592186045461L,
+    a0refs.touchMax(3) === Map(
+      ":db/id" -> a0refs,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045462L,
+        ":db/id" -> b1ref1,
         ":Ref1/ref2" -> Map(
-          ":db/id" -> 17592186045463L,
+          ":db/id" -> c2ref2,
           ":Ref2/str2" -> "c2"),
         ":Ref1/str1" -> "b1"),
       ":Ns/str" -> "a0"
     )
 
-    a0b1c2.touchMax(2) === Map(
-      ":db/id" -> 17592186045461L,
+    a0refs.touchMax(2) === Map(
+      ":db/id" -> a0refs,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045462L,
-        ":Ref1/ref2" -> 17592186045463L,
+        ":db/id" -> b1ref1,
+        ":Ref1/ref2" -> c2ref2,
         ":Ref1/str1" -> "b1"),
       ":Ns/str" -> "a0"
     )
 
-    a0b1c2.touchMax(1) === Map(
-      ":db/id" -> 17592186045461L,
-      ":Ns/ref1" -> 17592186045462L,
+    a0refs.touchMax(1) === Map(
+      ":db/id" -> a0refs,
+      ":Ns/ref1" -> b1ref1,
       ":Ns/str" -> "a0"
     )
 
     // Use `touchQ` to generate a quoted graph that you can paste into your tests
-    a0b1c2.touchQuotedMax(1) ===
-      """Map(
-        |  ":db/id" -> 17592186045461L,
-        |  ":Ns/ref1" -> 17592186045462L,
-        |  ":Ns/str" -> "a0")""".stripMargin
+    a0refs.touchQuotedMax(1) ===
+      s"""Map(
+         |  ":db/id" -> ${a0refs}L,
+         |  ":Ns/ref1" -> ${b1ref1}L,
+         |  ":Ns/str" -> "a0")""".stripMargin
   }
 
 
@@ -97,13 +99,14 @@ class InsertRelated extends CoreSpec {
     Ns.strs.ints.Ref1.strs1.ints1.Ref2.strs2.ints2.get.head === (Set("a0"), Set(0), Set("b1"), Set(1), Set("c2"), Set(2))
 
     // Address example
-    val address = Ns.str.Ref1.int1.str1.Ref2.str2.insert("273 Broadway", 10700, "New York", "USA").eid
-    address.touch === Map(
-      ":db/id" -> 17592186045462L,
+    val List(addressE, streetE, countryE) =
+      Ns.str.Ref1.int1.str1.Ref2.str2.insert("273 Broadway", 10700, "New York", "USA").eids
+    addressE.touch === Map(
+      ":db/id" -> addressE,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045463L,
+        ":db/id" -> streetE,
         ":Ref1/int1" -> 10700,
-        ":Ref1/ref2" -> Map(":db/id" -> 17592186045464L, ":Ref2/str2" -> "USA"),
+        ":Ref1/ref2" -> Map(":db/id" -> countryE, ":Ref2/str2" -> "USA"),
         ":Ref1/str1" -> "New York"),
       ":Ns/str" -> "273 Broadway")
 
@@ -132,11 +135,11 @@ class InsertRelated extends CoreSpec {
 
   "Card many references" in new CoreSetup {
 
-    val id = Ns.int.Refs1.str1.insert(42, "r").eid
-    id.touch === Map(
-      ":db/id" -> 17592186045454L,
+    val List(base, ref) = Ns.int.Refs1.str1.insert(42, "r").eids
+    base.touch === Map(
+      ":db/id" -> base,
       ":Ns/refs1" -> List( // <-- notice we have a list of references now (with one ref here)
-        Map(":db/id" -> 17592186045455L, ":Ref1/str1" -> "r")),
+        Map(":db/id" -> ref, ":Ref1/str1" -> "r")),
       ":Ns/int" -> 42
     )
 

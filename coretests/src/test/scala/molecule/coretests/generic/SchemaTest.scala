@@ -878,13 +878,13 @@ class SchemaTest extends CoreSpec {
   "t, tx, txInstant" >> {
 
     // Schema transaction time t
-    Schema.t.get === List(1001)
+    Schema.t.get === List(1000)
 
     // Schema transaction entity id
-    Schema.tx.get === List(13194139534313L)
+    Schema.tx.get === List(13194139534312L)
 
     // Get tx wall clock time from Log for comparison with time from Schema query
-    val txInstant = Log(Some(1001), Some(1002)).txInstant.get.head
+    val txInstant = Log(Some(1000), Some(1001)).txInstant.get.head
     Schema.txInstant.get === List(txInstant)
   }
 }

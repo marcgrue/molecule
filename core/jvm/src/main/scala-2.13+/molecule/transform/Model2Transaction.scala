@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters._
 /** Model to transaction transformation.
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
@@ -77,7 +77,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       // Entity id applied to initial namespace
       case (eid@Eid(id), Atom(nsFull, name, _, c, value@RetractValue(_), prefix, gs, _)) => (eid, stmts :+ Retract(id, s":$nsFull/$name", Values(value, prefix), bi(gs, c)))
       case (eid@Eid(id), Atom(nsFull, name, _, c, value, prefix, gs, _))                 => (eid, stmts :+ Add(id, s":$nsFull/$name", Values(value, prefix), bi(gs, c)))
-      case (Eid(id), Bond(nsFull, refAttr, refNs, c, gs))                                => ("v", stmts :+ Add(id, s":$nsFull/$refAttr", "__tempId", bi(gs, c)))
+      case (Eid(id), Bond(nsFull, refAttr, _, c, gs))                                    => ("v", stmts :+ Add(id, s":$nsFull/$refAttr", "__tempId", bi(gs, c)))
 
 
       // Same namespace
@@ -100,10 +100,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case (Eid(id), TxMetaData(elements)) => ("e", stmts ++ resolveTx(elements))
 
       // Continue with only transaction Atoms...
-      case ("tx", Atom(nsFull, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ("tx", stmts :+ Add("tx", s":$nsFull/${name.init}", Values(value, prefix), Card(c)))
-      case ("tx", Atom(nsFull, name, _, c, value, prefix, _, _))                                         => ("tx", stmts :+ Add("tx", s":$nsFull/$name", Values(value, prefix), Card(c)))
-      case ("tx", Bond(nsFull, refAttr, refNs, c, gs))                                                   => ("tx", stmts :+ Add("tx", s":$nsFull/$refAttr", s":$refNs", bi(gs, c)))
-      case ("tx", other)                                                                                 =>
+      case ("tx", Atom(nsFull, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$'    => ("tx", stmts :+ Add("tx", s":$nsFull/${name.init}", Values(value, prefix), Card(c)))
+      case ("tx", Atom(nsFull, name, _, c, value, prefix, _, _))                                            => ("tx", stmts :+ Add("tx", s":$nsFull/$name", Values(value, prefix), Card(c)))
+      case ("tx", Bond(nsFull, refAttr, refNs, c, gs))                                                      => ("txRef", stmts :+ Add("tx", s":$nsFull/$refAttr", s":$refNs", bi(gs, c)))
+      case ("txRef", Bond(nsFull, refAttr, refNs, c, gs))                                                   => ("txRef", stmts :+ Add("txRef", s":$nsFull/$refAttr", s":$refNs", bi(gs, c)))
+      case ("txRef", Atom(nsFull, name, _, c, value, prefix, _, _)) if name.last == '_' || name.last == '$' => ("txRef", stmts :+ Add("txRef", s":$nsFull/${name.init}", Values(value, prefix), Card(c)))
+      case ("txRef", Atom(nsFull, name, _, c, value, prefix, _, _))                                         => ("txRef", stmts :+ Add("txRef", s":$nsFull/$name", Values(value, prefix), Card(c)))
+      case ("tx" | "txRef", other)                                                                          =>
         err("stmtsModel", s"Transaction data can only have references and attributes with applied value:\nMODEL: $model \nFOUND: $other\nSTMTS: $stmts")
 
       // Next namespace
@@ -226,14 +229,14 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
       result match {
         case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
-        case Nil        =>
+        case Nil                =>
           val otherId = Entity(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
             s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
             s"\nSpooky id: $otherId" +
             "\n" + stmts.size + " statements so far:\n" + stmts.mkString("\n")
           )
-        case ids        =>
+        case ids                =>
           err("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
       }
     }
@@ -716,8 +719,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   }
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {
-    case ((stmts, txStmts), txStmt@Add("tx", _, _, _)) => (stmts, txStmts :+ txStmt)
-    case ((stmts, txStmts), stmt)                      => (stmts :+ stmt, txStmts)
+    case ((stmts, txStmts), txStmt@Add("tx" | "txRef", _, _, _)) => (stmts, txStmts :+ txStmt)
+    case ((stmts, txStmts), stmt)                                => (stmts :+ stmt, txStmts)
   }
 
   def lastE(stmts: Seq[Statement], attr: String, forcedE: Any, bi: GenericValue, composite: Any = "e"): Any = {
@@ -952,11 +955,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     val dataStmtss: Seq[Seq[Statement]] = dataRows.map(resolveStmts(genericStmts, _, 0))
     val txId                            = tempId("tx")
     val txStmtss  : Seq[Seq[Statement]] = Seq(genericTxStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add("tx", a, Values(vs, prefix), bi)) if txRefAttr(stmts)   => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
-      case (stmts, Add("tx", a, Values(vs, prefix), bi))                       => valueStmts(stmts, txId, a, vs, prefix, bi, None)
-      case (stmts, Add("tx", a, refNs: String, bi)) if !refNs.startsWith("__") => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
-      case (stmts, Add("v", a, Values(vs, prefix), bi))                        => valueStmts(stmts, txId, a, vs, prefix, bi, None)
-      case (stmts, unexpected)                                                 => err("insertStmts", "Unexpected insert statement: " + unexpected)
+      case (stmts, Add("tx", a, Values(vs, prefix), bi)) if txRefAttr(stmts)      => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("tx", a, Values(vs, prefix), bi))                          => valueStmts(stmts, txId, a, vs, prefix, bi, None)
+      case (stmts, Add("tx", a, refNs: String, bi)) if !refNs.startsWith("__")    => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
+      case (stmts, Add("txRef", a, Values(vs, prefix), bi)) if txRefAttr(stmts)   => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("txRef", a, Values(vs, prefix), bi))                       => valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("txRef", a, refNs: String, bi)) if !refNs.startsWith("__") => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
+      case (_, unexpected)                                                        => err("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
   }
@@ -975,14 +980,19 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
         case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
         case Add("v", a, Values(vs, prefix), bi)                                                    => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)                               => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("tx", a, Values(vs, prefix), bi)                                                   => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
-        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")                             => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add("nsFull", a, _, _)                                                                 => (edgeB, stmts)
-        case Retract(_, _, _, _)                                                                    => (edgeB, stmts)
-        case Add(id: Long, _, Values(_, _), _)                                                      => err("saveStmts", s"With a given id `$id` please use `update` instead.")
-        case Add(_, a, "__arg", _)                                                                  => err("saveStmts", s"Attribute `$a` needs a value applied")
-        case unexpected                                                                             => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
+
+        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)      => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("tx", a, Values(vs, prefix), bi)                          => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
+        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")    => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)   => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi)                       => (edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__") => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+
+        case Add("nsFull", _, _, _)            => (edgeB, stmts)
+        case Retract(_, _, _, _)               => (edgeB, stmts)
+        case Add(id: Long, _, Values(_, _), _) => err("saveStmts", s"With a given id `$id` please use `update` instead.")
+        case Add(_, a, "__arg", _)             => err("saveStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                        => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
       }
     }._2
   }
@@ -1014,15 +1024,16 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
           if (addStmts.isEmpty)
             (edgeB, Nil, e.asInstanceOf[Long]) // pass eid so that we have it for subsequent stmts
           else
-            (edgeB, addStmts, 0L)
+          (edgeB, addStmts, 0L)
         case Retract("e", a, Values(vs, prefix), bi)                                     => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB), 0L)
         case Retract(e, a, Values(vs, prefix), bi)                                       => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB), 0L)
         case Add(_, a, "__arg", _)                                                       => err("updateStmts", s"Attribute `$a` needs a value applied")
         case unexpected                                                                  => err("updateStmts", "Unexpected update statement: " + unexpected)
       }
     }._2
-    val txId                           = "datomic.tx"
-    val txStmts  : Seq[Statement]      = genericTxStmts.foldLeft(Seq[Statement]()) {
+
+    val txId    = "datomic.tx"
+    val txStmts = genericTxStmts.foldLeft(Seq[Statement]()) {
       case (stmts, Add("tx", a, Values(vs, prefix), bi)) => valueStmts(stmts, txId, a, vs, prefix, bi, None)
       case (_, unexpected)                               => err("updateStmts", "Unexpected insert statement: " + unexpected)
     }

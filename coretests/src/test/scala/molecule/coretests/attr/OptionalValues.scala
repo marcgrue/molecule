@@ -204,10 +204,10 @@ class OptionalValues extends CoreSpec {
 
       // We don't have to retrieve the attribute values in the same order as inserted
       Ns.int$.str.long$.get === List(
-        (None, "b", Some(20L)),
-        (Some(1), "a", Some(10L)),
         (None, "d", None),
         (Some(3), "c", None),
+        (None, "b", Some(20L)),
+        (Some(1), "a", Some(10L)),
       )
     }
   }
@@ -396,7 +396,6 @@ class OptionalValues extends CoreSpec {
     m(Ns.int(4).enums$(noEnums)).get === List((4, None))
   }
 
-
   "Allowing duplicate optional attributes" in new CoreSetup {
     Ns.str.int$ insert List(
       ("a", Some(1)),
@@ -418,5 +417,21 @@ class OptionalValues extends CoreSpec {
     Ns.str.int.int.get === List(
       ("a", 1, 1)
     )
+  }
+
+
+  "All optional card-many values returned" in new CoreSetup {
+
+    // Datomic by default returns max 1000 values from a pull expression.
+    // Molecule returns all values:
+
+    val ints = (1 to 1111).toSet
+
+    Ns.str.ints$ insert List(
+      ("a", Some(ints)),
+      ("b", None),
+    )
+
+    Ns.str("a").ints$.get.head._2.get.size === 1111
   }
 }

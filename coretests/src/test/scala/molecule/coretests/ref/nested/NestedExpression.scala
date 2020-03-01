@@ -21,7 +21,7 @@ class NestedExpression extends CoreSpec {
     m(Ns.int.>(1).Refs1 * Ref1.int1).get === List(
       (2, List(2, 3)),
     )
-    m(Ns.int.>(1).Refs1 *? Ref1.int1).get === List(
+    m(Ns.int.>(1).Refs1 *? Ref1.int1).get.sortBy(_._1) === List(
       (2, List(2, 3)),
       (3, List())
     )
@@ -30,7 +30,7 @@ class NestedExpression extends CoreSpec {
     m(Ns.int.>(one).Refs1 * Ref1.int1).get === List(
       (2, List(2, 3)),
     )
-    m(Ns.int.>(one).Refs1 *? Ref1.int1).get === List(
+    m(Ns.int.>(one).Refs1 *? Ref1.int1).get.sortBy(_._1) === List(
       (2, List(2, 3)),
       (3, List())
     )
@@ -48,12 +48,12 @@ class NestedExpression extends CoreSpec {
     m(Ns.int.Refs1 * Ref1.int1(1)).get === List(
       (1, List(1)),
     )
-    m(Ns.int.Refs1 * Ref1.int1(2)).get === List(
+    m(Ns.int.Refs1 * Ref1.int1(2)).get.sortBy(_._1) === List(
       (1, List(2)),
       (2, List(2)),
     )
 
-    m(Ns.int.Refs1 * Ref1.int1.>(1)).get === List(
+    m(Ns.int.Refs1 * Ref1.int1.>(1)).get.sortBy(_._1) === List(
       (1, List(2)),
       (2, List(2, 3))
     )
@@ -65,7 +65,7 @@ class NestedExpression extends CoreSpec {
     m(Ns.int.Refs1 * Ref1.int1(one)).get === List(
       (1, List(1)),
     )
-    m(Ns.int.Refs1 * Ref1.int1.>(one)).get === List(
+    m(Ns.int.Refs1 * Ref1.int1.>(one)).get.sortBy(_._1) === List(
       (1, List(2)),
       (2, List(2, 3))
     )

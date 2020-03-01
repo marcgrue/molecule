@@ -44,8 +44,8 @@ class TxBundle extends CoreSpec {
     ) must throwA[java.util.concurrent.ExecutionException]).message ===
       "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
         ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
-        "{:d1 [17592186045456 :Ns/int 31 13194139534357 true],\n" +
-        " :d2 [17592186045456 :Ns/int 32 13194139534357 true]}\n"
+        "{:d1 [17592186045455 :Ns/int 31 13194139534356 true],\n" +
+        " :d2 [17592186045455 :Ns/int 32 13194139534356 true]}\n"
   }
 
 

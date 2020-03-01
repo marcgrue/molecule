@@ -189,20 +189,19 @@ class GetHistory extends Specification {
 
     // We _can_ combine multiple attrs with generic attributes in a history
     // query but then two individual attribute history "timelines" of changes
-    // are unified which can become less useful:
+    // are unified which is much less useful:
     Ns(e1).str.t.op.int.t.op.getHistory === List(
-      ("a", 1037, true, 1, 1037, true),
-      ("b", 1039, true, 1, 1037, true),
-      ("a", 1039, false, 1, 1040, false),
-      ("b", 1039, true, 2, 1040, true),
-      ("a", 1037, true, 1, 1040, false),
-      ("b", 1039, true, 1, 1040, false),
-      ("a", 1039, false, 2, 1040, true),
-      ("a", 1039, false, 1, 1037, true),
-      ("a", 1037, true, 2, 1040, true)
+      ("b", t2, true, 1, t3, false),
+      ("a", t2, false, 1, t3, false),
+      ("a", t1, true, 1, t1, true),
+      ("b", t2, true, 2, t3, true),
+      ("b", t2, true, 1, t1, true),
+      ("a", t1, true, 1, t3, false),
+      ("a", t2, false, 2, t3, true),
+      ("a", t1, true, 2, t3, true),
+      ("a", t2, false, 1, t1, true),
     )
   }
-
 
   "Entity history" >> {
 

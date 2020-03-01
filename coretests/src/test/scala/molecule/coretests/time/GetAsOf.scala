@@ -11,40 +11,38 @@ class GetAsOf extends CoreSpec {
 
   "t (from history)" in new CoreSetup {
 
-    // Insert (t 1028) and get new entity ids of Ben and Liz
-    val List(ben, liz) = Ns.str.int insert List(
+    val tx1 = Ns.str.int insert List(
       ("Ben", 42),
       ("Liz", 37),
-    ) eids
+    )
+    val List(ben, liz) = tx1.eids
 
-    // Update (t 1031)
-    Ns(ben).int(43).update
+    val tx2 = Ns(ben).int(43).update
 
-    // Retract (t 1032)
-    ben.retract
+    val tx3 = ben.retract
 
     // See history of Ben
     Ns(ben).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
-      (42, 1037, true), // Insert:  42 asserted
-      (42, 1040, false), // Update:  42 retracted
-      (43, 1040, true), //          43 asserted
-      (43, 1041, false) // Retract: 43 retracted
+      (42, tx1.t, true), // Insert:  42 asserted
+      (42, tx2.t, false), // Update:  42 retracted
+      (43, tx2.t, true), //          43 asserted
+      (43, tx3.t, false) // Retract: 43 retracted
     )
 
     // Data after insertion
-    Ns.str.int.getAsOf(1037) === List(
+    Ns.str.int.getAsOf(tx1.t) === List(
       ("Liz", 37),
       ("Ben", 42)
     )
 
     // Data after update
-    Ns.str.int.getAsOf(1040) === List(
+    Ns.str.int.getAsOf(tx2.t) === List(
       ("Liz", 37),
       ("Ben", 43) // Ben now 43
     )
 
     // Data after retraction
-    Ns.str.int.getAsOf(1041) === List(
+    Ns.str.int.getAsOf(tx3.t) === List(
       ("Liz", 37) // Ben gone
     )
   }

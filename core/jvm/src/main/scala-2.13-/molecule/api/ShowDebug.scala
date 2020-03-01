@@ -228,8 +228,8 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     }
 
     _model.elements.head match {
-      case Generic("eavt" | "aevt" | "avet" | "aevt", _, _, _) => generic()
-      case _                                                   => data()
+      case Generic("eavt" | "aevt" | "avet" | "aevt" | "Log", _, _, _) => generic()
+      case _                                                           => data()
     }
   }
 

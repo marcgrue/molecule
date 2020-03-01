@@ -15,44 +15,44 @@ class EntityAPI extends CoreSpec {
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
     eid.touch === Map(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045455L,
+        ":db/id" -> refId,
         ":Ref1/str1" -> "Hollywood Rd"),
       ":Ns/str" -> "Ben"
     )
 
     eid.touchQuoted ===
-      """Map(
-        |  ":db/id" -> 17592186045454L,
-        |  ":Ns/int" -> 42,
-        |  ":Ns/ref1" -> Map(
-        |    ":db/id" -> 17592186045455L,
-        |    ":Ref1/str1" -> "Hollywood Rd"),
-        |  ":Ns/str" -> "Ben")""".stripMargin
+      s"""Map(
+         |  ":db/id" -> ${eid}L,
+         |  ":Ns/int" -> 42,
+         |  ":Ns/ref1" -> Map(
+         |    ":db/id" -> ${refId}L,
+         |    ":Ref1/str1" -> "Hollywood Rd"),
+         |  ":Ns/str" -> "Ben")""".stripMargin
 
     // Level
 
     eid.touchMax(2) === Map(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
-      ":Ns/ref1" -> Map(":db/id" -> 17592186045455L, ":Ref1/str1" -> "Hollywood Rd"),
+      ":Ns/ref1" -> Map(":db/id" -> refId, ":Ref1/str1" -> "Hollywood Rd"),
       ":Ns/str" -> "Ben"
     )
     eid.touchMax(1) === Map(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
-      ":Ns/ref1" -> 17592186045455L,
+      ":Ns/ref1" -> refId,
       ":Ns/str" -> "Ben"
     )
 
     eid.touchQuotedMax(1) ===
-      """Map(
-        |  ":db/id" -> 17592186045454L,
-        |  ":Ns/int" -> 42,
-        |  ":Ns/ref1" -> 17592186045455L,
-        |  ":Ns/str" -> "Ben")""".stripMargin
+      s"""Map(
+         |  ":db/id" -> ${eid}L,
+         |  ":Ns/int" -> 42,
+         |  ":Ns/ref1" -> ${refId}L,
+         |  ":Ns/str" -> "Ben")""".stripMargin
   }
 
 
@@ -61,41 +61,41 @@ class EntityAPI extends CoreSpec {
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
     eid.touchList === List(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
-      ":Ns/ref1" -> List((":db/id", 17592186045455L), (":Ref1/str1", "Hollywood Rd")),
+      ":Ns/ref1" -> List((":db/id", refId), (":Ref1/str1", "Hollywood Rd")),
       ":Ns/str" -> "Ben"
     )
 
     eid.touchListQuoted ===
-      """List(
-        |  ":db/id" -> 17592186045454L,
-        |  ":Ns/int" -> 42,
-        |  ":Ns/ref1" -> List(
-        |    ":db/id" -> 17592186045455L,
-        |    ":Ref1/str1" -> "Hollywood Rd"),
-        |  ":Ns/str" -> "Ben")""".stripMargin
+      s"""List(
+         |  ":db/id" -> ${eid}L,
+         |  ":Ns/int" -> 42,
+         |  ":Ns/ref1" -> List(
+         |    ":db/id" -> ${refId}L,
+         |    ":Ref1/str1" -> "Hollywood Rd"),
+         |  ":Ns/str" -> "Ben")""".stripMargin
 
     eid.touchListMax(3) === List(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
-      ":Ns/ref1" -> List((":db/id", 17592186045455L), (":Ref1/str1", "Hollywood Rd")),
+      ":Ns/ref1" -> List((":db/id", refId), (":Ref1/str1", "Hollywood Rd")),
       ":Ns/str" -> "Ben"
     )
     eid.touchListMax(1) === List(
-      ":db/id" -> 17592186045454L,
+      ":db/id" -> eid,
       ":Ns/int" -> 42,
-      ":Ns/ref1" -> 17592186045455L,
+      ":Ns/ref1" -> refId,
       ":Ns/str" -> "Ben"
     )
 
 
     eid.touchListQuotedMax(1) ===
-      """List(
-        |  ":db/id" -> 17592186045454L,
-        |  ":Ns/int" -> 42,
-        |  ":Ns/ref1" -> 17592186045455L,
-        |  ":Ns/str" -> "Ben")""".stripMargin
+      s"""List(
+         |  ":db/id" -> ${eid}L,
+         |  ":Ns/int" -> 42,
+         |  ":Ns/ref1" -> ${refId}L,
+         |  ":Ns/str" -> "Ben")""".stripMargin
   }
 
 
@@ -260,7 +260,7 @@ class EntityAPI extends CoreSpec {
       Some(42),
       Some(
         Map(
-          ":db/id" -> 17592186045455L,
+          ":db/id" -> refId,
           ":Ref1/str1" -> "Hollywood Rd"
         )
       )
@@ -269,9 +269,9 @@ class EntityAPI extends CoreSpec {
     // Type ascription is still unchecked since it is eliminated by erasure
     // so we suppress compile warnings emitted
     val List(
-    optName: Option[String] @unchecked,
-    optAge: Option[Int] @unchecked,
-    optAddress: Option[Map[String, Any]] @unchecked
+    optName: Option[String]@unchecked,
+    optAge: Option[Int]@unchecked,
+    optAddress: Option[Map[String, Any]]@unchecked
     ) = eid(
       ":Ns/str",
       ":Ns/int",

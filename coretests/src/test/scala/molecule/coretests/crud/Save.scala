@@ -253,13 +253,13 @@ class Save extends CoreSpec {
 
   "Relationships" in new CoreSetup {
 
-    val address = Ns.str("273 Broadway").Ref1.int1(10700).str1("New York").Ref2.str2("USA").save.eid
-    address.touch === Map(
-      ":db/id" -> 17592186045454L,
+    val List(addressE, streetE, countyE) = Ns.str("273 Broadway").Ref1.int1(10700).str1("New York").Ref2.str2("USA").save.eids
+    addressE.touch === Map(
+      ":db/id" -> addressE,
       ":Ns/ref1" -> Map(
-        ":db/id" -> 17592186045455L,
+        ":db/id" -> streetE,
         ":Ref1/int1" -> 10700,
-        ":Ref1/ref2" -> Map(":db/id" -> 17592186045456L, ":Ref2/str2" -> "USA"),
+        ":Ref1/ref2" -> Map(":db/id" -> countyE, ":Ref2/str2" -> "USA"),
         ":Ref1/str1" -> "New York"),
       ":Ns/str" -> "273 Broadway")
 

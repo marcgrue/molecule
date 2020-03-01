@@ -12,16 +12,18 @@ class History extends CoreSpec {
 
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
-  val e = Ns.int(1).save.eid
-  Ns(e).int(2).update
+  val tx1 = Ns.int(1).save
+  val e = tx1.eid
+
+  val tx2 = Ns(e).int(2).update
 
 
   "History" >> {
 
     Ns(e).int.t.op.getHistory.sortBy(t => (t._2, t._3)) === List(
-      (1, 1037, true),
-      (1, 1039, false),
-      (2, 1039, true)
+      (1, tx1.t, true),
+      (1, tx2.t, false),
+      (2, tx2.t, true)
     )
   }
 }

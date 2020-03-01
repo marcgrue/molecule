@@ -240,9 +240,9 @@ class Attributes extends CoreSpec {
 
     Ns.int(1).str$.getJson ===
       """[
-        |{"Ns.int": 1, "Ns.str": "c"},
         |{"Ns.int": 1, "Ns.str": null},
-        |{"Ns.int": 1, "Ns.str": ""}
+        |{"Ns.int": 1, "Ns.str": ""},
+        |{"Ns.int": 1, "Ns.str": "c"}
         |]""".stripMargin
 
     Ns.long(2L).int$.getJson ===
@@ -290,8 +290,8 @@ class Attributes extends CoreSpec {
 
     Ns.int(9).uri$.getJson ===
       s"""[
-         |{"Ns.int": 9, "Ns.uri": null},
-         |{"Ns.int": 9, "Ns.uri": "$uri2"}
+         |{"Ns.int": 9, "Ns.uri": "$uri2"},
+         |{"Ns.int": 9, "Ns.uri": null}
          |]""".stripMargin
 
     Ns.int(10).enum$.getJson ===
@@ -337,8 +337,8 @@ class Attributes extends CoreSpec {
 
     Ns.long(2L).ints$.getJson ===
       """[
-        |{"Ns.long": 2, "Ns.ints": null},
-        |{"Ns.long": 2, "Ns.ints": [1, 2]}
+        |{"Ns.long": 2, "Ns.ints": [1, 2]},
+        |{"Ns.long": 2, "Ns.ints": null}
         |]""".stripMargin
 
     Ns.int(3).longs$.getJson ===
@@ -386,8 +386,8 @@ class Attributes extends CoreSpec {
 
     Ns.int(10).enums$.getJson ===
       s"""[
-         |{"Ns.int": 10, "Ns.enums": null},
-         |{"Ns.int": 10, "Ns.enums": ["$enum1", "$enum2"]}
+         |{"Ns.int": 10, "Ns.enums": ["$enum1", "$enum2"]},
+         |{"Ns.int": 10, "Ns.enums": null}
          |]""".stripMargin
 
     Ns.int(11).bigInts$.getJson ===
@@ -426,8 +426,8 @@ class Attributes extends CoreSpec {
 
     Ns.long(2L).intMap$.getJson ===
       """[
-        |{"Ns.long": 2, "Ns.intMap": null},
-        |{"Ns.long": 2, "Ns.intMap": {"a": 1, "b": 2}}
+        |{"Ns.long": 2, "Ns.intMap": {"a": 1, "b": 2}},
+        |{"Ns.long": 2, "Ns.intMap": null}
         |]""".stripMargin
 
     Ns.int(3).longMap$.getJson ===
@@ -474,8 +474,8 @@ class Attributes extends CoreSpec {
 
     Ns.int(11).bigIntMap$.getJson ===
       s"""[
-         |{"Ns.int": 11, "Ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}},
-         |{"Ns.int": 11, "Ns.bigIntMap": null}
+         |{"Ns.int": 11, "Ns.bigIntMap": null},
+         |{"Ns.int": 11, "Ns.bigIntMap": {"a": $bigInt1, "b": $bigInt2}}
          |]""".stripMargin
 
     Ns.int(12).bigDecMap$.getJson ===

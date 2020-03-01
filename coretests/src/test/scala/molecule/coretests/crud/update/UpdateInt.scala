@@ -233,7 +233,7 @@ class UpdateInt extends CoreSpec {
       Ns.ints.get.head.toList.sorted === List(4)
 
       // Apply empty Seq of values (retracting all values!)
-      Ns(eid).ints(Set[Int]()).update
+      Ns(eid).ints(Seq[Int]()).update
       Ns.ints.get === List()
 
 

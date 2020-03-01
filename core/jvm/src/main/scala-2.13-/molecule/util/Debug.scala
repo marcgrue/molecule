@@ -12,34 +12,46 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
   // Helpers ..........................................
 
   def padS(longest: Int, str: String) = pad(longest, str.length) + "  "
-  def pad(longest: Int, shorter: Int) = if (longest > shorter) " " * (longest - shorter) + " " else ""
+  def pad(longest: Int, shorter: Int): String = if (longest > shorter) " " * (longest - shorter) + " " else ""
 
 
   def apply(id: Int, params: Any*): Unit = {
     val stackTrace = if (showStackTrace) Thread.currentThread.getStackTrace mkString "\n" else ""
     if (id >= threshold && id <= max) {
-      var lastId: Long = 0L
-      var ids: Set[Long] = Set()
+      var lastId: Long      = 0L
+      var ids   : Set[Long] = Set()
 
       def traverse(x: Any, level: Int, i: Int): String = {
-        if (!x.isInstanceOf[datomic.db.Datum]) {lastId = 0L; ids = Set()}
-        val pad1 = if (i == 0) "" else "  " * level
-        val pad2 = if (i < 10) "          " else "         "
-        val indent = if (i == 0) "" else pad1 + i + pad2
-        val max = level >= maxLevel
+        if (!x.isInstanceOf[datomic.db.Datum]) {
+          lastId = 0L
+          ids = Set()
+        }
+        val pad1   = if (i == 0) "" else "  " * level
+        val pad2   = if (i < 10) "          " else "         "
+        //        val indent = if (i == 0) "" else pad1 + i + pad2
+        val indent = if (i == 0) "" else pad1
+        val max    = level >= maxLevel
         x match {
           case Add(e, a, stmts: Seq[_], bi) =>
             val biStr = if (showBi && bi != NoValue) s"      <$bi>" else ""
             indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + s"List($biStr\n" +
               stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Add(e, a, v, bi)             =>
-            val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
-            indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + v + biStr
 
-          case Retract(e, a, v, bi) =>
+          case add@Add(e, a, v, bi) =>
             val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
-            indent + ":db/retract" + padS(10, ":db/retract") + e + padS(34, e.toString) + a + padS(20, a.toString) + v + biStr
-          case RetractEntity(e)     =>
+            //            if (i < 3)
+            //              indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + v + biStr
+            //            else
+            indent + add + ","
+
+          case ret@Retract(e, a, v, bi) =>
+            val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
+            //            if (i < 3)
+            //              indent + ":db/retract" + padS(10, ":db/retract") + e + padS(34, e.toString) + a + padS(20, a.toString) + v + biStr
+            //            else
+            indent + ret + ","
+
+          case RetractEntity(e) =>
             indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
 
           case l: java.util.List[_] if l.size() == 4 && l.asScala.head.toString.take(4) == ":db/" => {
@@ -47,19 +59,20 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
             indent + action + padS(13, action.toString) + e + padS(34, e.toString) + a + padS(26, a.toString) + "   " + v
           }
 
-          case l: List[_] if max        => indent + "List(" + l.mkString(",   ") + ")"
-          case l: List[_]               => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: jList[_] if max       => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
-          case l: jList[_]              => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: ArrayBuffer[_] if max => indent + "ArrayBuffer(" + l.zipWithIndex.mkString(",   ") + ")"
-          case l: ArrayBuffer[_]        => indent + "ArrayBuffer(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case l: Map[_, _] if max      => indent + "Map(" + l.mkString(",   ") + ")"
-          case l: Map[_, _]             => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Nested(bond, nested)     => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case TxMetaData(elements)     => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case Composite(elements)      => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case m: Model                 => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-          case m: java.util.Map[_, _]   => {
+          case l: List[_] if max                  => indent + "List(" + l.mkString(",   ") + ")"
+          case l: List[_] if level == 0 && i == 3 => indent + "list(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: List[_]                         => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: jList[_] if max                 => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
+          case l: jList[_]                        => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: ArrayBuffer[_] if max           => indent + "ArrayBuffer(" + l.zipWithIndex.mkString(",   ") + ")"
+          case l: ArrayBuffer[_]                  => indent + "ArrayBuffer(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case l: Map[_, _] if max                => indent + "Map(" + l.mkString(",   ") + ")"
+          case l: Map[_, _]                       => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case Nested(bond, nested)               => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case TxMetaData(elements)               => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case Composite(elements)                => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case m: Model                           => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+          case m: java.util.Map[_, _]             => {
             if (m.size() == 4 && m.asScala.keys.map(_.toString).toSeq.contains(":db-before")) {
               val tx = m.asScala.toList
               indent + "Transaction(\n" +
@@ -86,10 +99,10 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
             val (entitySep, no) = if (lastId == 0L) ("", 1) else if (lastId != d.e) ("\n", ids.size + 1) else ("", "")
             lastId = d.e
             ids += d.e
-            val pad3 = " " * (5 - no.toString.length)
-            val pad4 = " " * (6 - i.toString.length)
+            val pad3  = " " * (5 - no.toString.length)
+            val pad4  = " " * (6 - i.toString.length)
             val added = if (d.added) "true " else "false"
-            val r = if (d.added) " " else "-"
+            val r     = if (d.added) " " else "-"
             val datum = List("added: " + added, "t: " + d.tx, "e: " + d.e, "a: " + d.a, "v: " + d.v)
             entitySep + pad1 + no + pad3 + i + pad4 + datum.mkString(",  " + r)
           }
@@ -101,7 +114,7 @@ private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 999
       println(
         s"## $id ## $clazz \n================================================================================================================\n" +
           params.toList.zipWithIndex.map {
-            case (e, i) => traverse(e, 0, i + 1)
+            case (x, i) => traverse(x, 0, i + 1)
           }.mkString("\n----------------------------------------------------------------------------------------------------------------\n") +
           s"\n================================================================================================================\n$stackTrace"
       )

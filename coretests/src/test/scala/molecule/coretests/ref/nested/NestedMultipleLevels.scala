@@ -49,6 +49,16 @@ class NestedMultipleLevels extends CoreSpec {
       )),
       ("b", List())
     )
+
+    Ns.str.Refs1.*?(Ref1.int1).get.sortBy(_._1) === List(
+      ("a", List(1, 2)),
+      ("b", List())
+    )
+
+    Ref1.int1.Refs2.*?(Ref2.int2).get.sortBy(_._1) === List(
+      (1, List(11, 12)),
+      (2, List()),
+    )
   }
 
 

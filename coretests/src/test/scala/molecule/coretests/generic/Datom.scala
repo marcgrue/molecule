@@ -109,14 +109,14 @@ class Datom extends CoreSpec {
 
       // Core 5 Datom values (quintuplets)
       Ns(e1).e.a.v.tx.op.get === List(
-        (e1, ":Ns/str", "b", tx2, true),
         (e1, ":Ns/int", 3, tx3, true),
+        (e1, ":Ns/str", "b", tx2, true),
       )
 
       // Generic attributes can be added in any order
       Ns(e1).v.t.e.op.tx.a.get === List(
-        ("b", 1039, e1, true, tx2, ":Ns/str"),
-        (3, 1040, e1, true, tx3, ":Ns/int")
+        ("b", t2, e1, true, tx2, ":Ns/str"),
+        (3, t3, e1, true, tx3, ":Ns/int")
       )
     }
 
@@ -134,8 +134,8 @@ class Datom extends CoreSpec {
 
     "History" >> {
       Ns(e1, e2).e.t.a.v.op.getHistory.sortBy(t => (t._1, t._2)) === List(
-        (e1, t1, ":Ns/str", "a", true),
         (e1, t1, ":Ns/int", 1, true),
+        (e1, t1, ":Ns/str", "a", true),
         (e1, t2, ":Ns/str", "a", false),
         (e1, t2, ":Ns/str", "b", true),
         (e1, t3, ":Ns/int", 1, false),
@@ -209,8 +209,8 @@ class Datom extends CoreSpec {
 
       // Generic attributes after custom attribute ok
       Ns.int.t.op.get === List(
-        (3, t3, true),
         (5, t5, true),
+        (3, t3, true),
       )
 
       // Custom attributes after generic attributes ok as long
@@ -234,8 +234,8 @@ class Datom extends CoreSpec {
       // Any filter will prevent a full scan
 
       Ns.e.a(":Ns/str").v.t.get === List(
-        (e1, ":Ns/str", "b", 1039),
-        (e2, ":Ns/str", "x", 1041)
+        (e1, ":Ns/str", "b", t2),
+        (e2, ":Ns/str", "x", t4)
       )
 
       // Count also involves full scan if no other attribute is present
@@ -339,8 +339,8 @@ class Datom extends CoreSpec {
     Ns.v("hello").get === List("hello")
     Ns.v("non-existing value").get === Nil
     Ns.v(3, "b").get === List("b", 3)
-    Ns.v.not(3).get === List("b", 5, r1, "x", "hello")
-    Ns.v.not(3, "b").get === List(5, r1, "x", "hello")
+    Ns.v.not(3).get === List("b", r1, 5, "x", "hello")
+    Ns.v.not(3, "b").get === List(r1, 5, "x", "hello")
     expectCompileError(
       """m(Ns.v.>(3))""",
       "molecule.transform.exception.Dsl2ModelException: " +

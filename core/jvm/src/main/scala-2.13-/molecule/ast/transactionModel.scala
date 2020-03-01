@@ -33,6 +33,13 @@ object transactionModel extends JavaUtil {
 
   case class Add(e: Any, a: String, v: Any, gv: GenericValue) extends Statement {
     val action = ":db/add"
+    override def toString: String = {
+      val pad = " " * (25 - a.length)
+      if (v.isInstanceOf[AbstractValue])
+        s"""List(":db/add",     ${e}L, "$a", $pad $v, $gv)"""
+      else
+        s"""list(":db/add",     ${e}L, "$a", $pad $v)"""
+    }
   }
 
   // Todo: Implement in updates?
@@ -43,6 +50,13 @@ object transactionModel extends JavaUtil {
 
   case class Retract(e: Any, a: String, v: Any, gv: GenericValue = NoValue) extends Statement {
     val action = ":db/retract"
+    override def toString: String = {
+      val pad = " " * (25 - a.length)
+      if (v.isInstanceOf[AbstractValue])
+        s"""List(":db/retract", ${e}L, "$a", $pad $v, $gv)"""
+      else
+        s"""list(":db/retract", ${e}L, "$a", $pad $v)"""
+    }
   }
 
   case class RetractEntity(e: Any) extends Statement {
@@ -52,10 +66,11 @@ object transactionModel extends JavaUtil {
     val gv     = NoValue
   }
 
-  case class Eid(id: Long)
-  case class Eids(ids: Seq[Any])
-  case class Prefix(s: String)
-  case class Values(vs: Any, prefix: Option[String] = None)
+  trait AbstractValue
+  case class Eid(id: Long) extends AbstractValue
+  case class Eids(ids: Seq[Any]) extends AbstractValue
+  case class Prefix(s: String) extends AbstractValue
+  case class Values(vs: Any, prefix: Option[String] = None) extends AbstractValue
 
 
   def toJava(stmtss: Seq[Seq[Statement]]): jList[jList[_]] = stmtss.flatten.map {
