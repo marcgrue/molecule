@@ -95,7 +95,7 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
 
   > sbt [+]publishSigned for publishing to nexus/maven
  */
-//  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin)
 
 
 lazy val moleculeCoreJVM = moleculeCore.jvm

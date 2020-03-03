@@ -90,23 +90,28 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       println()
     }
 
-    // outputIndex, card, isOptional, isDate
-    def recurse(i: Int, acc: Seq[(Int, Boolean, Boolean)], elements: Seq[Element]): (Int, Seq[(Int, Boolean, Boolean)]) = {
+    def isAggr(fn: String) = Seq("count", "countDistinct", "avg", "variance", "stddev").contains(fn)
+
+    // outputMatrix:
+    // card, isOptional, isDate, isAggr
+    def recurse(i: Int, acc: Seq[(Int, Boolean, Boolean, Boolean)], elements: Seq[Element])
+    : (Int, Seq[(Int, Boolean, Boolean, Boolean)]) = {
       elements.foldLeft(i, acc) {
-        case ((i, acc), Generic(_, "txInstant", _, _))                     => (i + 1, acc :+ (1, false, true))
-        case ((i, acc), Generic(_, _, "datom", _))                         => (i + 1, acc :+ (1, false, false))
-        case ((i, acc), ga: GenericAtom) if ga.attr.last == '_'            => (i, acc)
-        case ((i, acc), Atom(_, attr, "java.util.Date", card, _, _, _, _)) => (i + 1, acc :+ (card, attr.last == '$', true))
-        case ((i, acc), Atom(_, attr, _, card, _, _, _, _))                => (i + 1, acc :+ (card, attr.last == '$', false))
-        case ((i, acc), Nested(_, nestedElements))                         => recurse(i, acc, nestedElements)
-        case ((i, acc), Composite(compositeElements))                      => recurse(i, acc, compositeElements)
-        case ((i, acc), TxMetaData(txElements))                            => recurse(i, acc, txElements)
-        case ((i, acc), _)                                                 => (i, acc)
+        case ((i, acc), Generic(_, "txInstant", _, _))                      => (i + 1, acc :+ (1, false, true, false))
+        case ((i, acc), Generic(_, _, "datom", _))                          => (i + 1, acc :+ (1, false, false, false))
+        case ((i, acc), ga: GenericAtom) if ga.attr.last == '_'             => (i, acc)
+        case ((i, acc), Atom(_, _, _, _, Fn(fn, _), _, _, _)) if isAggr(fn) => (i + 1, acc :+ (1, false, false, true))
+        case ((i, acc), Atom(_, attr, "java.util.Date", card, _, _, _, _))  => (i + 1, acc :+ (card, attr.last == '$', true, false))
+        case ((i, acc), Atom(_, attr, _, card, _, _, _, _))                 => (i + 1, acc :+ (card, attr.last == '$', false, false))
+        case ((i, acc), Nested(_, nestedElements))                          => recurse(i, acc, nestedElements)
+        case ((i, acc), Composite(compositeElements))                       => recurse(i, acc, compositeElements)
+        case ((i, acc), TxMetaData(txElements))                             => recurse(i, acc, txElements)
+        case ((i, acc), _)                                                  => (i, acc)
       }
     }
 
-    val dateIndex: Seq[(Int, Boolean, Boolean)] =
-      recurse(0, Seq.empty[(Int, Boolean, Boolean)], _model.elements)._2
+    val outputMatrix: Seq[(Int, Boolean, Boolean, Boolean)] =
+      recurse(0, Seq.empty[(Int, Boolean, Boolean, Boolean)], _model.elements)._2
 
     def resolve(rawRows: Iterable[jList[AnyRef]]): Seq[ListBuffer[Any]] = {
       def cardOneOpt(v: Any, isDate: Boolean): Option[String] = {
@@ -182,14 +187,15 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
         j = 0
         while (j < rowLength) {
           val v = oldRow.get(j)
-          newRow += (dateIndex(j) match {
-            case (1, false, true)   => date2str(v.asInstanceOf[Date])
-            case (1, true, isDate)  => cardOneOpt(v, isDate)
-            case (2, false, isDate) => cardMany(v, isDate)
-            case (2, true, isDate)  => cardManyOpt(v, isDate)
-            case (3, false, _)      => cardMap(v)
-            case (3, true, _)       => cardMapOpt(v)
-            case (_, _, _)          => v
+          newRow += (outputMatrix(j) match {
+            case (_, _, _, true)       => v
+            case (1, false, true, _)   => date2str(v.asInstanceOf[Date])
+            case (1, true, isDate, _)  => cardOneOpt(v, isDate)
+            case (2, false, isDate, _) => cardMany(v, isDate)
+            case (2, true, isDate, _)  => cardManyOpt(v, isDate)
+            case (3, false, _, _)      => cardMap(v)
+            case (3, true, _, _)       => cardMapOpt(v)
+            case (_, _, _, _)          => v
           })
           j += 1
         }

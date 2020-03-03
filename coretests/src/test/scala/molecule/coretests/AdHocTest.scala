@@ -15,6 +15,12 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "Adhoc" in new CoreSetup {
 
+    Ns.int(1).ints(7, 9, 13).save
+
+    Ns.int.ints(count).get === List((1, 3))
+
+    Ns.e.int.ints(count).debugGet
+
 
     ok
   }
