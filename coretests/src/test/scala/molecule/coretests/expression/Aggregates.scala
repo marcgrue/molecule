@@ -494,7 +494,7 @@ class Aggregates extends CoreSpec {
 
     // card-many
 
-    val e4 = Ns.ints(Seq(1,2)).save.eid
+    val e4 = Ns.ints(Seq(1, 2)).save.eid
     val e5 = Ns.ints(3).save.eid
 
     Ns.e.ints(count).get === List(
@@ -503,7 +503,7 @@ class Aggregates extends CoreSpec {
     )
   }
 
-    "Map attributes can't use aggregates" in new AggregateSetup {
+  "Map attributes can't use aggregates" in new AggregateSetup {
     expectCompileError(
       "m(Ns.intMap(min))",
       "molecule.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
@@ -513,5 +513,12 @@ class Aggregates extends CoreSpec {
       """m(Ns.intMapK("a")(min))""",
       "molecule.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
     )
+  }
+
+  "Multiple aggregates of same attr" in new CoreSetup {
+
+    Ns.int.insert(1, 2, 4)
+
+    Ns.int(sum).int(avg).int(median).get.head === (7, 2.3333333333333335, 2)
   }
 }

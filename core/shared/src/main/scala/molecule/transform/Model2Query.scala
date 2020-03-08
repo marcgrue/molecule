@@ -92,7 +92,7 @@ object Model2Query extends Helpers {
   : (Query, String, String, String, String, String) = {
     val (nsFull, attr) = (atom.nsFull, atom.attr)
     atom match {
-      case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(model, query, atom, nsFull, attr, e, v, w, prevNs)
+      case Atom(_, _, _, _, Fn("unify", _), _, _, _) => makeAtomUnify(query, atom, nsFull, attr, e, v, w, prevNs)
       case Atom(_, _, "a", _, _, _, _, _)            => (resolve(query, e, v, atom), e, w, nsFull, attr, "")
       case Atom(_, _, "ns", _, _, _, _, _)           => (resolve(query, e, v, atom), e, w, nsFull, attr, "")
       case _ if prevRefNs == "IndexVal"              => (resolve(query, e, w, atom), e, w, nsFull, attr, "")
@@ -115,7 +115,7 @@ object Model2Query extends Helpers {
     case Bond(nsFull, refAttr, refNs, _, _)                                    => (resolve(query, e, v, bond), e, v, nsFull, refAttr, refNs)
   }
 
-  def makeAtomUnify(model: Model, query: Query, a: Atom, nsFull: String, attr: String, e: String, v: String, w: String, prevNs: String)
+  def makeAtomUnify(query: Query, a: Atom, nsFull: String, attr: String, e: String, v: String, w: String, prevNs: String)
   : (Query, String, String, String, String, String) = {
     val attr1 = if (attr.last == '_') attr.init else attr
     // Find previous matching value that we want to unify with (from an identical attribute)
@@ -266,18 +266,18 @@ object Model2Query extends Helpers {
       case Atom(_, _, _, _, AssertValue(_) | ReplaceValue(_) | RetractValue(_) | AssertMapPairs(_) | ReplaceMapPairs(_) | RetractMapKeys(_), _, _, _) => q
 
       // Enum
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveEnumOptional2(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveEnumOptional1(q, e, a, v, v1, v2, prefix)
-      case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveEnumTacit(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveEnumMandatory2(q, e, a, v, v1, v2, v3, prefix)
-      case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveEnumMandatory1(q, e, a, v, v1, v2, v3, prefix)
+      case a@Atom(_, _, _, 2, _, Some(prefix), _, _) if opt       => resolveEnumOptional2(q, e, a, v, v2)
+      case a@Atom(_, _, _, 1, _, Some(prefix), _, _) if opt       => resolveEnumOptional1(q, e, a, v, v2, prefix)
+      case a@Atom(_, _, _, 1 | 2, _, Some(prefix), _, _) if tacit => resolveEnumTacit(q, e, a, v, v2, v3, prefix)
+      case a@Atom(_, _, _, 2, _, Some(prefix), _, _)              => resolveEnumMandatory2(q, e, a, v, v2, v3, prefix)
+      case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveEnumMandatory1(q, e, a, v, v2, v3, prefix)
 
       // Atom
       case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v)
       case a@Atom(_, _, _, 1, _, _, _, _) if opt       => resolveAtomOptional1(q, e, a, v)
       case a@Atom(_, _, _, 1 | 2, _, _, _, _) if tacit => resolveAtomTacit(q, e, a, v, v1)
-      case a@Atom(_, _, _, 2, _, _, _, _)              => resolveAtomMandatory2(q, e, a, v, v1, v2)
-      case a@Atom(_, _, _, 1, _, _, _, _)              => resolveAtomMandatory1(q, e, a, v, v1, v2)
+      case a@Atom(_, _, _, 2, _, _, _, _)              => resolveAtomMandatory2(q, e, a, v, v1)
+      case a@Atom(_, _, _, 1, _, _, _, _)              => resolveAtomMandatory1(q, e, a, v, v1)
 
       // Mapped attributes
       case a@Atom(_, _, _, 3, _, _, _, _) if opt      => resolveAtomMapOptional(q, e, a, v)
@@ -294,7 +294,7 @@ object Model2Query extends Helpers {
 
   def resolveGeneric(q: Query, e: String, g: Generic, v: String, v1: String, v2: String, v3: String): Query = g.tpe match {
     case "schema" => resolveSchema(q, g)
-    case "datom"  => resolveDatom(q, e, g, v, v1, v2, v3)
+    case "datom"  => resolveDatom(q, e, g, v, v1)
     case _        => q // Indexes are handled in Conn directly from Model elements
   }
 
@@ -405,26 +405,26 @@ object Model2Query extends Helpers {
 
   // Datom ....................................................................................
 
-  def resolveDatom(q: Query, e: String, g: Generic, v: String, v1: String, v2: String, v3: String): Query = g.attr match {
+  def resolveDatom(q: Query, e: String, g: Generic, v: String, v1: String): Query = g.attr match {
     case "e"         =>
       val q1 = q.datomE(e, v, v1, _model.elements.size == 1)
       val w  = if (q1.wh.clauses.exists {
         case DataClause(_, Var(`e`), KW(_, _, refNs), _, _, _) if refNs.nonEmpty => true
         case _                                                                   => false
       }) v else e
-      resolveDatomMandatory(q1, e, g, "Long", "", w)
-    case "tx"        => resolveDatomMandatory(q.datomTx(e, v, v1), e, g, "Long", v)
-    case "t"         => resolveDatomMandatory(q.datomT(e, v, v1), e, g, "Long", v)
-    case "txInstant" => resolveDatomMandatory(q.datomTxInstant(e, v, v1), e, g, "java.util.Date", v)
-    case "op"        => resolveDatomMandatory(q.datomOp(e, v, v1), e, g, "Boolean", v)
-    case "a"         => resolveDatomMandatory(q.datomA(e, v, v1), e, g, "String", v)
+      resolveDatomMandatory(q1, g, "Long", "", w)
+    case "tx"        => resolveDatomMandatory(q.datomTx(e, v, v1), g, "Long", v)
+    case "t"         => resolveDatomMandatory(q.datomT(e, v, v1), g, "Long", v)
+    case "txInstant" => resolveDatomMandatory(q.datomTxInstant(e, v, v1), g, "java.util.Date", v)
+    case "op"        => resolveDatomMandatory(q.datomOp(e, v, v1), g, "Boolean", v)
+    case "a"         => resolveDatomMandatory(q.datomA(e, v, v1), g, "String", v)
     case "v"         =>
       val q1 = q.datomV(e, v, v1)
       val w  = if (q1.wh.clauses.exists {
         case DataClause(_, _, KW(_, attr, _), _, _, _) if attr == e + "_attr" => true
         case _                                                                => false
       }) v else v + "_v"
-      resolveDatomMandatory(q1, e, g, "Any", "", w)
+      resolveDatomMandatory(q1, g, "Any", "", w)
 
     case "e_"         =>
       val q1 = q.datomE(e, v, v1)
@@ -447,7 +447,7 @@ object Model2Query extends Helpers {
       resolveDatomTacit(q1, e, g, "Any", "", w)
   }
 
-  def resolveDatomMandatory(q: Query, e: String, g: Generic, tpe: String, v0: String, w: String = ""): Query = {
+  def resolveDatomMandatory(q: Query, g: Generic, tpe: String, v0: String, w: String = ""): Query = {
     val v = if (w.nonEmpty) w else v0 + "_" + g.attr
     g.value match {
       case NoValue | EntValue => q.find(v)
@@ -691,7 +691,7 @@ object Model2Query extends Helpers {
 
   // Enum ....................................................................................
 
-  def resolveEnumOptional2(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
+  def resolveEnumOptional2(q: Query, e: String, a0: Atom, v: String, v2: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
     a.value match {
       case EnumVal      => q.pullEnum(e, a)
@@ -701,7 +701,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveEnumOptional1(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, prefix: String): Query = {
+  def resolveEnumOptional1(q: Query, e: String, a0: Atom, v: String, v2: String, prefix: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
     a.value match {
       case EnumVal        => q.pullEnum(e, a)
@@ -712,7 +712,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveEnumTacit(q: Query, e: String, a0: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumTacit(q: Query, e: String, a0: Atom, v: String, v2: String, v3: String, prefix: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
     a.value match {
       case Qm                                      => q.enum(e, a, v).in(e, a, Some(prefix), v2)
@@ -739,7 +739,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveEnumMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumMandatory2(q: Query, e: String, a: Atom, v: String, v2: String, v3: String, prefix: String): Query = {
     a.value match {
       case Qm                                          => q.findD(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                                => q.findD(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -771,7 +771,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveEnumMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String, v3: String, prefix: String): Query = {
+  def resolveEnumMandatory1(q: Query, e: String, a: Atom, v: String, v2: String, v3: String, prefix: String): Query = {
     a.value match {
       case Qm                                      => q.find(v2).enum(e, a, v).in(e, a, Some(prefix), v2)
       case Neq(Seq(Qm))                            => q.find(v2).enum(e, a, v).compareTo("!=", a, v2, Var(v3), 1).in(e, a, Some(prefix), v3)
@@ -861,7 +861,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomMandatory2(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
+  def resolveAtomMandatory2(q: Query, e: String, a: Atom, v: String, v1: String): Query = {
     val t = a.tpe
     a.value match {
       case Qm                                          => q.findD(v).where(e, a, v).in(e, a, None, v)
@@ -898,7 +898,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def resolveAtomMandatory1(q: Query, e: String, a: Atom, v: String, v1: String, v2: String): Query = {
+  def resolveAtomMandatory1(q: Query, e: String, a: Atom, v: String, v1: String): Query = {
     val t = a.tpe
     a.value match {
       case Qm                                      => q.find(v).where(e, a, v).in(e, a, None, v)

@@ -80,7 +80,9 @@ class Aggregates extends MoleculeSpec {
     Obj.meanRadius(stddev).get.head === 161902.52780945456
 
     // We can even fetch multiple aggregates in one query:
-    Obj.meanRadius(sum).meanRadius(avg).meanRadius(median).get.head === (907633.0, 53390.17647058824, 2631.2)
+    Obj.meanRadius(sum).meanRadius(avg).meanRadius(median).get.head ===
+      (907632.9999999999,53390.17647058823,2631.2)
+//    (907633.0, 53390.17647058824, 2631.2)
   }
 
 
