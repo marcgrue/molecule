@@ -541,9 +541,9 @@ class SeattleQueryTests extends SeattleSpec {
     testUpdateMolecule(
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
-      """List(
-        |  List(:db/add,  17592186045886                ,  :Community/name,  belltown 2),
-        |  List(:db/add,  17592186045886                ,  :Community/url ,  url 2     )
+      s"""List(
+        |  List(:db/add,  $belltownId                ,  :Community/name,  belltown 2),
+        |  List(:db/add,  $belltownId                ,  :Community/url ,  url 2     )
         |)""".stripMargin
 
 
@@ -554,9 +554,9 @@ class SeattleQueryTests extends SeattleSpec {
     testUpdateMolecule(
       Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  news     ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Cool news)
+      s"""List(
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  news     ),
+        |  List(:db/add    ,  $belltownId                ,  :Community/category,  Cool news)
         |)""".stripMargin
 
 
@@ -567,11 +567,11 @@ class SeattleQueryTests extends SeattleSpec {
         "events" -> "Super cool events"
       )
     ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  Cool news        ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool news  ),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  events           ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool events)
+      s"""List(
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  Cool news        ),
+        |  List(:db/add    ,  $belltownId                ,  :Community/category,  Super cool news  ),
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  events           ),
+        |  List(:db/add    ,  $belltownId                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -579,8 +579,8 @@ class SeattleQueryTests extends SeattleSpec {
     testUpdateMolecule(
       Community(belltownId).category.assert("extra category")
     ) -->
-      """List(
-        |  List(:db/add,  17592186045886                ,  :Community/category,  extra category)
+      s"""List(
+        |  List(:db/add,  $belltownId                ,  :Community/category,  extra category)
         |)""".stripMargin
 
 
@@ -588,8 +588,8 @@ class SeattleQueryTests extends SeattleSpec {
     testUpdateMolecule(
       Community(belltownId).category.retract("Super cool events")
     ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  Super cool events)
+      s"""List(
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  Super cool events)
         |)""".stripMargin
 
 
@@ -600,11 +600,11 @@ class SeattleQueryTests extends SeattleSpec {
     testUpdateMolecule(
       Community(belltownId).name("belltown 3").url().category()
     ) -->
-      """List(
-        |  List(:db/add    ,  17592186045886                ,  :Community/name    ,  belltown 3                    ),
-        |  List(:db/retract,  17592186045886                ,  :Community/url     ,  http://www.belltownpeople.com/),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  news                          ),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  events                        )
+      s"""List(
+        |  List(:db/add    ,  $belltownId                ,  :Community/name    ,  belltown 3                    ),
+        |  List(:db/retract,  $belltownId                ,  :Community/url     ,  http://www.belltownpeople.com/),
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  news                          ),
+        |  List(:db/retract,  $belltownId                ,  :Community/category,  events                        )
         |)""".stripMargin
   }
 }

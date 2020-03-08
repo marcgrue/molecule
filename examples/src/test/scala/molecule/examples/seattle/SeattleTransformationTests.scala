@@ -1208,14 +1208,14 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 2").url("url 2")
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "name", "String", 1, Eq(List("belltown 2")), None),
         Atom("Community", "url", "String", 1, Eq(List("url 2")), None))
       ) -->
-      """List(
-        |  List(:db/add,  17592186045886                ,  :Community/name,  belltown 2),
-        |  List(:db/add,  17592186045886                ,  :Community/url ,  url 2     )
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/add,  $belltownId                ,  :Community/name,  belltown 2),
+         |  List(:db/add,  $belltownId                ,  :Community/url ,  url 2     )
+         |)""".stripMargin
 
 
     // Many-cardinality attributes ............................
@@ -1226,13 +1226,13 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.replace("news" -> "Cool news")
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "category", "String", 2, ReplaceValue(Seq("news" -> "Cool news")), None))
       ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  news     ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Cool news)
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  news     ),
+         |  List(:db/add    ,  $belltownId                ,  :Community/category,  Cool news)
+         |)""".stripMargin
 
 
     // Replace multiple categories
@@ -1243,17 +1243,17 @@ class SeattleTransformationTests extends SeattleSpec {
       )
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "category", "String", 2, ReplaceValue(Seq(
           "Cool news" -> "Super cool news",
           "events" -> "Super cool events")), None))
       ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  Cool news        ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool news  ),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  events           ),
-        |  List(:db/add    ,  17592186045886                ,  :Community/category,  Super cool events)
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  Cool news        ),
+         |  List(:db/add    ,  $belltownId                ,  :Community/category,  Super cool news  ),
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  events           ),
+         |  List(:db/add    ,  $belltownId                ,  :Community/category,  Super cool events)
+         |)""".stripMargin
 
 
     // Add a category
@@ -1261,12 +1261,12 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.assert("extra category")
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "category", "String", 2, AssertValue(List("extra category")), None))
       ) -->
-      """List(
-        |  List(:db/add,  17592186045886                ,  :Community/category,  extra category)
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/add,  $belltownId                ,  :Community/category,  extra category)
+         |)""".stripMargin
 
 
     // Remove a category
@@ -1274,12 +1274,12 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).category.retract("Super cool events")
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "category", "String", 2, RetractValue(List("Super cool events")), None))
       ) -->
-      """List(
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  Super cool events)
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  Super cool events)
+         |)""".stripMargin
 
 
     // Mixing updates and deletes..........................
@@ -1290,16 +1290,16 @@ class SeattleTransformationTests extends SeattleSpec {
       Community(belltownId).name("belltown 3").url().category()
     ) -->
       Model(List(
-        Generic("Community", "e_", "datom", Eq(List(17592186045886L))),
+        Generic("Community", "e_", "datom", Eq(List(belltownId))),
         Atom("Community", "name", "String", 1, Eq(List("belltown 3")), None),
         Atom("Community", "url", "String", 1, Eq(List()), None),
         Atom("Community", "category", "String", 2, Eq(List()), None))
       ) -->
-      """List(
-        |  List(:db/add    ,  17592186045886                ,  :Community/name    ,  belltown 3                    ),
-        |  List(:db/retract,  17592186045886                ,  :Community/url     ,  http://www.belltownpeople.com/),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  news                          ),
-        |  List(:db/retract,  17592186045886                ,  :Community/category,  events                        )
-        |)""".stripMargin
+      s"""List(
+         |  List(:db/add    ,  $belltownId                ,  :Community/name    ,  belltown 3                    ),
+         |  List(:db/retract,  $belltownId                ,  :Community/url     ,  http://www.belltownpeople.com/),
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  news                          ),
+         |  List(:db/retract,  $belltownId                ,  :Community/category,  events                        )
+         |)""".stripMargin
   }
 }

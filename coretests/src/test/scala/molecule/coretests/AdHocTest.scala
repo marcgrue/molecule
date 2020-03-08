@@ -16,10 +16,6 @@ class AdHocTest extends CoreSpec with Helpers {
   "Adhoc" in new CoreSetup {
 
 
-    Ns.int.insert(1, 2, 4)
-
-    Ns.int(sum).int(avg).int(median).get.head === (7, 2.3333333333333335, 2)
-
     ok
   }
 }

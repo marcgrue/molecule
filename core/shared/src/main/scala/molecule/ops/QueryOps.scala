@@ -34,6 +34,11 @@ object QueryOps extends Helpers with JavaUtil {
     def find(fn: String, args: Seq[Any], v: String): Query =
       find(AggrExpr(fn, args, Var(v)))
 
+    def aggrV(a: Atom) =
+      q.wh.clauses.collectFirst{
+        case DataClause(_,_, KW("Obj", attr, _), Var(attrV), _,_) if a.attr == attr => attrV
+      }
+
     def find(v: String): Query =
       find(Var(v))
 

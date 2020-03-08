@@ -12,17 +12,21 @@ class SocialNewsSetup extends Scope {
   implicit val conn = recreateDbFrom(SocialNewsSchema)
 
   // Add Stories
-  val List(s1, s2, s3) = Story.title.url insert List(
+  val txR1 = Story.title.url insert List(
     ("Teach Yourself Programming in Ten Years", "http://norvig.com/21-days.html"),
     ("Clojure Rationale", "http://clojure.org/rationale"),
     ("Beating the Averages", "http://www.paulgraham.com/avg.html")
-  ) eids
+  )
+
+  val List(s1, s2, s3) = txR1.eids
+  val tx1 = txR1.tx
 
   // Add Users
-  val List(stu, ed) = User.firstName.lastName.email insert List(
+  val txR2 = User.firstName.lastName.email insert List(
     ("Stu", "Halloway", "stuarthalloway@datomic.com"),
     ("Ed", "Itor", "editor@example.com")
-  ) eids
+  )
+  val List(stu, ed) = txR2.eids
 
 
   // Add comments

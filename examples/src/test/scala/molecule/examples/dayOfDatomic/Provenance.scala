@@ -27,7 +27,7 @@ class Provenance extends MoleculeSpec {
         Atom("Story", "title", "String", 1, VarValue, None, List(), List()),
         Atom("Story", "url", "String", 1, VarValue, None, List(), List()),
         TxMetaData(List(
-          Atom("MetaData", "user_", "Long", 1, Eq(List(17592186045423L)), None, List(), List()),
+          Atom("MetaData", "user_", "ref", 1, Eq(List(stu)), None, List(), List()),
           Atom("MetaData", "usecase_", "String", 1, Eq(List("AddStories")), None, List(), List())))
       )) -->
       List(
@@ -35,24 +35,23 @@ class Provenance extends MoleculeSpec {
         List("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html")
       ) -->
       //       operation     temp id (dummy values)         attribute          value
-      """List(
+      s"""List(
         |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/title     ,  ElastiCache in 6 minutes                                     ),
         |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/title     ,  Keep Chocolate Love Atomic                                   ),
         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/user   ,  17592186045423                                               ),
+        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/user   ,  $stu                                               ),
         |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/usecase,  AddStories                                                   )
         |)""".stripMargin
 
     // Two story entities and one transaction entity is created
-    stuTx.eids === List(17592186045450L, 17592186045451L, 13194139534345L)
     val List(elasticacheStory, chocolateStory, stuTxId) = stuTx.eids
 
     // Now we have 5 stories - the two last from the transaction above
     Story.title.url.tx.get.sortBy(_._3) === List(
-      ("Clojure Rationale", "http://clojure.org/rationale", 13194139534314L),
-      ("Teach Yourself Programming in Ten Years", "http://norvig.com/21-days.html", 13194139534314L),
-      ("Beating the Averages", "http://www.paulgraham.com/avg.html", 13194139534314L),
+      ("Clojure Rationale", "http://clojure.org/rationale", tx1),
+      ("Teach Yourself Programming in Ten Years", "http://norvig.com/21-days.html", tx1),
+      ("Beating the Averages", "http://www.paulgraham.com/avg.html", tx1),
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html", stuTxId),
       ("ElastiCache in 6 minutes", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", stuTxId)
     )
@@ -95,43 +94,43 @@ class Provenance extends MoleculeSpec {
     // Find data via transaction meta data
 
     // Stories that Stu added (first meta information used)
-    Story.title.url.Tx(MetaData.user_(stu)).get === List(
+    Story.title.url.Tx(MetaData.user_(stu)).get.sortBy(_._1) === List(
+      ("ElastiCache in 6 minutes", ecURL),
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html"),
-      ("ElastiCache in 6 minutes", ecURL)
     )
 
     // Stories that were added with the AddStories use case (second meta information used)
-    Story.title.url.Tx(MetaData.usecase_("AddStories")).get === List(
+    Story.title.url.Tx(MetaData.usecase_("AddStories")).get.sortBy(_._1) === List(
+      ("ElastiCache in 6 minutes", ecURL),
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html"),
-      ("ElastiCache in 6 minutes", ecURL)
     )
 
     // Stories that Stu added with the AddStories use case (both meta data used)
-    Story.title.url.Tx(MetaData.user_(stu).usecase_("AddStories")).get === List(
+    Story.title.url.Tx(MetaData.user_(stu).usecase_("AddStories")).get.sortBy(_._1) === List(
+      ("ElastiCache in 6 minutes", ecURL),
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html"),
-      ("ElastiCache in 6 minutes", ecURL)
     )
 
     // Stories and transactions where Stu added stories (`tx` is returned)
-    Story.title.tx.Tx(MetaData.user_(stu).usecase_("AddStories")).get === List(
+    Story.title.tx.Tx(MetaData.user_(stu).usecase_("AddStories")).get.sortBy(_._1) === List(
       ("ElastiCache in 6 minutes", stuTxId),
-      ("Keep Chocolate Love Atomic", stuTxId)
+      ("Keep Chocolate Love Atomic", stuTxId),
     )
 
     // Stories and names of who added them (Note that we can have referenced meta data!)
-    Story.title.Tx(MetaData.User.firstName.lastName).get === List(
+    Story.title.Tx(MetaData.User.firstName.lastName).get.sortBy(_._1) === List(
       ("ElastiCache in 6 minutes", "Stu", "Halloway"),
       ("Keep Chocolate Love Atomic", "Stu", "Halloway")
     )
 
     // Stories added by a user named "Stu"
-    Story.title.Tx(MetaData.User.firstName_("Stu")).get === List(
+    Story.title.Tx(MetaData.User.firstName_("Stu")).get.sorted === List(
       "ElastiCache in 6 minutes",
       "Keep Chocolate Love Atomic"
     )
 
     // Stories added by a user with email "stuarthalloway@datomic.com"
-    Story.title.Tx(MetaData.User.email_("stuarthalloway@datomic.com")).get === List(
+    Story.title.Tx(MetaData.User.email_("stuarthalloway@datomic.com")).get .sorted=== List(
       "ElastiCache in 6 minutes",
       "Keep Chocolate Love Atomic"
     )
@@ -158,7 +157,7 @@ class Provenance extends MoleculeSpec {
     Story.url_(ecURL).title.getAsOf(stuTx.inst).head === "ElastiCache in 6 minutes"
 
     // Who changed the title and when? Using the history database
-    Story.url_(ecURL).title.op.tx.Tx(MetaData.usecase.User.firstName).getHistory === List(
+    Story.url_(ecURL).title.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._3, r._2)) === List(
       ("ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"), // Stu adds the story
       ("ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"), // retraction automatically added by Datomic
       ("ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")   // Ed's update of the title
@@ -173,15 +172,15 @@ class Provenance extends MoleculeSpec {
     )
 
     // Stories with latest use case meta date
-    Story.title.Tx(MetaData.usecase).get === List(
+    Story.title.Tx(MetaData.usecase).get.sortBy(_._1) === List(
+      ("ElastiCache in 5 minutes", "UpdateStory"),
       ("Keep Chocolate Love Atomic", "AddStories"),
-      ("ElastiCache in 5 minutes", "UpdateStory")
     )
 
     // Stories without use case meta data
-    Story.title.Tx(MetaData.usecase_(Nil)).get === List(
-      "Clojure Rationale",
+    Story.title.Tx(MetaData.usecase_(Nil)).get.sorted === List(
       "Beating the Averages",
+      "Clojure Rationale",
       "Teach Yourself Programming in Ten Years"
     )
   }

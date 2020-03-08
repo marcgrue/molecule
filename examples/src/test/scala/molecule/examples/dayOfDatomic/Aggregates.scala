@@ -81,8 +81,7 @@ class Aggregates extends MoleculeSpec {
 
     // We can even fetch multiple aggregates in one query:
     Obj.meanRadius(sum).meanRadius(avg).meanRadius(median).get.head ===
-      (907632.9999999999,53390.17647058823,2631.2)
-//    (907633.0, 53390.17647058824, 2631.2)
+      (907633.0, 53390.17647058824, 2631.2)
   }
 
 
@@ -133,11 +132,11 @@ class Aggregates extends MoleculeSpec {
     Monster.name.heads insert("Cyclops", 4)
 
     // Now we have a different set to aggregate over and compare
-    Monster.name.heads.get === List(
+    Monster.name.heads.get.sortBy(t => (t._1, t._2)) === List(
       ("Cerberus", 3),
-      ("Cyclops", 4),
       ("Chimera", 1),
       ("Cyclops", 1),
+      ("Cyclops", 4),
       ("Medusa", 1))
 
     Monster.heads(sum).get.head === 10 // 3 + 1 + 1 + 1 + 4
@@ -147,7 +146,7 @@ class Aggregates extends MoleculeSpec {
     Monster.heads(stddev).get.head === 1.2649110640673518
 
     // Note how the query group by name so that we get 1 + 4 = 5 Cyclopes heads
-    Monster.name.heads(sum).get === List(
+    Monster.name.heads(sum).get.sortBy(t => (t._1, t._2)) === List(
       ("Cerberus", 3),
       ("Chimera", 1),
       ("Cyclops", 5), // <-- 1 + 4

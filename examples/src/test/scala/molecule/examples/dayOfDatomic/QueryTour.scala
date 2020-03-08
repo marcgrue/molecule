@@ -11,15 +11,6 @@ class QueryTour extends MoleculeSpec {
 
   "Queries and joins" in new SocialNewsSetup {
 
-    // Created entity ids are Long values
-    (s1, s2, s3) ===(17592186045419L, 17592186045420L, 17592186045421L)
-    (stu, ed) ===(17592186045423L, 17592186045424L)
-    (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) ===(
-      17592186045426L, 17592186045428L, 17592186045430L, 17592186045432L,
-      17592186045434L, 17592186045436L, 17592186045438L, 17592186045440L,
-      17592186045442L, 17592186045444L, 17592186045446L, 17592186045448L)
-
-
     // 3. Finding All Users with a first name
     User.e.firstName_.get === List(stu, ed)
 
@@ -107,7 +98,7 @@ class QueryTour extends MoleculeSpec {
     // 13. Touching an entity
     // Get all attributes/values of this entity. Sub-component values are recursively retrieved
     editor.touch === Map(
-      ":db/id" -> 17592186045424L,
+      ":db/id" -> ed,
       ":User/email" -> "editor@example.com",
       ":User/firstName" -> "Ed",
       ":User/lastName" -> "Itor"
@@ -163,21 +154,24 @@ class QueryTour extends MoleculeSpec {
 
   "Time travel" in new SocialNewsSetup {
 
+    // Initial creation of Ed
+    val tx2 = txR2.tx
+
     // Update Ed's first name
-    m(User(ed).firstName("Edward")).update
+   val txR3 = m(User(ed).firstName("Edward")).update
 
 
     // 16. Querying for a Transaction
-    val tx = User(ed).firstName_.tx.get.head
-    tx === 13194139534345L
+    val tx3 = User(ed).firstName_.tx.get.head
+    tx3 === txR3.tx
 
 
     // 17. Converting Transaction to T
-    val t = datomic.Peer.toT(tx)
-    t === 1033
+    val t3 = datomic.Peer.toT(tx3)
+    t3 === txR3.t
 
     // Or query for relative system time directly
-    User(ed).firstName_.t.get.head === t
+    User(ed).firstName_.t.get.head === t3
 
 
     // 18. Getting a Tx Instant
@@ -187,22 +181,22 @@ class QueryTour extends MoleculeSpec {
     // 19. Going back in Time
 
     // Current name
-    User(ed).firstName.getAsOf(t).head === "Edward"
+    User(ed).firstName.getAsOf(t3).head === "Edward"
 
     // Name before change (from previous transaction)
-    User(ed).firstName.getAsOf(t - 1).head === "Ed"
+    User(ed).firstName.getAsOf(t3 - 1).head === "Ed"
 
     // We can use the transaction value also
-    User(ed).firstName.getAsOf(tx).head === "Edward"
+    User(ed).firstName.getAsOf(tx3).head === "Edward"
 
 
     // Auditing ................................................................
 
     // 20. Querying Across All time (sort by transactions)
     User(ed).firstName.tx.op.getHistory.sortBy(_._2) === List(
-      ("Ed", 13194139534318L, true),
-      ("Ed", 13194139534345L, false),
-      ("Edward", 13194139534345L, true)
+      ("Ed", tx2, true),
+      ("Ed", tx3, false),
+      ("Edward", tx3, true)
     )
 
     // 21. Querying Plain Java Data - not supported by Molecule

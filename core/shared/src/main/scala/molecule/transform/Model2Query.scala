@@ -15,7 +15,7 @@ import molecule.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
@@ -208,7 +208,7 @@ object Model2Query extends Helpers {
             nestedLevel += 1
             (acc :+ NestedAttrs(nestedLevel, nsFull1, clean(refAttr1), getNestedAttrs(elements1)), Nil)
         }
-        }._1
+      }._1
 
       val nestedE    = if (model.elements.init.last.isInstanceOf[Bond]) v else e
       val pullScalar = nestedE + "__" + query.f.outputs.length
@@ -765,7 +765,7 @@ object Model2Query extends Helpers {
       case Lt(arg)                                     => q.findD(v2).enum(e, a, v).compareTo("<", a, v2, Val(arg), 1)
       case Le(arg)                                     => q.findD(v2).enum(e, a, v).compareTo("<=", a, v2, Val(arg), 1)
       case Fn(fn, Some(i))                             => q.find(fn, Seq(i), v2).enum(e, a, v)
-      case Fn(fn, _) if coalesce(fn)                   => q.find(fn, Nil, v2).enum(e, a, v).widh(e)
+      case Fn(fn, _) if coalesce(fn)                   => q.aggrV(a).fold(q.find(fn, Nil, v2).enum(e, a, v).widh(e))(q.find(fn, Nil, _).widh(e))
       case Fn(fn, _)                                   => q.find(fn, Nil, v2).enum(e, a, v)
       case other                                       => abort(s"Unresolved cardinality-many enum Atom:\nAtom   : $a\nElement: $other")
     }
@@ -792,7 +792,7 @@ object Model2Query extends Helpers {
       case Lt(arg)                                 => q.find(v2).enum(e, a, v).compareTo("<", a, v2, Val(arg), 1)
       case Le(arg)                                 => q.find(v2).enum(e, a, v).compareTo("<=", a, v2, Val(arg), 1)
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v2).enum(e, a, v)
-      case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v2).enum(e, a, v).widh(e)
+      case Fn(fn, _) if coalesce(fn)               => q.aggrV(a).fold(q.find(fn, Nil, v2).enum(e, a, v).widh(e))(q.find(fn, Nil, _).widh(e))
       case Fn(fn, _)                               => q.find(fn, Nil, v2).enum(e, a, v)
       case other                                   => abort(s"Unresolved cardinality-one enum Atom:\nAtom   : $a\nElement: $other")
     }
@@ -891,7 +891,7 @@ object Model2Query extends Helpers {
       case Le(arg)                                     => q.findD(v).where(e, a, v).compareTo("<=", a, v, Val(arg))
       case And(args)                                   => q.findD(v).whereAnd(e, a, v, args, u(t, v))
       case Fn(fn, Some(i))                             => q.find(fn, Seq(i), v).where(e, a, v)
-      case Fn(fn, _) if coalesce(fn)                   => q.find(fn, Nil, v).where(e, a, v).widh(e)
+      case Fn(fn, _) if coalesce(fn)                   => q.aggrV(a).fold(q.find(fn, Nil, v).where(e, a, v).widh(e))(q.find(fn, Nil, _).widh(e))
       case Fn(fn, _)                                   => q.find(fn, Nil, v).where(e, a, v)
       case Fulltext(args)                              => q.findD(v).where(e, a, v).orRules(e, a, args, "", true)
       case other                                       => abort(s"Unresolved cardinality-many Atom:\nAtom   : $a\nElement: $other")
@@ -925,7 +925,7 @@ object Model2Query extends Helpers {
       case Lt(arg)                                 => q.find(v).where(e, a, v).compareTo("<", a, v, Val(arg))
       case Le(arg)                                 => q.find(v).where(e, a, v).compareTo("<=", a, v, Val(arg))
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v).where(e, a, v)
-      case Fn(fn, _) if coalesce(fn)               => q.find(fn, Nil, v).where(e, a, v).widh(e)
+      case Fn(fn, _) if coalesce(fn)               => q.aggrV(a).fold(q.find(fn, Nil, v).where(e, a, v).widh(e))(q.find(fn, Nil, _).widh(e))
       case Fn(fn, _)                               => q.find(fn, Nil, v).where(e, a, v)
       case Fulltext(arg :: Nil)                    => q.find(v).fulltext(e, a, v, arg.toString)
       case Fulltext(args)                          => q.find(v).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
