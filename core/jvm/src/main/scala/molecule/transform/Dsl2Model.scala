@@ -530,10 +530,21 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else {
         tree match {
-          case q"$prev.$ref.apply(..$values)" if t.isRef => abort(s"Can't apply value to a reference (`$ref`)")
-          case tr@q"$prev.$attr.apply(..$values)"        =>
+          case q"$prev.$ref.apply(..$values)" if t.isRef =>
+            abort(s"Can't apply value to a reference (`$ref`)")
+          case q"$prev.$attr.apply(..$values)"        =>
             x(270, attrStr, values)
-            traverseElement(prev, p, resolveOp(q"$prev.$attr", richTree(q"$prev.$attr"), prev, p, attr.toString(), q"apply", q"Seq(..$values)"))
+            traverseElement(
+              prev,
+              p,
+              resolveOp(
+                q"$prev.$attr",
+                richTree(q"$prev.$attr"),
+                prev,
+                p,
+                attr.toString(),
+                q"apply",
+                q"Seq(..$values)"))
 
         }
       }
@@ -777,8 +788,13 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         addJson1(jsonOptionalMapAttr, t)
         Atom(t.nsFull, attrStr, t.tpeS, 3, value, None, bi(tree, t))
 
-      } else if (t.isAttr) {
+      } else if (t.isRefAttr) {
         x(96, attrStr, value)
+        addAttrOrAggr(attrStr, t, t.tpeS, true)
+        Atom(t.nsFull, attrStr, "ref", t.card, value, t.enumPrefixOpt, bi(tree, t))
+
+      } else if (t.isAttr) {
+        x(97, attrStr, value)
         addAttrOrAggr(attrStr, t, t.tpeS, true)
         Atom(t.nsFull, attrStr, t.tpeS, t.card, value, t.enumPrefixOpt, bi(tree, t))
 

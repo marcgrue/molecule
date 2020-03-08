@@ -44,14 +44,12 @@ object QueryOps extends Helpers with JavaUtil {
     // Pull ..........................................
 
     def pull(e: String, atom: Atom): Query = {
-//      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
       val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr)))
         .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
     }
 
     def pullEnum(e: String, atom: Atom): Query = {
-//      val pullScalar = e + "_" + atom.attr + q.f.outputs.length
       val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr, atom.enumPrefix)))
         .func("molecule.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
@@ -434,28 +432,28 @@ object QueryOps extends Helpers with JavaUtil {
 
       /* admin-hack */
       case "Float" | "Double" if arg.toString.startsWith("__n__") =>
-        println("arg: " + arg)
         val arg1 = arg.toString.drop(5)
         val arg2 = if (arg1.contains(".")) arg1 else arg1 + ".0"
         q.func(s"""ground $arg2""", Empty, v)
 
-      case "Float" | "Double"         => q.func(s"""ground $arg""", Empty, v)
-      case "Int" | "Long" | "Boolean" => q.func(s"""ground $arg""", Empty, v)
-      case "java.util.Date"           => q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)
-      case "java.util.UUID"           => q.func(s"""ground #uuid "$arg"""", Empty, v)
-      case "java.net.URI"             => q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case "BigInt"                   => q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)
-      case "BigDecimal"               => q.func(s"""ground (java.math.BigDecimal. "$arg")""", Empty, v)
-    }
+      case "Float" | "Double" | "Int" | "Long" | "Boolean" | "ref" =>
+        q.func(s"""ground $arg""", Empty, v)
 
-    def groundX(a: Atom, arg: Any, v: String): Query = a.tpe match {
-      case "String"                                        => q.func(s"""ground "${esc1(arg)}"""", Empty, v)
-      case "Int" | "Long" | "Float" | "Double" | "Boolean" => q.func(s"""ground $arg""", Empty, v)
-      case "java.util.Date"                                => q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)
-      case "java.util.UUID"                                => q.func(s"""ground #uuid "$arg"""", Empty, v)
-      case "java.net.URI"                                  => q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case "BigInt"                                        => q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)
-      case "BigDecimal"                                    => q.func(s"""ground (java.math.BigDecimal. "$arg")""", Empty, v)
+      case "java.util.Date" =>
+        q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)
+
+      case "java.util.UUID" =>
+        q.func(s"""ground #uuid "$arg"""", Empty, v)
+
+      case "java.net.URI" =>
+        q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
+
+      case "BigInt" =>
+        q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)
+
+      case "BigDecimal" =>
+        q.func(s"""ground (java.math.BigDecimal. "$arg")""", Empty, v)
+
     }
 
     def fulltext(e: String, a: Atom, v: String, s: String): Query =

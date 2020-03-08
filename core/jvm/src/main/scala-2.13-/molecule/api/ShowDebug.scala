@@ -90,7 +90,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       println()
     }
 
-    def isAggr(fn: String) = Seq("count", "countDistinct", "avg", "variance", "stddev").contains(fn)
+    def isAggr(fn: String) = Seq("count", "count-distinct", "avg", "variance", "stddev").contains(fn)
 
     // outputMatrix:
     // card, isOptional, isDate, isAggr
@@ -188,14 +188,22 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
         while (j < rowLength) {
           val v = oldRow.get(j)
           newRow += (outputMatrix(j) match {
-            case (_, _, _, true)       => v
-            case (1, false, true, _)   => date2str(v.asInstanceOf[Date])
-            case (1, true, isDate, _)  => cardOneOpt(v, isDate)
-            case (2, false, isDate, _) => cardMany(v, isDate)
-            case (2, true, isDate, _)  => cardManyOpt(v, isDate)
-            case (3, false, _, _)      => cardMap(v)
-            case (3, true, _, _)       => cardMapOpt(v)
-            case (_, _, _, _)          => v
+            case (_, _, _, true)       =>
+              v
+            case (1, false, true, _)   =>
+              date2str(v.asInstanceOf[Date])
+            case (1, true, isDate, _)  =>
+              cardOneOpt(v, isDate)
+            case (2, false, isDate, _) =>
+              cardMany(v, isDate)
+            case (2, true, isDate, _)  =>
+              cardManyOpt(v, isDate)
+            case (3, false, _, _)      =>
+              cardMap(v)
+            case (3, true, _, _)       =>
+              cardMapOpt(v)
+            case (_, _, _, _)          =>
+              v
           })
           j += 1
         }
