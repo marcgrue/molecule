@@ -98,7 +98,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     : (Int, Seq[(Int, Boolean, Boolean, Boolean)]) = {
       elements.foldLeft(i, acc) {
         case ((i, acc), Generic(_, "txInstant", _, _))                      => (i + 1, acc :+ (1, false, true, false))
-        case ((i, acc), Generic(_, _, "datom", _))                          => (i + 1, acc :+ (1, false, false, false))
+        case ((i, acc), Generic(_, _, "datom" | "schema", _))               => (i + 1, acc :+ (1, false, false, false))
         case ((i, acc), ga: GenericAtom) if ga.attr.last == '_'             => (i, acc)
         case ((i, acc), Atom(_, _, _, _, Fn(fn, _), _, _, _)) if isAggr(fn) => (i + 1, acc :+ (1, false, false, true))
         case ((i, acc), Atom(_, attr, "java.util.Date", card, _, _, _, _))  => (i + 1, acc :+ (card, attr.last == '$', true, false))
@@ -110,8 +110,9 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       }
     }
 
-    val outputMatrix: Seq[(Int, Boolean, Boolean, Boolean)] =
+    val outputMatrix: Seq[(Int, Boolean, Boolean, Boolean)] = {
       recurse(0, Seq.empty[(Int, Boolean, Boolean, Boolean)], _model.elements)._2
+    }
 
     def resolve(rawRows: Iterable[jList[AnyRef]]): Seq[ListBuffer[Any]] = {
       def cardOneOpt(v: Any, isDate: Boolean): Option[String] = {

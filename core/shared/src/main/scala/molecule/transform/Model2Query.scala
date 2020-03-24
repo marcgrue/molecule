@@ -53,10 +53,19 @@ object Model2Query extends Helpers {
     }
 
     // Resolve nested
-    val optionQuery = if (nestedEntityClauses.isEmpty) None else
-      Some(query3.copy(f = Find(nestedEntityVars ++ query2.f.outputs), wh = Where(query2.wh.clauses ++ nestedEntityClauses)))
+    val optionQuery = if (nestedEntityClauses.isEmpty) None else {
+      Some(
+        QueryOptimizer(
+          query3.copy(
+            f = Find(nestedEntityVars ++ query2.f.outputs),
+            wh = Where(query2.wh.clauses ++ nestedEntityClauses)
+          )
+        )
+      )
+    }
 
-    (query3, optionQuery)
+    //    (query3, optionQuery)
+    (QueryOptimizer(query3), optionQuery)
   }
 
 
@@ -66,10 +75,10 @@ object Model2Query extends Helpers {
   : (Query, String, String, String, String, String) = {
     val (w, y) = (nextChar(v, 1), nextChar(v, 2))
     element match {
-      case atom: Atom             => makeAtom(model, query, atom, e, v, w, prevNs, prevAttr, prevRefNs)
-      case bond: Bond             => makeBond(model, query, bond, e, v, w, prevNs, prevAttr, prevRefNs)
+      case atom: Atom             => makeAtom(query, atom, e, v, w, prevNs, prevAttr, prevRefNs)
+      case bond: Bond             => makeBond(query, bond, e, v, w, prevNs, prevAttr, prevRefNs)
       case rb: ReBond             => makeReBond(model, query, rb, v)
-      case g: Generic             => makeGeneric(model, query, g, e, v, w, y, prevNs, prevAttr, prevRefNs)
+      case g: Generic             => makeGeneric(query, g, e, v, w, y, prevNs, prevAttr, prevRefNs)
       case txMetaData: TxMetaData => makeTxMetaData(model, query, txMetaData, w, prevNs, prevAttr, prevRefNs)
       case nested: Nested         =>
         if (!nested.bond.refAttr.endsWith("$")) {
@@ -88,7 +97,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def makeAtom(model: Model, query: Query, atom: Atom, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
+  def makeAtom(query: Query, atom: Atom, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
     val (nsFull, attr) = (atom.nsFull, atom.attr)
     atom match {
@@ -104,7 +113,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def makeBond(model: Model, query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
+  def makeBond(query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = bond match {
     case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional)               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
     case Bond(`prevNs`, `prevAttr`, refNs, _, _)                               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
@@ -148,7 +157,7 @@ object Model2Query extends Helpers {
     (query, backRefE, v, backRef, "", "")
   }
 
-  def makeGeneric(model: Model, query: Query, g: Generic, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
+  def makeGeneric(query: Query, g: Generic, e: String, v: String, w: String, y: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = if (prevRefNs.nonEmpty) {
     // Advance variable letters to next namespace
     (resolve(query, v, w, g), v, y, g.tpe, g.attr, "")

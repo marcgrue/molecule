@@ -484,10 +484,10 @@ private[molecule] trait Dsl2Model extends Cast with Json {
       if (t.isFirstNS) {
         x(230, attrStr, genericType)
         tree match {
-          case q"$prev.$nsFull.apply($pkg.?)"                             => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(Qm))))
-          case q"$prev.$nsFull.apply($eid)" if t.isBiEdge                 => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(extract(eid)))))
-          case q"$prev.$nnsFull.apply(..$eids)" if genericType != "datom" => traverseElement(prev, p, Generic(nnsFull.toString(), "args_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
-          case q"$prev.$nsFull.apply(..$eids)"                            => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$nsFull.apply($pkg.?)"                            => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(Qm))))
+          case q"$prev.$nsFull.apply($eid)" if t.isBiEdge                => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(extract(eid)))))
+          case q"$prev.$nsFull.apply(..$eids)" if genericType != "datom" => traverseElement(prev, p, Generic(nsFull.toString(), "args_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
+          case q"$prev.$nsFull.apply(..$eids)"                           => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(resolveValues(q"Seq(..$eids)"))))
         }
 
       } else if (genericType == "datom" && datomGeneric.contains(attrStr)) {
@@ -532,7 +532,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         tree match {
           case q"$prev.$ref.apply(..$values)" if t.isRef =>
             abort(s"Can't apply value to a reference (`$ref`)")
-          case q"$prev.$attr.apply(..$values)"        =>
+          case q"$prev.$attr.apply(..$values)"           =>
             x(270, attrStr, values)
             traverseElement(
               prev,
@@ -894,14 +894,14 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def nested1(prev: Tree, p: richTree, manyRef: TermName, nestedTree: Tree) = {
       val refNext  = q"$prev.$manyRef".refNext
       val parentNs = prev match {
-        case q"$pre.apply($value)" if p.isMapAttrK      => x(551, 1);new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
-        case q"$pre.apply($value)" if p.isAttr          => x(552, 1);richTree(pre).nsFull
-        case q"$pre.apply($value)"                      => x(553, 1);richTree(pre).name.capitalize
-        case _ if prev.symbol.name.toString.head == '_' => x(554, 1);prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")
-        case q"$pre.e" if p.isAttr                      => x(555, 1);q"$pre".symbol.name
-        case _ if p.isAttr                              => x(556, 1);p.nsFull
-        case _ if p.isRef                               => x(557, 1);p.refNext
-        case _                                          => x(558, 1);p.name.capitalize
+        case q"$pre.apply($value)" if p.isMapAttrK      => x(551, 1); new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
+        case q"$pre.apply($value)" if p.isAttr          => x(552, 1); richTree(pre).nsFull
+        case q"$pre.apply($value)"                      => x(553, 1); richTree(pre).name.capitalize
+        case _ if prev.symbol.name.toString.head == '_' => x(554, 1); prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")
+        case q"$pre.e" if p.isAttr                      => x(555, 1); q"$pre".symbol.name
+        case _ if p.isAttr                              => x(556, 1); p.nsFull
+        case _ if p.isRef                               => x(557, 1); p.refNext
+        case _                                          => x(558, 1); p.name.capitalize
       }
       val opt      = if (isOptNested) "$" else ""
       x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, jsons, tempJsons, post, postJsons)

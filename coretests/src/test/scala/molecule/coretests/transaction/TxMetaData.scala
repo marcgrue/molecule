@@ -150,36 +150,6 @@ class TxMetaData extends CoreSpec {
         (1, "a", 10)
       )
     }
-
-
-    "Multiple tx groups" in new CoreSetup {
-
-      // Tx meta data that is not connected by references can be saved by applying
-      // individual tx molecules to separate tx's
-      Ns.int(1).Tx(Ns.str("a")).Tx(Ref1.int1(10)).save
-
-      // This is not the same as a composite since the composite would be its own entity
-      // and not the tx entity. (won't compile either)
-      // Ns.int.Tx(Ns.str + Ref1.int1).get
-
-      // Ns.str has no own reference to Ref1.int1
-      Ns.int.Tx(Ns.str.Ref1.int1).get === Nil
-
-      // Tx entity has Ns.str asserted
-      Ns.int.Tx(Ns.str).get === List(
-        (1, "a")
-      )
-
-      // Tx entity also has Ref1.int1 asserted
-      Ns.int.Tx(Ref1.int1).get === List(
-        (1, 10)
-      )
-
-      // Tx entity has both Ns.str and Ref1.int1 asserted
-      Ns.int.Tx(Ns.str).Tx(Ref1.int1).get === List(
-        (1, "a", 10)
-      )
-    }
   }
 
 

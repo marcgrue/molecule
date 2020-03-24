@@ -11,8 +11,9 @@ import molecule.ast.tempDb._
 import molecule.ast.transactionModel._
 import molecule.exceptions._
 import molecule.ops.QueryOps._
-import molecule.transform.Query2String
+import molecule.transform.{Query2String, QueryOptimizer}
 import molecule.util.{BridgeDatomicFuture, Helpers}
+import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.util.control.NonFatal
@@ -35,9 +36,11 @@ object Conn {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  * */
+  **/
 class Conn(val datomicConn: datomic.Connection)
   extends Helpers with BridgeDatomicFuture {
+
+  val log = LoggerFactory.getLogger(getClass)
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
@@ -375,7 +378,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
-    * */
+    **/
   def q(query: String, inputs: Any*): List[List[AnyRef]] =
     q(db, query, inputs.toSeq)
 
@@ -417,7 +420,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @param query  Datomic query string
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
-    **/
+    * */
   def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
     collectionAsScalaIterableConverter(qRaw(db, query, inputs)).asScala.toList
       .map(asScalaBufferConverter(_).asScala.toList
@@ -456,7 +459,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @param query  Datomic query string
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
+    **/
   def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] =
     qRaw(db, query, inputs)
 
@@ -494,7 +497,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @param query   Datomic query string
     * @param inputs0 Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
+    **/
   def qRaw(db: Database, query: String, inputs0: Seq[Any]): jCollection[jList[AnyRef]] = {
     val inputs = inputs0.map {
       case it: Iterable[_] => it.asJava
@@ -518,7 +521,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @param model [[molecule.ast.model.Model Model]] instance
     * @param query [[molecule.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
-    **/
+    * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
     case Generic("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => _index(model)
     case _                                                           => _query(model, query)
@@ -526,7 +529,18 @@ class Conn(val datomicConn: datomic.Connection)
 
   // Datalog query execution
   private[molecule] def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]] = {
-    val p                      = (expr: QueryExpr) => Query2String(query).p(expr)
+        val optimizedQuery = QueryOptimizer(query)
+    ////    println("zzzzzzz")
+    ////    if(query != optimizedQuery) {
+    //      log.info("Query:")
+    //      log.debug("Query:")
+    //      log.debug(query.toString)
+    //      log.debug("Optimized query:")
+    //      log.debug(optimizedQuery.toString)
+    ////    }
+
+    val p                      = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
+//    val p                      = (expr: QueryExpr) => Query2String(query).p(expr)
     val rules                  = "[" + (query.i.rules map p mkString " ") + "]"
     val adhocDb                = _db.getOrElse(db)
     val first                  = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
