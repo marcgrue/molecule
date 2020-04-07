@@ -25,7 +25,11 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
         val (inParams, inTerm1, inTerm2) = (Seq(q"$i1: $t1", q"$i2: $t2"), i1, i2)
         q"""
           def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindSeqs(_query, $inTerm1, $inTerm2), None)) {
+            val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2)
+            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              _model,
+              (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+            ) {
               final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
             }
             new $outMolecule
@@ -38,7 +42,11 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
         val (inParams, inTerm1, inTerm2, inTerm3) = (Seq(q"$i1: $t1", q"$i2: $t2", q"$i3: $t3"), i1, i2, i3)
         q"""
           def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindSeqs(_query, $inTerm1, $inTerm2, $inTerm3), None)) {
+            val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2, $inTerm3)
+            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              _model,
+              (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+            ) {
               final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
             }
             new $outMolecule
@@ -51,10 +59,19 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
         import molecule.ast.model._
         import molecule.facade.Conn
         import molecule.ops.ModelOps._
+        import molecule.transform.{Model2Query, QueryOptimizer}
+
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-        final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](_resolvedModel, _root_.molecule.transform.Model2Query(_resolvedModel)) {
+        final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
+          _resolvedModel,
+          Model2Query(_resolvedModel)
+        ) {
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindValues(_query, args), None)) {
+            val boundRawQuery = bindValues(_rawQuery, args)
+            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              _model,
+              (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+            ) {
               final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
             }
             new $outMolecule
@@ -67,9 +84,15 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
       q"""
         import molecule.ast.model._
         import molecule.facade.Conn
+        import molecule.transform.QueryOptimizer
+
         final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindValues(_query, args), None)) {
+            val boundRawQuery = bindValues(_rawQuery, args)
+            final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              _model,
+              (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+            ) {
               final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
             }
             new $outMolecule

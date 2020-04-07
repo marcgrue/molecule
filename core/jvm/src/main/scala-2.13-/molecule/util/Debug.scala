@@ -7,7 +7,14 @@ import scala.collection.mutable.ArrayBuffer
 //import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-private[molecule] case class Debug(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false, maxLevel: Int = 99, showBi: Boolean = false) {
+private[molecule] case class Debug(
+  clazz: String,
+  threshold: Int,
+  max: Int = 9999,
+  showStackTrace: Boolean = false,
+  maxLevel: Int = 99,
+  showBi: Boolean = false
+) {
 
   // Helpers ..........................................
 

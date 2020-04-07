@@ -17,12 +17,16 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       q"""
         import molecule.ast.model._
         import molecule.ops.ModelOps._
+        import molecule.transform.Model2Query
+
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-        final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.transform.Model2Query(_resolvedModel)) {
+        final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
           final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
 
           final override def getJsonFlat(conn: _root_.molecule.facade.Conn, n: Int): String = getJsonComposite(conn, n)
-          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${compositeJsons(jsons)}}
+          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
+            ..${compositeJsons(jsons)}
+          }
         }
         new $outMolecule
       """
@@ -33,7 +37,9 @@ class MakeComposite(val c: blackbox.Context) extends Base {
           final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
 
           final override def getJsonFlat(conn: _root_.molecule.facade.Conn, n: Int): String = getJsonComposite(conn, n)
-          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${compositeJsons(jsons)}}
+          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
+            ..${compositeJsons(jsons)}
+          }
         }
         new $outMolecule
       """

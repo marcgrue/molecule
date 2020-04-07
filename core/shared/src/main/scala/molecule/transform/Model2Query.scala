@@ -29,7 +29,7 @@ object Model2Query extends Helpers {
   def abort(msg: String): Nothing = throw new Model2QueryException(msg)
 
 
-  def apply(model: Model): (Query, Option[Query]) = {
+  def apply(model: Model): (Query, Option[Query], Query, Option[Query]) = {
 
     // reset on each apply
     nestedEntityClauses = Nil
@@ -53,19 +53,13 @@ object Model2Query extends Helpers {
     }
 
     // Resolve nested
-    val optionQuery = if (nestedEntityClauses.isEmpty) None else {
-      Some(
-        QueryOptimizer(
-          query3.copy(
-            f = Find(nestedEntityVars ++ query2.f.outputs),
-            wh = Where(query2.wh.clauses ++ nestedEntityClauses)
-          )
-        )
-      )
-    }
+    val query3nested  : Query         = query3.copy(
+      f = Find(nestedEntityVars ++ query2.f.outputs),
+      wh = Where(query2.wh.clauses ++ nestedEntityClauses)
+    )
+    val quer3nestedOpt: Option[Query] = if (nestedEntityClauses.nonEmpty) Some(query3nested) else None
 
-    //    (query3, optionQuery)
-    (QueryOptimizer(query3), optionQuery)
+    (QueryOptimizer(query3), quer3nestedOpt.map(QueryOptimizer.apply), query3, quer3nestedOpt)
   }
 
 
@@ -282,8 +276,8 @@ object Model2Query extends Helpers {
       case a@Atom(_, _, _, 1, _, Some(prefix), _, _)              => resolveEnumMandatory1(q, e, a, v, v2, v3, prefix)
 
       // Atom
-      case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v)
-      case a@Atom(_, _, _, 1, _, _, _, _) if opt       => resolveAtomOptional1(q, e, a, v)
+      case a@Atom(_, _, _, 2, _, _, _, _) if opt       => resolveAtomOptional2(q, e, a, v, v1)
+      case a@Atom(_, _, _, 1, _, _, _, _) if opt       => resolveAtomOptional1(q, e, a, v, v1)
       case a@Atom(_, _, _, 1 | 2, _, _, _, _) if tacit => resolveAtomTacit(q, e, a, v, v1)
       case a@Atom(_, _, _, 2, _, _, _, _)              => resolveAtomMandatory2(q, e, a, v, v1)
       case a@Atom(_, _, _, 1, _, _, _, _)              => resolveAtomMandatory1(q, e, a, v, v1)
@@ -810,7 +804,7 @@ object Model2Query extends Helpers {
 
   // Atom ....................................................................................
 
-  def resolveAtomOptional2(q: Query, e: String, a0: Atom, v: String): Query = {
+  def resolveAtomOptional2(q: Query, e: String, a0: Atom, v: String, v1: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
     val t = a.tpe
     a.value match {
@@ -819,10 +813,12 @@ object Model2Query extends Helpers {
       case Eq(arg :: Nil) if uri(t) => q.findD(v).func(s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
       case Eq(arg :: Nil)           => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                 => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
+      case Fulltext(arg :: Nil)     => q.findD(v).fulltext(e, a, v, arg.toString)
+      case Fulltext(args)           => q.findD(v).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
       case other                    => abort("Unresolved optional cardinality-many Atom$:\nAtom$   : " + s"$a0\nElement: $other")
     }
   }
-  def resolveAtomOptional1(q: Query, e: String, a0: Atom, v: String): Query = {
+  def resolveAtomOptional1(q: Query, e: String, a0: Atom, v: String, v1: String): Query = {
     val a = a0.copy(attr = a0.attr.init)
     val t = a.tpe
     a.value match {
@@ -831,6 +827,8 @@ object Model2Query extends Helpers {
       case Eq(arg :: Nil) if uri(t) => q.find(v).func(s"""ground (java.net.URI. "$arg")""", Empty, v).where(e, a, v)
       case Eq(arg :: Nil)           => q.find(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                 => q.find(v).where(e, a, v).orRules(e, a, args, u(t, v))
+      case Fulltext(arg :: Nil)     => q.find(v).fulltext(e, a, v, arg.toString)
+      case Fulltext(args)           => q.find(v).fulltext(e, a, v, Var(v1)).orRules(v1, a, args, "", true)
       case other                    => abort("Unresolved optional cardinality-one Atom$:\nAtom$   : " + s"$a0\nElement: $other")
     }
   }
@@ -864,7 +862,7 @@ object Model2Query extends Helpers {
       case And(args) if a.card == 2                => q.whereAnd(e, a, v, args, u(t, v))
       case And(args)                               => q.where(e, a, Val(args.head))
       case Fn("unify", _)                          => q.where(e, a, v)
-      case Fulltext(arg :: Nil)                    => q.fulltext(e, a, v, arg.toString)
+      case Fulltext(arg :: Nil)                    => q.fulltext(e, a, "_", arg.toString)
       case Fulltext(args)                          => q.where(e, a, v).orRules(e, a, args, "", true)
       case other                                   => abort(s"Unresolved tacit Atom_:\nAtom_  : $a\nElement: $other")
     }

@@ -23,7 +23,7 @@ class IntCard2tacit extends CoreSpec {
   "Eq" in new ManySetup {
 
     val inputMolecule = m(Ns.int.ints_(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -37,7 +37,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int6)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -46,7 +46,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int6)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -55,7 +55,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1))).get === List(int1)
-    inputMolecule(List(Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -74,7 +74,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int1))).get === List(int1)
-    inputMolecule(List(Set(int1, int1)))._query === Query(
+    inputMolecule(List(Set(int1, int1)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -90,7 +90,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2))).get === List(int1)
-    inputMolecule(List(Set(int1, int2)))._query === Query(
+    inputMolecule(List(Set(int1, int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -111,7 +111,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set[Int]())).get === List(int1)
-    inputMolecule(List(Set(int1, int2), Set[Int]()))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -128,7 +128,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int1))).get === List(int1)
-    inputMolecule(List(Set(int1), Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int1)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -144,7 +144,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2))).get === List(int1, int2)
-    inputMolecule(List(Set(int1), Set(int2)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -164,7 +164,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int3))).get === List(int1, int2, int3)
-    inputMolecule(List(Set(int1, int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -183,7 +183,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2, int3))).get === List(int1, int2)
-    inputMolecule(List(Set(int1), Set(int2, int3)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2, int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -202,7 +202,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2), Set(int3))).get === List(int1, int2, int3)
-    inputMolecule(List(Set(int1), Set(int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2), Set(int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -222,7 +222,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int3, int4))).get === List(int1, int3)
-    inputMolecule(List(Set(int1, int2), Set(int3, int4)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3, int4)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -252,7 +252,7 @@ class IntCard2tacit extends CoreSpec {
     Ns.int.ints insert all
 
     val inputMolecule = m(Ns.int.ints_.not(?)) // or m(Ns.int.ints_.!=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -268,7 +268,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int1, int2, int3)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -277,7 +277,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int1, int2, int3)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -286,7 +286,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1))).get === List(int2, int3)
-    inputMolecule(List(Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -300,7 +300,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2))).get === List(int2, int3)
-    inputMolecule(List(Set(int1, int2)))._query === Query(
+    inputMolecule(List(Set(int1, int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -313,7 +313,7 @@ class IntCard2tacit extends CoreSpec {
 
     // nothing omitted
     inputMolecule(List(Set(int1, int3))).get === List(int2, int3)
-    inputMolecule(List(Set(int1, int3)))._query === Query(
+    inputMolecule(List(Set(int1, int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -325,7 +325,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int2, int3))).get === List(int3)
-    inputMolecule(List(Set(int2, int3)))._query === Query(
+    inputMolecule(List(Set(int2, int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -337,7 +337,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int1))).get === List(int2, int3)
-    inputMolecule(List(Set(int1), Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int1)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -348,7 +348,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2))).get === List(int3)
-    inputMolecule(List(Set(int1), Set(int2)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -364,7 +364,7 @@ class IntCard2tacit extends CoreSpec {
     inputMolecule(List(Set(int1), Set(int4))).get === Nil
 
     inputMolecule(List(Set(int1, int2), Set(int3))).get === Nil
-    inputMolecule(List(Set(int1, int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -378,7 +378,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int2, int3))).get === List(int3)
-    inputMolecule(List(Set(int1, int2), Set(int2, int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int2, int3)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -393,7 +393,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int4, int5))).get === List(int2)
-    inputMolecule(List(Set(int1, int2), Set(int4, int5)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int4, int5)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -411,7 +411,7 @@ class IntCard2tacit extends CoreSpec {
   ">" in new ManySetup {
 
     val inputMolecule = m(Ns.int.ints_.>(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -427,7 +427,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -436,7 +436,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -446,7 +446,7 @@ class IntCard2tacit extends CoreSpec {
 
     // (int3, int4), (int4, int5), (int4, int5, int6)
     inputMolecule(List(Set(int2))).get === List(int2, int3, int4, int5)
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -475,7 +475,7 @@ class IntCard2tacit extends CoreSpec {
   ">=" in new ManySetup {
 
     val inputMolecule = m(Ns.int.ints_.>=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -491,7 +491,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -500,7 +500,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -510,7 +510,7 @@ class IntCard2tacit extends CoreSpec {
 
     // (int2, int4), (int3, int4), (int4, int5), (int4, int5, int6)
     inputMolecule(List(Set(int2))).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -539,7 +539,7 @@ class IntCard2tacit extends CoreSpec {
   "<" in new ManySetup {
 
     val inputMolecule = m(Ns.int.ints_.<(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -555,7 +555,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -564,7 +564,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -573,7 +573,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int2))).get === List(int1)
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -602,7 +602,7 @@ class IntCard2tacit extends CoreSpec {
   "<=" in new ManySetup {
 
     val inputMolecule = m(Ns.int.ints_.<=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(
@@ -618,7 +618,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -627,7 +627,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(int1, int2, int3, int4, int5)
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         Var("b"))),
       Where(List(
@@ -636,7 +636,7 @@ class IntCard2tacit extends CoreSpec {
 
 
     inputMolecule(List(Set(int2))).get === List(int1, int2)
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         Var("b"))),
       In(

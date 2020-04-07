@@ -23,7 +23,7 @@ class IntCard1 extends CoreSpec {
     "Eq" in new OneSetup {
 
       val inputMolecule = m(Ns.int(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -47,7 +47,7 @@ class IntCard1 extends CoreSpec {
       // Ns.str.int(Nil).get === Nil // not allowed to compile (mandatory/Nil is contradictive)
       // same as
       inputMolecule(Nil).get === Nil
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -60,7 +60,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1)).get === List(int1)
-      inputMolecule(List(int1))._query === Query(
+      inputMolecule(List(int1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -73,7 +73,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1, int1)).get === List(int1)
-      inputMolecule(List(int1, int1))._query === Query(
+      inputMolecule(List(int1, int1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -86,7 +86,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1, int2)).get === List(int1, int2)
-      inputMolecule(List(int1, int2))._query === Query(
+      inputMolecule(List(int1, int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -102,7 +102,7 @@ class IntCard1 extends CoreSpec {
     "!=" in new OneSetup {
 
       val inputMolecule = m(Ns.int.not(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -117,7 +117,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(int1, int2, int3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -125,7 +125,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1)).get === List(int2, int3)
-      inputMolecule(List(int1))._query === Query(
+      inputMolecule(List(int1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -140,7 +140,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1, int2)).get === List(int3)
-      inputMolecule(List(int1, int2))._query === Query(
+      inputMolecule(List(int1, int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -156,7 +156,7 @@ class IntCard1 extends CoreSpec {
     ">" in new OneSetup {
 
       val inputMolecule = m(Ns.int.>(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -171,7 +171,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(int1, int2, int3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -179,7 +179,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(int3)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -202,7 +202,7 @@ class IntCard1 extends CoreSpec {
     ">=" in new OneSetup {
 
       val inputMolecule = m(Ns.int.>=(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -217,7 +217,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(int1, int2, int3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -225,7 +225,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(int2, int3)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -248,7 +248,7 @@ class IntCard1 extends CoreSpec {
     "<" in new OneSetup {
 
       val inputMolecule = m(Ns.int.<(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -263,7 +263,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(int1, int2, int3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -271,7 +271,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(int1)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -294,7 +294,7 @@ class IntCard1 extends CoreSpec {
     "<=" in new OneSetup {
 
       val inputMolecule = m(Ns.int.<=(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -309,7 +309,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(int1, int2, int3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -317,7 +317,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(int1, int2)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -343,7 +343,7 @@ class IntCard1 extends CoreSpec {
     "Eq" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -368,7 +368,7 @@ class IntCard1 extends CoreSpec {
       Ns.str.int_(Nil).get === List(str4)
       // same as
       inputMolecule(Nil).get === List(str4)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -377,7 +377,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1)).get === List(str1)
-      inputMolecule(List(int1))._query === Query(
+      inputMolecule(List(int1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -391,7 +391,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1, int2)).get === List(str1, str2)
-      inputMolecule(List(int1, int2))._query === Query(
+      inputMolecule(List(int1, int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -408,7 +408,7 @@ class IntCard1 extends CoreSpec {
     "!=" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_.not(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -424,7 +424,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -433,7 +433,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1)).get === List(str2, str3)
-      inputMolecule(List(int1))._query === Query(
+      inputMolecule(List(int1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -449,7 +449,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int1, int2)).get === List(str3)
-      inputMolecule(List(int1, int2))._query === Query(
+      inputMolecule(List(int1, int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -465,7 +465,7 @@ class IntCard1 extends CoreSpec {
     ">" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_.>(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -481,7 +481,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -490,7 +490,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(str3)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -514,7 +514,7 @@ class IntCard1 extends CoreSpec {
     ">=" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_.>=(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -530,7 +530,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -539,7 +539,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(str2, str3)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -563,7 +563,7 @@ class IntCard1 extends CoreSpec {
     "<" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_.<(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -579,7 +579,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -588,7 +588,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(str1)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -612,7 +612,7 @@ class IntCard1 extends CoreSpec {
     "<=" in new OneSetup {
 
       val inputMolecule = m(Ns.str.int_.<=(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -628,7 +628,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -637,7 +637,7 @@ class IntCard1 extends CoreSpec {
 
 
       inputMolecule(List(int2)).get === List(str1, str2)
-      inputMolecule(List(int2))._query === Query(
+      inputMolecule(List(int2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(

@@ -34,4 +34,24 @@ trait MoleculeBase {
     * @group internal
     **/
   val _nestedQuery: Option[Query]
+
+  /** Internal un-optimized [[molecule.ast.query.Query Query]] representation molecule.
+    * <br><br>
+    * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
+    * <br><br>
+    * Custom DSL molecule --> Model --> Query --> Datomic query string
+    *
+    * @group internal
+    **/
+  val _rawQuery: Query
+
+  /** Internal un-optimized optional [[molecule.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
+    * <br><br>
+    * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
+    * <br><br>
+    * Custom DSL molecule --> Model --> Query --> Datomic query string
+    *
+    * @group internal
+    **/
+  val _rawNestedQuery: Option[Query]
 }

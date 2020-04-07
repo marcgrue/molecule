@@ -119,9 +119,17 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
         if (v == null) {
           Option.empty[String]
         } else if (isDate) {
-          Some(date2str(v.asInstanceOf[jMap[String, Date]].values.iterator.next))
+          if (v.isInstanceOf[jMap[_, _]]) {
+            Some(date2str(v.asInstanceOf[jMap[String, Date]].values.iterator.next))
+          } else {
+            Some(date2str(v.asInstanceOf[Date]))
+          }
         } else {
-          Some(v.asInstanceOf[jMap[String, Any]].values.iterator.next.toString)
+          if (v.isInstanceOf[jMap[_, _]]) {
+            Some(v.asInstanceOf[jMap[String, Any]].values.iterator.next.toString)
+          } else {
+            Some(v.toString)
+          }
         }
       }
 
@@ -138,17 +146,29 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       def cardManyOpt(v: Any, isDate: Boolean): Option[Set[String]] = {
         if (v == null) {
           Option.empty[Set[String]]
-        } else {
-          val it  = v.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
-          var set = Set.empty[String]
-          if (isDate) {
-            while (it.hasNext)
-              set = set + date2str(it.next.asInstanceOf[Date])
-          } else {
-            while (it.hasNext)
-              set = set + it.next.toString
-          }
-          Some(set)
+        } else v match {
+          case set1: PersistentHashSet =>
+            val it  = set1.iterator
+            var set = Set.empty[String]
+            if (isDate) {
+              while (it.hasNext)
+                set = set + date2str(it.next.asInstanceOf[Date])
+            } else {
+              while (it.hasNext)
+                set = set + it.next.toString
+            }
+            Some(set)
+          case _                       =>
+            val it  = v.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+            var set = Set.empty[String]
+            if (isDate) {
+              while (it.hasNext)
+                set = set + date2str(it.next.asInstanceOf[Date])
+            } else {
+              while (it.hasNext)
+                set = set + it.next.toString
+            }
+            Some(set)
         }
       }
 

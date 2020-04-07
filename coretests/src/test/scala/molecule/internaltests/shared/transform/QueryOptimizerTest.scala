@@ -6,7 +6,7 @@ import molecule.api.out5._
 import molecule.ast.query._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.QueryOptimizer
+import molecule.transform.{Model2Query, QueryOptimizer}
 
 
 class QueryOptimizerTest extends CoreSpec {
@@ -241,5 +241,65 @@ class QueryOptimizerTest extends CoreSpec {
     test(3, q1)
 
     ok
+  }
+
+
+  "4" in new Setup {
+
+    QueryOptimizer(
+      Query(
+        Find(List(
+          Var("a"),
+          Var("c"),
+          Var("d"),
+          Pull("a__3", "music_WorkTitle", "short", None))),
+        Where(List(
+          DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "title", ""), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "short", ""), Val("x"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "short", ""), Var("d"), Empty, NoBinding),
+          Funct("molecule.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__3"))))))
+    ) === Query(
+      Find(List(
+        Var("a"),
+        Var("c"),
+        Var("d"),
+        Pull("a__3", "music_WorkTitle", "short", None))),
+      Where(List(
+        Funct("molecule.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__3"))),
+        DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "short", ""), Val("x"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "title", ""), Var("c"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("music_WorkTitle", "short", ""), Var("d"), Empty, NoBinding),
+      )))
+  }
+
+
+  "Using un-optimized raw query" in new Setup {
+
+    Ns.str("a").int(42).save
+
+    // Binding 42 is promoted as first clause in optimized query
+    m(Ns.str.int(42))._query === Query(
+      Find(List(
+        Var("b"),
+        Var("c"))),
+      Where(List(
+        Funct("ground 42", Seq(Empty), ScalarBinding(Var("c"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "int", ""), Var("c"), Empty, NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding)
+      )))
+
+    Ns.str.int(42).get.head === ("a", 42)
+
+    m(Ns.str.int(42))._rawQuery === Query(
+      Find(List(
+        Var("b"),
+        Var("c"))),
+      Where(List(
+        DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding),
+        Funct("ground 42", Seq(Empty), ScalarBinding(Var("c"))),
+        DataClause(ImplDS, Var("a"), KW("Ns", "int", ""), Var("c"), Empty, NoBinding),
+      )))
+
+    conn.q(Ns.str.int(42)._rawQuery.toMap).head === List("a", 42)
   }
 }

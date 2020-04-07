@@ -23,7 +23,7 @@ class IntCard2coalesce extends CoreSpec {
   "Eq" in new ManySetup {
 
     val inputMolecule = m(Ns.ints(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -36,7 +36,18 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === Nil
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
+      Find(List(
+        AggrExpr("distinct", Seq(), Var("b")))),
+      In(
+        List(
+          InVar(CollectionBinding(Var("b")), Seq(Seq()))),
+        List(),
+        List(DS)),
+      Where(List(
+        DataClause(ImplDS, Var("a"), KW("Ns", "ints"), Var("b"), Empty, NoBinding))))
+
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -49,7 +60,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === Nil
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -62,7 +73,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1))).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -80,7 +91,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int1))).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int1, int1)))._query === Query(
+    inputMolecule(List(Set(int1, int1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -95,7 +106,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2))).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int1, int2)))._query === Query(
+    inputMolecule(List(Set(int1, int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -115,7 +126,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set[Int]())).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int1, int2), Set[Int]()))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -131,7 +142,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int1))).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int1), Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -146,7 +157,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2))).get === List(Set(int1, int2, int3)) // (int1, int2) + (int2, int3)
-    inputMolecule(List(Set(int1), Set(int2)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -165,7 +176,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int3))).get === List(Set(int1, int2, int3, int4)) // (int1, int2) + (int2, int3) + (int3, int4)
-    inputMolecule(List(Set(int1, int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -183,7 +194,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2, int3))).get === List(Set(int1, int2, int3)) // (int1, int2) + (int2, int3)
-    inputMolecule(List(Set(int1), Set(int2, int3)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2, int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -201,7 +212,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2), Set(int3))).get === List(Set(int1, int2, int3, int4)) // (int1, int2) + (int2, int3)
-    inputMolecule(List(Set(int1), Set(int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2), Set(int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -220,7 +231,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int3, int4))).get === List(Set(int1, int2, int3, int4)) // (int1, int2) + (int3, int4)
-    inputMolecule(List(Set(int1, int2), Set(int3, int4)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3, int4)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -249,7 +260,7 @@ class IntCard2coalesce extends CoreSpec {
     Ns.int.ints insert all
 
     val inputMolecule = m(Ns.ints.not(?)) // or m(Ns.ints.!=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -264,7 +275,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(int1, int2, int3, int4, int5))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -272,7 +283,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int1, int2, int3, int4, int5))
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -280,7 +291,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1))).get === List(Set(int2, int3, int4, int5))
-    inputMolecule(List(Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -293,7 +304,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2))).get === List(Set(int2, int3, int4, int5))
-    inputMolecule(List(Set(int1, int2)))._query === Query(
+    inputMolecule(List(Set(int1, int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -305,7 +316,7 @@ class IntCard2coalesce extends CoreSpec {
 
     // nothing omitted
     inputMolecule(List(Set(int1, int3))).get === List(Set(int2, int3, int4, int5))
-    inputMolecule(List(Set(int1, int3)))._query === Query(
+    inputMolecule(List(Set(int1, int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -316,7 +327,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int1))).get === List(Set(int2, int3, int4, int5))
-    inputMolecule(List(Set(int1), Set(int1)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -326,7 +337,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1), Set(int2))).get === List(Set(int3, int4, int5))
-    inputMolecule(List(Set(int1), Set(int2)))._query === Query(
+    inputMolecule(List(Set(int1), Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -343,7 +354,7 @@ class IntCard2coalesce extends CoreSpec {
     inputMolecule(List(Set(int1, int2), Set(int1))).get === List(Set(int2, int3, int4, int5))
     inputMolecule(List(Set(int1, int2), Set(int2))).get === List(Set(int3, int4, int5))
     inputMolecule(List(Set(int1, int2), Set(int3))).get === Nil
-    inputMolecule(List(Set(int1, int2), Set(int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -356,7 +367,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int1, int2), Set(int2, int3))).get === List(Set(int3, int4, int5))
-    inputMolecule(List(Set(int1, int2), Set(int2, int3)))._query === Query(
+    inputMolecule(List(Set(int1, int2), Set(int2, int3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -373,7 +384,7 @@ class IntCard2coalesce extends CoreSpec {
   ">" in new ManySetup {
 
     val inputMolecule = m(Ns.ints.>(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -388,7 +399,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -396,7 +407,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -405,7 +416,7 @@ class IntCard2coalesce extends CoreSpec {
 
     // (int3, int4), (int4, int5), (int4, int5, int6)
     inputMolecule(List(Set(int2))).get === List(Set(int4, int6, int3, int5))
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -433,7 +444,7 @@ class IntCard2coalesce extends CoreSpec {
   ">=" in new ManySetup {
 
     val inputMolecule = m(Ns.ints.>=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -448,7 +459,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -456,7 +467,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -465,7 +476,7 @@ class IntCard2coalesce extends CoreSpec {
 
     // (int2, int4), (int3, int4), (int4, int5), (int4, int5, int6)
     inputMolecule(List(Set(int2))).get === List(Set(int5, int6, int2, int3, int4))
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -493,7 +504,7 @@ class IntCard2coalesce extends CoreSpec {
   "<" in new ManySetup {
 
     val inputMolecule = m(Ns.ints.<(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -508,7 +519,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -516,7 +527,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -524,7 +535,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int2))).get === List(Set(int1))
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -552,7 +563,7 @@ class IntCard2coalesce extends CoreSpec {
   "<=" in new ManySetup {
 
     val inputMolecule = m(Ns.ints.<=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(
@@ -567,7 +578,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -575,7 +586,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[Int]())).get === List(Set(int5, int1, int6, int2, int3, int4))
-    inputMolecule(List(Set[Int]()))._query === Query(
+    inputMolecule(List(Set[Int]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       Where(List(
@@ -583,7 +594,7 @@ class IntCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(int2))).get === List(Set(int1, int2))
-    inputMolecule(List(Set(int2)))._query === Query(
+    inputMolecule(List(Set(int2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b")))),
       In(

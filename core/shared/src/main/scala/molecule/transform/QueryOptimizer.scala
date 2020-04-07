@@ -18,10 +18,13 @@ object QueryOptimizer {
     q.i.inputs.foreach {
       case InVar(ScalarBinding(Var(v)), _)     => equalsOne += v -> None
       case InVar(CollectionBinding(Var(v)), _) => equalsMany += v -> None
-      case InVar(RelationBinding(_), _)        =>
+      case _                                   =>
     }
 
     q.wh.clauses.foreach {
+      case cl@Funct("molecule.util.fns/bind", Seq(Var(_)), ScalarBinding(Var(v))) =>
+        grounds += v -> Some(cl)
+
       case cl@Funct(fn, _, ScalarBinding(Var(v))) if fn.startsWith("ground") =>
         grounds += v -> Some(cl)
 
@@ -33,6 +36,9 @@ object QueryOptimizer {
 
       case cl@Funct("fulltext", _, RelationBinding(Seq(_, Var(v)))) =>
         fulltextSearches += v -> Some(cl)
+
+      case cl@DataClause(_, Var(v), _, Val(_), _, _) =>
+        equalsOne += v -> Some(cl)
 
       case cl@DataClause(_, Var(v1), _, Var(v2), _, _) =>
         remainingClauses += Set(v1, v2) -> cl
@@ -69,7 +75,7 @@ object QueryOptimizer {
       val a = limiterCoordinates.flatMap(_._2)
       val b = optimizedClauses
       val c = remainingClauses.map(_._2)
-      (a ++ b ++ c).toSeq
+      a ++ b ++ c
     }
 
     val optimizedClauses_ = getOptimizeClauses

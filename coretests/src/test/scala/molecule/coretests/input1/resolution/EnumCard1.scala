@@ -22,7 +22,7 @@ class EnumCard1 extends CoreSpec {
 
     "Eq" in new OneSetup {
       val inputMolecule = m(Ns.enum(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -48,7 +48,7 @@ class EnumCard1 extends CoreSpec {
       // Ns.str.enum(Nil).get === Nil // not allowed to compile (mandatory/Nil is contradictive)
       // same as
       inputMolecule(Nil).get === Nil
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -62,7 +62,7 @@ class EnumCard1 extends CoreSpec {
           Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))))))
 
       inputMolecule(List(enum1)).get === List(enum1)
-      inputMolecule(List(enum1))._query === Query(
+      inputMolecule(List(enum1))._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -78,7 +78,7 @@ class EnumCard1 extends CoreSpec {
       inputMolecule(List(enum1, enum1)).get === List(enum1)
 
       inputMolecule(List(enum1, enum2)).get === List(enum2, enum1)
-      inputMolecule(List(enum1, enum2))._query === Query(
+      inputMolecule(List(enum1, enum2))._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -102,7 +102,7 @@ class EnumCard1 extends CoreSpec {
 
     "!=" in new OneSetup {
       val inputMolecule = m(Ns.enum.not(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -118,7 +118,7 @@ class EnumCard1 extends CoreSpec {
           Funct("!=", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
       inputMolecule(Nil).get.sorted === List(enum1, enum2, enum3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b2"))),
         Where(List(
@@ -128,7 +128,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1)).get.sorted === List(enum2, enum3)
-      inputMolecule(List(enum1))._query === Query(
+      inputMolecule(List(enum1))._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -147,7 +147,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1, enum2)).get.sorted === List(enum3)
-      inputMolecule(List(enum1, enum2))._query === Query(
+      inputMolecule(List(enum1, enum2))._rawQuery === Query(
         Find(List(
           Var("b2"))),
         Where(List(
@@ -163,7 +163,7 @@ class EnumCard1 extends CoreSpec {
 
     ">" in new OneSetup {
       val inputMolecule = m(Ns.enum.>(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -180,7 +180,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get.sorted === List(enum1, enum2, enum3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b2"))),
         Where(List(
@@ -190,7 +190,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum2)).get.sorted === List(enum3)
-      inputMolecule(List(enum2))._query === Query(
+      inputMolecule(List(enum2))._rawQuery === Query(
         Find(List(
           Var("b2"))),
         In(
@@ -246,7 +246,7 @@ class EnumCard1 extends CoreSpec {
 
     "Eq" in new OneSetup {
       val inputMolecule = m(Ns.str.enum_(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -273,7 +273,7 @@ class EnumCard1 extends CoreSpec {
       Ns.str.enum$(None).get === List((str4, None))
       // same as
       inputMolecule(Nil).get === List(str4)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -282,7 +282,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1)).get === List(str1)
-      inputMolecule(List(enum1))._query === Query(
+      inputMolecule(List(enum1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -298,7 +298,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1, enum2)).get === List(str1, str2)
-      inputMolecule(List(enum1, enum2))._query === Query(
+      inputMolecule(List(enum1, enum2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -314,7 +314,7 @@ class EnumCard1 extends CoreSpec {
 
     "!=" in new OneSetup {
       val inputMolecule = m(Ns.str.enum_.not(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -332,7 +332,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get.sorted === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -341,7 +341,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1)).get.sorted === List(str2, str3)
-      inputMolecule(List(enum1))._query === Query(
+      inputMolecule(List(enum1))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -361,7 +361,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum1, enum2)).get === List(str3)
-      inputMolecule(List(enum1, enum2))._query === Query(
+      inputMolecule(List(enum1, enum2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -378,7 +378,7 @@ class EnumCard1 extends CoreSpec {
 
     ">" in new OneSetup {
       val inputMolecule = m(Ns.str.enum_.>(?))
-      inputMolecule._query === Query(
+      inputMolecule._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(
@@ -396,7 +396,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(Nil).get === List(str1, str2, str3)
-      inputMolecule(Nil)._query === Query(
+      inputMolecule(Nil)._rawQuery === Query(
         Find(List(
           Var("b"))),
         Where(List(
@@ -405,7 +405,7 @@ class EnumCard1 extends CoreSpec {
 
 
       inputMolecule(List(enum2)).get === List(str3)
-      inputMolecule(List(enum2))._query === Query(
+      inputMolecule(List(enum2))._rawQuery === Query(
         Find(List(
           Var("b"))),
         In(

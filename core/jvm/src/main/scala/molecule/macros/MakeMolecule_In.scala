@@ -15,7 +15,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
     val inputMolecule = TypeName(c.freshName("inputMolecule$"))
     val outMolecule = TypeName(c.freshName("outMolecule$"))
     val (model0, types, casts, jsons, nestedRefAttrs, hasVariables,
-    postTypes, postCasts, postJsons, isNestedPull, _, _) = getModel(dsl)
+    postTypes, postCasts, postJsons, _, _, _) = getModel(dsl)
     val flat = casts.size == 1
 
     // Methods for applying separate lists of input
@@ -29,7 +29,11 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         if (flat) {
           q"""
             def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindSeqs(_query, $inTerm1, $inTerm2), None)) {
+              val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2)
+              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+                _model,
+                (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+              ) {
                 final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
@@ -38,9 +42,12 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         } else {
           q"""
             def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+              val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2)
+              val boundRawNestedQuery = bindSeqs(_rawNestedQuery.get, $inTerm1, $inTerm2)
               final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
                 _model,
-                (bindSeqs(_query, $inTerm1, $inTerm2), Some(bindSeqs(_nestedQuery.get, $inTerm1, $inTerm2)))
+                (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
+                  boundRawQuery, Some(boundRawNestedQuery))
               ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
                 ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
@@ -57,7 +64,11 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         if (flat) {
           q"""
             def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindSeqs(_query, $inTerm1, $inTerm2, $inTerm3), None)) {
+              val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2, $inTerm3)
+              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+                _model,
+                (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+              ) {
                 final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
@@ -66,9 +77,12 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         } else {
           q"""
             def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+              val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2, $inTerm3)
+              val boundRawNestedQuery = bindSeqs(_rawNestedQuery.get, $inTerm1, $inTerm2, $inTerm3)
               final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
                 _model,
-                (bindSeqs(_query, $inTerm1, $inTerm2, $inTerm3), Some(bindSeqs(_nestedQuery.get, $inTerm1, $inTerm2, $inTerm3)))
+                (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
+                  boundRawQuery, Some(boundRawNestedQuery))
               ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
                 ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
@@ -79,19 +93,28 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         }
     }
 
-
     if (flat) {
       if (hasVariables) {
         q"""
           import molecule.ast.model._
           import molecule.facade.Conn
           import molecule.ops.ModelOps._
+          import molecule.transform.{Model2Query, QueryOptimizer}
+
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](_resolvedModel, _root_.molecule.transform.Model2Query(_resolvedModel)) {
+          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
+            _resolvedModel, Model2Query(_resolvedModel)
+          ) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindValues(_query, args), None)) {
+              val boundRawQuery = bindValues(_rawQuery, args)
+              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+                _model,
+                (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+              ) {
                 final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
+                  ..${topLevelJson(jsons)}
+                }
               }
               new $outMolecule
             }
@@ -103,12 +126,19 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         q"""
           import molecule.ast.model._
           import molecule.facade.Conn
+          import molecule.transform.QueryOptimizer
 
           final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_model, (bindValues(_query, args), None)) {
+              val boundRawQuery = bindValues(_rawQuery, args)
+              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+                _model,
+                (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
+              ) {
                 final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
+                  ..${topLevelJson(jsons)}
+                }
               }
               new $outMolecule
             }
@@ -125,12 +155,19 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
           import molecule.ast.model._
           import molecule.facade.Conn
           import molecule.ops.ModelOps._
+          import molecule.transform.{Model2Query, QueryOptimizer}
+
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](_resolvedModel, _root_.molecule.transform.Model2Query(_resolvedModel)) {
+          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
+            _resolvedModel, Model2Query(_resolvedModel)
+          ) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+              val boundRawQuery = bindValues(_rawQuery, args)
+              val boundRawNestedQuery = bindValues(_rawNestedQuery.get, args)
               final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
                 _model,
-                (bindValues(_query, args), Some(bindValues(_nestedQuery.get, args)))
+                (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
+                  boundRawQuery, Some(boundRawNestedQuery))
               ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
                 ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
@@ -145,11 +182,16 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         q"""
           import molecule.ast.model._
           import molecule.facade.Conn
+          import molecule.transform.QueryOptimizer
+
           final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+              val boundRawQuery = bindValues(_rawQuery, args)
+              val boundRawNestedQuery = bindValues(_rawNestedQuery.get, args)
               final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
                 _model,
-                (bindValues(_query, args), Some(bindValues(_nestedQuery.get, args)))
+                (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
+                  boundRawQuery, Some(boundRawNestedQuery))
               ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
                 ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}

@@ -434,4 +434,51 @@ class OptionalValues extends CoreSpec {
 
     Ns.str("a").ints$.get.head._2.get.size === 1111
   }
+
+
+  "Fulltext search on optional card-one attribute" in new CoreSetup {
+    Ns.int.str$ insert List(
+      (0, Some("hello world")),
+      (1, Some("hi there")),
+      (2, None),
+    )
+
+    // Equality matching full search string
+    Ns.int.str("hi there").get === List(
+      (1, "hi there"),
+    )
+    Ns.int.str$(Some("hi there")).get === List(
+      (1, Some("hi there")),
+    )
+    Ns.int.str$(Some("hi")).get === List()
+
+    // Fulltext matching a single full word
+    Ns.int.str$.contains("hi").get === List(
+      (1, Some("hi there")),
+    )
+  }
+
+
+  "Fulltext search on optional card-many attribute" in new CoreSetup {
+    Ns.int.strs$ insert List(
+      (0, Some(Set("hello world"))),
+      (1, Some(Set("hi there", "hi five"))),
+      (2, None),
+    )
+
+    // Equality matching full search string
+    Ns.int.strs(Set("hi there")).get === List(
+      (1, Set("hi there", "hi five")),
+    )
+    Ns.int.strs$(Some(Set("hi there"))).get === List(
+      (1, Some(Set("hi there", "hi five"))),
+    )
+    Ns.int.strs(Set("hi")).get === List()
+    Ns.int.strs$(Some(Set("hi"))).get === List()
+
+    // Fulltext matching a single full word
+    Ns.int.strs$.contains("hi").get === List(
+      (1, Some(Set("hi there", "hi five"))),
+    )
+  }
 }

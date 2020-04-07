@@ -51,7 +51,7 @@ class Input1URI extends CoreSpec {
         inputMolecule(List(uri1, uri1)).get.sorted === List(uri2, uri3)
 
         inputMolecule(List(uri1, uri2)).get.sorted === List(uri3)
-        inputMolecule(List(uri1, uri2))._query === Query(
+        inputMolecule(List(uri1, uri2))._rawQuery === Query(
           Find(List(
             Var("b"))),
           Where(List(
@@ -195,7 +195,7 @@ class Input1URI extends CoreSpec {
 
       "Eq" in new ManySetup {
         val inputMolecule = m(Ns.uri.uris(?))
-        inputMolecule._query === Query(
+        inputMolecule._rawQuery === Query(
           Find(List(
             Var("b"),
             AggrExpr("distinct", Seq(), Var("c")))),
@@ -210,7 +210,7 @@ class Input1URI extends CoreSpec {
 
 
         inputMolecule(Nil).get === Nil
-        inputMolecule(Nil)._query === Query(
+        inputMolecule(Nil)._rawQuery === Query(
           Find(List(
             Var("b"),
             AggrExpr("distinct", Seq(), Var("c")))),
@@ -229,7 +229,7 @@ class Input1URI extends CoreSpec {
         // Values of 1 Set match values of 1 card-many attribute at a time
 
         inputMolecule(List(Set(uri1))).get === List((uri1, Set(uri1, uri2)))
-        inputMolecule(List(Set(uri1)))._query === Query(
+        inputMolecule(List(Set(uri1)))._rawQuery === Query(
           Find(List(
             Var("b"),
             AggrExpr("distinct", Seq(), Var("c")))),
@@ -247,7 +247,7 @@ class Input1URI extends CoreSpec {
 
         inputMolecule(List(Set(uri1, uri1))).get === List((uri1, Set(uri1, uri2)))
         inputMolecule(List(Set(uri1, uri2))).get === List((uri1, Set(uri1, uri2)))
-        inputMolecule(List(Set(uri1, uri2)))._query === Query(
+        inputMolecule(List(Set(uri1, uri2)))._rawQuery === Query(
           Find(List(
             Var("b"),
             AggrExpr("distinct", Seq(), Var("c")))),

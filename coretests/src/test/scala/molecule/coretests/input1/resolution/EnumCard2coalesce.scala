@@ -22,7 +22,7 @@ class EnumCard2coalesce extends CoreSpec {
 
   "Eq" in new ManySetup {
     val inputMolecule = m(Ns.enums(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -37,7 +37,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === Nil
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -55,7 +55,7 @@ class EnumCard2coalesce extends CoreSpec {
     // Values of 1 Set match values of 1 card-many attribute at a time
 
     inputMolecule(List(Set(enum1))).get === List(Set(enum1, enum2))
-    inputMolecule(List(Set(enum1)))._query === Query(
+    inputMolecule(List(Set(enum1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -102,7 +102,9 @@ class EnumCard2coalesce extends CoreSpec {
     Ns.enum.enums insert all
 
     val inputMolecule = m(Ns.enums.not(?)) // or m(Ns.enums.!=(?))
-    inputMolecule._query === Query(
+
+    // Un-optimized query following same structure as model
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -117,9 +119,26 @@ class EnumCard2coalesce extends CoreSpec {
         Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
         Funct("!=", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
+    // Optimized query where most specific Where clauses come first
+    inputMolecule._query === Query(
+      Find(List(
+        AggrExpr("distinct", Seq(), Var("b2")))),
+      In(
+        List(
+          Placeholder(Var("a"), KW("Ns", "enums"), Var("b3"), Some(":Ns.enums/"))),
+        List(),
+        List(DS)),
+      Where(List(
+        Funct(".compareTo ^String", Seq(Var("b2"), Var("b3")), ScalarBinding(Var("b2_1"))),
+        Funct("!=", Seq(Var("b2_1"), Val(0)), NoBinding),
+        DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Var("b"), Empty, NoBinding),
+        DataClause(ImplDS, Var("b"), KW("db", "ident"), Var("b1"), Empty, NoBinding),
+        Funct("name", Seq(Var("b1")), ScalarBinding(Var("b2"))),
+      )))
+
 
     inputMolecule(Nil).get === List(Set(enum1, enum2, enum3, enum4, enum5))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -129,7 +148,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set[String]())).get === List(Set(enum1, enum2, enum3, enum4, enum5))
-    inputMolecule(List(Set[String]()))._query === Query(
+    inputMolecule(List(Set[String]()))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -139,7 +158,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(enum1))).get === List(Set(enum2, enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1)))._query === Query(
+    inputMolecule(List(Set(enum1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -154,7 +173,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(enum1, enum2))).get === List(Set(enum2, enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1, enum2)))._query === Query(
+    inputMolecule(List(Set(enum1, enum2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -168,7 +187,7 @@ class EnumCard2coalesce extends CoreSpec {
 
     // nothing omitted
     inputMolecule(List(Set(enum1, enum3))).get === List(Set(enum2, enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1, enum3)))._query === Query(
+    inputMolecule(List(Set(enum1, enum3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -181,7 +200,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(enum1), Set(enum1))).get === List(Set(enum2, enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1), Set(enum1)))._query === Query(
+    inputMolecule(List(Set(enum1), Set(enum1)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -193,7 +212,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(enum1), Set(enum2))).get === List(Set(enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1), Set(enum2)))._query === Query(
+    inputMolecule(List(Set(enum1), Set(enum2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -212,7 +231,7 @@ class EnumCard2coalesce extends CoreSpec {
     inputMolecule(List(Set(enum1, enum2), Set(enum1))).get === List(Set(enum2, enum3, enum4, enum5))
     inputMolecule(List(Set(enum1, enum2), Set(enum2))).get === List(Set(enum3, enum4, enum5))
     inputMolecule(List(Set(enum1, enum2), Set(enum3))).get === Nil
-    inputMolecule(List(Set(enum1, enum2), Set(enum3)))._query === Query(
+    inputMolecule(List(Set(enum1, enum2), Set(enum3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -227,7 +246,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(List(Set(enum1, enum2), Set(enum2, enum3))).get === List(Set(enum3, enum4, enum5))
-    inputMolecule(List(Set(enum1, enum2), Set(enum2, enum3)))._query === Query(
+    inputMolecule(List(Set(enum1, enum2), Set(enum2, enum3)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -245,7 +264,7 @@ class EnumCard2coalesce extends CoreSpec {
 
   ">" in new ManySetup {
     val inputMolecule = m(Ns.enums.>(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -262,7 +281,7 @@ class EnumCard2coalesce extends CoreSpec {
 
 
     inputMolecule(Nil).get === List(Set(enum1, enum2, enum3, enum4, enum5, enum6))
-    inputMolecule(Nil)._query === Query(
+    inputMolecule(Nil)._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       Where(List(
@@ -274,7 +293,7 @@ class EnumCard2coalesce extends CoreSpec {
     inputMolecule(List(Set[String]())).get === List(Set(enum1, enum2, enum3, enum4, enum5, enum6))
 
     inputMolecule(List(Set(enum2))).get === List(Set(enum3, enum4, enum5, enum6))
-    inputMolecule(List(Set(enum2)))._query === Query(
+    inputMolecule(List(Set(enum2)))._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -301,7 +320,7 @@ class EnumCard2coalesce extends CoreSpec {
 
   ">=" in new ManySetup {
     val inputMolecule = m(Ns.enums.>=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -333,7 +352,7 @@ class EnumCard2coalesce extends CoreSpec {
 
   "<" in new ManySetup {
     val inputMolecule = m(Ns.enums.<(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
@@ -365,7 +384,7 @@ class EnumCard2coalesce extends CoreSpec {
 
   "<=" in new ManySetup {
     val inputMolecule = m(Ns.enums.<=(?))
-    inputMolecule._query === Query(
+    inputMolecule._rawQuery === Query(
       Find(List(
         AggrExpr("distinct", Seq(), Var("b2")))),
       In(
