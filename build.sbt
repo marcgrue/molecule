@@ -9,7 +9,7 @@ lazy val baseFlags              = List(
 )
 
 lazy val baseSettings = Defaults.coreDefaultSettings ++ Seq(
-  version := "0.22.0",
+  version := "0.22.1",
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org"))
@@ -59,8 +59,8 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("core"))
   .settings(baseSettings ++
-    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
-    //    publishSettings ++ // make docs for publishSigned
+    //    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
+    publishSettings ++ // make docs for publishSigned
     Seq(
       moduleName := "molecule",
       crossScalaVersions := supportedScalaVersions,
@@ -79,23 +79,23 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin)
   .jvmSettings(jvmSettings)
 
-/*
-  Publishing instructions:
+  /*
+    Publishing instructions:
 
-  Delete previous ivy cached build files before publishing locally
-  > del ~/.ivy2/local/org.scalamolecule/molecule*
+    Delete previous ivy cached build files before publishing locally
+    > del ~/.ivy2/local/org.scalamolecule/molecule*
 
-  `.enablePlugins(ScalaJSPlugin)` un-commented (active):
-  > sbt +publishLocal // produces sjs build files (for %%% refs) 2.12/2.13
-  > sbt publishLocal  // produces sjs build files (for %%% refs) 2.12
+    `.enablePlugins(ScalaJSPlugin)` un-commented (active):
+    > sbt +publishLocal // produces sjs build files (for %%% refs) 2.12/2.13
+    > sbt publishLocal  // produces sjs build files (for %%% refs) 2.12
 
-  `.enablePlugins(ScalaJSPlugin)` commented (inactive):
-  > sbt +publishLocal // produces scala build files (for %% refs) 2.12/2.13
-  > sbt publishLocal  // produces scala build files (for %% refs) 2.12
+    `.enablePlugins(ScalaJSPlugin)` commented (inactive):
+    > sbt +publishLocal // produces scala build files (for %% refs) 2.12/2.13
+    > sbt publishLocal  // produces scala build files (for %% refs) 2.12
 
-  > sbt [+]publishSigned for publishing to nexus/maven
- */
-//  .enablePlugins(ScalaJSPlugin)
+    > sbt [+]publishSigned for publishing to nexus/maven
+   */
+  .enablePlugins(ScalaJSPlugin)
 
 
 lazy val moleculeCoreJVM = moleculeCore.jvm

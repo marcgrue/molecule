@@ -615,28 +615,44 @@ class SchemaTest extends CoreSpec {
       Schema.fulltext(count).get === List(1)
 
       // Attributes with fulltext search
-      Schema.a.fulltext.get === List(
-        (":Ns/strs", true),
-        (":Ns/strMap", true),
+      Schema.a.fulltext.get.sortBy(_._1) === List(
         (":Ns/str", true),
+        (":Ns/strMap", true),
+        (":Ns/strs", true),
+        (":Ref1/str1", true),
+        (":Ref2/str2", true)
       )
 
-      Schema.a.fulltext(true).get.size === 3
+      Schema.a.fulltext(true).get.size === 5
       // Option is either true or non-asserted (nil/None), never false
       Schema.a.fulltext(false).get.size === 0
 
       Schema.a.fulltext.not(true).get.size === 0
-      Schema.a.fulltext.not(false).get.size === 3
+      Schema.a.fulltext.not(false).get.size === 5
 
 
       // Filter attributes with tacit `fulltext_` option
-      Schema.fulltext_.a.get === List(
-        ":Ns/strs", ":Ns/strMap", ":Ns/str")
-
-      Schema.fulltext_(true).a.get === List(
-        ":Ns/strs", ":Ns/strMap", ":Ns/str")
-      Schema.fulltext_.not(false).a.get === List(
-        ":Ns/strs", ":Ns/strMap", ":Ns/str")
+      Schema.fulltext_.a.get.sorted === List(
+        ":Ns/str",
+        ":Ns/strMap",
+        ":Ns/strs",
+        ":Ref1/str1",
+        ":Ref2/str2"
+      )
+      Schema.fulltext_(true).a.get.sorted === List(
+        ":Ns/str",
+        ":Ns/strMap",
+        ":Ns/strs",
+        ":Ref1/str1",
+        ":Ref2/str2"
+      )
+      Schema.fulltext_.not(false).a.get.sorted === List(
+        ":Ns/str",
+        ":Ns/strMap",
+        ":Ns/strs",
+        ":Ref1/str1",
+        ":Ref2/str2"
+      )
 
 
       // Get optional attribute fulltext status with `fulltext$`
@@ -659,7 +675,7 @@ class SchemaTest extends CoreSpec {
         (":Ns/bool", None))
 
       // Number of attributes without fulltext search
-      Schema.a.fulltext$(None).get.size === 74 - 3
+      Schema.a.fulltext$(None).get.size === 74 - 5
     }
 
 

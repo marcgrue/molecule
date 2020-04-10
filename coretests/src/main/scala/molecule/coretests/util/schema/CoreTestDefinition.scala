@@ -54,7 +54,7 @@ object CoreTestDefinition {
   }
 
   trait Ref1 {
-    val str1    = oneString
+    val str1    = oneString.fulltext
     val int1    = oneInt
     val enum1   = oneEnum("enum10", "enum11", "enum12")
     val ref2    = one[Ref2]
@@ -70,7 +70,7 @@ object CoreTestDefinition {
   }
 
   trait Ref2 {
-    val str2  = oneString.uniqueIdentity
+    val str2  = oneString.uniqueIdentity.fulltext
     val int2  = oneInt.uniqueValue
     val enum2 = oneEnum("enum20", "enum21", "enum22")
     val strs2 = manyString

@@ -34,7 +34,7 @@ object QueryOptimizer {
       case cl@Funct(_, _, NoBinding) =>
         comparisons += "" -> Some(cl)
 
-      case cl@Funct("fulltext", _, RelationBinding(Seq(_, Var(v)))) =>
+      case cl@Funct("fulltext", _, RelationBinding(Seq(Var(v), _))) =>
         fulltextSearches += v -> Some(cl)
 
       case cl@DataClause(_, Var(v), _, Val(_), _, _) =>
@@ -75,7 +75,7 @@ object QueryOptimizer {
       val a = limiterCoordinates.flatMap(_._2)
       val b = optimizedClauses
       val c = remainingClauses.map(_._2)
-      a ++ b ++ c
+      (a ++ b ++ c).toSeq // needed for 2.13
     }
 
     val optimizedClauses_ = getOptimizeClauses
