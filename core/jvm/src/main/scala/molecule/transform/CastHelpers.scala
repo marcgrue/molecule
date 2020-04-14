@@ -334,8 +334,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   } else {
     Some(row.get(i)
       .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next
-      .asInstanceOf[jMap[_, _]].values.iterator.next
-      .asInstanceOf[jLong].toLong)
+      .asInstanceOf[jMap[_, _]].get(Keyword.intern("db", "id")).asInstanceOf[jLong].toLong
+    )
   }
 
   protected def castOptManyRefAttr(row: jList[_], i: Int): Option[Set[Long]] = if (row.get(i) == null) {
@@ -344,7 +344,7 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     val it  = row.get(i).asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
     var set = Set.empty[Long]
     while (it.hasNext)
-      set += it.next.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jLong].toLong
+      set += it.next.asInstanceOf[jMap[_, _]].get(Keyword.intern("db", "id")).asInstanceOf[jLong].toLong
     Some(set)
   }
 
@@ -354,7 +354,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOptOneEnum(row: jList[_], i: Int): Option[String] = if (row.get(i) == null) {
     Option.empty[String]
   } else {
-    Some(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jMap[String, Keyword]].values.iterator.next.getName)
+    Some(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next
+      .asInstanceOf[jMap[String, Keyword]].values.iterator.next.getName)
   }
 
   protected def castOptManyEnum(row: jList[_], i: Int): Option[Set[String]] = if (row.get(i) == null) {
