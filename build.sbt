@@ -9,7 +9,7 @@ lazy val baseFlags              = List(
 )
 
 lazy val baseSettings = Defaults.coreDefaultSettings ++ Seq(
-  version := "0.22.1",
+  version := "0.22.2-SNAPSHOT",
   organization := "org.scalamolecule",
   organizationName := "ScalaMolecule",
   organizationHomepage := Some(url("http://www.scalamolecule.org"))
