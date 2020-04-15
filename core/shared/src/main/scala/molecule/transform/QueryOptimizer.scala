@@ -37,6 +37,9 @@ object QueryOptimizer {
       case cl@Funct("fulltext", _, RelationBinding(Seq(Var(v), _))) =>
         fulltextSearches += v -> Some(cl)
 
+      case cl@NotClause(Var(v), _) =>
+        comparisons += v -> Some(cl)
+
       case cl@DataClause(_, Var(v), _, Val(_), _, _) =>
         equalsOne += v -> Some(cl)
 

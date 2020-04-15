@@ -19,9 +19,9 @@ object QueryOps extends Helpers with JavaUtil {
   def esc1(arg: Any) = arg.toString.replace("\"", "\\\"")
 
   def castStr(tpe: String): String = tpe match {
-    case "Int"   => "Long"
-    case "Float" => "Double"
-    case other   => other
+    case "Int" | "ref" => "Long"
+    case "Float"       => "Double"
+    case other         => other
   }
 
   implicit class QueryOps(q: Query) {
@@ -35,8 +35,8 @@ object QueryOps extends Helpers with JavaUtil {
       find(AggrExpr(fn, args, Var(v)))
 
     def aggrV(a: Atom) =
-      q.wh.clauses.collectFirst{
-        case DataClause(_,_, KW(ns, attr, _), Var(attrV), _,_)
+      q.wh.clauses.collectFirst {
+        case DataClause(_, _, KW(ns, attr, _), Var(attrV), _, _)
           if a.nsFull == ns && a.attr == attr => attrV
       }
 

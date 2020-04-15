@@ -59,8 +59,8 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("core"))
   .settings(baseSettings ++
-    //    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
-    publishSettings ++ // make docs for publishSigned
+    publishSettingsWithoutDoc ++ // save time without doc creation for publishLocal
+    //    publishSettings ++ // make docs for publishSigned
     Seq(
       moduleName := "molecule",
       crossScalaVersions := supportedScalaVersions,
@@ -95,7 +95,7 @@ lazy val moleculeCore = crossProject(JSPlatform, JVMPlatform)
 
     > sbt [+]publishSigned for publishing to nexus/maven
    */
-  .enablePlugins(ScalaJSPlugin)
+//  .enablePlugins(ScalaJSPlugin)
 
 
 lazy val moleculeCoreJVM = moleculeCore.jvm

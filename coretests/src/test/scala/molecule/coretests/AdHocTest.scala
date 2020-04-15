@@ -13,7 +13,8 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "Adhoc" in new CoreSetup {
 
-    Ns.e.ref1$.int(1).debugGet
+
+    Ns.int.ref1.>(42).debugGet
 
     ok
   }
