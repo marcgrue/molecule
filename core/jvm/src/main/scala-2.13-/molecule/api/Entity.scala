@@ -737,6 +737,10 @@ object Entity {
     * @param id
     * @return
     */
-  def apply(entity: datomic.Entity, conn: Conn, id: Object) =
-    new Entity(entity, conn, id)
+  def apply(
+    entity: datomic.Entity,
+    conn: Conn,
+    id: Object,
+    showKW: Boolean = true
+  ) = new Entity(entity, conn, id, showKW)
 }
