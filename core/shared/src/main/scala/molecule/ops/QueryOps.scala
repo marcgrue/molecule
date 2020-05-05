@@ -11,12 +11,12 @@ import molecule.util.{Helpers, JavaUtil}
 /** Query operations */
 object QueryOps extends Helpers with JavaUtil {
 
-  def esc(arg: Any) = arg match {
+  def doubleEsc(arg: Any): Any = arg match {
     case s: String => s.replaceAll("\"", "\\\\\"")
     case other     => other
   }
 
-  def esc1(arg: Any) = arg.toString.replace("\"", "\\\"")
+  def esc1(arg: Any): String = escStr(arg.toString)
 
   def castStr(tpe: String): String = tpe match {
     case "Int" | "ref" => "Long"
@@ -127,7 +127,7 @@ object QueryOps extends Helpers with JavaUtil {
             val x = Var(v + "_" + (j + 1))
             Seq(
               DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), x, Empty),
-              Funct(s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(x))
+              Funct(s"""ground (java.net.URI. "${doubleEsc(uri)}")""", Nil, ScalarBinding(x))
             )
           }
           q1.copy(wh = Where(q1.wh.clauses :+ NotJoinClauses(Seq(Var(e)), notClauses)))
@@ -587,27 +587,27 @@ object QueryOps extends Helpers with JavaUtil {
               val x = Var(specialV + "_" + (j + 1))
               Seq(
                 DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), x, Empty),
-                Funct(s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(x))
+                Funct(s"""ground (java.net.URI. "${doubleEsc(uri)}")""", Nil, ScalarBinding(x))
               )
             }
             case set: Set[_]                      => set.toSeq.map(arg =>
               DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), Val(pre(a, arg)), Empty)
             )
             case mapArg if a.card == 3            => Seq(
-              Funct(".matches ^String", Seq(Var(e), Val(".+@" + esc(mapArg))), NoBinding)
+              Funct(".matches ^String", Seq(Var(e), Val(".+@" + doubleEsc(mapArg))), NoBinding)
             )
             case _ if specialV.nonEmpty && flag   => Seq(
               Funct("=", Seq(Var(specialV), Val(arg)), NoBinding)
             )
             case uri if specialV.nonEmpty         => Seq(
               DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), Var(specialV), Empty),
-              Funct(s"""ground (java.net.URI. "${esc(uri)}")""", Nil, ScalarBinding(Var(specialV)))
+              Funct(s"""ground (java.net.URI. "${doubleEsc(uri)}")""", Nil, ScalarBinding(Var(specialV)))
             )
             case fulltext if flag                 => Seq(
               Funct("fulltext", Seq(DS(""), KW(a.nsFull, a.attr), Val(arg)), RelationBinding(List(Var(e), Var(e + "_" + (i + 1)))))
             )
             case _                                => Seq(
-              DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), Val(pre(a, esc(arg))), Empty)
+              DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), Val(pre(a, doubleEsc(arg))), Empty)
             )
           }
           if (ruleClauses.isEmpty) None else Some(Rule(ruleName, Seq(Var(e)), ruleClauses))

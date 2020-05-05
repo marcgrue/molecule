@@ -34,8 +34,8 @@ class SeattleQueryTests extends SeattleSpec {
     // Names of twitter communities
     m(Community.name.type_("twitter")) -->
       """[:find  ?b
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ":Community.type/twitter"]]""".stripMargin
+        | :where [?a :Community/type ":Community.type/twitter"]
+        |        [?a :Community/name ?b]]""".stripMargin
 
 
     // Categories (many-cardinality) of the Belltown community
@@ -67,10 +67,10 @@ class SeattleQueryTests extends SeattleSpec {
     // Ref's are modelled as "Bond"'s (between Atoms)
     m(Community.name.Neighborhood.District.region_("ne")) -->
       """[:find  ?b
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/neighborhood ?c]
+        | :where [?d :District/region ":District.region/ne"]
         |        [?c :Neighborhood/district ?d]
-        |        [?d :District/region ":District.region/ne"]]""".stripMargin
+        |        [?a :Community/neighborhood ?c]
+        |        [?a :Community/name ?b]]""".stripMargin
 
 
     // Communities and their region
@@ -102,8 +102,8 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_(?))("twitter") -->
       """[:find  ?b
         | :in    $ ?c
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ?c]]
+        | :where [?a :Community/type ?c]
+        |        [?a :Community/name ?b]]
         |
         |INPUTS:
         |List(
@@ -196,8 +196,8 @@ class SeattleQueryTests extends SeattleSpec {
       //    m(Community.name.type_(?).orgtype_(?)).apply(List(("email_list", "community"))) -->
       """[:find  ?b
         | :in    $ ?c ?d
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ?c]
+        | :where [?a :Community/type ?c]
+        |        [?a :Community/name ?b]
         |        [?a :Community/orgtype ?d]]
         |
         |INPUTS:
@@ -256,23 +256,23 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Community.name < "C") -->
       """[:find  ?b
-        | :where [?a :Community/name ?b]
-        |        [(.compareTo ^String ?b "C") ?b2]
-        |        [(< ?b2 0)]]""".stripMargin
+        | :where [(.compareTo ^String ?b "C") ?b2]
+        |        [(< ?b2 0)]
+        |        [?a :Community/name ?b]]""".stripMargin
 
     m(Community.name < ?) -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :Community/name ?b]
-        |        [(.compareTo ^String ?b ?b1) ?b2]
-        |        [(< ?b2 0)]]""".stripMargin
+        | :where [(.compareTo ^String ?b ?b1) ?b2]
+        |        [(< ?b2 0)]
+        |        [?a :Community/name ?b]]""".stripMargin
 
     m(Community.name < ?).apply("C") -->
       """[:find  ?b
         | :in    $ ?b1
-        | :where [?a :Community/name ?b]
-        |        [(.compareTo ^String ?b ?b1) ?b2]
-        |        [(< ?b2 0)]]
+        | :where [(.compareTo ^String ?b ?b1) ?b2]
+        |        [(< ?b2 0)]
+        |        [?a :Community/name ?b]]
         |
         |INPUTS:
         |List(
@@ -312,8 +312,8 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_("website").category contains "food") -->
       """[:find  ?b (distinct ?d)
         | :in    $ %
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ":Community.type/website"]
+        | :where [?a :Community/type ":Community.type/website"]
+        |        [?a :Community/name ?b]
         |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
@@ -327,18 +327,18 @@ class SeattleQueryTests extends SeattleSpec {
     m(Community.name.type_(?).category contains ?) -->
       """[:find  ?b (distinct ?d)
         | :in    $ ?c2 ?d1
-        | :where [?a :Community/name ?b]
+        | :where [(fulltext $ :Community/category ?d1) [[ ?a ?d ]]]
+        |        [?a :Community/name ?b]
         |        [?a :Community/type ?c]
         |        [?c :db/ident ?c1]
-        |        [(name ?c1) ?c2]
-        |        [(fulltext $ :Community/category ?d1) [[ ?a ?d ]]]]""".stripMargin
+        |        [(name ?c1) ?c2]]""".stripMargin
 
 
     m(Community.name.type_(?).category contains ?).apply("website", Set("food")) -->
       """[:find  ?b (distinct ?d)
         | :in    $ % ?c
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ?c]
+        | :where [?a :Community/type ?c]
+        |        [?a :Community/name ?b]
         |        [?a :Community/category ?d]
         |        (rule1 ?a)]
         |
@@ -425,11 +425,11 @@ class SeattleQueryTests extends SeattleSpec {
     ) -->
       """[:find  ?b
         | :in    $ [?c ...] [?f ...]
-        | :where [?a :Community/name ?b]
-        |        [?a :Community/type ?c]
-        |        [?a :Community/neighborhood ?d]
+        | :where [?a :Community/type ?c]
+        |        [?a :Community/name ?b]
+        |        [?e :District/region ?f]
         |        [?d :Neighborhood/district ?e]
-        |        [?e :District/region ?f]]
+        |        [?a :Community/neighborhood ?d]]
         |
         |INPUTS:
         |List(
@@ -444,15 +444,15 @@ class SeattleQueryTests extends SeattleSpec {
 
     m(Schema.txInstant) -->
       """[:find  ?txInstant
-        | :where [_ :db.install/attribute ?id ?tx]
+        | :where [(= ?sys false)]
+        |        [(molecule.util.fns/live ?nsFull)]
+        |        [_ :db.install/attribute ?id ?tx]
         |        [?id :db/ident ?idIdent]
         |        [(namespace ?idIdent) ?nsFull]
         |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
-        |        [(= ?sys false)]
         |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
         |        [(first ?partNs) ?part]
         |        [(second ?partNs) ?ns]
-        |        [(molecule.util.fns/live ?nsFull)]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 

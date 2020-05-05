@@ -41,34 +41,47 @@ class MBrainz extends MoleculeSpec {
 
   "Data" >> {
 
-    // What are the titles of all the tracks John Lennon played on?
-    Track.name.Artists.name_("John Lennon").get(3) === List("Baby's Heartbeat", "John & Yoko", "Nutopian International Anthem")
+    // What are the titles of all the tracks John Lennon played on? (showing 5)
+    Track.name.Artists.name_("John Lennon").get.sorted.take(5) === List(
+      "Aisumasen (I'm Sorry)",
+      "Amsterdam",
+      "Angela",
+      "Attica State",
+      "Au"
+      // etc...
+    )
 
-        // What are the titles, album names, and release years of John Lennon's tracks?
-    Release.year.name.Media.Tracks.name.Artists.name_("John Lennon").get(5) === List(
+
+
+    // What are the titles, album names, and release years of John Lennon's tracks?
+    Release.year.name.Media.Tracks.name.Artists.name_("John Lennon")
+      .get(5).sortBy(t => (t._1, t._2, t._3)) === List(
+      (1969, "Live Peace in Toronto 1969", "Cold Turkey"),
       (1969, "Unfinished Music No. 3: Wedding Album", "Amsterdam"),
+      (1971, "Power to the People", "Open Your Box"),
       (1973, "Some Time in New York City", "Sunday Bloody Sunday"),
       (1973, "Some Time in New York City", "The Luck of the Irish"),
-      (1971, "Power to the People", "Open Your Box"),
-      (1969, "Live Peace in Toronto 1969", "Cold Turkey")
     )
 
     // What are the titles, album names, and release years of the John Lennon tracks released before or during 1970?
-    Release.year.<=(1970).name.Media.Tracks.name.Artists.name_("John Lennon").get(5) === List(
-      (1969, "Unfinished Music No. 3: Wedding Album", "Amsterdam"),
+    Release.year.<=(1970).name.Media.Tracks.name.Artists.name_("John Lennon")
+      .get(5).sortBy(t => (t._1, t._2, t._3)) === List(
       (1969, "Live Peace in Toronto 1969", "Cold Turkey"),
-      (1970, "Instant Karma! / Who Has Seen the Wind?", "Instant Karma!"),
+      (1969, "Unfinished Music No. 2: Life With the Lions", "Baby's Heartbeat"),
       (1969, "Unfinished Music No. 2: Life With the Lions", "Two Minutes Silence"),
-      (1969, "Unfinished Music No. 2: Life With the Lions", "Baby's Heartbeat")
+      (1969, "Unfinished Music No. 3: Wedding Album", "Amsterdam"),
+      (1970, "Instant Karma! / Who Has Seen the Wind?", "Instant Karma!"),
     )
 
     // What are the titles, artists, album names, and release years of all tracks having the word "always" in their titles?
-    Release.year.name.Media.Tracks.name.contains("always").Artists.name.get(5) === List(
+    Release.year.name.Media.Tracks.name.contains("always").Artists.name
+      .get(5).sortBy(t => (t._1, t._2, t._3)) === List(
+      (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"),
+      (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
+      (1971, "Hot Rocks 1964-1971", "You Can’t Always Get What You Want", "The Rolling Stones"),
       (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
       (1972, "You'll Always Be a Friend", "You'll Always Be a Friend", "Hot Chocolate"),
-      (1971, "Hot Rocks 1964-1971", "You Can’t Always Get What You Want", "The Rolling Stones"),
-      (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
-      (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"))
+    )
 
 
     // Gender distribution

@@ -13,8 +13,12 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "Adhoc" in new CoreSetup {
 
+    val expr = """Hello "\d" expression"""
 
-    Ns.int.ref1.>(42).debugGet
+    Ns.str(expr).save
+
+    Ns.str.get === List(expr)
+    Ns.str(expr).get === List(expr)
 
     ok
   }

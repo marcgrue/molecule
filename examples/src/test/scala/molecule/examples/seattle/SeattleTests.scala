@@ -294,19 +294,24 @@ class SeattleTests extends SeattleSpec {
       "Beach Drive Blog", "KOMO Communities - Green Lake", "Delridge Produce Cooperative")
 
     val southernSocialMedia = List(
+      "Blogging Georgetown",
       "Columbia Citizens",
       "Fauntleroy Community Association",
       "MyWallingford",
-      "Blogging Georgetown")
+    )
 
-    Community.name.type_("twitter" or "facebook_page").Neighborhood.District.region_("sw" or "s" or "se").get === southernSocialMedia
+    Community.name.type_("twitter" or "facebook_page")
+      .Neighborhood.District.region_("sw" or "s" or "se")
+      .get.sorted === southernSocialMedia
 
     // Parameterized
     val typeAndRegion = m(Community.name.type_(?).Neighborhood.District.region_(?))
 
-    typeAndRegion(("twitter" or "facebook_page") and ("sw" or "s" or "se")).get === southernSocialMedia
+    typeAndRegion(("twitter" or "facebook_page") and ("sw" or "s" or "se"))
+      .get.sorted === southernSocialMedia
     // ..same as
-    typeAndRegion(Seq("twitter", "facebook_page"), Seq("sw", "s", "se")).get === southernSocialMedia
+    typeAndRegion(Seq("twitter", "facebook_page"), Seq("sw", "s", "se"))
+      .get.sorted === southernSocialMedia
   }
 
   "Bonus: Cardinality-many queries" >> {

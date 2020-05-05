@@ -26,28 +26,34 @@ trait Helpers extends DateHandling {
     case other      => other
   }
 
+  def escStr(s: String) = s.replace("""\""", """\\""").replace(""""""", """\"""")
+  def unescStr(s: String) = s.replace("""\"""", """"""").replace("""\\""", """\""")
+
   protected def cast(value: Any): String = value match {
     case (a, b)                             => s"(${cast(a)}, ${cast(b)})"
     case v: Long                            => v.toString + "L"
     case v: Float                           => v.toString + "f"
     case date: Date                         => "\"" + date2str(date) + "\""
     case v: String if v.startsWith("__n__") => v.drop(5) // JS number hack
-    case v: String                          => "\"" + v + "\""
+    case v: String                          => "\"" + escStr(v) + "\""
     case v: UUID                            => "\"" + v + "\""
     case v: URI                             => "\"" + v + "\""
     case v                                  => v.toString
   }
 
-  final protected def os(opt: Option[Set[_]]): String = if (opt.isEmpty) "None" else s"""Some(${opt.get.map(cast)})"""
+  final protected def os(opt: Option[Set[_]]): String =
+    if (opt.isEmpty) "None" else s"""Some(${opt.get.map(cast)})"""
 
-  final protected def o(opt: Option[Any]): String = if (opt.isEmpty) "None" else s"""Some(${cast(opt.get)})"""
+  final protected def o(opt: Option[Any]): String =
+    if (opt.isEmpty) "None" else s"""Some(${cast(opt.get)})"""
 
-  final protected def seq[T](values: Seq[T]): String = values.map {
-    case set: Set[_] => set.map(cast).mkString("Set(", ", ", ")")
-    case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
-    case (a, b)      => s"${cast(a)} -> ${cast(b)}"
-    case v           => cast(v)
-  }.mkString("Seq(", ", ", ")")
+  final protected def seq[T](values: Seq[T]): String =
+    values.map {
+      case set: Set[_] => set.map(cast).mkString("Set(", ", ", ")")
+      case seq: Seq[_] => seq.map(cast).mkString("Seq(", ", ", ")")
+      case (a, b)      => s"${cast(a)} -> ${cast(b)}"
+      case v           => cast(v)
+    }.mkString("Seq(", ", ", ")")
 
 
   final protected def tupleToSeq(arg: Any): Seq[Any] = arg match {

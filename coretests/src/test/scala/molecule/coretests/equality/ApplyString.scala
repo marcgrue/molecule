@@ -59,6 +59,21 @@ class ApplyString extends CoreSpec {
     }
 
 
+    "Escaping 1" in new CoreSetup {
+      val expr = """Hello "\d" expression"""
+      Ns.str(expr).save
+      Ns.str.get === List(expr)
+      Ns.str(expr).get === List(expr)
+    }
+
+    "Escaping 2" in new CoreSetup {
+      val expr = "Hello \"\\d\" expression"
+      Ns.str(expr).save
+      Ns.str.get === List(expr)
+      Ns.str(expr).get === List(expr)
+    }
+
+
     // OR semantics only for card-one attributes
 
     "Mandatory" in new OneSetup {

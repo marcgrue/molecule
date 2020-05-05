@@ -53,29 +53,33 @@ object model extends Helpers {
     val value : Value
   }
 
-  case class Generic(nsFull: String,
-                     attr: String,
-                     tpe: String,
-                     value: Value) extends GenericAtom {
+  case class Generic(
+    nsFull: String,
+    attr: String,
+    tpe: String,
+    value: Value) extends GenericAtom {
     override def toString: String = s"""Generic("$nsFull", "$attr", "$tpe", $value)"""
   }
 
-  case class Atom(nsFull: String,
-                  attr: String,
-                  tpe: String,
-                  card: Int,
-                  value: Value,
-                  enumPrefix: Option[String] = None,
-                  gvs: Seq[GenericValue] = Nil,
-                  keys: Seq[String] = Nil) extends GenericAtom {
-    override def toString: String = s"""Atom("$nsFull", "$attr", "$tpe", $card, ${tv(tpe, value)}, ${o(enumPrefix)}, ${seq(gvs)}, ${seq(keys)})"""
+  case class Atom(
+    nsFull: String,
+    attr: String,
+    tpe: String,
+    card: Int,
+    value: Value,
+    enumPrefix: Option[String] = None,
+    gvs: Seq[GenericValue] = Nil,
+    keys: Seq[String] = Nil) extends GenericAtom {
+    override def toString: String =
+      s"""Atom("$nsFull", "$attr", "$tpe", $card, ${tv(tpe, value)}, ${o(enumPrefix)}, ${seq(gvs)}, ${seq(keys)})"""
   }
 
-  case class Bond(nsFull: String,
-                  refAttr: String,
-                  refNs: String = "",
-                  card: Int,
-                  gvs: Seq[GenericValue] = Nil) extends Element {
+  case class Bond(
+    nsFull: String,
+    refAttr: String,
+    refNs: String = "",
+    card: Int,
+    gvs: Seq[GenericValue] = Nil) extends Element {
     override def toString: String = s"""Bond("$nsFull", "$refAttr", "$refNs", $card, ${seq(gvs)})"""
   }
 
@@ -83,8 +87,7 @@ object model extends Helpers {
     override def toString: String = s"""ReBond("$backRef")"""
   }
 
-  case class Nested(bond: Bond,
-                    elements: Seq[Element]) extends Element
+  case class Nested(bond: Bond, elements: Seq[Element]) extends Element
 
   case class TxMetaData(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
@@ -215,16 +218,18 @@ object model extends Helpers {
     case ("Float" | "Double", v) if v.toString.startsWith("__n__") => v.toString.drop(5)
     case ("Float" | "Double", v)                                   => v.toString
     case ("Date", date: Date)                                      => "\"" + date2str(date) + "\""
-    case ("String" | "UUID" | "URI", v)                            => "\"" + v + "\""
+    case ("String", s: String)                                     => "\"" + escStr(s) + "\""
+    case ("UUID" | "URI", v)                                       => "\"" + v + "\""
     case (_, v)                                                    => v.toString
   }
 
-  final def getSeq2[T](tpe: String, values: Seq[T]): String = values.map {
-    case set: Set[_] => set.map(cast2(tpe, _)).mkString("Set(", ", ", ")")
-    case seq: Seq[_] => seq.map(cast2(tpe, _)).mkString("Seq(", ", ", ")")
-    case (a, b)      => s"${cast2(tpe, a)} -> ${cast2(tpe, b)}"
-    case v           => cast2(tpe, v)
-  }.mkString("Seq(", ", ", ")")
+  final def getSeq2[T](tpe: String, values: Seq[T]): String =
+    values.map {
+      case set: Set[_] => set.map(cast2(tpe, _)).mkString("Set(", ", ", ")")
+      case seq: Seq[_] => seq.map(cast2(tpe, _)).mkString("Seq(", ", ", ")")
+      case (a, b)      => s"${cast2(tpe, a)} -> ${cast2(tpe, b)}"
+      case v           => cast2(tpe, v)
+    }.mkString("Seq(", ", ", ")")
 
   final protected def tv(tpe: String, value: Value): String = {
     value match {
