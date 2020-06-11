@@ -1,7 +1,7 @@
 package molecule.coretests
 
 
-import molecule.api.in1_out6._
+import molecule.api.out10._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.util.Helpers
@@ -13,12 +13,9 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "Adhoc" in new CoreSetup {
 
-    val expr = """Hello "\d" expression"""
+    Ns.int(1).save
 
-    Ns.str(expr).save
-
-    Ns.str.get === List(expr)
-    Ns.str(expr).get === List(expr)
+    Ns.int.get === List(1)
 
     ok
   }

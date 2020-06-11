@@ -67,35 +67,35 @@ class Partition extends MoleculeSpec {
 
     "Back only" in new PartitionSetup {
       lit_Book.title("A good book").cat("good").Author.name("Marc").save
-      lit_Book.title.Author.name._Book.cat.get.head === ("A good book", "Marc", "good")
+      lit_Book.title.Author.name._lit_Book.cat.get.head === ("A good book", "Marc", "good")
     }
 
     "Adjacent" in new PartitionSetup {
-      m(lit_Book.title.Author.name._Book.Reviewers.name) insert List(("book", "John", "Marc"))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers.name) insert List(("book", "John", "Marc"))
 
-      m(lit_Book.title.Author.name._Book.Reviewers.name).get === List(("book", "John", "Marc"))
-      m(lit_Book.title.Author.name._Book.Reviewers * gen_Person.name).get === List(("book", "John", List("Marc")))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers.name).get === List(("book", "John", "Marc"))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name).get === List(("book", "John", List("Marc")))
     }
 
     "Nested" in new PartitionSetup {
-      m(lit_Book.title.Author.name._Book.Reviewers * gen_Person.name) insert List(("book", "John", List("Marc")))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name) insert List(("book", "John", List("Marc")))
 
-      m(lit_Book.title.Author.name._Book.Reviewers.name).get === List(("book", "John", "Marc"))
-      m(lit_Book.title.Author.name._Book.Reviewers * gen_Person.name).get === List(("book", "John", List("Marc")))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers.name).get === List(("book", "John", "Marc"))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name).get === List(("book", "John", List("Marc")))
     }
 
     "Nested + adjacent" in new PartitionSetup {
-      m(lit_Book.title.Author.name._Book.Reviewers * gen_Person.name.Professions.name) insert List(("book", "John", List(("Marc", "Musician"))))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name.Professions.name) insert List(("book", "John", List(("Marc", "Musician"))))
 
-      m(lit_Book.title.Author.name._Book.Reviewers.name.Professions.name).get === List(("book", "John", "Marc", "Musician"))
-      m(lit_Book.title.Author.name._Book.Reviewers * gen_Person.name.Professions.name).get === List(("book", "John", List(("Marc", "Musician"))))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name).get === List(("book", "John", "Marc", "Musician"))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name.Professions.name).get === List(("book", "John", List(("Marc", "Musician"))))
     }
 
     "Nested + nested" in new PartitionSetup {
-      m(lit_Book.title.Author.name._Book.Reviewers * (gen_Person.name.Professions * gen_Profession.name)) insert List(("book", "John", List(("Marc", List("Musician")))))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * (gen_Person.name.Professions * gen_Profession.name)) insert List(("book", "John", List(("Marc", List("Musician")))))
 
-      m(lit_Book.title.Author.name._Book.Reviewers.name.Professions.name).get === List(("book", "John", "Marc", "Musician"))
-      m(lit_Book.title.Author.name._Book.Reviewers * (gen_Person.name.Professions * gen_Profession.name)).get === List(("book", "John", List(("Marc", List("Musician")))))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name).get === List(("book", "John", "Marc", "Musician"))
+      m(lit_Book.title.Author.name._lit_Book.Reviewers * (gen_Person.name.Professions * gen_Profession.name)).get === List(("book", "John", List(("Marc", List("Musician")))))
     }
   }
 }

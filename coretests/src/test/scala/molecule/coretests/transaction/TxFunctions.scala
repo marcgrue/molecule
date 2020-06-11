@@ -11,7 +11,6 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-
 /* Example tx functions for tests
 *
 * To run tx functions, the transactor needs to have access to them. This is achieved
@@ -30,19 +29,19 @@ import scala.concurrent.duration._
 * LOCAL DEV / IN-MEMORY
 * No need to prepare anything since transaction functions defined within the project
 * will be available on the classpath for the Transactor managed by the Peer.
+* OBS: Note that when running test from sbt
 *
 * STARTER PRO / PRO
 * Set Datomic classpath variable to where your tx functions are before starting the transactor
-* > cd DATOMIC_HOME
-* > export DATOMIC_EXT_CLASSPATH=/Users/mg/molecule/molecule/coretests/target/scala-2.12/test-classes/
+* > export DATOMIC_EXT_CLASSPATH=/Users/mg/molecule/molecule/coretests/target/scala-2.13/test-classes/
 * > bin/transactor ...
 *
 * FREE
 * The Free version can't set the classpath variable so we need to provide the tx functions manually
-* by making a jar of our classes, move it to the transactor bin folder and start the transactor:
-* > cd ~/molecule/molecule/coretests/target/scala-2.12/test-classes  [path to your compiled classes]
+* by making a jar of our classes, move it to the transactor lib folder and start the transactor:
+* > cd ~/molecule/molecule/coretests/target/scala-2.13/test-classes  [path to your compiled classes]
 * > jar cvf scala-fns.jar .
-* > mv ~/molecule/molecule/coretests/target/scala-2.12/test-classes/scala-fns.jar DATOMIC_HOME/bin/
+* > mv ~/molecule/molecule/coretests/target/scala-2.13/test-classes/scala-fns.jar DATOMIC_HOME/lib/
 * > bin/transactor ...
 * */
 @TxFns
@@ -62,6 +61,7 @@ object txFns {
 
   // Constraint check before multiple updates
   def transfer(from: Long, to: Long, amount: Int)(implicit conn: Conn): Seq[Seq[Statement]] = {
+
     // Validate sufficient funds in from-account
     val curFromBalance = Ns(from).int.get.headOption.getOrElse(0)
 
@@ -145,7 +145,6 @@ class TxFunctions extends CoreSpec {
 
   import txFns._
 
-
   "Synchronous / Asynchronous" in new CoreSetup {
 
     // Transaction functions can be invoked both synchronously and asynchronously
@@ -216,7 +215,7 @@ class TxFunctions extends CoreSpec {
     Ns(toAccount).int.get.head === 700
 
     val okAmount = 20
-    // `transferComposed` calls two sub tx functions and still quarantees atomicity
+    // `transferComposed` calls two sub tx functions and still guarantees atomicity
     transact(transferComposed(fromAccount, toAccount, okAmount))
 
     // Live data changed
@@ -224,8 +223,19 @@ class TxFunctions extends CoreSpec {
     Ns(toAccount).int.get.head === 720
   }
 
+  /*
+  Tthe two following tests fail when running in sbt and succedd when running in IDE
 
-  "Tx fn + 1 tx meta data molecule" in new CoreSetup {
+  [error]  org.codehaus.commons.compiler.CompileException:
+  File org.codehaus.commons.compiler.jdk.SimpleCompiler$1[simplecompiler], Line 1, Column 0:
+  package datomic does not exist (compiler.err.doesnt.exist) (TxMethods.scala:320)
+
+  `datomic` doesn't seem to be on the classpath and might be related some of those issues:
+
+
+   */
+
+  "Tx fn + 1 tx meta data molecule (OBS: fails with sbt, but succeeds with IDE!)" in new CoreSetup {
 
     val fromAccount = Ns.int(100).save.eid
     val toAccount   = Ns.int(700).save.eid
@@ -241,7 +251,7 @@ class TxFunctions extends CoreSpec {
   }
 
 
-  "Tx fn + 2 tx meta data molecules" in new CoreSetup {
+  "Tx fn + 2 tx meta data molecules (OBS: fails with sbt, but succeeds with IDE!)" in new CoreSetup {
 
     val fromAccount = Ns.int(100).save.eid
     val toAccount   = Ns.int(700).save.eid
