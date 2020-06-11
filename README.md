@@ -99,7 +99,7 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.3",
+      "org.scalamolecule" %% "molecule" % "0.22.4",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -142,7 +142,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.3",
+      "org.scalamolecule" %% "molecule" % "0.22.4",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -151,7 +151,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.22.3")
+      ("org.scalamolecule" %%% "molecule" % "0.22.4")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -171,7 +171,6 @@ sbt
 sbt:molecule> test
 sbt:molecule> testOnly molecule.coretests.expression.Comparison
 ```
-Spec2 testing info [sbt/spec2](https://etorreborre.github.io/specs2/guide/SPECS2-4.8.3/org.specs2.guide.Runners.html#via-sbt)
 
 #### Author
 Marc Grue
