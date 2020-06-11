@@ -165,10 +165,18 @@ Molecule js-transpiled cross-compilations available at maven central for Scala
 [2.12](https://repo1.maven.org/maven2/org/scalamolecule/molecule_sjs1_2.12/).
 
 ## Test
-Test in IDE or with `sbt`:
+Test in IDE or with `sbt` (Scala 2.13.2):
 ```
 sbt
-sbt:molecule> test
+
+// All tests
+sbt:molecule> test 
+
+// All JS or JVM tests
+sbt:molecule> moleculeJS/test
+sbt:molecule> moleculeJVM/test
+
+// Single test
 sbt:molecule> testOnly molecule.coretests.expression.Comparison
 ```
 
