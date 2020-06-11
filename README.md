@@ -160,9 +160,7 @@ lazy val yourProjectJS = yourProject.js
 Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not 
 compiled to javascript).
 
-Molecule js-transpiled cross-compilations available at maven central for Scala 
-[2.13](https://repo1.maven.org/maven2/org/scalamolecule/molecule_sjs1_2.13/) and
-[2.12](https://repo1.maven.org/maven2/org/scalamolecule/molecule_sjs1_2.12/).
+Molecule js-transpiled cross-compilations available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).
 
 ## Test
 Test in IDE or with `sbt` (Scala 2.13.2):
