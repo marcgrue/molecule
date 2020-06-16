@@ -11,7 +11,7 @@ object Settings {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.22.4",
+    version := "0.22.5",
     crossScalaVersions := Seq("2.12.11", "2.13.2"),
     scalaVersion in ThisBuild := "2.13.2",
 

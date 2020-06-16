@@ -99,16 +99,12 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.4",
+      "org.scalamolecule" %% "molecule" % "0.22.5",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Molecule cross-compilations available at maven central for Scala 
-[2.13](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.13/) and
-[2.12](https://repo1.maven.org/maven2/org/scalamolecule/molecule_2.12/).
-
 
 ## Molecule in a Scala.js project
 
@@ -142,7 +138,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.4",
+      "org.scalamolecule" %% "molecule" % "0.22.5",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -151,7 +147,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.22.4")
+      ("org.scalamolecule" %%% "molecule" % "0.22.5")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -160,7 +156,7 @@ lazy val yourProjectJS = yourProject.js
 Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not 
 compiled to javascript).
 
-Molecule js-transpiled cross-compilations available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).
+Molecule is available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).
 
 ## Test
 Test in IDE or with `sbt` (Scala 2.13.2):

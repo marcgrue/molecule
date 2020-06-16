@@ -170,7 +170,7 @@ trait AttrExpressions {
       * @param moreValues Optional additional Iterables of attribute values to be matched
       * @return Filtered molecule
       */
-    def apply(values: Seq[T], moreValues: Seq[T]*): Ns with Attr = ???
+    def apply(values: Iterable[T], moreValues: Iterable[T]*): Ns with Attr = ???
 
 
     /** Mark tacit attribute to be unified in self-join.
@@ -230,7 +230,7 @@ trait AttrExpressions {
       * @param values Iterable of negated attribute values
       * @return Filtered molecule
       */
-    def not(values: Seq[T]): Ns with Attr = ???
+    def not(values: Iterable[T]): Ns with Attr = ???
 
 
     /** Match attribute values different from one or more applied values.
@@ -402,9 +402,6 @@ trait AttrExpressions {
       * @return Molecule to be updated
       */
     def retract(values: Iterable[Rem]): Ns with Attr = ???
-
-    // todo?
-    //    def retract(values: ??): In with Attr = ???
   }
 
 
