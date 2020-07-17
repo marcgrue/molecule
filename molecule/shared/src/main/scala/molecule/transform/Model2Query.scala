@@ -16,7 +16,7 @@ import molecule.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  * */
+  **/
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
@@ -886,6 +886,8 @@ object Model2Query extends Helpers {
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
       case Eq((set: Set[_]) :: Nil)                    => q.findD(v).whereAnd(e, a, v, set.toSeq, u(t, v))
       case Eq(arg :: Nil) if uri(t)                    => q.findD(v).where(e, a, v).where(e, a, v + "_uri").func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
+      case Eq(arg :: Nil) if a.tpe == "Float"          => q.findD(v).where(e, a, Val(arg.toString.toFloat)).where(e, a, v)
+      case Eq(arg :: Nil) if a.tpe == "Double"         => q.findD(v).where(e, a, Val(arg.toString.toDouble)).where(e, a, v)
       case Eq(arg :: Nil) if a.tpe == "BigDecimal"     => q.findD(v).where(e, a, Val(BigDecimal(withDecimal(arg)))).where(e, a, v)
       case Eq(arg :: Nil)                              => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                                    => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))

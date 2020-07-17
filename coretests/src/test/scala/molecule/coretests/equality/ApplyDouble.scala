@@ -294,4 +294,230 @@ class ApplyDouble extends CoreSpec {
       Ns.int.doubles_.apply(double1 and double2).get === List(1)
     }
   }
+
+
+  "Implicit widening conversions, card one" in new CoreSetup {
+
+    Ns.int.double insert List(
+      (1, 1),
+      (2, 1L),
+      (3, 1f),
+      (4, 1.0),
+      (5, double2),
+    )
+
+    val res1 = List(
+      (1, 1.0),
+      (2, 1.0),
+      (3, 1.0),
+      (4, 1.0),
+    )
+    val res2 = List((5, 2.0))
+
+    val res1t = List(1, 2, 3, 4)
+    val res2t = List(5)
+
+    // Mandatory
+
+    Ns.int.double(1).get.sortBy(_._1) === res1
+    Ns.int.double.not(2).get.sortBy(_._1) === res1
+    Ns.int.double.<(2).get.sortBy(_._1) === res1
+    Ns.int.double.>(1).get === res2
+    Ns.int.double.>=(2).get === res2
+    Ns.int.double.<=(1).get.sortBy(_._1) === res1
+
+    Ns.int.double(1L).get.sortBy(_._1) === res1
+    Ns.int.double.not(2L).get.sortBy(_._1) === res1
+    Ns.int.double.<(2L).get.sortBy(_._1) === res1
+    Ns.int.double.>(1L).get === res2
+    Ns.int.double.>=(2L).get === res2
+    Ns.int.double.<=(1L).get.sortBy(_._1) === res1
+
+    Ns.int.double(1f).get.sortBy(_._1) === res1
+    Ns.int.double.not(2f).get.sortBy(_._1) === res1
+    Ns.int.double.<(2f).get.sortBy(_._1) === res1
+    Ns.int.double.>(1f).get === res2
+    Ns.int.double.>=(2f).get === res2
+    Ns.int.double.<=(1f).get.sortBy(_._1) === res1
+
+
+    Ns.int.double(int1).get.sortBy(_._1) === res1
+    Ns.int.double.not(int2).get.sortBy(_._1) === res1
+    Ns.int.double.<(int2).get.sortBy(_._1) === res1
+    Ns.int.double.>(int1).get === res2
+    Ns.int.double.>=(int2).get === res2
+    Ns.int.double.<=(int1).get.sortBy(_._1) === res1
+
+    Ns.int.double(long1).get.sortBy(_._1) === res1
+    Ns.int.double.not(long2).get.sortBy(_._1) === res1
+    Ns.int.double.<(long2).get.sortBy(_._1) === res1
+    Ns.int.double.>(long1).get === res2
+    Ns.int.double.>=(long2).get === res2
+    Ns.int.double.<=(long1).get.sortBy(_._1) === res1
+
+    Ns.int.double(float1).get.sortBy(_._1) === res1
+    Ns.int.double.not(float2).get.sortBy(_._1) === res1
+    Ns.int.double.<(float2).get.sortBy(_._1) === res1
+    Ns.int.double.>(float1).get === res2
+    Ns.int.double.>=(float2).get === res2
+    Ns.int.double.<=(float1).get.sortBy(_._1) === res1
+
+    // Tacit
+
+    Ns.int.double_(1).get.sorted === res1t
+    Ns.int.double_.not(2).get.sorted === res1t
+    Ns.int.double_.<(2).get.sorted === res1t
+    Ns.int.double_.>(1).get === res2t
+    Ns.int.double_.>=(2).get === res2t
+    Ns.int.double_.<=(1).get.sorted === res1t
+
+    Ns.int.double_(1L).get.sorted === res1t
+    Ns.int.double_.not(2L).get.sorted === res1t
+    Ns.int.double_.<(2L).get.sorted === res1t
+    Ns.int.double_.>(1L).get === res2t
+    Ns.int.double_.>=(2L).get === res2t
+    Ns.int.double_.<=(1L).get.sorted === res1t
+
+    Ns.int.double_(1f).get.sorted === res1t
+    Ns.int.double_.not(2f).get.sorted === res1t
+    Ns.int.double_.<(2f).get.sorted === res1t
+    Ns.int.double_.>(1f).get === res2t
+    Ns.int.double_.>=(2f).get === res2t
+    Ns.int.double_.<=(1f).get.sorted === res1t
+
+
+    Ns.int.double_(int1).get.sorted === res1t
+    Ns.int.double_.not(int2).get.sorted === res1t
+    Ns.int.double_.<(int2).get.sorted === res1t
+    Ns.int.double_.>(int1).get === res2t
+    Ns.int.double_.>=(int2).get === res2t
+    Ns.int.double_.<=(int1).get.sorted === res1t
+
+    Ns.int.double_(long1).get.sorted === res1t
+    Ns.int.double_.not(long2).get.sorted === res1t
+    Ns.int.double_.<(long2).get.sorted === res1t
+    Ns.int.double_.>(long1).get === res2t
+    Ns.int.double_.>=(long2).get === res2t
+    Ns.int.double_.<=(long1).get.sorted === res1t
+
+    Ns.int.double_(float1).get.sorted === res1t
+    Ns.int.double_.not(float2).get.sorted === res1t
+    Ns.int.double_.<(float2).get.sorted === res1t
+    Ns.int.double_.>(float1).get === res2t
+    Ns.int.double_.>=(float2).get === res2t
+    Ns.int.double_.<=(float1).get.sorted === res1t
+  }
+
+
+  "Implicit widening conversions, card many" in new CoreSetup {
+
+    Ns.int.doubles insert List(
+      (1, Set(1)),
+      (2, Set(1L)),
+      (3, Set(1f)),
+      (4, Set(1.0)),
+      (5, Set(double2)),
+    )
+
+    val res1 = List(
+      (1, Set(1.0)),
+      (2, Set(1.0)),
+      (3, Set(1.0)),
+      (4, Set(1.0)),
+    )
+    val res2 = List((5, Set(2.0)))
+
+    val res1t = List(1, 2, 3, 4)
+    val res2t = List(5)
+
+    // Mandatory
+
+    Ns.int.doubles(1).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(2).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(2).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(1).get === res2
+    Ns.int.doubles.>=(2).get === res2
+    Ns.int.doubles.<=(1).get.sortBy(_._1) === res1
+
+    Ns.int.doubles(1L).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(2L).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(2L).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(1L).get === res2
+    Ns.int.doubles.>=(2L).get === res2
+    Ns.int.doubles.<=(1L).get.sortBy(_._1) === res1
+
+    Ns.int.doubles(1f).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(2f).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(2f).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(1f).get === res2
+    Ns.int.doubles.>=(2f).get === res2
+    Ns.int.doubles.<=(1f).get.sortBy(_._1) === res1
+
+
+    Ns.int.doubles(int1).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(int2).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(int2).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(int1).get === res2
+    Ns.int.doubles.>=(int2).get === res2
+    Ns.int.doubles.<=(int1).get.sortBy(_._1) === res1
+
+    Ns.int.doubles(long1).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(long2).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(long2).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(long1).get === res2
+    Ns.int.doubles.>=(long2).get === res2
+    Ns.int.doubles.<=(long1).get.sortBy(_._1) === res1
+
+    Ns.int.doubles(float1).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(float2).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(float2).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(float1).get === res2
+    Ns.int.doubles.>=(float2).get === res2
+    Ns.int.doubles.<=(float1).get.sortBy(_._1) === res1
+
+    // Tacit
+
+    Ns.int.doubles_(1).get.sorted === res1t
+    Ns.int.doubles_.not(2).get.sorted === res1t
+    Ns.int.doubles_.<(2).get.sorted === res1t
+    Ns.int.doubles_.>(1).get === res2t
+    Ns.int.doubles_.>=(2).get === res2t
+    Ns.int.doubles_.<=(1).get.sorted === res1t
+
+    Ns.int.doubles_(1L).get.sorted === res1t
+    Ns.int.doubles_.not(2L).get.sorted === res1t
+    Ns.int.doubles_.<(2L).get.sorted === res1t
+    Ns.int.doubles_.>(1L).get === res2t
+    Ns.int.doubles_.>=(2L).get === res2t
+    Ns.int.doubles_.<=(1L).get.sorted === res1t
+
+    Ns.int.doubles_(1f).get.sorted === res1t
+    Ns.int.doubles_.not(2f).get.sorted === res1t
+    Ns.int.doubles_.<(2f).get.sorted === res1t
+    Ns.int.doubles_.>(1f).get === res2t
+    Ns.int.doubles_.>=(2f).get === res2t
+    Ns.int.doubles_.<=(1f).get.sorted === res1t
+
+
+    Ns.int.doubles_(int1).get.sorted === res1t
+    Ns.int.doubles_.not(int2).get.sorted === res1t
+    Ns.int.doubles_.<(int2).get.sorted === res1t
+    Ns.int.doubles_.>(int1).get === res2t
+    Ns.int.doubles_.>=(int2).get === res2t
+    Ns.int.doubles_.<=(int1).get.sorted === res1t
+
+    Ns.int.doubles_(long1).get.sorted === res1t
+    Ns.int.doubles_.not(long2).get.sorted === res1t
+    Ns.int.doubles_.<(long2).get.sorted === res1t
+    Ns.int.doubles_.>(long1).get === res2t
+    Ns.int.doubles_.>=(long2).get === res2t
+    Ns.int.doubles_.<=(long1).get.sorted === res1t
+
+    Ns.int.doubles_(float1).get.sorted === res1t
+    Ns.int.doubles_.not(float2).get.sorted === res1t
+    Ns.int.doubles_.<(float2).get.sorted === res1t
+    Ns.int.doubles_.>(float1).get === res2t
+    Ns.int.doubles_.>=(float2).get === res2t
+    Ns.int.doubles_.<=(float1).get.sorted === res1t
+  }
 }

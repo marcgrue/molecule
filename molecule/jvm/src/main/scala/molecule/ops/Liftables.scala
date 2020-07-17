@@ -42,10 +42,10 @@ private[molecule] trait Liftables extends MacroHelpers {
     case bigDec: BigDecimal            => mkBigDecimal(bigDec)
     case uuid: UUID                    => mkUUID(uuid)
     case uri: URI                      => mkURI(uri)
-    case qm: Qm.type                   => q"Qm"
-    case maybe: Distinct.type          => q"Distinct"
-    case entValue: EntValue.type       => q"EntValue"
-    case varValue: VarValue.type       => q"VarValue"
+    case _: Qm.type                    => q"Qm"
+    case _: Distinct.type              => q"Distinct"
+    case _: EntValue.type              => q"EntValue"
+    case _: VarValue.type              => q"VarValue"
     case set: Set[_]                   => set match {
       case s1: Set1[_]   => q"Set(${any(s1.head)})"
       case s2: Set2[_]   => q"Set(..${s2 map any})"
@@ -57,9 +57,12 @@ private[molecule] trait Liftables extends MacroHelpers {
     case q"scala.None   "              => q"None"
     case null                          => q"null"
     case other                         =>
-      abort("Can't lift unexpected Any type: " + other.getClass +
+      abort("Can't lift unexpected code:" +
+        "\ncode : " + other +
+        "\nclass: " + other.getClass +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-        "\nTry to assign the expression to a variable and apply the variable instead.")
+        "\nTry to assign the expression to a variable and apply the variable instead."
+      )
   }
 
   def any(v: Any): c.universe.Tree = v match {

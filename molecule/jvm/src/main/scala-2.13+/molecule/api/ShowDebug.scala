@@ -21,7 +21,7 @@ import scala.language.implicitConversions
   *
   * Call a debug method on a molecule to see the internal transformations and
   * produced transaction statements or sample data.
-  * */
+  **/
 trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
 
 
@@ -251,6 +251,18 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       val rulesOut: String = if (_query2.i.rules.isEmpty) "none\n\n" else "[\n " + _query2.i.rules.map(Query2String(_query2).p(_)).mkString("\n ") + "\n]\n\n"
       val inputs  : String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}").mkString("\n") + "\n\n"
       val outs    : String = rows.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1.mkString("[", "  ", "]")}").mkString("\n")
+      // If resolution doesn't take place
+      //      println(
+      //        "\n--------------------------------------------------------------------------\n" +
+      //          _model + "\n\n-- Before variable resolution (if any) --\n" +
+      //          _query + "\n\n-- After variable resolution (if any) --\n" +
+      //          _query2 + "\n\n" +
+      //          _query2.datalog + "\n\n" +
+      //          "RULES: " + rulesOut +
+      //          "INPUTS: " + inputs +
+      //          "OUTPUTS:\n" + outs + "\n(showing up to 500 rows)" +
+      //          "\n--------------------------------------------------------------------------\n"
+      //      )
       println(
         "\n--------------------------------------------------------------------------\n" +
           _model + "\n\n" +

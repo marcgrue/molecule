@@ -296,7 +296,8 @@ class ApplyBigDecimal extends CoreSpec {
   }
 
 
-  "Implicit conversions, card one" in new CoreSetup {
+  "Implicit widening conversions, card one" in new CoreSetup {
+
     Ns.int.bigDec insert List(
       (1, 1),
       (2, 1L),
@@ -373,7 +374,8 @@ class ApplyBigDecimal extends CoreSpec {
   }
 
 
-  "Implicit conversions, card many" in new CoreSetup {
+  "Implicit widening conversions, card many" in new CoreSetup {
+
     Ns.int.bigDecs insert List(
       (1, Set(1)),
       (2, Set(1L)),

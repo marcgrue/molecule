@@ -410,15 +410,17 @@ object QueryOps extends Helpers with JavaUtil {
 
     def compareToMany[T](op: String, a: Atom, v: String, args: Seq[T]): Query =
       args.zipWithIndex.foldLeft(q) {
-        case (q1, (arg: URI, i))                     =>
+        case (q1, (arg: URI, i)) =>
           q1.func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
             .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(Var(v + "_" + (i + 1) + "b")))
             .func(op, Seq(Var(v + "_" + (i + 1) + "b"), Val(0)))
-        case (q1, (arg, i))                          => q1.compareTo(op, a, v, Val(arg), i + 1)
+        case (q1, (arg, i))      => q1.compareTo(op, a, v, Val(arg), i + 1)
       }
 
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = qv match {
       case Val(arg) if a.tpe == "String"     => compareTo2(op, a.tpe, v, Val(arg.toString.replace("\"", "\\\"")), i)
+      case Val(arg) if a.tpe == "Float"      => compareTo2(op, a.tpe, v, Val(arg.toString.toFloat), i)
+      case Val(arg) if a.tpe == "Double"     => compareTo2(op, a.tpe, v, Val(arg.toString.toDouble), i)
       case Val(arg) if a.tpe == "BigDecimal" => compareTo2(op, a.tpe, v, Val(BigDecimal(withDecimal(arg))), i)
       case _                                 => compareTo2(op, a.tpe, v, qv, i)
     }
@@ -449,8 +451,11 @@ object QueryOps extends Helpers with JavaUtil {
         val arg2 = withDecimal(arg1)
         q.func(s"""ground $arg2""", Empty, v)
 
-      case "Float" | "Double" | "Int" | "Long" | "Boolean" | "ref" =>
+      case "Int" | "Long" | "Boolean" | "ref" =>
         q.func(s"""ground $arg""", Empty, v)
+
+      case "Float" | "Double" =>
+        q.func(s"""ground ${withDecimal(arg)}""", Empty, v)
 
       case "java.util.Date" =>
         q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)

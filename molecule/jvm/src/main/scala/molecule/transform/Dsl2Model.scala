@@ -1,4 +1,5 @@
 package molecule.transform
+
 import molecule.ast.model._
 import molecule.boilerplate.attributes._
 import molecule.generic.index.{AEVT, AVET, EAVT, VAET}
@@ -1300,7 +1301,14 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         case Literal(Constant(b: Boolean))                  => b
         case Ident(TermName(v: String))                     => hasVariables = true; "__ident__" + v
         case Select(This(TypeName(_)), TermName(v: String)) => hasVariables = true; "__ident__" + v
-        case other                                          => other
+
+        // Implicit widening conversions of variables
+        case Select(Select(This(TypeName(_)), TermName(v)),
+        TermName("toFloat" | "toDouble" | "toLong")) =>
+          hasVariables = true
+          "__ident__" + v
+
+        case other => other
       }
     }
 

@@ -294,4 +294,170 @@ class ApplyFloat extends CoreSpec {
       Ns.int.floats_.apply(float1 and float2).get === List(1)
     }
   }
+
+
+  "Implicit widening conversions, card one" in new CoreSetup {
+
+    Ns.int.float insert List(
+      (1, 1),
+      (2, 1L),
+      (3, 1f),
+      (4, float2),
+    )
+
+    val res1 = List(
+      (1, 1f),
+      (2, 1f),
+      (3, 1f),
+    )
+    val res2 = List((4, 2f))
+
+    val res1t = List(1, 2, 3)
+    val res2t = List(4)
+
+    // Mandatory
+
+    Ns.int.float(1).get.sortBy(_._1) === res1
+    Ns.int.float.not(2).get.sortBy(_._1) === res1
+    Ns.int.float.<(2).get.sortBy(_._1) === res1
+    Ns.int.float.>(1).get === res2
+    Ns.int.float.>=(2).get === res2
+    Ns.int.float.<=(1).get.sortBy(_._1) === res1
+
+    Ns.int.float(1L).get.sortBy(_._1) === res1
+    Ns.int.float.not(2L).get.sortBy(_._1) === res1
+    Ns.int.float.<(2L).get.sortBy(_._1) === res1
+    Ns.int.float.>(1L).get === res2
+    Ns.int.float.>=(2L).get === res2
+    Ns.int.float.<=(1L).get.sortBy(_._1) === res1
+
+
+    Ns.int.float(int1).get.sortBy(_._1) === res1
+    Ns.int.float.not(int2).get.sortBy(_._1) === res1
+    Ns.int.float.<(int2).get.sortBy(_._1) === res1
+    Ns.int.float.>(int1).get === res2
+    Ns.int.float.>=(int2).get === res2
+    Ns.int.float.<=(int1).get.sortBy(_._1) === res1
+
+    Ns.int.float(long1).get.sortBy(_._1) === res1
+    Ns.int.float.not(long2).get.sortBy(_._1) === res1
+    Ns.int.float.<(long2).get.sortBy(_._1) === res1
+    Ns.int.float.>(long1).get === res2
+    Ns.int.float.>=(long2).get === res2
+    Ns.int.float.<=(long1).get.sortBy(_._1) === res1
+
+    // Tacit
+
+    Ns.int.float_(1).get.sorted === res1t
+    Ns.int.float_.not(2).get.sorted === res1t
+    Ns.int.float_.<(2).get.sorted === res1t
+    Ns.int.float_.>(1).get === res2t
+    Ns.int.float_.>=(2).get === res2t
+    Ns.int.float_.<=(1).get.sorted === res1t
+
+    Ns.int.float_(1L).get.sorted === res1t
+    Ns.int.float_.not(2L).get.sorted === res1t
+    Ns.int.float_.<(2L).get.sorted === res1t
+    Ns.int.float_.>(1L).get === res2t
+    Ns.int.float_.>=(2L).get === res2t
+    Ns.int.float_.<=(1L).get.sorted === res1t
+
+
+    Ns.int.float_(int1).get.sorted === res1t
+    Ns.int.float_.not(int2).get.sorted === res1t
+    Ns.int.float_.<(int2).get.sorted === res1t
+    Ns.int.float_.>(int1).get === res2t
+    Ns.int.float_.>=(int2).get === res2t
+    Ns.int.float_.<=(int1).get.sorted === res1t
+
+    Ns.int.float_(long1).get.sorted === res1t
+    Ns.int.float_.not(long2).get.sorted === res1t
+    Ns.int.float_.<(long2).get.sorted === res1t
+    Ns.int.float_.>(long1).get === res2t
+    Ns.int.float_.>=(long2).get === res2t
+    Ns.int.float_.<=(long1).get.sorted === res1t
+  }
+
+
+  "Implicit widening conversions, card many" in new CoreSetup {
+
+    Ns.int.floats insert List(
+      (1, Set(1)),
+      (2, Set(1L)),
+      (3, Set(1f)),
+      (4, Set(float2)),
+    )
+
+    val res1 = List(
+      (1, Set(1f)),
+      (2, Set(1f)),
+      (3, Set(1f)),
+    )
+    val res2 = List((4, Set(2f)))
+
+    val res1t = List(1, 2, 3)
+    val res2t = List(4)
+
+    // Mandatory
+
+    Ns.int.floats(1).get.sortBy(_._1) === res1
+    Ns.int.floats.not(2).get.sortBy(_._1) === res1
+    Ns.int.floats.<(2).get.sortBy(_._1) === res1
+    Ns.int.floats.>(1).get === res2
+    Ns.int.floats.>=(2).get === res2
+    Ns.int.floats.<=(1).get.sortBy(_._1) === res1
+
+    Ns.int.floats(1L).get.sortBy(_._1) === res1
+    Ns.int.floats.not(2L).get.sortBy(_._1) === res1
+    Ns.int.floats.<(2L).get.sortBy(_._1) === res1
+    Ns.int.floats.>(1L).get === res2
+    Ns.int.floats.>=(2L).get === res2
+    Ns.int.floats.<=(1L).get.sortBy(_._1) === res1
+
+
+    Ns.int.floats(int1).get.sortBy(_._1) === res1
+    Ns.int.floats.not(int2).get.sortBy(_._1) === res1
+    Ns.int.floats.<(int2).get.sortBy(_._1) === res1
+    Ns.int.floats.>(int1).get === res2
+    Ns.int.floats.>=(int2).get === res2
+    Ns.int.floats.<=(int1).get.sortBy(_._1) === res1
+
+    Ns.int.floats(long1).get.sortBy(_._1) === res1
+    Ns.int.floats.not(long2).get.sortBy(_._1) === res1
+    Ns.int.floats.<(long2).get.sortBy(_._1) === res1
+    Ns.int.floats.>(long1).get === res2
+    Ns.int.floats.>=(long2).get === res2
+    Ns.int.floats.<=(long1).get.sortBy(_._1) === res1
+
+    // Tacit
+
+    Ns.int.floats_(1).get.sorted === res1t
+    Ns.int.floats_.not(2).get.sorted === res1t
+    Ns.int.floats_.<(2).get.sorted === res1t
+    Ns.int.floats_.>(1).get === res2t
+    Ns.int.floats_.>=(2).get === res2t
+    Ns.int.floats_.<=(1).get.sorted === res1t
+
+    Ns.int.floats_(1L).get.sorted === res1t
+    Ns.int.floats_.not(2L).get.sorted === res1t
+    Ns.int.floats_.<(2L).get.sorted === res1t
+    Ns.int.floats_.>(1L).get === res2t
+    Ns.int.floats_.>=(2L).get === res2t
+    Ns.int.floats_.<=(1L).get.sorted === res1t
+
+
+    Ns.int.floats_(int1).get.sorted === res1t
+    Ns.int.floats_.not(int2).get.sorted === res1t
+    Ns.int.floats_.<(int2).get.sorted === res1t
+    Ns.int.floats_.>(int1).get === res2t
+    Ns.int.floats_.>=(int2).get === res2t
+    Ns.int.floats_.<=(int1).get.sorted === res1t
+
+    Ns.int.floats_(long1).get.sorted === res1t
+    Ns.int.floats_.not(long2).get.sorted === res1t
+    Ns.int.floats_.<(long2).get.sorted === res1t
+    Ns.int.floats_.>(long1).get === res2t
+    Ns.int.floats_.>=(long2).get === res2t
+    Ns.int.floats_.<=(long1).get.sorted === res1t
+  }
 }

@@ -1,4 +1,5 @@
 package molecule.coretests.expression
+
 import molecule.api.in1_out4._
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.coretests.util.CoreSpec
@@ -34,9 +35,12 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or other expressions
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
-      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
-        "Maybe you are applying some Scala expression to a molecule attribute?\n" +
-        "Try to assign the expression to a variable and apply the variable instead.")
+      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+        "\ncode : scala.collection.immutable.Seq.empty[Int]" +
+        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+        "\nTry to assign the expression to a variable and apply the variable instead."
+    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.str.int_(?)).apply(Nil).get === List("d")
@@ -73,9 +77,12 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.int.ints_(Seq.empty[Int]))",
-      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected Any type: class scala.reflect.internal.Trees$TypeApply\n" +
-        "Maybe you are applying some Scala expression to a molecule attribute?\n" +
-        "Try to assign the expression to a variable and apply the variable instead.")
+      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+        "\ncode : scala.collection.immutable.Seq.empty[Int]" +
+        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+        "\nTry to assign the expression to a variable and apply the variable instead."
+    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.int.ints_(?)).apply(Nil).get === List(40)
