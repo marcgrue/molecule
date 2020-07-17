@@ -129,7 +129,7 @@ class Aggregates extends MoleculeSpec {
 
 
     // Add a twin Cyclop with 4 heads (not factual!)
-    Monster.name.heads insert("Cyclops", 4)
+    Monster.name.heads.insert("Cyclops", 4)
 
     // Now we have a different set to aggregate over and compare
     Monster.name.heads.get.sortBy(t => (t._1, t._2)) === List(

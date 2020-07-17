@@ -11,9 +11,9 @@ object Settings {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.22.5",
-    crossScalaVersions := Seq("2.12.11", "2.13.2"),
-    scalaVersion in ThisBuild := "2.13.2",
+    version := "0.22.6",
+    crossScalaVersions := Seq("2.12.12", "2.13.3"),
+    scalaVersion in ThisBuild := "2.13.3",
 
     scalacOptions := List(
       "-feature",
@@ -58,7 +58,7 @@ object Settings {
     name := "molecule",
     libraryDependencies ++= Seq(
       "com.datomic" % "datomic-free" % "0.9.5697",
-      "org.specs2" %% "specs2-core" % "4.9.4"
+      "org.specs2" %% "specs2-core" % "4.10.0"
     )
   )
 

@@ -41,7 +41,8 @@ class SeattleQueryTests extends SeattleSpec {
     // Categories (many-cardinality) of the Belltown community
     m(Community.name_("belltown").category) -->
       """[:find  (distinct ?c)
-        | :where [?a :Community/name "belltown"]
+        | :where [(ground "belltown") ?b]
+        |        [?a :Community/name ?b]
         |        [?a :Community/category ?c]]""".stripMargin
 
 

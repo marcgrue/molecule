@@ -131,15 +131,15 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have an id, a tacit `id_` makes no difference
-      Schema.id_.attr.get.size === 72
+      Schema.id_.attr.get.size === 74
       Schema.id_.attr.get(3) === List("floats", "double", "str1")
 
       // We can though filter by one or more tacit attribute ids
       Schema.id_(97).attr.get === List("longMap")
       Schema.id_(99, 100).attr.get === List("doubleMap", "boolMap")
 
-      Schema.id_.not(97).attr.get.size === 71
-      Schema.id_.not(97, 98).attr.get.size === 70
+      Schema.id_.not(97).attr.get.size === 73
+      Schema.id_.not(97, 98).attr.get.size === 72
     }
 
 
@@ -210,7 +210,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
-      Schema.nsFull_.attr.get.size === 72
+      Schema.nsFull_.attr.get.size === 74
 
       // We can though filter by one or more tacit namespace names
       Schema.nsFull_("Ref1").attr.get.sorted === List(
@@ -230,8 +230,8 @@ class SchemaTest extends CoreSpec {
         "enum1", "enum2", "enum3", "enum4", "enums1",
         "int1", "int2", "int3", "int4", "intMap1",
         "ints1", "ints2", "ints3", "ints4",
-        "ref2", "ref3", "refSub2",
-        "refs2", "refs3", "refsSub2",
+        "ref2", "ref3", "ref4", "refSub2",
+        "refs2", "refs3", "refs4", "refsSub2",
         "str1", "str2", "str3", "str4",
         "strs1", "strs2", "strs3", "strs4"
       )
@@ -239,8 +239,8 @@ class SchemaTest extends CoreSpec {
         "enum1", "enum3", "enum4", "enums1",
         "int1", "int3", "int4", "intMap1",
         "ints1", "ints3", "ints4",
-        "ref2", "ref3", "refSub2",
-        "refs2", "refs3", "refsSub2",
+        "ref2", "ref4", "refSub2",
+        "refs2", "refs4", "refsSub2",
         "str1", "str3", "str4",
         "strs1", "strs3", "strs4"
       )
@@ -263,7 +263,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
-      Schema.ns_.attr.get.size === 72
+      Schema.ns_.attr.get.size === 74
 
       // We can though filter by one or more tacit namespace names
       Schema.ns_("Ref1").attr.get.sorted === List(
@@ -287,8 +287,8 @@ class SchemaTest extends CoreSpec {
         "enum1", "enum2", "enum3", "enum4", "enums1",
         "int1", "int2", "int3", "int4", "intMap1",
         "ints1", "ints2", "ints3", "ints4",
-        "ref2", "ref3", "refSub2",
-        "refs2", "refs3", "refsSub2",
+        "ref2", "ref3", "ref4", "refSub2",
+        "refs2", "refs3", "refs4", "refsSub2",
         "str1", "str2", "str3", "str4",
         "strs1", "strs2", "strs3", "strs4"
       )
@@ -296,8 +296,8 @@ class SchemaTest extends CoreSpec {
         "enum1", "enum3", "enum4", "enums1",
         "int1", "int3", "int4", "intMap1",
         "ints1", "ints3", "ints4",
-        "ref2", "ref3", "refSub2",
-        "refs2", "refs3", "refsSub2",
+        "ref2", "ref4", "refSub2",
+        "refs2", "refs4", "refsSub2",
         "str1", "str3", "str4",
         "strs1", "strs3", "strs4"
       )
@@ -306,16 +306,16 @@ class SchemaTest extends CoreSpec {
 
     "attr" >> {
 
-      Schema.attr.get.size === 72
+      Schema.attr.get.size === 74
       Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
 
       Schema.attr("str").get === List("str")
       Schema.attr("str", "int").get === List("str", "int")
 
-      Schema.attr.not("str").get.size === 71
-      Schema.attr.not("str", "int").get.size === 70
+      Schema.attr.not("str").get.size === 73
+      Schema.attr.not("str", "int").get.size === 72
 
-      Schema.attr(count).get === List(72)
+      Schema.attr(count).get === List(74)
 
 
       // Since all attributes have an attribute name, a tacit `a_` makes no difference

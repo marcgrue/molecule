@@ -99,11 +99,13 @@ class SeattleTransformationTests extends SeattleSpec {
         Find(List(
           AggrExpr("distinct", List(), Var("c")))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "name"), Val("belltown"), Empty),
+          Funct("""ground "belltown"""", Seq(Empty), ScalarBinding(Var("b"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "category"), Var("c"), Empty)))
       ) -->
       """[:find  (distinct ?c)
-        | :where [?a :Community/name "belltown"]
+        | :where [(ground "belltown") ?b]
+        |        [?a :Community/name ?b]
         |        [?a :Community/category ?c]]""".stripMargin
 
 

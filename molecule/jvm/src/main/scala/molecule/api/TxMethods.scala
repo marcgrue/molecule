@@ -408,7 +408,7 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
         }
       }
       txFnInstallFuture flatMap { txFnInstall =>
-        val p                        = Promise[java.util.Map[_, _]]
+        val p                        = Promise[java.util.Map[_, _]]()
         val txFnInvocationClause     = list(list(read(txFn) +:
           txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
         val txFnInvocationListenable = conn.datomicConn.transactAsync(txFnInvocationClause)

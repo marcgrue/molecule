@@ -28,8 +28,8 @@ private[molecule] object expectCompileError {
       }
 
       try {
-        val dummy0 = TermName(c.freshName)
-        val dummy1 = TermName(c.freshName)
+        val dummy0 = TermName(c.freshName())
+        val dummy1 = TermName(c.freshName())
         c.typecheck(c.parse(s"object $dummy0 { val $dummy1 = { $codeStr } }"))
         c.abort(c.enclosingPosition,
           s"""Type-checking succeeded unexpectedly!!!

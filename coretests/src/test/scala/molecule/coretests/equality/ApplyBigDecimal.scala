@@ -294,4 +294,158 @@ class ApplyBigDecimal extends CoreSpec {
       Ns.int.bigDecs_.apply(bigDec1 and bigDec2).get === List(1)
     }
   }
+
+
+  "Implicit conversions, card one" in new CoreSetup {
+    Ns.int.bigDec insert List(
+      (1, 1),
+      (2, 1L),
+      (3, 1f),
+      (4, 1.0),
+      (5, BigDecimal(1)),
+      (6, BigDecimal(1.0)),
+      (7, bigDec2),
+    )
+
+    val res1 = List(
+      (1, BigDecimal(1)),
+      (2, BigDecimal(1)),
+      (3, BigDecimal(1)),
+      (4, BigDecimal(1)),
+      (5, BigDecimal(1)),
+      (6, BigDecimal(1)),
+    )
+    val res2 = List((7, BigDecimal(2)))
+
+    val i1 = 1
+    val i2 = 2
+    val d1 = 1.0
+    val x1 = BigDecimal(1)
+    val y1 = BigDecimal(1.0)
+
+    Ns.int.bigDec(1).get.sortBy(_._1) === res1
+    Ns.int.bigDec(1L).get.sortBy(_._1) === res1
+    Ns.int.bigDec(1f).get.sortBy(_._1) === res1
+    Ns.int.bigDec(1.0).get.sortBy(_._1) === res1
+
+    Ns.int.bigDec(i1).get.sortBy(_._1) === res1
+    Ns.int.bigDec(d1).get.sortBy(_._1) === res1
+    Ns.int.bigDec(x1).get.sortBy(_._1) === res1
+    Ns.int.bigDec(y1).get.sortBy(_._1) === res1
+
+    Ns.int.bigDec.not(i2).get.sortBy(_._1) === res1
+    Ns.int.bigDec.<(i2).get.sortBy(_._1) === res1
+    Ns.int.bigDec.>(i1).get === res2
+    Ns.int.bigDec.>=(i2).get === res2
+    Ns.int.bigDec.<=(i1).get.sortBy(_._1) === res1
+
+    Ns.int.bigDec.not(2).get.sortBy(_._1) === res1
+    Ns.int.bigDec.<(2).get.sortBy(_._1) === res1
+    Ns.int.bigDec.>(1).get === res2
+    Ns.int.bigDec.>=(2).get === res2
+    Ns.int.bigDec.<=(1).get.sortBy(_._1) === res1
+
+
+    val res1t = List(1, 2, 3, 4, 5, 6)
+    val res2t = List(7)
+
+    Ns.int.bigDec_(1).get.sorted === res1t
+    Ns.int.bigDec_(1L).get.sorted === res1t
+    Ns.int.bigDec_(1f).get.sorted === res1t
+    Ns.int.bigDec_(1.0).get.sorted === res1t
+
+    Ns.int.bigDec_(i1).get.sorted === res1t
+    Ns.int.bigDec_(d1).get.sorted === res1t
+    Ns.int.bigDec_(x1).get.sorted === res1t
+    Ns.int.bigDec_(y1).get.sorted === res1t
+
+    Ns.int.bigDec_.not(i2).get.sorted === res1t
+    Ns.int.bigDec_.<(i2).get.sorted === res1t
+    Ns.int.bigDec_.>(i1).get === res2t
+    Ns.int.bigDec_.>=(i2).get === res2t
+    Ns.int.bigDec_.<=(i1).get.sorted === res1t
+
+    Ns.int.bigDec_.not(2).get.sorted === res1t
+    Ns.int.bigDec_.<(2).get.sorted === res1t
+    Ns.int.bigDec_.>(1).get === res2t
+    Ns.int.bigDec_.>=(2).get === res2t
+    Ns.int.bigDec_.<=(1).get.sorted === res1t
+  }
+
+
+  "Implicit conversions, card many" in new CoreSetup {
+    Ns.int.bigDecs insert List(
+      (1, Set(1)),
+      (2, Set(1L)),
+      (3, Set(1f)),
+      (4, Set(1.0)),
+      (5, Set(BigDecimal(1))),
+      (6, Set(BigDecimal(1.0))),
+      (7, Set(bigDec2)),
+    )
+
+    val res1 = List(
+      (1, Set(BigDecimal(1))),
+      (2, Set(BigDecimal(1))),
+      (3, Set(BigDecimal(1))),
+      (4, Set(BigDecimal(1))),
+      (5, Set(BigDecimal(1))),
+      (6, Set(BigDecimal(1))),
+    )
+    val res2 = List((7, Set(BigDecimal(2))))
+
+    val i1 = 1
+    val i2 = 2
+    val d1 = 1.0
+    val x1 = BigDecimal(1)
+    val y1 = BigDecimal(1.0)
+
+    Ns.int.bigDecs(1).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(1L).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(1f).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(1.0).get.sortBy(_._1) === res1
+
+    Ns.int.bigDecs(i1).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(d1).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(x1).get.sortBy(_._1) === res1
+    Ns.int.bigDecs(y1).get.sortBy(_._1) === res1
+
+    Ns.int.bigDecs.not(i2).get.sortBy(_._1) === res1
+    Ns.int.bigDecs.<(i2).get.sortBy(_._1) === res1
+    Ns.int.bigDecs.>(i1).get === res2
+    Ns.int.bigDecs.>=(i2).get === res2
+    Ns.int.bigDecs.<=(i1).get.sortBy(_._1) === res1
+
+    Ns.int.bigDecs.not(2).get.sortBy(_._1) === res1
+    Ns.int.bigDecs.<(2).get.sortBy(_._1) === res1
+    Ns.int.bigDecs.>(1).get === res2
+    Ns.int.bigDecs.>=(2).get === res2
+    Ns.int.bigDecs.<=(1).get.sortBy(_._1) === res1
+
+
+    val res1t = List(1, 2, 3, 4, 5, 6)
+    val res2t = List(7)
+
+    Ns.int.bigDecs_(1).get.sorted === res1t
+    Ns.int.bigDecs_(1L).get.sorted === res1t
+    Ns.int.bigDecs_(1f).get.sorted === res1t
+    Ns.int.bigDecs_(1.0).get.sorted === res1t
+
+    Ns.int.bigDecs_(i1).get.sorted === res1t
+    Ns.int.bigDecs_(d1).get.sorted === res1t
+    Ns.int.bigDecs_(x1).get.sorted === res1t
+    Ns.int.bigDecs_(y1).get.sorted === res1t
+
+    Ns.int.bigDecs_.not(i2).get.sorted === res1t
+    Ns.int.bigDecs_.<(i2).get.sorted === res1t
+    Ns.int.bigDecs_.>(i1).get === res2t
+    Ns.int.bigDecs_.>=(i2).get === res2t
+    Ns.int.bigDecs_.<=(i1).get.sorted === res1t
+
+    Ns.int.bigDecs_.not(2).get.sorted === res1t
+    Ns.int.bigDecs_.<(2).get.sorted === res1t
+    Ns.int.bigDecs_.>(1).get === res2t
+    Ns.int.bigDecs_.>=(2).get === res2t
+    Ns.int.bigDecs_.<=(1).get.sorted === res1t
+  }
 }

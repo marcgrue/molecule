@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters._
 /** Model to transaction transformation.
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
@@ -185,6 +185,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def p(v: Any): Any = v match {
       case f: Float              => f.toString.toDouble
       case _ if prefix.isDefined => prefix.get + v
+      case bd: BigDecimal        => bd + 0.0 // ensure decimal digits
       case _                     => v
     }
 
@@ -1026,7 +1027,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
           if (addStmts.isEmpty)
             (edgeB, Nil, e.asInstanceOf[Long]) // pass eid so that we have it for subsequent stmts
           else
-          (edgeB, addStmts, 0L)
+            (edgeB, addStmts, 0L)
         case Retract("e", a, Values(vs, prefix), bi)                                     => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB), 0L)
         case Retract(e, a, Values(vs, prefix), bi)                                       => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB), 0L)
         case Add(_, a, "__arg", _)                                                       => err("updateStmts", s"Attribute `$a` needs a value applied")

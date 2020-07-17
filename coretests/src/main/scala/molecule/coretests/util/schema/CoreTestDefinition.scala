@@ -85,8 +85,8 @@ object CoreTestDefinition {
     val enum3 = oneEnum("enum30", "enum31", "enum32")
     val strs3 = manyString
     val ints3 = manyInt
-    val ref3  = one[Ref3]
-    val refs3 = many[Ref3]
+    val ref4  = one[Ref4]
+    val refs4 = many[Ref4]
   }
 
   trait Ref4 {

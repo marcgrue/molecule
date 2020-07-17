@@ -1,5 +1,6 @@
 package molecule
 package transform
+
 import molecule.ast.model._
 import molecule.ast.query._
 import molecule.ops.QueryOps._
@@ -15,7 +16,7 @@ import molecule.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
@@ -852,7 +853,7 @@ object Model2Query extends Helpers {
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty => q.not(e, a)
       case Eq((set: Set[_]) :: Nil)                => q.whereAnd(e, a, v, set.toSeq, u(t, v))
       case Eq(arg :: Nil) if uri(t)                => q.where(e, a, v).func(s"""ground (java.net.URI. "$arg")""", Empty, v)
-      case Eq(arg :: Nil)                          => q.where(e, a, Val(arg))
+      case Eq(arg :: Nil)                          => q.ground(a, arg, v).where(e, a, v)
       case Eq(args)                                => q.orRules(e, a, args, u(t, v))
       case Neq(args)                               => q.where(e, a, v).compareToMany("!=", a, v, args)
       case Gt(arg)                                 => q.where(e, a, v).compareTo(">", a, v, Val(arg))
@@ -885,11 +886,11 @@ object Model2Query extends Helpers {
       case Eq((seq: Seq[_]) :: Nil) if seq.isEmpty     => q.findD(v).where(e, a, v).not(e, a)
       case Eq((set: Set[_]) :: Nil)                    => q.findD(v).whereAnd(e, a, v, set.toSeq, u(t, v))
       case Eq(arg :: Nil) if uri(t)                    => q.findD(v).where(e, a, v).where(e, a, v + "_uri").func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_uri")
+      case Eq(arg :: Nil) if a.tpe == "BigDecimal"     => q.findD(v).where(e, a, Val(BigDecimal(withDecimal(arg)))).where(e, a, v)
       case Eq(arg :: Nil)                              => q.findD(v).where(e, a, Val(arg)).where(e, a, v)
       case Eq(args)                                    => q.findD(v).where(e, a, v).orRules(e, a, args, u(t, v))
       case Neq(Nil)                                    => q.findD(v).where(e, a, v)
       case Neq(sets) if sets.head.isInstanceOf[Set[_]] => q.findD(v).where(e, a, v).nots(e, a, v, sets)
-      case Neq(arg :: Nil) if uri(t)                   => q.findD(v).where(e, a, v).compareTo("!=", a, v, Val(arg))
       case Neq(arg :: Nil)                             => q.findD(v).where(e, a, v).compareTo("!=", a, v, Val(arg))
       case Neq(args)                                   => q.findD(v).where(e, a, v).compareToMany("!=", a, v, args)
       case Gt(arg)                                     => q.findD(v).where(e, a, v).compareTo(">", a, v, Val(arg))

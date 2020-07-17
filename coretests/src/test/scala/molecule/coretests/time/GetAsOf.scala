@@ -190,21 +190,21 @@ class GetAsOf extends CoreSpec {
     val iterator1: Iterator[(String, Int)] = iterable1.iterator
 
     // Type casting lazily performed with each call to `next`
-    iterator1.next === ("Liz", 37)
-    iterator1.next === ("Ben", 42)
+    iterator1.next() === ("Liz", 37)
+    iterator1.next() === ("Ben", 42)
 
     val iterable2: Iterable[(String, Int)] = Ns.str.int.getIterableAsOf(tx2)
     val iterator2: Iterator[(String, Int)] = iterable2.iterator
 
     // Type casting lazily performed with each call to `next`
-    iterator2.next === ("Liz", 37)
-    iterator2.next === ("Ben", 43) // Ben now 43
+    iterator2.next() === ("Liz", 37)
+    iterator2.next() === ("Ben", 43) // Ben now 43
 
     val iterable3: Iterable[(String, Int)] = Ns.str.int.getIterableAsOf(tx3)
     val iterator3: Iterator[(String, Int)] = iterable3.iterator
 
     // Type casting lazily performed with each call to `next`
-    iterator3.next === ("Liz", 37)
+    iterator3.next() === ("Liz", 37)
     iterator3.hasNext === false // Ben gone
   }
 

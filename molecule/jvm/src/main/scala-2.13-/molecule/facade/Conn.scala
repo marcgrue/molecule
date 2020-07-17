@@ -230,7 +230,7 @@ class Conn(val datomicConn: datomic.Connection)
   }
 
   def transactAsync(stmtss: Seq[Seq[Statement]])
-    (implicit ec: ExecutionContext): Future[TxReport] = {
+                   (implicit ec: ExecutionContext): Future[TxReport] = {
 
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
@@ -318,7 +318,7 @@ class Conn(val datomicConn: datomic.Connection)
     * @return Future with [[molecule.facade.TxReport TxReport]] with result of transaction
     */
   def transactAsync(rawTxStmts: jList[AnyRef])
-    (implicit ec: ExecutionContext): Future[TxReport] = {
+                   (implicit ec: ExecutionContext): Future[TxReport] = {
 
     if (_testDb.isDefined) {
       Future {
@@ -529,16 +529,7 @@ class Conn(val datomicConn: datomic.Connection)
 
   // Datalog query execution
   private[molecule] def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]] = {
-    val optimizedQuery = QueryOptimizer(query)
-    ////    println("zzzzzzz")
-    ////    if(query != optimizedQuery) {
-    //      log.info("Query:")
-    //      log.debug("Query:")
-    //      log.debug(query.toString)
-    //      log.debug("Optimized query:")
-    //      log.debug(optimizedQuery.toString)
-    ////    }
-
+    val optimizedQuery         = QueryOptimizer(query)
     val p                      = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
     val rules                  = "[" + (query.i.rules map p mkString " ") + "]"
     val adhocDb                = _db.getOrElse(db)
@@ -556,7 +547,7 @@ class Conn(val datomicConn: datomic.Connection)
           builder += e.getMessage
           e = e.getCause
         }
-        throw new QueryException(e, model, query, allInputs, p, builder.result)
+        throw new QueryException(e, model, query, allInputs, p, builder.result())
       case NonFatal(ex)                                           =>
         throw new QueryException(ex, model, query, allInputs, p)
     }

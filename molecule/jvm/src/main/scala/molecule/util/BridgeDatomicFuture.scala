@@ -6,7 +6,7 @@ import scala.util.control.NonFatal
 trait BridgeDatomicFuture {
 
   private[molecule] def bridgeDatomicFuture[T](listenF: ListenableFuture[T])(implicit ec: ExecutionContext): Future[T] = {
-    val p = Promise[T]
+    val p = Promise[T]()
     listenF.addListener(
       new java.lang.Runnable {
         override def run: Unit = {

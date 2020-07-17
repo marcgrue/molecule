@@ -37,7 +37,7 @@ package object exceptions {
        |
        |${query.datalog}
        |
-       |RULES: ${if (query.i.rules.isEmpty) "none" else query.i.rules map p mkString("[\n ", "\n ", "\n]")}
+       |RULES: ${if (query.i.rules.isEmpty) "none" else query.i.rules.map(p).mkString("[\n ", "\n ", "\n]")}
        |
        |INPUTS: ${allInputs.zipWithIndex.map(e => "\n" + (e._2 + 1) + " " + e._1)}
        |#############################################################################

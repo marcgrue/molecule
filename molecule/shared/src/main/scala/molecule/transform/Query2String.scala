@@ -23,14 +23,14 @@ case class Query2String(q: Query) extends Helpers {
 
   def p(expr: QueryExpr): String = expr match {
     case Query(find, widh, in, where)                    => pp(find, widh, in, where)
-    case Find(outputs)                                   => ":find  " + (outputs map p mkString " ")
-    case With(variables)                                 => if (variables.isEmpty) "" else ":with  " + (variables map s mkString " ")
+    case Find(outputs)                                   => ":find  " + outputs.map(p).mkString(" ")
+    case With(variables)                                 => if (variables.isEmpty) "" else ":with  " + variables.map(s).mkString(" ")
     case in@In(_, _, _)                                  => mkIn(in, false)
-    case Where(clauses)                                  => ":where " + (clauses map p mkString " ")
+    case Where(clauses)                                  => ":where " + clauses.map(p).mkString(" ")
     case KW("?", attr, _)                                => s"?$attr"
     case KW(nsFull, "?", _)                              => s"?$nsFull"
     case KW(nsFull, attr, _)                             => s":$nsFull/$attr"
-    case AggrExpr(fn, args, v)                           => s"($fn " + ((args :+ p(v)) mkString " ") + ")"
+    case AggrExpr(fn, args, v)                           => s"($fn " + args.:+(p(v)).mkString(" ") + ")"
     case Var("?")                                        => "?"
     case Var("_")                                        => "_"
     case Var(eid) if eid matches """\d+"""               => eid
@@ -51,12 +51,8 @@ case class Query2String(q: Query) extends Helpers {
     case Pull(e, nsFull, attr, Some(_))                  => s"(pull ?$e [{:$nsFull/$attr [:db/ident]}])"
     case Pull(e, nsFull, attr, _)                        => s"(pull ?$e [(limit :$nsFull/$attr nil)])"
     case PullNested(e, nestedAttrs)                      => s"\n        (pull ?$e [\n          ${p(nestedAttrs)}])"
-    case NestedAttrs(1, nsFull, attr, attrSpecs)         =>
-      val sp = "  " * 6
-      s"""{(:$nsFull/$attr :limit nil) [""" + s"\n$sp${attrSpecs map p mkString s"\n$sp"}]}"
-    case NestedAttrs(level, nsFull, attr, attrSpecs)     =>
-      val sp = "  " * (5 + level)
-      s"""{(:$nsFull/$attr :limit nil :default "__none__") [""" + s"\n$sp${attrSpecs map p mkString s"\n$sp"}]}"
+    case NestedAttrs(1, nsFull, attr, attrSpecs)         => val sp = "  " * 6; s"""{(:$nsFull/$attr :limit nil) [""" + s"\n$sp${attrSpecs.map(p).mkString(s"\n$sp")}]}"
+    case NestedAttrs(level, nsFull, attr, attrSpecs)     => val sp = "  " * (5 + level); s"""{(:$nsFull/$attr :limit nil :default "__none__") [""" + s"\n$sp${attrSpecs.map(p).mkString(s"\n$sp")}]}"
     case PullAttr(nsFull, attr, true)                    => s"""(:$nsFull/$attr :limit nil :default "__none__")"""
     case PullAttr(nsFull, attr, _)                       => s"""(:$nsFull/$attr :limit nil)"""
     case PullEnum(nsFull, attr, true)                    => s"""{(:$nsFull/$attr :limit nil :default "__none__") [:db/ident]}"""
@@ -72,17 +68,17 @@ case class Query2String(q: Query) extends Helpers {
     case NoBinding                                       => ""
     case ScalarBinding(v)                                => p(v)
     case CollectionBinding(v)                            => "[" + p(v) + " ...]"
-    case TupleBinding(vs)                                => "[ " + (vs map p mkString " ") + " ]"
-    case RelationBinding(vs)                             => "[[ " + (vs map p mkString " ") + " ]]"
+    case TupleBinding(vs)                                => "[ " + vs.map(p).mkString(" ") + " ]"
+    case RelationBinding(vs)                             => "[[ " + vs.map(p).mkString(" ") + " ]]"
     case DataClause(ds, e, a, v@Val(bi: BigInt), tx, op) => asN = true; val dc = pp(ds, e, a, v, tx, op); asN = false; dc
     case DataClause(ds, e, a, v, tx, op)                 => pp(ds, e, a, v, tx, op)
     case NotClause(e, a)                                 => s"(not [" + p(e) + " " + p(a) + "])"
-    case NotClauses(cls)                                 => s"(not " + (cls map p mkString " ") + ")"
-    case NotJoinClauses(vars, cls)                       => s"(not-join [" + (vars map p mkString " ") + "]\n          " + (cls map p mkString "\n          ") + ")"
-    case Funct(name, ins, outs)                          => ((s"[($name " + (ins map p mkString " ")).trim + ") " + p(outs)).trim + "]"
-    case RuleInvocation(name, args)                      => s"($name " + (args map p mkString " ") + ")"
-    case Rule(name, args, clauses) if clauses.size > 1   => asN = true; val rc = clauses map p mkString "\n   "; asN = false; s"[($name " + (args map p mkString " ") + ")\n   " + rc + "]"
-    case Rule(name, args, clauses)                       => asN = true; val rc = clauses map p mkString " "; asN = false; s"[($name " + (args map p mkString " ") + ") " + rc + "]"
+    case NotClauses(cls)                                 => s"(not " + cls.map(p).mkString(" ") + ")"
+    case NotJoinClauses(vars, cls)                       => s"(not-join [" + vars.map(p).mkString(" ") + "]\n          " + cls.map(p).mkString("\n          ") + ")"
+    case Funct(name, ins, outs)                          => ((s"[($name " + ins.map(p).mkString(" ")).trim + ") " + p(outs)).trim + "]"
+    case RuleInvocation(name, args)                      => s"($name " + args.map(p).mkString(" ") + ")"
+    case Rule(name, args, clauses) if clauses.size > 1   => asN = true; val rc = clauses.map(p).mkString("\n   "); asN = false; s"[($name " + args.map(p).mkString(" ") + ")\n   " + rc + "]"
+    case Rule(name, args, clauses)                       => asN = true; val rc = clauses.map(p).mkString(" "); asN = false; s"[($name " + args.map(p).mkString(" ") + ") " + rc + "]"
     case unresolvedQuery                                 => throw new Query2StringException(s"\nUNRESOLVED query expression: $unresolvedQuery")
   }
 
@@ -94,19 +90,19 @@ case class Query2String(q: Query) extends Helpers {
     val (l, r) = if (bracket) (":in    [ ", " ]") else (":in    ", "")
     if (in.inputs.isEmpty && in.rules.isEmpty) ""
     else
-      l + ((in.ds map p mkString("", " ", " "))
+      l + (in.ds.map(p).mkString("", " ", " ")
         + (if (in.rules.isEmpty) "" else "% ")
-        + (in.inputs map p mkString " ")).trim + r
+        + in.inputs.map(p).mkString(" ")).trim + r
   }
 
   def toList: String = p(q)
 
   def toMap: String = {
     val str =
-      s"""{ :find [ ${q.f.outputs map p mkString " "} ]""" +
-        (if (q.wi.variables.isEmpty) "" else s" :with [ ${q.wi.variables map s mkString " "} ]") +
+      s"""{ :find [ ${q.f.outputs.map(p).mkString(" ")} ]""" +
+        (if (q.wi.variables.isEmpty) "" else s" :with [ ${q.wi.variables.map(s).mkString(" ")} ]") +
         mkIn(q.i, true) +
-        s""" :where [ ${q.wh.clauses map p mkString " "} ] }"""
+        s""" :where [ ${q.wh.clauses.map(p).mkString(" ")} ] }"""
     str.replaceAll(" +\n", "\n")
   }
 

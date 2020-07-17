@@ -1,5 +1,6 @@
 package molecule
 package ops
+
 import java.net.URI
 import java.util.{Collections, Date, UUID}
 import molecule.ast.model._
@@ -22,6 +23,11 @@ object QueryOps extends Helpers with JavaUtil {
     case "Int" | "ref" => "Long"
     case "Float"       => "Double"
     case other         => other
+  }
+
+  def withDecimal(v: Any): String = {
+    val s = v.toString
+    if (s.contains(".")) s else s + ".0"
   }
 
   implicit class QueryOps(q: Query) {
@@ -404,16 +410,17 @@ object QueryOps extends Helpers with JavaUtil {
 
     def compareToMany[T](op: String, a: Atom, v: String, args: Seq[T]): Query =
       args.zipWithIndex.foldLeft(q) {
-        case (q1, (arg: URI, i)) =>
+        case (q1, (arg: URI, i))                     =>
           q1.func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
             .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(Var(v + "_" + (i + 1) + "b")))
             .func(op, Seq(Var(v + "_" + (i + 1) + "b"), Val(0)))
-        case (q1, (arg, i))      => q1.compareTo(op, a, v, Val(arg), i + 1)
+        case (q1, (arg, i))                          => q1.compareTo(op, a, v, Val(arg), i + 1)
       }
 
     def compareTo(op: String, a: Atom, v: String, qv: QueryValue, i: Int = 0): Query = qv match {
-      case Val(arg) if a.tpe == "String" => compareTo2(op, a.tpe, v, Val(arg.toString.replace("\"", "\\\"")), i)
-      case _                             => compareTo2(op, a.tpe, v, qv, i)
+      case Val(arg) if a.tpe == "String"     => compareTo2(op, a.tpe, v, Val(arg.toString.replace("\"", "\\\"")), i)
+      case Val(arg) if a.tpe == "BigDecimal" => compareTo2(op, a.tpe, v, Val(BigDecimal(withDecimal(arg))), i)
+      case _                                 => compareTo2(op, a.tpe, v, qv, i)
     }
 
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
@@ -436,10 +443,10 @@ object QueryOps extends Helpers with JavaUtil {
     def ground(a: Atom, arg: Any, v: String): Query = a.tpe match {
       case "String" => q.func(s"""ground "${esc1(arg)}"""", Empty, v)
 
-      /* admin-hack */
+      /* Hack for MoleculeAdmin / ScalaJS */
       case "Float" | "Double" if arg.toString.startsWith("__n__") =>
         val arg1 = arg.toString.drop(5)
-        val arg2 = if (arg1.contains(".")) arg1 else arg1 + ".0"
+        val arg2 = withDecimal(arg1)
         q.func(s"""ground $arg2""", Empty, v)
 
       case "Float" | "Double" | "Int" | "Long" | "Boolean" | "ref" =>
@@ -458,8 +465,7 @@ object QueryOps extends Helpers with JavaUtil {
         q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)
 
       case "BigDecimal" =>
-        q.func(s"""ground (java.math.BigDecimal. "$arg")""", Empty, v)
-
+        q.func(s"""ground (java.math.BigDecimal. "${withDecimal(arg)}")""", Empty, v)
     }
 
     def fulltext(e: String, a: Atom, v: String, s: String): Query =

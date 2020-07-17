@@ -42,15 +42,15 @@ private[molecule] trait NestedJson[OuterTpl] extends NestedTuples[OuterTpl] with
     descending = false
     firstLevel0 = true
 
-    sb0.clear
+    sb0.clear()
     sb0.append("[\n")
-    sb1.clear
-    sb2.clear
-    sb3.clear
-    sb4.clear
-    sb5.clear
-    sb6.clear
-    sb7.clear
+    sb1.clear()
+    sb2.clear()
+    sb3.clear()
+    sb4.clear()
+    sb5.clear()
+    sb6.clear()
+    sb7.clear()
 
     for (lvl <- 0 to 6) {firstJsonObjects(lvl) = true}
   }
@@ -72,7 +72,7 @@ private[molecule] trait NestedJson[OuterTpl] extends NestedTuples[OuterTpl] with
     sb.append(": [\n")
     sb.append("   " * (level + 1))
     sb.append(leaf.toString)
-    leaf.clear
+    leaf.clear()
     sb.append("]")
     post // adds post fields to `sb`
     sb.append("}")

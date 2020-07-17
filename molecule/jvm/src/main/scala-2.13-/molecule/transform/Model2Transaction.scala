@@ -183,6 +183,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def p(v: Any): Any = v match {
       case f: Float              => f.toString.toDouble
       case _ if prefix.isDefined => prefix.get + v
+      case bd: BigDecimal        => bd + 0.0 // ensure decimal digits
       case _                     => v
     }
 
