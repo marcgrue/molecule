@@ -9,7 +9,7 @@ import molecule.ast.transactionModel.{Statement, _}
 import molecule.util.Debug
 import scala.jdk.CollectionConverters._
 
-/** Facade to Datomic transaction report facade with convenience methods to access tx data. */
+/** Facade to Datomic transaction report with convenience methods to access tx data. */
 case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) {
 
   /** Get List of affected entity ids from transaction */
@@ -63,7 +63,7 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
   /** Get Set of affected entity ids from transaction. */
   def eidSet: Set[Long] = eids.toSet
 
-  /** Convenience method to get last affected entity id from transaction.
+  /** Convenience method to get single affected entity id from transaction.
     *
     * Often useful when you know only one entity was affected:
     * {{{

@@ -299,9 +299,9 @@ class Insert extends CoreSpec {
         (date2, Set(20L, 21L))
       )
 
-      Ns.date.longs$.get === List(
-        (date2, Some(Set(20L, 21L))),
+      Ns.date.longs$.get.sortBy(_._1) === List(
         (date1, None),
+        (date2, Some(Set(20L, 21L))),
       )
 
       Ns.date.longs.get === List(

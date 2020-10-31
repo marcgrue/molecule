@@ -30,7 +30,7 @@ class ApplyDate extends CoreSpec     {
 
       // `or`
       Ns.date.apply(date1 or date2).get === List(date2, date1)
-      Ns.date.apply(date1 or date2 or date3).get === List(date2, date1, date3)
+      Ns.date.apply(date1 or date2 or date3).get.sorted === List(date1, date2, date3)
 
       // Seq
       Ns.date.apply().get === Nil

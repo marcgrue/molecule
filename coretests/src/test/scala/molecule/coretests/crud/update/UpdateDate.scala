@@ -137,13 +137,13 @@ class UpdateDate extends CoreSpec {
       (Ns(eid).dates.replace(date7 -> date8, date8 -> other8).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
-        "\nTue Jan 01 00:00:00 CET 2008"
+        "\n" + date8
 
       // Conflicting new values
       (Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> other8)).update must throwA[Model2TransactionException])
         .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
-        "\nTue Jan 01 00:00:00 CET 2008"
+        "\n" + date8
     }
 
 
