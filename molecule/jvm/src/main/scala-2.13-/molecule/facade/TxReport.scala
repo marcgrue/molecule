@@ -37,12 +37,6 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
 
   def txDataRaw: List[Datum] = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].asScala.toList.asInstanceOf[List[Datum]]
 
-  private def attr(d: Datum) = {
-    val kw = dbAfter.entity(d.a).get(":db/ident").asInstanceOf[Keyword]
-    s":${kw.getNamespace}/${kw.getName}"
-    kw.toString
-  }
-
   private def datom2string(d: datomic.db.Datum) = s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"
 
   def debug: Unit = Debug("TxReport", 1)(1, stmtss, txDataRaw)
