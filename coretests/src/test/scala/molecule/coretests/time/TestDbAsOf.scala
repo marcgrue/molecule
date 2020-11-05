@@ -12,18 +12,15 @@ class TestDbAsOf extends Specification with Scope {
 
   sequential
 
-  def init(implicit conn: Conn) = {
-    val tx1 = Ns.int(1).save
-    val eid = tx1.eid
-    val tx2 = Ns(eid).int(2).update
-    (tx1, eid, tx2)
-  }
+  implicit val conn = recreateDbFrom(CoreTestSchema)
+  val tx1 = Ns.int(1).save
+  val eid = tx1.eid
+  val tx2 = Ns(eid).int(2).update
+
 
   "Local molecules" >> {
 
     "as of now" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       "Current live state" >> {
         Ns.int.get === List(2)
@@ -54,8 +51,6 @@ class TestDbAsOf extends Specification with Scope {
 
 
     "as of tx" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       "Current live state" >> {
         Ns.int.get === List(2)
@@ -86,8 +81,6 @@ class TestDbAsOf extends Specification with Scope {
 
 
     "as of t" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       // Sequential transaction number t
       val t1 = tx1.t
@@ -122,8 +115,6 @@ class TestDbAsOf extends Specification with Scope {
 
 
     "as of date" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       // Transaction date
       val date1 = tx1.inst
@@ -160,8 +151,6 @@ class TestDbAsOf extends Specification with Scope {
   "Molecules in domain objects" >> {
 
     "as of now" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       // Some domain object
       val counter = domain.Counter(eid)
@@ -198,8 +187,6 @@ class TestDbAsOf extends Specification with Scope {
 
 
     "as of tx" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, eid, tx2) = init
 
       // Some domain object
       val counter = domain.Counter(eid)

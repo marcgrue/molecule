@@ -11,22 +11,18 @@ class TestDbSince extends Specification {
 
   sequential
 
-  def init(implicit conn: Conn) = {
-    val tx1 = Ns.int(1).save
-    val tx2 = Ns.int(2).save
-    val tx3 = Ns.int(3).save
-    val e1 = tx1.eid
-    val e2 = tx2.eid
-    val e3 = tx3.eid
-    (tx1, tx2, tx3, e1, e2, e3)
-  }
+  implicit val conn = recreateDbFrom(CoreTestSchema)
+  val tx1 = Ns.int(1).save
+  val tx2 = Ns.int(2).save
+  val tx3 = Ns.int(3).save
+  val e1  = tx1.eid
+  val e2  = tx2.eid
+  val e3  = tx3.eid
 
 
   "Local molecules" >> {
 
     "as of tx" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, tx2, tx3, e1, e2, e3) = init
 
       "Current live state" >> {
         Ns.int.get === List(1, 2, 3)
@@ -58,8 +54,6 @@ class TestDbSince extends Specification {
 
 
     "as of t" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, tx2, tx3, e1, e2, e3) = init
 
       // Sequential transaction number t
       val t1 = tx1.t
@@ -94,8 +88,6 @@ class TestDbSince extends Specification {
 
 
     "as of date" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, tx2, tx3, e1, e2, e3) = init
 
       // Transaction date
       val date1 = tx1.inst
@@ -133,8 +125,6 @@ class TestDbSince extends Specification {
   "Molecules in domain objects" >> {
 
     "as of tx" >> {
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val (tx1, tx2, tx3, e1, e2, e3) = init
 
       // Some domain object
       val crud = domain.Crud

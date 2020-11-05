@@ -1,14 +1,12 @@
 package molecule.coretests.util
 
 import java.net.URI
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID._
 import molecule.api.core._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.util.{DateHandling, MoleculeSpec}
 import org.specs2.specification.Scope
-import scala.util.Random
 
 class CoreSpec extends MoleculeSpec with DateHandling {
 
@@ -17,13 +15,13 @@ class CoreSpec extends MoleculeSpec with DateHandling {
     implicit val conn = recreateDbFrom(CoreTestSchema)
   }
 
-  def da(i: Int): Date = {
+  private def da(i: Int): Date = {
     // Alternate between winter/summer time to test daylight savings too
     val month = i % 2 * 6 + 1
     str2date((2000 + i).toString + "-" + month)
   }
-  def uu = randomUUID()
-  def ur(i: Int) = new URI("uri" + i)
+  private def uu = randomUUID()
+  private def ur(i: Int) = new URI("uri" + i)
 
   // Sample data
 
@@ -35,7 +33,7 @@ class CoreSpec extends MoleculeSpec with DateHandling {
     List(uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu).sortBy(_.toString)
 
   lazy val List(uri0, uri1, uri2, uri3, uri4, uri5, uri6, uri7, uri8, uri9, uri10, uri11, uri12, uri13, uri14, uri15, uri16, uri17, uri18) =
-    List(ur(0), ur(1), ur(2), ur(3), ur(4), ur(5), ur(6), ur(7), ur(8), ur(9), ur(10), ur(11), ur(12), ur(13), ur(14), ur(15), ur(16), ur(17), ur(18)) //.sortBy(_.toString)
+    List(ur(0), ur(1), ur(2), ur(3), ur(4), ur(5), ur(6), ur(7), ur(8), ur(9), ur(10), ur(11), ur(12), ur(13), ur(14), ur(15), ur(16), ur(17), ur(18))
 
   lazy val (str0, int0, long0, float0, double0, bigInt0, bigDec0, bool0, enum0) = (" ", 0, 0L, 0.0f, 0.0, BigInt(0), BigDecimal(0.0), false, "enum0")
   lazy val (str1, int1, long1, float1, double1, bigInt1, bigDec1, bool1, enum1) = ("a", 1, 1L, 1.0f, 1.0, BigInt(1), BigDecimal(1.0), true, "enum1")

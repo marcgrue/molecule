@@ -10,12 +10,13 @@ class TestDbWith extends Specification {
 
   sequential
 
+  implicit val conn = recreateDbFrom(CoreTestSchema)
+  val List(e1, e2, e3) = Ns.int.insert(1, 2, 3).eids
+
+
   "Local molecules" >> {
 
     "with single tx" >> {
-      // Init
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
       // Current live state
       Ns.int.get === List(1, 2, 3)
@@ -48,9 +49,6 @@ class TestDbWith extends Specification {
   }
 
   "with multiple txs" >> {
-    // Init
-    implicit val conn = recreateDbFrom(CoreTestSchema)
-    val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     "Current live state" >> {
       // Current live state
@@ -112,18 +110,15 @@ class TestDbWith extends Specification {
 
 
   "with multiple modularized txs" >> {
-    // Init
-    implicit val conn = recreateDbFrom(CoreTestSchema)
-    val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     // Current live state
     Ns.int.get.sorted === List(1, 2, 3)
 
     "Setup test db with multiple modularized transactions" >> {
 
-      val save = Ns.int(4).getSaveTx
-      val insert = Ns.int getInsertTx List(5, 6)
-      val update = Ns(e1).int(0).getUpdateTx
+      val save    = Ns.int(4).getSaveTx
+      val insert  = Ns.int getInsertTx List(5, 6)
+      val update  = Ns(e1).int(0).getUpdateTx
       val retract = e2.getRetractTx
 
       // Apply a set of saved modularized transactions to get a
@@ -173,9 +168,6 @@ class TestDbWith extends Specification {
   "Molecules in domain objects" >> {
 
     "with single tx" >> {
-      // Init
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
       // Some domain object
       val crud = domain.Crud
@@ -212,9 +204,6 @@ class TestDbWith extends Specification {
 
 
     "with multiple txs" >> {
-      // Init
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
       // Some domain object
       val crud = domain.Crud
