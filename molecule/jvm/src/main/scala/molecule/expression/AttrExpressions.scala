@@ -55,7 +55,7 @@ trait AttrExpressions {
     * */
   trait ?
 
-  // Avoiding overload via core.? import
+  // Avoiding overload via Keywords.? import
   type ?? = molecule.expression.AttrExpressions.?
 
   /** Unify attribute value in self-join.
@@ -80,6 +80,7 @@ trait AttrExpressions {
     * @group attrMarker
     * */
   trait unify
+  type unify_stable = molecule.expression.AttrExpressions.unify
 
 
   /** Expression methods common for all attributes. */
@@ -192,7 +193,7 @@ trait AttrExpressions {
       * @param unifyer `unify` marker to unify self-join by this attribute values
       * @return Self-join molecule
       */
-    def apply(unifyer: unify): Ns with Attr = ???
+    def apply(unifyer: unify_stable): Ns with Attr = ???
 
 
     /** Match attribute values different from one or more applied values.
@@ -252,23 +253,6 @@ trait AttrExpressions {
       * @return Filtered molecule
       */
     def !=(value: T, moreValues: T*): Ns with Attr = ???
-    //    def !=(value: T, value2: T, moreValues: T*): Ns with Attr = ???
-
-    //    /** Match attribute values different from applied value.
-    //      * {{{
-    //      *   Person.name.get === List("Ben", "Liz", "Joe")
-    //      *
-    //      *   // Negate value
-    //      *   Person.name.!=("Ben").get === List("Liz", "Joe")
-    //      *
-    //      *   // same as
-    //      *   Person.name.not("Ben").get === List("Liz", "Joe")
-    //      * }}}
-    //      *
-    //      * @param value Negated attribute value
-    //      * @return Filtered molecule
-    //      */
-    //    def !=(value: T): Ns with Attr = ??? // Hack to satisfy intellij inference
 
 
     /** Match attribute values different from applied Iterable of values.

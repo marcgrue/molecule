@@ -1,7 +1,7 @@
 package molecule.coretests.input1
 
 import java.util.UUID
-import molecule.api.in1_out2._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.input.exception.InputMoleculeException

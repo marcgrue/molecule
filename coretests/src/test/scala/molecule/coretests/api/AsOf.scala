@@ -1,7 +1,7 @@
 package molecule.coretests.api
 
 import java.util.Date
-import molecule.api.out10._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema

@@ -1,13 +1,14 @@
-package molecule.api
+package molecule.datomic.peer
 
-import molecule.expression.{AggregateKeywords, AttrExpressions, LogicImplicits}
+import molecule.api.{EntityOps, Keywords, TxMethods}
+import molecule.expression.LogicImplicits
 import molecule.facade.Datomic
+import molecule.factory._
 import molecule.generic.GenericLog
 import molecule.generic.index.{GenericAEVT, GenericAVET, GenericEAVT, GenericVAET}
 import molecule.generic.schema.GenericSchema
 
-
-/** Molecule API to be imported into your project to use Molecule.
+/** Molecule API to be imported into your project to use Molecule with the Datomic Peer API.
   * <br><br>
   * To start using Molecule involves 2 initial steps:
   *
@@ -30,35 +31,25 @@ import molecule.generic.schema.GenericSchema
   * }}}
   * For brevity, arity 3-22 interfaces and empty companion traits are left ungrouped.
   * */
-private[molecule] trait core extends Datomic
-  with AttrExpressions
-  with AggregateKeywords
+object api extends Datomic
+  with Keywords
   with LogicImplicits
   with EntityOps
   with TxMethods
+
+  with Molecule_Factory
+  with Molecule_In_1_Factory
+  with Molecule_In_2_Factory
+  with Molecule_In_3_Factory
+
+  with Composite_Factory
+  with Composite_In_1_Factory
+  with Composite_In_2_Factory
+  with Composite_In_3_Factory
+
   with GenericSchema
   with GenericLog
   with GenericAEVT
   with GenericAVET
   with GenericEAVT
   with GenericVAET
-{
-
-  object ? extends molecule.expression.AttrExpressions.?
-  object unify extends molecule.api.core.unify
-
-  object count extends molecule.api.core.count
-  object countDistinct extends molecule.api.core.countDistinct
-  object distinct extends molecule.api.core.distinct
-  object max extends molecule.api.core.max
-  object min extends molecule.api.core.min
-  object rand extends molecule.api.core.rand
-  object sample extends molecule.api.core.sample
-  object avg extends molecule.api.core.avg
-  object median extends molecule.api.core.median
-  object stddev extends molecule.api.core.stddev
-  object sum extends molecule.api.core.sum
-  object variance extends molecule.api.core.variance
-}
-
-object core extends core

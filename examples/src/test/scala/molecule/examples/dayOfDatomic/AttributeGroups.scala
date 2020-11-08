@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.api.in1_out3._
+import molecule.datomic.peer.api._
 import molecule.util.MoleculeSpec
 
 

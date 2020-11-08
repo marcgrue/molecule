@@ -2,7 +2,7 @@ package molecule.examples.mbrainz.dayOfDatomic
 
 import java.util.UUID
 import datomic.Peer
-import molecule.api.in1_out4._
+import molecule.datomic.peer.api._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.facade.Conn
 import molecule.util.MoleculeSpec

@@ -1,6 +1,6 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule.api.out4._
+import molecule.datomic.peer.api._
 import molecule.examples.gremlin.dsl.modernGraph1._
 import molecule.examples.gremlin.schema.ModernGraph1Schema
 import molecule.util.MoleculeSpec

@@ -1,7 +1,7 @@
 
 package molecule.coretests.generic
 
-import molecule.api.out10._
+import molecule.datomic.peer.api._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._

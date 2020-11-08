@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.api.out4._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 
 class Fulltext extends Base {

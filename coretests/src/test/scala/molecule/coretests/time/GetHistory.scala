@@ -1,6 +1,6 @@
 package molecule.coretests.time
 
-import molecule.api.in1_out6._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import org.specs2.mutable.Specification

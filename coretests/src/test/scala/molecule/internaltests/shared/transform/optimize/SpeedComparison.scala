@@ -2,7 +2,7 @@ package molecule.internaltests.shared.transform.optimize
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-import molecule.api.out5._
+import molecule.datomic.peer.api._
 import molecule.ast.query.{Query, _}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._

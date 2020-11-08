@@ -1,11 +1,9 @@
 package molecule.coretests.json
 
-import molecule.api.out4._
-import molecule.api.out5.m
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.macros.exception.NestedJsonException
-import molecule.ops.exception.VerifyModelException
 
 
 class NestedJson extends CoreSpec {

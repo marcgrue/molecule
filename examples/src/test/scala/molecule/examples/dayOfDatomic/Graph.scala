@@ -1,6 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.api.out4._
-
+import molecule.datomic.peer.api._
 import molecule.examples.dayOfDatomic.schema.{Graph2Schema, GraphSchema}
 import org.specs2.mutable.Specification
 

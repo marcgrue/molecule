@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.api.out5._
+import molecule.datomic.peer.api._
 
 
 import molecule.examples.dayOfDatomic.dsl.productsOrder._

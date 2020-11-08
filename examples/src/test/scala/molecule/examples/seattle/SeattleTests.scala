@@ -1,7 +1,7 @@
 package molecule.examples.seattle
 import java.io.FileReader
 import datomic.Util
-import molecule.api.in2_out8._
+import molecule.datomic.peer.api._
 import molecule.examples.seattle.dsl.seattle._
 
 class SeattleTests extends SeattleSpec {

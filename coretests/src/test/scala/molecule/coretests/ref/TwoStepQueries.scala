@@ -1,6 +1,6 @@
 package molecule.coretests.ref
 
-import molecule.api.out3._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 

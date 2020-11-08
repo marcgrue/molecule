@@ -1,7 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.api.in1_out4.m
-import molecule.api.out4._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.ops.exception.VerifyModelException
 

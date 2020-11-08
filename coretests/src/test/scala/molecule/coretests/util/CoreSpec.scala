@@ -3,7 +3,7 @@ package molecule.coretests.util
 import java.net.URI
 import java.util.Date
 import java.util.UUID._
-import molecule.api.core._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.util.{DateHandling, MoleculeSpec}
 import org.specs2.specification.Scope

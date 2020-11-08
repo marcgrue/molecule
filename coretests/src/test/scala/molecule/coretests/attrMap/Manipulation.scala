@@ -1,6 +1,6 @@
 package molecule.coretests.attrMap
 
-import molecule.api.out2._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 
 class Manipulation extends Base {

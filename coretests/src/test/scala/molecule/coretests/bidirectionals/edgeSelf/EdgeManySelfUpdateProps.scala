@@ -1,6 +1,6 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.api.in1_out9._
+import molecule.datomic.peer.api._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.ops.exception.VerifyModelException

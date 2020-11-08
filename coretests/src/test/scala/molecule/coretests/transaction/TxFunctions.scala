@@ -1,6 +1,6 @@
 package molecule.coretests.transaction
 
-import molecule.api.out4._
+import molecule.datomic.peer.api._
 import molecule.ast.transactionModel.Statement
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._

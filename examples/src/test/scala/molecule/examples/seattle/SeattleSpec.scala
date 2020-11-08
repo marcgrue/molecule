@@ -1,10 +1,9 @@
 package molecule.examples.seattle
 
-import molecule.api.core._
+import molecule.datomic.peer.api._
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.seattle.schema._
 import molecule.facade.Conn
-import molecule.factory.Molecule_Factory8._
 import molecule.util.MoleculeSpec
 import org.specs2.specification.Scope
 

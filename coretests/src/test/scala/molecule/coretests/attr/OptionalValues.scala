@@ -1,6 +1,6 @@
 package molecule.coretests.attr
 
-import molecule.api.out5._
+import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.ops.exception.VerifyModelException

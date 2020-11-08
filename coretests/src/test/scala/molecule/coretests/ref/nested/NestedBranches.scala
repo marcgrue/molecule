@@ -1,6 +1,6 @@
 package molecule.coretests.ref.nested
 
-import molecule.api.out3._
+import molecule.datomic.peer.api._
 import molecule.coretests.nested.dsl.nested._
 import molecule.coretests.nested.schema.NestedSchema
 import org.specs2.mutable.Specification

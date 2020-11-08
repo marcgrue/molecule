@@ -248,7 +248,7 @@ trait AggregateKeywords {
     * <br><br>
     * Apply `avg` keyword to attribute to return average of attribute values of entities matching the molecule.
     * {{{
-    *   Match.score.insert(1, 2, 4)
+    *   Match.sKeywords.insert(1, 2, 4)
     *   Match.score(avg).get.head === 2.3333333333333335 // (1 + 2 + 4) / 3
     * }}}
     *
@@ -262,7 +262,7 @@ trait AggregateKeywords {
     * <br><br>
     * Apply `median` keyword to attribute to return median of attribute values of entities matching the molecule.
     * {{{
-    *   Match.score.insert(1, 2, 4)
+    *   Match.sKeywords.insert(1, 2, 4)
     *   Match.score(median).get.head === 2
     * }}}
     * OBS: When it comes to an even number of values, Datomic has a special implementation of median that is different from the one described on the
@@ -270,12 +270,12 @@ trait AggregateKeywords {
     * <br><br>
     * Datomic calculates the median of even number of values as the average of the two middle numbers rounded down to nearest whole number
     * {{{
-    *   Match.score.insert(1, 2, 3, 4)
+    *   Match.sKeywords.insert(1, 2, 3, 4)
     *   Match.score(median).get.head === 2 // (2 + 3) / 2 = 2.5 rounded down to 2
     * }}}
     * With decimal numbers this can go wrong:
     * {{{
-    *   Match.score.insert(1.0, 2.5, 2.5, 3.0)
+    *   Match.sKeywords.insert(1.0, 2.5, 2.5, 3.0)
     *   Match.score(median).get.head === 2 // (2.5 + 2.5) / 2 = 2.5 rounded down to 2 (This is wrong and bug report has been filed)
     * }}}
     *
@@ -289,7 +289,7 @@ trait AggregateKeywords {
     * <br><br>
     * Apply `stddev` keyword to attribute to return variance of attribute values of entities matching the molecule.
     * {{{
-    *   Match.score.insert(1, 2, 4)
+    *   Match.sKeywords.insert(1, 2, 4)
     *   Match.score(stddev).get.head === 1.247219128924647
     * }}}
     *
@@ -303,7 +303,7 @@ trait AggregateKeywords {
     * <br><br>
     * Apply `sum` keyword to attribute to return sum of attribute values of entities matching the molecule.
     * {{{
-    *   Match.score.insert(1, 2, 4)
+    *   Match.sKeywords.insert(1, 2, 4)
     *   Match.score(sum).get.head === 7
     * }}}
     *
@@ -317,7 +317,7 @@ trait AggregateKeywords {
     * <br><br>
     * Apply `variance` keyword to attribute to return variance of attribute values of entities matching the molecule.
     * {{{
-    *   Match.score.insert(1, 2, 4)
+    *   Match.sKeywords.insert(1, 2, 4)
     *   Match.score(variance).get.head === 1.5555555555555556
     * }}}
     *
@@ -330,512 +330,512 @@ trait AggregateKeywords {
 /** Apply methods of arity 1-22 taking aggregate keywords. */
 object AggregateKeywords extends AggregateKeywords {
 
-  import molecule.api.core
+  import molecule.api.Keywords
 
   trait Aggregate00[Ns0]
 
   trait Aggregate01[Ns1[_], A] {
 
-    def apply(v: core.min)     : Ns1[A] = ???
-    def apply(v: core.max)     : Ns1[A] = ???
-    def apply(v: core.rand)    : Ns1[A] = ???
-    def apply(v: core.sample)  : Ns1[A] = ???
+    def apply(v: Keywords.min)     : Ns1[A] = ???
+    def apply(v: Keywords.max)     : Ns1[A] = ???
+    def apply(v: Keywords.rand)    : Ns1[A] = ???
+    def apply(v: Keywords.sample)  : Ns1[A] = ???
 
-    def apply(v: core.mins)    : Ns1[List[A]] = ???
-    def apply(v: core.maxs)    : Ns1[List[A]] = ???
-    def apply(v: core.distinct): Ns1[List[A]] = ???
-    def apply(v: core.rands)   : Ns1[List[A]] = ???
-    def apply(v: core.samples) : Ns1[List[A]] = ???
+    def apply(v: Keywords.mins)    : Ns1[List[A]] = ???
+    def apply(v: Keywords.maxs)    : Ns1[List[A]] = ???
+    def apply(v: Keywords.distinct): Ns1[List[A]] = ???
+    def apply(v: Keywords.rands)   : Ns1[List[A]] = ???
+    def apply(v: Keywords.samples) : Ns1[List[A]] = ???
 
-    def apply(v: core.count)        : Ns1[Int   ] = ???
-    def apply(v: core.countDistinct): Ns1[Int   ] = ???
-    def apply(v: core.sum)          : Ns1[A     ] = ???
-    def apply(v: core.avg)          : Ns1[Double] = ???
-    def apply(v: core.median)       : Ns1[A     ] = ???
-    def apply(v: core.variance)     : Ns1[Double] = ???
-    def apply(v: core.stddev)       : Ns1[Double] = ???
+    def apply(v: Keywords.count)        : Ns1[Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns1[Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns1[A     ] = ???
+    def apply(v: Keywords.avg)          : Ns1[Double] = ???
+    def apply(v: Keywords.median)       : Ns1[A     ] = ???
+    def apply(v: Keywords.variance)     : Ns1[Double] = ???
+    def apply(v: Keywords.stddev)       : Ns1[Double] = ???
   }
 
 
   trait Aggregate02[Ns2[_,_], A, B] {
 
-    def apply(v: core.min)     : Ns2[A, B] = ???
-    def apply(v: core.max)     : Ns2[A, B] = ???
-    def apply(v: core.rand)    : Ns2[A, B] = ???
-    def apply(v: core.sample)  : Ns2[A, B] = ???
+    def apply(v: Keywords.min)     : Ns2[A, B] = ???
+    def apply(v: Keywords.max)     : Ns2[A, B] = ???
+    def apply(v: Keywords.rand)    : Ns2[A, B] = ???
+    def apply(v: Keywords.sample)  : Ns2[A, B] = ???
 
-    def apply(v: core.mins)    : Ns2[A, List[B]] = ???
-    def apply(v: core.maxs)    : Ns2[A, List[B]] = ???
-    def apply(v: core.distinct): Ns2[A, List[B]] = ???
-    def apply(v: core.rands)   : Ns2[A, List[B]] = ???
-    def apply(v: core.samples) : Ns2[A, List[B]] = ???
+    def apply(v: Keywords.mins)    : Ns2[A, List[B]] = ???
+    def apply(v: Keywords.maxs)    : Ns2[A, List[B]] = ???
+    def apply(v: Keywords.distinct): Ns2[A, List[B]] = ???
+    def apply(v: Keywords.rands)   : Ns2[A, List[B]] = ???
+    def apply(v: Keywords.samples) : Ns2[A, List[B]] = ???
 
-    def apply(v: core.count)        : Ns2[A, Int   ] = ???
-    def apply(v: core.countDistinct): Ns2[A, Int   ] = ???
-    def apply(v: core.sum)          : Ns2[A, B     ] = ???
-    def apply(v: core.avg)          : Ns2[A, Double] = ???
-    def apply(v: core.median)       : Ns2[A, B     ] = ???
-    def apply(v: core.variance)     : Ns2[A, Double] = ???
-    def apply(v: core.stddev)       : Ns2[A, Double] = ???
+    def apply(v: Keywords.count)        : Ns2[A, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns2[A, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns2[A, B     ] = ???
+    def apply(v: Keywords.avg)          : Ns2[A, Double] = ???
+    def apply(v: Keywords.median)       : Ns2[A, B     ] = ???
+    def apply(v: Keywords.variance)     : Ns2[A, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns2[A, Double] = ???
   }
 
 
   trait Aggregate03[Ns3[_,_,_], A, B, C] {
 
-    def apply(v: core.min)     : Ns3[A, B, C] = ???
-    def apply(v: core.max)     : Ns3[A, B, C] = ???
-    def apply(v: core.rand)    : Ns3[A, B, C] = ???
-    def apply(v: core.sample)  : Ns3[A, B, C] = ???
+    def apply(v: Keywords.min)     : Ns3[A, B, C] = ???
+    def apply(v: Keywords.max)     : Ns3[A, B, C] = ???
+    def apply(v: Keywords.rand)    : Ns3[A, B, C] = ???
+    def apply(v: Keywords.sample)  : Ns3[A, B, C] = ???
 
-    def apply(v: core.mins)    : Ns3[A, B, List[C]] = ???
-    def apply(v: core.maxs)    : Ns3[A, B, List[C]] = ???
-    def apply(v: core.distinct): Ns3[A, B, List[C]] = ???
-    def apply(v: core.rands)   : Ns3[A, B, List[C]] = ???
-    def apply(v: core.samples) : Ns3[A, B, List[C]] = ???
+    def apply(v: Keywords.mins)    : Ns3[A, B, List[C]] = ???
+    def apply(v: Keywords.maxs)    : Ns3[A, B, List[C]] = ???
+    def apply(v: Keywords.distinct): Ns3[A, B, List[C]] = ???
+    def apply(v: Keywords.rands)   : Ns3[A, B, List[C]] = ???
+    def apply(v: Keywords.samples) : Ns3[A, B, List[C]] = ???
 
-    def apply(v: core.count)        : Ns3[A, B, Int   ] = ???
-    def apply(v: core.countDistinct): Ns3[A, B, Int   ] = ???
-    def apply(v: core.sum)          : Ns3[A, B, C     ] = ???
-    def apply(v: core.avg)          : Ns3[A, B, Double] = ???
-    def apply(v: core.median)       : Ns3[A, B, C     ] = ???
-    def apply(v: core.variance)     : Ns3[A, B, Double] = ???
-    def apply(v: core.stddev)       : Ns3[A, B, Double] = ???
+    def apply(v: Keywords.count)        : Ns3[A, B, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns3[A, B, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns3[A, B, C     ] = ???
+    def apply(v: Keywords.avg)          : Ns3[A, B, Double] = ???
+    def apply(v: Keywords.median)       : Ns3[A, B, C     ] = ???
+    def apply(v: Keywords.variance)     : Ns3[A, B, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns3[A, B, Double] = ???
   }
 
 
   trait Aggregate04[Ns4[_,_,_,_], A, B, C, D] {
 
-    def apply(v: core.min)     : Ns4[A, B, C, D] = ???
-    def apply(v: core.max)     : Ns4[A, B, C, D] = ???
-    def apply(v: core.rand)    : Ns4[A, B, C, D] = ???
-    def apply(v: core.sample)  : Ns4[A, B, C, D] = ???
+    def apply(v: Keywords.min)     : Ns4[A, B, C, D] = ???
+    def apply(v: Keywords.max)     : Ns4[A, B, C, D] = ???
+    def apply(v: Keywords.rand)    : Ns4[A, B, C, D] = ???
+    def apply(v: Keywords.sample)  : Ns4[A, B, C, D] = ???
 
-    def apply(v: core.mins)    : Ns4[A, B, C, List[D]] = ???
-    def apply(v: core.maxs)    : Ns4[A, B, C, List[D]] = ???
-    def apply(v: core.distinct): Ns4[A, B, C, List[D]] = ???
-    def apply(v: core.rands)   : Ns4[A, B, C, List[D]] = ???
-    def apply(v: core.samples) : Ns4[A, B, C, List[D]] = ???
+    def apply(v: Keywords.mins)    : Ns4[A, B, C, List[D]] = ???
+    def apply(v: Keywords.maxs)    : Ns4[A, B, C, List[D]] = ???
+    def apply(v: Keywords.distinct): Ns4[A, B, C, List[D]] = ???
+    def apply(v: Keywords.rands)   : Ns4[A, B, C, List[D]] = ???
+    def apply(v: Keywords.samples) : Ns4[A, B, C, List[D]] = ???
 
-    def apply(v: core.count)        : Ns4[A, B, C, Int   ] = ???
-    def apply(v: core.countDistinct): Ns4[A, B, C, Int   ] = ???
-    def apply(v: core.sum)          : Ns4[A, B, C, D     ] = ???
-    def apply(v: core.avg)          : Ns4[A, B, C, Double] = ???
-    def apply(v: core.median)       : Ns4[A, B, C, D     ] = ???
-    def apply(v: core.variance)     : Ns4[A, B, C, Double] = ???
-    def apply(v: core.stddev)       : Ns4[A, B, C, Double] = ???
+    def apply(v: Keywords.count)        : Ns4[A, B, C, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns4[A, B, C, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns4[A, B, C, D     ] = ???
+    def apply(v: Keywords.avg)          : Ns4[A, B, C, Double] = ???
+    def apply(v: Keywords.median)       : Ns4[A, B, C, D     ] = ???
+    def apply(v: Keywords.variance)     : Ns4[A, B, C, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns4[A, B, C, Double] = ???
   }
 
 
   trait Aggregate05[Ns5[_,_,_,_,_], A, B, C, D, E] {
 
-    def apply(v: core.min)     : Ns5[A, B, C, D, E] = ???
-    def apply(v: core.max)     : Ns5[A, B, C, D, E] = ???
-    def apply(v: core.rand)    : Ns5[A, B, C, D, E] = ???
-    def apply(v: core.sample)  : Ns5[A, B, C, D, E] = ???
+    def apply(v: Keywords.min)     : Ns5[A, B, C, D, E] = ???
+    def apply(v: Keywords.max)     : Ns5[A, B, C, D, E] = ???
+    def apply(v: Keywords.rand)    : Ns5[A, B, C, D, E] = ???
+    def apply(v: Keywords.sample)  : Ns5[A, B, C, D, E] = ???
 
-    def apply(v: core.mins)    : Ns5[A, B, C, D, List[E]] = ???
-    def apply(v: core.maxs)    : Ns5[A, B, C, D, List[E]] = ???
-    def apply(v: core.distinct): Ns5[A, B, C, D, List[E]] = ???
-    def apply(v: core.rands)   : Ns5[A, B, C, D, List[E]] = ???
-    def apply(v: core.samples) : Ns5[A, B, C, D, List[E]] = ???
+    def apply(v: Keywords.mins)    : Ns5[A, B, C, D, List[E]] = ???
+    def apply(v: Keywords.maxs)    : Ns5[A, B, C, D, List[E]] = ???
+    def apply(v: Keywords.distinct): Ns5[A, B, C, D, List[E]] = ???
+    def apply(v: Keywords.rands)   : Ns5[A, B, C, D, List[E]] = ???
+    def apply(v: Keywords.samples) : Ns5[A, B, C, D, List[E]] = ???
 
-    def apply(v: core.count)        : Ns5[A, B, C, D, Int   ] = ???
-    def apply(v: core.countDistinct): Ns5[A, B, C, D, Int   ] = ???
-    def apply(v: core.sum)          : Ns5[A, B, C, D, E     ] = ???
-    def apply(v: core.avg)          : Ns5[A, B, C, D, Double] = ???
-    def apply(v: core.median)       : Ns5[A, B, C, D, E     ] = ???
-    def apply(v: core.variance)     : Ns5[A, B, C, D, Double] = ???
-    def apply(v: core.stddev)       : Ns5[A, B, C, D, Double] = ???
+    def apply(v: Keywords.count)        : Ns5[A, B, C, D, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns5[A, B, C, D, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns5[A, B, C, D, E     ] = ???
+    def apply(v: Keywords.avg)          : Ns5[A, B, C, D, Double] = ???
+    def apply(v: Keywords.median)       : Ns5[A, B, C, D, E     ] = ???
+    def apply(v: Keywords.variance)     : Ns5[A, B, C, D, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns5[A, B, C, D, Double] = ???
   }
 
 
   trait Aggregate06[Ns6[_,_,_,_,_,_], A, B, C, D, E, F] {
 
-    def apply(v: core.min)     : Ns6[A, B, C, D, E, F] = ???
-    def apply(v: core.max)     : Ns6[A, B, C, D, E, F] = ???
-    def apply(v: core.rand)    : Ns6[A, B, C, D, E, F] = ???
-    def apply(v: core.sample)  : Ns6[A, B, C, D, E, F] = ???
+    def apply(v: Keywords.min)     : Ns6[A, B, C, D, E, F] = ???
+    def apply(v: Keywords.max)     : Ns6[A, B, C, D, E, F] = ???
+    def apply(v: Keywords.rand)    : Ns6[A, B, C, D, E, F] = ???
+    def apply(v: Keywords.sample)  : Ns6[A, B, C, D, E, F] = ???
 
-    def apply(v: core.mins)    : Ns6[A, B, C, D, E, List[F]] = ???
-    def apply(v: core.maxs)    : Ns6[A, B, C, D, E, List[F]] = ???
-    def apply(v: core.distinct): Ns6[A, B, C, D, E, List[F]] = ???
-    def apply(v: core.rands)   : Ns6[A, B, C, D, E, List[F]] = ???
-    def apply(v: core.samples) : Ns6[A, B, C, D, E, List[F]] = ???
+    def apply(v: Keywords.mins)    : Ns6[A, B, C, D, E, List[F]] = ???
+    def apply(v: Keywords.maxs)    : Ns6[A, B, C, D, E, List[F]] = ???
+    def apply(v: Keywords.distinct): Ns6[A, B, C, D, E, List[F]] = ???
+    def apply(v: Keywords.rands)   : Ns6[A, B, C, D, E, List[F]] = ???
+    def apply(v: Keywords.samples) : Ns6[A, B, C, D, E, List[F]] = ???
 
-    def apply(v: core.count)        : Ns6[A, B, C, D, E, Int   ] = ???
-    def apply(v: core.countDistinct): Ns6[A, B, C, D, E, Int   ] = ???
-    def apply(v: core.sum)          : Ns6[A, B, C, D, E, F     ] = ???
-    def apply(v: core.avg)          : Ns6[A, B, C, D, E, Double] = ???
-    def apply(v: core.median)       : Ns6[A, B, C, D, E, F     ] = ???
-    def apply(v: core.variance)     : Ns6[A, B, C, D, E, Double] = ???
-    def apply(v: core.stddev)       : Ns6[A, B, C, D, E, Double] = ???
+    def apply(v: Keywords.count)        : Ns6[A, B, C, D, E, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns6[A, B, C, D, E, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns6[A, B, C, D, E, F     ] = ???
+    def apply(v: Keywords.avg)          : Ns6[A, B, C, D, E, Double] = ???
+    def apply(v: Keywords.median)       : Ns6[A, B, C, D, E, F     ] = ???
+    def apply(v: Keywords.variance)     : Ns6[A, B, C, D, E, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns6[A, B, C, D, E, Double] = ???
   }
 
 
   trait Aggregate07[Ns7[_,_,_,_,_,_,_], A, B, C, D, E, F, G] {
 
-    def apply(v: core.min)     : Ns7[A, B, C, D, E, F, G] = ???
-    def apply(v: core.max)     : Ns7[A, B, C, D, E, F, G] = ???
-    def apply(v: core.rand)    : Ns7[A, B, C, D, E, F, G] = ???
-    def apply(v: core.sample)  : Ns7[A, B, C, D, E, F, G] = ???
+    def apply(v: Keywords.min)     : Ns7[A, B, C, D, E, F, G] = ???
+    def apply(v: Keywords.max)     : Ns7[A, B, C, D, E, F, G] = ???
+    def apply(v: Keywords.rand)    : Ns7[A, B, C, D, E, F, G] = ???
+    def apply(v: Keywords.sample)  : Ns7[A, B, C, D, E, F, G] = ???
 
-    def apply(v: core.mins)    : Ns7[A, B, C, D, E, F, List[G]] = ???
-    def apply(v: core.maxs)    : Ns7[A, B, C, D, E, F, List[G]] = ???
-    def apply(v: core.distinct): Ns7[A, B, C, D, E, F, List[G]] = ???
-    def apply(v: core.rands)   : Ns7[A, B, C, D, E, F, List[G]] = ???
-    def apply(v: core.samples) : Ns7[A, B, C, D, E, F, List[G]] = ???
+    def apply(v: Keywords.mins)    : Ns7[A, B, C, D, E, F, List[G]] = ???
+    def apply(v: Keywords.maxs)    : Ns7[A, B, C, D, E, F, List[G]] = ???
+    def apply(v: Keywords.distinct): Ns7[A, B, C, D, E, F, List[G]] = ???
+    def apply(v: Keywords.rands)   : Ns7[A, B, C, D, E, F, List[G]] = ???
+    def apply(v: Keywords.samples) : Ns7[A, B, C, D, E, F, List[G]] = ???
 
-    def apply(v: core.count)        : Ns7[A, B, C, D, E, F, Int   ] = ???
-    def apply(v: core.countDistinct): Ns7[A, B, C, D, E, F, Int   ] = ???
-    def apply(v: core.sum)          : Ns7[A, B, C, D, E, F, G     ] = ???
-    def apply(v: core.avg)          : Ns7[A, B, C, D, E, F, Double] = ???
-    def apply(v: core.median)       : Ns7[A, B, C, D, E, F, G     ] = ???
-    def apply(v: core.variance)     : Ns7[A, B, C, D, E, F, Double] = ???
-    def apply(v: core.stddev)       : Ns7[A, B, C, D, E, F, Double] = ???
+    def apply(v: Keywords.count)        : Ns7[A, B, C, D, E, F, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns7[A, B, C, D, E, F, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns7[A, B, C, D, E, F, G     ] = ???
+    def apply(v: Keywords.avg)          : Ns7[A, B, C, D, E, F, Double] = ???
+    def apply(v: Keywords.median)       : Ns7[A, B, C, D, E, F, G     ] = ???
+    def apply(v: Keywords.variance)     : Ns7[A, B, C, D, E, F, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns7[A, B, C, D, E, F, Double] = ???
   }
 
 
   trait Aggregate08[Ns8[_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H] {
 
-    def apply(v: core.min)     : Ns8[A, B, C, D, E, F, G, H] = ???
-    def apply(v: core.max)     : Ns8[A, B, C, D, E, F, G, H] = ???
-    def apply(v: core.rand)    : Ns8[A, B, C, D, E, F, G, H] = ???
-    def apply(v: core.sample)  : Ns8[A, B, C, D, E, F, G, H] = ???
+    def apply(v: Keywords.min)     : Ns8[A, B, C, D, E, F, G, H] = ???
+    def apply(v: Keywords.max)     : Ns8[A, B, C, D, E, F, G, H] = ???
+    def apply(v: Keywords.rand)    : Ns8[A, B, C, D, E, F, G, H] = ???
+    def apply(v: Keywords.sample)  : Ns8[A, B, C, D, E, F, G, H] = ???
 
-    def apply(v: core.mins)    : Ns8[A, B, C, D, E, F, G, List[H]] = ???
-    def apply(v: core.maxs)    : Ns8[A, B, C, D, E, F, G, List[H]] = ???
-    def apply(v: core.distinct): Ns8[A, B, C, D, E, F, G, List[H]] = ???
-    def apply(v: core.rands)   : Ns8[A, B, C, D, E, F, G, List[H]] = ???
-    def apply(v: core.samples) : Ns8[A, B, C, D, E, F, G, List[H]] = ???
+    def apply(v: Keywords.mins)    : Ns8[A, B, C, D, E, F, G, List[H]] = ???
+    def apply(v: Keywords.maxs)    : Ns8[A, B, C, D, E, F, G, List[H]] = ???
+    def apply(v: Keywords.distinct): Ns8[A, B, C, D, E, F, G, List[H]] = ???
+    def apply(v: Keywords.rands)   : Ns8[A, B, C, D, E, F, G, List[H]] = ???
+    def apply(v: Keywords.samples) : Ns8[A, B, C, D, E, F, G, List[H]] = ???
 
-    def apply(v: core.count)        : Ns8[A, B, C, D, E, F, G, Int   ] = ???
-    def apply(v: core.countDistinct): Ns8[A, B, C, D, E, F, G, Int   ] = ???
-    def apply(v: core.sum)          : Ns8[A, B, C, D, E, F, G, H     ] = ???
-    def apply(v: core.avg)          : Ns8[A, B, C, D, E, F, G, Double] = ???
-    def apply(v: core.median)       : Ns8[A, B, C, D, E, F, G, H     ] = ???
-    def apply(v: core.variance)     : Ns8[A, B, C, D, E, F, G, Double] = ???
-    def apply(v: core.stddev)       : Ns8[A, B, C, D, E, F, G, Double] = ???
+    def apply(v: Keywords.count)        : Ns8[A, B, C, D, E, F, G, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns8[A, B, C, D, E, F, G, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns8[A, B, C, D, E, F, G, H     ] = ???
+    def apply(v: Keywords.avg)          : Ns8[A, B, C, D, E, F, G, Double] = ???
+    def apply(v: Keywords.median)       : Ns8[A, B, C, D, E, F, G, H     ] = ???
+    def apply(v: Keywords.variance)     : Ns8[A, B, C, D, E, F, G, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns8[A, B, C, D, E, F, G, Double] = ???
   }
 
 
   trait Aggregate09[Ns9[_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I] {
 
-    def apply(v: core.min)     : Ns9[A, B, C, D, E, F, G, H, I] = ???
-    def apply(v: core.max)     : Ns9[A, B, C, D, E, F, G, H, I] = ???
-    def apply(v: core.rand)    : Ns9[A, B, C, D, E, F, G, H, I] = ???
-    def apply(v: core.sample)  : Ns9[A, B, C, D, E, F, G, H, I] = ???
+    def apply(v: Keywords.min)     : Ns9[A, B, C, D, E, F, G, H, I] = ???
+    def apply(v: Keywords.max)     : Ns9[A, B, C, D, E, F, G, H, I] = ???
+    def apply(v: Keywords.rand)    : Ns9[A, B, C, D, E, F, G, H, I] = ???
+    def apply(v: Keywords.sample)  : Ns9[A, B, C, D, E, F, G, H, I] = ???
 
-    def apply(v: core.mins)    : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
-    def apply(v: core.maxs)    : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
-    def apply(v: core.distinct): Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
-    def apply(v: core.rands)   : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
-    def apply(v: core.samples) : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
+    def apply(v: Keywords.mins)    : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
+    def apply(v: Keywords.maxs)    : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
+    def apply(v: Keywords.distinct): Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
+    def apply(v: Keywords.rands)   : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
+    def apply(v: Keywords.samples) : Ns9[A, B, C, D, E, F, G, H, List[I]] = ???
 
-    def apply(v: core.count)        : Ns9[A, B, C, D, E, F, G, H, Int   ] = ???
-    def apply(v: core.countDistinct): Ns9[A, B, C, D, E, F, G, H, Int   ] = ???
-    def apply(v: core.sum)          : Ns9[A, B, C, D, E, F, G, H, I     ] = ???
-    def apply(v: core.avg)          : Ns9[A, B, C, D, E, F, G, H, Double] = ???
-    def apply(v: core.median)       : Ns9[A, B, C, D, E, F, G, H, I     ] = ???
-    def apply(v: core.variance)     : Ns9[A, B, C, D, E, F, G, H, Double] = ???
-    def apply(v: core.stddev)       : Ns9[A, B, C, D, E, F, G, H, Double] = ???
+    def apply(v: Keywords.count)        : Ns9[A, B, C, D, E, F, G, H, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns9[A, B, C, D, E, F, G, H, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns9[A, B, C, D, E, F, G, H, I     ] = ???
+    def apply(v: Keywords.avg)          : Ns9[A, B, C, D, E, F, G, H, Double] = ???
+    def apply(v: Keywords.median)       : Ns9[A, B, C, D, E, F, G, H, I     ] = ???
+    def apply(v: Keywords.variance)     : Ns9[A, B, C, D, E, F, G, H, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns9[A, B, C, D, E, F, G, H, Double] = ???
   }
 
 
   trait Aggregate10[Ns10[_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J] {
 
-    def apply(v: core.min)     : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
-    def apply(v: core.max)     : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
-    def apply(v: core.rand)    : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
-    def apply(v: core.sample)  : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
+    def apply(v: Keywords.min)     : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
+    def apply(v: Keywords.max)     : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
+    def apply(v: Keywords.rand)    : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
+    def apply(v: Keywords.sample)  : Ns10[A, B, C, D, E, F, G, H, I, J] = ???
 
-    def apply(v: core.mins)    : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
-    def apply(v: core.maxs)    : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
-    def apply(v: core.distinct): Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
-    def apply(v: core.rands)   : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
-    def apply(v: core.samples) : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
+    def apply(v: Keywords.mins)    : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
+    def apply(v: Keywords.maxs)    : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
+    def apply(v: Keywords.distinct): Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
+    def apply(v: Keywords.rands)   : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
+    def apply(v: Keywords.samples) : Ns10[A, B, C, D, E, F, G, H, I, List[J]] = ???
 
-    def apply(v: core.count)        : Ns10[A, B, C, D, E, F, G, H, I, Int   ] = ???
-    def apply(v: core.countDistinct): Ns10[A, B, C, D, E, F, G, H, I, Int   ] = ???
-    def apply(v: core.sum)          : Ns10[A, B, C, D, E, F, G, H, I, J     ] = ???
-    def apply(v: core.avg)          : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
-    def apply(v: core.median)       : Ns10[A, B, C, D, E, F, G, H, I, J     ] = ???
-    def apply(v: core.variance)     : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
-    def apply(v: core.stddev)       : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
+    def apply(v: Keywords.count)        : Ns10[A, B, C, D, E, F, G, H, I, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns10[A, B, C, D, E, F, G, H, I, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns10[A, B, C, D, E, F, G, H, I, J     ] = ???
+    def apply(v: Keywords.avg)          : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
+    def apply(v: Keywords.median)       : Ns10[A, B, C, D, E, F, G, H, I, J     ] = ???
+    def apply(v: Keywords.variance)     : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns10[A, B, C, D, E, F, G, H, I, Double] = ???
   }
 
 
   trait Aggregate11[Ns11[_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K] {
 
-    def apply(v: core.min)     : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
-    def apply(v: core.max)     : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
-    def apply(v: core.rand)    : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
-    def apply(v: core.sample)  : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
+    def apply(v: Keywords.min)     : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
+    def apply(v: Keywords.max)     : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
+    def apply(v: Keywords.rand)    : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
+    def apply(v: Keywords.sample)  : Ns11[A, B, C, D, E, F, G, H, I, J, K] = ???
 
-    def apply(v: core.mins)    : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
-    def apply(v: core.maxs)    : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
-    def apply(v: core.distinct): Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
-    def apply(v: core.rands)   : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
-    def apply(v: core.samples) : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
+    def apply(v: Keywords.mins)    : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
+    def apply(v: Keywords.maxs)    : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
+    def apply(v: Keywords.distinct): Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
+    def apply(v: Keywords.rands)   : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
+    def apply(v: Keywords.samples) : Ns11[A, B, C, D, E, F, G, H, I, J, List[K]] = ???
 
-    def apply(v: core.count)        : Ns11[A, B, C, D, E, F, G, H, I, J, Int   ] = ???
-    def apply(v: core.countDistinct): Ns11[A, B, C, D, E, F, G, H, I, J, Int   ] = ???
-    def apply(v: core.sum)          : Ns11[A, B, C, D, E, F, G, H, I, J, K     ] = ???
-    def apply(v: core.avg)          : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
-    def apply(v: core.median)       : Ns11[A, B, C, D, E, F, G, H, I, J, K     ] = ???
-    def apply(v: core.variance)     : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
-    def apply(v: core.stddev)       : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
+    def apply(v: Keywords.count)        : Ns11[A, B, C, D, E, F, G, H, I, J, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns11[A, B, C, D, E, F, G, H, I, J, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns11[A, B, C, D, E, F, G, H, I, J, K     ] = ???
+    def apply(v: Keywords.avg)          : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
+    def apply(v: Keywords.median)       : Ns11[A, B, C, D, E, F, G, H, I, J, K     ] = ???
+    def apply(v: Keywords.variance)     : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns11[A, B, C, D, E, F, G, H, I, J, Double] = ???
   }
 
 
   trait Aggregate12[Ns12[_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L] {
 
-    def apply(v: core.min)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
-    def apply(v: core.max)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
-    def apply(v: core.rand)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
-    def apply(v: core.sample)  : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
+    def apply(v: Keywords.min)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
+    def apply(v: Keywords.max)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
+    def apply(v: Keywords.rand)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
+    def apply(v: Keywords.sample)  : Ns12[A, B, C, D, E, F, G, H, I, J, K, L] = ???
 
-    def apply(v: core.mins)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
-    def apply(v: core.maxs)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
-    def apply(v: core.distinct): Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
-    def apply(v: core.rands)   : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
-    def apply(v: core.samples) : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
+    def apply(v: Keywords.mins)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
+    def apply(v: Keywords.maxs)    : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
+    def apply(v: Keywords.distinct): Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
+    def apply(v: Keywords.rands)   : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
+    def apply(v: Keywords.samples) : Ns12[A, B, C, D, E, F, G, H, I, J, K, List[L]] = ???
 
-    def apply(v: core.count)        : Ns12[A, B, C, D, E, F, G, H, I, J, K, Int   ] = ???
-    def apply(v: core.countDistinct): Ns12[A, B, C, D, E, F, G, H, I, J, K, Int   ] = ???
-    def apply(v: core.sum)          : Ns12[A, B, C, D, E, F, G, H, I, J, K, L     ] = ???
-    def apply(v: core.avg)          : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
-    def apply(v: core.median)       : Ns12[A, B, C, D, E, F, G, H, I, J, K, L     ] = ???
-    def apply(v: core.variance)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
-    def apply(v: core.stddev)       : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
+    def apply(v: Keywords.count)        : Ns12[A, B, C, D, E, F, G, H, I, J, K, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns12[A, B, C, D, E, F, G, H, I, J, K, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns12[A, B, C, D, E, F, G, H, I, J, K, L     ] = ???
+    def apply(v: Keywords.avg)          : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
+    def apply(v: Keywords.median)       : Ns12[A, B, C, D, E, F, G, H, I, J, K, L     ] = ???
+    def apply(v: Keywords.variance)     : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns12[A, B, C, D, E, F, G, H, I, J, K, Double] = ???
   }
 
 
   trait Aggregate13[Ns13[_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M] {
 
-    def apply(v: core.min)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
-    def apply(v: core.max)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
-    def apply(v: core.rand)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
-    def apply(v: core.sample)  : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
+    def apply(v: Keywords.min)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
+    def apply(v: Keywords.max)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
+    def apply(v: Keywords.rand)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
+    def apply(v: Keywords.sample)  : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M] = ???
 
-    def apply(v: core.mins)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
-    def apply(v: core.maxs)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
-    def apply(v: core.distinct): Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
-    def apply(v: core.rands)   : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
-    def apply(v: core.samples) : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
+    def apply(v: Keywords.mins)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
+    def apply(v: Keywords.maxs)    : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
+    def apply(v: Keywords.distinct): Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
+    def apply(v: Keywords.rands)   : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
+    def apply(v: Keywords.samples) : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, List[M]] = ???
 
-    def apply(v: core.count)        : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Int   ] = ???
-    def apply(v: core.countDistinct): Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Int   ] = ???
-    def apply(v: core.sum)          : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M     ] = ???
-    def apply(v: core.avg)          : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
-    def apply(v: core.median)       : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M     ] = ???
-    def apply(v: core.variance)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
-    def apply(v: core.stddev)       : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
+    def apply(v: Keywords.count)        : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M     ] = ???
+    def apply(v: Keywords.avg)          : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
+    def apply(v: Keywords.median)       : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, M     ] = ???
+    def apply(v: Keywords.variance)     : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns13[A, B, C, D, E, F, G, H, I, J, K, L, Double] = ???
   }
 
 
   trait Aggregate14[Ns14[_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N] {
 
-    def apply(v: core.min)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
-    def apply(v: core.max)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
-    def apply(v: core.rand)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
-    def apply(v: core.sample)  : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
+    def apply(v: Keywords.min)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
+    def apply(v: Keywords.max)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
+    def apply(v: Keywords.rand)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
+    def apply(v: Keywords.sample)  : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] = ???
 
-    def apply(v: core.mins)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
-    def apply(v: core.maxs)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
-    def apply(v: core.distinct): Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
-    def apply(v: core.rands)   : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
-    def apply(v: core.samples) : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
+    def apply(v: Keywords.mins)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
+    def apply(v: Keywords.maxs)    : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
+    def apply(v: Keywords.distinct): Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
+    def apply(v: Keywords.rands)   : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
+    def apply(v: Keywords.samples) : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, List[N]] = ???
 
-    def apply(v: core.count)        : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Int   ] = ???
-    def apply(v: core.countDistinct): Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Int   ] = ???
-    def apply(v: core.sum)          : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N     ] = ???
-    def apply(v: core.avg)          : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
-    def apply(v: core.median)       : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N     ] = ???
-    def apply(v: core.variance)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
-    def apply(v: core.stddev)       : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
+    def apply(v: Keywords.count)        : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N     ] = ???
+    def apply(v: Keywords.avg)          : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
+    def apply(v: Keywords.median)       : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, N     ] = ???
+    def apply(v: Keywords.variance)     : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns14[A, B, C, D, E, F, G, H, I, J, K, L, M, Double] = ???
   }
 
 
   trait Aggregate15[Ns15[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] {
 
-    def apply(v: core.min)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
-    def apply(v: core.max)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
-    def apply(v: core.rand)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
-    def apply(v: core.sample)  : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
+    def apply(v: Keywords.min)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
+    def apply(v: Keywords.max)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
+    def apply(v: Keywords.rand)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
+    def apply(v: Keywords.sample)  : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] = ???
 
-    def apply(v: core.mins)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
-    def apply(v: core.maxs)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
-    def apply(v: core.distinct): Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
-    def apply(v: core.rands)   : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
-    def apply(v: core.samples) : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
+    def apply(v: Keywords.mins)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
+    def apply(v: Keywords.maxs)    : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
+    def apply(v: Keywords.distinct): Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
+    def apply(v: Keywords.rands)   : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
+    def apply(v: Keywords.samples) : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, List[O]] = ???
 
-    def apply(v: core.count)        : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Int   ] = ???
-    def apply(v: core.countDistinct): Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Int   ] = ???
-    def apply(v: core.sum)          : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O     ] = ???
-    def apply(v: core.avg)          : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
-    def apply(v: core.median)       : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O     ] = ???
-    def apply(v: core.variance)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
-    def apply(v: core.stddev)       : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
+    def apply(v: Keywords.count)        : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O     ] = ???
+    def apply(v: Keywords.avg)          : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
+    def apply(v: Keywords.median)       : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O     ] = ???
+    def apply(v: Keywords.variance)     : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Double] = ???
   }
 
 
   trait Aggregate16[Ns16[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] {
 
-    def apply(v: core.min)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
-    def apply(v: core.max)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
-    def apply(v: core.rand)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
-    def apply(v: core.sample)  : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
+    def apply(v: Keywords.min)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
+    def apply(v: Keywords.max)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
+    def apply(v: Keywords.rand)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
+    def apply(v: Keywords.sample)  : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] = ???
 
-    def apply(v: core.mins)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
-    def apply(v: core.maxs)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
-    def apply(v: core.distinct): Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
-    def apply(v: core.rands)   : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
-    def apply(v: core.samples) : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
+    def apply(v: Keywords.mins)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
+    def apply(v: Keywords.maxs)    : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
+    def apply(v: Keywords.distinct): Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
+    def apply(v: Keywords.rands)   : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
+    def apply(v: Keywords.samples) : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, List[P]] = ???
 
-    def apply(v: core.count)        : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Int   ] = ???
-    def apply(v: core.countDistinct): Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Int   ] = ???
-    def apply(v: core.sum)          : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P     ] = ???
-    def apply(v: core.avg)          : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
-    def apply(v: core.median)       : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P     ] = ???
-    def apply(v: core.variance)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
-    def apply(v: core.stddev)       : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
+    def apply(v: Keywords.count)        : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P     ] = ???
+    def apply(v: Keywords.avg)          : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
+    def apply(v: Keywords.median)       : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P     ] = ???
+    def apply(v: Keywords.variance)     : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Double] = ???
   }
 
 
   trait Aggregate17[Ns17[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] {
 
-    def apply(v: core.min)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
-    def apply(v: core.max)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
-    def apply(v: core.rand)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
-    def apply(v: core.sample)  : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
+    def apply(v: Keywords.min)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
+    def apply(v: Keywords.max)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
+    def apply(v: Keywords.rand)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
+    def apply(v: Keywords.sample)  : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] = ???
 
-    def apply(v: core.mins)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
-    def apply(v: core.maxs)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
-    def apply(v: core.distinct): Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
-    def apply(v: core.rands)   : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
-    def apply(v: core.samples) : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
+    def apply(v: Keywords.mins)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
+    def apply(v: Keywords.maxs)    : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
+    def apply(v: Keywords.distinct): Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
+    def apply(v: Keywords.rands)   : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
+    def apply(v: Keywords.samples) : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, List[Q]] = ???
 
-    def apply(v: core.count)        : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Int   ] = ???
-    def apply(v: core.countDistinct): Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Int   ] = ???
-    def apply(v: core.sum)          : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q     ] = ???
-    def apply(v: core.avg)          : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
-    def apply(v: core.median)       : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q     ] = ???
-    def apply(v: core.variance)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
-    def apply(v: core.stddev)       : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
+    def apply(v: Keywords.count)        : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q     ] = ???
+    def apply(v: Keywords.avg)          : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
+    def apply(v: Keywords.median)       : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q     ] = ???
+    def apply(v: Keywords.variance)     : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Double] = ???
   }
 
 
   trait Aggregate18[Ns18[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] {
 
-    def apply(v: core.min)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
-    def apply(v: core.max)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
-    def apply(v: core.rand)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
-    def apply(v: core.sample)  : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
+    def apply(v: Keywords.min)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
+    def apply(v: Keywords.max)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
+    def apply(v: Keywords.rand)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
+    def apply(v: Keywords.sample)  : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] = ???
 
-    def apply(v: core.mins)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
-    def apply(v: core.maxs)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
-    def apply(v: core.distinct): Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
-    def apply(v: core.rands)   : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
-    def apply(v: core.samples) : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
+    def apply(v: Keywords.mins)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
+    def apply(v: Keywords.maxs)    : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
+    def apply(v: Keywords.distinct): Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
+    def apply(v: Keywords.rands)   : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
+    def apply(v: Keywords.samples) : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, List[R]] = ???
 
-    def apply(v: core.count)        : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Int   ] = ???
-    def apply(v: core.countDistinct): Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Int   ] = ???
-    def apply(v: core.sum)          : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R     ] = ???
-    def apply(v: core.avg)          : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
-    def apply(v: core.median)       : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R     ] = ???
-    def apply(v: core.variance)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
-    def apply(v: core.stddev)       : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
+    def apply(v: Keywords.count)        : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R     ] = ???
+    def apply(v: Keywords.avg)          : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
+    def apply(v: Keywords.median)       : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R     ] = ???
+    def apply(v: Keywords.variance)     : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Double] = ???
   }
 
 
   trait Aggregate19[Ns19[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] {
 
-    def apply(v: core.min)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
-    def apply(v: core.max)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
-    def apply(v: core.rand)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
-    def apply(v: core.sample)  : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
+    def apply(v: Keywords.min)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
+    def apply(v: Keywords.max)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
+    def apply(v: Keywords.rand)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
+    def apply(v: Keywords.sample)  : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] = ???
 
-    def apply(v: core.mins)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
-    def apply(v: core.maxs)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
-    def apply(v: core.distinct): Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
-    def apply(v: core.rands)   : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
-    def apply(v: core.samples) : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
+    def apply(v: Keywords.mins)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
+    def apply(v: Keywords.maxs)    : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
+    def apply(v: Keywords.distinct): Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
+    def apply(v: Keywords.rands)   : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
+    def apply(v: Keywords.samples) : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, List[S]] = ???
 
-    def apply(v: core.count)        : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Int   ] = ???
-    def apply(v: core.countDistinct): Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Int   ] = ???
-    def apply(v: core.sum)          : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S     ] = ???
-    def apply(v: core.avg)          : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
-    def apply(v: core.median)       : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S     ] = ???
-    def apply(v: core.variance)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
-    def apply(v: core.stddev)       : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
+    def apply(v: Keywords.count)        : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S     ] = ???
+    def apply(v: Keywords.avg)          : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
+    def apply(v: Keywords.median)       : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S     ] = ???
+    def apply(v: Keywords.variance)     : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Double] = ???
   }
 
 
   trait Aggregate20[Ns20[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] {
 
-    def apply(v: core.min)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
-    def apply(v: core.max)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
-    def apply(v: core.rand)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
-    def apply(v: core.sample)  : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
+    def apply(v: Keywords.min)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
+    def apply(v: Keywords.max)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
+    def apply(v: Keywords.rand)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
+    def apply(v: Keywords.sample)  : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = ???
 
-    def apply(v: core.mins)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
-    def apply(v: core.maxs)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
-    def apply(v: core.distinct): Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
-    def apply(v: core.rands)   : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
-    def apply(v: core.samples) : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
+    def apply(v: Keywords.mins)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
+    def apply(v: Keywords.maxs)    : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
+    def apply(v: Keywords.distinct): Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
+    def apply(v: Keywords.rands)   : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
+    def apply(v: Keywords.samples) : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, List[T]] = ???
 
-    def apply(v: core.count)        : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Int   ] = ???
-    def apply(v: core.countDistinct): Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Int   ] = ???
-    def apply(v: core.sum)          : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T     ] = ???
-    def apply(v: core.avg)          : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
-    def apply(v: core.median)       : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T     ] = ???
-    def apply(v: core.variance)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
-    def apply(v: core.stddev)       : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
+    def apply(v: Keywords.count)        : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T     ] = ???
+    def apply(v: Keywords.avg)          : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
+    def apply(v: Keywords.median)       : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T     ] = ???
+    def apply(v: Keywords.variance)     : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Double] = ???
   }
 
 
   trait Aggregate21[Ns21[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] {
 
-    def apply(v: core.min)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
-    def apply(v: core.max)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
-    def apply(v: core.rand)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
-    def apply(v: core.sample)  : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
+    def apply(v: Keywords.min)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
+    def apply(v: Keywords.max)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
+    def apply(v: Keywords.rand)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
+    def apply(v: Keywords.sample)  : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = ???
 
-    def apply(v: core.mins)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
-    def apply(v: core.maxs)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
-    def apply(v: core.distinct): Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
-    def apply(v: core.rands)   : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
-    def apply(v: core.samples) : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
+    def apply(v: Keywords.mins)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
+    def apply(v: Keywords.maxs)    : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
+    def apply(v: Keywords.distinct): Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
+    def apply(v: Keywords.rands)   : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
+    def apply(v: Keywords.samples) : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, List[U]] = ???
 
-    def apply(v: core.count)        : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Int   ] = ???
-    def apply(v: core.countDistinct): Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Int   ] = ???
-    def apply(v: core.sum)          : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U     ] = ???
-    def apply(v: core.avg)          : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
-    def apply(v: core.median)       : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U     ] = ???
-    def apply(v: core.variance)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
-    def apply(v: core.stddev)       : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
+    def apply(v: Keywords.count)        : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U     ] = ???
+    def apply(v: Keywords.avg)          : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
+    def apply(v: Keywords.median)       : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U     ] = ???
+    def apply(v: Keywords.variance)     : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Double] = ???
   }
 
 
   trait Aggregate22[Ns22[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] {
 
-    def apply(v: core.min)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
-    def apply(v: core.max)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
-    def apply(v: core.rand)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
-    def apply(v: core.sample)  : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
+    def apply(v: Keywords.min)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
+    def apply(v: Keywords.max)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
+    def apply(v: Keywords.rand)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
+    def apply(v: Keywords.sample)  : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
 
-    def apply(v: core.mins)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
-    def apply(v: core.maxs)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
-    def apply(v: core.distinct): Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
-    def apply(v: core.rands)   : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
-    def apply(v: core.samples) : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
+    def apply(v: Keywords.mins)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
+    def apply(v: Keywords.maxs)    : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
+    def apply(v: Keywords.distinct): Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
+    def apply(v: Keywords.rands)   : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
+    def apply(v: Keywords.samples) : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, List[U]] = ???
 
-    def apply(v: core.count)        : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Int   ] = ???
-    def apply(v: core.countDistinct): Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Int   ] = ???
-    def apply(v: core.sum)          : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V     ] = ???
-    def apply(v: core.avg)          : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
-    def apply(v: core.median)       : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V     ] = ???
-    def apply(v: core.variance)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
-    def apply(v: core.stddev)       : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
+    def apply(v: Keywords.count)        : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Int   ] = ???
+    def apply(v: Keywords.countDistinct): Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Int   ] = ???
+    def apply(v: Keywords.sum)          : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V     ] = ???
+    def apply(v: Keywords.avg)          : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
+    def apply(v: Keywords.median)       : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V     ] = ???
+    def apply(v: Keywords.variance)     : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
+    def apply(v: Keywords.stddev)       : Ns22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Double] = ???
   }
 }
