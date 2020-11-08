@@ -1,7 +1,5 @@
 package molecule.expression
 
-import scala.language.higherKinds
-
 
 /** Aggregate keywords to mark aggregate expressions on attributes.
   * {{{

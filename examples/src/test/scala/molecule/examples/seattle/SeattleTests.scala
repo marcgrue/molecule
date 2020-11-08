@@ -1,6 +1,6 @@
 package molecule.examples.seattle
 import java.io.FileReader
-import datomic._
+import datomic.Util
 import molecule.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
 

@@ -191,7 +191,11 @@ class Conn(val datomicConn: datomic.Connection)
     datomicConn.db
   }
 
-
+  /** Transact Seq of Seqs of [[Statement]]s
+    *
+    * @param stmtss
+    * @return [[molecule.facade.TxReport TxReport]]
+    */
   def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
@@ -228,6 +232,7 @@ class Conn(val datomicConn: datomic.Connection)
       TxReport(datomicConn.transact(javaStmts).get, stmtss)
     }
   }
+
 
   def transactAsync(stmtss: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {

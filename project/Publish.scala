@@ -23,7 +23,10 @@ object Publish {
     pomIncludeRepository := (_ => false),
     homepage := Some(url("http://scalamolecule.org")),
     licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
-    scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
+    scmInfo := Some(ScmInfo(
+      url("https://github.com/scalamolecule/molecule"),
+      "scm:git:git@github.com:scalamolecule/molecule.git"
+    )),
     description := "molecule",
     developers := List(
       Developer(
@@ -45,7 +48,10 @@ object Publish {
     homepage := Some(url("http://scalamolecule.org")),
     description := "molecule",
     licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
-    scmInfo := Some(ScmInfo(url("https://github.com/scalamolecule/molecule"), "scm:git:git@github.com:scalamolecule/molecule.git")),
+    scmInfo := Some(ScmInfo(
+      url("https://github.com/scalamolecule/molecule"),
+      "scm:git:git@github.com:scalamolecule/molecule.git"
+    )),
     developers := List(
       Developer(
         id = "marcgrue",

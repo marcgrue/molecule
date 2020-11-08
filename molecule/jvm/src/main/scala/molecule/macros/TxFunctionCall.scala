@@ -1,7 +1,6 @@
 package molecule.macros
 
 import molecule.util.MacroHelpers
-import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 
 

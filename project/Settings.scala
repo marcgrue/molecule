@@ -57,8 +57,19 @@ object Settings {
   val jvm: Seq[Def.Setting[_]] = Seq(
     name := "molecule",
     libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "com.datomic" % "datomic-free" % "0.9.5697",
-      "org.specs2" %% "specs2-core" % "4.10.0"
+      "org.specs2" %% "specs2-core" % "4.10.0",
+      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.3.0"
+    )
+  )
+
+  // Proprietary Client dev-local dependency needed for tests
+  // Please download from https://cognitect.com/dev-tools and install locally per included instructions
+  val tests: Seq[Def.Setting[_]] = Seq(
+    resolvers ++= Seq(Resolver.mavenLocal),
+    libraryDependencies ++= Seq(
+      "com.datomic" % "dev-local" % "0.9.225"
     )
   )
 
