@@ -18,7 +18,7 @@ import molecule.generic.schema.GenericSchema
   * Then you can start using your DSL and create molecules by importing the api, your DSL
   * and assign a Datomic connection to an implicit val:
   * {{{
-  *   import molecule.api.All._                  // import Molecule API
+  *   import molecule.datomic.peer.api._     // import Molecule API for Datomic Peer api
   *   import path.to.dsl.yourDomain._        // auto-generated custom DSL
   *   import path.to.schema.YourDomainSchema // auto-generated custom Schema Transaction data
   *
@@ -29,7 +29,6 @@ import molecule.generic.schema.GenericSchema
   *   val benAge = Person.name_("Ben").age.get.head // 42
   *   // etc..
   * }}}
-  * For brevity, arity 3-22 interfaces and empty companion traits are left ungrouped.
   * */
 object api extends Datomic
   with Keywords
