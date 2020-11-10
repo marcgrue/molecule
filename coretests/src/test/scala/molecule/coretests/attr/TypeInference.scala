@@ -2,9 +2,9 @@ package molecule.coretests.attr
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.out22._
 
 class TypeInference extends CoreSpec {
 

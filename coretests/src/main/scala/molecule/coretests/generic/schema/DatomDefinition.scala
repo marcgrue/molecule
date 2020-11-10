@@ -1,5 +1,5 @@
 package molecule.coretests.generic.schema
-import molecule.schema.definition._
+import molecule.core.schema.definition._
 
 @InOut(0, 22)
 object DatomDefinition {

@@ -1,15 +1,12 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api._
-
-import molecule.ast.model._
+import molecule.core.ast.model._
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out7._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
-import molecule.util.MoleculeSpec
-
 import scala.language.reflectiveCalls
 
 
 class Provenance extends MoleculeSpec {
-
 
   "Transaction meta data" in new SocialNewsSetup {
 

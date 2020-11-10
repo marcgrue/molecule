@@ -1,11 +1,10 @@
 package molecule.coretests.schemaDef
 
-import molecule.datomic.peer.api._
-import molecule.ast.model.{Atom, Bond, Eq, Model}
+import molecule.core.ast.model.{Atom, Bond, Eq, Model}
+import molecule.core.util.MoleculeSpec
 import molecule.coretests.schemaDef.dsl.partitionTest._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
-import molecule.ops.exception.VerifyModelException
-import molecule.util.MoleculeSpec
+import molecule.datomic.peer.api.out4._
 import org.specs2.specification.Scope
 import scala.language.reflectiveCalls
 

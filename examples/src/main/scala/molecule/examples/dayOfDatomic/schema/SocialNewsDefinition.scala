@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic.schema
-import molecule.schema.definition._
+import molecule.core.schema.definition._
 
 // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html
 

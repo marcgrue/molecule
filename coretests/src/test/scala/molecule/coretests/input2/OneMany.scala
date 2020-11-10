@@ -1,13 +1,12 @@
 package molecule.coretests.input2
 
-import molecule.datomic.peer.api._
+import molecule.core.input.exception.{InputMolecule_2_Exception, InputMoleculeException}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.{InputMoleculeException, InputMolecule_2_Exception}
+import molecule.datomic.peer.api.in2_out3._
 
 
 class OneMany extends CoreSpec {
-
 
   "Pairs" >> {
 
@@ -65,7 +64,7 @@ class OneMany extends CoreSpec {
 
         // Mandatory attribute will not match Nil
         (m(Ns.int.str_(?).longs(?)).apply(Nil).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
       }
 
@@ -259,17 +258,17 @@ class OneMany extends CoreSpec {
 
         // Card one
         (m(Ns.int.str_.not(?).longs(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card many
         (m(Ns.int.str_(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card one + many
         (m(Ns.int.str_.not(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
       }
 
@@ -297,7 +296,7 @@ class OneMany extends CoreSpec {
 
         // Can't apply multiple values to comparison function
         (m(Ns.int.str_(?).longs.<(?))("a", Set(2L, 3L)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 

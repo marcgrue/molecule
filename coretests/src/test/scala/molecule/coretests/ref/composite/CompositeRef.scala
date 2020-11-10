@@ -1,12 +1,10 @@
 package molecule.coretests.ref.composite
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out4._
 
 class CompositeRef extends CoreSpec {
-
 
   "Card-one ref" in new CoreSetup {
 

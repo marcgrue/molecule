@@ -1,9 +1,9 @@
 package molecule.coretests.input2
 
-import molecule.datomic.peer.api._
+import molecule.core.input.exception.{InputMolecule_2_Exception, InputMoleculeException}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.{InputMoleculeException, InputMolecule_2_Exception}
+import molecule.datomic.peer.api.in2_out3._
 
 
 class Input2syntax extends CoreSpec {
@@ -175,7 +175,7 @@ class Input2syntax extends CoreSpec {
       // Multiple pairs
       // Compare functions expects only one argument, so multiple input pairs are not allowed
       (inputExpression.apply((1, 2L), (1, 3L)).get must throwA[InputMolecule_2_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
         "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
     }
   }
@@ -306,11 +306,11 @@ class Input2syntax extends CoreSpec {
       // Comparison functions set limit on inputs
 
       (inputExpression.apply(2L, Set(1, 2)).get must throwA[InputMoleculeException])
-        .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+        .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
         "Can't apply multiple values to comparison function."
 
       (inputExpression.apply((1L, Set(1)), (2L, Set(2))).get must throwA[InputMolecule_2_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
         "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
 

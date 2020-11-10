@@ -1,19 +1,15 @@
 
 package molecule.coretests.generic
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.CoreSpec
-import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.ops.exception.VerifyModelException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out3._
 
 
 class SchemaTest extends CoreSpec {
-
   sequential
-
 
   "Partition schema values" >> {
 
@@ -461,7 +457,7 @@ class SchemaTest extends CoreSpec {
       // Fulltext search for multiple words not allowed
       expectCompileError(
         """m(Schema.doc.contains("Int", "String"))""",
-        "molecule.transform.exception.Model2QueryException: " +
+        "molecule.core.transform.exception.Model2QueryException: " +
           "Fulltext search can only be performed with 1 search phrase.")
 
       // Count documented attributes

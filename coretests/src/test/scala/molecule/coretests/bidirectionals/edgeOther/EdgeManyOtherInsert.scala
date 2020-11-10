@@ -1,10 +1,10 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.util._
+import molecule.datomic.peer.api.in1_out4._
 
 class EdgeManyOtherInsert extends MoleculeSpec {
 
@@ -44,7 +44,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
       // Can't save nested edges without including target entity
       (Person.name.CloseTo.*(CloseTo.weight).Animal.name insert List(
         ("Ann", List(7, 8), "Gus")
-      ) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNestedEdgesWithoutTarget]  Nested edge ns `CloseTo` should link to " +
         s"target ns within the nested group of attributes."
     }
@@ -91,7 +91,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
 
     // Can't allow edge without ref to target entity
     (Person.name.CloseTo.weight.insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
@@ -99,7 +99,7 @@ class EdgeManyOtherInsert extends MoleculeSpec {
 
     // Edge always have to have a ref to a target entity
     (CloseTo.weight.insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
   }
 

@@ -1,15 +1,15 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.util._
+import molecule.datomic.peer.api.in1_out3._
 
 class EdgeManySelfInsert extends MoleculeSpec {
 
   class setup extends Setup {
-    val knownBy  = m(Person.name_(?).Knows.*(Knows.weight.Person.name))
+    val knownBy = m(Person.name_(?).Knows.*(Knows.weight.Person.name))
   }
 
   "base/edge/target" >> {
@@ -20,9 +20,9 @@ class EdgeManySelfInsert extends MoleculeSpec {
       Person.name.Knows.*(Knows.weight.Person.name).insert("Ann", List((7, "Ben"), (8, "Joe")))
 
       // Bidirectional property edges have been inserted
-knownBy("Ann").get.head === List((7, "Ben"), (8, "Joe"))
-knownBy("Ben").get.head === List((7, "Ann"))
-knownBy("Joe").get.head === List((8, "Ann"))
+      knownBy("Ann").get.head === List((7, "Ben"), (8, "Joe"))
+      knownBy("Ben").get.head === List((7, "Ann"))
+      knownBy("Joe").get.head === List((8, "Ann"))
     }
 
     "existing targets" in new setup {
@@ -43,7 +43,7 @@ knownBy("Joe").get.head === List((8, "Ann"))
       // Can't save nested edges without including target entity
       (Person.name.Knows.*(Knows.weight).Person.name insert List(
         ("Ben", List(7, 8), "Joe")
-      ) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
         s"target ns within the nested group of attributes."
     }
@@ -68,7 +68,7 @@ knownBy("Joe").get.head === List((8, "Ann"))
 
     "existing targets" in new setup {
 
-      val Seq(ben , joe) = Person.name.insert("Ben", "Joe").eids
+      val Seq(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
       // Create edges to existing target entities
       val Seq(knowsBen, knowsJoe): Seq[Long] = Knows.weight.person.insert(List((7, ben), (8, joe))).eids.grouped(3).map(_.head).toSeq
@@ -90,7 +90,7 @@ knownBy("Joe").get.head === List((8, "Ann"))
 
     // Can't allow edge without ref to target entity
     (Person.name.Knows.weight.insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
@@ -98,7 +98,7 @@ knownBy("Joe").get.head === List((8, "Ann"))
 
     // Edge always have to have a ref to a target entity
     (Knows.weight.insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."
   }
 }

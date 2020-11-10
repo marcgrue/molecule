@@ -1,13 +1,12 @@
 package molecule.coretests.attr
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.ops.exception.VerifyModelException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out5._
 
 class OptionalValues extends CoreSpec {
-
 
   "Correct card-one types returned" >> {
 
@@ -320,7 +319,7 @@ class OptionalValues extends CoreSpec {
     }
 
     "No tacit attributes in insert molecule" in new CoreSetup {
-      (m(Ns.str_.int$).insert must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      (m(Ns.str_.int$).insert must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
     }
   }
@@ -337,11 +336,11 @@ class OptionalValues extends CoreSpec {
     Ns.Ref1.int1.get === List(1, 2)
 
     // First namespace without any attributes not allowed
-    (m(Ns.Ref1.int1).insert must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    (m(Ns.Ref1.int1).insert must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
 
     // First namespace without any mandatory attributes not allowed
-    (Ns.str$.Ref1.int1.insert must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    (Ns.str$.Ref1.int1.insert must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[missingAttrInStartEnd]  Missing mandatory attributes of first namespace."
 
     // If at least 1 mandatory attribute is present we can have optional attributes too
@@ -352,11 +351,11 @@ class OptionalValues extends CoreSpec {
     Ns.int.str$.get === List((1, Some("a")), (2, None))
 
     // First namespace without any mandatory attributes not allowed
-    (Ns.str_.Ref1.int1.insert must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    (Ns.str_.Ref1.int1.insert must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[noTacitAttrs]  Tacit attributes like `str_` not allowed in insert molecules."
 
     // Last namespace without any mandatory attributes not allowed
-    (Ns.str.Ref1.int1$.insert must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+    (Ns.str.Ref1.int1$.insert must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
@@ -365,12 +364,12 @@ class OptionalValues extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str$)",
-      "molecule.ops.exception.VerifyRawModelException: " +
+      "molecule.core.ops.exception.VerifyRawModelException: " +
         "Molecule has only optional attributes. Please add one or more mandatory/tacit attributes.")
 
     expectCompileError(
       "m(Ns.str$.int$)",
-      "molecule.ops.exception.VerifyRawModelException: " +
+      "molecule.core.ops.exception.VerifyRawModelException: " +
         "Molecule has only optional attributes. Please add one or more mandatory/tacit attributes.")
   }
 

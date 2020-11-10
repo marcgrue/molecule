@@ -1,12 +1,11 @@
 package molecule.coretests.json
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.out3._
 
 
 class NestedTypes extends CoreSpec {
-
 
   "value" in new CoreSetup {
 

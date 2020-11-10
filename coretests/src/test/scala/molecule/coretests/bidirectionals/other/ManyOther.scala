@@ -1,10 +1,10 @@
 package molecule.coretests.bidirectionals.other
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.util._
+import molecule.datomic.peer.api.in1_out3._
 
 
 class ManyOther extends MoleculeSpec {
@@ -46,7 +46,7 @@ class ManyOther extends MoleculeSpec {
       // It could become unwieldy if different referenced attributes had different number of
       // values (arities) - how many related entities should be created then?
       (Person.name("Ann").Buddies.name("Gus", "Leo").save must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
         "\n  Animal ... name(Gus, Leo)"
 
@@ -66,7 +66,7 @@ class ManyOther extends MoleculeSpec {
 
       // Can't `save` nested data structures - use nested `insert` instead for that (see tests further down)
       (Person.name("Ann").Buddies.*(Animal.name("Gus")).save must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNested]  Nested data structures not allowed in save molecules"
 
       // So, we can't create multiple referenced entities in one go with the `save` command.
@@ -92,7 +92,7 @@ class ManyOther extends MoleculeSpec {
       // Saving reference to generic `e` not allowed.
       // (instead apply ref to ref attribute as shown above)
       (Person.name("Ann").Buddies.e(gus).save must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
         s"not allowed in save molecules. Found `e($gus)`"
     }

@@ -1,15 +1,14 @@
 package molecule.coretests.crud.update
 
 import java.util.concurrent.ExecutionException
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateEnum extends CoreSpec {
-
 
   "Card-one values" >> {
 
@@ -33,7 +32,7 @@ class UpdateEnum extends CoreSpec {
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).enum("enum2", "enum3").update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... enum(enum2, enum3)"
     }
@@ -62,7 +61,7 @@ class UpdateEnum extends CoreSpec {
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).enum(enum2, enum3).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... enum($enum2, $enum3)"
     }
@@ -143,12 +142,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace("enum7" -> "enum8", "enum8" -> "enum8").update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq("enum7" -> "enum8", "enum8" -> "enum8")).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\nenum8")
     }
 
@@ -300,12 +299,12 @@ class UpdateEnum extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).enums.replace(enum7 -> enum8, enum8 -> enum8).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
       expectCompileError(
         """Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> enum8)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/enums`:" +
           "\n__ident__enum8")
 
 
@@ -313,13 +312,13 @@ class UpdateEnum extends CoreSpec {
       val other8 = enum8
 
       (Ns(eid).enums.replace(enum7 -> enum8, enum8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/enums`:" +
         "\nenum8"
 
       // Conflicting new values
       (Ns(eid).enums.replace(Seq(enum7 -> enum8, enum8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/enums`:" +
         "\nenum8"
     }

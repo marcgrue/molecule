@@ -1,16 +1,15 @@
 package molecule.coretests.crud
 
-import molecule.datomic.peer.api._
+import molecule.core.facade.TxReport
+import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.facade.TxReport
-import molecule.ops.exception.VerifyModelException
-import scala.concurrent.{Await, Future}
+import molecule.datomic.peer.api.out9._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class Save extends CoreSpec {
-
 
   "Async" in new CoreSetup {
 
@@ -31,7 +30,6 @@ class Save extends CoreSpec {
       // Data was saved
       result.head === ("Ben", 42)
     }
-
 
     // For brevity, the synchronous equivalent `save` is used in the following tests
   }
@@ -66,7 +64,7 @@ class Save extends CoreSpec {
     // Applying multiple values to card-one attr not allowed when saving
 
     (Ns.str("a", "b").save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
       s"\n  Ns ... str(a, b)"
   }

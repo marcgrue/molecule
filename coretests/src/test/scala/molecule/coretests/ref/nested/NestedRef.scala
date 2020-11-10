@@ -1,15 +1,12 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
-import molecule.ast.model._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.Model2Query
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out4._
 
 
 class NestedRef extends CoreSpec {
-
 
   "ref + opt attr" in new CoreSetup {
 
@@ -178,7 +175,7 @@ class NestedRef extends CoreSpec {
     // Flat card many refs not allowed in optional nested structure
     expectCompileError(
       "m(Ns.str.Refs1.*?(Ref1.int1.Refs2.int2))",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Flat card many ref not allowed with optional nesting. " +
         """Found: Bond("Ref1", "refs2", "Ref2", 2, Seq())""")
 

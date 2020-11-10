@@ -1,11 +1,10 @@
 package molecule.coretests.expression
 
 import java.net.URI
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.datomic.peer.api.out2._
 
 class Negation extends Base {
-
 
   "Card one" in new OneSetup {
 
@@ -22,6 +21,7 @@ class Negation extends Base {
     Ns.str.not("c").get.sorted === List("", " ", ",", ".", "?", "A", "B", "a", "b")
 
     // Same as
+    // Intellij shows error although it is fine
     Ns.str.!=("").get.sorted === List(" ", ",", ".", "?", "A", "B", "a", "b")
     Ns.str.!=(" ").get.sorted === List("", ",", ".", "?", "A", "B", "a", "b")
     Ns.str.!=(",").get.sorted === List("", " ", ".", "?", "A", "B", "a", "b")

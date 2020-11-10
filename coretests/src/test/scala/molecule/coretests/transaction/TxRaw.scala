@@ -1,18 +1,16 @@
 package molecule.coretests.transaction
 
 import java.io.FileReader
-import java.util
 import datomic.Util
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns
+import molecule.datomic.peer.api.out1._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 
 class TxRaw extends CoreSpec {
-
 
   "Transact external data from file" in new CoreSetup {
 

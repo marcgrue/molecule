@@ -1,12 +1,12 @@
 package molecule.coretests.generic
 
-import molecule.datomic.peer.api._
+import molecule.core.exceptions.MoleculeException
+import molecule.core.facade.TxReport
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.exceptions.MoleculeException
-import molecule.facade.TxReport
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out5._
 
 
 class LogTest extends CoreSpec {
@@ -17,7 +17,6 @@ class LogTest extends CoreSpec {
 
   // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
   // the wall clock time since Date's are a bit unreliable for precision.
-
 
   // First entity
 
@@ -247,11 +246,11 @@ class LogTest extends CoreSpec {
     // Applying values to Schema attributes not allowed
     expectCompileError(
       "m(Log.e(e1).a.v.t)",
-      "molecule.transform.exception.Dsl2ModelException: Log attributes not allowed to have values applied.\n" +
+      "molecule.core.transform.exception.Dsl2ModelException: Log attributes not allowed to have values applied.\n" +
         "Log only accepts range arguments: `Log(from, until)`.")
 
     (Log(Some(t1), Some("unexpect string")).t.get must throwA[MoleculeException])
-      .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Args to Log can only be t, tx or txInstant of type Int/Long/Date"
 
   }
@@ -276,7 +275,7 @@ class LogTest extends CoreSpec {
     // Start - end
     // Molecule disallow returning from beginning to end (the whole database!)
     (Log(None, None).t.get must throwA[MoleculeException])
-      .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Molecule not allowing returning from start to end (the whole database!).\n" +
       "If you need this, please use raw Datomic access:\n" +
       "`conn.datomicConn.log.txRange(tx1, tx2)`"

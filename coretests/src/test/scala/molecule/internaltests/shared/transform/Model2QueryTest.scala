@@ -1,11 +1,9 @@
 package molecule.internaltests.shared.transform
 
-import molecule.ast.model._
-import molecule.ast.query.{AggrExpr, DataClause, Empty, Find, ImplDS, In, KW, NoBinding, Var, Where, With}
-//import molecule.ast.query._
-import molecule.ast.query.Query
-import molecule.transform.Model2Query
-import molecule.util.MoleculeSpec
+import molecule.core.ast.model._
+import molecule.core.ast.query.{AggrExpr, DataClause, Empty, Find, ImplDS, In, KW, NoBinding, Query, Var, Where, With}
+import molecule.core.transform.Model2Query
+import molecule.core.util.MoleculeSpec
 
 class Model2QueryTest extends MoleculeSpec {
 

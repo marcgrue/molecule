@@ -1,7 +1,7 @@
 package molecule.coretests.equality
 
 import java.util.UUID
-import molecule.datomic.peer.api._
+import molecule.datomic.peer.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 

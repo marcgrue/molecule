@@ -1,9 +1,9 @@
 package molecule.coretests.transaction
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.ops.exception.VerifyModelException
+import molecule.datomic.peer.api.out10._
 
 class TxMetaData extends CoreSpec {
 
@@ -158,15 +158,15 @@ class TxMetaData extends CoreSpec {
     "Insert 1 or more" in new CoreSetup {
 
       // Can't add transaction meta data along other data of molecule
-      (Ns.int.Tx(Ns.str).insert(0, "a") must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      (Ns.int.Tx(Ns.str).insert(0, "a") must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Can't both apply meta data to tx attribute and insert meta data
-      (Ns.int.Tx(Ns.str("a")).insert(List((0, "b"))) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      (Ns.int.Tx(Ns.str("a")).insert(List((0, "b"))) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Can't both apply meta data to optional tx attribute and insert meta data
-      (Ns.int.Tx(Ns.str$(Some("a"))).insert(List((0, Some("b")))) must throwA[VerifyModelException]).message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      (Ns.int.Tx(Ns.str$(Some("a"))).insert(List((0, Some("b")))) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[onlyTacitTxAttrs]  For inserts, tx meta data can only be applied to tacit attributes, like: `Ns.str_(<metadata>)`"
 
       // Apply tx meta data to tacit tx attributes:

@@ -1,12 +1,11 @@
 package molecule.coretests.expression
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.coretests.util.CoreSpec
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.in1_out2._
 
 class Null extends CoreSpec {
-
 
   "Card one" in new CoreSetup {
 
@@ -35,7 +34,7 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or other expressions
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
-      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
         "\ncode : scala.collection.immutable.Seq.empty[Int]" +
         "\nclass: class scala.reflect.internal.Trees$TypeApply" +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +
@@ -77,7 +76,7 @@ class Null extends CoreSpec {
     // Can't apply empty Iterable constructor or any Scala expression
     expectCompileError(
       "m(Ns.int.ints_(Seq.empty[Int]))",
-      "molecule.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
         "\ncode : scala.collection.immutable.Seq.empty[Int]" +
         "\nclass: class scala.reflect.internal.Trees$TypeApply" +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +

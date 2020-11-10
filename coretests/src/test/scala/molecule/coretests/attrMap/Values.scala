@@ -1,12 +1,9 @@
 package molecule.coretests.attrMap
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
-//import datomic.Peer
-//import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out2._
 
 class Values extends Base {
-
 
   "Type checks" in new Setup {
 
@@ -173,25 +170,32 @@ class Values extends Base {
 
     // String
 
+    // Intellij wrongly indicates an error when using `!=`
+    // As an alternative, `not` can be used instead
     Ns.int(2).strMap.!=("Bon giorno").get === List(
       (2, Map("en" -> "Oh, Hi", "da" -> "Hilser", "fr" -> "Bonjour"))
     )
+    // Same as
+    Ns.int(2).strMap.not("Bon giorno").get === List(
+      (2, Map("en" -> "Oh, Hi", "da" -> "Hilser", "fr" -> "Bonjour"))
+    )
     // Omit multiple values
+    // (here Intellij doesn't show an error when using `!=`
     Ns.int(2).strMap.!=("Bonjour", "Bon giorno").get === List(
       (2, Map("en" -> "Oh, Hi", "da" -> "Hilser"))
     )
-    Ns.int(2).strMap_.!=("Bonjour", "Bon giorno").get === List(2)
+    Ns.int(2).strMap_.not("Bonjour", "Bon giorno").get === List(2)
 
 
     // Int
 
-    Ns.int.intMap.!=(10).get === List(
+    Ns.int.intMap.not(10).get === List(
       (1, Map("da" -> 30)),
       (2, Map("fr" -> 20, "it" -> 30)),
       (3, Map("en" -> 30, "da" -> 30)),
       (4, Map("da" -> 30))
     )
-    Ns.int.intMap.!=(10, 30).get === List(
+    Ns.int.intMap.not(10, 30).get === List(
       (2, Map("fr" -> 20))
     )
     // Tacit omitted attribute map values
@@ -200,7 +204,7 @@ class Values extends Base {
 
     // Boolean
 
-    Ns.int.boolMap.!=(true).get === List(
+    Ns.int.boolMap.not(true).get === List(
       (1, Map("da" -> false)),
       (2, Map("fr" -> false, "it" -> false)),
       (3, Map("en" -> false, "en" -> false)),
@@ -213,10 +217,10 @@ class Values extends Base {
       (3, Map("en" -> false, "en" -> false)),
       (4, Map("da" -> false))
     )
-    Ns.int.boolMap_.!=(true).get === List(1, 2, 3, 4)
+    Ns.int.boolMap_.not(true).get === List(1, 2, 3, 4)
     Ns.int.boolMap_(false).get === List(1, 2, 3, 4)
 
-    Ns.int.boolMap.!=(false).get === List(
+    Ns.int.boolMap.not(false).get === List(
       (1, Map("en" -> true)),
       (2, Map("en" -> true, "da" -> true))
     )
@@ -225,7 +229,7 @@ class Values extends Base {
       (1, Map("en" -> true)),
       (2, Map("en" -> true, "da" -> true))
     )
-    Ns.int.boolMap_.!=(false).get === List(1, 2)
+    Ns.int.boolMap_.not(false).get === List(1, 2)
     Ns.int.boolMap_(true).get === List(1, 2)
 
     // Well...
@@ -235,13 +239,13 @@ class Values extends Base {
 
     // Date
 
-    Ns.int.dateMap.!=(date1).get === List(
+    Ns.int.dateMap.not(date1).get === List(
       (1, Map("da" -> date3)),
       (2, Map("fr" -> date2, "it" -> date3)),
       (3, Map("en" -> date3, "da" -> date3)),
       (4, Map("da" -> date3))
     )
-    Ns.int.dateMap.!=(date1, date3).get === List(
+    Ns.int.dateMap.not(date1, date3).get === List(
       (2, Map("fr" -> date2))
     )
     // Tacit omitted attribute map values
@@ -250,28 +254,28 @@ class Values extends Base {
 
     // UUID
 
-    Ns.int.uuidMap.!=(uuid1).get === List(
+    Ns.int.uuidMap.not(uuid1).get === List(
       (1, Map("da" -> uuid3)),
       (2, Map("fr" -> uuid2, "it" -> uuid3)),
       (3, Map("en" -> uuid3, "da" -> uuid3)),
       (4, Map("da" -> uuid3))
     )
-    Ns.int.uuidMap.!=(uuid1, uuid3).get === List(
+    Ns.int.uuidMap.not(uuid1, uuid3).get === List(
       (2, Map("fr" -> uuid2))
     )
     // Tacit omitted attribute map values
-    Ns.int.uuidMap_.!=(uuid1, uuid3).get === List(2)
+    Ns.int.uuidMap_.not(uuid1, uuid3).get === List(2)
 
 
     // URI
 
-    Ns.int.uriMap.!=(uri1).get === List(
+    Ns.int.uriMap.not(uri1).get === List(
       (1, Map("da" -> uri3)),
       (2, Map("fr" -> uri2, "it" -> uri3)),
       (3, Map("en" -> uri3, "da" -> uri3)),
       (4, Map("da" -> uri3))
     )
-    Ns.int.uriMap.!=(uri1, uri3).get === List(
+    Ns.int.uriMap.not(uri1, uri3).get === List(
       (2, Map("fr" -> uri2))
     )
     // Tacit omitted attribute map values

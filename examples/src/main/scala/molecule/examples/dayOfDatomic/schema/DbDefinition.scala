@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic.schema
-import molecule.schema.definition._
+import molecule.core.schema.definition._
 
 @InOut(3, 6)
 object DbDefinition {

@@ -1,15 +1,14 @@
 package molecule.coretests.crud.update
 
 import java.util.Date
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateDate extends CoreSpec {
-
 
   "Card-one variables" >> {
 
@@ -33,7 +32,7 @@ class UpdateDate extends CoreSpec {
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).date(date2, date3).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... date($date2, $date3)"
     }
@@ -122,12 +121,12 @@ class UpdateDate extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).dates.replace(date7 -> date8, date8 -> date8).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
       expectCompileError(
         """Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> date8)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/dates`:" +
           "\n__ident__date8")
 
 
@@ -135,13 +134,13 @@ class UpdateDate extends CoreSpec {
       val other8 = date8
 
       (Ns(eid).dates.replace(date7 -> date8, date8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\n" + date8
 
       // Conflicting new values
       (Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\n" + date8
     }

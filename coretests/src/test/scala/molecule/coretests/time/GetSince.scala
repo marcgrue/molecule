@@ -1,8 +1,8 @@
 package molecule.coretests.time
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.datomic.peer.api.out1._
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 

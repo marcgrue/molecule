@@ -1,12 +1,12 @@
 package molecule.coretests.transaction
 
-import molecule.datomic.peer.api._
-import molecule.ast.transactionModel.Statement
+import molecule.core.ast.transactionModel.Statement
+import molecule.core.facade.Conn
+import molecule.core.macros.TxFns
+import molecule.core.macros.exception.TxFnException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.facade.Conn
-import molecule.macros.TxFns
-import molecule.macros.exception.TxFnException
+import molecule.datomic.peer.api.out3._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -180,7 +180,7 @@ class TxFunctions extends CoreSpec {
     val tooBigAmount = 200
 
     (transact(transfer(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
-      .message === s"Got the exception molecule.macros.exception.TxFnException: " +
+      .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
       s"Can't transfer 200 from account $fromAccount having a balance of only 100."
 
     // Live data unchanged
@@ -207,7 +207,7 @@ class TxFunctions extends CoreSpec {
     val tooBigAmount = 200
 
     (transact(transferComposed(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
-      .message === s"Got the exception molecule.macros.exception.TxFnException: " +
+      .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
       s"Can't transfer 200 from account $fromAccount having a balance of only 100."
 
     // Live data unchanged
@@ -282,12 +282,12 @@ class TxFunctions extends CoreSpec {
     Ns.str("Ben").int(28).save
 
     (transact(addUser("Ben", 22)) must throwA[TxFnException])
-      .message === "Got the exception molecule.macros.exception.TxFnException: " +
+      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
       "Username `Ben` is already taken. Please choose another username."
 
     // Age validation in tx fn
     (transact(addUser("Liz", 17)) must throwA[TxFnException])
-      .message === "Got the exception molecule.macros.exception.TxFnException: " +
+      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
       "Users have to be at least 18 years old to register."
 
     // Successful User construction with all validation rules satisfied
@@ -306,7 +306,7 @@ class TxFunctions extends CoreSpec {
     Ns.str("Ben").int(28).save
 
     (transact(addUserPartiallyChecked("Ben", 22)) must throwA[TxFnException])
-      .message === "Got the exception molecule.macros.exception.TxFnException: " +
+      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
       "Username `Ben` is already taken. Please choose another username."
 
     // Age validation outside tx fn

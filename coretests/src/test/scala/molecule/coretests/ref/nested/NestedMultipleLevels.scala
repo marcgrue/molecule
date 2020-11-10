@@ -1,13 +1,12 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out3._
 
 
 class NestedMultipleLevels extends CoreSpec {
-
 
   "Optional/mandatory" in new CoreSetup {
 
@@ -15,14 +14,13 @@ class NestedMultipleLevels extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str.Refs1.*?(Ref1.int1.Refs2.*(Ref2.int2)))",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Optional nested structure can't be mixed with mandatory nested structure.")
 
     expectCompileError(
       "m(Ns.str.Refs1.*(Ref1.int1.Refs2.*?(Ref2.int2)))",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Optional nested structure can't be mixed with mandatory nested structure.")
-
   }
 
 

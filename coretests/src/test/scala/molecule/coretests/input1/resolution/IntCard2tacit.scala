@@ -1,10 +1,10 @@
 package molecule.coretests.input1.resolution
 
-import molecule.datomic.peer.api._
-import molecule.ast.query._
+import molecule.core.ast.query._
+import molecule.core.input.exception.InputMoleculeException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.InputMoleculeException
+import molecule.datomic.peer.api.in1_out2._
 
 
 class IntCard2tacit extends CoreSpec {
@@ -462,12 +462,12 @@ class IntCard2tacit extends CoreSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -526,12 +526,12 @@ class IntCard2tacit extends CoreSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -589,12 +589,12 @@ class IntCard2tacit extends CoreSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -652,12 +652,12 @@ class IntCard2tacit extends CoreSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 }

@@ -1,14 +1,13 @@
 package molecule.coretests.crud.updateMap
 
 import java.util.UUID
-import molecule.datomic.peer.api._
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateMapUUID extends CoreSpec {
-
 
   "Mapped variables" >> {
 
@@ -42,14 +41,14 @@ class UpdateMapUUID extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).uuidMap.assert(str1 -> uuid1, str1 -> uuid2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       // Seq
       expectCompileError(
         """Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
@@ -58,7 +57,7 @@ class UpdateMapUUID extends CoreSpec {
 
       // vararg
       (Ns(eid).uuidMap.assert(str1 -> uuid1, str1x -> uuid2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -66,7 +65,7 @@ class UpdateMapUUID extends CoreSpec {
 
       // Seq
       (Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1x -> uuid2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -106,13 +105,13 @@ class UpdateMapUUID extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(str1 -> uuid1, str1 -> uuid2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
 
       expectCompileError(
         """Ns(eid).uuidMap.replace(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
           "\n__ident__str1 -> __ident__uuid1" +
           "\n__ident__str1 -> __ident__uuid2")
     }
@@ -180,7 +179,7 @@ class UpdateMapUUID extends CoreSpec {
 
       // vararg
       (Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -188,20 +187,20 @@ class UpdateMapUUID extends CoreSpec {
 
       // Seq
       (Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
 
 //      expectCompileError(
 //        """Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update""",
-//        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+//        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
 //
 //      expectCompileError(
 //        """Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update""",
-//        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
+//        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
 //          "\n__ident__str1 -> __ident__uuid1" +
 //          "\n__ident__str1 -> __ident__uuid2")
     }

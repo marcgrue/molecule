@@ -1,8 +1,8 @@
 package molecule.coretests.input1
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.in1_out2._
 
 
 class Input1Boolean extends CoreSpec {

@@ -1,11 +1,10 @@
 package molecule.coretests.json
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.out3._
 
 class Composite extends CoreSpec {
-
 
   "1 + 1" in new CoreSetup {
     Ref2.int2 + Ns.int insert Seq(

@@ -1,5 +1,5 @@
 package molecule.coretests.bidirectionals.schema
-import molecule.schema.definition._
+import molecule.core.schema.definition._
 
 @InOut(1, 9)
 object BidirectionalDefinition {

@@ -1,12 +1,11 @@
 package molecule.coretests.input2
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.in2_out3._
 
 
 class OneOne extends CoreSpec {
-
 
   "Pairs" >> {
 

@@ -3,9 +3,9 @@ package molecule.coretests.util
 import java.net.URI
 import java.util.Date
 import java.util.UUID._
-import molecule.datomic.peer.api._
+import molecule.core.util.{DateHandling, MoleculeSpec}
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.util.{DateHandling, MoleculeSpec}
+import molecule.datomic.peer.api.out1._
 import org.specs2.specification.Scope
 
 class CoreSpec extends MoleculeSpec with DateHandling {

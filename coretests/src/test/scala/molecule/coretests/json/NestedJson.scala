@@ -1,19 +1,18 @@
 package molecule.coretests.json
 
-import molecule.datomic.peer.api._
+import molecule.core.macros.exception.NestedJsonException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.macros.exception.NestedJsonException
+import molecule.datomic.peer.api.out5._
 
 
 class NestedJson extends CoreSpec {
-
 
   "Optional nested not implemented" in new CoreSetup {
 
     (m(Ns.int.str.Refs1 *? Ref1.int1).getJson
       must throwA[NestedJsonException]).message ===
-      "Got the exception molecule.macros.exception.NestedJsonException: " +
+      "Got the exception molecule.core.macros.exception.NestedJsonException: " +
       "Optional nested data as json not implemented"
   }
 
@@ -34,6 +33,7 @@ class NestedJson extends CoreSpec {
         |   {"Ref1.int1": 21}]}
         |]""".stripMargin
   }
+
 
   "Nested enum after ref" in new CoreSetup {
     m(Ns.str.Refs1 * Ref1.enum1) insert List(("a", List("enum11")))

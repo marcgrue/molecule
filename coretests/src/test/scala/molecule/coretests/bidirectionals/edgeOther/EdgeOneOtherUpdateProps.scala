@@ -1,13 +1,12 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.datomic.peer.api._
+import molecule.datomic.peer.api.out9._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.util._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util._
 
 class EdgeOneOtherUpdateProps extends MoleculeSpec {
-
 
   class setup extends Setup {
     
@@ -85,7 +84,7 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
 
       // Updating edge properties from the base entity is not allowed
       (Person(ann).Favorite.howWeMet("inSchool").update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_edgeComplete]  Can't update edge `Favorite` " +
         s"of base entity `Person` without knowing which target entity the edge is pointing too. " +
         s"Please update the edge itself, like `Favorite(<edgeId>).edgeProperty(<new value>).update`."
@@ -134,7 +133,7 @@ class EdgeOneOtherUpdateProps extends MoleculeSpec {
 
       // We can't update across namespaces
       (Favorite(annRex).CoreQuality.name("Compassion").update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Quality`."
 
       // Instead we can either update the referenced entity or replace the reference to another existing Quality entity

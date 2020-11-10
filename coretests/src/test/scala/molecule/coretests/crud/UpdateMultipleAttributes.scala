@@ -1,13 +1,12 @@
 package molecule.coretests.crud
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.out4._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class UpdateMultipleAttributes extends CoreSpec {
-
 
   "Async" in new CoreSetup {
 

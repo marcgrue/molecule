@@ -1,11 +1,10 @@
 package molecule.coretests.generic
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.util.expectCompileError
-
+import molecule.datomic.peer.api.out6._
 
 /** Generic Datom attribute interface
   *
@@ -203,7 +202,7 @@ class Datom extends CoreSpec {
       // Other generic attributes not allowed before first attribute
       expectCompileError(
         "Ns.t.op.int.get",
-        "molecule.ops.exception.VerifyRawModelException: " +
+        "molecule.core.ops.exception.VerifyRawModelException: " +
           "Can't add first attribute `int` after generic attributes (except `e` which is ok to have first). " +
           "Please add generic attributes `t`, `op` after `int`.")
 
@@ -227,7 +226,7 @@ class Datom extends CoreSpec {
       // cause a full scan of the whole database and is not allowed
       expectCompileError(
         "Ns.e.a.v.t.get",
-        "molecule.ops.exception.VerifyRawModelException: " +
+        "molecule.core.ops.exception.VerifyRawModelException: " +
           "Molecule with only generic attributes and no entity id(s) applied are not allowed since " +
           "it would cause a full scan of the whole database.")
 
@@ -241,7 +240,7 @@ class Datom extends CoreSpec {
       // Count also involves full scan if no other attribute is present
       expectCompileError(
         "Ns.e(count).get",
-        "molecule.ops.exception.VerifyRawModelException: " +
+        "molecule.core.ops.exception.VerifyRawModelException: " +
           "Molecule with only generic attributes and no entity id(s) applied are not allowed since " +
           "it would cause a full scan of the whole database.")
 
@@ -300,7 +299,7 @@ class Datom extends CoreSpec {
     "Tacit" >> {
       expectCompileError(
         """m(Ns.int.tx_)""",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "Tacit `tx_` can only be used with an applied value i.e. `tx_(<value>)`")
       ok
     }
@@ -343,7 +342,7 @@ class Datom extends CoreSpec {
     Ns.v.not(3, "b").get === List(r1, 5, "x", "hello")
     expectCompileError(
       """m(Ns.v.>(3))""",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Can't compare generic values being of different types. Found: v.>(3)")
 
     Ns.tx(tx3).get === List(tx3)
@@ -427,7 +426,7 @@ class Datom extends CoreSpec {
     // Generic attributes only allowed to aggregate `count`
     expectCompileError(
       """m(Ns.int.t(max))""",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Generic attributes only allowed to aggregate `count`. Found: `max`")
     ok
   }
@@ -453,7 +452,7 @@ class Datom extends CoreSpec {
     Ns.int.v_.not(3, "b").get === List(5)
     expectCompileError(
       """m(Ns.int.v_.<=(3))""",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Can't compare generic values being of different types. Found: v_.<=(3)")
 
     Ns.int.tx_(tx3).get === List(3)
@@ -520,19 +519,19 @@ class Datom extends CoreSpec {
   "Optional tx data not allowed" >> {
     expectCompileError(
       """m(Ns.int$.tx.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")
+      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")
 
     expectCompileError(
       """m(Ns.int$.t.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
+      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
 
     expectCompileError(
       """m(Ns.int$.txInstant.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`txInstant`).")
+      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`txInstant`).")
 
     expectCompileError(
       """m(Ns.int$.op.str)""",
-      "molecule.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`op`).")
+      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`op`).")
 
     ok
   }

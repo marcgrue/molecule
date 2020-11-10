@@ -2,7 +2,7 @@
 
 /** [[http://www.scalamolecule.org Molecule]] library - a Scala meta-DSL for the [[https://www.datomic.com Datomic]] database.
   *
-  * See [[molecule.api api]] package for various api imports to start using Molecule.
+  * See [[molecule.core.api api]] package for various api imports to start using Molecule.
   *
   * == Sub-packages ==
   * <table>

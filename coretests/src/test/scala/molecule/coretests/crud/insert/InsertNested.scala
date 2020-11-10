@@ -1,15 +1,11 @@
 package molecule.coretests.crud.insert
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.facade.TxReport
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import molecule.datomic.peer.api.out2._
 
 
 class InsertNested extends CoreSpec {
-
 
   "Mandatory" in new CoreSetup {
 

@@ -1,8 +1,8 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
 import molecule.coretests.nested.dsl.nested._
 import molecule.coretests.nested.schema.NestedSchema
+import molecule.datomic.peer.api.out3._
 import org.specs2.mutable.Specification
 
 class NestedBranches extends Specification {

@@ -1,13 +1,12 @@
 package molecule.coretests.attr
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
+import molecule.datomic.peer.api.out11._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class Attribute extends CoreSpec {
-
 
   "Async" in new CoreSetup {
 
@@ -176,7 +175,7 @@ class Attribute extends CoreSpec {
     )
 
     // Get two molecules as tuples of values
-    Ns.str.int.long.float.double.date.uuid.uri.enum.get.sortBy(_._1.toString) === List(
+    Ns.str.int.long.float.double.date.uuid.uri.enum.get.sortBy(_._1) === List(
       (str1, int1, long1, float1, double1, date1, uuid1, uri1, enum1),
       (str2, int2, long2, float2, double2, date2, uuid2, uri2, enum2)
     )

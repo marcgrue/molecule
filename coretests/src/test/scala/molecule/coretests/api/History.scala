@@ -1,20 +1,18 @@
 package molecule.coretests.api
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.datomic.peer.api.out3._
 
 
 class History extends CoreSpec {
   sequential
 
-
   implicit val conn = recreateDbFrom(CoreTestSchema)
 
   val tx1 = Ns.int(1).save
   val e = tx1.eid
-
   val tx2 = Ns(e).int(2).update
 
 

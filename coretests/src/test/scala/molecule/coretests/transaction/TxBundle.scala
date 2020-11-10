@@ -1,15 +1,14 @@
 package molecule.coretests.transaction
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns
+import molecule.datomic.peer.api.out1._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 
 class TxBundle extends CoreSpec {
-
 
   "Transact multiple molecules" in new CoreSetup {
 

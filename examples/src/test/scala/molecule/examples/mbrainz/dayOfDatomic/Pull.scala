@@ -1,11 +1,9 @@
 package molecule.examples.mbrainz.dayOfDatomic
 
 import java.util.UUID
-import datomic.Peer
-import molecule.datomic.peer.api._
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
-import molecule.facade.Conn
-import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
 /*
@@ -15,7 +13,8 @@ import scala.language.postfixOps
 class Pull extends MoleculeSpec {
   sequential
 
-  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
+//  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
+  implicit val conn = connect("localhost:4334/mbrainz-1968-1973", "free")
 
   val ledZeppelin = Artist.e.name_("Led Zeppelin").get.head
   val mccartney = Artist.e.name_("Paul McCartney").get.head
@@ -98,7 +97,7 @@ class Pull extends MoleculeSpec {
     conn.q(
       """[:find  ?a (pull ?a_gid1 [:Artist/gid])
         | :where [?a :Artist/name "Led Zeppelin"]
-        |        [(molecule.util.fns/bind ?a) ?a_gid1]]""".stripMargin
+        |        [(molecule.core.util.fns/bind ?a) ?a_gid1]]""".stripMargin
     )
     conn.q(
       """[:find  ?f ?g ?j
@@ -138,7 +137,7 @@ class Pull extends MoleculeSpec {
         |        [?c :Medium/tracks ?d]
         |        [?d :Track/position 11]
         |        [?d :Track/name ?f]
-        |        [(molecule.util.fns/bind ?d) ?d_artists1]]""".stripMargin
+        |        [(molecule.core.util.fns/bind ?d) ?d_artists1]]""".stripMargin
     ).toString === """List(List(Ghost Riders in the Sky, {:Track/artists [{:db/id 646512837145512} {:db/id 721279627832670}]}))"""
 
     conn.q(
@@ -148,7 +147,7 @@ class Pull extends MoleculeSpec {
         |        [?c :Medium/tracks ?d]
         |        [?d :Track/position 11]
         |        [?d :Track/name ?f]
-        |        [(molecule.util.fns/bind ?d) ?d_track]]""".stripMargin
+        |        [(molecule.core.util.fns/bind ?d) ?d_track]]""".stripMargin
     ).toString === """List(List(Ghost Riders in the Sky, {:track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}))"""
 
     conn.q(
@@ -159,7 +158,7 @@ class Pull extends MoleculeSpec {
         |        [?c :Medium/tracks ?d]
         |        [?d :Track/position ?pos]
         |        [?d :Track/name ?f]
-        |        [(molecule.util.fns/bind ?d) ?d_track]]""".stripMargin,
+        |        [(molecule.core.util.fns/bind ?d) ?d_track]]""".stripMargin,
       datomic.Util.list(
         10.asInstanceOf[Object],
         11.asInstanceOf[Object],

@@ -1,13 +1,12 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.datomic.peer.api._
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateMapBigInt extends CoreSpec {
-
 
   "Mapped variables" >> {
 
@@ -41,14 +40,14 @@ class UpdateMapBigInt extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
       // Seq
       expectCompileError(
         """Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
@@ -57,7 +56,7 @@ class UpdateMapBigInt extends CoreSpec {
 
       // vararg
       (Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1x -> bigInt2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
@@ -65,7 +64,7 @@ class UpdateMapBigInt extends CoreSpec {
 
       // Seq
       (Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1x -> bigInt2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
@@ -105,13 +104,13 @@ class UpdateMapBigInt extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).bigIntMap.replace(str1 -> bigInt1, str1 -> bigInt2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
 
       expectCompileError(
         """Ns(eid).bigIntMap.replace(Seq(str1 -> bigInt1, str1 -> bigInt2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
           "\n__ident__str1 -> __ident__bigInt1" +
           "\n__ident__str1 -> __ident__bigInt2")
     }
@@ -178,13 +177,13 @@ class UpdateMapBigInt extends CoreSpec {
       // Can't apply pairs with duplicate keys
 
       (Ns(eid).bigIntMap(str1 -> bigInt1, str1 -> bigInt2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
 
       (Ns(eid).bigIntMap(Seq(str1 -> bigInt1, str1 -> bigInt2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2

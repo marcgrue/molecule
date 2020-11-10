@@ -1,10 +1,9 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api._
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out3._
 import molecule.examples.dayOfDatomic.dsl.aggregates._
 import molecule.examples.dayOfDatomic.schema.AggregatesSchema
-import molecule.util.MoleculeSpec
 import scala.language.postfixOps
-
 
 class Aggregates extends MoleculeSpec {
 

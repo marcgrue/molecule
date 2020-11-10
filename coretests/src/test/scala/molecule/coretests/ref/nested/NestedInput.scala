@@ -1,13 +1,12 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.in3_out9._
 
 
 class NestedInput extends CoreSpec {
-
 
   "Optional nested" in new CoreSetup {
 
@@ -18,7 +17,7 @@ class NestedInput extends CoreSpec {
 
     expectCompileError(
       "m(Ns.int.Refs1 *? Ref1.int1(?))",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Input not allowed in optional nested structures. " +
       """Found: Atom("Ref1", "int1", "Int", 1, Qm, None, Seq(), Seq())"""
     )

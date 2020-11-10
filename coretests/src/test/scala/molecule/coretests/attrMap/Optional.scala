@@ -1,11 +1,10 @@
 package molecule.coretests.attrMap
 
-import molecule.api.OptionalMapOps._
-import molecule.datomic.peer.api._
+import molecule.core.api.OptionalMapOps._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.datomic.peer.api.out2._
 
 class Optional extends Base {
-
 
   "Post-process keys (String)" in new CoreSetup {
 

@@ -1,13 +1,12 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.datomic.peer.api._
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateMapBoolean extends CoreSpec {
-
 
   "Mapped variables" >> {
 
@@ -41,14 +40,14 @@ class UpdateMapBoolean extends CoreSpec {
       // vararg
       expectCompileError(
         """Ns(eid).boolMap.assert(str1 -> bool1, str1 -> bool2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
 
       // Seq
       expectCompileError(
         """Ns(eid).boolMap.assert(Seq(str1 -> bool1, str1 -> bool2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
 
@@ -57,7 +56,7 @@ class UpdateMapBoolean extends CoreSpec {
 
       // vararg
       (Ns(eid).boolMap.assert(str1 -> bool1, str1x -> bool2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
         "\na -> true" +
         "\na -> false"
@@ -65,7 +64,7 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Seq
       (Ns(eid).boolMap.assert(Seq(str1 -> bool1, str1x -> bool2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
         "\na -> true" +
         "\na -> false"
@@ -105,13 +104,13 @@ class UpdateMapBoolean extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).boolMap.replace(str1 -> bool1, str1 -> bool2).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
 
       expectCompileError(
         """Ns(eid).boolMap.replace(Seq(str1 -> bool1, str1 -> bool2)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace multiple key/value pairs with the same key for attribute `:Ns/boolMap`:" +
           "\n__ident__str1 -> __ident__bool1" +
           "\n__ident__str1 -> __ident__bool2")
     }
@@ -177,13 +176,13 @@ class UpdateMapBoolean extends CoreSpec {
 
       // Can't apply pairs with duplicate keys
       (Ns(eid).longMap(str1 -> long1, str1 -> long2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
 
       (Ns(eid).longMap(Seq(str1 -> long1, str1 -> long2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"

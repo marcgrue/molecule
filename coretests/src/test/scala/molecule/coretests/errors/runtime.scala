@@ -1,11 +1,10 @@
-package molecule.errors
+package molecule.coretests.errors
 
-import molecule.datomic.peer.api._
-import molecule.ast.tempDb.History
+import molecule.core.util.Helpers
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.util.{Helpers, expectCompileError}
+import molecule.datomic.peer.api.in1_out1._
 
 
 class runtime extends CoreSpec with Helpers {
@@ -18,7 +17,7 @@ class runtime extends CoreSpec with Helpers {
   "Cannot resolve overloaded method 'inputMolecule'" >> {
 
     // Missing explicit `m` to create input molecule
-    val inputMolecule1 = Ns.int(?)
+    // val inputMolecule1 = Ns.int(?)
 
     // inferred: Cannot resolve overloaded method 'inputMolecule'
     // compiled: overloaded method value apply with alternatives:

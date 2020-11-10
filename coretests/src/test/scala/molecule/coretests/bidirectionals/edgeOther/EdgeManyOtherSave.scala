@@ -1,10 +1,10 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.util._
+import molecule.datomic.peer.api.in1_out4._
 
 class EdgeManyOtherSave extends MoleculeSpec {
 
@@ -19,13 +19,13 @@ class EdgeManyOtherSave extends MoleculeSpec {
     "no nesting in save molecules" in new Setup {
 
       (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).Animal.name("Rex").save must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNested]  Nested data structures not allowed in save molecules"
 
       // Insert entities, each having one or more connected entities with relationship properties
       val rex = Animal.name.insert("Rex").eid
       (Person.name("Rex").CloseTo.*(CloseTo.weight(7).animal(rex)).save must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNested]  Nested data structures not allowed in save molecules"
     }
 
@@ -99,7 +99,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
 
     // Can't allow edge without ref to target entity
     (Person.name("Gus").CloseTo.weight(5).save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
@@ -107,7 +107,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
 
     // Edge always have to have a ref to a target entity
     (CloseTo.weight(7).save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace somewhere after edge property `CloseTo/weight`."
   }
 

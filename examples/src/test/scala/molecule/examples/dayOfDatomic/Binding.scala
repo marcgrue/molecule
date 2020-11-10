@@ -1,9 +1,8 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api._
-
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.in2_out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.examples.dayOfDatomic.schema._
-import molecule.util.MoleculeSpec
 
 
 class Binding extends MoleculeSpec {

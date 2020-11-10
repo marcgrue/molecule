@@ -1,10 +1,10 @@
 package molecule.coretests.ref
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.ops.exception.VerifyModelException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out4._
 
 class Relations extends CoreSpec {
 
@@ -70,13 +70,13 @@ class Relations extends CoreSpec {
 
     // Avoid mixing update/save semantics
     (Ns(id).Refs1.int1(1).save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[unexpectedAppliedId]  Applying an eid is only allowed for updates."
 
     // Updating across namespaces not allowed
 
     (Ns(id).Refs1.int1(1).update must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
   }
 
@@ -152,7 +152,7 @@ class Relations extends CoreSpec {
 
     // But in insert molecules we don't want to create referenced orphan entities
     (m(Ns.str.Ref1.int1$).insert must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       "[missingAttrInStartEnd]  Missing mandatory attributes of last namespace."
   }
 
@@ -191,11 +191,11 @@ class Relations extends CoreSpec {
 
     expectCompileError(
       "m(Ns.str.refs1.Refs1.int1)",
-      "molecule.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
+      "molecule.core.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
 
     expectCompileError(
       "m(Ns.refs1.str.Refs1.int1)",
-      "molecule.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
+      "molecule.core.ops.exception.VerifyRawModelException: Instead of getting the ref id with `refs1` please get it via the referenced namespace: `Refs1.e ...`")
   }
 
   "Molecule has to end with attribute" >> {
@@ -203,7 +203,7 @@ class Relations extends CoreSpec {
     "Ending with ref" in new CoreSetup {
       expectCompileError(
         "m(Ns.str.Ref1)",
-        "molecule.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.core.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
 
@@ -211,7 +211,7 @@ class Relations extends CoreSpec {
 
       expectCompileError(
         "m(Ns.str.Refs1)",
-        "molecule.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
+        "molecule.core.ops.exception.VerifyRawModelException: Molecule not allowed to end with a reference. Please add one or more attribute to the reference.")
       ok
     }
   }

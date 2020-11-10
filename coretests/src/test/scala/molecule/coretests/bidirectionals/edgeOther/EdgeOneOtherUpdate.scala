@@ -1,9 +1,9 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.datomic.peer.api._
+import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.util._
+import molecule.datomic.peer.api.in1_out3._
 
 class EdgeOneOtherUpdate extends MoleculeSpec {
 

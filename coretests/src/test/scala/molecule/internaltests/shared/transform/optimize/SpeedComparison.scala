@@ -1,12 +1,12 @@
 package molecule.internaltests.shared.transform.optimize
 
-import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-import molecule.datomic.peer.api._
-import molecule.ast.query.{Query, _}
+import java.time.format.DateTimeFormatter
+import molecule.core.ast.query.{Query, _}
+import molecule.core.transform.QueryOptimizer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.QueryOptimizer
+import molecule.datomic.peer.api.out3._
 
 
 class SpeedComparison extends CoreSpec {

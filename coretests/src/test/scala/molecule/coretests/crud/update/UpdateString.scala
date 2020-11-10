@@ -1,14 +1,13 @@
 package molecule.coretests.crud.update
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out1._
 
 class UpdateString extends CoreSpec {
-
 
   "Card-one values" >> {
 
@@ -32,7 +31,7 @@ class UpdateString extends CoreSpec {
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).str("b", "c").update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... str(b, c)"
     }
@@ -61,7 +60,7 @@ class UpdateString extends CoreSpec {
       // Applying multiple values to card-one attribute not allowed
 
       (Ns(eid).str(str2, str3).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         "[noConflictingCardOneValues]  Can't update multiple values for cardinality-one attribute:" +
         s"\n  Ns ... str($str2, $str3)"
     }
@@ -137,12 +136,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace("g" -> "h", "h" -> "h").update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\nh")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq("g" -> "h", "h" -> "h")).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\nh")
     }
 
@@ -297,12 +296,12 @@ class UpdateString extends CoreSpec {
 
       expectCompileError(
         """Ns(eid).strs.replace(str7 -> str8, str8 -> str8).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\n__ident__str8")
 
       expectCompileError(
         """Ns(eid).strs.replace(Seq(str7 -> str8, str8 -> str8)).update""",
-        "molecule.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
+        "molecule.core.ops.exception.VerifyRawModelException: Can't replace with duplicate values of attribute `:Ns/strs`:" +
           "\n__ident__str8")
 
 
@@ -310,13 +309,13 @@ class UpdateString extends CoreSpec {
       val other8 = str8
 
       (Ns(eid).strs.replace(str7 -> str8, str8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/strs`:" +
         "\nh"
 
       // Conflicting new values
       (Ns(eid).strs.replace(Seq(str7 -> str8, str8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/strs`:" +
         "\nh"
     }

@@ -1,11 +1,11 @@
 package molecule.coretests.input2
 
 import java.net.URI
-import molecule.datomic.peer.api._
+import molecule.core.input.{InputMolecule_1, InputMolecule_2}
+import molecule.core.input.exception.InputMolecule_2_Exception
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.InputMolecule_2_Exception
-import molecule.input.{InputMolecule_1, InputMolecule_2}
+import molecule.datomic.peer.api.in2_out3._
 import scala.reflect.ClassTag
 
 
@@ -446,22 +446,22 @@ class ManyMany extends CoreSpec {
         // Can't apply 0 pairs to molecule with tacit input attribute
 
         (m(Ns.int.ints(?).longs(?)).apply(Nil).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
         (m(Ns.int.ints(?).longs_(?)).apply(Nil).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
         (m(Ns.int.ints_(?).longs(?)).apply(Nil).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
 
         // Can't apply multiple pairs to input molecule with an expression input attribute
 
         (m(Ns.int.ints_(?).longs_.not(?)).apply(List((Set(1), Set(1L)), (Set(2), Set(2L)))).get must throwA[InputMolecule_2_Exception])
-          .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
       }
@@ -907,12 +907,12 @@ class ManyMany extends CoreSpec {
 
 
       (m(Ns.int.ints(?).longs(?)).apply(Nil, List(Set(1L))).get must throwA[InputMolecule_2_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
         "Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `ints` --> `ints_`"
 
 
       (m(Ns.int.ints_.<=(?).longs_(?)).apply(List(Set(1), Set(2)), List(Set(1L))).get must throwA[InputMolecule_2_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
         s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
     }
 

@@ -1,12 +1,11 @@
 package molecule.coretests.ref
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out8._
 
 class SelfJoin extends CoreSpec {
-
 
   class Setup extends CoreSetup {
 
@@ -335,7 +334,7 @@ class SelfJoin extends CoreSpec {
 
     expectCompileError(
       "m(Ns.int_(23).Refs1.str1._Ns.Self.int_(25).Refs1.str1(unify))",
-      "molecule.transform.exception.Dsl2ModelException: Can only unify on tacit attributes. Please add underscore to attribute: `str1_(unify)`")
+      "molecule.core.transform.exception.Dsl2ModelException: Can only unify on tacit attributes. Please add underscore to attribute: `str1_(unify)`")
   }
 
 

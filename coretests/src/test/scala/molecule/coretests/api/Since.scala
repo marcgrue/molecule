@@ -1,11 +1,11 @@
 package molecule.coretests.api
 
 import java.util.Date
-import molecule.datomic.peer.api._
+import molecule.core.facade.TxReport
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.facade.TxReport
+import molecule.datomic.peer.api.out1._
 
 
 class Since extends CoreSpec {

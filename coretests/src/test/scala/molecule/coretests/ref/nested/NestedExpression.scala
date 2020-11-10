@@ -1,9 +1,9 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out2._
 
 
 class NestedExpression extends CoreSpec {
@@ -73,7 +73,7 @@ class NestedExpression extends CoreSpec {
     // Expressions not allowed in optional nested structures
     expectCompileError(
       "m(Ns.int.Refs1 *? Ref1.int1(1))",
-      "molecule.transform.exception.Dsl2ModelException: " +
+      "molecule.core.transform.exception.Dsl2ModelException: " +
         "Expressions not allowed in optional nested structures. " +
         """Found: Atom("Ref1", "int1", "Int", 1, Eq(Seq(1)), None, Seq(), Seq())""")
   }

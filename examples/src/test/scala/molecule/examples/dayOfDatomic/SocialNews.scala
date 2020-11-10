@@ -1,7 +1,7 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api._
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out4._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
-import molecule.util.MoleculeSpec
 
 
 class SocialNews extends MoleculeSpec {

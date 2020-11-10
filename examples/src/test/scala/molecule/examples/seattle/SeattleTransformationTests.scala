@@ -1,7 +1,7 @@
 package molecule.examples.seattle
-import molecule.datomic.peer.api._
-import molecule.ast.model._
-import molecule.ast.query._
+import molecule.core.ast.model._
+import molecule.core.ast.query._
+import molecule.datomic.peer.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
 import scala.language.reflectiveCalls
 
@@ -1085,24 +1085,24 @@ class SeattleTransformationTests extends SeattleSpec {
           Var("txInstant"))),
         Where(List(
           Funct("=", Seq(Var("sys"), Val(false)), NoBinding),
-          Funct("molecule.util.fns/live", Seq(Var("nsFull")), NoBinding),
+          Funct("molecule.core.util.fns/live", Seq(Var("nsFull")), NoBinding),
           DataClause(ImplDS, Var("_"), KW("db.install", "attribute", ""), Var("id"), Var("tx"), NoBinding),
           DataClause(ImplDS, Var("id"), KW("db", "ident", ""), Var("idIdent"), NoBinding, NoBinding),
           Funct("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull"))),
           Funct(".matches ^String", Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")), ScalarBinding(Var("sys"))),
-          Funct("molecule.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs"))),
+          Funct("molecule.core.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs"))),
           Funct("first", Seq(Var("partNs")), ScalarBinding(Var("part"))),
           Funct("second", Seq(Var("partNs")), ScalarBinding(Var("ns"))),
           DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInstant"), Empty, NoBinding)))
       ) -->
       """[:find  ?txInstant
         | :where [(= ?sys false)]
-        |        [(molecule.util.fns/live ?nsFull)]
+        |        [(molecule.core.util.fns/live ?nsFull)]
         |        [_ :db.install/attribute ?id ?tx]
         |        [?id :db/ident ?idIdent]
         |        [(namespace ?idIdent) ?nsFull]
         |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
-        |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
+        |        [(molecule.core.util.fns/partNs ?nsFull) ?partNs]
         |        [(first ?partNs) ?part]
         |        [(second ?partNs) ?ns]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin

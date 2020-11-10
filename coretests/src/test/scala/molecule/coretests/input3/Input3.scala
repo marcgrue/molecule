@@ -1,11 +1,11 @@
 package molecule.coretests.input3
 
 import java.net.URI
-import molecule.datomic.peer.api._
+import molecule.core.input.{InputMolecule_1, InputMolecule_3}
+import molecule.core.input.exception.InputMolecule_3_Exception
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.InputMolecule_3_Exception
-import molecule.input.{InputMolecule_1, InputMolecule_3}
+import molecule.datomic.peer.api.in3_out4._
 import scala.reflect.ClassTag
 
 
@@ -469,11 +469,11 @@ class Input3 extends CoreSpec {
 
 
       (m(Ns.int.ints(?).longs(?).strs(?)).apply(Nil, List(Set(1L)), List(Set("a"))).get must throwA[InputMolecule_3_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_3_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
         "Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `ints` --> `ints_`"
 
       (m(Ns.int.ints_.<=(?).longs_(?).strs_(?)).apply(List(Set(1), Set(2)), List(Set(1L)), List(Set("a"))).get must throwA[InputMolecule_3_Exception])
-        .message === "Got the exception molecule.input.exception.InputMolecule_3_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
         s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
     }
   }

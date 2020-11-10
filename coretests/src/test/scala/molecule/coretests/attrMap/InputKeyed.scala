@@ -1,10 +1,9 @@
 package molecule.coretests.attrMap
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.datomic.peer.api.in1_out2._
 
 class InputKeyed extends Base {
-
 
   "Equality" in new Setup {
 

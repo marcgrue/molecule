@@ -1,9 +1,9 @@
 package molecule.coretests.equality
 
-import molecule.datomic.peer.api._
+import molecule.datomic.peer.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.util.expectCompileError
+import molecule.core.util.expectCompileError
 
 class ApplyEnum extends CoreSpec {
 
@@ -47,7 +47,7 @@ class ApplyEnum extends CoreSpec {
       expectCompileError(
         """m(Ns.enum("zzz"))""",
         """
-          |molecule.transform.exception.Dsl2ModelException: 'zzz' is not among available enum values of attribute :Ns/enum:
+          |molecule.core.transform.exception.Dsl2ModelException: 'zzz' is not among available enum values of attribute :Ns/enum:
           |  enum0
           |  enum1
           |  enum2

@@ -1,10 +1,10 @@
 package molecule.coretests.input1.resolution
 
-import molecule.datomic.peer.api._
-import molecule.ast.query._
+import molecule.core.ast.query._
+import molecule.core.input.exception.InputMoleculeException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.input.exception.InputMoleculeException
+import molecule.datomic.peer.api.in1_out2._
 
 
 class EnumCard2coalesce extends CoreSpec {
@@ -309,11 +309,11 @@ class EnumCard2coalesce extends CoreSpec {
         Funct(">", Seq(Var("b2_1"), Val(0)), NoBinding))))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -341,11 +341,11 @@ class EnumCard2coalesce extends CoreSpec {
     inputMolecule(List(Set(enum2))).get === List(Set(enum2, enum3, enum4, enum5, enum6))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -373,11 +373,11 @@ class EnumCard2coalesce extends CoreSpec {
     inputMolecule(List(Set(enum2))).get === List(Set(enum1))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -405,11 +405,11 @@ class EnumCard2coalesce extends CoreSpec {
     inputMolecule(List(Set(enum2))).get === List(Set(enum1, enum2))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[InputMoleculeException])
-      .message === "Got the exception molecule.input.exception.InputMoleculeException: " +
+      .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 }

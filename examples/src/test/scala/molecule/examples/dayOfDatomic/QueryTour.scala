@@ -1,8 +1,7 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api._
-
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
-import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
 // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html

@@ -1,12 +1,11 @@
 package molecule.coretests.crud
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.ops.exception.VerifyModelException
+import molecule.datomic.peer.api.out2._
 
 class UpdateRef extends CoreSpec {
-
 
   "Related" >> {
 
@@ -20,19 +19,19 @@ class UpdateRef extends CoreSpec {
       // its own entity id.
 
       (Ns(42L).str("b").Ref1.int1(2).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
 
       (Ns(42L).str("b").Refs1.int1(2).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't span multiple namespaces like `Ref1`."
 
       (Ns(42L).str("b").Refs1.*(Ref1.int1(2)).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Ref1`."
 
       (m(Ns(42L).str("b") + Ref2.int2(2)).update must throwA[VerifyModelException])
-        .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[update_onlyOneNs]  Update molecules can't be composites."
     }
   }

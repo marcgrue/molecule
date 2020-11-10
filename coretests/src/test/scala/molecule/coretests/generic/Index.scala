@@ -1,11 +1,11 @@
 package molecule.coretests.generic
 
-import molecule.datomic.peer.api._
+import molecule.core.exceptions.MoleculeException
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.exceptions.MoleculeException
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out5._
 
 
 class Index extends CoreSpec {
@@ -16,7 +16,6 @@ class Index extends CoreSpec {
 
   // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
   // the wall clock time since Date's are a bit unreliable for precision.
-
 
   // First entity
 
@@ -224,7 +223,7 @@ class Index extends CoreSpec {
       // Missing Index arguments
       expectCompileError(
         "m(EAVT.e.a.v.t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
           "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
           "  `conn.db.datoms(datomic.Database.EAVT)`")
@@ -232,7 +231,7 @@ class Index extends CoreSpec {
       // Applying values to Index attributes not allowed
       expectCompileError(
         "m(EAVT(42L).e.a.v(500).t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "EAVT index attributes not allowed to have values applied.\n" +
           "EAVT index only accepts datom arguments: `EAVT(<e/a/v/t>)`.")
 
@@ -299,7 +298,7 @@ class Index extends CoreSpec {
       // Missing Index arguments
       expectCompileError(
         "m(AEVT.a.e.v.t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
           "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
           "  `conn.db.datoms(datomic.Database.AEVT)`")
@@ -307,7 +306,7 @@ class Index extends CoreSpec {
       // Applying values to Index attributes not allowed
       expectCompileError(
         """m(AEVT(":Ns/int").a.e.v(42).t)""",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "AEVT index attributes not allowed to have values applied.\n" +
           "AEVT index only accepts datom arguments: `AEVT(<a/e/v/t>)`.")
 
@@ -353,7 +352,7 @@ class Index extends CoreSpec {
       // Missing Index arguments
       expectCompileError(
         "m(AVET.a.v.e.t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
           "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
           "  `conn.db.datoms(datomic.Database.AVET)`")
@@ -361,7 +360,7 @@ class Index extends CoreSpec {
       // Applying values to Index attributes not allowed
       expectCompileError(
         """m(AVET(":Ns/int").a.v.e(77L).t)""",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "AVET index attributes not allowed to have values applied.\n" +
           "AVET index only accepts datom arguments: `AVET(<a/v/e/t>)` or range arguments: `AVET.range(a, from, until)`.")
 
@@ -419,7 +418,7 @@ class Index extends CoreSpec {
       // Start - end
       // Molecule disallow returning from beginning to end (the whole database!)
       (AVET.range(":Ns/int", None, None).e.get must throwA[MoleculeException])
-        .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
+        .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
         "Molecule not allowing returning from start to end (the whole database!).\n" +
         "If you need this, please use raw Datomic access:\n" +
         "`conn.db.datoms(datomic.Database.AVET)`"
@@ -430,7 +429,7 @@ class Index extends CoreSpec {
 
       // Different range types throw an exception
       (AVET.range(":Ns/int", Some(1), Some("y")).e.get must throwA[MoleculeException])
-        .message === "Got the exception molecule.exceptions.package$MoleculeException: " +
+        .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
         "Please supply range arguments of same type as attribute."
 
       // Two wrong types simply returns no result
@@ -540,7 +539,7 @@ class Index extends CoreSpec {
       // Missing Index arguments
       expectCompileError(
         "m(VAET.v.a.e.t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
           "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
           "  `conn.db.datoms(datomic.Database.VAET)`")
@@ -548,7 +547,7 @@ class Index extends CoreSpec {
       // Applying values to Index attributes not allowed
       expectCompileError(
         "m(VAET(42L).v.a.e(77L).t)",
-        "molecule.transform.exception.Dsl2ModelException: " +
+        "molecule.core.transform.exception.Dsl2ModelException: " +
           "VAET index attributes not allowed to have values applied.\n" +
           "VAET index only accepts datom arguments: `VAET(<v/a/e/t>)`.")
 

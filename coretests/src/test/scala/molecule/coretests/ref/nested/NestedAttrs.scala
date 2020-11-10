@@ -1,12 +1,11 @@
 package molecule.coretests.ref.nested
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
+import molecule.datomic.peer.api.out3._
 
 
 class NestedAttrs extends CoreSpec {
-
 
   "card 1" >> {
 

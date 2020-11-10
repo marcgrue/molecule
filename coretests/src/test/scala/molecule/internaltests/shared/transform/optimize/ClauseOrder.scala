@@ -1,12 +1,9 @@
 package molecule.internaltests.shared.transform.optimize
 
-import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDateTime, ZoneOffset}
-import molecule.datomic.peer.api._
-import molecule.ast.query.{Query, _}
+import molecule.core.ast.query.{Query, _}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.transform.QueryOptimizer
+import molecule.datomic.peer.api.out2._
 
 
 class ClauseOrder extends CoreSpec {
@@ -46,7 +43,7 @@ class ClauseOrder extends CoreSpec {
         Pull("a__1", "Ns", "int", None))),
       Where(List(
         DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding),
-        Funct("molecule.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1")))
+        Funct("molecule.core.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1")))
       )))
 
     m1._query === Query(
@@ -54,7 +51,7 @@ class ClauseOrder extends CoreSpec {
         Var("b"),
         Pull("a__1", "Ns", "int", None))),
       Where(List(
-        Funct("molecule.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1"))),
+        Funct("molecule.core.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1"))),
         DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding))))
   }
 

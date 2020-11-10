@@ -1,15 +1,14 @@
 package molecule.coretests.crud.insert
 
-import molecule.datomic.peer.api._
+import molecule.core.facade.TxReport
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.facade.TxReport
+import molecule.datomic.peer.api.out2._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 class InsertAsync extends CoreSpec {
-
 
   "Async insert" in new CoreSetup {
 

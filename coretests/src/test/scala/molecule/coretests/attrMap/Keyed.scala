@@ -1,7 +1,7 @@
 package molecule.coretests.attrMap
 
-import molecule.datomic.peer.api._
 import molecule.coretests.util.dsl.coreTest._
+import molecule.datomic.peer.api.out2._
 
 class Keyed extends Base {
 
@@ -101,7 +101,6 @@ class Keyed extends Base {
       (2, "Hilser"),
       (1, "Hi there")
     )
-    val reg_ex   = ".*Hi.*"
 
     // We can get values with multiple keys by using a regex for the key
     Ns.int.strMapK("en|da")(".*Hi.*").get === en_da_hi
@@ -131,7 +130,6 @@ class Keyed extends Base {
 
   "Multiple keys, multiple values" in new Setup {
 
-    val oh_he       = Seq("Oh.*", ".*He.*")
     val en_da_oh_he = List(
       (2, "Oh, Hi"),
       (3, "Hello"),

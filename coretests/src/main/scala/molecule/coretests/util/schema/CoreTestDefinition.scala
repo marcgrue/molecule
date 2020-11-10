@@ -1,5 +1,5 @@
 package molecule.coretests.util.schema
-import molecule.schema.definition._
+import molecule.core.schema.definition._
 
 @InOut(3, 22)
 object CoreTestDefinition {

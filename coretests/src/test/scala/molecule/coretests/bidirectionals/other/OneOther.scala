@@ -1,11 +1,11 @@
 package molecule.coretests.bidirectionals.other
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
+import molecule.core.transform.exception.Model2TransactionException
+import molecule.core.util.MoleculeSpec
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.ops.exception.VerifyModelException
-import molecule.transform.exception.Model2TransactionException
-import molecule.util.MoleculeSpec
+import molecule.datomic.peer.api.in1_out3._
 
 
 class OneOther extends MoleculeSpec {
@@ -68,7 +68,7 @@ class OneOther extends MoleculeSpec {
     // Saving reference to generic `e` not allowed.
     // (instead apply ref to ref attribute as shown above)
     (Person.name("Ben").Pet.e(rex).save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[noGenerics]  Generic elements `e`, `a`, `v`, `ns`, `tx`, `t`, `txInstant` and `op` " +
       s"not allowed in save molecules. Found `e($rex)`"
   }
@@ -191,7 +191,7 @@ class OneOther extends MoleculeSpec {
 
       // Referencing the same id is not allowed
       (Person(ben).pet(ben).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
         "[valueStmts:biSelfRef]  Current entity and referenced entity ids can't be the same."
     }
 

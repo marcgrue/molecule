@@ -1,7 +1,6 @@
 package molecule.examples.seattle
-import molecule.datomic.peer.api._
+import molecule.datomic.peer.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
-import molecule.generic._
 import scala.language.reflectiveCalls
 
 
@@ -446,12 +445,12 @@ class SeattleQueryTests extends SeattleSpec {
     m(Schema.txInstant) -->
       """[:find  ?txInstant
         | :where [(= ?sys false)]
-        |        [(molecule.util.fns/live ?nsFull)]
+        |        [(molecule.core.util.fns/live ?nsFull)]
         |        [_ :db.install/attribute ?id ?tx]
         |        [?id :db/ident ?idIdent]
         |        [(namespace ?idIdent) ?nsFull]
         |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
-        |        [(molecule.util.fns/partNs ?nsFull) ?partNs]
+        |        [(molecule.core.util.fns/partNs ?nsFull) ?partNs]
         |        [(first ?partNs) ?part]
         |        [(second ?partNs) ?ns]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin

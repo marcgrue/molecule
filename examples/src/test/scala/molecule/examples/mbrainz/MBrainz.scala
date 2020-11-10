@@ -1,10 +1,8 @@
 package molecule.examples.mbrainz
-import datomic.Peer
-import molecule.datomic.peer.api._
+import molecule.core.util.MoleculeSpec
+import molecule.datomic.peer.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
-import molecule.facade.Conn
-import molecule.util.MoleculeSpec
 import scala.language.postfixOps
 
 /*
@@ -30,7 +28,8 @@ import scala.language.postfixOps
 class MBrainz extends MoleculeSpec {
   sequential
 
-  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
+//  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
+  implicit val conn = connect("localhost:4334/mbrainz-1968-1973", "free")
 
   if (Schema.a(":Artist/name").get.isEmpty) {
     // Add uppercase-namespaced attribute names so that we can access the externally
@@ -50,8 +49,6 @@ class MBrainz extends MoleculeSpec {
       "Au"
       // etc...
     )
-
-
 
     // What are the titles, album names, and release years of John Lennon's tracks?
     Release.year.name.Media.Tracks.name.Artists.name_("John Lennon")
@@ -126,7 +123,7 @@ class MBrainz extends MoleculeSpec {
 
     // 2-step querying:
     // First get songs of The Who
-    val whoSongs = Track.name.!=("Outro", "[outro]", "Intro", "[intro]").Artists.name_("The Who").get.toSeq
+    val whoSongs = Track.name.!=("Outro", "[outro]", "Intro", "[intro]").Artists.name_("The Who").get
     // Then get songs with same titles by other artists (using output from first query)
     Track.name(whoSongs).Artists.name.!=("The Who").get(5) === List(
       ("The Last Time", "The Rolling Stones"),

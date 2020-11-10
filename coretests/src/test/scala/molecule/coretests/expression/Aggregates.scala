@@ -1,9 +1,9 @@
 package molecule.coretests.expression
 
-import molecule.datomic.peer.api._
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.util.expectCompileError
+import molecule.datomic.peer.api.out3._
 
 class Aggregates extends CoreSpec {
 
@@ -506,12 +506,12 @@ class Aggregates extends CoreSpec {
   "Map attributes can't use aggregates" in new AggregateSetup {
     expectCompileError(
       "m(Ns.intMap(min))",
-      "molecule.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
+      "molecule.core.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
     )
 
     expectCompileError(
       """m(Ns.intMapK("a")(min))""",
-      "molecule.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
+      "molecule.core.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."
     )
   }
 

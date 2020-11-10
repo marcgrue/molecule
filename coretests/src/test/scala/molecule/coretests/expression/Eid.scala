@@ -1,11 +1,10 @@
 package molecule.coretests.expression
 
-import molecule.datomic.peer.api._
+import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.dsl.coreTest._
-import molecule.ops.exception.VerifyModelException
+import molecule.datomic.peer.api.in1_out2._
 
 class Eid extends Base {
-
 
   "Entity id" in new CoreSetup {
 
@@ -135,11 +134,11 @@ class Eid extends Base {
 
   "Saving generic `e` values not allowed" in new CoreSetup {
     (Ns(42L).str("man").save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[unexpectedAppliedId]  Applying an eid is only allowed for updates."
 
     (Ns.e(42L).str("man").save must throwA[VerifyModelException])
-      .message === "Got the exception molecule.ops.exception.VerifyModelException: " +
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[unexpectedAppliedId]  Applying an eid is only allowed for updates."
   }
 }
