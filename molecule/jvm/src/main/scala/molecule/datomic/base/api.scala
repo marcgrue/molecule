@@ -1,4 +1,4 @@
-package molecule.datomic.peer
+package molecule.datomic.base
 
 import molecule.core.api.{EntityOps, Keywords, TxMethods}
 import molecule.core.expression.LogicImplicits
@@ -30,17 +30,17 @@ import molecule.datomic.peer.facade.Datomic_Peer
   *   // etc..
   * }}}
   * */
-trait api extends Datomic_Peer
-  with Keywords
-  with LogicImplicits
-  with EntityOps
-  with TxMethods
-  with GenericSchema
-  with GenericLog
-  with GenericAEVT
-  with GenericAVET
-  with GenericEAVT
-  with GenericVAET
+trait api
+  extends Keywords
+    with LogicImplicits
+    with EntityOps
+    with TxMethods
+    with GenericSchema
+    with GenericLog
+    with GenericAEVT
+    with GenericAVET
+    with GenericEAVT
+    with GenericVAET
 
 object api extends api
   // Default max arities (can become a burden on compilation time if number of molecules is in the thousands)

@@ -1,8 +1,9 @@
-package molecule.core.facade
+package molecule.datomic.peer.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
 import molecule.core.facade.exception.DatomicFacadeException
+import molecule.core.facade.Conn
 import molecule.core.schema.SchemaTransaction
 import scala.jdk.CollectionConverters._
 
@@ -13,7 +14,7 @@ import scala.jdk.CollectionConverters._
   * @groupname database  Database operations
   * @groupprio 10
   * */
-trait Datomic {
+trait Datomic_Peer {
 
   def getDatabaseNames(protocol: String = "mem"): List[String] = {
     Peer.getDatabaseNames(s"datomic:$protocol://*").asScala.toList
@@ -137,5 +138,6 @@ trait Datomic {
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
-
 }
+
+object Datomic_Peer extends Datomic_Peer

@@ -1,88 +1,161 @@
 package molecule.coretests.util
 
-import java.net.URI
-import java.util.Date
-import java.util.UUID._
-import molecule.core.util.{DateHandling, MoleculeSpec}
+import datomicScala.client.api.sync.{Client, Connection, Datomic}
+import datomicScala.CognitectAnomaly
+import molecule.core.facade.Conn
+import molecule.core.util.MoleculeSpec
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.base.api
+import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.specification.Scope
+import org.specs2.specification.core.{Fragments, Text}
 
-class CoreSpec extends MoleculeSpec with DateHandling {
+class CoreSpec extends MoleculeSpec with CoreData {
+
+  sealed trait System
+  case object Peer extends System
+  case object PeerServer extends System
+  case object DevLocal extends System
+  case object Cloud extends System
+
+  private var system    : System     = Peer
+  private var client    : Client     = null // set in setup
+  private var connection: Connection = null // set in setup
+
+  //  override def map(fs: => Fragments): Fragments = {
+  //    step(setupPeer()) ^
+  //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+  //      step(setupDevLocal()) ^
+  //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+  //      step(setupPeerServer()) ^
+  //      fs.mapDescription(d => Text(s"$system: " + d.show))
+  //  }
+
+
+  def setupPeer(): Unit = {
+    system = Peer
+  }
+
+  def setupPeerServer(): Unit = {
+    system = PeerServer
+    client = Datomic.clientPeerServer("myaccesskey", "mysecret", "localhost:8998")
+    connection = try {
+      client.connect("hello")
+    } catch {
+      case e: CognitectAnomaly =>
+        println(e)
+        println(e.msg)
+        throw e
+      case t: Throwable        => throw t
+    }
+  }
+
+  def setupDevLocal(): Unit = {
+    system = DevLocal
+    client = Datomic.clientDevLocal("Hello system name")
+  }
 
   class CoreSetup extends Scope {
-    // Empty db for each test
-    implicit val conn = recreateDbFrom(CoreTestSchema)
+    // Entry point for Molecule to all systems
+    implicit val conn: Conn = system match {
+      case Peer       => Datomic_Peer.recreateDbFrom(CoreTestSchema)
+      case PeerServer => Datomic_Peer.recreateDbFrom(CoreTestSchema)
+      case DevLocal   => Datomic_Peer.recreateDbFrom(CoreTestSchema)
+      case Cloud      => Datomic_Peer.recreateDbFrom(CoreTestSchema)
+    }
   }
 
-  private def da(i: Int): Date = {
-    // Alternate between winter/summer time to test daylight savings too
-    val month = i % 2 * 6 + 1
-    str2date((2000 + i).toString + "-" + month)
-  }
-  private def uu = randomUUID()
-  private def ur(i: Int) = new URI("uri" + i)
 
-  // Sample data
-
-  lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9, date10, date11, date12, date13, date14, date15, date16, date17, date18) =
-    (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9), da(10), da(11), da(12), da(13), da(14), da(15), da(16), da(17), da(18))
-
-
-  lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7, uuid8, uuid9, uuid10, uuid11, uuid12, uuid13, uuid14, uuid15, uuid16, uuid17, uuid18) =
-    List(uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu).sortBy(_.toString)
-
-  lazy val List(uri0, uri1, uri2, uri3, uri4, uri5, uri6, uri7, uri8, uri9, uri10, uri11, uri12, uri13, uri14, uri15, uri16, uri17, uri18) =
-    List(ur(0), ur(1), ur(2), ur(3), ur(4), ur(5), ur(6), ur(7), ur(8), ur(9), ur(10), ur(11), ur(12), ur(13), ur(14), ur(15), ur(16), ur(17), ur(18))
-
-  lazy val (str0, int0, long0, float0, double0, bigInt0, bigDec0, bool0, enum0) = (" ", 0, 0L, 0.0f, 0.0, BigInt(0), BigDecimal(0.0), false, "enum0")
-  lazy val (str1, int1, long1, float1, double1, bigInt1, bigDec1, bool1, enum1) = ("a", 1, 1L, 1.0f, 1.0, BigInt(1), BigDecimal(1.0), true, "enum1")
-  lazy val (str2, int2, long2, float2, double2, bigInt2, bigDec2, bool2, enum2) = ("b", 2, 2L, 2.0f, 2.0, BigInt(2), BigDecimal(2.0), false, "enum2")
-  lazy val (str3, int3, long3, float3, double3, bigInt3, bigDec3, bool3, enum3) = ("c", 3, 3L, 3.0f, 3.0, BigInt(3), BigDecimal(3.0), true, "enum3")
-  lazy val (str4, int4, long4, float4, double4, bigInt4, bigDec4, bool4, enum4) = ("d", 4, 4L, 4.0f, 4.0, BigInt(4), BigDecimal(4.0), false, "enum4")
-  lazy val (str5, int5, long5, float5, double5, bigInt5, bigDec5, bool5, enum5) = ("e", 5, 5L, 5.0f, 5.0, BigInt(5), BigDecimal(5.0), true, "enum5")
-  lazy val (str6, int6, long6, float6, double6, bigInt6, bigDec6, bool6, enum6) = ("f", 6, 6L, 6.0f, 6.0, BigInt(6), BigDecimal(6.0), false, "enum6")
-  lazy val (str7, int7, long7, float7, double7, bigInt7, bigDec7, bool7, enum7) = ("g", 7, 7L, 7.0f, 7.0, BigInt(7), BigDecimal(7.0), true, "enum7")
-  lazy val (str8, int8, long8, float8, double8, bigInt8, bigDec8, bool8, enum8) = ("h", 8, 8L, 8.0f, 8.0, BigInt(8), BigDecimal(8.0), false, "enum8")
-  lazy val (str9, int9, long9, float9, double9, bigInt9, bigDec9, bool9, enum9) = ("i", 9, 9L, 9.0f, 9.0, BigInt(9), BigDecimal(9.0), true, "enum9")
-
-  lazy val (enum10, enum11, enum12) = ("enum10", "enum11", "enum12")
-  lazy val (enum20, enum21, enum22) = ("enum20", "enum21", "enum22")
-
-
-  lazy val (strs0, ints0, longs0, floats0, doubles0, bools0, dates0, uuids0, uris0, enums0) = (
-    Set(str0),
-    Set(int0),
-    Set(long0),
-    Set(float0),
-    Set(double0),
-    Set(bool0),
-    Set(date0),
-    Set(uuid0),
-    Set(uri0),
-    Set(enum0))
-
-  lazy val (strs1, ints1, longs1, floats1, doubles1, bools1, dates1, uuids1, uris1, enums1) = (
-    Set(str1),
-    Set(int1),
-    Set(long1),
-    Set(float1),
-    Set(double1),
-    Set(bool1),
-    Set(date1),
-    Set(uuid1),
-    Set(uri1),
-    Set(enum1))
-
-  lazy val (strs2, ints2, longs2, floats2, doubles2, bools2, dates2, uuids2, uris2, enums2) = (
-    Set(str1, str2),
-    Set(int1, int2),
-    Set(long1, long2),
-    Set(float1, float2),
-    Set(double1, double2),
-    Set(bool1, bool2),
-    Set(date1, date2),
-    Set(uuid1, uuid2),
-    Set(uri1, uri2),
-    Set(enum1, enum2))
 }
+
+class CoreSpec1 extends CoreSpec with api.out1
+class CoreSpec2 extends CoreSpec with api.out2
+class CoreSpec3 extends CoreSpec with api.out3
+class CoreSpec4 extends CoreSpec with api.out4
+class CoreSpec5 extends CoreSpec with api.out5
+class CoreSpec6 extends CoreSpec with api.out6
+class CoreSpec7 extends CoreSpec with api.out7
+class CoreSpec8 extends CoreSpec with api.out8
+class CoreSpec9 extends CoreSpec with api.out9
+class CoreSpec10 extends CoreSpec with api.out10
+class CoreSpec11 extends CoreSpec with api.out11
+class CoreSpec12 extends CoreSpec with api.out12
+class CoreSpec13 extends CoreSpec with api.out13
+class CoreSpec14 extends CoreSpec with api.out14
+class CoreSpec15 extends CoreSpec with api.out15
+class CoreSpec16 extends CoreSpec with api.out16
+class CoreSpec17 extends CoreSpec with api.out17
+class CoreSpec18 extends CoreSpec with api.out18
+class CoreSpec19 extends CoreSpec with api.out19
+class CoreSpec20 extends CoreSpec with api.out20
+class CoreSpec21 extends CoreSpec with api.out21
+class CoreSpec22 extends CoreSpec with api.out22
+
+class CoreSpec1_1 extends CoreSpec with api.in1_out1
+class CoreSpec1_2 extends CoreSpec with api.in1_out2
+class CoreSpec1_3 extends CoreSpec with api.in1_out3
+class CoreSpec1_4 extends CoreSpec with api.in1_out4
+class CoreSpec1_5 extends CoreSpec with api.in1_out5
+class CoreSpec1_6 extends CoreSpec with api.in1_out6
+class CoreSpec1_7 extends CoreSpec with api.in1_out7
+class CoreSpec1_8 extends CoreSpec with api.in1_out8
+class CoreSpec1_9 extends CoreSpec with api.in1_out9
+class CoreSpec1_10 extends CoreSpec with api.in1_out10
+class CoreSpec1_11 extends CoreSpec with api.in1_out11
+class CoreSpec1_12 extends CoreSpec with api.in1_out12
+class CoreSpec1_13 extends CoreSpec with api.in1_out13
+class CoreSpec1_14 extends CoreSpec with api.in1_out14
+class CoreSpec1_15 extends CoreSpec with api.in1_out15
+class CoreSpec1_16 extends CoreSpec with api.in1_out16
+class CoreSpec1_17 extends CoreSpec with api.in1_out17
+class CoreSpec1_18 extends CoreSpec with api.in1_out18
+class CoreSpec1_19 extends CoreSpec with api.in1_out19
+class CoreSpec1_20 extends CoreSpec with api.in1_out20
+class CoreSpec1_21 extends CoreSpec with api.in1_out21
+class CoreSpec1_22 extends CoreSpec with api.in1_out22
+
+class CoreSpec2_1 extends CoreSpec with api.in2_out1
+class CoreSpec2_2 extends CoreSpec with api.in2_out2
+class CoreSpec2_3 extends CoreSpec with api.in2_out3
+class CoreSpec2_4 extends CoreSpec with api.in2_out4
+class CoreSpec2_5 extends CoreSpec with api.in2_out5
+class CoreSpec2_6 extends CoreSpec with api.in2_out6
+class CoreSpec2_7 extends CoreSpec with api.in2_out7
+class CoreSpec2_8 extends CoreSpec with api.in2_out8
+class CoreSpec2_9 extends CoreSpec with api.in2_out9
+class CoreSpec2_10 extends CoreSpec with api.in2_out10
+class CoreSpec2_11 extends CoreSpec with api.in2_out11
+class CoreSpec2_12 extends CoreSpec with api.in2_out12
+class CoreSpec2_13 extends CoreSpec with api.in2_out13
+class CoreSpec2_14 extends CoreSpec with api.in2_out14
+class CoreSpec2_15 extends CoreSpec with api.in2_out15
+class CoreSpec2_16 extends CoreSpec with api.in2_out16
+class CoreSpec2_17 extends CoreSpec with api.in2_out17
+class CoreSpec2_18 extends CoreSpec with api.in2_out18
+class CoreSpec2_19 extends CoreSpec with api.in2_out19
+class CoreSpec2_20 extends CoreSpec with api.in2_out20
+class CoreSpec2_21 extends CoreSpec with api.in2_out21
+class CoreSpec2_22 extends CoreSpec with api.in2_out22
+
+class CoreSpec3_1 extends CoreSpec with api.in3_out1
+class CoreSpec3_2 extends CoreSpec with api.in3_out2
+class CoreSpec3_3 extends CoreSpec with api.in3_out3
+class CoreSpec3_4 extends CoreSpec with api.in3_out4
+class CoreSpec3_5 extends CoreSpec with api.in3_out5
+class CoreSpec3_6 extends CoreSpec with api.in3_out6
+class CoreSpec3_7 extends CoreSpec with api.in3_out7
+class CoreSpec3_8 extends CoreSpec with api.in3_out8
+class CoreSpec3_9 extends CoreSpec with api.in3_out9
+class CoreSpec3_10 extends CoreSpec with api.in3_out10
+class CoreSpec3_11 extends CoreSpec with api.in3_out11
+class CoreSpec3_12 extends CoreSpec with api.in3_out12
+class CoreSpec3_13 extends CoreSpec with api.in3_out13
+class CoreSpec3_14 extends CoreSpec with api.in3_out14
+class CoreSpec3_15 extends CoreSpec with api.in3_out15
+class CoreSpec3_16 extends CoreSpec with api.in3_out16
+class CoreSpec3_17 extends CoreSpec with api.in3_out17
+class CoreSpec3_18 extends CoreSpec with api.in3_out18
+class CoreSpec3_19 extends CoreSpec with api.in3_out19
+class CoreSpec3_20 extends CoreSpec with api.in3_out20
+class CoreSpec3_21 extends CoreSpec with api.in3_out21
+class CoreSpec3_22 extends CoreSpec with api.in3_out22
