@@ -18,7 +18,8 @@ object Settings {
     scalacOptions := List(
       "-feature",
       "-language:implicitConversions",
-      "-deprecation"
+      "-deprecation",
+      "-language:postfixOps"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Seq("-Ymacro-annotations")
       case _             => Nil

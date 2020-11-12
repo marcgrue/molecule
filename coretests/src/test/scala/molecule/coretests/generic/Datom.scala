@@ -1,10 +1,10 @@
 package molecule.coretests.generic
 
+import molecule.core.facade.Conn
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out6._
+import molecule.datomic.api.out6._
 
 /** Generic Datom attribute interface
   *
@@ -20,7 +20,7 @@ class Datom extends CoreSpec {
   sequential
 
   // Create new db from schema
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  implicit val conn: Conn = getConn()
 
   // First entity
 

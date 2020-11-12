@@ -1,9 +1,10 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.examples.dayOfDatomic.schema._
 import org.specs2.specification.Scope
 import scala.language.postfixOps
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class SocialNewsSetup extends Scope {

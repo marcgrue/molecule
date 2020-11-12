@@ -1,7 +1,7 @@
 package molecule.coretests.attrMap
 
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 class Keys extends Base {
 

@@ -4,7 +4,7 @@ import java.util.Date
 import molecule.core.input.exception.InputMoleculeException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.in1_out2._
+import molecule.datomic.api.in1_out2._
 
 
 class Input1Date extends CoreSpec {

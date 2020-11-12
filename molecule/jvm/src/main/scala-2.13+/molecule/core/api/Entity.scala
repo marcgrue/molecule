@@ -11,7 +11,7 @@ import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.jdk.CollectionConverters._
-import scala.language.{existentials, higherKinds}
+import scala.language.existentials
 
 
 /** Entity wrapper with actions on entity.

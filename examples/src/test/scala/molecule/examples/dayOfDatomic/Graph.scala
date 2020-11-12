@@ -1,7 +1,8 @@
 package molecule.examples.dayOfDatomic
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
 import molecule.examples.dayOfDatomic.schema.{Graph2Schema, GraphSchema}
 import org.specs2.mutable.Specification
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class Graph extends Specification {

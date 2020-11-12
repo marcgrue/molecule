@@ -4,7 +4,7 @@ import java.io.FileReader
 import datomic.Util
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.api.out1._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

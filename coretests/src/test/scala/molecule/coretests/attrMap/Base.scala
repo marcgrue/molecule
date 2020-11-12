@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 class Base extends CoreSpec {
 

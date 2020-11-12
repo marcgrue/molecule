@@ -1,9 +1,10 @@
 package molecule.examples.mbrainz
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
 import scala.language.postfixOps
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 /*
   Download free Datomic version to your machine and download the mbrainz-sample data set (see links below)

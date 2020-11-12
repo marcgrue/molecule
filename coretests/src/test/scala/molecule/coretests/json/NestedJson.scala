@@ -3,7 +3,7 @@ package molecule.coretests.json
 import molecule.core.macros.exception.NestedJsonException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.out5._
+import molecule.datomic.api.out5._
 
 
 class NestedJson extends CoreSpec {

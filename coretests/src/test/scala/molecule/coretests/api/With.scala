@@ -5,7 +5,8 @@ import datomic.Util
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.api.out1._
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class With extends CoreSpec {

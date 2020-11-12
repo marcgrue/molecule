@@ -1,8 +1,9 @@
 package molecule.examples.dayOfDatomic
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out5._
+import molecule.datomic.api.out5._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class ProductsAndOrders extends MoleculeSpec {

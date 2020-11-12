@@ -4,7 +4,8 @@ import molecule.core.ast.model.{Atom, Bond, Eq, Model}
 import molecule.core.util.MoleculeSpec
 import molecule.coretests.schemaDef.dsl.partitionTest._
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
+import molecule.datomic.peer.facade.Datomic_Peer._
 import org.specs2.specification.Scope
 import scala.language.reflectiveCalls
 

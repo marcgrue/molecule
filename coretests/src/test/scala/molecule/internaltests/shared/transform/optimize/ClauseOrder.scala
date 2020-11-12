@@ -3,7 +3,7 @@ package molecule.internaltests.shared.transform.optimize
 import molecule.core.ast.query.{Query, _}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 
 class ClauseOrder extends CoreSpec {

@@ -2,7 +2,7 @@ package molecule.coretests.ref.composite
 
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out22._
+import molecule.datomic.api.out22._
 
 class CompositeChains extends CoreSpec {
 

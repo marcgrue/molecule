@@ -6,7 +6,7 @@ import molecule.core.macros.TxFns
 import molecule.core.macros.exception.TxFnException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

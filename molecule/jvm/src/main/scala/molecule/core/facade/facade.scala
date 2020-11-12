@@ -1,3 +1,3 @@
-package molecule
+package molecule.core
 
 package object facade

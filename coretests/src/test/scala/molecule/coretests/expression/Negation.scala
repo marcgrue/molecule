@@ -2,7 +2,7 @@ package molecule.coretests.expression
 
 import java.net.URI
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 class Negation extends Base {
 

@@ -2,7 +2,7 @@ package molecule.coretests.ref
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 class TwoStepQueries extends CoreSpec {
 

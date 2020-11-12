@@ -1,6 +1,6 @@
 package molecule.examples.dayOfDatomic
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import scala.language.postfixOps
 

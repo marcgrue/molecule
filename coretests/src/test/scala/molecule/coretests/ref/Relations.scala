@@ -4,7 +4,7 @@ import molecule.core.ops.exception.VerifyModelException
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
 
 class Relations extends CoreSpec {
 

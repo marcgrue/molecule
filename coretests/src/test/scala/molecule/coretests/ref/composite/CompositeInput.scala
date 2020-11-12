@@ -2,7 +2,7 @@ package molecule.coretests.ref.composite
 
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.in3_out9._
+import molecule.datomic.api.in3_out9._
 
 class CompositeInput extends CoreSpec {
 

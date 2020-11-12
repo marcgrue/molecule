@@ -2,9 +2,10 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 class GetWith extends Specification with Scope {
 

@@ -3,7 +3,7 @@ package molecule.coretests.ref.composite
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out6._
+import molecule.datomic.api.out6._
 
 class CompositeAttrs extends CoreSpec {
 

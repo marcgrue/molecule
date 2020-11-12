@@ -1,7 +1,7 @@
 package molecule.examples.dayOfDatomic
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out2._
-
+import molecule.datomic.api.out2._
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 class AttributeGroups extends MoleculeSpec {
 

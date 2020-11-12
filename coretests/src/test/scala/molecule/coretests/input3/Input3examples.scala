@@ -2,7 +2,7 @@ package molecule.coretests.input3
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.in3_out4._
+import molecule.datomic.api.in3_out4._
 
 
 class Input3examples extends CoreSpec {

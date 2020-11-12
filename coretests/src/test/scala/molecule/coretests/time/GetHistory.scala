@@ -2,8 +2,9 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.in1_out6._
+import molecule.datomic.api.in1_out6._
 import org.specs2.mutable.Specification
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class GetHistory extends Specification {

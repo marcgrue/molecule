@@ -2,11 +2,11 @@ package molecule.examples.seattle
 
 import molecule.core.facade.Conn
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out8._
+import molecule.datomic.api.out8._
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.seattle.schema._
 import org.specs2.specification.Scope
-
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 trait SeattleSpec extends MoleculeSpec {
 

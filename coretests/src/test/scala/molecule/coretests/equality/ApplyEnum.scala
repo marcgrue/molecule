@@ -1,6 +1,6 @@
 package molecule.coretests.equality
 
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.core.util.expectCompileError

@@ -2,7 +2,7 @@ package molecule.coretests.crud.insert
 
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out10._
+import molecule.datomic.api.out10._
 
 
 class Insert extends CoreSpec {

@@ -2,7 +2,7 @@ package molecule.coretests.time.domain
 
 import molecule.core.facade.Conn
 import molecule.coretests.util.dsl.coreTest.Ns
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.api.out1._
 
 // Example domain class getting and manipulating the db with molecules
 // Molecules need an implicit conn object at runtime

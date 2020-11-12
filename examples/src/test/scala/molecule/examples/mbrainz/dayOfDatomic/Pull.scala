@@ -2,9 +2,10 @@ package molecule.examples.mbrainz.dayOfDatomic
 
 import java.util.UUID
 import molecule.core.util.MoleculeSpec
-import molecule.datomic.peer.api.out4._
+import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import scala.language.postfixOps
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 /*
   https://github.com/Datomic/day-of-datomic/blob/master/tutorial/pull.clj

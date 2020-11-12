@@ -2,7 +2,7 @@ package molecule.core.boilerplate
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.api.out1._
 
 /** Boilerplate interfaces for custom DSL generated from schema definition file.
   * <br><br>

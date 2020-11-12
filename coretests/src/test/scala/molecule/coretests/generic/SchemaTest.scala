@@ -1,14 +1,15 @@
 
 package molecule.coretests.generic
 
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, MoleculeSpec}
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-class SchemaTest extends CoreSpec {
+class SchemaTest extends MoleculeSpec {
   sequential
 
   "Partition schema values" >> {

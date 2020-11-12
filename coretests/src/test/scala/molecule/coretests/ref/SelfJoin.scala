@@ -3,7 +3,7 @@ package molecule.coretests.ref
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out8._
+import molecule.datomic.api.out8._
 
 class SelfJoin extends CoreSpec {
 

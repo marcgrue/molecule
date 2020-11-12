@@ -2,7 +2,7 @@ package molecule.coretests.time.domain
 
 import molecule.core.facade.Conn
 import molecule.coretests.util.dsl.coreTest.Ns
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 
 // Example domain class doing CRUD operations on the database

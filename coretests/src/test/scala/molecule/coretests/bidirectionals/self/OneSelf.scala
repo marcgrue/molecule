@@ -5,7 +5,7 @@ import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.MoleculeSpec
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.datomic.peer.api.in1_out3._
+import molecule.datomic.api.in1_out3._
 
 
 class OneSelf extends MoleculeSpec {

@@ -3,7 +3,7 @@ package molecule.coretests.crud
 import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 class UpdateRef extends CoreSpec {
 

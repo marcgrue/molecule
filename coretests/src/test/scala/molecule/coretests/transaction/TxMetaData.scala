@@ -3,7 +3,7 @@ package molecule.coretests.transaction
 import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out10._
+import molecule.datomic.api.out10._
 
 class TxMetaData extends CoreSpec {
 

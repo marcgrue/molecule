@@ -3,7 +3,8 @@ package molecule.coretests
 import molecule.core.util.Helpers
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class DevLocalTest extends CoreSpec with Helpers {

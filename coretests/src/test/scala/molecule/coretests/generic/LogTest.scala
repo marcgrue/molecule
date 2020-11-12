@@ -5,15 +5,14 @@ import molecule.core.facade.TxReport
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.peer.api.out5._
+import molecule.datomic.api.out5._
 
 
 class LogTest extends CoreSpec {
   sequential
 
   // Create new db from schema
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  implicit val conn = getConn()
 
   // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
   // the wall clock time since Date's are a bit unreliable for precision.

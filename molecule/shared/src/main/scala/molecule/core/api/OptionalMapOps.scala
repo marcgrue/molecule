@@ -217,7 +217,7 @@ trait OptionalMapOps {
   * the following aditional import:
   * {{{
   *   import molecule.api.optionalMapOps._
-  *   import molecule.datomic.peer.api._ // Standard api import with any arity
+  *   import molecule.datomic.api._ // Standard api import with any arity
   * }}}
   * Since this is a rather specialized
   * */

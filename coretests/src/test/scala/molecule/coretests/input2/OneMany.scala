@@ -3,7 +3,7 @@ package molecule.coretests.input2
 import molecule.core.input.exception.{InputMolecule_2_Exception, InputMoleculeException}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.in2_out3._
+import molecule.datomic.api.in2_out3._
 
 
 class OneMany extends CoreSpec {

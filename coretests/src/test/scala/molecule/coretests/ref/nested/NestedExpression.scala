@@ -3,7 +3,7 @@ package molecule.coretests.ref.nested
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.out2._
+import molecule.datomic.api.out2._
 
 
 class NestedExpression extends CoreSpec {

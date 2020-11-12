@@ -1,6 +1,6 @@
 package molecule.coretests.crud.updateMap
 
-import molecule.datomic.peer.api.out1._
+import molecule.datomic.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.core.transform.exception.Model2TransactionException

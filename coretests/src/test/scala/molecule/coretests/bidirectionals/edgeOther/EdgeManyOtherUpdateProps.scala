@@ -4,7 +4,7 @@ import molecule.core.ops.exception.VerifyModelException
 import molecule.core.util._
 import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
-import molecule.datomic.peer.api.out9._
+import molecule.datomic.api.out9._
 
 class EdgeManyOtherUpdateProps extends MoleculeSpec {
 

@@ -4,7 +4,7 @@ import molecule.core.facade.TxReport
 import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.out9._
+import molecule.datomic.api.out9._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

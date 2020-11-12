@@ -1,5 +1,5 @@
 package molecule.examples.seattle
-import molecule.datomic.peer.api.in2_out8._
+import molecule.datomic.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
 import scala.language.reflectiveCalls
 

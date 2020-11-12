@@ -2,7 +2,7 @@ package molecule.coretests.expression
 
 import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.dsl.coreTest._
-import molecule.datomic.peer.api.in1_out2._
+import molecule.datomic.api.in1_out2._
 
 class Eid extends Base {
 

@@ -5,7 +5,7 @@ import molecule.core.input.{InputMolecule_1, InputMolecule_3}
 import molecule.core.input.exception.InputMolecule_3_Exception
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.datomic.peer.api.in3_out4._
+import molecule.datomic.api.in3_out4._
 import scala.reflect.ClassTag
 
 

@@ -2,8 +2,9 @@ package molecule.coretests.ref.nested
 
 import molecule.coretests.nested.dsl.nested._
 import molecule.coretests.nested.schema.NestedSchema
-import molecule.datomic.peer.api.out3._
+import molecule.datomic.api.out3._
 import org.specs2.mutable.Specification
+import molecule.datomic.peer.facade.Datomic_Peer._
 
 class NestedBranches extends Specification {
   sequential
