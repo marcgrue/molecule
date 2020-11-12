@@ -1,19 +1,32 @@
 package molecule.datomic.base.facade
 
+
 import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.Database
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
+import molecule.core.ast.tempDb.TempDb
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.facade.TxReport
 import scala.concurrent.{ExecutionContext, Future}
 
+
+/** Facade to Datomic Connection.
+  *
+  * @see [[http://www.scalamolecule.org/manual/time/testing/ Manual]]
+  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
+  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
+  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
+  **/
 trait Conn {
 
+  val datomicConn: datomic.Connection
 
   // In-memory fixed test db for integration testing of domain model
   // (takes precedence over live db)
-  protected var _testDb: Option[Database] = None
+//  protected var _testDb: Option[Database] = None
+
+  def usingTempDb(tempDb: TempDb): Conn
 
   /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean
@@ -313,4 +326,7 @@ trait Conn {
     * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]]
 
+
+  def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]]
+  def _index(model: Model): jCollection[jList[AnyRef]]
 }

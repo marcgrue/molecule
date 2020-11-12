@@ -57,7 +57,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
     if (hasVariables) {
       q"""
         import molecule.core.ast.model._
-        import molecule.core.facade.Conn
+        import molecule.datomic.base.facade.Conn
         import molecule.core.ops.ModelOps._
         import molecule.core.transform.{Model2Query, QueryOptimizer}
 
@@ -83,7 +83,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
     } else {
       q"""
         import molecule.core.ast.model._
-        import molecule.core.facade.Conn
+        import molecule.datomic.base.facade.Conn
         import molecule.core.transform.QueryOptimizer
 
         final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {

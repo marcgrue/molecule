@@ -39,7 +39,7 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
     case q"def $txFn(..$args)(implicit $conn: Conn): $jLists = {..$txFnBody}" =>
       q"""
         def ${TermName(txFn.toString + "__txfn")}(txDb: AnyRef, txMetaData: AnyRef, ..${args.map(untypedParam(_))}): AnyRef = {
-          implicit val conn: Conn = Conn(txDb)
+          implicit val conn: Conn = molecule.datomic.peer.facade.Conn_Peer(txDb)
           ..${args.map(typedParam(_))}
           ..${txFnBody.init}
           val _txFnStmts = ${txFnBody.last}

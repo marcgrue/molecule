@@ -3,7 +3,7 @@ package molecule.core.api.getAsync
 import molecule.core.api.get.GetJson
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.transform.JsonBuilder
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -64,7 +64,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @see [[http://www.scalamolecule.org/manual/crud/getjson/ Manual on getJson]]
     * @group getAsync
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     */
   def getAsyncJson(implicit conn: Conn): Future[String] =
@@ -82,7 +82,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @see [[http://www.scalamolecule.org/manual/crud/getjson/ Manual on getJson]]
     * @group getAsync
     * @param n    Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     */
   def getAsyncJson(n: Int)(implicit conn: Conn): Future[String] =
@@ -103,7 +103,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonAsOf
     * @param t    Transaction time t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -124,7 +124,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonAsOf
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -147,7 +147,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonAsOf
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -171,7 +171,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonAsOf
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -188,7 +188,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonAsOf
     * @param date java.util.Date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -206,7 +206,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonAsOf
     * @param date java.util.Date
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -225,7 +225,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonSince
     * @param t    Transaction time t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -243,7 +243,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonSince
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -265,7 +265,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonSince
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -288,7 +288,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonSince
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -305,7 +305,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonSince
     * @param date java.util.Date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -323,7 +323,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonSince
     * @param date java.util.Date
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
@@ -344,7 +344,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonWith
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
@@ -363,7 +363,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonWith
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
@@ -380,7 +380,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     *
     * @group getAsyncJsonWith
     * @param txData Raw transaction data as java.util.List[Object]
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
@@ -398,7 +398,7 @@ trait GetAsyncJson { self: MoleculeBase with GetJson with JsonBuilder =>
     * @group getAsyncJsonWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param n      Int Number of rows returned
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */

@@ -7,11 +7,12 @@ import molecule.core.ast.query.QueryExpr
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.exceptions.{MoleculeException, QueryException}
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.ops.QueryOps._
 import molecule.core.ops.VerifyModel
 import molecule.core.transform._
 import molecule.core.util.Debug
+import molecule.datomic.base.facade.Conn
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
@@ -35,7 +36,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * OBS: printing raw Date's (Clojure Instant) will miss the time-zone
     *
     * @group debugGet
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGet(implicit conn: Conn): Unit = {
 
@@ -288,7 +289,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetAsOf(t: Long)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxLong(t))))
 
@@ -304,7 +305,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param tx   [[molecule.core.facade.TxReport TxReport]]
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetAsOf(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
@@ -320,7 +321,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scsope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scsope
     */
   def debugGetAsOf(date: Date)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxDate(date))))
 
@@ -336,7 +337,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetSince(t: Long)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(Since(TxLong(t))))
 
@@ -352,7 +353,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param tx   [[molecule.core.facade.TxReport TxReport]]
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetSince(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(Since(TxLong(tx.t))))
 
@@ -368,7 +369,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetSince(date: Date)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(Since(TxDate(date))))
 
@@ -386,7 +387,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
     debugGet(conn.usingTempDb(With(seqAsJavaListConverter(txMolecules.flatten.flatten.map(_.toJava)).asJava)))
@@ -409,7 +410,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     *
     * @group debugGet
     * @param txData Raw transaction data as java.util.List[Object]
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetWith(txData: jList[jList[_]])(implicit conn: Conn): Unit = {
     debugGet(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
@@ -428,7 +429,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * 2. Data returned from get query (max 500 rows).
     *
     * @group debugGet
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetHistory(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(History))
 
@@ -440,7 +441,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * Model --> Generic statements --> Datomic statements
     *
     * @group debugOp
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Unit
     */
   def debugSave(implicit conn: Conn): Unit = {
@@ -480,7 +481,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * Model --> Generic statements --> Datomic statements
     *
     * @group debugOp
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return
     */
   def debugUpdate(implicit conn: Conn): Unit = {

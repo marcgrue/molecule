@@ -2,7 +2,7 @@ package molecule.core.macros
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList, Comparator => jComparator, List => jList}
 import molecule.core.api.Molecule
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 
 /** Builder classes of various arity of nested tuples. */
 private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>

@@ -4,7 +4,7 @@ import datomic._
 import molecule.core.api.Entity
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{Debug, Helpers}
 import scala.collection.JavaConverters._

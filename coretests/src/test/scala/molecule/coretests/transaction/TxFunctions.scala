@@ -1,7 +1,7 @@
 package molecule.coretests.transaction
 
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.macros.TxFns
 import molecule.core.macros.exception.TxFnException
 import molecule.coretests.util.CoreSpec

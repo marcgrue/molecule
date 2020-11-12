@@ -2,7 +2,6 @@ package molecule.coretests
 
 
 import datomic.Peer
-import molecule.core.facade.Conn
 import molecule.datomic.api
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._

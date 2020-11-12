@@ -3,7 +3,7 @@ package molecule.datomic.peer.facade
 import java.util.UUID.randomUUID
 import datomic.Peer
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.schema.SchemaTransaction
 import scala.jdk.CollectionConverters._
 
@@ -42,8 +42,8 @@ trait Datomic_Peer {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  def connect(dbIdentifier: String, protocol: String = "mem"): Conn = try {
-    Conn(Peer.connect(s"datomic:$protocol://$dbIdentifier"))
+  def connect(dbIdentifier: String, protocol: String = "mem"): Conn_Peer = try {
+    Conn_Peer(Peer.connect(s"datomic:$protocol://$dbIdentifier"))
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
@@ -62,13 +62,13 @@ trait Datomic_Peer {
     *                     (in package yourdomain.schema of generated source jar)
     * @param dbIdentifier Optional String identifier to name database (default empty string creates a randomUUID)
     * @param protocol     Datomic protocol. Defaults to "mem" for in-memory database.
-    * @return [[molecule.core.facade.Conn Conn]]
+    * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
   def recreateDbFrom(
     schema: SchemaTransaction,
     dbIdentifier: String = "",
     protocol: String = "mem"
-  ): Conn = {
+  ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     try {
       deleteDatabase(id, protocol)
@@ -95,13 +95,13 @@ trait Datomic_Peer {
     * @param dbIdentifier Optional String identifier of database (default empty string creates a randomUUID)
     * @see [[https://docs.datomic.com/on-prem/javadoc/datomic/Peer.html#connect-java.lang.Object-]]
     * @param protocol Datomic protocol. Defaults to "mem" for in-memory database.
-    * @return [[molecule.core.facade.Conn Conn]]
+    * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
   def recreateDbFromRaw(
     schemaData: java.util.List[_],
     dbIdentifier: String = "",
     protocol: String = "mem"
-  ): Conn = {
+  ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     try {
       deleteDatabase(id, protocol)
@@ -129,7 +129,7 @@ trait Datomic_Peer {
     schema: SchemaTransaction,
     dbIdentifier: String,
     protocol: String = "mem"
-  ): Conn = try {
+  ): Conn_Peer = try {
     val conn = connect(dbIdentifier, protocol)
     if (schema.partitions.size() > 0)
       conn.datomicConn.transact(schema.partitions)

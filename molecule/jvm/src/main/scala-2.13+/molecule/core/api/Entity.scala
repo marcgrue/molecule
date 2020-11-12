@@ -5,11 +5,12 @@ import molecule.core.api.exception.EntityException
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import molecule.datomic.base.facade.Conn
+import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
@@ -27,7 +28,7 @@ import scala.language.existentials
   * @groupname touch Touch entity graph
   * @groupprio touch 3
   * @param entity datomic.Entity
-  * @param conn   Implicit [[molecule.core.facade.Conn Conn]] in scope
+  * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
   * @param id     Entity id of type Object
   * @param showKW If a ref id points to an attribute definition, whether to show
   *               the attribute keyword (like `:Ns.enum/enumValue`) or its
@@ -732,7 +733,7 @@ object Entity {
   /** Entity wrapper factory method
     *
     * @param entity Instantiated datomic.Entity from id
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @param id
     * @return
     */

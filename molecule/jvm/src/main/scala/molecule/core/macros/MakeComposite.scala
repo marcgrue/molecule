@@ -23,7 +23,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
           final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
 
-          final override def getJsonFlat(conn: _root_.molecule.core.facade.Conn, n: Int): String = getJsonComposite(conn, n)
+          final override def getJsonFlat(conn: _root_.molecule.datomic.base.facade.Conn, n: Int): String = getJsonComposite(conn, n)
           final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
             ..${compositeJsons(jsons)}
           }
@@ -36,7 +36,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         final class $outMolecule extends $MoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
 
-          final override def getJsonFlat(conn: _root_.molecule.core.facade.Conn, n: Int): String = getJsonComposite(conn, n)
+          final override def getJsonFlat(conn: _root_.molecule.datomic.base.facade.Conn, n: Int): String = getJsonComposite(conn, n)
           final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
             ..${compositeJsons(jsons)}
           }

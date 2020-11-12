@@ -4,7 +4,7 @@ import java.util.{List => jList}
 import molecule.core.api.Molecule
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
@@ -31,7 +31,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * also be the fastest way to traverse the data set.
     *
     * @group get
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArray(implicit* getAsyncArray]] method.
@@ -63,7 +63,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group get
     * @param n       Number of rows. If -1, all rows are fetched.
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArray(n:Int)* getAsyncArray]] method.
@@ -141,7 +141,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArrayAsOf
     * @param t       Transaction time t
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -194,7 +194,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArrayAsOf
     * @param t       Long Transaction time t
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -250,7 +250,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArrayAsOf
     * @param tx      [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -301,7 +301,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArrayAsOf
     * @param tx      [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -359,7 +359,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArrayAsOf
     * @param date    java.util.Date
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -407,7 +407,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArrayAsOf
     * @param date    java.util.Date
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -449,7 +449,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArraySince
     * @param t       Transaction time t
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -488,7 +488,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArraySince
     * @param t       Transaction time t
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -530,7 +530,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArraySince
     * @param tx      [[molecule.core.facade.TxReport TxReport]]
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -572,7 +572,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArraySince
     * @param tx      [[molecule.core.facade.TxReport TxReport]]
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -609,7 +609,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArraySince
     * @param date    java.util.Date
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -646,7 +646,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArraySince
     * @param date    java.util.Date
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
@@ -687,7 +687,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArrayWith
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
@@ -734,7 +734,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArrayWith
     * @param n           Int Number of rows returned
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
@@ -765,7 +765,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     *
     * @group getArrayWith
     * @param txData  Raw transaction data as java.util.List[Object]
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
@@ -801,7 +801,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @group getArrayWith
     * @param txData  Raw transaction data as java.util.List[Object]
     * @param n       Int Number of rows returned
-    * @param conn    Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`

@@ -2,7 +2,6 @@ package molecule.coretests.util
 
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
 import datomicScala.CognitectAnomaly
-import molecule.core.facade.Conn
 import molecule.core.util.MoleculeSpec
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.peer.facade.Datomic_Peer
@@ -10,6 +9,7 @@ import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 import molecule.core.schema.SchemaTransaction
+import molecule.datomic.base.facade.Conn
 
 class CoreSpec extends MoleculeSpec with CoreData {
 
@@ -25,15 +25,15 @@ class CoreSpec extends MoleculeSpec with CoreData {
   private var client    : Client     = null // set in setup
   private var connection: Connection = null // set in setup
 
-  override def map(fs: => Fragments): Fragments = {
-    step(setupPeer()) ^
-      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-      step(setupDevLocal()) ^
-      fs.mapDescription(d => Text(s"$system: " + d.show))
+//  override def map(fs: => Fragments): Fragments = {
+//    step(setupPeer()) ^
 //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-//      step(setupPeerServer()) ^
+//      step(setupDevLocal()) ^
 //      fs.mapDescription(d => Text(s"$system: " + d.show))
-  }
+////      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+////      step(setupPeerServer()) ^
+////      fs.mapDescription(d => Text(s"$system: " + d.show))
+//  }
 
 
   def setupPeer(): Unit = {

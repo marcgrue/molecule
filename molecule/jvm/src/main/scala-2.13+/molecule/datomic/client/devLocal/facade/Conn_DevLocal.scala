@@ -10,10 +10,11 @@ import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
+import molecule.datomic.base.facade.Conn
 import org.slf4j.LoggerFactory
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -27,7 +28,7 @@ import scala.util.control.NonFatal
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
   **/
-class Conn_DevLocal()
-  extends Helpers with BridgeDatomicFuture {
+abstract class Conn_DevLocal()
+  extends Conn with Helpers with BridgeDatomicFuture {
 
 }

@@ -27,7 +27,7 @@ import scala.language.{existentials, higherKinds}
   * @groupname touch Touch entity graph
   * @groupprio touch 3
   * @param entity datomic.Entity
-  * @param conn   Implicit [[molecule.core.facade.Conn Conn]] in scope
+  * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
   * @param id     Entity id of type Object
   * @param showKW If a ref id points to an attribute definition, whether to show
   *               the attribute keyword (like `:Ns.enum/enumValue`) or its
@@ -732,7 +732,7 @@ object Entity {
   /** Entity wrapper factory method
     *
     * @param entity Instantiated datomic.Entity from id
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @param id
     * @return
     */

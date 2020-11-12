@@ -4,7 +4,7 @@ import java.util.{Collection => jCollection, List => jList}
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
@@ -26,7 +26,7 @@ trait GetRaw { self: MoleculeBase =>
     * }}}
     *
     * @group get
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRaw(implicit* getAsyncRaw]] method.
     */
@@ -40,7 +40,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group get
     * @param n    Number of rows
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRaw(n:Int)* getAsyncRaw]] method.
     */
@@ -103,7 +103,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawAsOf
     * @param t    Transaction time t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(t:Long)* getAsyncRawAsOf]] method.
@@ -147,7 +147,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawAsOf
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(t:Long,n:Int)* getAsyncRawAsOf]] method.
@@ -191,7 +191,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawAsOf
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.facade\.TxReport)* getAsyncRawAsOf]] method.
@@ -234,7 +234,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawAsOf
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncRawAsOf]] method.
@@ -282,7 +282,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawAsOf
     * @param date java.util.Date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date)* getAsyncRawAsOf]] method.
@@ -328,7 +328,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawAsOf
     * @param date java.util.Date
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date,n:Int)* getAsyncRawAsOf]] method.
@@ -368,7 +368,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawSince
     * @param t    Transaction time t
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(t:Long)* getAsyncRawSince]] method.
@@ -404,7 +404,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawSince
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(t:Long,n:Int)* getAsyncRawSince]] method.
@@ -443,7 +443,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawSince
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(tx:molecule\.facade\.TxReport)* getAsyncRawSince]] method.
@@ -480,7 +480,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawSince
     * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(tx:molecule\.facade\.TxReport,n:Int)* getAsyncRawSince]] method.
@@ -515,7 +515,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawSince
     * @param date java.util.Date
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date)* getAsyncRawSince]] method.
@@ -548,7 +548,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawSince
     * @param date java.util.Date
     * @param n    Int Number of rows returned
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date,n:Int)* getAsyncRawSince]] method.
@@ -578,7 +578,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawWith
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawWith(txMolecules* getAsyncRawWith]] method.
@@ -615,7 +615,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawWith
     * @param n           Int Number of rows returned
     * @param txMolecules Transaction statements from applied Molecules with test data
-    * @param conn        Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
@@ -642,7 +642,7 @@ trait GetRaw { self: MoleculeBase =>
     *
     * @group getRawWith
     * @param txData Raw transaction data as java.util.List[Object]
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_])* getAsyncRawWith]] method.
@@ -672,7 +672,7 @@ trait GetRaw { self: MoleculeBase =>
     * @group getRawWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param n      Int Number of rows returned
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_],n:Int)* getAsyncRawWith]] method.

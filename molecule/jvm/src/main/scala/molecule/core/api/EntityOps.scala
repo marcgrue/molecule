@@ -2,10 +2,11 @@ package molecule.core.api
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.Debug
+import molecule.datomic.base.facade.Conn
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Operations on multiple entities.
@@ -28,7 +29,7 @@ trait EntityOps {
     *
     * @group entityOps
     * @param id   Entity id of type Long
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return
     */
   implicit final def long2Entity(id: Long)(implicit conn: Conn): Entity = Entity(conn.db.entity(id), conn, id.asInstanceOf[Object])
@@ -54,7 +55,7 @@ trait EntityOps {
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
-    * @param conn                Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]] with result of retract
     */
   def retract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): TxReport = {
@@ -99,7 +100,7 @@ trait EntityOps {
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
-    * @param conn                Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]] with result of retract
     */
   def retractAsync(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
@@ -154,7 +155,7 @@ trait EntityOps {
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
-    * @param conn                Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Unit (prints to output)
     */
   def debugRetract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): Unit = {

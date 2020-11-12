@@ -8,12 +8,13 @@ import datomic.Util.{list, read}
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Composite, Model, TxMetaData}
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.macros.TxFunctionCall
 import molecule.core.macros.exception.TxFnException
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
-import scala.concurrent.{ExecutionContext, Future, Promise, blocking}
+import molecule.datomic.base.facade.Conn
+import scala.concurrent.{blocking, ExecutionContext, Future, Promise}
 import scala.language.experimental.macros
 import scala.language.implicitConversions
 import scala.util.control.NonFatal
@@ -48,7 +49,7 @@ trait TxMethods {
     *
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]] with result of transaction
     */
   def transact(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): TxReport =
@@ -77,7 +78,7 @@ trait TxMethods {
     *
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Future with [[molecule.core.facade.TxReport TxReport]] with result of transaction
     */
   def transactAsync(
@@ -137,7 +138,7 @@ trait TxMethods {
     *
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
-    * @param conn   Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugTransact(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
     // Use temporary branch of db to not changing any live data

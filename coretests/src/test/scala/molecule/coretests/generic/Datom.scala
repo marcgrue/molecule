@@ -1,6 +1,6 @@
 package molecule.coretests.generic
 
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._

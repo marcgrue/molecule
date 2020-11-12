@@ -1,6 +1,6 @@
 package molecule.examples.seattle
 
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.util.MoleculeSpec
 import molecule.datomic.api.out8._
 import molecule.examples.seattle.dsl.seattle._

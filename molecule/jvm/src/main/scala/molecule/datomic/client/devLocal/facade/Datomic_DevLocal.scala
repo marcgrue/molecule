@@ -4,7 +4,7 @@ import java.util.UUID.randomUUID
 import datomic.Peer
 import datomicScala.client.api.sync.Client
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.schema.SchemaTransaction
 import molecule.datomic.peer.facade.Datomic_Peer
 import scala.jdk.CollectionConverters._
@@ -48,7 +48,7 @@ case class Datomic_DevLocal(client: Client) {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  def connect(dbName: String): Conn = try {
+  def connect(dbName: String): Conn_DevLocal = try {
 //    Conn(Peer.connect(s"datomic:$protocol://$dbIdentifier"))
 //    Conn_DevLocal(client, dbName)
     null
@@ -70,16 +70,18 @@ case class Datomic_DevLocal(client: Client) {
     *                     (in package yourdomain.schema of generated source jar)
     * @param dbIdentifier Optional String identifier to name database (default empty string creates a randomUUID)
     * @param protocol     Datomic protocol. Defaults to "mem" for in-memory database.
-    * @return [[molecule.core.facade.Conn Conn]]
+    * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
-  def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn = try {
+  def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_DevLocal = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
-    val clientConnection = connect(dbName)
-    if (schema.partitions.size() > 0)
-      clientConnection.datomicConn.transact(schema.partitions)
-    clientConnection.datomicConn.transact(schema.namespaces)
-    clientConnection
+//    val clientConnection = connect(dbName)
+//    if (schema.partitions.size() > 0)
+//      clientConnection.datomicConn.transact(schema.partitions)
+//    clientConnection.datomicConn.transact(schema.namespaces)
+//    clientConnection
+
+    null
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
@@ -96,14 +98,16 @@ case class Datomic_DevLocal(client: Client) {
     * @param dbIdentifier Optional String identifier of database (default empty string creates a randomUUID)
     * @see [[https://docs.datomic.com/on-prem/javadoc/datomic/Peer.html#connect-java.lang.Object-]]
     * @param protocol Datomic protocol. Defaults to "mem" for in-memory database.
-    * @return [[molecule.core.facade.Conn Conn]]
+    * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
-  def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn = try {
+  def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn_DevLocal = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
-    val conn = connect(dbName)
-    conn.datomicConn.transact(schemaData).get()
-    conn
+//    val conn = connect(dbName)
+//    conn.datomicConn.transact(schemaData).get()
+//    conn
+
+    null
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
@@ -122,12 +126,14 @@ case class Datomic_DevLocal(client: Client) {
   def transactSchema(
     schema: SchemaTransaction,
     dbName: String
-  ): Conn = try {
+  ): Conn_DevLocal = try {
     val conn = connect(dbName)
-    if (schema.partitions.size() > 0)
-      conn.datomicConn.transact(schema.partitions)
-    conn.datomicConn.transact(schema.namespaces)
-    conn
+//    if (schema.partitions.size() > 0)
+//      conn.datomicConn.transact(schema.partitions)
+//    conn.datomicConn.transact(schema.namespaces)
+//    conn
+
+    null
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }

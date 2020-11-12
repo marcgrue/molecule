@@ -5,10 +5,11 @@ import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model._
 import molecule.core.ast.query.Query
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.TxReport
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.{CastHelpers, JsonBuilder, Model2Transaction}
 import molecule.core.util.Debug
+import molecule.datomic.base.facade.Conn
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
@@ -217,7 +218,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     * The save operation is synchronous and blocking. Use `saveAsync` for non-blocking asynchronous saves.
     *
     * @group save
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]] with info about the result of the `save` transaction.
     */
   def save(implicit conn: Conn): TxReport = {
@@ -244,7 +245,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     * The save operation is asynchronous and non-blocking. Internally calls Datomic's asynchronous API.
     *
     * @group save
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]] with info about the result of the `save` transaction.
     */
   def saveAsync(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
@@ -256,7 +257,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
   /** Get transaction statements of a call to `save` on a molecule (without affecting the db).
     *
     * @group getTx
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Transaction statements
     */
   def getSaveTx(implicit conn: Conn): Seq[Seq[Statement]] = {
@@ -445,7 +446,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     * The update operation is synchronous and blocking. Use `updateAsync` for non-blocking asynchronous updates.
     *
     * @group update
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]]
     */
   def update(implicit conn: Conn): TxReport = {
@@ -470,7 +471,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     * The update operation is asynchronous and non-blocking. Internally calls Datomic's asynchronous API.
     *
     * @group update
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.core.facade.TxReport TxReport]]
     */
   def updateAsync(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
@@ -482,7 +483,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
   /** Get transaction statements of a call to `update` on a molecule (without affecting the db).
     *
     * @group getTx
-    * @param conn Implicit [[molecule.core.facade.Conn Conn]] value in scope
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return
     */
   def getUpdateTx(implicit conn: Conn): Seq[Seq[Statement]] = {

@@ -4,7 +4,7 @@ import molecule.core.ast.model.Model
 import molecule.core.ast.query._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions.MoleculeException
-import molecule.core.facade.Conn
+import molecule.datomic.base.facade.Conn
 import molecule.core.input.InputMolecule
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Model2Transaction, Query2String}
