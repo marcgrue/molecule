@@ -6,6 +6,7 @@ import molecule.core.facade.Conn
 import molecule.core.util.MoleculeSpec
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.peer.facade.Datomic_Peer
+import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 import molecule.core.schema.SchemaTransaction
@@ -16,7 +17,7 @@ class CoreSpec extends MoleculeSpec with CoreData {
   case object Peer extends System
   case object PeerServer extends System
 
-  // Only testing cloud client with dev-local
+  // Only testing cloud client with dev-local, presuming they behave identically
   case object DevLocal extends System
   //  case object Cloud extends System
 
@@ -24,14 +25,15 @@ class CoreSpec extends MoleculeSpec with CoreData {
   private var client    : Client     = null // set in setup
   private var connection: Connection = null // set in setup
 
-  //  override def map(fs: => Fragments): Fragments = {
-  //    step(setupPeer()) ^
-  //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-  //      step(setupDevLocal()) ^
-  //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-  //      step(setupPeerServer()) ^
-  //      fs.mapDescription(d => Text(s"$system: " + d.show))
-  //  }
+  override def map(fs: => Fragments): Fragments = {
+    step(setupPeer()) ^
+      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+      step(setupDevLocal()) ^
+      fs.mapDescription(d => Text(s"$system: " + d.show))
+//      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+//      step(setupPeerServer()) ^
+//      fs.mapDescription(d => Text(s"$system: " + d.show))
+  }
 
 
   def setupPeer(): Unit = {
@@ -42,7 +44,7 @@ class CoreSpec extends MoleculeSpec with CoreData {
     system = PeerServer
     client = Datomic.clientPeerServer("myaccesskey", "mysecret", "localhost:8998")
     connection = try {
-      client.connect("hello")
+      client.connect("coretests")
     } catch {
       case e: CognitectAnomaly =>
         println(e)
@@ -54,7 +56,7 @@ class CoreSpec extends MoleculeSpec with CoreData {
 
   def setupDevLocal(): Unit = {
     system = DevLocal
-    client = Datomic.clientDevLocal("Hello system name")
+    client = Datomic.clientDevLocal("coretests")
   }
 
   def getConn(
@@ -69,7 +71,7 @@ class CoreSpec extends MoleculeSpec with CoreData {
         Datomic_Peer.recreateDbFrom(schema, dbIdentifier)
 
       case DevLocal =>
-        Datomic_Peer.recreateDbFrom(schema, dbIdentifier)
+        Datomic_DevLocal(client).recreateDbFrom(schema, dbIdentifier)
 
       //      case Cloud      =>
       //        Datomic_Peer.recreateDbFrom(schema, dbIdentifier)

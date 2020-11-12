@@ -36,7 +36,7 @@ object Conn {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  **/
+  * */
 class Conn(val datomicConn: datomic.Connection)
   extends Helpers with BridgeDatomicFuture {
 
@@ -44,15 +44,15 @@ class Conn(val datomicConn: datomic.Connection)
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
-  private var _adhocDb: Option[TempDb] = None
-  private[molecule] def usingTempDb(tempDb: TempDb): Conn = {
+  protected var _adhocDb: Option[TempDb] = None
+  protected[molecule] def usingTempDb(tempDb: TempDb): Conn = {
     _adhocDb = Some(tempDb)
     this
   }
 
   // In-memory fixed test db for integration testing of domain model
   // (takes precedence over live db)
-  private var _testDb: Option[Database] = None
+  protected var _testDb: Option[Database] = None
 
   /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
@@ -297,16 +297,15 @@ class Conn(val datomicConn: datomic.Connection)
     * @return [[molecule.core.facade.TxReport TxReport]]
     */
   def transact(rawTxStmts: jList[AnyRef]): TxReport = {
-
-    if (_testDb.isDefined) {
+    _testDb.fold {
+      // Live transaction
+      TxReport(datomicConn.transact(rawTxStmts).get)
+    } { testDb =>
       // In-memory "transaction"
-      val txReport = TxReport(_testDb.get.`with`(rawTxStmts))
+      val txReport = TxReport(testDb.`with`(rawTxStmts))
       // Continue with updated in-memory db
       _testDb = Some(txReport.dbAfter.asOf(txReport.t))
       txReport
-    } else {
-      // Live transaction
-      TxReport(datomicConn.transact(rawTxStmts).get)
     }
   }
 
