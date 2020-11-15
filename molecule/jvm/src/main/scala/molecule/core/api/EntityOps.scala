@@ -2,11 +2,10 @@ package molecule.core.api
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
-import molecule.core.facade.TxReport
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.Debug
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Operations on multiple entities.
@@ -56,7 +55,7 @@ trait EntityOps {
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]] with result of retract
+    * @return [[TxReport TxReport]] with result of retract
     */
   def retract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): TxReport = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
@@ -101,7 +100,7 @@ trait EntityOps {
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]] with result of retract
+    * @return [[TxReport TxReport]] with result of retract
     */
   def retractAsync(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
     val retractStmts = eids.toSeq.distinct map RetractEntity

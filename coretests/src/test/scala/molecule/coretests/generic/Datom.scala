@@ -20,7 +20,7 @@ class Datom extends CoreSpec {
   sequential
 
   // Create new db from schema
-  implicit val conn: Conn = getConn()
+  implicit val conn: Conn = recreatedDbConn()
 
   // First entity
 

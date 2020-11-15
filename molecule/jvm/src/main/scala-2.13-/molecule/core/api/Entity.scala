@@ -5,12 +5,13 @@ import molecule.core.api.exception.EntityException
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
-import molecule.core.facade.{Conn, TxReport}
+import molecule.core.facade.Conn
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
+import molecule.datomic.base.facade.TxReport
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.language.{existentials, higherKinds}
 
 
@@ -61,7 +62,7 @@ class Entity(
     * `retract(eids, txMetaDataMolecules*)` in [[molecule.core.api.EntityOps]].
     *
     * @group retract
-    * @return [[molecule.core.facade.TxReport]] with result of retraction
+    * @return [[TxReport]] with result of retraction
     */
   def retract: TxReport = conn.transact(getRetractTx)
 
@@ -87,7 +88,7 @@ class Entity(
     * `retract(eids, txMetaDataMolecules*)` in [[molecule.core.api.EntityOps]].
     *
     * @group retract
-    * @return [[molecule.core.facade.TxReport]] with result of retraction
+    * @return [[TxReport]] with result of retraction
     */
   def retractAsync(implicit ec: ExecutionContext): Future[TxReport] =
     conn.transactAsync(getRetractTx)
@@ -184,7 +185,7 @@ class Entity(
 
     /** Perform retraction of entity with added transaction meta data against database.
       *
-      * @return [[molecule.core.facade.TxReport TxReport]] with result of transaction
+      * @return [[TxReport TxReport]] with result of transaction
       */
     def retract: TxReport = conn.transact(stmtss)
 

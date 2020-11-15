@@ -13,9 +13,10 @@ import molecule.core.exceptions._
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
+import molecule.datomic.base.facade.TxReport
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 /** Factory methods to create facade to Datomic Connection. */
@@ -289,7 +290,7 @@ class Conn(val datomicConn: datomic.Connection)
     * }}}
     *
     * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
   def transact(rawTxStmts: jList[AnyRef]): TxReport = {
 
@@ -315,7 +316,7 @@ class Conn(val datomicConn: datomic.Connection)
     * }}}
     *
     * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return Future with [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return Future with [[TxReport TxReport]] with result of transaction
     */
   def transactAsync(rawTxStmts: jList[AnyRef])
                    (implicit ec: ExecutionContext): Future[TxReport] = {

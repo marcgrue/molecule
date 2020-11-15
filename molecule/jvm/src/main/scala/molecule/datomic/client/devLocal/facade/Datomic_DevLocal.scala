@@ -49,9 +49,7 @@ case class Datomic_DevLocal(client: Client) {
   }
 
   def connect(dbName: String): Conn_DevLocal = try {
-//    Conn(Peer.connect(s"datomic:$protocol://$dbIdentifier"))
-//    Conn_DevLocal(client, dbName)
-    null
+    Conn_DevLocal(client, dbName)
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
@@ -75,13 +73,11 @@ case class Datomic_DevLocal(client: Client) {
   def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_DevLocal = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
-//    val clientConnection = connect(dbName)
-//    if (schema.partitions.size() > 0)
-//      clientConnection.datomicConn.transact(schema.partitions)
-//    clientConnection.datomicConn.transact(schema.namespaces)
-//    clientConnection
-
-    null
+    val conn = connect(dbName)
+    if (schema.partitions.size() > 0)
+      conn.transact(schema.partitions)
+    conn.transact(schema.namespaces)
+    conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
@@ -95,19 +91,15 @@ case class Datomic_DevLocal(client: Client) {
     * @see [[https://docs.datomic.com/on-prem/data-structure-literals.html]]
     * @group database
     * @param schemaData   java.util.List of java.util.Maps of key/values defining a Datomic schema
-    * @param dbIdentifier Optional String identifier of database (default empty string creates a randomUUID)
-    * @see [[https://docs.datomic.com/on-prem/javadoc/datomic/Peer.html#connect-java.lang.Object-]]
-    * @param protocol Datomic protocol. Defaults to "mem" for in-memory database.
+    * @param dbName Optional String identifier of database (default empty string creates a randomUUID)
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
   def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn_DevLocal = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
-//    val conn = connect(dbName)
-//    conn.datomicConn.transact(schemaData).get()
-//    conn
-
-    null
+    val conn = connect(dbName)
+    conn.transact(schemaData)
+    conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }

@@ -14,7 +14,7 @@ trait SeattleSpec extends MoleculeSpec {
     implicit val conn: Conn = recreateDbFrom(SeattleSchema)
 
     // Add lowercase-namespaced attribute names so that we can import data with those names
-    conn.datomicConn.transact(SeattleSchemaUpperToLower.namespaces)
+    conn.peerConn.transact(SeattleSchemaUpperToLower.namespaces)
 
     // Insert data
     Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData

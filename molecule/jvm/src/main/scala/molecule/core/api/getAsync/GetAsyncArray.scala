@@ -3,7 +3,7 @@ package molecule.core.api.getAsync
 import molecule.core.api.Molecule
 import molecule.core.api.get.GetArray
 import molecule.core.ast.transactionModel.Statement
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -125,9 +125,9 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve
     * a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[molecule.core.facade.TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
@@ -138,13 +138,13 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * also be the fastest way to traverse the data set.
     *
     * @group getAsyncArrayAsOf
-    * @param tx      [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
-  def getAsyncArrayAsOf(tx: molecule.core.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArrayAsOf(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(tx.t)(conn, tplType))
 
 
@@ -153,9 +153,9 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[molecule.core.facade.TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
@@ -168,14 +168,14 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getAsyncArrayAsOf
-    * @param tx      [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
-  def getAsyncArrayAsOf(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(tx.t, n)(conn, tplType))
 
 
@@ -286,9 +286,9 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.facade\.TxReport)* getArraySince]] method.
@@ -298,13 +298,13 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * also be the fastest way to traverse the data set.
     *
     * @group getAsyncArraySince
-    * @param tx      [[molecule.core.facade.TxReport TxReport]]
+    * @param tx      [[TxReport TxReport]]
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncArraySince(tx: molecule.core.facade.TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArraySince(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(tx.t)(conn, tplType))
 
 
@@ -313,9 +313,9 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.facade\.TxReport,n:Int)* getArraySince]] method.
@@ -327,14 +327,14 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getAsyncArraySince
-    * @param tx      [[molecule.core.facade.TxReport TxReport]]
+    * @param tx      [[TxReport TxReport]]
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
-  def getAsyncArraySince(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArraySince(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(tx.t, n)(conn, tplType))
 
 

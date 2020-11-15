@@ -1,13 +1,18 @@
 package molecule.core.transform
 
+import java.util
 import java.util.Date
+import clojure.lang.Keyword
 import datomic._
+import datomic.Util.read
+import datomic.db.DbId
 import molecule.core.api.Entity
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{Debug, Helpers}
 import molecule.datomic.base.facade.Conn
+import molecule.datomic.peer.facade.Conn_Peer
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 
@@ -144,25 +149,28 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   private def tempId(attr: String): AnyRef = attr match {
     case null                 => err("__tempId", "Attribute name unexpectedly null.")
-    case "tx"                 => Peer.tempid(":db.part/tx")
-    case s if s.contains('_') => Peer.tempid(":" + attr.substring(1).split("(?=_)").head) // extract "partition" from ":partition_Namespace/attr"
-    case _                    => Peer.tempid(":db.part/user")
+    case "tx"                 => Peer.tempid(read(":db.part/tx"))
+    case s if s.contains('_') => Peer.tempid(read(":" + attr.substring(1).split("(?=_)").head)) // extract "partition" from ":partition_Namespace/attr"
+    case _                    => Peer.tempid(read(":db.part/user"))
   }
 
   // Lookup if key is already populated
   def pairStrs(e: Any, a: String, key: String) = {
     val query = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+    //    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+    conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
   }
 
   def getPairs(e: Any, a: String, key: String = "") = {
     val strs = if (key.isEmpty) {
       val query  = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
+      //      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result = conn.q(query, e.asInstanceOf[Object], read(a)).map(_.head)
       result
     } else {
       val query  = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+      //      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result = conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
       result
     }
     strs.map {
@@ -179,7 +187,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     arg: Any,
     prefix: Option[String],
     bidirectional: GenericValue,
-    otherEdgeId: Option[AnyRef]
+    otherEdgeId: Option[AnyRef],
+    temp: Boolean = false
   ): Seq[Statement] = {
 
     def p(v: Any): Any = v match {
@@ -194,7 +203,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case other   => other
     }
 
-    def attrValues(id: Any, attr: String) = {
+    def attrValues(id: Any, attr: String): List[AnyRef] = if (temp) Nil else {
       val query = if (prefix.isDefined)
         s"""[:find ?enums
            | :in $$ ?id
@@ -205,7 +214,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       else
         s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
-      Peer.q(query, conn.db, id.asInstanceOf[Object]).asScala.map(_.get(0))
+      //      Peer.q(query, conn.db, id.asInstanceOf[Object]).asScala.map(_.get(0))
+      conn.q(query, id.asInstanceOf[Object]).map(_.head)
     }
 
     def edgeAB(edge1: Any, targetAttr: String): (Any, Any) = {
@@ -227,7 +237,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def otherEdge(edgeA: Any): AnyRef = {
       val query  = s"[:find ?edgeB :in $$ ?edgeA :where [?edgeA :molecule_Meta/otherEdge ?edgeB]]"
-      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
+      //      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result = conn.q(query, edgeA.asInstanceOf[Object]).map(_.head)
       result match {
         case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
         case Nil                =>
@@ -275,7 +286,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def biSelf(card: Int): Iterable[Statement] = arg match {
 
       case AssertValue(refs) => refs.flatMap { case ref: Long =>
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, a, e)) else Nil
         if (ref == e) err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
         reverseRetracts ++ Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card)))
       }
@@ -667,7 +678,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case Eq(newValues0) =>
         val newValues       = flatten(newValues0).distinct
-        val curValues       = if (e == "datomic.tx") Nil else attrValues(e, a).toSeq
+        val curValues       = if (e == "datomic.tx") Nil else
+          attrValues(e, a)
         val newValueStrings = newValues.map(_.toString)
         val curValueStrings = curValues.map(_.toString)
         val retracts        = if (card == 2 || (newValues.isEmpty && curValues.nonEmpty))
@@ -974,8 +986,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     val txId = "datomic.tx"
     stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
       genericStmt match {
-        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
-        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
+        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1, true))
+        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB, true))
         case Add("e", a, "__tempId", bi)                                                            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
         case Add(e, a, "__tempId", bi)                                                              => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
         case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB))

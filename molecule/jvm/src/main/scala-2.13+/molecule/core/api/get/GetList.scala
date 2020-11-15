@@ -4,7 +4,7 @@ import java.util.{List => jList}
 import molecule.core.api.Molecule
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
@@ -196,9 +196,9 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a
     * database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[molecule.core.facade.TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -233,13 +233,13 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getAsOf
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport)* getAsyncAsOf]] method.
     **/
-  def getAsOf(tx: molecule.core.facade.TxReport)(implicit conn: Conn): List[Tpl] =
+  def getAsOf(tx: TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
 
@@ -248,9 +248,9 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[molecule.core.facade.TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -282,14 +282,14 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getAsOf
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncAsOf]] method.
     **/
-  def getAsOf(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
+  def getAsOf(tx: TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
 
@@ -466,9 +466,9 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -489,13 +489,13 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getSince
-    * @param tx   [[molecule.core.facade.TxReport TxReport]]
+    * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncSince(tx:molecule\.facade\.TxReport)* getAsyncSince]] method.
     */
-  def getSince(tx: molecule.core.facade.TxReport)(implicit conn: Conn): List[Tpl] =
+  def getSince(tx: TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(Since(TxLong(tx.t))))
 
 
@@ -504,9 +504,9 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -524,14 +524,14 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getSince
-    * @param tx   [[molecule.core.facade.TxReport TxReport]]
+    * @param tx   [[TxReport TxReport]]
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncSince(tx:molecule\.facade\.TxReport,n:Int)* getAsyncSince]] method.
     */
-  def getSince(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
+  def getSince(tx: TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(Since(TxLong(tx.t))))
 
 
@@ -741,7 +741,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * <br> `a` - Attribute name
     * <br> `v` - Attribute value
     * <br> `ns` - Namespace name
-    * <br> `tx` - [[molecule.core.facade.TxReport TxReport]]
+    * <br> `tx` - [[TxReport TxReport]]
     * <br> `t` - Transaction time t
     * <br> `txInstant` - Transaction time as java.util.Date
     * <br> `op` - Operation: true (add) or false (retract)

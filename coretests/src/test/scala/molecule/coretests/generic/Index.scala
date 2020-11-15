@@ -12,7 +12,7 @@ class Index extends CoreSpec {
   sequential
 
   // Create new db from schema
-  implicit val conn = getConn()
+  implicit val conn = recreatedDbConn()
 
   // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
   // the wall clock time since Date's are a bit unreliable for precision.

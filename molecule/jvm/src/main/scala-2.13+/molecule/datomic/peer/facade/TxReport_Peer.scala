@@ -1,22 +1,23 @@
-package molecule.core.facade
+package molecule.datomic.peer.facade
 
 import java.util.{Date, List => jList, Map => jMap}
-import clojure.lang.Keyword
+import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
 import datomic.db.Datum
-import datomic.{Database, _}
 import molecule.core.ast.transactionModel.{Statement, _}
 import molecule.core.util.Debug
+import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
 
 /** Facade to Datomic transaction report with convenience methods to access tx data. */
-case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) {
+case class TxReport_Peer(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil)
+  extends TxReport {
 
   /** Get List of affected entity ids from transaction */
   def eids: List[Long] = if (stmtss.isEmpty) {
     val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
-    var a = Array.empty[Long]
-    var i = 0
+    var a      = Array.empty[Long]
+    var i      = 0
     datoms.next() // skip first transaction time datom
     while (datoms.hasNext) {
       a = a :+ datoms.next.asInstanceOf[Datom].e().asInstanceOf[Long]
@@ -25,23 +26,25 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
     a.toList.distinct
 
   } else {
-    val tempIds = stmtss.flatten.collect {
+    val tempIds    = stmtss.flatten.collect {
       case Add(e, _, _, _) if e.toString.take(6) == "#db/id" => e
       case Add(_, _, v, _) if v.toString.take(6) == "#db/id" => v
     }.distinct
     val txTtempIds = rawTxReport.get(Connection.TEMPIDS)
-    val dbAfter = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
-    val ids: Seq[Long] = tempIds.map(tempId => datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]).distinct
-    ids.toList
+    val dbAfter    = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
+    tempIds.map(tempId =>
+      datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]
+    ).distinct.toList
   }
 
-  def txDataRaw: List[Datum] = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].asScala.toList.asInstanceOf[List[Datum]]
+  private def txDataRaw: List[Datum] =
+    rawTxReport.get(Connection.TX_DATA)
+      .asInstanceOf[jList[_]].asScala.toList.asInstanceOf[List[Datum]]
 
-  private def datom2string(d: datomic.db.Datum) = s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"
+  private def datom2string(d: datomic.db.Datum) =
+    s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"
 
   def debug: Unit = Debug("TxReport", 1)(1, stmtss, txDataRaw)
-
-  private val tempids = rawTxReport.get(TEMPIDS).asInstanceOf[AnyRef]
 
   override def toString =
     s"""TxReport {
@@ -50,25 +53,10 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
        |  dbAfter        : $dbAfter
        |  dbAfter.basisT : ${dbAfter.basisT}
        |  txData         : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
-       |  tempids        : $tempids
+       |  tempids        : ${rawTxReport.get(TEMPIDS).asInstanceOf[AnyRef]}
        |}""".stripMargin
 
 
-  /** Get Set of affected entity ids from transaction. */
-  def eidSet: Set[Long] = eids.toSet
-
-  /** Convenience method to get single affected entity id from transaction.
-    *
-    * Often useful when you know only one entity was affected:
-    * {{{
-    *   val benId = Person.name("Ben").eid
-    *
-    *   // We could have said
-    *   val lizId = Person.name("Liz").eids.head
-    * }}}
-    *
-    * @return
-    */
   def eid: Long = eids.head
 
   /** Get database value before transaction. */

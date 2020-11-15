@@ -4,6 +4,7 @@ import java.util.{List => jList}
 import molecule.core.ast.model._
 import molecule.core.util.JavaUtil
 import scala.jdk.CollectionConverters._
+import datomic.Util.read
 
 
 /** Datomic transaction representation and operations. */
@@ -26,10 +27,11 @@ object transactionModel extends JavaUtil {
       case other              => other
     }).asInstanceOf[Object]
 
+    // Convert actions and attribute names to Clojure Keywords
     def toJava: jList[_] = this match {
-      case _: RetractEntity => Util.list(action, e.asInstanceOf[Object])
-      case _: Cas           => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(oldV), value(v))
-      case _                => Util.list(action, e.asInstanceOf[Object], a.asInstanceOf[Object], value(v))
+      case _: RetractEntity => Util.list(read(action), e.asInstanceOf[Object])
+      case _: Cas           => Util.list(read(action), e.asInstanceOf[Object], read(a), value(oldV), value(v))
+      case _                => Util.list(read(action), e.asInstanceOf[Object], read(a), value(v))
     }
   }
 

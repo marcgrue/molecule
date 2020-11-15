@@ -7,8 +7,8 @@ import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
 import molecule.core.ast.tempDb.TempDb
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.TxReport
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
 
 /** Facade to Datomic Connection.
@@ -20,11 +20,16 @@ import scala.concurrent.{ExecutionContext, Future}
   **/
 trait Conn {
 
-  val datomicConn: datomic.Connection
+  val peerConn: datomic.Connection
+
+  // Temporary db for ad-hoc queries against time variation dbs
+  // (takes precedence over test db)
+  protected var _adhocDb: Option[TempDb] = None
 
   // In-memory fixed test db for integration testing of domain model
   // (takes precedence over live db)
-//  protected var _testDb: Option[Database] = None
+  protected var _testDb: Option[Database] = None
+
 
   def usingTempDb(tempDb: TempDb): Conn
 
@@ -114,12 +119,13 @@ trait Conn {
   def useLiveDb: Unit
 
   /** Get current test/live db. Test db has preference. */
-  def db: Database
+  def db: DatomicDb
+//  def db: Database
 
   /** Transact Seq of Seqs of [[Statement]]s
     *
     * @param stmtss
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
   def transact(stmtss: Seq[Seq[Statement]]): TxReport
 
@@ -127,7 +133,7 @@ trait Conn {
   /** Asynchronously transact Seq of Seqs of [[Statement]]s
     *
     * @param stmtss
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
   def transactAsync(stmtss: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport]
@@ -142,9 +148,10 @@ trait Conn {
     * }}}
     *
     * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
-  def transact(rawTxStmts: jList[AnyRef]): TxReport
+//  def transact(rawTxStmts: jList[AnyRef]): TxReport
+  def transact(rawTxStmts: jList[_]): TxReport
 
 
   /** Asynchronously transact edn files or other raw transaction data.
@@ -157,7 +164,7 @@ trait Conn {
     * }}}
     *
     * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return Future with [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return Future with [[TxReport TxReport]] with result of transaction
     */
   def transactAsync(rawTxStmts: jList[AnyRef])
                    (implicit ec: ExecutionContext): Future[TxReport]
@@ -196,7 +203,8 @@ trait Conn {
     * @param inputs Optional input(s) to query
     * @return List[List[AnyRef]]
     * */
-  def q(query: String, inputs: Any*): List[List[AnyRef]]
+  def q(query: String, inputs: Any*): List[List[AnyRef]] =
+    q(db, query, inputs.toSeq)
 
 
   /** Query Datomic directly with db value and optional Scala inputs.
@@ -237,7 +245,14 @@ trait Conn {
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
     * */
-  def q(db: Database, query: String, inputs: Seq[Any]): List[List[AnyRef]]
+  def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
+    qRaw(db, query, inputs).asScala.toList
+      .map(_.asScala.toList
+        .map {
+          case set: clojure.lang.PersistentHashSet => set.asScala.toSet
+          case other                               => other
+        }
+      )
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.
@@ -269,7 +284,8 @@ trait Conn {
     * @param inputs Optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */
-  def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]]
+  def qRaw(query: String, inputs: Any*): jCollection[jList[AnyRef]] =
+    qRaw(db, query, inputs)
 
 
   /** Query Datomic directly with db value and optional Scala inputs and get raw Java result.
@@ -306,7 +322,7 @@ trait Conn {
     * @param inputs0 Seq of optional input(s) to query
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */
-  def qRaw(db: Database, query: String, inputs0: Seq[Any]): jCollection[jList[AnyRef]]
+  def qRaw(db: DatomicDb, query: String, inputs0: Seq[Any]): jCollection[jList[AnyRef]]
 
 
   /** Query Datomic with Model and Query to get raw Java data.
@@ -327,6 +343,6 @@ trait Conn {
   def query(model: Model, query: Query): jCollection[jList[AnyRef]]
 
 
-  def _query(model: Model, query: Query, _db: Option[Database] = None): jCollection[jList[AnyRef]]
+  def _query(model: Model, query: Query, _db: Option[DatomicDb] = None): jCollection[jList[AnyRef]]
   def _index(model: Model): jCollection[jList[AnyRef]]
 }

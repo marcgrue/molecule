@@ -8,12 +8,12 @@ import datomic.Util.{list, read}
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Composite, Model, TxMetaData}
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.TxReport
 import molecule.core.macros.TxFunctionCall
 import molecule.core.macros.exception.TxFnException
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
+import molecule.datomic.peer.facade.TxReport_Peer
 import scala.concurrent.{blocking, ExecutionContext, Future, Promise}
 import scala.language.experimental.macros
 import scala.language.implicitConversions
@@ -50,7 +50,7 @@ trait TxMethods {
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return [[TxReport TxReport]] with result of transaction
     */
   def transact(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): TxReport =
     conn.transact(stmtss.flatten)
@@ -79,7 +79,7 @@ trait TxMethods {
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Future with [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return Future with [[TxReport TxReport]] with result of transaction
     */
   def transactAsync(
     stmtss: Seq[Seq[Statement]]*
@@ -179,7 +179,7 @@ trait TxMethods {
     * @group txfn
     * @param txFnCall    Tx function invocation
     * @param txMolecules Optional tx meta data molecules
-    * @return [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return [[TxReport TxReport]] with result of transaction
     */
   def transact(
     txFnCall: Seq[Seq[Statement]],
@@ -222,7 +222,7 @@ trait TxMethods {
     * @group txfn
     * @param txFnCall    Tx function invocation
     * @param txMolecules Optional tx meta data molecules
-    * @return Future with [[molecule.core.facade.TxReport TxReport]] with result of transaction
+    * @return Future with [[TxReport TxReport]] with result of transaction
     */
   def transactAsync(
     txFnCall: Seq[Seq[Statement]],
@@ -364,15 +364,15 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
   )(implicit conn: Conn): TxReport = tryTransactTxFn {
 
     // Install transaction function if not installed yet
-    if (conn.datomicConn.db.entity(s":$txFn") == null)
-      conn.datomicConn.transact(list(buildTxFnInstall(txFn, args))).get
+    if (conn.peerConn.db.entity(s":$txFn") == null)
+      conn.peerConn.transact(list(buildTxFnInstall(txFn, args))).get
 
     // Build transaction function call clause
     val txFnInvocationClause = list(list(read(txFn) +:
       txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
 
     // Invoke transaction function and retrieve result from ListenableFuture synchronously
-    TxReport(conn.datomicConn.transact(txFnInvocationClause).get)
+    TxReport_Peer(conn.peerConn.transact(txFnInvocationClause).get)
   }
 
 
@@ -398,10 +398,10 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
       val txFnInstallFuture = {
         // Install transaction function if not installed yet
         // todo: entity call is blocking - can we make it non-blocking too?
-        if (conn.datomicConn.db.entity(s":$txFn") == null) {
+        if (conn.peerConn.db.entity(s":$txFn") == null) {
           // Install tx function
           bridgeDatomicFuture(
-            conn.datomicConn.transactAsync(list(buildTxFnInstall(txFn, args)))
+            conn.peerConn.transactAsync(list(buildTxFnInstall(txFn, args)))
           )
         } else {
           // Tx function already installed
@@ -412,7 +412,7 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
         val p                        = Promise[java.util.Map[_, _]]()
         val txFnInvocationClause     = list(list(read(txFn) +:
           txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
-        val txFnInvocationListenable = conn.datomicConn.transactAsync(txFnInvocationClause)
+        val txFnInvocationListenable = conn.peerConn.transactAsync(txFnInvocationClause)
         txFnInvocationListenable.addListener(
           new java.lang.Runnable {
             override def run: Unit = {
@@ -447,7 +447,7 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
 
     // Wrap in TxReport
     txFnInvocationfuture map { txFnInvocationResult: java.util.Map[_, _] =>
-      TxReport(txFnInvocationResult)
+      TxReport_Peer(txFnInvocationResult)
     }
   }
 }

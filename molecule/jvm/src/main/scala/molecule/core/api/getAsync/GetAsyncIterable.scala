@@ -3,7 +3,7 @@ package molecule.core.api.getAsync
 import molecule.core.api.Molecule
 import molecule.core.api.get.GetIterable
 import molecule.core.ast.transactionModel.Statement
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -72,20 +72,20 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetIterable.getIterableAsOf(tx:molecule\.facade\.TxReport)* getIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncIterableAsOf(tx: molecule.core.facade.TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
+  def getAsyncIterableAsOf(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableAsOf(tx.t)(conn))
 
 
@@ -133,20 +133,20 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetIterable.getIterableSince(tx:molecule\.facade\.TxReport)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
-    * @param tx   [[molecule.core.facade.TxReport TxReport]]
+    * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncIterableSince(tx: molecule.core.facade.TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
+  def getAsyncIterableSince(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableSince(tx.t)(conn))
 
 

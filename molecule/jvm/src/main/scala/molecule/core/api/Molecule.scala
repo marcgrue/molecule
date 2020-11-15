@@ -5,11 +5,10 @@ import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model._
 import molecule.core.ast.query.Query
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.facade.TxReport
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.{CastHelpers, JsonBuilder, Model2Transaction}
 import molecule.core.util.Debug
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
@@ -207,7 +206,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
 
   /** Save data applied to molecule attributes.
     * <br><br>
-    * Returns [[molecule.core.facade.TxReport TxReport]] having info about
+    * Returns [[TxReport TxReport]] having info about
     * the result of the save transaction.
     * {{{
     *   val txReport = Person.name("Ben").age(42).save
@@ -219,7 +218,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     *
     * @group save
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]] with info about the result of the `save` transaction.
+    * @return [[TxReport TxReport]] with info about the result of the `save` transaction.
     */
   def save(implicit conn: Conn): TxReport = {
     VerifyModel(_model, "save")
@@ -229,7 +228,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
 
   /** Asynchronously save data applied to molecule attributes.
     * <br><br>
-    * Returns `Future` with [[molecule.core.facade.TxReport TxReport]] having info about
+    * Returns `Future` with [[TxReport TxReport]] having info about
     * the result of the save transaction.
     * {{{
     *   val futureSave: Future[TxReport] = Person.name("Ben").age(42).saveAsync
@@ -246,7 +245,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     *
     * @group save
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]] with info about the result of the `save` transaction.
+    * @return [[TxReport TxReport]] with info about the result of the `save` transaction.
     */
   def saveAsync(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
     VerifyModel(_model, "save")
@@ -279,7 +278,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
 
   /** Insert one or more rows of data matching molecule.
     * <br><br>
-    * Returns `Future` with [[molecule.core.facade.TxReport TxReport]] having info about
+    * Returns `Future` with [[TxReport TxReport]] having info about
     * the result of the insert transaction.
     * <br><br>
     * Data matching the types of the molecule can be inserted either as individual args
@@ -301,7 +300,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     *     ("Liz", 37)
     *   )
     * }}}
-    * Each insert apply method returns a [[molecule.core.facade.TxReport TxReport]] with info about the result of the transaction.
+    * Each insert apply method returns a [[TxReport TxReport]] with info about the result of the transaction.
     * <br><br>
     * Since `insert` is an object of each arity 1-22 Molecule implementation, we can make an "insert-molecule" at compile time
     * that we can re-use for inserting data at runtime matching the molecule type:
@@ -340,7 +339,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
 
   /** Asynchronously insert one or more rows of data matching molecule.
     * <br><br>
-    * Returns `Future` with [[molecule.core.facade.TxReport TxReport]] having info about
+    * Returns `Future` with [[TxReport TxReport]] having info about
     * the result of the insert transaction.
     * <br><br>
     * Data matching the types of the molecule can be inserted either as individual args
@@ -432,7 +431,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
 
   /** Update entity with data applied to molecule attributes.
     * <br><br>
-    * Returns [[molecule.core.facade.TxReport TxReport]] with info about the result of the update transaction.
+    * Returns [[TxReport TxReport]] with info about the result of the update transaction.
     * {{{
     *   // Current data
     *   val ben = Person.name("Ben").age(42).save.eid
@@ -447,7 +446,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     *
     * @group update
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
   def update(implicit conn: Conn): TxReport = {
     VerifyModel(_model, "update")
@@ -455,7 +454,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
   }
 
   /** Asynchronously update entity with data applied to molecule attributes.
-    * Returns `Future` with [[molecule.core.facade.TxReport TxReport]] having info about
+    * Returns `Future` with [[TxReport TxReport]] having info about
     * the result of the update transaction.
     * {{{
     *   for {
@@ -472,7 +471,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     *
     * @group update
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[molecule.core.facade.TxReport TxReport]]
+    * @return [[TxReport TxReport]]
     */
   def updateAsync(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
     VerifyModel(_model, "update")

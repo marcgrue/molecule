@@ -7,12 +7,11 @@ import molecule.core.ast.query.QueryExpr
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.exceptions.{MoleculeException, QueryException}
-import molecule.core.facade.TxReport
 import molecule.core.ops.QueryOps._
 import molecule.core.ops.VerifyModel
 import molecule.core.transform._
 import molecule.core.util.Debug
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
@@ -309,7 +308,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * 2. Data returned from get query (max 500 rows).
     *
     * @group debugGet
-    * @param tx   [[molecule.core.facade.TxReport TxReport]]
+    * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetAsOf(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -357,7 +356,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * 2. Data returned from get query (max 500 rows).
     *
     * @group debugGet
-    * @param tx   [[molecule.core.facade.TxReport TxReport]]
+    * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetSince(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(Since(TxLong(tx.t))))

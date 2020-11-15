@@ -61,7 +61,7 @@ object Settings {
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "com.datomic" % "datomic-free" % "0.9.5697",
       "org.specs2" %% "specs2-core" % "4.10.0",
-      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.3.0"
+      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.3.1"
     )
   )
 

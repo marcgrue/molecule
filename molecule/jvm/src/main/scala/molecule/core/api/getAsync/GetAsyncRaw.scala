@@ -4,7 +4,7 @@ import java.util.{Collection => jCollection, List => jList}
 import molecule.core.api.get.GetRaw
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.transactionModel.Statement
-import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -120,20 +120,20 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetRaw.getRawAsOf(tx:molecule\.facade\.TxReport)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncRawAsOf(tx: molecule.core.facade.TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawAsOf(tx: TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(tx.t)(conn))
 
 
@@ -143,21 +143,21 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetRaw.getRawAsOf(tx:molecule\.facade\.TxReport,n:Int)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncRawAsOf(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawAsOf(tx: TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(tx.t, n)(conn))
 
 
@@ -253,20 +253,20 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * <br><br>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database value since that transaction (excluding).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetRaw.getRawSince(tx:molecule\.facade\.TxReport)* getRawSince]] method.
     *
     * @group getAsyncRawSince
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncRawSince(tx: molecule.core.facade.TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawSince(tx: TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(tx.t)(conn))
 
 
@@ -276,21 +276,21 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * <br><br>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database value since that transaction (excluding).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.core.facade.TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[molecule.core.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
     * [[molecule.core.api.get.GetRaw.getRawSince(tx:molecule\.facade\.TxReport,n:Int)* getRawSince]] method.
     *
     * @group getAsyncRawSince
-    * @param tx   [[molecule.core.facade.TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
-  def getAsyncRawSince(tx: molecule.core.facade.TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawSince(tx: TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(tx.t, n)(conn))
 
 

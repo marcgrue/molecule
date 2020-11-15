@@ -35,7 +35,7 @@ class MBrainz extends MoleculeSpec {
   if (Schema.a(":Artist/name").get.isEmpty) {
     // Add uppercase-namespaced attribute names so that we can access the externally
     // transacted lowercase names with uppercase names of the molecule code.
-    conn.datomicConn.transact(MBrainzSchemaLowerToUpper.namespaces)
+    conn.peerConn.transact(MBrainzSchemaLowerToUpper.namespaces)
   }
 
 
