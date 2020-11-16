@@ -157,20 +157,39 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   // Lookup if key is already populated
   def pairStrs(e: Any, a: String, key: String) = {
     val query = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-    //    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
-    conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
+    val res1  = Peer.q(query, conn.db.getDatomicDb, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+    val res2  = conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
+    if (res1 != res2)
+      throw new RuntimeException(
+        s"""Diverging results 1:
+           |$res1
+           |$res2""".stripMargin
+      )
+    res2
   }
 
   def getPairs(e: Any, a: String, key: String = "") = {
     val strs = if (key.isEmpty) {
-      val query  = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
-      //      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
-      val result = conn.q(query, e.asInstanceOf[Object], read(a)).map(_.head)
+      val query   = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
+      val result0 = Peer.q(query, conn.db.getDatomicDb, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result  = conn.q(query, e.asInstanceOf[Object], read(a)).map(_.head)
+      if (result0 != result)
+        throw new RuntimeException(
+          s"""Diverging results 2:
+             |$result0
+             |$result""".stripMargin
+        )
       result
     } else {
-      val query  = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-      //      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
-      val result = conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
+      val query   = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
+      val result0 = Peer.q(query, conn.db.getDatomicDb, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result  = conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
+      if (result0 != result)
+        throw new RuntimeException(
+          s"""Diverging results 3:
+             |$result0
+             |$result""".stripMargin
+        )
       result
     }
     strs.map {
@@ -240,7 +259,8 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       //      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
       val result = conn.q(query, edgeA.asInstanceOf[Object]).map(_.head)
       result match {
-        case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
+        case List(edgeB) => edgeB.asInstanceOf[Object]
+//        case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
         case Nil                =>
           val otherId = Entity(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +

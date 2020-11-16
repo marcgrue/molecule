@@ -27,15 +27,15 @@ class CoreSpec extends MoleculeSpec with CoreData {
   var client    : Client     = null // set in setup
   var connection: Connection = null // set in setup
 
-  override def map(fs: => Fragments): Fragments = {
-    step(setupPeer()) ^
-      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-      step(setupDevLocal()) ^
-      fs.mapDescription(d => Text(s"$system: " + d.show))
-    //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-    //      step(setupPeerServer()) ^
-    //      fs.mapDescription(d => Text(s"$system: " + d.show))
-  }
+//  override def map(fs: => Fragments): Fragments = {
+//    step(setupPeer()) ^
+//      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+//      step(setupDevLocal()) ^
+//      fs.mapDescription(d => Text(s"$system: " + d.show))
+//    //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+//    //      step(setupPeerServer()) ^
+//    //      fs.mapDescription(d => Text(s"$system: " + d.show))
+//  }
 
 
   def setupPeer(): Unit = {
