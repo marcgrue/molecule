@@ -18,14 +18,16 @@ class CoreSpec extends MoleculeSpec with CoreData {
   sealed trait System
   case object Peer extends System
   case object PeerServer extends System
-
-  // Only testing cloud client with dev-local, presuming they behave identically
   case object DevLocal extends System
-  //  case object Cloud extends System
+  //  case object Cloud extends System // DevLocal should cover this
 
   var system    : System     = Peer
+//  var system    : System     = DevLocal
   var client    : Client     = null // set in setup
   var connection: Connection = null // set in setup
+
+  // Do or skip looping input tests that take a few minutes
+  val heavyInputTesting = false
 
 //  override def map(fs: => Fragments): Fragments = {
 //    step(setupPeer()) ^
