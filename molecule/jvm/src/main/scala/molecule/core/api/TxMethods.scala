@@ -364,15 +364,16 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
   )(implicit conn: Conn): TxReport = tryTransactTxFn {
 
     // Install transaction function if not installed yet
-    if (conn.peerConn.db.entity(s":$txFn") == null)
-      conn.peerConn.transact(list(buildTxFnInstall(txFn, args))).get
+    //    if (conn.peerConn.db.entity(s":$txFn") == null)
+    if (conn.db.entity(s":$txFn") == null)
+      conn.transact(list(buildTxFnInstall(txFn, args)))
 
     // Build transaction function call clause
     val txFnInvocationClause = list(list(read(txFn) +:
       txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
 
     // Invoke transaction function and retrieve result from ListenableFuture synchronously
-    TxReport_Peer(conn.peerConn.transact(txFnInvocationClause).get)
+    conn.transact(txFnInvocationClause)
   }
 
 
@@ -393,62 +394,27 @@ object TxMethods extends Helpers with BridgeDatomicFuture {
     txFn: String,
     txMolecules: Seq[MoleculeBase],
     args: Any*
-  )(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
-    val txFnInvocationfuture = try {
-      val txFnInstallFuture = {
-        // Install transaction function if not installed yet
-        // todo: entity call is blocking - can we make it non-blocking too?
-        if (conn.peerConn.db.entity(s":$txFn") == null) {
-          // Install tx function
-          bridgeDatomicFuture(
-            conn.peerConn.transactAsync(list(buildTxFnInstall(txFn, args)))
-          )
-        } else {
-          // Tx function already installed
-          Future.unit
-        }
+  )(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = try {
+    val txFnInstallFuture: Future[Any] = {
+      // Install transaction function if not installed yet
+      // todo: entity call is blocking - can we make it non-blocking too?
+      if (conn.db.entity(s":$txFn") == null) {
+        // Install tx function
+        conn.transactAsync(list(buildTxFnInstall(txFn, args)))
+      } else {
+        // Tx function already installed
+        Future.unit
       }
-      txFnInstallFuture flatMap { txFnInstall =>
-        val p                        = Promise[java.util.Map[_, _]]()
-        val txFnInvocationClause     = list(list(read(txFn) +:
-          txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
-        val txFnInvocationListenable = conn.peerConn.transactAsync(txFnInvocationClause)
-        txFnInvocationListenable.addListener(
-          new java.lang.Runnable {
-            override def run: Unit = {
-              try {
-                p.success(txFnInvocationListenable.get())
-              } catch {
-                case e: ExecutionExc => e.getMessage match {
-                  case msg if msg.startsWith("java.lang.NoClassDefFoundError: scala") =>
-                    p.failure(throw new TxFnException(excMissingScalaJar(e)))
-
-                  case msg if msg.startsWith("java.lang.NoClassDefFoundError: molecule") =>
-                    p.failure(throw new TxFnException(excMissingMoleculeClass(e)))
-
-                  case msg if msg.startsWith("java.lang.NoSuchMethodError: molecule") =>
-                    p.failure(throw new TxFnException(excMissingMoleculeMethod(e)))
-
-                  case _ => p.failure(throw new TxFnException(txFnException(e)))
-                }
-
-                case NonFatal(e) => p.failure(throw new TxFnException(txFnException(e)))
-              }
-              ()
-            }
-          },
-          (arg0: Runnable) => ec.execute(arg0)
-        )
-        p.future
-      }
-    } catch {
-      case NonFatal(e) => Future.failed(e)
     }
 
-    // Wrap in TxReport
-    txFnInvocationfuture map { txFnInvocationResult: java.util.Map[_, _] =>
-      TxReport_Peer(txFnInvocationResult)
+    txFnInstallFuture flatMap { txFnInstalled =>
+      // Build transaction function call clause
+      val txFnInvocationClause = list(list(read(txFn) +:
+        txStmts(txMolecules, conn) +: args.map(_.asInstanceOf[AnyRef]): _*))
+      conn.transactAsync(txFnInvocationClause)
     }
+  } catch {
+    case NonFatal(e) => Future.failed(e)
   }
 }
 

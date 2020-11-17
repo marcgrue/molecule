@@ -20,17 +20,6 @@ import scala.jdk.CollectionConverters._
   **/
 trait Conn {
 
-  val peerConn: datomic.Connection
-
-  // Temporary db for ad-hoc queries against time variation dbs
-  // (takes precedence over test db)
-  protected var _adhocDb: Option[TempDb] = None
-
-  // In-memory fixed test db for integration testing of domain model
-  // (takes precedence over live db)
-  protected var _testDb: Option[Database] = None
-
-
   def usingTempDb(tempDb: TempDb): Conn
 
   /** Flag to indicate if live database is used */
@@ -166,7 +155,7 @@ trait Conn {
     * @param rawTxStmts Raw transaction data, typically from edn file.
     * @return Future with [[TxReport TxReport]] with result of transaction
     */
-  def transactAsync(rawTxStmts: jList[AnyRef])
+  def transactAsync(rawTxStmts: jList[_])
                    (implicit ec: ExecutionContext): Future[TxReport]
 
 

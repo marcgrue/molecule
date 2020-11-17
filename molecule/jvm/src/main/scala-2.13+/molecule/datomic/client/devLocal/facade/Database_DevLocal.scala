@@ -6,12 +6,13 @@ import datomicScala.client.api.sync.Db
 import molecule.datomic.base.facade.DatomicDb
 
 case class Database_DevLocal(clientDb: Db) extends DatomicDb {
-  def asOf(t: Long): DatomicDb = ???
-  def since(t: Long): DatomicDb = ???
-  def widh(stmts: util.List[_]): DatomicDb = ???
-  def history: DatomicDb = ???
-  override def entity(o: Any): Entity = ???
-  override def pull(o: Any, o1: Any): util.Map[_, _] = ???
-  override def datoms(o: Any, objects: Any*): lang.Iterable[Datom] = ???
-  override def getDatomicDb: AnyRef = clientDb.datomicDb
+//  def asOf(t: Long): DatomicDb = ???
+//  def since(t: Long): DatomicDb = ???
+//  def widh(stmts: util.List[_]): DatomicDb = ???
+//  def history: DatomicDb = ???
+  def entity(o: Any): Entity = ???
+  def pull(o: Any, o1: Any): util.Map[_, _] = ???
+  def datoms(o: Any, objects: Any*): lang.Iterable[Datom] = ???
+  def getDatomicDb: AnyRef = clientDb.datomicDb
+  def indexRange(o: Any, o1: Any, o2: Any): lang.Iterable[Datom] = ???
 }

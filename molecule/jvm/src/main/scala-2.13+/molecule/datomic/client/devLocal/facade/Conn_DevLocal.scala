@@ -22,6 +22,7 @@ import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 import datomicScala.client.api.sync.{Datomic => clientDatomic}
+import datomicScala.client.api.sync
 
 
 /** Facade to Datomic dev-local connection.
@@ -34,7 +35,7 @@ import datomicScala.client.api.sync.{Datomic => clientDatomic}
 case class Conn_DevLocal(client: Client, dbName: String)
   extends Conn with Helpers with BridgeDatomicFuture {
 
-  val clientConn = client.connect(dbName)
+  val clientConn: sync.Connection = client.connect(dbName)
 
 
   val peerConn: Connection = null
@@ -83,7 +84,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
 
   //  def transact(rawTxStmts: jList[AnyRef]): TxReport = ???
 
-  def transactAsync(rawTxStmts: jList[AnyRef])(implicit ec: ExecutionContext): Future[TxReport] = ???
+  def transactAsync(rawTxStmts: jList[_])(implicit ec: ExecutionContext): Future[TxReport] = ???
 
 //  def q(query: String, inputs: Any*): List[List[AnyRef]] =
 //    q(db, query, inputs.toSeq)

@@ -13,13 +13,11 @@ class TxFunctionCall(val c: blackbox.Context) extends MacroHelpers {
     val q"$owner.$txFn(..$args)(..$conn)" = txFnCall
     val ownerType = owner.tpe.toString
     val txFnIdentifier = ownerType.take(ownerType.length - 4) + txFn + "__txfn"
-    val x = op match {
+    op match {
       case "sync"  => q"_root_.molecule.core.api.TxMethods.txFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
       case "async" => q"_root_.molecule.core.api.TxMethods.asyncTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
       case "debug" => q"_root_.molecule.core.api.TxMethods.debugTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
     }
-    println(x)
-    x
   }
 
   final def txFnCall(txFnCall: Tree, txMolecules: Tree*): Tree = resolve(txFnCall, txMolecules, "sync")
