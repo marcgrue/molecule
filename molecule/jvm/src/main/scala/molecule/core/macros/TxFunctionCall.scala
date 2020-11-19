@@ -14,9 +14,9 @@ class TxFunctionCall(val c: blackbox.Context) extends MacroHelpers {
     val ownerType = owner.tpe.toString
     val txFnIdentifier = ownerType.take(ownerType.length - 4) + txFn + "__txfn"
     op match {
-      case "sync"  => q"_root_.molecule.core.api.TxMethods.txFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
-      case "async" => q"_root_.molecule.core.api.TxMethods.asyncTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
-      case "debug" => q"_root_.molecule.core.api.TxMethods.debugTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
+      case "sync"  => q"_root_.molecule.core.api.TxFunctions.txFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
+      case "async" => q"_root_.molecule.core.api.TxFunctions.asyncTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
+      case "debug" => q"_root_.molecule.core.api.TxFunctions.debugTxFnCall($txFnIdentifier, Seq(..$txMolecules), ..$args)"
     }
   }
 

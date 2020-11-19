@@ -1,6 +1,6 @@
 package molecule.datomic
 
-import molecule.core.api.{EntityOps, Keywords, TxMethods}
+import molecule.core.api.{EntityOps, Keywords, TxBundles, TxFunctions}
 import molecule.core.expression.LogicImplicits
 import molecule.core.factory._
 import molecule.core.generic.GenericLog
@@ -34,7 +34,8 @@ trait api
   extends Keywords
     with LogicImplicits
     with EntityOps
-    with TxMethods
+    with TxBundles
+    with TxFunctions
     with GenericSchema
     with GenericLog
     with GenericAEVT

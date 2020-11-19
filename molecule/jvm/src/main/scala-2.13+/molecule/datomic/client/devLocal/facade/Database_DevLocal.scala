@@ -10,8 +10,14 @@ case class Database_DevLocal(clientDb: Db) extends DatomicDb {
 //  def since(t: Long): DatomicDb = ???
 //  def widh(stmts: util.List[_]): DatomicDb = ???
 //  def history: DatomicDb = ???
+
+
+  def basisT: Long = ???
   def entity(o: Any): Entity = ???
-  def pull(o: Any, o1: Any): util.Map[_, _] = ???
+
+  def pull(pattern: String, eid: Any): util.Map[_, _] =
+    clientDb.pull(pattern, eid)
+
   def datoms(o: Any, objects: Any*): lang.Iterable[Datom] = ???
   def getDatomicDb: AnyRef = clientDb.datomicDb
   def indexRange(o: Any, o1: Any, o2: Any): lang.Iterable[Datom] = ???

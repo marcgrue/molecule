@@ -16,7 +16,7 @@ class TxBundle extends CoreSpec {
     val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     // Transact multiple molecule statements in one bundled transaction
-    transact(
+    transactBundle(
       // retract
       e1.getRetractTx,
       // save
@@ -37,7 +37,7 @@ class TxBundle extends CoreSpec {
     )
 
     // Can't transact conflicting datoms
-    (transact(
+    (transactBundle(
       Ns(e3).int(31).getUpdateTx,
       Ns(e3).int(32).getUpdateTx
     ) must throwA[java.util.concurrent.ExecutionException]).message ===
@@ -51,7 +51,7 @@ class TxBundle extends CoreSpec {
   "Asynchronous" in new CoreSetup {
 
     Await.result(
-      transactAsync(
+      transactBundleAsync(
         Ns.int(1).getSaveTx,
         Ns.str("a").getSaveTx
       ) map { txReport =>
@@ -69,7 +69,7 @@ class TxBundle extends CoreSpec {
     val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
     // Print debug info for group transaction without affecting live db
-    debugTransact(
+    debugTransactBundle(
       // retract
       e1.getRetractTx,
       // save
@@ -120,7 +120,7 @@ class TxBundle extends CoreSpec {
     Ns.int.get === List(1, 2, 3)
 
     // If a real group transaction is invoked, the resulting tx report can also be debugged
-    val tx = transact(
+    val tx = transactBundle(
       // retract
       e1.getRetractTx,
       // save

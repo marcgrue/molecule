@@ -34,10 +34,10 @@ trait TxReport {
   def debug: Unit
 
   /** Get database value before transaction. */
-  def dbBefore: Database
+//  def dbBefore: DatomicDb
 
   /** Get database value after transaction. */
-  def dbAfter: Database
+//  def dbAfter: DatomicDb
 
   /** Get transaction time t. */
   def t: Long

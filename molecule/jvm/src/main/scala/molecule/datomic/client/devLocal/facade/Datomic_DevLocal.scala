@@ -64,10 +64,9 @@ case class Datomic_DevLocal(client: Client) {
     *     `implicit val conn = recreateDbFrom(YourDomainSchema)`
     *
     * @group database
-    * @param schema       Auto-generated YourDomainSchema Transaction object<br>
-    *                     (in package yourdomain.schema of generated source jar)
-    * @param dbIdentifier Optional String identifier to name database (default empty string creates a randomUUID)
-    * @param protocol     Datomic protocol. Defaults to "mem" for in-memory database.
+    * @param schema Auto-generated YourDomainSchema Transaction object<br>
+    *               (in package yourdomain.schema of generated source jar)
+    * @param dbName Database name
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
   def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_DevLocal = try {
@@ -90,8 +89,8 @@ case class Datomic_DevLocal(client: Client) {
     *
     * @see [[https://docs.datomic.com/on-prem/data-structure-literals.html]]
     * @group database
-    * @param schemaData   java.util.List of java.util.Maps of key/values defining a Datomic schema
-    * @param dbName Optional String identifier of database (default empty string creates a randomUUID)
+    * @param schemaData java.util.List of java.util.Maps of key/values defining a Datomic schema
+    * @param dbName     Optional String identifier of database (default empty string creates a randomUUID)
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
   def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn_DevLocal = try {
@@ -111,8 +110,7 @@ case class Datomic_DevLocal(client: Client) {
     *
     * @group database
     * @param schema sbt-plugin auto-generated Transaction file path.to.schema.YourDomainSchema
-    * @param dbIdentifier
-    * @param protocol
+    * @param dbName Database name
     * @return
     */
   def transactSchema(
@@ -120,12 +118,10 @@ case class Datomic_DevLocal(client: Client) {
     dbName: String
   ): Conn_DevLocal = try {
     val conn = connect(dbName)
-//    if (schema.partitions.size() > 0)
-//      conn.datomicConn.transact(schema.partitions)
-//    conn.datomicConn.transact(schema.namespaces)
-//    conn
-
-    null
+    if (schema.partitions.size() > 0)
+      conn.transact(schema.partitions)
+    conn.transact(schema.namespaces)
+    conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }

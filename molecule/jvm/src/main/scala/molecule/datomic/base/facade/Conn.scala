@@ -29,7 +29,8 @@ trait Conn {
     *
     * @param db
     */
-  def testDb(db: Database): Unit
+  def testDb(db: DatomicDb): Unit
+//  def testDb(db: Database): Unit
 
   /** Use test database as of time t.
     *
@@ -109,7 +110,6 @@ trait Conn {
 
   /** Get current test/live db. Test db has preference. */
   def db: DatomicDb
-//  def db: Database
 
   /** Transact Seq of Seqs of [[Statement]]s
     *
@@ -139,7 +139,6 @@ trait Conn {
     * @param rawTxStmts Raw transaction data, typically from edn file.
     * @return [[TxReport TxReport]]
     */
-//  def transact(rawTxStmts: jList[AnyRef]): TxReport
   def transact(rawTxStmts: jList[_]): TxReport
 
 

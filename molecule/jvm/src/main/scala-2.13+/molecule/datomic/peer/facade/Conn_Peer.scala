@@ -4,7 +4,8 @@ import java.{lang, util}
 import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.Peer._
 import datomic.Util._
-import datomic.{Connection, Database, Datom, Peer}
+import datomic.{Connection, Database, Datom, ListenableFuture, Peer}
+import datomic.Connection.DB_AFTER
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
@@ -26,7 +27,7 @@ object Conn_Peer {
 
   // Constructor for transaction functions where db is supplied inside transaction by transactor
   def apply(txDb: AnyRef): Conn_Peer = new Conn_Peer(null) {
-    testDb(txDb.asInstanceOf[Database])
+    testDb(Database_Peer(txDb.asInstanceOf[Database]))
   }
 }
 
@@ -38,7 +39,7 @@ object Conn_Peer {
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
   **/
-class Conn_Peer(peerConn: datomic.Connection)
+class Conn_Peer(val peerConn: datomic.Connection)
   extends Conn with Helpers with BridgeDatomicFuture {
 
   // Temporary db for ad-hoc queries against time variation dbs
@@ -62,8 +63,8 @@ class Conn_Peer(peerConn: datomic.Connection)
     *
     * @param db
     */
-  def testDb(db: Database): Unit = {
-    _testDb = Some(db)
+  def testDb(db: DatomicDb): Unit = {
+    _testDb = Some(db.asInstanceOf[Database_Peer].peerDb)
   }
 
   /** Use test database as of time t.
@@ -146,12 +147,12 @@ class Conn_Peer(peerConn: datomic.Connection)
     */
   def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
     val txDataJava: jList[jList[_]] = txData.flatten.flatten.map(_.toJava).asJava
-    _testDb = Some(peerConn.db.`with`(txDataJava).get(datomic.Connection.DB_AFTER).asInstanceOf[Database])
+    _testDb = Some(peerConn.db.`with`(txDataJava).get(DB_AFTER).asInstanceOf[Database])
   }
 
   /** Use test database with temporary raw Java transaction data. */
   def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = {
-    _testDb = Some(peerConn.db.`with`(txDataJava).get(datomic.Connection.DB_AFTER).asInstanceOf[Database])
+    _testDb = Some(peerConn.db.`with`(txDataJava).get(DB_AFTER).asInstanceOf[Database])
   }
 
   /* testDbHistory not implemented.
@@ -163,28 +164,28 @@ class Conn_Peer(peerConn: datomic.Connection)
     _testDb = None
   }
 
+  private def getAdhocDb: Database  = {
+    val baseDb : Database = _testDb.getOrElse(peerConn.db)
+    val adhocDb: Database = _adhocDb.get match {
+      case AsOf(TxLong(t))  => baseDb.asOf(t)
+      case AsOf(TxDate(d))  => baseDb.asOf(d)
+      case Since(TxLong(t)) => baseDb.since(t)
+      case Since(TxDate(d)) => baseDb.since(d)
+      case With(tx)         => {
+        val txReport = TxReport_Peer(baseDb.`with`(tx))
+        txReport.dbAfter.asOf(txReport.t)
+      }
+      case History          => baseDb.history()
+    }
+    _adhocDb = None
+    adhocDb
+  }
+
   /** Get current test/live db. Test db has preference. */
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
-      val baseDb  = _testDb.getOrElse(peerConn.db)
-      val adhocDb = _adhocDb.get match {
-        case AsOf(TxLong(t))  =>
-          baseDb.asOf(t)
-        case AsOf(TxDate(d))  => baseDb.asOf(d)
-        case Since(TxLong(t)) => baseDb.since(t)
-        case Since(TxDate(d)) => baseDb.since(d)
-        case With(tx)         => {
-          val txReport = TxReport_Peer(baseDb.`with`(tx))
-          txReport.dbAfter.asOf(txReport.t)
-        }
-        case History          => baseDb.history()
-        case Using(db)        => db
-      }
-      // Void adhoc db
-      _adhocDb = None
-
       // Return singleton adhoc db
-      Database_Peer(adhocDb)
+      Database_Peer(getAdhocDb)
     } else if (_testDb.isDefined) {
       // Test db
       Database_Peer(_testDb.get)
@@ -203,20 +204,8 @@ class Conn_Peer(peerConn: datomic.Connection)
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
     if (_adhocDb.isDefined) {
-      val baseDb  = _testDb.getOrElse(peerConn.db)
-      val adhocDb = _adhocDb.get match {
-        case AsOf(TxLong(t))  => baseDb.asOf(t)
-        case AsOf(TxDate(d))  => baseDb.asOf(d)
-        case Since(TxLong(t)) => baseDb.since(t)
-        case Since(TxDate(d)) => baseDb.since(d)
-        case With(tx)         => baseDb.`with`(tx).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
-        case History          => baseDb.history()
-        case Using(db)        => db
-      }
-      // Void adhoc db
-      _adhocDb = None
       // In-memory "transaction"
-      TxReport_Peer(adhocDb.`with`(javaStmts), stmtss)
+      TxReport_Peer(getAdhocDb.`with`(javaStmts), stmtss)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
@@ -230,7 +219,6 @@ class Conn_Peer(peerConn: datomic.Connection)
       txReport
 
     } else {
-      // println("---------\n" + javaStmts)
       // Live transaction
       TxReport_Peer(peerConn.transact(javaStmts).get, stmtss)
     }
@@ -239,26 +227,11 @@ class Conn_Peer(peerConn: datomic.Connection)
 
   def transactAsync(stmtss: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-
     val javaStmts: jList[jList[_]] = toJava(stmtss)
 
     if (_adhocDb.isDefined) {
       Future {
-        val baseDb  = _testDb.getOrElse(peerConn.db)
-        val adhocDb = _adhocDb.get match {
-          case AsOf(TxLong(t))  => baseDb.asOf(t)
-          case AsOf(TxDate(d))  => baseDb.asOf(d)
-          case Since(TxLong(t)) => baseDb.since(t)
-          case Since(TxDate(d)) => baseDb.since(d)
-          case With(tx)         => baseDb.`with`(tx).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
-          case History          => baseDb.history()
-          case Using(db)        => db
-        }
-        // Void adhoc db
-        _adhocDb = None
-
-        // In-memory "transaction"
-        TxReport_Peer(adhocDb.`with`(javaStmts), stmtss)
+        TxReport_Peer(getAdhocDb.`with`(javaStmts), stmtss)
       }
 
     } else if (_testDb.isDefined) {
@@ -299,7 +272,6 @@ class Conn_Peer(peerConn: datomic.Connection)
     * @param rawTxStmts Raw transaction data, typically from edn file.
     * @return [[TxReport TxReport]]
     */
-//  def transact(rawTxStmts: jList[AnyRef]): TxReport = {
   def transact(rawTxStmts: jList[_]): TxReport = {
     if (_testDb.isDefined) {
       // In-memory "transaction"
@@ -623,4 +595,8 @@ class Conn_Peer(peerConn: datomic.Connection)
     }
     jColl
   }
+
+  def sync: ListenableFuture[Database] = peerConn.sync()
+  def sync(t: Long): ListenableFuture[Database] = peerConn.sync(t)
+  def syncIndex(t: Long): ListenableFuture[Database] = peerConn.syncIndex(t)
 }

@@ -247,7 +247,7 @@ class Conn(val datomicConn: datomic.Connection)
           case History          => baseDb.history()
           case Using(db)        => db
         }
-        // Void adhoc db
+        // Void _adhocDb
         _adhocDb = None
 
         // In-memory "transaction"

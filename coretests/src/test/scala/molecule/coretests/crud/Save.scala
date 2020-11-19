@@ -1,5 +1,9 @@
 package molecule.coretests.crud
 
+import java.net.URI
+import datomic.Util.{list, read}
+import datomicClojure.ClojureBridge
+import molecule.core.ast.transactionModel
 import molecule.core.ops.exception.VerifyModelException
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
@@ -9,35 +13,39 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class Save extends CoreSpec {
+class Save extends CoreSpec with ClojureBridge {
+  sequential
 
-  "Async" in new CoreSetup {
+  // todo: remove when async implemented for other systems
+  if (system == Peer) {
+    "Async" in new CoreSetup {
 
-    // Save asynchronously and return Future[TxReport]
-    // Calls Datomic's transactAsync API
+      // Save asynchronously and return Future[TxReport]
+      // Calls Datomic's transactAsync API
 
-    Ns.int(1).saveAsync.map { tx => // tx report from successful save transaction
-      Ns.int.get === List(1)
+      Ns.int(1).saveAsync.map { tx => // tx report from successful save transaction
+        Ns.int.get === List(1)
+      }
+
+      // Deferred resolution
+      val futureSave: Future[TxReport] = Ns.str("Ben").int(42).saveAsync
+
+      for {
+        _ <- futureSave
+        result <- Ns.str.int.getAsync
+      } yield {
+        // Data was saved
+        result.head === ("Ben", 42)
+      }
+
+      // For brevity, the synchronous equivalent `save` is used in the following tests
     }
-
-    // Deferred resolution
-    val futureSave: Future[TxReport] = Ns.str("Ben").int(42).saveAsync
-
-    for {
-      _ <- futureSave
-      result <- Ns.str.int.getAsync
-    } yield {
-      // Data was saved
-      result.head === ("Ben", 42)
-    }
-
-    // For brevity, the synchronous equivalent `save` is used in the following tests
   }
 
 
   "Card one attr" in new CoreSetup {
 
-    // Construct a "Data-Molecule" with an attribute value and add it to the database
+    // Construct a "Data-Molecule" with an attribute value and save it to the database
 
     Ns.str("a").save
     Ns.int(1).save
@@ -68,6 +76,7 @@ class Save extends CoreSpec {
       "[noConflictingCardOneValues]  Can't save multiple values for cardinality-one attribute:" +
       s"\n  Ns ... str(a, b)"
   }
+
 
   "Card many attr" in new CoreSetup {
 
@@ -220,8 +229,8 @@ class Save extends CoreSpec {
       val set0   = Set.empty[Int]
       val set12  = Set(1, 2)
       val seq122 = Seq(1, 2, 2) // Seq with duplicate values
-      val set23 = Set(2, 3)
-      val set45 = Set(4, 5)
+      val set23  = Set(2, 3)
+      val set45  = Set(4, 5)
 
       // Empty Set - no facts asserted
       Ns.int(0).ints(set0).save

@@ -1,6 +1,7 @@
 package molecule.core.ast
 import java.util.{Date, List => jList}
 import datomic.Database
+import molecule.datomic.base.facade.DatomicDb
 
 private[molecule] object tempDb {
 
@@ -13,5 +14,5 @@ private[molecule] object tempDb {
   case class Since(tx: TxType) extends TempDb
   case class With(tx: jList[jList[_]]) extends TempDb
   case object History extends TempDb
-  case class Using(db: Database) extends TempDb
+//  case class Using(db: DatomicDb) extends TempDb
 }

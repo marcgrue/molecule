@@ -66,7 +66,7 @@ case class TxReport_Peer(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = 
   def dbAfter: Database = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
 
   /** Get transaction time t. */
-  def t: Long = dbAfter.basisT()
+  def t: Long = dbAfter.basisT
 
   /** Get transaction entity id (Long). */
   def tx: Long = Peer.toTx(t).asInstanceOf[Long]
