@@ -1,15 +1,14 @@
 package molecule.coretests.bidirectionals.self
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
 
-class ManySelf extends MoleculeSpec {
+class ManySelf extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val friendsOf = m(Person.name_(?).Friends.name)
   }
 
@@ -163,7 +162,7 @@ class ManySelf extends MoleculeSpec {
     }
 
 
-    "nested new" in new Setup {
+    "nested new" in new setup {
 
       // Insert molecules allow nested data structures. So we can conveniently
       // insert 2 entities each connected to 2 target entites
@@ -184,7 +183,7 @@ class ManySelf extends MoleculeSpec {
     }
 
 
-    "nested existing" in new Setup {
+    "nested existing" in new setup {
 
       val List(ben, joe, tim) = Person.name insert List("Ben", "Joe", "Tim") eids
 

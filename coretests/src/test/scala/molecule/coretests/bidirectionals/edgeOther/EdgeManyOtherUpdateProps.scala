@@ -1,15 +1,14 @@
 package molecule.coretests.bidirectionals.edgeOther
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
+import molecule.coretests.util.CoreSpec
 import molecule.coretests.bidirectionals.dsl.bidirectional._
 import molecule.datomic.api.out9._
 
-class EdgeManyOtherUpdateProps extends MoleculeSpec {
+class EdgeManyOtherUpdateProps extends CoreSpec {
 
-  class setup extends Setup {
-    
+  class setup extends BidirectionalSetup {
+
     val love                  = Quality.name("Love").save.eid
     val List(patience, humor) = Quality.name.insert("Patience", "Humor").eids
     val rex                   = Animal.name.insert("Rex").eid

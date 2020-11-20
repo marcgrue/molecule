@@ -1,14 +1,13 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
-class EdgeManySelfInsert extends MoleculeSpec {
+class EdgeManySelfInsert extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val knownBy = m(Person.name_(?).Knows.*(Knows.weight.Person.name))
   }
 
@@ -38,7 +37,7 @@ class EdgeManySelfInsert extends MoleculeSpec {
       knownBy("Joe").get.head === List((8, "Ann"))
     }
 
-    "nested edge only not allowed" in new Setup {
+    "nested edge only not allowed" in new setup {
 
       // Can't save nested edges without including target entity
       (Person.name.Knows.*(Knows.weight).Person.name insert List(
@@ -86,7 +85,7 @@ class EdgeManySelfInsert extends MoleculeSpec {
 
   // Edge consistency checks
 
-  "base/edge - <missing target>" in new Setup {
+  "base/edge - <missing target>" in new setup {
 
     // Can't allow edge without ref to target entity
     (Person.name.Knows.weight.insert must throwA[VerifyModelException])
@@ -94,7 +93,7 @@ class EdgeManySelfInsert extends MoleculeSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
-  "<missing base> - edge - <missing target>" in new Setup {
+  "<missing base> - edge - <missing target>" in new setup {
 
     // Edge always have to have a ref to a target entity
     (Knows.weight.insert must throwA[VerifyModelException])

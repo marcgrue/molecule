@@ -1,16 +1,15 @@
 package molecule.coretests.bidirectionals.edgeOther
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out4._
 
-class EdgeManyOtherUpdate extends MoleculeSpec {
+class EdgeManyOtherUpdate extends CoreSpec {
 
-  class setup extends Setup {
-    val ann     = Person.name("Ann").save.eid
-    
+  class setup extends BidirectionalSetup {
+    val ann = Person.name("Ann").save.eid
+
     val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
     val personsCloseTo = m(Animal.name_(?).CloseTo.*(CloseTo.weight.Person.name))
 

@@ -2,19 +2,18 @@ package molecule.coretests.bidirectionals.self
 
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.MoleculeSpec
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
 
-class OneSelf extends MoleculeSpec {
+class OneSelf extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val spouses = m(Person.name.Spouse.name)
   }
 
-  "Save new" in new Setup {
+  "Save new" in new setup {
 
     // Save Adam, Lisa and bidirectional references between them
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
@@ -34,7 +33,7 @@ class OneSelf extends MoleculeSpec {
     Person(lisa).Spouse.name_.Spouse.name.get.head === "Lisa"
   }
 
-  "Save id" in new Setup {
+  "Save id" in new setup {
 
     val lisa = Person.name.insert("Lisa").eid
 
@@ -55,7 +54,7 @@ class OneSelf extends MoleculeSpec {
   }
 
 
-  "Insert new" in new Setup {
+  "Insert new" in new setup {
 
     // Insert 2 pairs of bidirectionally referenced entities
     Person.name.Spouse.name insert List(
@@ -73,7 +72,7 @@ class OneSelf extends MoleculeSpec {
     )
   }
 
-  "Insert id" in new Setup {
+  "Insert id" in new setup {
 
     val List(lisa, nina) = Person.name insert List("Lisa", "Nina") eids
 
@@ -95,7 +94,7 @@ class OneSelf extends MoleculeSpec {
 
   "Update new" >> {
 
-    "creating ref to new" in new Setup {
+    "creating ref to new" in new setup {
 
       val adam = Person.name.insert("Adam").eid
 
@@ -109,7 +108,7 @@ class OneSelf extends MoleculeSpec {
     }
 
 
-    "replacing ref to new" in new Setup {
+    "replacing ref to new" in new setup {
 
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -133,7 +132,7 @@ class OneSelf extends MoleculeSpec {
 
   "Update id" >> {
 
-    "creating ref to existing" in new Setup {
+    "creating ref to existing" in new setup {
 
       // Adam and Lisa not married yet
       val adam = Person.name.insert("Adam").eid
@@ -154,7 +153,7 @@ class OneSelf extends MoleculeSpec {
     }
 
 
-    "replacing ref to other existing" in new Setup {
+    "replacing ref to other existing" in new setup {
 
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -177,7 +176,7 @@ class OneSelf extends MoleculeSpec {
   }
 
 
-  "Update removing reference" in new Setup {
+  "Update removing reference" in new setup {
 
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -195,7 +194,7 @@ class OneSelf extends MoleculeSpec {
   }
 
 
-  "Retract" in new Setup {
+  "Retract" in new setup {
 
     val adam = Person.name.insert("Adam").eid
 

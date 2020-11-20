@@ -2,20 +2,19 @@ package molecule.coretests.bidirectionals.other
 
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.MoleculeSpec
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
 
-class OneOther extends MoleculeSpec {
+class OneOther extends CoreSpec {
 
-  class setup extends Setup {
-    val personPet = m(Person.name.Pet.name)
+  class setup extends BidirectionalSetup {
+    val personPet    = m(Person.name.Pet.name)
     val animalMaster = m(Animal.name.Master.name)
   }
 
-  "Save new" in new Setup {
+  "Save new" in new setup {
 
     // Save Ben, Rex and bidirectional references between them
     val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
@@ -32,7 +31,7 @@ class OneOther extends MoleculeSpec {
   }
 
 
-  "Save new in reverse" in new Setup {
+  "Save new in reverse" in new setup {
 
     // Building from the other end gives the same result
 

@@ -1,16 +1,15 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
 
-class EdgeOneSelfSave extends MoleculeSpec {
+class EdgeOneSelfSave extends CoreSpec {
 
   "base/edge/target" >> {
 
-    "new target" in new Setup {
+    "new target" in new BidirectionalSetup {
 
       /*
           When a "property edge" is created, Molecule automatically creates a reverse reference in the opposite direction:
@@ -35,7 +34,7 @@ Ann --> annLovesBen (7) -->  Ben
     }
 
 
-    "existing target" in new Setup {
+    "existing target" in new BidirectionalSetup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -53,7 +52,7 @@ Ann --> annLovesBen (7) -->  Ben
 
   "base + edge/target" >> {
 
-    "new target" in new Setup {
+    "new target" in new BidirectionalSetup {
 
       // Create love edges to/from Ben
       val List(lovesBen, benLoves, ben) = Loves.weight(7).Person.name("Ben").save.eids
@@ -108,7 +107,7 @@ Ann --> annLovesBen (7) -->  Ben
       )
     }
 
-    "existing target" in new Setup {
+    "existing target" in new BidirectionalSetup {
 
       val ben = Person.name.insert("Ben").eid
 

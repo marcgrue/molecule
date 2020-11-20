@@ -1,13 +1,12 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
-class EdgeOneSelfUpdate extends MoleculeSpec {
+class EdgeOneSelfUpdate extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val loveOf = m(Person.name_(?).Loves.weight.Person.name)
     val ann    = Person.name("Ann").save.eid
   }

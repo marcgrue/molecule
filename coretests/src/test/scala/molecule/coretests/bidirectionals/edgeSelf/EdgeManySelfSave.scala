@@ -1,21 +1,20 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
-class EdgeManySelfSave extends MoleculeSpec {
+class EdgeManySelfSave extends CoreSpec {
 
-  class setup extends Setup {
-    val knownBy  = m(Person.name_(?).Knows.weight.Person.name)
+  class setup extends BidirectionalSetup {
+    val knownBy = m(Person.name_(?).Knows.weight.Person.name)
   }
 
 
   "base/edge/target" >> {
 
-    "no nesting in save molecules" in new Setup {
+    "no nesting in save molecules" in new setup {
 
       (Person.name("Ann").Knows.*(Knows.weight(7)).Person.name("Ben").save must throwA[VerifyModelException])
         .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
@@ -62,7 +61,7 @@ class EdgeManySelfSave extends MoleculeSpec {
 
   "base + edge/target" >> {
 
-    "new target" in new Setup {
+    "new target" in new setup {
 
       // Create edges to new target entities
       val knowsBen = Knows.weight(7).Person.name("Ben").save.eid
@@ -80,7 +79,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       )
     }
 
-    "existing target" in new Setup {
+    "existing target" in new setup {
 
       val List(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
@@ -104,7 +103,7 @@ class EdgeManySelfSave extends MoleculeSpec {
 
   // Edge consistency checks.
   // Any edge should always be connected to both a base and a target entity.
-  "base/edge - <missing target>" in new Setup {
+  "base/edge - <missing target>" in new setup {
     // Can't save edge missing the target namespace (`Person`)
     // The edge needs to be complete at all times to preserve consistency.
     (Person.name("Ann").Knows.weight(5).save must throwA[VerifyModelException])
@@ -112,7 +111,7 @@ class EdgeManySelfSave extends MoleculeSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
-  "<missing base> - edge - <missing target>" in new Setup {
+  "<missing base> - edge - <missing target>" in new setup {
     (Knows.weight(7).save must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."

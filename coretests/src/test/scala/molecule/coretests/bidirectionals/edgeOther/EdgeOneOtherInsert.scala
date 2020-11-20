@@ -1,14 +1,13 @@
 package molecule.coretests.bidirectionals.edgeOther
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out4._
 
-class EdgeOneOtherInsert extends MoleculeSpec {
+class EdgeOneOtherInsert extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
     val favoritePersonOf = m(Animal.name_(?).Favorite.weight.Person.name)
   }
@@ -70,14 +69,14 @@ class EdgeOneOtherInsert extends MoleculeSpec {
     }
   }
 
-  "base/edge - <missing target>" in new Setup {
+  "base/edge - <missing target>" in new setup {
     // Can't allow edge without ref to target entity
     (Person.name.Favorite.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `Favorite`."
   }
 
-  "<missing base> - edge - <missing target>" in new Setup {
+  "<missing base> - edge - <missing target>" in new setup {
     // Edge always have to have a ref to a target entity
     (Favorite.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +

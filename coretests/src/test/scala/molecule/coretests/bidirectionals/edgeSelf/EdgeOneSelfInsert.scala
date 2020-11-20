@@ -1,14 +1,13 @@
 package molecule.coretests.bidirectionals.edgeSelf
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
-class EdgeOneSelfInsert extends MoleculeSpec {
+class EdgeOneSelfInsert extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val loveOf = m(Person.name_(?).Loves.weight.Person.name)
   }
 
@@ -40,7 +39,7 @@ class EdgeOneSelfInsert extends MoleculeSpec {
 
   "base + edge/target" >> {
 
-    "new target" in new Setup {
+    "new target" in new setup {
 
       // Create edges and Ben
       val List(lovesBen, benLoves, ben) = Loves.weight.Person.name.insert(7, "Ben").eids
@@ -90,7 +89,7 @@ class EdgeOneSelfInsert extends MoleculeSpec {
       )
     }
 
-    "existing target" in new Setup {
+    "existing target" in new setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -109,14 +108,14 @@ class EdgeOneSelfInsert extends MoleculeSpec {
   }
 
 
-  "base/edge - <missing target>" in new Setup {
+  "base/edge - <missing target>" in new setup {
     // Can't allow edge without ref to target entity
     (Person.name.Loves.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `Loves`."
   }
 
-  "<missing base> - edge - <missing target>" in new Setup {
+  "<missing base> - edge - <missing target>" in new setup {
     // Edge always have to have a ref to a target entity
     (Loves.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +

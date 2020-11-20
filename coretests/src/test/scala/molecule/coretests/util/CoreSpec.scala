@@ -6,10 +6,12 @@ import datomicScala.client.api.sync.{Client, Connection, Datomic}
 import datomicScala.CognitectAnomaly
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util.MoleculeSpec
+import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
 import molecule.datomic.peer.facade.Datomic_Peer
+import molecule.datomic.peer.facade.Datomic_Peer.recreateDbFrom
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 
@@ -88,7 +90,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   }
 
   def recreatedDbConn(
-    schema: SchemaTransaction = CoreTestSchema,
+    schema: SchemaTransaction,
     dbIdentifier: String = ""
   ) = {
     system match {
@@ -108,6 +110,10 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   class CoreSetup extends Scope {
     // Entry point for Molecule to all systems
-    implicit val conn: Conn = recreatedDbConn()
+    implicit val conn: Conn = recreatedDbConn(CoreTestSchema)
+  }
+
+  class BidirectionalSetup extends Scope {
+    implicit val conn = recreateDbFrom(BidirectionalSchema)
   }
 }

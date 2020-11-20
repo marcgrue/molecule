@@ -1,14 +1,13 @@
 package molecule.coretests.bidirectionals.edgeOther
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out4._
 
-class EdgeManyOtherSave extends MoleculeSpec {
+class EdgeManyOtherSave extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
     val personsCloseTo = m(Animal.name_(?).CloseTo.*(CloseTo.weight.Person.name))
   }
@@ -16,7 +15,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
 
   "base/edge/target" >> {
 
-    "no nesting in save molecules" in new Setup {
+    "no nesting in save molecules" in new setup {
 
       (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).Animal.name("Rex").save must throwA[VerifyModelException])
         .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
@@ -95,7 +94,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
 
   // Edge consistency checks.
 
-  "base - edge - <missing target>" in new Setup {
+  "base - edge - <missing target>" in new setup {
 
     // Can't allow edge without ref to target entity
     (Person.name("Gus").CloseTo.weight(5).save must throwA[VerifyModelException])
@@ -103,7 +102,7 @@ class EdgeManyOtherSave extends MoleculeSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
-  "<missing base> - edge - <missing target>" in new Setup {
+  "<missing base> - edge - <missing target>" in new setup {
 
     // Edge always have to have a ref to a target entity
     (CloseTo.weight(7).save must throwA[VerifyModelException])

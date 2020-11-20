@@ -1,13 +1,12 @@
 package molecule.coretests.bidirectionals.edgeOther
 
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
-class EdgeOneOtherSave extends MoleculeSpec {
+class EdgeOneOtherSave extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
     val favoritePersonOf = m(Animal.name_(?).Favorite.weight.Person.name)
   }

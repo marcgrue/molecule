@@ -1,15 +1,14 @@
 package molecule.coretests.bidirectionals.other
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util._
-import molecule.coretests.bidirectionals.Setup
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out3._
 
 
-class ManyOther extends MoleculeSpec {
+class ManyOther extends CoreSpec {
 
-  class setup extends Setup {
+  class setup extends BidirectionalSetup {
     val animalBuddiesOf = m(Person.name_(?).Buddies.name)
     val personBuddiesOf = m(Animal.name_(?).Buddies.name)
   }
@@ -74,7 +73,7 @@ class ManyOther extends MoleculeSpec {
     }
 
 
-    "1 existing" in new Setup {
+    "1 existing" in new setup {
 
       val gus = Animal.name.insert("Gus").eid
 
@@ -170,7 +169,7 @@ class ManyOther extends MoleculeSpec {
     }
 
 
-    "nested new" in new Setup {
+    "nested new" in new setup {
 
       // Insert molecules allow nested data structures. So we can conveniently
       // insert 2 entities each connected to 2 target entites
@@ -192,7 +191,7 @@ class ManyOther extends MoleculeSpec {
       )
     }
 
-    "nested existing" in new Setup {
+    "nested existing" in new setup {
 
       val List(gus, leo, rex) = Animal.name insert List("Gus", "Leo", "Rex") eids
 
