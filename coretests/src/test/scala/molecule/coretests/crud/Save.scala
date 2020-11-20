@@ -14,7 +14,6 @@ import scala.concurrent.Future
 
 
 class Save extends CoreSpec with ClojureBridge {
-  sequential
 
   // todo: remove when async implemented for other systems
   if (system == Peer) {

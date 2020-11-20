@@ -43,7 +43,7 @@ class ClauseOrder extends CoreSpec {
         Pull("a__1", "Ns", "int", None))),
       Where(List(
         DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding),
-        Funct("molecule.core.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1")))
+        Funct("identity", Seq(Var("a")), ScalarBinding(Var("a__1")))
       )))
 
     m1._query === Query(
@@ -51,7 +51,7 @@ class ClauseOrder extends CoreSpec {
         Var("b"),
         Pull("a__1", "Ns", "int", None))),
       Where(List(
-        Funct("molecule.core.util.fns/bind", Seq(Var("a")), ScalarBinding(Var("a__1"))),
+        Funct("identity", Seq(Var("a")), ScalarBinding(Var("a__1"))),
         DataClause(ImplDS, Var("a"), KW("Ns", "str", ""), Var("b"), Empty, NoBinding))))
   }
 

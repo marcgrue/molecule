@@ -10,8 +10,6 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class PSTest extends CoreSpec with Helpers {
-  sequential
-
 
 
   "peer-server" >> {

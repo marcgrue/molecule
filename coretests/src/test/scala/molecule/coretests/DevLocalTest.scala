@@ -8,8 +8,6 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class DevLocalTest extends CoreSpec with Helpers {
-  sequential
-
 
 
   "dev-local" >> {

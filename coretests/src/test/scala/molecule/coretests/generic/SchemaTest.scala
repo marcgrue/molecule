@@ -10,7 +10,6 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class SchemaTest extends MoleculeSpec {
-  sequential
 
   "Partition schema values" >> {
 

@@ -22,7 +22,7 @@ object QueryOptimizer {
     }
 
     q.wh.clauses.foreach {
-      case cl@Funct("molecule.core.util.fns/bind", Seq(Var(_)), ScalarBinding(Var(v))) =>
+      case cl@Funct("identity", Seq(Var(_)), ScalarBinding(Var(v))) =>
         grounds += v -> Some(cl)
 
       case cl@Funct(fn, _, ScalarBinding(Var(v))) if fn.startsWith("ground") =>

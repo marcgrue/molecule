@@ -9,7 +9,6 @@ import molecule.datomic.api.out5._
 
 
 class Index extends CoreSpec {
-  sequential
 
   // Create new db from schema
   implicit val conn = recreatedDbConn()

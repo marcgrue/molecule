@@ -4,7 +4,6 @@ import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out2._
 
 class KeysValues extends Base {
-  sequential
 
   val en_da       = Seq("en", "da")
   val hi_he       = Seq("Hi there", "Hello")

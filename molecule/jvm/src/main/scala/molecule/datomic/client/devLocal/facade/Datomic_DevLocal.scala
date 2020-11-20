@@ -2,7 +2,9 @@ package molecule.datomic.client.devLocal.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
+import datomicClojure.ClojureBridge
 import datomicScala.client.api.sync.Client
+import datomicScala.client.api.sync.Datomic.require
 import molecule.core.facade.exception.DatomicFacadeException
 import molecule.datomic.base.facade.Conn
 import molecule.core.schema.SchemaTransaction
@@ -16,7 +18,9 @@ import scala.jdk.CollectionConverters._
   * @groupname database  Database operations
   * @groupprio 10
   * */
-case class Datomic_DevLocal(client: Client) {
+case class Datomic_DevLocal(client: Client) extends ClojureBridge {
+
+//  require("molecule.core.util.fns")
 
   def getDatabaseNames(
     timeout: Int = 0,

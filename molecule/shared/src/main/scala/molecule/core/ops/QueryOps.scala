@@ -57,13 +57,13 @@ object QueryOps extends Helpers with JavaUtil {
     def pull(e: String, atom: Atom): Query = {
       val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr)))
-        .func("molecule.core.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
+        .func("identity", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
     }
 
     def pullEnum(e: String, atom: Atom): Query = {
       val pullScalar = e + "__" + q.f.outputs.length
       q.copy(f = Find(q.f.outputs :+ Pull(pullScalar, atom.nsFull, atom.attr, atom.enumPrefix)))
-        .func("molecule.core.util.fns/bind", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
+        .func("identity", Seq(Var(e)), ScalarBinding(Var(pullScalar)))
     }
 
 
@@ -224,11 +224,11 @@ object QueryOps extends Helpers with JavaUtil {
 
     def schemaPull(v: String): Query =
       q.copy(f = Find(q.f.outputs :+ Pull(v + "_pull", "db", v)))
-        .func("molecule.core.util.fns/bind", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
+        .func("identity", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
 
     def schemaPullUnique(v: String): Query =
       q.copy(f = Find(q.f.outputs :+ Pull(v + "_pull", "db", v, Some(""))))
-        .func("molecule.core.util.fns/bind", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
+        .func("identity", Seq(Var("id")), ScalarBinding(Var(v + "_pull")))
 
     def not(attr: String): Query =
       q.copy(wh = Where(q.wh.clauses :+ NotClause(Var("id"), KW("db", attr))))
@@ -249,7 +249,7 @@ object QueryOps extends Helpers with JavaUtil {
       } else {
         q.wh.clauses.reverse.collectFirst {
           case Funct("namespace", _, _)                                                   => q
-          case Funct("molecule.core.util.fns/bind", _, _) /* Optional attributes */            => q
+          case Funct("identity", _, _) /* Optional attributes */            => q
           case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q
           case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         => q.ident(e + "_attr", v1)
           case DataClause(_, Var(`e`), _, _, _, _)                                        => q
@@ -298,7 +298,7 @@ object QueryOps extends Helpers with JavaUtil {
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         => q.ident(e + "_attr", v1)
         case DataClause(_, Var(`e`), KW(_, _, _), _, _, _)                              => q
-          .func("molecule.core.util.fns/bind", Seq(Var(v)), ScalarBinding(Var(v + "_v")))
+          .func("identity", Seq(Var(v)), ScalarBinding(Var(v + "_v")))
       } getOrElse
         q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)

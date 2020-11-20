@@ -17,7 +17,6 @@ import molecule.datomic.api.out6._
   * - `op` Assertion (true) / retraction (false) status
   */
 class Datom extends CoreSpec {
-  sequential
 
   // Create new db from schema
   implicit val conn: Conn = recreatedDbConn()

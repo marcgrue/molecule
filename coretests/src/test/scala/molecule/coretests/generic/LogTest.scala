@@ -9,7 +9,6 @@ import molecule.datomic.base.facade.TxReport
 
 
 class LogTest extends CoreSpec {
-  sequential
 
   // Create new db from schema
   implicit val conn = recreatedDbConn()

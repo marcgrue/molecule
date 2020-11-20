@@ -10,7 +10,6 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class With extends CoreSpec {
-  sequential
 
   implicit val conn = recreateDbFrom(CoreTestSchema)
 

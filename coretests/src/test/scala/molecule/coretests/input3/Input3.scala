@@ -10,7 +10,6 @@ import scala.reflect.ClassTag
 
 
 class Input3 extends CoreSpec {
-  sequential
 
   if (heavyInputTesting) {
 

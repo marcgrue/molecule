@@ -14,13 +14,15 @@ import molecule.datomic.client.devLocal.facade.Database_DevLocal
 import molecule.datomic.peer.facade.Database_Peer
 
 class AdHocTest extends CoreSpec with Helpers {
-  sequential
 
 
   "adhoc" in new CoreSetup {
 
-    Ns.int(1).save.eid
-    Ns.int.get === List(1)
+//    Ns.int(1).save.eid
+//    Ns.int.get === List(1)
+
+    Ns.int.enum$ insert List((1, Some("enum1")), (2, None))
+    m(Ns.int(1).enum$(Some("enum1"))).get === List((1, Some("enum1")))
 
     ok
   }

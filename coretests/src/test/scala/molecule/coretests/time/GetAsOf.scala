@@ -6,7 +6,6 @@ import molecule.datomic.api.out3._
 
 
 class GetAsOf extends CoreSpec {
-  sequential
 
   "t (from history)" in new CoreSetup {
 

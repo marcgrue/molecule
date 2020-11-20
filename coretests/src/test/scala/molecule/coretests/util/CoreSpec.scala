@@ -1,5 +1,6 @@
 package molecule.coretests.util
 
+import datomicClojure.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
 import datomicScala.CognitectAnomaly
@@ -13,7 +14,8 @@ import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 
 
-class CoreSpec extends MoleculeSpec with CoreData {
+class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
+  sequential
 
   sealed trait System
   case object Peer extends System
@@ -29,7 +31,7 @@ class CoreSpec extends MoleculeSpec with CoreData {
   // Do or skip looping input tests that take a few minutes
   val heavyInputTesting = false
 
-  var peerOnly = true
+  var peerOnly = false
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {

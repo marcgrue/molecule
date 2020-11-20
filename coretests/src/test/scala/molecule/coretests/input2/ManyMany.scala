@@ -10,7 +10,6 @@ import scala.reflect.ClassTag
 
 
 class ManyMany extends CoreSpec {
-  sequential
 
   if (heavyInputTesting) {
 

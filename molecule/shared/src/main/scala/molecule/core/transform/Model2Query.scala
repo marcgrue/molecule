@@ -22,7 +22,6 @@ object Model2Query extends Helpers {
   var nestedEntityVars   : List[Var]   = List.empty[Var]
   var nestedLevel        : Int         = 1
   var _model             : Model       = null
-  val fns                : String      = "molecule.core.util.fns"
   val datomGeneric                     =
     Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
 
@@ -78,11 +77,11 @@ object Model2Query extends Helpers {
         if (!nested.bond.refAttr.endsWith("$")) {
           if (nestedEntityClauses.isEmpty) {
             nestedEntityVars = List(Var("sort0"))
-            nestedEntityClauses = List(Funct(s"$fns/bind", Seq(Var(e)), ScalarBinding(Var("sort0"))))
+            nestedEntityClauses = List(Funct("identity", Seq(Var(e)), ScalarBinding(Var("sort0"))))
           }
           // Next level
           nestedEntityVars = nestedEntityVars :+ Var("sort" + nestedEntityClauses.size)
-          nestedEntityClauses = nestedEntityClauses :+ Funct(s"$fns/bind", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
+          nestedEntityClauses = nestedEntityClauses :+ Funct("identity", Seq(Var(w)), ScalarBinding(Var("sort" + nestedEntityClauses.size)))
         }
         makeNested(model, query, nested, e, v, w, prevNs, prevAttr, prevRefNs)
       case composite: Composite   => makeComposite(model, query, composite, e, v, prevNs, prevAttr, prevRefNs)
@@ -219,7 +218,7 @@ object Model2Query extends Helpers {
       val find2      = query.f.copy(outputs = query.f.outputs :+ pullNested)
       val q2         = query
         .copy(f = find2)
-        .func("molecule.core.util.fns/bind", Seq(Var(nestedE)), ScalarBinding(Var(pullScalar)))
+        .func("identity", Seq(Var(nestedE)), ScalarBinding(Var(pullScalar)))
       (q2, "", "", "", "", "")
     } else {
       // Mandatory nested values - where clauses

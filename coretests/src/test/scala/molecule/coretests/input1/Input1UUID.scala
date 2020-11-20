@@ -8,7 +8,6 @@ import molecule.datomic.api.in1_out2._
 
 
 class Input1UUID extends CoreSpec {
-  sequential
 
   "Card one" >> {
 

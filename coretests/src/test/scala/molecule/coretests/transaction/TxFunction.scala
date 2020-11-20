@@ -152,8 +152,6 @@ object TxFunctionExamples {
   * the tx function is installed in the data
   */
 class TxFunction extends CoreSpec {
-  // OBS: important, otherwise parallel test execution mess up!
-  sequential
 
   import TxFunctionExamples._
 

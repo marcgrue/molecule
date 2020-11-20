@@ -7,8 +7,6 @@ import molecule.datomic.api.in1_out2._
 
 class Input1StringIntro extends CoreSpec {
 
-  sequential
-
   // Parameterized molecules have a `?` placeholder for an expected input value
   // and we call them "Input molecules".
 
