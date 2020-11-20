@@ -5,6 +5,8 @@ import molecule.datomic.api.out2._
 
 class Fulltext extends Base {
 
+  peerOnly = true
+
   "Card one" in new CoreSetup {
 
     Ns.str insert List("The quick fox jumps", "Ten slow monkeys")

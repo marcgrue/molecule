@@ -441,21 +441,21 @@ class Aggregates extends CoreSpec {
     )
     Ns.int(4).save
 
-    Ns.str.int(count).get.sortBy(_._1) === List(
+    Ns.str.int(count).get.sorted === List(
       ("a", 1),
       ("b", 3)
     )
-    Ns.str.int(countDistinct).get.sortBy(_._1) === List(
+    Ns.str.int(countDistinct).get.sorted === List(
       ("a", 1),
       ("b", 2)
     )
 
-    Ns.int.str(count).get.sortBy(_._1) === List(
+    Ns.int.str(count).get.sorted === List(
       (1, 1),
       (2, 2),
       (3, 1)
     )
-    Ns.int.str(countDistinct).get.sortBy(_._1) === List(
+    Ns.int.str(countDistinct).get.sorted === List(
       (1, 1),
       (2, 1),
       (3, 1)
@@ -485,11 +485,11 @@ class Aggregates extends CoreSpec {
     val e2 = Ns.int(2).save.eid
     val e3 = Ns.int(3).save.eid
 
-    Ns.e.int(count).get === List(
+    Ns.e.int(count).get.sorted === List(
       (e1, 1),
       (e2, 1),
       (e3, 1)
-    )
+    ).sorted
 
 
     // card-many
@@ -497,7 +497,7 @@ class Aggregates extends CoreSpec {
     val e4 = Ns.ints(Seq(1, 2)).save.eid
     val e5 = Ns.ints(3).save.eid
 
-    Ns.e.ints(count).get === List(
+    Ns.e.ints(count).get.sorted === List(
       (e4, 2),
       (e5, 1)
     )

@@ -21,8 +21,7 @@ class AdHocTest extends CoreSpec with Helpers {
 //    Ns.int(1).save.eid
 //    Ns.int.get === List(1)
 
-    Ns.int.enum$ insert List((1, Some("enum1")), (2, None))
-    m(Ns.int(1).enum$(Some("enum1"))).get === List((1, Some("enum1")))
+    Ns.enum.not(enum0, enum1).debugGet
 
     ok
   }

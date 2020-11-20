@@ -1,6 +1,6 @@
 package molecule.core.transform
+
 import java.util.{Date, UUID}
-import java.net.URI
 import molecule.core.ast.query._
 import molecule.core.transform.exception.Query2StringException
 import molecule.core.util.Helpers
@@ -15,7 +15,7 @@ import scala.language.implicitConversions
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 case class Query2String(q: Query) extends Helpers {
 
   // Ugly convenience hack to switch BigInt representation
@@ -46,7 +46,8 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: BigDecimal)                              => v.toString + ".0M"
     case Val(date: Date)                                 => "#inst \"" + date2datomicStr(date) + "\""
     case Val(v: UUID)                                    => "#uuid \"" + v + "\""
-    case Val(v: String) if v.startsWith("__n__")         => v.drop(5) /* JS number hack */
+    case Val(v: String) if v.startsWith("__n__")         => v.drop(5) // JS number hack
+    case Val(v: String) if v.startsWith("__enum__")      => v.drop(8) // clojure Keyword notation (clojure non-ScalaJS compatible)
     case Val(v)                                          => "\"" + v + "\""
     case Pull(e, nsFull, attr, Some(_))                  => s"(pull ?$e [{:$nsFull/$attr [:db/ident]}])"
     case Pull(e, nsFull, attr, _)                        => s"(pull ?$e [(limit :$nsFull/$attr nil)])"

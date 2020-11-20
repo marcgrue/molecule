@@ -19,19 +19,19 @@ class Eid extends Base {
     Ns(e1).int.get === List(1)
 
     // Vararg
-    Ns(e1, e2).int.get === List(1, 2)
+    Ns(e1, e2).int.get.sorted === List(1, 2)
 
     // Seq
-    Ns(Seq(e1, e2)).int.get === List(1, 2)
-    Ns(seq).int.get === List(1, 2)
+    Ns(Seq(e1, e2)).int.get.sorted === List(1, 2)
+    Ns(seq).int.get.sorted === List(1, 2)
 
     // Set
-    Ns(Set(e3, e4)).int.get === List(3, 4)
-    Ns(set).int.get === List(3, 4)
+    Ns(Set(e3, e4)).int.get.sorted === List(3, 4)
+    Ns(set).int.get.sorted === List(3, 4)
 
     // Iterable
-    Ns(Iterable(e3, e4)).int.get === List(3, 4)
-    Ns(iterable).int.get === List(3, 4)
+    Ns(Iterable(e3, e4)).int.get.sorted === List(3, 4)
+    Ns(iterable).int.get.sorted === List(3, 4)
   }
 
 
@@ -39,17 +39,17 @@ class Eid extends Base {
 
     val List(e1, e2, e3) = Ns.int.insert(1, 2, 3).eids
 
-    Ns.int.get === List(1, 2, 3)
+    Ns.int.get.sorted === List(1, 2, 3)
 
     Ns(e1).int.get === List(1)
 
-    Ns(e1, e2).int.get === List(1, 2)
+    Ns(e1, e2).int.get.sorted === List(1, 2)
 
     val e23 = Seq(e2, e3)
-    Ns(e23).int.get === List(2, 3)
+    Ns(e23).int.get.sorted === List(2, 3)
 
     val e23s = Set(e2, e3)
-    Ns(e23s).int.get === List(2, 3)
+    Ns(e23s).int.get.sorted === List(2, 3)
   }
 
 
@@ -62,12 +62,12 @@ class Eid extends Base {
     Ns.e(e1).int.get === List((e1, 1))
     Ns.e_(e1).int.get === List(1)
 
-    Ns.e(e1, e2).int.get === List((e2, 2), (e1, 1))
-    Ns.e_(e1, e2).int.get === List(1, 2)
+    Ns.e(e1, e2).int.get.sorted === List((e1, 1), (e2, 2))
+    Ns.e_(e1, e2).int.get.sorted === List(1, 2)
 
     val e23 = Seq(e2, e3)
-    Ns.e(e23).int.get === List((e3, 3), (e2, 2))
-    Ns.e_(e23).int.get === List(2, 3)
+    Ns.e(e23).int.get.sorted === List((e2, 2), (e3, 3))
+    Ns.e_(e23).int.get.sorted === List(2, 3)
   }
 
 
@@ -79,17 +79,17 @@ class Eid extends Base {
 
     ints(e1).get === List(1)
 
-    ints(e1, e2).get === List(1, 2)
+    ints(e1, e2).get.sorted === List(1, 2)
 
     val e23 = Seq(e2, e3)
-    ints.apply(e23).get === List(2, 3)
+    ints.apply(e23).get.sorted === List(2, 3)
   }
 
 
   "e" in new CoreSetup {
     val List(e1, e2) = Ns.int insert List(1, 2) eids
 
-    Ns.e.int.get === List((e1, 1), (e2, 2))
+    Ns.e.int.get.sorted === List((e1, 1), (e2, 2))
 
 
     // Applying attribute values
@@ -100,8 +100,8 @@ class Eid extends Base {
     Ns.e.int(1).get === List((e1, 1))
     Ns.e.int(2).get === List((e2, 2))
 
-    Ns.e.int_(1, 2).get === List(e1, e2)
-    Ns.e.int(1, 2).get === List((e1, 1), (e2, 2))
+    Ns.e.int_(1, 2).get.sorted === List(e1, e2)
+    Ns.e.int(1, 2).get.sorted === List((e1, 1), (e2, 2))
 
 
     // Applying entity id values
@@ -111,11 +111,11 @@ class Eid extends Base {
     Ns(e1).int.get === List(1)
     Ns(e2).int.get === List(2)
 
-    Ns.e(e1).int.get === List((e1, 1))
-    Ns.e(e2).int.get === List((e2, 2))
+    Ns.e(e1).int.get.sorted === List((e1, 1))
+    Ns.e(e2).int.get.sorted === List((e2, 2))
 
-    Ns.e_(e1, e2).int.get === List(1, 2)
-    Ns.e(e1, e2).int.get === List((e2, 2), (e1, 1))
+    Ns.e_(e1, e2).int.get.sorted === List(1, 2)
+    Ns.e(e1, e2).int.get.sorted === List((e1, 1), (e2, 2))
   }
 
 

@@ -114,13 +114,14 @@ object QueryOps extends Helpers with JavaUtil {
 
 
     def whereAndEnum[T](e: String, a: Atom, v: String, prefix: String, args: Seq[T]): Query = {
-      args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val(prefix + arg)) }.enum(e, a, v)
+      args.foldLeft(q) { case (q1, arg) => q1.where(e, a, Val("__enum__" + prefix + arg)) }.enum(e, a, v)
     }
 
 
     // Null ..........................................
 
-    def pre(a: Atom, arg: Any): Any = if (a.enumPrefix.isDefined) a.enumPrefix.get + arg else arg
+    def pre(a: Atom, arg: Any): Any = if (a.enumPrefix.isDefined)
+      "__enum__" + a.enumPrefix.get + arg else arg
 
     def not(e: String, a: Atom): Query =
       q.copy(wh = Where(q.wh.clauses :+ NotClause(Var(e), KW(a.nsFull, a.attr))))
