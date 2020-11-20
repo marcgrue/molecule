@@ -528,7 +528,7 @@ object QueryOps extends Helpers with JavaUtil {
       }
     }
 
-    def mapInCompareTo(op: String, e: String, a: Atom, v: String): Query = {
+    def mapInCompareTo(op: String, a: Atom, v: String): Query = {
       val q1 = q
         // Concatenate search string from input vars
         .func("str", Seq(Val("("), Var(v + "Key"), Val(")@.*")), ScalarBinding(Var(v + 1)))
@@ -541,8 +541,7 @@ object QueryOps extends Helpers with JavaUtil {
         case "String"         => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "Boolean"        => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "java.util.Date" => q1
-          .func("molecule.core.util.fns/date2str", Seq(Var(v + "Value")), ScalarBinding(Var(v + 4)))
-          .func(".compareTo ^String", Seq(Var(v + 3), Var(v + 4)), ScalarBinding(Var(v + 5)))
+          .func(".compareTo ^String", Seq(Var(v + 3), Var(v + "Value")), ScalarBinding(Var(v + 5)))
           .func(op, Seq(Var(v + 5), Val(0)))
         case "java.util.UUID" => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
         case "java.net.URI"   => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
@@ -552,7 +551,7 @@ object QueryOps extends Helpers with JavaUtil {
       }
     }
 
-    def mapInCompareToK(op: String, e: String, a: Atom, v: String, key: String): Query = {
+    def mapInCompareToK(op: String, a: Atom, v: String, key: String): Query = {
       val q1 = q
         // match key(s) (could be regex)
         .func(".matches ^String", Seq(Var(v), Val(s"($key)@.*")))
@@ -563,8 +562,7 @@ object QueryOps extends Helpers with JavaUtil {
         case "String"         => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "Boolean"        => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "java.util.Date" => q1
-          .func("molecule.core.util.fns/date2str", Seq(Var(v + "Value")), ScalarBinding(Var(v + 3)))
-          .func(".compareTo ^String", Seq(Var(v + 2), Var(v + 3)), ScalarBinding(Var(v + 4)))
+          .func(".compareTo ^String", Seq(Var(v + 2), Var(v + "Value")), ScalarBinding(Var(v + 4)))
           .func(op, Seq(Var(v + 4), Val(0)))
         case "UUID"           => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
         case "URI"            => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)

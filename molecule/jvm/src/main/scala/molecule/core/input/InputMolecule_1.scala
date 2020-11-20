@@ -1,11 +1,13 @@
 package molecule.core.input
 
+import java.util.Date
 import molecule.core.api.Molecule._
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model._
 import molecule.core.ast.query._
 import molecule.datomic.base.facade.Conn
 import molecule.core.input.exception.InputMolecule_1_Exception
+import molecule.core.util.fns
 
 
 /** Shared interfaces of input molecules awaiting 1 input.
@@ -40,10 +42,14 @@ trait InputMolecule_1[I1] extends InputMolecule {
 
       // Mapped attributes
       case 2 => {
-        val inVars = query.i.inputs.collect { case Placeholder(_, _, v, _) => v }
+        val inVars                                    = query.i.inputs.collect { case Placeholder(_, _, v, _) => v }
         val Placeholder(_, KW(nsFull, attr, _), _, _) = query.i.inputs.head
-        val values = inputs.flatMap {
-          case map: Map[_, _] => map.toSeq.map { case (k, v) => Seq(k, v) }
+        val values                                    = inputs.flatMap {
+          case map: Map[_, _] =>
+            map.head._2 match {
+              case _: Date => map.toSeq.map { case (k, v: Date) => Seq(k, fns.date2str(v)) } // compare standardized format
+              case _       => map.toSeq.map { case (k, v) => Seq(k, v) }
+            }
           case other          => throw new InputMolecule_1_Exception(s"Unexpected input for mapped attribute `:$nsFull/$attr`: " + other)
         }
         query.copy(i = In(Seq(InVar(RelationBinding(inVars), values)), query.i.rules, query.i.ds))

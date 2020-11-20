@@ -1,9 +1,12 @@
 package molecule.core.input
+
 import java.net.URI
+import java.util.Date
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model._
 import molecule.core.ast.query.{DataClause, _}
 import molecule.core.input.exception.InputMoleculeException
+import molecule.core.util.fns
 
 /** Shared interface of all input molecules.
   * <br><br>
@@ -59,7 +62,8 @@ trait InputMolecule extends MoleculeBase {
     case Placeholder(_, _, v, enumPrefix) => (v, enumPrefix.getOrElse(""))
   }
 
-  protected def pre[T](enumPrefix: Option[String], arg: T): Any = if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
+  protected def pre[T](enumPrefix: Option[String], arg: T): Any =
+    if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
 
   protected def isTacit(nsFull: String, attr: String): Boolean = {
     val nsFull_                = nsFull + "_"
@@ -149,14 +153,23 @@ trait InputMolecule extends MoleculeBase {
     case _                                   => false
   }
 
-  protected def resolveInput[T](query: Query, ph: Placeholder, inputs: Seq[T], ruleName: String = "rule1", unifyRule: Boolean = false): Query = {
+  protected def resolveInput[T](
+    query: Query,
+    ph: Placeholder,
+    inputs: Seq[T],
+    ruleName: String = "rule1",
+    unifyRule: Boolean = false
+  ): Query = {
     val Placeholder(e@Var(e_), kw@KW(nsFull, attr, _), v@Var(w), prefix) = ph
     val card                                                             = cardinality(nsFull, attr)
 
     // Mapped key attributes
     if (card == 4) {
 
-      val values = inputs.map(Seq(_))
+      val values = inputs.map {
+        case d: Date => Seq(fns.date2str(d)) // compare standardized format
+        case v       => Seq(v)
+      }
       if (inputs.size > 1) {
         query.copy(i = In(Seq(InVar(CollectionBinding(v), Seq(values.flatten))), query.i.rules, query.i.ds))
       } else if (values.nonEmpty && values.head.size > 1) {

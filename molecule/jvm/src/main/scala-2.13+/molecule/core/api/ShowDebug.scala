@@ -232,23 +232,24 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     }
 
     def data(): Unit = {
-      // Force Model2Query transformation at runtime to be able to debug it.
-      // Note that if variables are used in the molecule, this transformation
-      // will be done twice!
-      val _query2 = Model2Query(_model)._1
-      val ins     = QueryOps(_query2).inputs
-      val p       = (expr: QueryExpr) => Query2String(_query2).p(expr)
-      val rules   = "[" + (_query2.i.rules.map(p).mkString(" ")) + "]"
+      // Also do Model2Query transformation at runtime to be able to debug it.
+      // Note though that input variables are only bound in the macro at compile
+      // time and are therefore not present in this runtime process.
+      Model2Query(_model)
+
+      val ins     = QueryOps(_query).inputs
+      val p       = (expr: QueryExpr) => Query2String(_query).p(expr)
+      val rules   = "[" + (_query.i.rules.map(p).mkString(" ")) + "]"
       val db      = conn.db
-      val first   = if (_query2.i.rules.isEmpty) Seq(db) else Seq(db, rules)
+      val first   = if (_query.i.rules.isEmpty) Seq(db) else Seq(db, rules)
       val rows    = try {
-        resolve(conn._query(_model, _query2, Some(db)).asScala.take(500))
+        resolve(conn._query(_model, _query, Some(db)).asScala.take(500))
       } catch {
         case ex: Throwable =>
-          throw new QueryException(ex, _model, _query2, first ++ ins, p)
+          throw new QueryException(ex, _model, _query, first ++ ins, p)
       }
 
-      val rulesOut: String = if (_query2.i.rules.isEmpty) "none\n\n" else "[\n " + _query2.i.rules.map(Query2String(_query2).p(_)).mkString("\n ") + "\n]\n\n"
+      val rulesOut: String = if (_query.i.rules.isEmpty) "none\n\n" else "[\n " + _query.i.rules.map(Query2String(_query).p(_)).mkString("\n ") + "\n]\n\n"
       val inputs  : String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}").mkString("\n") + "\n\n"
       val outs    : String = rows.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1.mkString("[", "  ", "]")}").mkString("\n")
       // If resolution doesn't take place
@@ -266,8 +267,8 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       println(
         "\n--------------------------------------------------------------------------\n" +
           _model + "\n\n" +
-          _query2 + "\n\n" +
-          _query2.datalog + "\n\n" +
+          _query + "\n\n" +
+          _query.datalog + "\n\n" +
           "RULES: " + rulesOut +
           "INPUTS: " + inputs +
           "OUTPUTS:\n" + outs + "\n(showing up to 500 rows)" +
