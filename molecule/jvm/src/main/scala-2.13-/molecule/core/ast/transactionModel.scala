@@ -62,7 +62,7 @@ object transactionModel extends JavaUtil {
   }
 
   case class RetractEntity(e: Any) extends Statement {
-    val action = ":db.fn/retractEntity"
+    val action = ":db/retractEntity"
     val a      = ""
     val v      = ""
     val gv     = NoValue

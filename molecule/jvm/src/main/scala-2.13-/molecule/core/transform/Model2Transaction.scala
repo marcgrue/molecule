@@ -1,7 +1,7 @@
 package molecule.core.transform
 import java.util.Date
 import datomic._
-import molecule.core.api.Entity
+import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import molecule.datomic.base.facade.Conn

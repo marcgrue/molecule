@@ -1,4 +1,7 @@
-package molecule.core.api
+package molecule.datomic.peer.api
+
+import datomic.Entity
+import molecule.core.api.DatomicEntity
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
@@ -6,6 +9,8 @@ import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.Debug
 import molecule.datomic.base.facade.{Conn, TxReport}
+import molecule.datomic.client.devLocal.facade.{Conn_DevLocal, DatomicEntity_DevLocal}
+import molecule.datomic.peer.facade.{Conn_Peer, DatomicEntity_Peer}
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Operations on multiple entities.
@@ -15,9 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait EntityOps {
 
-  /** Long -> [[molecule.core.api.Entity Entity]] api implicit.
+  /** Long -> [[molecule.core.api.DatomicEntity Entity]] api implicit.
     * <br><br>
-    * Convenience implicit to allow calling [[molecule.core.api.Entity Entity]] methods directly on entity Long value.
+    * Convenience implicit to allow calling [[molecule.core.api.DatomicEntity Entity]] methods directly on entity Long value.
     * {{{
     *   // Get entity id of Ben
     *   val benId = Person.e.name_("Ben").get.head
@@ -31,7 +36,11 @@ trait EntityOps {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return
     */
-  implicit final def long2Entity(id: Long)(implicit conn: Conn): Entity = Entity(conn.db.entity(id), conn, id.asInstanceOf[Object])
+  implicit final def long2Entity(id: Long)(implicit conn: Conn): DatomicEntity = conn match {
+    case conn: Conn_Peer     => DatomicEntity_Peer(conn.peerConn.db.entity(id), conn, id)
+    case conn: Conn_DevLocal => DatomicEntity_DevLocal(conn, id)
+  }
+
 
   /** Retract multiple entities with optional transaction meta data.
     * <br><br>
@@ -50,7 +59,7 @@ trait EntityOps {
     * }}}
     *
     * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
+    *      | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
@@ -95,7 +104,7 @@ trait EntityOps {
     * }}}
     *
     * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
+    *      | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
@@ -145,8 +154,8 @@ trait EntityOps {
     *   ------------------------------------------------
     *   3      List(
     *     1      List(
-    *       1      :db.fn/retractEntity   17592186045445
-    *       2      :db.fn/retractEntity   17592186045446
+    *       1      :db/retractEntity   17592186045445
+    *       2      :db/retractEntity   17592186045446
     *       3      :db/add   #db/id[:db.part/tx -1000097]    :MetaData/user     b                                    Card(1)))
     *   ===================================================================================================================
     * }}}

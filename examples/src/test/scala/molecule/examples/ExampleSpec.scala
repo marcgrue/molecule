@@ -24,11 +24,15 @@ class ExampleSpec  extends MoleculeSpec with ClojureBridge {
   // Do or skip looping input tests that take a few minutes
   val heavyInputTesting = false
 
-  var peerOnly = false
+  var peerOnly     = false
+  var devLocalOnly = false
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {
       step(setupPeer()) ^
+        fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (devLocalOnly) {
+      step(setupDevLocal()) ^
         fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
 

@@ -6,6 +6,7 @@ import datomic.Peer._
 import datomic.Util._
 import datomic.{Connection, Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
+import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
@@ -27,7 +28,7 @@ object Conn_Peer {
 
   // Constructor for transaction functions where db is supplied inside transaction by transactor
   def apply(txDb: AnyRef): Conn_Peer = new Conn_Peer(null) {
-    testDb(Database_Peer(txDb.asInstanceOf[Database]))
+    testDb(DatomicDb_Peer(txDb.asInstanceOf[Database]))
   }
 }
 
@@ -64,7 +65,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
     * @param db
     */
   def testDb(db: DatomicDb): Unit = {
-    _testDb = Some(db.asInstanceOf[Database_Peer].peerDb)
+    _testDb = Some(db.asInstanceOf[DatomicDb_Peer].peerDb)
   }
 
   /** Use test database as of time t.
@@ -185,15 +186,17 @@ class Conn_Peer(val peerConn: datomic.Connection)
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
       // Return singleton adhoc db
-      Database_Peer(getAdhocDb)
+      DatomicDb_Peer(getAdhocDb)
     } else if (_testDb.isDefined) {
       // Test db
-      Database_Peer(_testDb.get)
+      DatomicDb_Peer(_testDb.get)
     } else {
       // Live db
-      Database_Peer(peerConn.db)
+      DatomicDb_Peer(peerConn.db)
     }
   }
+
+  def entity(id: Any): DatomicEntity = db.entity(this, id)
 
   /** Transact Seq of Seqs of [[Statement]]s
     *
@@ -504,7 +507,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
 
     val adhocDb = db
-    def date(d: Datom): Date = adhocDb.entity(d.tx).get(":db/txInstant").asInstanceOf[Date]
+    def date(d: Datom): Date = adhocDb.entity(this, d.tx).value(":db/txInstant").asInstanceOf[Date]
     def ident(d: Datom): AnyRef = adhocDb.getDatomicDb.asInstanceOf[Database].ident(d.a).toString
     def t(d: Datom): AnyRef = toT(d.tx).asInstanceOf[AnyRef]
     def op(d: Datom): AnyRef = d.added.asInstanceOf[AnyRef]

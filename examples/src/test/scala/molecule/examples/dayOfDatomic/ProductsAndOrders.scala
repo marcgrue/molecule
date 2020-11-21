@@ -1,29 +1,33 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.MoleculeSpec
+
 import molecule.datomic.api.out5._
+//import molecule.datomic.peer.facade.Datomic_Peer._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
 import molecule.examples.dayOfDatomic.schema._
-import molecule.datomic.peer.facade.Datomic_Peer._
+import molecule.examples.ExampleSpec
 
 
-class ProductsAndOrders extends MoleculeSpec {
+class ProductsAndOrders extends ExampleSpec {
+
+//  peerOnly = true
+  devLocalOnly = true
 
 
-  "Nested data, 1 level without initial namespace asserts" >> {
+  "Nested data, 1 level without initial namespace asserts" in new ProductsSetup {
 
     // See: http://blog.datomic.com/2013/06/component-entities.html
 
-    // Make db
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
-
     // Insert 2 products
-    val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
+    val List(chocolateId, whiskyId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky").eids
 
     // Insert nested data .................................
 
     // We don't necessarily have to assert a fact of the initial namespace
-    val List(order, l1, l2) = m(Order.LineItems * LineItem.product.price.quantity) insert List((chocolateId, 48.00, 1), (whiskyId, 38.00, 2)) eids
+    val List(order, l1, l2) = m(Order.LineItems * LineItem.product.price.quantity) insert
+      List((chocolateId, 48.00, 1), (whiskyId, 38.00, 2)) eids
 
+//    println(order.touchQuoted)
     order.touch === Map(
       ":db/id" -> order,
       ":Order/lineItems" -> List(Map(
@@ -45,7 +49,8 @@ class ProductsAndOrders extends MoleculeSpec {
       (order, Seq((chocolateId, 48.00, 1), (whiskyId, 38.00, 2)))
     )
 
-    // Or we can omit the order entity id and get the lineItem data in groups for each Order found (only 1 here)
+    // Or we can omit the order entity id and get the lineItem data in groups
+    // for each Order found (only 1 here)
     m(Order.LineItems * LineItem.product.price.quantity).get === Seq(
       Seq((chocolateId, 48.00, 1), (whiskyId, 38.00, 2))
     )
@@ -57,12 +62,11 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, 1 level" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, 1 level" in new ProductsSetup {
 
     // Insert 2 products
-    val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
+    val List(chocolateId, whiskyId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky").eids
 
     // Template for Order with multiple LineItems
     val order = m(Order.orderid.LineItems * LineItem.product.price.quantity)
@@ -70,7 +74,8 @@ class ProductsAndOrders extends MoleculeSpec {
     // Insert nested data .................................
 
     // Make order with two line items and return created entity id
-    val List(orderId, l1, l2) = order.insert(23, List((chocolateId, 48.00, 1), (whiskyId, 38.00, 2))).eids
+    val List(orderId, l1, l2) = order
+      .insert(23, List((chocolateId, 48.00, 1), (whiskyId, 38.00, 2))).eids
 
     // Find id of order with chocolate
     Order.e.LineItems.Product.description_("Expensive Chocolate").get.head === orderId
@@ -78,7 +83,8 @@ class ProductsAndOrders extends MoleculeSpec {
 
     // Touch entity ................................
 
-    // Get all attributes/values of this entity. Sub-component values are recursively retrieved
+    // Get all attributes/values of this entity. Sub-component values are
+    // recursively retrieved
     orderId.touch === Map(
       ":db/id" -> orderId,
       ":Order/lineItems" -> List(
@@ -99,16 +105,16 @@ class ProductsAndOrders extends MoleculeSpec {
     orderId.retract
 
     // The products are still there
-    Product.e.description_("Expensive Chocolate" or "Cheap Whisky").get === List(chocolateId, whiskyId)
+    Product.e.description_("Expensive Chocolate" or "Cheap Whisky").get ===
+      List(chocolateId, whiskyId)
   }
 
 
-  "Nested Data, 1 level, with non-asserted values" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, 1 level, with non-asserted values" in new ProductsSetup {
 
     // Insert 2 products
-    val List(chocolateId, whiskyId, licoriceId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky", "Licorice").eids
+    val List(chocolateId, whiskyId, licoriceId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky", "Licorice").eids
 
     // Template for Order with multiple LineItems and optional quantity
     val order = m(Order.orderid.LineItems * LineItem.product.price.quantity$)
@@ -160,7 +166,8 @@ class ProductsAndOrders extends MoleculeSpec {
     // Get ................................
 
     // Get adjacent facts
-    m(Order.orderid.LineItems.quantity.price.Product.e.description).get.sortBy(_._1) === List(
+    Order.orderid.LineItems.quantity.price.Product.e.description
+      .get.sortBy(_._1) === List(
       (23, 2, 77.0, licoriceId, "Licorice"),
       // whisky for order 23 is _not_ fetched since it has no quantity asserted!
       (23, 1, 48.0, chocolateId, "Expensive Chocolate"),
@@ -168,9 +175,11 @@ class ProductsAndOrders extends MoleculeSpec {
       (24, 4, 77.0, licoriceId, "Licorice")
     )
 
-    // Make `quantity` optional (by appending `$`) and get all facts wether quantity is asserted or not.
+    // Make `quantity` optional (by appending `$`) and get all facts wether
+    // quantity is asserted or not.
     // Quantities are then returned as Option[Int]
-    m(Order.orderid.LineItems.quantity$.price.Product.e.description).get.sortBy(t => (t._1, t._5)) === List(
+    Order.orderid.LineItems.quantity$.price.Product.e.description
+      .get.sortBy(t => (t._1, t._5)) === List(
       (23, None, 38.0, whiskyId, "Cheap Whisky"),
       (23, Some(1), 48.0, chocolateId, "Expensive Chocolate"),
       (23, Some(2), 77.0, licoriceId, "Licorice"),
@@ -198,32 +207,32 @@ class ProductsAndOrders extends MoleculeSpec {
     order23.retract
 
     // The products are still there
-    Product.e.description_("Expensive Chocolate" or "Cheap Whisky").get === List(chocolateId, whiskyId)
+    Product.e.description_("Expensive Chocolate" or "Cheap Whisky")
+      .get === List(chocolateId, whiskyId)
   }
 
 
-  "Mixing nested and adjacent data" >> {
+  "Mixing nested and adjacent data" in new ProductsSetup {
 
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
-
-    // Template for Order with multiple nested LineItems, optional quantity and adjacent `Product.description`
+    // Template for Order with multiple nested LineItems, optional quantity and
+    // adjacent `Product.description`
     val order = m(Order.orderid.LineItems * LineItem.price.quantity$.Product.description)
 
 
     // Insert .................................
 
-    // Although we wouldn't like to create redundant products, we'll make some here anyway
-    // just to demonstrate that the nested part of a molecule can contain an adjacent card-one reference
-    val List(order23, l1, p1, l2, p2, l3, p3, order24, ll1, pp1, ll2, pp2) = order insert List(
-      (23, List(
-        (48.00, Some(1), "Expensive Chocolate"),
-        (38.00, None, "Cheap Whisky"),
-        (77.00, Some(2), "Licorice"))),
-      (24, List(
-        (38.00, Some(3), "Cheap Whisky"),
-        (77.00, Some(4), "Licorice")))) eids
-
-    //    val List(order23, order24) = Order.e.orderid.get.sortBy(_._2).map(_._1)
+    // Although we wouldn't like to create redundant products, we'll make some
+    // here anyway just to demonstrate that the nested part of a molecule can
+    // contain an adjacent card-one reference
+    val List(order23, l1, p1, l2, p2, l3, p3, order24, ll1, pp1, ll2, pp2) =
+      order insert List(
+        (23, List(
+          (48.00, Some(1), "Expensive Chocolate"),
+          (38.00, None, "Cheap Whisky"),
+          (77.00, Some(2), "Licorice"))),
+        (24, List(
+          (38.00, Some(3), "Cheap Whisky"),
+          (77.00, Some(4), "Licorice")))) eids
 
     // Find id of orders containing various products
     Order.e.LineItems.Product.description_("Expensive Chocolate").get === List(order23)
@@ -232,7 +241,8 @@ class ProductsAndOrders extends MoleculeSpec {
 
     // Touch ................................
 
-    // Get all attributes/values of this entity. Sub-component values are recursively retrieved
+    // Get all attributes/values of this entity. Sub-component values are
+    // recursively retrieved
     order23.touch === Map(
       ":db/id" -> order23,
       ":Order/lineItems" -> List(
@@ -267,20 +277,21 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, 2 levels" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, 2 levels" in new ProductsSetup {
 
     // Insert 2 products
-    val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
+    val List(chocolateId, whiskyId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky").eids
 
     // Insert nested data
-    val List(o1, l1, c1, c2, l2, c3, c4, c5) = Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * Comment.text) insert List(
-      (23, List(
-        (chocolateId, 48.00, 1, List("first", "product")),
-        (whiskyId, 38.00, 2, List("second", "is", "best"))
-      ))
-    ) eids
+    val List(o1, l1, c1, c2, l2, c3, c4, c5) =
+      Order.orderid.LineItems * (
+        LineItem.product.price.quantity.Comments * Comment.text) insert List(
+        (23, List(
+          (chocolateId, 48.00, 1, List("first", "product")),
+          (whiskyId, 38.00, 2, List("second", "is", "best"))
+        ))
+      ) eids
 
     // Order lines with correct products added
     Order(o1).LineItems.product.get === List(chocolateId, whiskyId)
@@ -330,7 +341,8 @@ class ProductsAndOrders extends MoleculeSpec {
     //      ":Order/orderid" -> 23)
 
 
-    m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * Comment.text)).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.product.price.quantity.Comments * Comment.text)).get === List(
       (23, List(
         (chocolateId, 48.00, 1, List("first", "product")),
         (whiskyId, 38.00, 2, List("second", "is", "best"))
@@ -339,25 +351,26 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, 2 levels, multiple attrs" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, 2 levels, multiple attrs" in new ProductsSetup {
 
     // Insert 2 products
-    val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
+    val List(chocolateId, whiskyId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky").eids
 
     // Insert nested data with multiple 2nd level args
-    val List(o1, l1, c1, c2, l2, c3, c4, c5) = Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * Comment.text.descr) insert List(
-      (23, List(
-        (chocolateId, 48.00, 1, List(
-          ("first", "1a"),
-          ("product", "1b"))),
-        (whiskyId, 38.00, 2, List(
-          ("second", "2b"),
-          ("is", "2b"),
-          ("best", "2c")))
-      ))
-    ) eids
+    val List(o1, l1, c1, c2, l2, c3, c4, c5) =
+      Order.orderid.LineItems * (
+        LineItem.product.price.quantity.Comments * Comment.text.descr) insert List(
+        (23, List(
+          (chocolateId, 48.00, 1, List(
+            ("first", "1a"),
+            ("product", "1b"))),
+          (whiskyId, 38.00, 2, List(
+            ("second", "2b"),
+            ("is", "2b"),
+            ("best", "2c")))
+        ))
+      ) eids
 
     // 2 levels of nested data entered
     o1.touch === Map(
@@ -405,7 +418,8 @@ class ProductsAndOrders extends MoleculeSpec {
     //      ":Order/orderid" -> 23)
 
 
-    m(Order.orderid.LineItems * (LineItem.quantity.price.Comments * Comment.text.descr)).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.quantity.price.Comments * Comment.text.descr)).get === List(
       (23, List(
         (1, 48.00, List(
           ("first", "1a"),
@@ -419,16 +433,17 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, 3 levels" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, 3 levels" in new ProductsSetup {
 
     // Insert 2 products
-    val List(chocolateId, whiskyId) = Product.description.insert("Expensive Chocolate", "Cheap Whisky").eids
+    val List(chocolateId, whiskyId) = Product.description
+      .insert("Expensive Chocolate", "Cheap Whisky").eids
 
     // Insert nested data in 3 levels
     val List(o1, l1, c1, a1, c2, a2, l2, c3, a3, a4, c4, a5, c5, a6) =
-      Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name)) insert List(
+      Order.orderid.LineItems * (
+        LineItem.product.price.quantity.Comments * (
+          Comment.text.descr.Authors * Person.name)) insert List(
         (23, List(
           (chocolateId, 48.00, 1, List(
             ("first", "1a", List("Marc Grue")),
@@ -481,7 +496,9 @@ class ProductsAndOrders extends MoleculeSpec {
           ":db/id" -> l2)),
       ":Order/orderid" -> 23)
 
-    m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.product.price.quantity.Comments * (
+        Comment.text.descr.Authors * Person.name))).get === List(
       (23, List(
         (chocolateId, 48.00, 1, List(
           ("first", "1a", List("Marc Grue")),
@@ -495,25 +512,27 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, empty data sets" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, empty data sets" in new ProductsSetup {
 
     // Insert 2 products
     val whiskyId = Product.description.insert("Cheap Whisky").eid
 
-    // Insert nested data in 3 levels - passing empty lists of nested date prevents it to be saved
+    // Insert nested data in 3 levels - passing empty lists of nested date
+    // prevents it to be saved
     val List(o1, l1, c1, a1, c2, c3) =
-      Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name)) insert List(
-      (23, List(
-        (whiskyId, 38.00, 2, List(
-          ("second", "2b", List("Don Juan")),
-          ("is", "2b", Nil),
-          ("best", "2c", List())))
-      ))
-    ) eids
+      Order.orderid.LineItems * (
+        LineItem.product.price.quantity.Comments * (
+          Comment.text.descr.Authors * Person.name)) insert List(
+        (23, List(
+          (whiskyId, 38.00, 2, List(
+            ("second", "2b", List("Don Juan")),
+            ("is", "2b", Nil),
+            ("best", "2c", List())))
+        ))
+      ) eids
 
-    // 3 levels of nested data entered, some with missing values that are then not asserted
+    // 3 levels of nested data entered, some with missing values that are
+    // then not asserted
     o1.touch === Map(
       ":db/id" -> o1,
       ":Order/lineItems" -> List(
@@ -532,7 +551,9 @@ class ProductsAndOrders extends MoleculeSpec {
       ":Order/orderid" -> 23)
 
     // Comments with no author are not fetched
-    m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.product.price.quantity.Comments * (
+        Comment.text.descr.Authors * Person.name))).get === List(
       (23, List(
         (whiskyId, 38.00, 2, List(
           ("second", "2b", List("Don Juan"))))
@@ -541,25 +562,26 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Nested Data, non-asserted values" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Nested Data, non-asserted values" in new ProductsSetup {
 
     // Insert product
     val whiskyId = Product.description.insert("Cheap Whisky").eid
 
     // We can use an optional attribute (`Comment.descr$`) for missing values
     val List(o1, l1, c1, a1, c2, a2) =
-      Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr$.Authors * Person.name)) insert List(
-      (23, List(
-        (whiskyId, 38.00, 2, List(
-          ("second", None, List("Don Juan")),
-          ("chance", Some("foo"), List("Marc"))
+      Order.orderid.LineItems * (
+        LineItem.product.price.quantity.Comments * (
+          Comment.text.descr$.Authors * Person.name)) insert List(
+        (23, List(
+          (whiskyId, 38.00, 2, List(
+            ("second", None, List("Don Juan")),
+            ("chance", Some("foo"), List("Marc"))
+          ))
         ))
-      ))
-    ) eids
+      ) eids
 
-    // 3 levels of nested data entered, some with missing values that are then not asserted
+    // 3 levels of nested data entered, some with missing values that are
+    // then not asserted
     o1.touch === Map(
       ":db/id" -> o1,
       ":Order/lineItems" -> List(
@@ -579,7 +601,9 @@ class ProductsAndOrders extends MoleculeSpec {
       ":Order/orderid" -> 23)
 
     // Comment with no `description` is not fetched
-    m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr.Authors * Person.name))).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.product.price.quantity.Comments * (
+        Comment.text.descr.Authors * Person.name))).get === List(
       (23, List(
         (whiskyId, 38.00, 2, List(
           ("chance", "foo", List("Marc"))
@@ -588,7 +612,9 @@ class ProductsAndOrders extends MoleculeSpec {
     )
 
     // Comment with optional `description` is fetched
-    m(Order.orderid.LineItems * (LineItem.product.price.quantity.Comments * (Comment.text.descr$.Authors * Person.name))).get === List(
+    m(Order.orderid.LineItems * (
+      LineItem.product.price.quantity.Comments * (
+        Comment.text.descr$.Authors * Person.name))).get === List(
       (23, List(
         (whiskyId, 38.00, 2, List(
           ("second", None, List("Don Juan")),
@@ -599,15 +625,15 @@ class ProductsAndOrders extends MoleculeSpec {
   }
 
 
-  "Corner case with flat card-many + nested" >> {
-
-    implicit val conn = recreateDbFrom(ProductsOrderSchema)
+  "Corner case with flat card-many + nested" in new ProductsSetup {
 
     // Insert product
     val whiskyId = Product.description.insert("Cheap Whisky").eid
 
     // We can use an optional attribute (`Comment.descr$`) for missing values
-    val orderId = Order.orderid.LineItems * (LineItem.product.price.quantity.text.Comments * (Comment.text.descr$.Authors * Person.name)) insert List(
+    val orderId = Order.orderid.LineItems * (
+      LineItem.product.price.quantity.text.Comments * (
+        Comment.text.descr$.Authors * Person.name)) insert List(
       (23, List(
         (whiskyId, 38.00, 2, "in stock", List(
           ("second", None, List("Don Juan")),

@@ -1,19 +1,15 @@
 package molecule.core.transform
 
-import java.util
 import java.util.Date
 import clojure.lang.Keyword
-import datomic._
+import datomic.Peer
 import datomic.Util.read
 import datomic.db.DbId
-import molecule.core.api.Entity
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{Debug, Helpers}
 import molecule.datomic.base.facade.Conn
-import molecule.datomic.peer.facade.Conn_Peer
-import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 
 
@@ -219,14 +215,14 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       val edge2 = otherEdge(edge1)
 
       // Edges to other ns already has one ref extra in one direction
-      val s1 = conn.db.entity(edge1).keySet().size()
-      val s2 = conn.db.entity(edge2).keySet().size()
+      val s1 = conn.entity(edge1).keys.size
+      val s2 = conn.entity(edge2).keys.size
 
       if (s1 > s2)
         (edge1, edge2)
       else if (s1 < s2)
         (edge2, edge1)
-      else if (conn.db.entity(edge1).get(targetAttr) == null)
+      else if (conn.entity(edge1).value(targetAttr) == null)
         (edge2, edge1)
       else
         (edge1, edge2)
@@ -240,7 +236,9 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case List(edgeB) => edgeB.asInstanceOf[Object]
 //        case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
         case Nil                =>
-          val otherId = Entity(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
+//          val otherId = Entity_Peer(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
+//          val otherId = getEntity(edgeA)(conn)
+          val otherId = conn.entity(edgeA)
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
             s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
             s"\nSpooky id: $otherId" +
@@ -739,7 +737,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case BiTargetRef(_, _) => {
         val lastEdgeNs = attr.split("/").head
         stmts.reverse.collectFirst {
-          case Add(e: db.DbId, a, _, _) if a.startsWith(lastEdgeNs) => e
+          case Add(e: DbId, a, _, _) if a.startsWith(lastEdgeNs) => e
         } getOrElse err("lastE", s"Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n"))
       }
       case _                 => {
@@ -766,7 +764,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       stmts.last.v
   }
 
-  def eidV(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId]
+  def eidV(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.isInstanceOf[DbId]
 
   def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, forcedE: Any, edgeB: Option[AnyRef])
   : (Int, Option[AnyRef], Seq[Statement]) = genericStmt match {
@@ -911,7 +909,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         (stmts0, forcedE0)
       else stmts0.last match {
         case Add("nsFull", _, backRef, _) => (stmts0.init, backRef)
-        case Add(_, _, _: db.DbId, _)     => (stmts0, 0)
+        case Add(_, _, _: DbId, _)     => (stmts0, 0)
         case Add(-1, _, _, _)             => (stmts0, 0)
         case _                            => (stmts0, stmts0.last.e)
       }
@@ -924,7 +922,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case (_, Add("nsFull", nsFull, "", bi)) =>
           // Back reference - with mandatory previous ref
           val backRef = stmts.reverse.collectFirst {
-            case Add(e: db.DbId, a, _, _) if a.startsWith(nsFull) => e
+            case Add(e: DbId, a, _, _) if a.startsWith(nsFull) => e
           } getOrElse err("resolveStmts", s"Couldn't find namespace `$nsFull` in any previous Add statements.\n" + stmts.mkString("\n"))
           (cur, edgeB, stmts :+ Add("nsFull", nsFull, backRef, bi))
 
@@ -954,7 +952,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     if (stmts1.isEmpty) {
       Seq.empty[Statement]
-    } else if (stmts1.last.v.isInstanceOf[db.DbId]) {
+    } else if (stmts1.last.v.isInstanceOf[DbId]) {
       stmts1.init
     } else {
       stmts1

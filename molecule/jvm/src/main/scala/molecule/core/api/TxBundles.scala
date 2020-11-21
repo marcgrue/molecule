@@ -84,7 +84,7 @@ trait TxBundles {
     *   ========================================================================
     *   1          ArrayBuffer(
     *     1          List(
-    *       1          :db.fn/retractEntity   17592186045445)
+    *       1          :db/retractEntity   17592186045445)
     *     2          List(
     *       1          :db/add       #db/id[:db.part/user -1000247]     :Ns/int          4           Card(1))
     *     3          List(

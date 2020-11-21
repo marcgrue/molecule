@@ -88,7 +88,9 @@ class QueryTour extends MoleculeSpec {
 
 
     // 12. Requesting an Attribute value
-    editor(":User/firstName") === Some("Ed")
+    editor.get(":User/firstName") === Some("Ed")
+    editor.apply(":User/firstName") === "Ed"
+    editor(":unrecognizedKey") === "Ed"
 
     // Or as query
     User(editor).firstName.get.head === "Ed"
@@ -107,7 +109,7 @@ class QueryTour extends MoleculeSpec {
     // 14. Navigating backwards
 
     // The editors comments (Comments pointing to the Editor entity)
-    editor(":Comment/_author") === Some(List(c2, c4, c5, c7, c11))
+    editor(":Comment/_author") === List(c2, c4, c5, c7, c11)
 
     // .. almost same as: (here, only matching data is returned)
     // Comments of editor
@@ -119,13 +121,13 @@ class QueryTour extends MoleculeSpec {
     // Todo: using the entity api like this is clumsy. Find a better way...
 
     // Comments to the editors comments (with mapping)
-    editor(":Comment/_author").get.asInstanceOf[List[Long]]
-      .flatMap(_(":Parent/comment")).asInstanceOf[List[Map[String, Any]]]
+    editor(":Comment/_author").asInstanceOf[List[Long]]
+      .map(_(":Parent/comment")).asInstanceOf[List[Map[String, Any]]]
       .map(_.head._2) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with `for` comprehension)
     (for {
-      editorComment <- editor(":Comment/_author").get.asInstanceOf[List[Long]]
+      editorComment <- editor(":Comment/_author").asInstanceOf[List[Long]]
       editorCommentComment <- editorComment(":Parent/comment").asInstanceOf[Option[Map[String, Any]]]
     } yield editorCommentComment.head._2) === List(c3, c6, c8, c12)
 

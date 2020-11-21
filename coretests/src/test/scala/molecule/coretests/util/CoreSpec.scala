@@ -26,11 +26,15 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   // Do or skip looping input tests that take a few minutes
   val heavyInputTesting = false
 
-  var peerOnly = false
+  var peerOnly     = false
+  var devLocalOnly = false
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {
       step(setupPeer()) ^
+        fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (devLocalOnly) {
+      step(setupDevLocal()) ^
         fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
 
@@ -104,12 +108,6 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   // Entry points
   class CoreSetup extends Scope {
     implicit val conn: Conn = recreatedDbConn(CoreTestSchema)
-    //    implicit val conn: Conn = {
-    //      system match {
-    //        case DatomicDevLocal => recreatedDbConn(CoreTestSchema)
-    //        case _               => recreatedDbConn(CoreTestSchema)
-    //      }
-    //    }
   }
   class BidirectionalSetup extends Scope {
     implicit val conn = recreatedDbConn(BidirectionalSchema)

@@ -1,4 +1,5 @@
 package molecule.examples.seattle
+
 import java.io.FileReader
 import datomic.Util
 import molecule.datomic.api.in2_out8._
@@ -52,8 +53,8 @@ class SeattleTests extends SeattleSpec {
       ":Community/url" -> "http://greenlake.wetpaint.com/")
 
     // We can also retrive a single (optional) attribute value
-    val untyped: Option[Any]    = communityId(":community/name")
-    val typed  : Option[String] = communityId[String](":community/name")
+    val untyped: Any            = communityId(":community/name")
+    val typed  : Option[String] = communityId.get[String](":community/name")
 
     communityId(":Community/name") === Some("Greenlake Community Wiki")
     communityId(":Community/url") === Some("http://greenlake.wetpaint.com/")
@@ -147,7 +148,7 @@ class SeattleTests extends SeattleSpec {
 
   "Advanced queries - parameterizing queries" >> {
 
-    /** ******* Single input parameter **************************/
+    /** ******* Single input parameter ************************* */
 
     // Single input value for an attribute ------------------------
 
@@ -194,7 +195,7 @@ class SeattleTests extends SeattleSpec {
     communitiesWithType(Seq("facebook_page", "twitter")).get(3).sorted === facebookOrTwitterCommunities
 
 
-    /** ******* Multiple input parameters **************************/
+    /** ******* Multiple input parameters ************************* */
 
     // Tuple of input values for multiple attributes - logical AND ------------------------
 

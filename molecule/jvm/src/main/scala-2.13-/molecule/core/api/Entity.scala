@@ -10,6 +10,7 @@ import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
 import molecule.datomic.base.facade.TxReport
+import molecule.datomic.peer.api.EntityOps
 import scala.collection.JavaConverters._
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.language.{existentials, higherKinds}
@@ -45,7 +46,7 @@ class Entity(
 
   /** Retract single entity using entity id.
     * <br><br>
-    * Given the implicit conversion of Long's in [[molecule.core.api.EntityOps]] to an [[molecule.core.api.Entity Entity]] we can
+    * Given the implicit conversion of Long's in [[EntityOps]] to an [[molecule.core.api.DatomicEntity Entity]] we can
     * can call `retract` on an entity id directly:
     * {{{
     *   // Get entity id of Ben
@@ -59,7 +60,7 @@ class Entity(
     * `eid.Tx(MyMetaData.action("my meta data")).retract`
     * <br><br>
     * To retract multiple entities (with or without tx meta data), use<br>
-    * `retract(eids, txMetaDataMolecules*)` in [[molecule.core.api.EntityOps]].
+    * `retract(eids, txMetaDataMolecules*)` in [[EntityOps]].
     *
     * @group retract
     * @return [[TxReport]] with result of retraction
@@ -69,7 +70,7 @@ class Entity(
 
   /** Asynchronously retract single entity using entity id.
     * <br><br>
-    * Given the implicit conversion of Long's in [[molecule.core.api.EntityOps]] to an [[molecule.core.api.Entity Entity]] we can
+    * Given the implicit conversion of Long's in [[EntityOps]] to an [[molecule.core.api.DatomicEntity Entity]] we can
     * can call `retractAsync` on an entity id directly:
     * {{{
     *   // Get entity id of Ben
@@ -85,7 +86,7 @@ class Entity(
     * `eid.Tx(MyMetaData.action("my meta data")).retract`
     * <br><br>
     * To retract multiple entities (with or without tx meta data), use<br>
-    * `retract(eids, txMetaDataMolecules*)` in [[molecule.core.api.EntityOps]].
+    * `retract(eids, txMetaDataMolecules*)` in [[EntityOps]].
     *
     * @group retract
     * @return [[TxReport]] with result of retraction
@@ -120,7 +121,7 @@ class Entity(
     *   ========================================================================
     *   1          List(
     *     1          List(
-    *       1          :db.fn/retractEntity   17592186045445))
+    *       1          :db/retractEntity   17592186045445))
     *   ========================================================================
     * }}}
     *
@@ -150,14 +151,14 @@ class Entity(
     *
     * @group tx
     * @param metaMolecule Transaction meta data molecule
-    * @return [[molecule.core.api.Entity.RetractMolecule RetractMolecule]] - a simple wrapper for adding retraction tx meta data
+    * @return [[molecule.core.api.DatomicEntity.RetractMolecule RetractMolecule]] - a simple wrapper for adding retraction tx meta data
     */
   def Tx(metaMolecule: MoleculeBase): RetractMolecule =
     RetractMolecule(metaMolecule)
 
   /** Wrapper to add retract methods on entity with transaction meta data.
     * <br><br>
-    * [[molecule.core.api.Entity.RetractMolecule RetractMolecule]] is created from calling `Tx`:
+    * [[molecule.core.api.DatomicEntity.RetractMolecule RetractMolecule]] is created from calling `Tx`:
     * {{{
     *   val benId = Person.name("Ben").Tx(MyMetaData.action("add member")).save.eid
     *
@@ -206,7 +207,7 @@ class Entity(
       *   ========================================================================
       *   1          List(
       *     1          List(
-      *       1          :db.fn/retractEntity   17592186045445
+      *       1          :db/retractEntity   17592186045445
       *       2          :db/add   #db/id[:db.part/tx -1000100]  :myMetaData/action   moved away   Card(1)))
       *   ========================================================================
       * }}}
@@ -742,5 +743,5 @@ object Entity {
     conn: Conn,
     id: Object,
     showKW: Boolean = true
-  ) = new Entity(entity, conn, id, showKW)
+  ) = new DatomicEntity(entity, conn, id, showKW)
 }

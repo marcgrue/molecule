@@ -142,7 +142,7 @@ object definition {
       * <br><br>
       * Referenced entities become subcomponents of the entity to which the attribute is applied.
       * <br><br>
-      * When you retract an entity with :db.fn/retractEntity, all subcomponents are also retracted.
+      * When you retract an entity with :db/retractEntity, all subcomponents are also retracted.
       * <br><br>
       * When you touch an entity, all its subcomponent entities are touched recursively.
       */

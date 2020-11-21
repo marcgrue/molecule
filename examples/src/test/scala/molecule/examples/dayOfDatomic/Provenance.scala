@@ -65,7 +65,7 @@ class Provenance extends MoleculeSpec {
       ":Story/url" -> "http://blog.datomic.com/2012/08/atomic-chocolate.html")
 
     // Time of transaction
-    val stuTxInstant = stuTxId[java.util.Date](":db/txInstant").get
+    val stuTxInstant = stuTxId.get[java.util.Date](":db/txInstant").get
 
     // Limit entity traversal 1 level deep
     stuTxId.touchMax(1) === Map(

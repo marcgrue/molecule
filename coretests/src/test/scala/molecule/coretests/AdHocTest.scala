@@ -11,8 +11,8 @@ import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.core.util.Helpers
 import molecule.datomic.api.in1_out6._
-import molecule.datomic.client.devLocal.facade.Database_DevLocal
-import molecule.datomic.peer.facade.Database_Peer
+import molecule.datomic.client.devLocal.facade.DatomicDb_DevLocal
+import molecule.datomic.peer.facade.DatomicDb_Peer
 
 class AdHocTest extends CoreSpec with Helpers {
 

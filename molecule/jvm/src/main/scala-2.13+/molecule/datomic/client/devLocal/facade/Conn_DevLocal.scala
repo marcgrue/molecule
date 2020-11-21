@@ -18,12 +18,13 @@ import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
-import molecule.datomic.peer.facade.{Database_Peer, TxReport_Peer}
+import molecule.datomic.peer.facade.{DatomicDb_Peer, TxReport_Peer}
 import org.slf4j.LoggerFactory
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 import datomicScala.client.api.sync
+import molecule.core.api.DatomicEntity
 
 
 /** Facade to Datomic dev-local connection.
@@ -58,7 +59,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
   //    _testDb = Some(db)
   //  }
   def testDb(db: DatomicDb): Unit = {
-    _testDb = Some(db.asInstanceOf[Database_DevLocal].clientDb)
+    _testDb = Some(db.asInstanceOf[DatomicDb_DevLocal].clientDb)
   }
 
   def testDbAsOf(t: Long): Unit = ???
@@ -100,15 +101,18 @@ case class Conn_DevLocal(client: Client, dbName: String)
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
       // Return singleton adhoc db
-      Database_DevLocal(getAdhocDb)
+      DatomicDb_DevLocal(getAdhocDb)
     } else if (_testDb.isDefined) {
       // Test db
-      Database_DevLocal(_testDb.get)
+      DatomicDb_DevLocal(_testDb.get)
     } else {
       // Live db
-      Database_DevLocal(clientConn.db)
+      DatomicDb_DevLocal(clientConn.db)
     }
   }
+
+  def entity(id: Any): DatomicEntity = db.entity(this, id)
+
 
   def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
@@ -213,7 +217,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
   }
 
   def _query(model: Model, query: Query, _db: Option[DatomicDb]): jCollection[jList[AnyRef]] = {
-    val adhocDb        = _db.getOrElse(db).asInstanceOf[Database_DevLocal].clientDb
+    val adhocDb        = _db.getOrElse(db).asInstanceOf[DatomicDb_DevLocal].clientDb
     val optimizedQuery = QueryOptimizer(query)
     val p              = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
     val rules          = if (query.i.rules.isEmpty) Nil else

@@ -3,6 +3,7 @@ package molecule.datomic.base.facade
 
 import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.Database
+import molecule.core.api.DatomicEntity
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
 import molecule.core.ast.tempDb.TempDb
@@ -110,6 +111,9 @@ trait Conn {
 
   /** Get current test/live db. Test db has preference. */
   def db: DatomicDb
+
+  /** Convenience method to retrieve entity directly from connection. */
+  def entity(id: Any): DatomicEntity
 
   /** Transact Seq of Seqs of [[Statement]]s
     *

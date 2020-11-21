@@ -58,7 +58,7 @@ private[molecule] case class Debug(
             indent + ret + ","
 
           case RetractEntity(e) =>
-            indent + ":db.fn/retractEntity" + padS(22, ":db.fn/retractEntity") + e
+            indent + ":db/retractEntity" + padS(22, ":db/retractEntity") + e
 
           case l: java.util.List[_] if l.size() == 4 && l.asScala.head.toString.take(4) == ":db/" => {
             val List(action, e, a, v) = l.asScala.toList
