@@ -1,21 +1,16 @@
 
 package molecule.coretests.generic
 
-import molecule.core.util.{expectCompileError, MoleculeSpec}
-import molecule.coretests.schemaDef.schema.PartitionTestSchema
+import molecule.core.util.expectCompileError
 import molecule.coretests.util.CoreSpec
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out3._
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-class SchemaTest extends MoleculeSpec {
+class SchemaTest extends CoreSpec {
 
   "Partition schema values" >> {
 
-    implicit val conn = recreateDbFrom(PartitionTestSchema)
-
-    "part" >> {
+    "part" in new PartitionSetup {
 
       Schema.part.get === List("lit", "gen")
 
@@ -57,7 +52,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "nsFull" >> {
+    "nsFull" in new PartitionSetup {
 
       // Partition-prefixed namespaces
       Schema.nsFull.get.sorted === List("gen_Person", "gen_Profession", "lit_Book")
@@ -107,11 +102,9 @@ class SchemaTest extends MoleculeSpec {
   }
 
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
-
   "Schema attributes" >> {
 
-    "id" >> {
+    "id" in new CoreSetup {
 
       Schema.id.get.size === 74
 
@@ -139,7 +132,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "a" >> {
+    "a" in new CoreSetup {
 
       Schema.a.get.size === 74
       Schema.a.get(3) === List(":Ns/double", ":Ns/doubleMap", ":Ref2/ints2")
@@ -179,7 +172,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "part when not defined" >> {
+    "part when not defined" in new CoreSetup {
 
       // Default `db.part/user` partition name returned when no custom partitions are defined
       Schema.part.get === List("db.part/user")
@@ -188,7 +181,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "nsFull" >> {
+    "nsFull" in new CoreSetup {
 
       // `nsfull` always starts with lowercase letter as used in Datomic queries
       // - when partitions are defined: concatenates `part` + `ns`
@@ -243,7 +236,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "ns" >> {
+    "ns" in new CoreSetup {
 
       Schema.ns.get === List("Ns", "Ref4", "Ref2", "Ref3", "Ref1")
 
@@ -300,7 +293,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "attr" >> {
+    "attr" in new CoreSetup {
 
       Schema.attr.get.size === 74
       Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
@@ -340,7 +333,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "tpe" >> {
+    "tpe" in new CoreSetup {
 
       // Datomic types of schema attributes
       // Note that attributes defined being of Scala type
@@ -392,7 +385,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "card" >> {
+    "card" in new CoreSetup {
 
       Schema.card.get === List("one", "many")
 
@@ -426,7 +419,7 @@ class SchemaTest extends MoleculeSpec {
 
   "Schema attribute options" >> {
 
-    "doc" >> {
+    "doc" in new CoreSetup {
 
       // 2 core attributes are documented
       Schema.doc.get === List(
@@ -498,7 +491,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "index" >> {
+    "index" in new CoreSetup {
 
       // All attributes are indexed
       Schema.index.get === List(true) // no false
@@ -545,7 +538,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "unique" >> {
+    "unique" in new CoreSetup {
 
       // Unique options
       Schema.unique.get === List("identity", "value")
@@ -602,7 +595,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "fulltext" >> {
+    "fulltext" in new CoreSetup {
 
       // Fulltext options
       Schema.fulltext.get === List(true) // no false
@@ -675,7 +668,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "isComponent" >> {
+    "isComponent" in new CoreSetup {
 
       // Component status options - either true or non-asserted
       Schema.isComponent.get === List(true) // no false
@@ -742,7 +735,7 @@ class SchemaTest extends MoleculeSpec {
     }
 
 
-    "noHistory" >> {
+    "noHistory" in new CoreSetup {
 
       // No-history status options - either true or non-asserted
       Schema.noHistory.get === List(true) // no false
@@ -792,7 +785,7 @@ class SchemaTest extends MoleculeSpec {
   }
 
 
-  "enum" >> {
+  "enum" in new CoreSetup {
 
     // Attribute/enum values in namespace `ref2`
     Schema.ns_("Ref2").attr.enum.get.sorted === List(
@@ -887,7 +880,7 @@ class SchemaTest extends MoleculeSpec {
   }
 
 
-  "t, tx, txInstant" >> {
+  "t, tx, txInstant" in new CoreSetup {
 
     // Schema transaction time t
     Schema.t.get === List(1000)

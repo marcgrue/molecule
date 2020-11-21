@@ -10,94 +10,93 @@ import molecule.datomic.base.facade.TxReport
 
 class LogTest extends CoreSpec {
 
-  // Create new db from schema
-  implicit val conn = recreatedDbConn()
+  class setup extends CoreSetup {
+    // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
+    // the wall clock time since Date's are a bit unreliable for precision.
 
-  // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
-  // the wall clock time since Date's are a bit unreliable for precision.
+    // First entity
 
-  // First entity
+    val txR1: TxReport = Ns.str("a").int(1).save
+    val tx1            = txR1.tx
+    val e1             = txR1.eid
+    val t1             = txR1.t
+    val d1             = txR1.inst
 
-  val txR1: TxReport = Ns.str("a").int(1).save
-  val tx1            = txR1.tx
-  val e1   = txR1.eid
-  val t1   = txR1.t
-  val d1   = txR1.inst
+    val txR2 = Ns(e1).str("b").update
+    val tx2  = txR2.tx
+    val t2   = txR2.t
+    val d2   = txR2.inst
 
-  val txR2 = Ns(e1).str("b").update
-  val tx2  = txR2.tx
-  val t2   = txR2.t
-  val d2   = txR2.inst
-
-  val txR3 = Ns(e1).int(2).update
-  val tx3  = txR3.tx
-  val t3   = txR3.t
-  val d3   = txR3.inst
+    val txR3 = Ns(e1).int(2).update
+    val tx3  = txR3.tx
+    val t3   = txR3.t
+    val d3   = txR3.inst
 
 
-  // Second entity
+    // Second entity
 
-  val txR4 = Ns.str("x").int(4).save
-  val tx4  = txR4.tx
-  val e2   = txR4.eid
-  val t4   = txR4.t
-  val d4   = txR4.inst
+    val txR4 = Ns.str("x").int(4).save
+    val tx4  = txR4.tx
+    val e2   = txR4.eid
+    val t4   = txR4.t
+    val d4   = txR4.inst
 
-  val txR5 = Ns(e2).int(5).update
-  val tx5  = txR5.tx
-  val t5   = txR5.t
-  val d5   = txR5.inst
-
-
-  // Relationship
-
-  val txR6 = Ref1.str1("hello").save
-  val tx6  = txR6.tx
-  val t6   = txR6.t
-  val d6   = txR6.inst
-  val e3   = txR6.eid
-
-  // e2 points to e3
-  val txR7 = Ns(e2).ref1(e3).update
-  val tx7  = txR7.tx
-  val t7   = txR7.t
-  val d7   = txR7.inst
+    val txR5 = Ns(e2).int(5).update
+    val tx5  = txR5.tx
+    val t5   = txR5.t
+    val d5   = txR5.inst
 
 
-  // Cardinality-many attributes
+    // Relationship
 
-  // 6, 7, 8
-  val txR8 = Ns.ints(6, 7, 8).save
-  val t8   = txR8.t
-  val e4   = txR8.eid
+    val txR6 = Ref1.str1("hello").save
+    val tx6  = txR6.tx
+    val t6   = txR6.t
+    val d6   = txR6.inst
+    val e3   = txR6.eid
 
-  // 6, 70, 80
-  val t9 = Ns(e4).ints.replace(7 -> 70, 8 -> 80).update.t
-
-  // 70, 80
-  val t10 = Ns(e4).ints.retract(6).update.t
-
-  // 70, 80, 90
-  val t11 = Ns(e4).ints.assert(60).update.t
+    // e2 points to e3
+    val txR7 = Ns(e2).ref1(e3).update
+    val tx7  = txR7.tx
+    val t7   = txR7.t
+    val d7   = txR7.inst
 
 
-  // e2 now points to e4
-  val txR12 = Ns(e2).ref1(e4).update
-  val tx12  = txR12.tx
-  val t12   = txR12.t
-  val d12   = txR12.inst
+    // Cardinality-many attributes
 
-  // e1 also points to e4
-  val txR13 = Ns(e2).refs1(e4).update
-  val tx13  = txR13.tx
-  val t13   = txR13.t
-  val d13   = txR13.inst
+    // 6, 7, 8
+    val txR8 = Ns.ints(6, 7, 8).save
+    val t8   = txR8.t
+    val e4   = txR8.eid
 
-  // Inline descriptions taken from the manual:
-  // https://docs.datomic.com/on-prem/indexes.html
+    // 6, 70, 80
+    val t9 = Ns(e4).ints.replace(7 -> 70, 8 -> 80).update.t
+
+    // 70, 80
+    val t10 = Ns(e4).ints.retract(6).update.t
+
+    // 70, 80, 90
+    val t11 = Ns(e4).ints.assert(60).update.t
 
 
-  "Basics" >> {
+    // e2 now points to e4
+    val txR12 = Ns(e2).ref1(e4).update
+    val tx12  = txR12.tx
+    val t12   = txR12.t
+    val d12   = txR12.inst
+
+    // e1 also points to e4
+    val txR13 = Ns(e2).refs1(e4).update
+    val tx13  = txR13.tx
+    val t13   = txR13.t
+    val d13   = txR13.inst
+
+    // Inline descriptions taken from the manual:
+    // https://docs.datomic.com/on-prem/indexes.html
+  }
+
+
+  "Basics" in new setup {
 
     // Apply attribute name and `from` + `until` value range arguments
 
@@ -144,7 +143,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Grouped" >> {
+  "Grouped" in new setup {
 
     //Resembling the original structure of the Datomic Log
     val logMap = Log(Some(t1), Some(t4)).t.e.a.v.op.get.groupBy(_._1)
@@ -176,7 +175,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Args" >> {
+  "Args" in new setup {
 
     // t - t
     Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
@@ -254,7 +253,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Start/End" >> {
+  "Start/End" in new setup {
 
     // t12 (inclusive) - end
     Log(Some(t12), None).t.e.a.v.op.get === List(
@@ -280,7 +279,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Queries" >> {
+  "Queries" in new setup {
 
     // Number of transactions between tx1 and tx12
     Log(Some(tx1), Some(tx12)).t.get.distinct.size === 11
@@ -331,7 +330,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "History" >> {
+  "History" in new setup {
 
     // Since we get the Log from the Connection and not the Database,
     // any time filter getter will make no difference

@@ -47,8 +47,13 @@ trait InputMolecule_1[I1] extends InputMolecule {
         val values                                    = inputs.flatMap {
           case map: Map[_, _] =>
             map.head._2 match {
-              case _: Date => map.toSeq.map { case (k, v: Date) => Seq(k, fns.date2str(v)) } // compare standardized format
-              case _       => map.toSeq.map { case (k, v) => Seq(k, v) }
+              case _: Date => map.toSeq.map {
+                case (k, v: Date) => Seq(k, fns.date2str(v)) // compare standardized format
+                case (k, v)       => Seq(k, v)
+              }
+              case _       => map.toSeq.map {
+                case (k, v) => Seq(k, v)
+              }
             }
           case other          => throw new InputMolecule_1_Exception(s"Unexpected input for mapped attribute `:$nsFull/$attr`: " + other)
         }
@@ -59,7 +64,7 @@ trait InputMolecule_1[I1] extends InputMolecule {
       case 1 => {
         val List(ph: Placeholder) = query.i.inputs
         // Remove placeholder
-        val q1 = query.copy(i = In(Nil, query.i.rules, query.i.ds))
+        val q1                    = query.copy(i = In(Nil, query.i.rules, query.i.ds))
         resolveInput(q1, ph, inputs)
       }
     }

@@ -1,14 +1,13 @@
 package molecule.datomic.client.devLocal.facade
 
-import java.util.UUID.randomUUID
+import java.util.{List => jList, Map => jMap}
+import java.util
 import datomic.Peer
+import datomic.Util.read
 import datomicClojure.ClojureBridge
 import datomicScala.client.api.sync.Client
-import datomicScala.client.api.sync.Datomic.require
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.datomic.base.facade.Conn
 import molecule.core.schema.SchemaTransaction
-import molecule.datomic.peer.facade.Datomic_Peer
 import scala.jdk.CollectionConverters._
 
 
@@ -19,8 +18,6 @@ import scala.jdk.CollectionConverters._
   * @groupprio 10
   * */
 case class Datomic_DevLocal(client: Client) extends ClojureBridge {
-
-//  require("molecule.core.util.fns")
 
   def getDatabaseNames(
     timeout: Int = 0,
@@ -58,6 +55,27 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
+  private def allowedDevLocalDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
+    val nss2     = new util.ArrayList[jMap[Object, Object]]()
+    val bytes    = read(":db.type/bytes")
+    val index    = read(":db/index")
+    val fulltext = read(":db/fulltext")
+    nss.asInstanceOf[jList[jMap[Object, Object]]].asScala.foreach { map0 =>
+      val map1     : Map[Object, Object] = map0.asScala.toMap
+      val validType: Boolean             = map1.collect {
+        case (k, v) if v == bytes => "bytes not implemented for dev-local"
+      }.isEmpty
+      if (validType) {
+        val map2: jMap[Object, Object] = map1.filterNot {
+          // Indexing and fulltext not implemented
+          case (k, _) => k == index || k == fulltext
+        }.asJava
+        nss2.add(map2)
+      }
+    }
+    nss2
+  }
+
   /** Deletes existing database (!) and creates a new empty db with schema from Schema Transaction file.
     * <br><br>
     * A typical development cycle in the initial stages of creating the db schema:
@@ -78,8 +96,8 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     createDatabase(dbName)
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(schema.partitions)
-    conn.transact(schema.namespaces)
+      conn.transact(allowedDevLocalDefinitions(schema.partitions))
+    conn.transact(allowedDevLocalDefinitions(schema.namespaces))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
@@ -123,8 +141,8 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
   ): Conn_DevLocal = try {
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(schema.partitions)
-    conn.transact(schema.namespaces)
+      conn.transact(allowedDevLocalDefinitions(schema.partitions))
+    conn.transact(allowedDevLocalDefinitions(schema.namespaces))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)

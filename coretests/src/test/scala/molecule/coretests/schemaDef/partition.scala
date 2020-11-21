@@ -1,19 +1,13 @@
 package molecule.coretests.schemaDef
 
 import molecule.core.ast.model.{Atom, Bond, Eq, Model}
-import molecule.core.util.MoleculeSpec
 import molecule.coretests.schemaDef.dsl.partitionTest._
-import molecule.coretests.schemaDef.schema.PartitionTestSchema
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out4._
-import molecule.datomic.peer.facade.Datomic_Peer._
-import org.specs2.specification.Scope
 import scala.language.reflectiveCalls
 
-class PartitionSetup extends Scope {
-  implicit val conn = recreateDbFrom(PartitionTestSchema)
-}
 
-class Partition extends MoleculeSpec {
+class Partition extends CoreSpec {
 
   "Insert resolves to correct partitions" in new PartitionSetup {
     testInsertMolecule(

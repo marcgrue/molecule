@@ -5,6 +5,7 @@ import datomic.Util.{list, read}
 import datomicClojure.ClojureBridge
 import molecule.core.ast.transactionModel
 import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out9._
@@ -16,7 +17,7 @@ import scala.concurrent.Future
 class Save extends CoreSpec with ClojureBridge {
 
   // todo: remove when async implemented for other systems
-  if (system == Peer) {
+  if (system == DatomicPeer) {
     "Async" in new CoreSetup {
 
       // Save asynchronously and return Future[TxReport]

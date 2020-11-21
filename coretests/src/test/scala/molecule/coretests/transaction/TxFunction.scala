@@ -4,6 +4,7 @@ import molecule.core.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.core.macros.TxFns
 import molecule.core.macros.exception.TxFnException
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out3._
@@ -175,7 +176,7 @@ class TxFunction extends CoreSpec {
     Ns.int.get.head === 110
 
     // todo: Async implementation for systems other than Peer
-    if (system == Peer) {
+    if (system == DatomicPeer) {
       // Asynchronous, non-blocking tx fn call (uses Datomic's asynchronous api)
       Await.result(
         transactFnAsync(inc(e, 15)) map { txReport =>

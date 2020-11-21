@@ -1,21 +1,19 @@
-package molecule.coretests.util
+package molecule.examples
 
 import datomicClojure.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
 import datomicScala.CognitectAnomaly
 import molecule.core.schema.SchemaTransaction
-import molecule.core.util._
-import molecule.coretests.bidirectionals.schema.BidirectionalSchema
-import molecule.coretests.schemaDef.schema.PartitionTestSchema
-import molecule.coretests.util.schema.CoreTestSchema
+import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer, MoleculeSpec, System}
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
 import molecule.datomic.peer.facade.Datomic_Peer
+import molecule.examples.dayOfDatomic.schema.{AggregatesSchema, GraphSchema, ProductsOrderSchema, SocialNewsSchema}
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 
-class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
+class ExampleSpec  extends MoleculeSpec with ClojureBridge {
   sequential
 
   var system     : System      = DatomicPeer
@@ -102,19 +100,17 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   }
 
   // Entry points
-  class CoreSetup extends Scope {
-    implicit val conn: Conn = recreatedDbConn(CoreTestSchema)
-    //    implicit val conn: Conn = {
-    //      system match {
-    //        case DatomicDevLocal => recreatedDbConn(CoreTestSchema)
-    //        case _               => recreatedDbConn(CoreTestSchema)
-    //      }
-    //    }
+  class AggregateSetup extends Scope {
+    implicit val conn: Conn = recreatedDbConn(AggregatesSchema)
   }
-  class BidirectionalSetup extends Scope {
-    implicit val conn = recreatedDbConn(BidirectionalSchema)
+  class SocialSetup extends Scope {
+    implicit val conn = recreatedDbConn(SocialNewsSchema)
   }
-  class PartitionSetup extends Scope {
-    implicit val conn = recreatedDbConn(PartitionTestSchema)
+  class GraphSetup extends Scope {
+    implicit val conn = recreatedDbConn(GraphSchema)
   }
+  class ProductsSetup extends Scope {
+    implicit val conn = recreatedDbConn(ProductsOrderSchema)
+  }
+
 }

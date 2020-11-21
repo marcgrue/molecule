@@ -2,7 +2,7 @@ package molecule.coretests.crud.update
 
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out1._
@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class UpdateInt extends CoreSpec {
 
-  if (system == Peer) {
+  if (system == DatomicPeer) {
     "Async" in new CoreSetup {
 
       // Update data asynchronously. Internally calls Datomic's transactAsync API.

@@ -1,7 +1,7 @@
 package molecule.coretests.attr
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out5._
@@ -451,10 +451,12 @@ class OptionalValues extends CoreSpec {
     )
     Ns.int.str$(Some("hi")).get === List()
 
-    // Fulltext matching a single full word
-    Ns.int.str$.contains("hi").get === List(
-      (1, Some("hi there")),
-    )
+    if (system == DatomicPeer) {
+      // Fulltext matching a single full word
+      Ns.int.str$.contains("hi").get === List(
+        (1, Some("hi there")),
+      )
+    }
   }
 
 
@@ -475,9 +477,11 @@ class OptionalValues extends CoreSpec {
     Ns.int.strs(Set("hi")).get === List()
     Ns.int.strs$(Some(Set("hi"))).get === List()
 
-    // Fulltext matching a single full word
-    Ns.int.strs$.contains("hi").get === List(
-      (1, Some(Set("hi there", "hi five"))),
-    )
+    if (system == DatomicPeer) {
+      // Fulltext matching a single full word
+      Ns.int.strs$.contains("hi").get === List(
+        (1, Some(Set("hi there", "hi five"))),
+      )
+    }
   }
 }

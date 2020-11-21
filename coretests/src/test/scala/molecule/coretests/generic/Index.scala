@@ -10,87 +10,87 @@ import molecule.datomic.api.out5._
 
 class Index extends CoreSpec {
 
-  // Create new db from schema
-  implicit val conn = recreatedDbConn()
+  class setup extends CoreSetup {
+    // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
+    // the wall clock time since Date's are a bit unreliable for precision.
 
-  // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
-  // the wall clock time since Date's are a bit unreliable for precision.
+    // First entity
 
-  // First entity
+    val txR1 = Ns.str("a").int(1).save
+    val tx1  = txR1.tx
+    val e1   = txR1.eid
+    val t1   = txR1.t
+    val d1   = txR1.inst
 
-  val txR1 = Ns.str("a").int(1).save
-  val tx1  = txR1.tx
-  val e1   = txR1.eid
-  val t1   = txR1.t
-  val d1   = txR1.inst
+    val txR2 = Ns(e1).str("b").update
+    val tx2  = txR2.tx
+    val t2   = txR2.t
+    val d2   = txR2.inst
 
-  val txR2 = Ns(e1).str("b").update
-  val tx2  = txR2.tx
-  val t2   = txR2.t
-  val d2   = txR2.inst
-
-  val txR3 = Ns(e1).int(2).update
-  val tx3  = txR3.tx
-  val t3   = txR3.t
-  val d3   = txR3.inst
+    val txR3 = Ns(e1).int(2).update
+    val tx3  = txR3.tx
+    val t3   = txR3.t
+    val d3   = txR3.inst
 
 
-  // Second entity
+    // Second entity
 
-  val txR4 = Ns.str("x").int(4).save
-  val tx4  = txR4.tx
-  val e2   = txR4.eid
-  val t4   = txR4.t
-  val d4   = txR4.inst
+    val txR4 = Ns.str("x").int(4).save
+    val tx4  = txR4.tx
+    val e2   = txR4.eid
+    val t4   = txR4.t
+    val d4   = txR4.inst
 
-  val txR5 = Ns(e2).int(5).update
-  val tx5  = txR5.tx
-  val t5   = txR5.t
-  val d5   = txR5.inst
-
-
-  // Relationship
-
-  val txR6 = Ref1.str1("hello").save
-  val tx6  = txR6.tx
-  val t6   = txR6.t
-  val d6   = txR6.inst
-  val e3   = txR6.eid
-
-  // e2 points to e3
-  val txR7 = Ns(e2).ref1(e3).update
-  val tx7  = txR7.tx
-  val t7   = txR7.t
-  val d7   = txR7.inst
+    val txR5 = Ns(e2).int(5).update
+    val tx5  = txR5.tx
+    val t5   = txR5.t
+    val d5   = txR5.inst
 
 
-  // Cardinality-many attributes
+    // Relationship
 
-  // 6, 7, 8
-  val txR8 = Ns.ints(6, 7, 8).save
-  val t8   = txR8.t
-  val e4   = txR8.eid
+    val txR6 = Ref1.str1("hello").save
+    val tx6  = txR6.tx
+    val t6   = txR6.t
+    val d6   = txR6.inst
+    val e3   = txR6.eid
 
-  // 6, 70, 80
-  val t9 = Ns(e4).ints.replace(7 -> 70, 8 -> 80).update.t
-
-  // 70, 80
-  val t10 = Ns(e4).ints.retract(6).update.t
-
-  // 70, 80, 90
-  val t11 = Ns(e4).ints.assert(60).update.t
+    // e2 points to e3
+    val txR7 = Ns(e2).ref1(e3).update
+    val tx7  = txR7.tx
+    val t7   = txR7.t
+    val d7   = txR7.inst
 
 
-  // e2 now points to e4
-  val txR12 = Ns(e2).ref1(e4).update
-  val t12   = txR12.t
+    // Cardinality-many attributes
 
-  // e1 also points to e4
-  val txR13 = Ns(e2).refs1(e4).update
-  val t13   = txR13.t
+    // 6, 7, 8
+    val txR8 = Ns.ints(6, 7, 8).save
+    val t8   = txR8.t
+    val e4   = txR8.eid
 
-  // Inline descriptions respectfully borrowed from the manual:
-  // https://docs.datomic.com/on-prem/indexes.html
+    // 6, 70, 80
+    val t9 = Ns(e4).ints.replace(7 -> 70, 8 -> 80).update.t
+
+    // 70, 80
+    val t10 = Ns(e4).ints.retract(6).update.t
+
+    // 70, 80, 90
+    val t11 = Ns(e4).ints.assert(60).update.t
+
+
+    // e2 now points to e4
+    val txR12 = Ns(e2).ref1(e4).update
+    val t12   = txR12.t
+
+    // e1 also points to e4
+    val txR13 = Ns(e2).refs1(e4).update
+    val t13   = txR13.t
+
+    // Inline descriptions respectfully borrowed from the manual:
+    // https://docs.datomic.com/on-prem/indexes.html
+  }
+
 
   "EAVT" >> {
 
@@ -104,7 +104,7 @@ class Index extends CoreSpec {
     // still grouped together.
 
 
-    "Current values" >> {
+    "Current values" in new setup {
 
       // EAVT datom values of entity e1
       EAVT(e1).e.a.v.t.get === List(
@@ -145,7 +145,7 @@ class Index extends CoreSpec {
       EAVT(e1).op.get === List(true, true)
     }
 
-    "History values" >> {
+    "History values" in new setup {
 
       // History of attribute values of entity e1
       // Generic attribute `op` is interesting when looking at the history database since
@@ -191,7 +191,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Card many" >> {
+    "Card many" in new setup {
 
       // Each value is asserted/retracted on its own
       EAVT(e4).a.v.t.get === List(
@@ -217,7 +217,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" >> {
+    "Only mandatory datom args" in new setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -241,7 +241,7 @@ class Index extends CoreSpec {
 
   "AEVT" >> {
 
-    "Args" >> {
+    "Args" in new setup {
 
       // The AEVT index provides efficient access to all values for a given attribute,
       // comparable to traditional column access style.
@@ -292,7 +292,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" >> {
+    "Only mandatory datom args" in new setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -316,7 +316,7 @@ class Index extends CoreSpec {
 
   "AVET" >> {
 
-    "Basics" >> {
+    "Basics" in new setup {
 
       // The AVET index provides efficient access to particular combinations of attribute and value.
 
@@ -346,7 +346,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" >> {
+    "Only mandatory datom args" in new setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -370,7 +370,7 @@ class Index extends CoreSpec {
 
   "AVET Index range" >> {
 
-    "Basics" >> {
+    "Basics" in new setup {
 
       // Apply attribute name and `from` + `until` value range arguments
 
@@ -382,7 +382,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg combinations" >> {
+    "Arg combinations" in new setup {
 
       // `until` arg 5 is not included
       AVET.range(":Ns/int", Some(2), Some(5)).e.get === List(e1)
@@ -424,7 +424,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg types" >> {
+    "Arg types" in new setup {
 
       // Different range types throw an exception
       (AVET.range(":Ns/int", Some(1), Some("y")).e.get must throwA[MoleculeException])
@@ -436,7 +436,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg variables" >> {
+    "Arg variables" in new setup {
 
       // Args can be supplied as variables
 
@@ -459,7 +459,7 @@ class Index extends CoreSpec {
     }
 
 
-    "History" >> {
+    "History" in new setup {
 
       // Attribute :Ns/int values from 1 to end
       AVET.range(":Ns/int", Some(1), None).v.e.t.op.getHistory === List(
@@ -508,7 +508,7 @@ class Index extends CoreSpec {
 
   "VAET" >> {
 
-    "Args" >> {
+    "Args" in new setup {
 
       // e2 no longer points to e3
       VAET(e3).a.e.t.get === Nil
@@ -533,7 +533,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" >> {
+    "Only mandatory datom args" in new setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -555,7 +555,7 @@ class Index extends CoreSpec {
   }
 
 
-  "Raw access to all Datoms of Index" >> {
+  "Raw access to all Datoms of Index" in new setup {
 
     // Access all datoms (the entire database!) of an Index by raw access:
     conn.db.datoms(datomic.Database.EAVT)

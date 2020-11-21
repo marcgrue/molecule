@@ -1,14 +1,13 @@
 package molecule.internaltests.shared.transform
 
 import molecule.core.ast.model._
-import molecule.core.ast.query.{AggrExpr, DataClause, Empty, Find, ImplDS, In, KW, NoBinding, Query, Var, Where, With}
+import molecule.core.ast.query._
 import molecule.core.transform.Model2Query
-import molecule.core.util.MoleculeSpec
+import molecule.coretests.util.CoreSpec
 
-class Model2QueryTest extends MoleculeSpec {
+class Model2QueryTest extends CoreSpec {
 
-
-  "Multiple aggregates share attribute value" >> {
+  "Multiple aggregates share attribute value" in new CoreSetup {
 
     Model2Query(Model(List(
       Atom("Obj", "meanRadius", "Double", 1, Fn("sum", None), None, Seq(), Seq()),
@@ -38,7 +37,5 @@ class Model2QueryTest extends MoleculeSpec {
         Where(List(
           DataClause(ImplDS, Var("a"), KW("Obj", "meanRadius", ""), Var("b"), Empty, NoBinding)
         ))).toString
-
-
   }
 }
