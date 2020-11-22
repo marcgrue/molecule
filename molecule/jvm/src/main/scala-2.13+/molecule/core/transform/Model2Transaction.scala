@@ -145,7 +145,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   private def tempId(attr: String): AnyRef = attr match {
     case null                 => err("__tempId", "Attribute name unexpectedly null.")
-    case "tx"                 => Peer.tempid(read(":db.part/tx"))
+    case "tx"                 => "datomic.tx"
     case s if s.contains('_') => Peer.tempid(read(":" + attr.substring(1).split("(?=_)").head)) // extract "partition" from ":partition_Namespace/attr"
     case _                    => Peer.tempid(read(":db.part/user"))
   }
@@ -184,7 +184,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def p(v: Any): Any = v match {
       case f: Float              => f.toString.toDouble
-//      case _ if prefix.isDefined => prefix.get + v
       case _ if prefix.isDefined => Keyword.intern(prefix.get.tail.init, v.toString)
       case bd: BigDecimal        => bd + 0.0 // ensure decimal digits
       case _                     => v

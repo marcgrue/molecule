@@ -5,6 +5,7 @@ import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
 import datomic.db.Datum
 import molecule.core.ast.transactionModel._
+import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.util.Debug
 import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
@@ -14,28 +15,32 @@ case class TxReport_Peer(
   stmtss: Seq[Seq[Statement]] = Nil
 ) extends TxReport {
 
-  def eids: List[Long] = if (stmtss.isEmpty) {
-    val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
-    var a      = Array.empty[Long]
-    var i      = 0
-    datoms.next() // skip first transaction time datom
-    while (datoms.hasNext) {
-      a = a :+ datoms.next.asInstanceOf[Datom].e().asInstanceOf[Long]
-      i += 1
+  def eids: List[Long] = {
+    val allIds = {
+      val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
+      var a      = Array.empty[Long]
+      var i      = 0
+      datoms.next() // skip first transaction time datom
+      while (datoms.hasNext) {
+        a = a :+ datoms.next.asInstanceOf[Datom].e().asInstanceOf[Long]
+        i += 1
+      }
+      a.toList
     }
-    a.toList.distinct
-
-  } else {
-    val tempIds    = stmtss.flatten.collect {
-      case Add(e, _, _, _) if e.toString.take(6) == "#db/id" => e
-      case Add(_, _, v, _) if v.toString.take(6) == "#db/id" => v
-    }.distinct
-    val txTtempIds = rawTxReport.get(Connection.TEMPIDS)
-    val dbAfter    = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
-    val res        = tempIds.map(tempId =>
-      datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]
-    ).distinct.toList
-    res
+    if (stmtss.isEmpty) {
+      allIds.distinct
+    } else {
+      val flattenStmts = stmtss.flatten
+      if (allIds.size != flattenStmts.size)
+        throw new DatomicFacadeException(
+          s"Unexpected different counts of ${allIds.size} ids and ${flattenStmts.size} stmts."
+        )
+      val resolvedIds = flattenStmts.zip(allIds).collect {
+        case (Add(tempId, _, _, _), eid) if tempId.toString.take(6) == "#db/id" => eid
+        case (Add("datomic.tx", _, _, _), eid)                                  => eid
+      }.distinct.toList
+      resolvedIds
+    }
   }
 
   private def txDataRaw: List[Datum] =

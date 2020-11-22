@@ -37,6 +37,7 @@ case class TxReport_DevLocal(
         )
       val resolvedIds = flattenStmts.zip(allIds).collect {
         case (Add(tempId, _, _, _), eid) if tempId.toString.take(6) == "#db/id" => eid
+        case (Add("datomic.tx", _, _, _), eid)                                  => eid
       }.distinct.toList
       resolvedIds
     }

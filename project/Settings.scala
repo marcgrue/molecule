@@ -29,8 +29,20 @@ object Settings {
 
     resolvers ++= Seq(
       ("datomic" at "http://files.datomic.com/maven").withAllowInsecureProtocol(true),
-      ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true)
+      ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true),
+      // If using datomic-pro/starter
+      "my.datomic.com" at "https://my.datomic.com/repo"
     ),
+
+    /*
+    If using datomic-pro/starter, create a ~/.sbt/.credentials file with the following content:
+      realm=Datomic Maven Repo
+      host=my.datomic.com
+      id=my.datomic.com
+      user=<your-username>
+      pass=<your-password>
+    * */
+    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
 
     unmanagedSourceDirectories in Compile ++= {
       (unmanagedSourceDirectories in Compile).value.map { dir =>
@@ -59,7 +71,11 @@ object Settings {
     name := "molecule",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "com.datomic" % "datomic-free" % "0.9.5697",
+
+      //      "com.datomic" % "datomic-free" % "0.9.5697",
+      "com.datomic" % "datomic-pro" % "1.0.6202",
+
+
       "org.specs2" %% "specs2-core" % "4.10.0",
       "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.2-SNAPSHOT"
     )

@@ -25,8 +25,8 @@ object transactionModel extends JavaUtil {
       case f: Float           => f.toDouble
       case bigInt: BigInt     => bigInt.bigInteger
       case bigDec: BigDecimal => bigDec.bigDecimal
-//      case kw: Keyword        => kw
-      case other              => other
+      //      case kw: Keyword        => kw
+      case other => other
     }).asInstanceOf[Object]
 
     // Convert actions and attribute names to Clojure Keywords
@@ -37,14 +37,20 @@ object transactionModel extends JavaUtil {
     }
   }
 
+  private def eid(e: Any): String = {
+    val e1 = if (e.isInstanceOf[Long]) e + "L" else e.toString
+    val pad = " " * (8 - e1.length)
+    e1 + pad
+  }
+
   case class Add(e: Any, a: String, v: Any, gv: GenericValue) extends Statement {
     val action = ":db/add"
     override def toString: String = {
       val pad = " " * (25 - a.length)
       if (v.isInstanceOf[AbstractValue])
-        s"""List(":db/add",     ${e}L, "$a", $pad $v, $gv)"""
+        s"""List(":db/add",     ${eid(e)}, "$a", $pad $v, $gv)"""
       else
-        s"""list(":db/add",     ${e}L, "$a", $pad $v)"""
+        s"""list(":db/add",     ${eid(e)}, "$a", $pad $v)"""
     }
   }
 
@@ -59,9 +65,9 @@ object transactionModel extends JavaUtil {
     override def toString: String = {
       val pad = " " * (25 - a.length)
       if (v.isInstanceOf[AbstractValue])
-        s"""List(":db/retract", ${e}L, "$a", $pad $v, $gv)"""
+        s"""List(":db/retract", ${eid(e)}, "$a", $pad $v, $gv)"""
       else
-        s"""list(":db/retract", ${e}L, "$a", $pad $v)"""
+        s"""list(":db/retract", ${eid(e)}, "$a", $pad $v)"""
     }
   }
 

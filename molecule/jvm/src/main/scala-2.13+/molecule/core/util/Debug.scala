@@ -33,8 +33,6 @@ private[molecule] case class Debug(
           ids = Set()
         }
         val pad1   = if (i == 0) "" else "  " * level
-        val pad2   = if (i < 10) "          " else "         "
-        //        val indent = if (i == 0) "" else pad1 + i + pad2
         val indent = if (i == 0) "" else pad1
         val max    = level >= maxLevel
         x match {

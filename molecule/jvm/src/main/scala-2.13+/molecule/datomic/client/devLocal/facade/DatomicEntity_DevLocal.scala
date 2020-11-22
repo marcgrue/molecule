@@ -64,8 +64,7 @@ case class DatomicEntity_DevLocal(
     maxDepth: Int = 5,
     tpe: String = "Map"
   ): Any = {
-    val v = vOpt.getOrElse(value(key))
-    v match {
+    vOpt.getOrElse(value(key)) match {
       case s: java.lang.String      => s
       case i: java.lang.Integer     => i.toLong: Long
       case l: java.lang.Long        =>
