@@ -8,8 +8,8 @@ import molecule.core.ast.transactionModel.Statement
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.{CastHelpers, JsonBuilder, Model2Transaction}
 import molecule.core.util.Debug
+import molecule.datomic.base.api.EntityOps
 import molecule.datomic.base.facade.{Conn, TxReport}
-import molecule.datomic.peer.api.EntityOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 

@@ -1,17 +1,14 @@
 package molecule.examples.dayOfDatomic
 
 import molecule.datomic.api.out5._
-//import molecule.datomic.peer.facade.Datomic_Peer._
 import molecule.examples.dayOfDatomic.dsl.productsOrder._
-import molecule.examples.dayOfDatomic.schema._
 import molecule.examples.ExampleSpec
 
 
 class ProductsAndOrders extends ExampleSpec {
 
-//  peerOnly = true
-  devLocalOnly = true
-
+  //  peerOnly = true
+  //  devLocalOnly = true
 
   "Nested data, 1 level without initial namespace asserts" in new ProductsSetup {
 
@@ -27,7 +24,7 @@ class ProductsAndOrders extends ExampleSpec {
     val List(order, l1, l2) = m(Order.LineItems * LineItem.product.price.quantity) insert
       List((chocolateId, 48.00, 1), (whiskyId, 38.00, 2)) eids
 
-//    println(order.touchQuoted)
+    //    println(order.touchQuoted)
     order.touch === Map(
       ":db/id" -> order,
       ":Order/lineItems" -> List(Map(
@@ -134,8 +131,11 @@ class ProductsAndOrders extends ExampleSpec {
 
 
     // Find id of orders containing various products
-    Order.e.LineItems.Product.description_("Expensive Chocolate").get === List(order23)
-    Order.e.LineItems.Product.description_("Licorice").get === List(order24, order23)
+    Order.e.LineItems.Product.description_("Expensive Chocolate").get ===
+      List(order23)
+
+    Order.e.LineItems.Product.description_("Licorice").get.sorted ===
+      List(order23, order24)
 
 
     // Touch ................................
@@ -167,12 +167,12 @@ class ProductsAndOrders extends ExampleSpec {
 
     // Get adjacent facts
     Order.orderid.LineItems.quantity.price.Product.e.description
-      .get.sortBy(_._1) === List(
-      (23, 2, 77.0, licoriceId, "Licorice"),
+      .get.sortBy(t => (t._1, t._2)) === List(
       // whisky for order 23 is _not_ fetched since it has no quantity asserted!
       (23, 1, 48.0, chocolateId, "Expensive Chocolate"),
+      (23, 2, 77.0, licoriceId, "Licorice"),
       (24, 3, 38.0, whiskyId, "Cheap Whisky"),
-      (24, 4, 77.0, licoriceId, "Licorice")
+      (24, 4, 77.0, licoriceId, "Licorice"),
     )
 
     // Make `quantity` optional (by appending `$`) and get all facts wether
@@ -235,8 +235,11 @@ class ProductsAndOrders extends ExampleSpec {
           (77.00, Some(4), "Licorice")))) eids
 
     // Find id of orders containing various products
-    Order.e.LineItems.Product.description_("Expensive Chocolate").get === List(order23)
-    Order.e.LineItems.Product.description_("Licorice").get === List(order24, order23)
+    Order.e.LineItems.Product.description_("Expensive Chocolate").get ===
+      List(order23)
+
+    Order.e.LineItems.Product.description_("Licorice").get.sorted ===
+      List(order23, order24)
 
 
     // Touch ................................

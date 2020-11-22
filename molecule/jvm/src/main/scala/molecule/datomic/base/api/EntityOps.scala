@@ -1,6 +1,5 @@
-package molecule.datomic.peer.api
+package molecule.datomic.base.api
 
-import datomic.Entity
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}

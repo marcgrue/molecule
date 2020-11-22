@@ -11,8 +11,8 @@ import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
 import molecule.core.util.fns.date2str
+import molecule.datomic.base.api.EntityOps
 import molecule.datomic.base.facade.{Conn, TxReport}
-import molecule.datomic.peer.api.EntityOps
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
@@ -69,12 +69,12 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * }}}
     *
     * @group entityApi
-    * @param kw Namespaced attribute: ":[namespace with lowercase first letter]/[attribute name]"
+    * @param key Attribute: ":ns/attr"
     * @tparam T Type of attribute
     * @return Optional typed attribute value
     */
-  def get[T](kw: String): Option[T] = {
-    value(kw) match {
+  def get[T](key: String): Option[T] = {
+    value(key) match {
       case null => Option.empty[T]
 
       case results: clojure.lang.PersistentHashSet => results.asScala.head match {
@@ -83,10 +83,12 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
             .map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long])
             .sorted.asInstanceOf[T])
 
-        case _ => Some(results.asScala.toList.map(toScala(_)).toSet.asInstanceOf[T])
+        case _ => Some(results.asScala.toList.map(v1 =>
+          toScala(key, Some(v1))).toSet.asInstanceOf[T]
+        )
       }
 
-      case result => Some(toScala(result).asInstanceOf[T])
+      case result => Some(toScala(key, Some(result)).asInstanceOf[T])
     }
   }
 
@@ -552,7 +554,8 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
 
 
   private[molecule] def toScala(
-    v: Any,
+    key: String,
+    vOpt: Option[Any],
     depth: Int = 1,
     maxDepth: Int = 5,
     tpe: String = "Map"
@@ -619,7 +622,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     sb.result()
   }
 
-  val ident = Keyword.intern("db", "ident")
+  lazy protected val ident = Keyword.intern("db", "ident")
 
   protected def asMap(depth: Int, maxDepth: Int): Map[String, Any] = {
     val builder    = Map.newBuilder[String, Any]
@@ -627,7 +630,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     if (keysSorted.head != ":db/id")
       builder += ":db/id" -> value(":db/id")
     keysSorted.foreach { key =>
-      val scalaValue  = toScala(value(key), depth, maxDepth)
+      val scalaValue  = toScala(key, None, depth, maxDepth)
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
           case m1: Map[_, _]
@@ -657,8 +660,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     if (keysSorted.head != ":db/id")
       builder += ":db/id" -> value(":db/id")
     keysSorted.foreach { key =>
-      val rawValue    = value(key)
-      val scalaValue  = toScala(rawValue, depth, maxDepth, "List")
+      val scalaValue  = toScala(key, None, depth, maxDepth, "List")
       val sortedValue = scalaValue match {
         case l: Seq[_] => l.head match {
           case l0: Seq[_] => l0.head match {

@@ -17,6 +17,4 @@ trait DatomicDb {
   def datoms(o: Any, objects: Any*): java.lang.Iterable[Datom]
 
   def indexRange(o: Any, o1: Any, o2: Any): java.lang.Iterable[Datom]
-
-
 }

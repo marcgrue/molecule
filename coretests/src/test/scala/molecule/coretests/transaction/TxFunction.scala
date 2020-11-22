@@ -1,15 +1,14 @@
 package molecule.coretests.transaction
 
 import molecule.core.ast.transactionModel.Statement
-import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.core.macros.TxFns
 import molecule.core.macros.exception.TxFnException
 import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out3._
-import molecule.datomic.peer.facade.{Conn_Peer, Database_Peer, TxReport_Peer}
-import scala.concurrent.{blocking, Await}
+import molecule.datomic.base.facade.Conn
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 

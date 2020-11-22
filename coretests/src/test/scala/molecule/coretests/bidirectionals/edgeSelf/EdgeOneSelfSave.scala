@@ -7,6 +7,8 @@ import molecule.datomic.api.out3._
 
 class EdgeOneSelfSave extends CoreSpec {
 
+//  devLocalOnly = true
+
   "base/edge/target" >> {
 
     "new target" in new BidirectionalSetup {
@@ -14,9 +16,9 @@ class EdgeOneSelfSave extends CoreSpec {
       /*
           When a "property edge" is created, Molecule automatically creates a reverse reference in the opposite direction:
 
-Ann --> annLovesBen (7) -->  Ben
-  \                         /
-    <-- benLovesAnn (7) <--
+          Ann --> annLovesBen (7) -->  Ben
+            \                         /
+              <-- benLovesAnn (7) <--
 
           This allow us to query from Ann to Ben and Ben to Ann in a uniform way.
 
@@ -30,6 +32,28 @@ Ann --> annLovesBen (7) -->  Ben
         ("Ann", 7, "Ben"),
         // Reverse edge:
         ("Ben", 7, "Ann")
+      )
+
+      ann.touchMax(1) === Map(
+        ":db/id" -> ann,
+        ":Person/loves" -> annLovesBen,
+        ":Person/name" -> "Ann"
+      )
+
+      ben.touchMax(1) === Map(
+        ":db/id" -> ben,
+        ":Person/loves" -> benLovesAnn,
+        ":Person/name" -> "Ben"
+      )
+
+      ann.touchMax(2) === Map(
+        ":db/id" -> ann,
+        ":Person/loves" -> Map(
+          ":db/id" -> annLovesBen,
+          ":Loves/person" -> ben,
+          ":Loves/weight" -> 7,
+          ":molecule_Meta/otherEdge" -> benLovesAnn),
+        ":Person/name" -> "Ann"
       )
     }
 
@@ -54,19 +78,23 @@ Ann --> annLovesBen (7) -->  Ben
 
     "new target" in new BidirectionalSetup {
 
-      // Create love edges to/from Ben
-      val List(lovesBen, benLoves, ben) = Loves.weight(7).Person.name("Ben").save.eids
-
       /*
+          Create love edges to/from Ben
           Ben and bidirectional edges created
 
                 (-->)  lovesBen  -->
           (Ann)                       Ben
                 (<--)  benLoves  <--
-
       */
+      val List(lovesBen, benLoves, ben) = Loves.weight(7).Person.name("Ben").save.eids
 
       // lovesBen edge points to Ben
+      ben.touchMax(1) === Map(
+        ":db/id" -> ben,
+        ":Person/loves" -> benLoves,
+        ":Person/name" -> "Ben"
+      )
+
       lovesBen.touchMax(1) === Map(
         ":db/id" -> lovesBen,
         ":Loves/person" -> ben,
@@ -94,6 +122,12 @@ Ann --> annLovesBen (7) -->  Ben
 
       // Base entity Ann points to one of the edges (doesn't matter which of them)
       val ann = Person.name("Ann").loves(lovesBen).save.eid
+
+      ben.touchMax(1) === Map(
+        ":db/id" -> ben,
+        ":Person/loves" -> benLoves,
+        ":Person/name" -> "Ben"
+      )
 
       // Narcissistic tendencies not allowed
       (Person(ann).loves(ann).update must throwA[Model2TransactionException])

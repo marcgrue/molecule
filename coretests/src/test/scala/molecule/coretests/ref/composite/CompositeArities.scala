@@ -192,7 +192,7 @@ class CompositeArities extends CoreSpec {
     txId.touchList === List(
       ":db/id" -> txId,
       ":Ns/str" -> "Tx meta data",
-      ":db/txInstant" -> txId(":db/txInstant").get,
+      ":db/txInstant" -> txId(":db/txInstant"),
     )
 
     // Queries via one namespace

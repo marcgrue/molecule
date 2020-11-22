@@ -8,9 +8,6 @@ class EntityAPI extends CoreSpec {
 
   // See also molecule.examples.dayOfDatomic.ProductsAndOrders
 
-  //  peerOnly = true
-  //  devLocalOnly = true
-
   "touch Map" in new CoreSetup {
 
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids

@@ -9,8 +9,8 @@ import molecule.core.facade.Conn
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{DateHandling, Debug}
+import molecule.datomic.base.api.EntityOps
 import molecule.datomic.base.facade.TxReport
-import molecule.datomic.peer.api.EntityOps
 import scala.collection.JavaConverters._
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.language.{existentials, higherKinds}

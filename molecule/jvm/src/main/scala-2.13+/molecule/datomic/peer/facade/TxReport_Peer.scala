@@ -4,16 +4,16 @@ import java.util.{Date, List => jList, Map => jMap}
 import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
 import datomic.db.Datum
-import molecule.core.ast.transactionModel.{Statement, _}
+import molecule.core.ast.transactionModel._
 import molecule.core.util.Debug
 import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
 
-/** Facade to Datomic transaction report with convenience methods to access tx data. */
-case class TxReport_Peer(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil)
-  extends TxReport {
+case class TxReport_Peer(
+  rawTxReport: jMap[_, _],
+  stmtss: Seq[Seq[Statement]] = Nil
+) extends TxReport {
 
-  /** Get List of affected entity ids from transaction */
   def eids: List[Long] = if (stmtss.isEmpty) {
     val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
     var a      = Array.empty[Long]
@@ -32,9 +32,10 @@ case class TxReport_Peer(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = 
     }.distinct
     val txTtempIds = rawTxReport.get(Connection.TEMPIDS)
     val dbAfter    = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
-    tempIds.map(tempId =>
+    val res        = tempIds.map(tempId =>
       datomic.Peer.resolveTempid(dbAfter, txTtempIds, tempId).asInstanceOf[Long]
     ).distinct.toList
+    res
   }
 
   private def txDataRaw: List[Datum] =
@@ -65,15 +66,9 @@ case class TxReport_Peer(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = 
   /** Get database value after transaction. */
   def dbAfter: Database = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
 
-  /** Get transaction time t. */
   def t: Long = dbAfter.basisT
 
-  /** Get transaction entity id (Long). */
   def tx: Long = Peer.toTx(t).asInstanceOf[Long]
 
-  /** Get transaction entity (datomic.Entity). */
-  def txE: datomic.Entity = dbAfter.entity(tx)
-
-  /** Get transaction instant (Date). */
-  def inst: Date = txE.get(":db/txInstant").asInstanceOf[Date]
+  def inst: Date = dbAfter.entity(tx).get(":db/txInstant").asInstanceOf[Date]
 }

@@ -1,12 +1,6 @@
 package molecule.datomic.base.facade
 
-import java.util.{Date, List => jList, Map => jMap}
-import datomic.{Database, _}
-import datomic.Connection.TEMPIDS
-import datomic.db.Datum
-import molecule.core.ast.transactionModel.{Statement, _}
-import molecule.core.util.Debug
-import scala.jdk.CollectionConverters._
+import java.util.Date
 
 /** Facade to Datomic transaction report with convenience methods to access tx data. */
 trait TxReport {
@@ -33,20 +27,11 @@ trait TxReport {
 
   def debug: Unit
 
-  /** Get database value before transaction. */
-//  def dbBefore: DatomicDb
-
-  /** Get database value after transaction. */
-//  def dbAfter: DatomicDb
-
   /** Get transaction time t. */
   def t: Long
 
   /** Get transaction entity id (Long). */
   def tx: Long
-
-  /** Get transaction entity (datomic.Entity). */
-  def txE: datomic.Entity
 
   /** Get transaction instant (Date). */
   def inst: Date

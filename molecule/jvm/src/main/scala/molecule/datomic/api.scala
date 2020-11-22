@@ -6,7 +6,7 @@ import molecule.core.factory._
 import molecule.core.generic.GenericLog
 import molecule.core.generic.index.{GenericAEVT, GenericAVET, GenericEAVT, GenericVAET}
 import molecule.core.generic.schema.GenericSchema
-import molecule.datomic.peer.api.EntityOps
+import molecule.datomic.base.api.EntityOps
 
 /** Molecule API to be imported into your project to use Molecule with the Datomic Peer API.
   * <br><br>
