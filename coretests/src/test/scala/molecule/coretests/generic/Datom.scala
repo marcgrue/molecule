@@ -1,7 +1,6 @@
 package molecule.coretests.generic
 
-import molecule.datomic.base.facade.Conn
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out6._
@@ -70,7 +69,6 @@ class Datom extends CoreSpec {
   "Entities" >> {
 
     "1 entity" in new setup {
-
       // Several generic attributes can be asserted with a common entity id
       // Molecules with an applied entity id and only generic attributes
       // matches the Datom values of the entity
@@ -95,8 +93,11 @@ class Datom extends CoreSpec {
       // Transaction entity id
       Ns(e1).tx.get === List(tx2, tx3)
 
-      // Transaction time t
-      Ns(e1).t.get === List(t2, t3)
+      // `t` not directly accessible in Client
+      if (system == DatomicPeer) {
+        // Transaction time t
+        Ns(e1).t.get === List(t2, t3)
+      }
 
       // Transaction wall clock time as Date
       Ns(e1).txInstant.get.sorted === List(d2, d3)
@@ -111,38 +112,38 @@ class Datom extends CoreSpec {
       )
 
       // Generic attributes can be added in any order
-      Ns(e1).v.t.e.op.tx.a.get === List(
-        ("b", t2, e1, true, tx2, ":Ns/str"),
-        (3, t3, e1, true, tx3, ":Ns/int")
+      Ns(e1).v.e.op.tx.a.get === List(
+        ("b", e1, true, tx2, ":Ns/str"),
+        (3, e1, true, tx3, ":Ns/int")
       )
     }
 
 
     "n entities" in new setup {
-      Ns(e1, e2).e.t.a.v.get.sortBy(t => (t._1, t._2)) === List(
-        (e1, t2, ":Ns/str", "b"),
-        (e1, t3, ":Ns/int", 3),
-        (e2, t4, ":Ns/str", "x"),
-        (e2, t5, ":Ns/int", 5),
-        (e2, t7, ":Ns/ref1", r1)
+      Ns(e1, e2).e.tx.a.v.get.sortBy(t => (t._1, t._2)) === List(
+        (e1, tx2, ":Ns/str", "b"),
+        (e1, tx3, ":Ns/int", 3),
+        (e2, tx4, ":Ns/str", "x"),
+        (e2, tx5, ":Ns/int", 5),
+        (e2, tx7, ":Ns/ref1", r1)
       )
     }
 
 
     "History" in new setup {
-      Ns(e1, e2).e.t.a.v.op.getHistory.sortBy(t => (t._1, t._2)) === List(
-        (e1, t1, ":Ns/int", 1, true),
-        (e1, t1, ":Ns/str", "a", true),
-        (e1, t2, ":Ns/str", "a", false),
-        (e1, t2, ":Ns/str", "b", true),
-        (e1, t3, ":Ns/int", 1, false),
-        (e1, t3, ":Ns/int", 3, true),
+      Ns(e1, e2).e.tx.a.v.op.getHistory.sortBy(t => (t._1, t._2)) === List(
+        (e1, tx1, ":Ns/int", 1, true),
+        (e1, tx1, ":Ns/str", "a", true),
+        (e1, tx2, ":Ns/str", "a", false),
+        (e1, tx2, ":Ns/str", "b", true),
+        (e1, tx3, ":Ns/int", 1, false),
+        (e1, tx3, ":Ns/int", 3, true),
 
-        (e2, t4, ":Ns/int", 4, true),
-        (e2, t4, ":Ns/str", "x", true),
-        (e2, t5, ":Ns/int", 4, false),
-        (e2, t5, ":Ns/int", 5, true),
-        (e2, t7, ":Ns/ref1", r1, true),
+        (e2, tx4, ":Ns/int", 4, true),
+        (e2, tx4, ":Ns/str", "x", true),
+        (e2, tx5, ":Ns/int", 4, false),
+        (e2, tx5, ":Ns/int", 5, true),
+        (e2, tx7, ":Ns/ref1", r1, true),
       )
     }
   }
@@ -156,7 +157,8 @@ class Datom extends CoreSpec {
       Ns.int.a.get === List((3, ":Ns/int"), (5, ":Ns/int"))
       Ns.int.v.get === List((3, 3), (5, 5))
       Ns.int.tx.get === List((3, tx3), (5, tx5))
-      Ns.int.t.get === List((3, t3), (5, t5))
+      if (system == DatomicPeer)
+        Ns.int.t.get === List((3, t3), (5, t5))
       Ns.int.txInstant.get.sortBy(_._1).toString === List((3, d3), (5, d5)).toString
       Ns.int.op.get === List((5, true), (3, true))
 
@@ -165,7 +167,8 @@ class Datom extends CoreSpec {
       Ns.int(5).a.get === List((5, ":Ns/int"))
       Ns.int(5).v.get === List((5, 5))
       Ns.int(5).tx.get === List((5, tx5))
-      Ns.int(5).t.get === List((5, t5))
+      if (system == DatomicPeer)
+        Ns.int(5).t.get === List((5, t5))
       Ns.int(5).txInstant.get.toString === List((5, d5)).toString
       Ns.int(5).op.get === List((5, true))
 
@@ -174,7 +177,8 @@ class Datom extends CoreSpec {
       Ns.int.<(4).a.get === List((3, ":Ns/int"))
       Ns.int.<(4).v.get === List((3, 3))
       Ns.int.<(4).tx.get === List((3, tx3))
-      Ns.int.<(4).t.get === List((3, t3))
+      if (system == DatomicPeer)
+        Ns.int.<(4).t.get === List((3, t3))
       Ns.int.<(4).txInstant.get.toString === List((3, d3)).toString
       Ns.int.<(4).op.get === List((3, true))
 
@@ -183,7 +187,8 @@ class Datom extends CoreSpec {
       Ns.int(max).a.get === List((5, ":Ns/int"))
       Ns.int(max).v.get === List((3, 3), (5, 5))
       Ns.int(max).tx.get === List((3, tx3), (5, tx5))
-      Ns.int(max).t.get === List((3, t3), (5, t5))
+      if (system == DatomicPeer)
+        Ns.int(max).t.get === List((3, t3), (5, t5))
       Ns.int(max).txInstant.get.sortBy(_._1).toString === List((3, d3), (5, d5)).toString
       Ns.int(max).op.get === List((5, true))
     }
@@ -192,9 +197,9 @@ class Datom extends CoreSpec {
     "order of attribute types" in new setup {
 
       // Generic entity id first is ok
-      Ns.e.int.t.get.sorted === List(
-        (e1, 3, t3),
-        (e2, 5, t5),
+      Ns.e.int.tx.get.sorted === List(
+        (e1, 3, tx3),
+        (e2, 5, tx5),
       )
 
       // Other generic attributes not allowed before first attribute
@@ -205,9 +210,9 @@ class Datom extends CoreSpec {
           "Please add generic attributes `t`, `op` after `int`.")
 
       // Generic attributes after custom attribute ok
-      Ns.int.t.op.get === List(
-        (5, t5, true),
-        (3, t3, true),
+      Ns.int.tx.op.get === List(
+        (5, tx5, true),
+        (3, tx3, true),
       )
 
       // Custom attributes after generic attributes ok as long
@@ -230,9 +235,9 @@ class Datom extends CoreSpec {
 
       // Any filter will prevent a full scan
 
-      Ns.e.a(":Ns/str").v.t.get === List(
-        (e1, ":Ns/str", "b", t2),
-        (e2, ":Ns/str", "x", t4)
+      Ns.e.a(":Ns/str").v.tx.get === List(
+        (e1, ":Ns/str", "b", tx2),
+        (e2, ":Ns/str", "x", tx4)
       )
 
       // Count also involves full scan if no other attribute is present
@@ -255,7 +260,8 @@ class Datom extends CoreSpec {
       Ns.Ref1.v.get === List("hello")
       // `ref1` ref datom asserted in tx7
       Ns.Ref1.tx.get === List(tx7)
-      Ns.Ref1.t.get === List(t7)
+      if (system == DatomicPeer)
+        Ns.Ref1.t.get === List(t7)
       Ns.Ref1.txInstant.get.toString === List(d7).toString
       Ns.Ref1.op.get === List(true)
 
@@ -265,7 +271,8 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.v.get === List((5, "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.get === List((5, tx7))
-      Ns.int.Ref1.t.get === List((5, t7))
+      if (system == DatomicPeer)
+        Ns.int.Ref1.t.get === List((5, t7))
       Ns.int.Ref1.txInstant.get.toString === List((5, d7)).toString
       Ns.int.Ref1.op.get === List((5, true))
 
@@ -275,7 +282,8 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.v.str1.get === List((5, "hello", "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.str1.get === List((5, tx7, "hello"))
-      Ns.int.Ref1.t.str1.get === List((5, t7, "hello"))
+      if (system == DatomicPeer)
+        Ns.int.Ref1.t.str1.get === List((5, t7, "hello"))
       Ns.int.Ref1.txInstant.str1.get.toString === List((5, d7, "hello")).toString
       Ns.int.Ref1.op.str1.get === List((5, true, "hello"))
 
@@ -285,7 +293,8 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.str1.v.get === List((5, "hello", "hello"))
       // `str1` datom asserted in tx6
       Ns.int.Ref1.str1.tx.get === List((5, "hello", tx6))
-      Ns.int.Ref1.str1.t.get === List((5, "hello", t6))
+      if (system == DatomicPeer)
+        Ns.int.Ref1.str1.t.get === List((5, "hello", t6))
       Ns.int.Ref1.str1.txInstant.get.toString === List((5, "hello", d6)).toString
       Ns.int.Ref1.str1.op.get === List((5, "hello", true))
 
@@ -362,18 +371,20 @@ class Datom extends CoreSpec {
     Ns.tx_.>(tx2).tx.<=(tx4).get.sorted === List(tx3, tx4)
     Ns.int_.tx(count).get === List(2)
 
-    Ns.t(t3).get === List(t3)
-    Ns.t(t3, t5).get.sorted === List(t3, t5)
-    Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
-    Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
-    Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
-    Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
-    Ns.t.<=(t3).get.sorted === List(t2, t3)
-    Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
-    Ns.t.<(t3).get === List(t2)
-    // Range of transaction t's
-    Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
-    Ns.int_.t(count).get === List(2)
+    if (system == DatomicPeer) {
+      Ns.t(t3).get === List(t3)
+      Ns.t(t3, t5).get.sorted === List(t3, t5)
+      Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
+      Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
+      Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
+      Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
+      Ns.t.<=(t3).get.sorted === List(t2, t3)
+      Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
+      Ns.t.<(t3).get === List(t2)
+      // Range of transaction t's
+      Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
+      Ns.int_.t(count).get === List(2)
+    }
 
     Ns.txInstant(d2).get === List(d2)
     Ns.txInstant(d2, d3).get.sorted === List(d2, d3)
@@ -465,17 +476,19 @@ class Datom extends CoreSpec {
     Ns.int.tx_.>(tx2).tx_.<=(tx4).get === List(3)
     Ns.int.tx_.>(tx2).tx_.<=(tx5).get === List(3, 5)
 
-    Ns.int.t_(t3).get === List(3)
-    Ns.int.t_(t3, t5).get === List(3, 5)
-    Ns.int.t_.not(t3).get === List(5)
-    Ns.int.t_.not(t3, t5).get === Nil
-    Ns.int.t_.>(t3).get === List(5)
-    Ns.int.t_.>=(t3).get === List(3, 5)
-    Ns.int.t_.<=(t3).get === List(3)
-    Ns.int.t_.<(t3).get === Nil
-    // Int values withing range of transaction t's
-    Ns.int.t_.>(t2).t_.<=(t4).get === List(3)
-    Ns.int.t_.>(t2).t_.<=(t5).get === List(3, 5)
+    if (system == DatomicPeer) {
+      Ns.int.t_(t3).get === List(3)
+      Ns.int.t_(t3, t5).get === List(3, 5)
+      Ns.int.t_.not(t3).get === List(5)
+      Ns.int.t_.not(t3, t5).get === Nil
+      Ns.int.t_.>(t3).get === List(5)
+      Ns.int.t_.>=(t3).get === List(3, 5)
+      Ns.int.t_.<=(t3).get === List(3)
+      Ns.int.t_.<(t3).get === Nil
+      // Int values withing range of transaction t's
+      Ns.int.t_.>(t2).t_.<=(t4).get === List(3)
+      Ns.int.t_.>(t2).t_.<=(t5).get === List(3, 5)
+    }
 
     Ns.int.txInstant_(d3).get === List(3)
     Ns.int.txInstant_(d3, d5).get === List(3, 5)
@@ -519,9 +532,10 @@ class Datom extends CoreSpec {
       """m(Ns.int$.tx.str)""",
       "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")
 
-    expectCompileError(
-      """m(Ns.int$.t.str)""",
-      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
+    if (system == DatomicPeer)
+      expectCompileError(
+        """m(Ns.int$.t.str)""",
+        "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
 
     expectCompileError(
       """m(Ns.int$.txInstant.str)""",

@@ -23,6 +23,9 @@ trait Conn {
 
   def usingTempDb(tempDb: TempDb): Conn
 
+  /** Convenience retrieval of time t via connection. */
+  def getT(tx: Long): Long
+
   /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean
 
@@ -31,11 +34,10 @@ trait Conn {
     * @param db
     */
   def testDb(db: DatomicDb): Unit
-//  def testDb(db: Database): Unit
 
-  /** Use test database as of time t.
+  /** Use test database as of time t / tx id.
     *
-    * @param t Long
+    * @param t Long Time t or tx id
     */
   def testDbAsOf(t: Long): Unit
 

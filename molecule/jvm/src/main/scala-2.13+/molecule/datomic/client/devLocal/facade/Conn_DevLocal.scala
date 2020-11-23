@@ -53,6 +53,8 @@ case class Conn_DevLocal(client: Client, dbName: String)
     this
   }
 
+  def getT(tx: Long): Long = clientConn.db.asOf(tx).asOfT
+
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
   //  def testDb(db: Db): Unit = {
@@ -62,7 +64,9 @@ case class Conn_DevLocal(client: Client, dbName: String)
     _testDb = Some(db.asInstanceOf[DatomicDb_DevLocal].clientDb)
   }
 
-  def testDbAsOf(t: Long): Unit = ???
+  def testDbAsOf(t: Long): Unit = {
+    _testDb = Some(clientConn.db.asOf(t))
+  }
 
   def testDbAsOf(d: Date): Unit = ???
 

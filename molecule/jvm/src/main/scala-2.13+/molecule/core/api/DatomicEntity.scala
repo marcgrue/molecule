@@ -1,7 +1,7 @@
 package molecule.core.api
 
 import java.net.URI
-import java.util.{Date, UUID, Collection => jCollection}
+import java.util.{Date, UUID}
 import clojure.lang.{Keyword, PersistentArrayMap}
 import molecule.core.api.exception.EntityException
 import molecule.core.ast.MoleculeBase
@@ -9,11 +9,11 @@ import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
-import molecule.core.util.{DateHandling, Debug}
+import molecule.core.util.Debug
 import molecule.core.util.fns.date2str
 import molecule.datomic.base.api.EntityOps
 import molecule.datomic.base.facade.{Conn, TxReport}
-import scala.concurrent.{blocking, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
 

@@ -29,7 +29,7 @@ class ApplyDouble extends CoreSpec {
 
       // `or`
       Ns.double.apply(1.0 or 2.0).get === List(1.0, 2.0)
-      Ns.double.apply(1.0 or 2.0 or 3.0).get === List(3.0, 1.0, 2.0)
+      Ns.double.apply(1.0 or 2.0 or 3.0).get.sorted === List(1.0, 2.0, 3.0)
 
       // Seq
       Ns.double.apply().get === Nil
@@ -38,9 +38,9 @@ class ApplyDouble extends CoreSpec {
       Ns.double.apply(List(2.0)).get === List(2.0)
       Ns.double.apply(List(1.0, 2.0)).get === List(1.0, 2.0)
       Ns.double.apply(List(1.0), List(2.0)).get === List(1.0, 2.0)
-      Ns.double.apply(List(1.0, 2.0), List(3.0)).get === List(3.0, 1.0, 2.0)
-      Ns.double.apply(List(1.0), List(2.0, 3.0)).get === List(3.0, 1.0, 2.0)
-      Ns.double.apply(List(1.0, 2.0, 3.0)).get === List(3.0, 1.0, 2.0)
+      Ns.double.apply(List(1.0, 2.0), List(3.0)).get.sorted === List(1.0, 2.0, 3.0)
+      Ns.double.apply(List(1.0), List(2.0, 3.0)).get.sorted === List(1.0, 2.0, 3.0)
+      Ns.double.apply(List(1.0, 2.0, 3.0)).get.sorted === List(1.0, 2.0, 3.0)
     }
 
 

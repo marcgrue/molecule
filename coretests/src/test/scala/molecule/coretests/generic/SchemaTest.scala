@@ -1,7 +1,7 @@
 
 package molecule.coretests.generic
 
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
 
@@ -882,8 +882,10 @@ class SchemaTest extends CoreSpec {
 
   "t, tx, txInstant" in new CoreSetup {
 
-    // Schema transaction time t
-    Schema.t.get === List(1000)
+    if (system == DatomicPeer) {
+      // Schema transaction time t
+      Schema.t.get === List(1000)
+    }
 
     // Schema transaction entity id
     Schema.tx.get === List(13194139534312L)

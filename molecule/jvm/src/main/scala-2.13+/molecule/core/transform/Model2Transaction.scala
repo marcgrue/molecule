@@ -205,8 +205,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       else
         s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
-      println(id.getClass)
-
       conn.q(query, id.asInstanceOf[Object]).map(_.head)
     }
 
@@ -229,14 +227,10 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def otherEdge(edgeA: Any): AnyRef = {
       val query  = s"[:find ?edgeB :in $$ ?edgeA :where [?edgeA :molecule_Meta/otherEdge ?edgeB]]"
-      //      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
       val result = conn.q(query, edgeA.asInstanceOf[Object]).map(_.head)
       result match {
         case List(edgeB) => edgeB.asInstanceOf[Object]
-//        case ArrayBuffer(edgeB) => edgeB.asInstanceOf[Object]
         case Nil                =>
-//          val otherId = Entity_Peer(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
-//          val otherId = getEntity(edgeA)(conn)
           val otherId = conn.entity(edgeA)
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
             s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
@@ -481,7 +475,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
         case AssertMapPairs(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "assert")
-          //          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
           val curPairs = getPairs(edgeA, a)
           val curKeys  = curPairs.keys
           newPairs.flatMap {
@@ -979,17 +972,13 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def saveStmts(): Seq[Statement] = {
     val txId = "datomic.tx"
-    val x = stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
+    stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
       genericStmt match {
         case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1, true))
-        case Add("__tempId", a, Values(vs, pf), bi)                                                 =>
-          (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB, true))
-        case Add("e", a, "__tempId", bi)                                                            =>
-          (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB, true))
-        case Add(e, a, "__tempId", bi)                                                              =>
-          (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB, true))
-        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         =>
-          (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB, true))
+        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB, true))
+        case Add("e", a, "__tempId", bi)                                                            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB, true))
+        case Add(e, a, "__tempId", bi)                                                              => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB, true))
+        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB, true))
         case Add(e@("e" | "ec"), a, refNs: String, bi@BiEdgeRef(_, _)) if !refNs.startsWith("__")   => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB1, true))
         case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB, true))
         case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB, true))
@@ -1009,8 +998,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case unexpected                        => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
       }
     }._2
-
-    x
   }
 
 

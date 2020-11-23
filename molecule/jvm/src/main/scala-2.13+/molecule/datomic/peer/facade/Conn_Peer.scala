@@ -57,6 +57,8 @@ class Conn_Peer(val peerConn: datomic.Connection)
     this
   }
 
+  def getT(tx: Long): Long = Peer.toT(tx)
+
   /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
@@ -68,9 +70,9 @@ class Conn_Peer(val peerConn: datomic.Connection)
     _testDb = Some(db.asInstanceOf[DatomicDb_Peer].peerDb)
   }
 
-  /** Use test database as of time t.
+  /** Use test database as of time t / tx id.
     *
-    * @param t Long
+    * @param t Long Time t or tx id
     */
   def testDbAsOf(t: Long): Unit = {
     _testDb = Some(peerConn.db.asOf(t))

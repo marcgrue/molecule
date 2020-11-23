@@ -157,13 +157,12 @@ object QueryOps extends Helpers with JavaUtil {
         .where(Var("id"), KW("db", "ident"), "idIdent")
         .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
         .func(".matches ^String",
-          Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")),
+          Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|:?-.*)")),
           ScalarBinding(Var("sys")))
         .func("=", Seq(Var("sys"), Val(false)))
         .func("molecule.core.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs")))
         .func("first", Seq(Var("partNs")), ScalarBinding(Var("part")))
         .func("second", Seq(Var("partNs")), ScalarBinding(Var("ns")))
-        .func("molecule.core.util.fns/live", Seq(Var("nsFull")))
     )
 
     def schemaA: Query = q.schema
@@ -250,7 +249,7 @@ object QueryOps extends Helpers with JavaUtil {
       } else {
         q.wh.clauses.reverse.collectFirst {
           case Funct("namespace", _, _)                                                   => q
-          case Funct("identity", _, _) /* Optional attributes */            => q
+          case Funct("identity", _, _) /* Optional attributes */                          => q
           case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" => q
           case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr"         => q.ident(e + "_attr", v1)
           case DataClause(_, Var(`e`), _, _, _, _)                                        => q
@@ -272,21 +271,25 @@ object QueryOps extends Helpers with JavaUtil {
           q
         case DataClause(_, Var(e0), KW("db", "ident", _), _, _, _) if e0 == e + "_attr" =>
           q.func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
-            .func("molecule.core.util.fns/live", Seq(Var(v + "_a")))
+            .func(".matches ^String", Seq(Var(v + "_a"), Val(":?-.*")), ScalarBinding(Var(v + "_a_test")))
+            .func("=", Seq(Var(v + "_a_test"), Val(false)))
 
         case DataClause(_, _, KW("?", attr, _), _, _, _) if attr == e + "_attr" =>
           q.ident(e + "_attr", v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
-            .func("molecule.core.util.fns/live", Seq(Var(v + "_a")))
+            .func(".matches ^String", Seq(Var(v + "_a"), Val(":?-.*")), ScalarBinding(Var(v + "_a_test")))
+            .func("=", Seq(Var(v + "_a_test"), Val(false)))
         case DataClause(_, Var(`e`), KW(nsFull, attr, _), _, _, _)              =>
           q.where(KW(nsFull, attr), KW("db", "ident"), v1)
             .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
-            .func("molecule.core.util.fns/live", Seq(Var(v + "_a")))
+            .func(".matches ^String", Seq(Var(v + "_a"), Val(":?-.*")), ScalarBinding(Var(v + "_a_test")))
+            .func("=", Seq(Var(v + "_a_test"), Val(false)))
       }.getOrElse(
         q.where(e, "?", e + "_attr", Var(v), "")
           .ident(e + "_attr", v1)
           .func("str", Seq(Var(v1)), ScalarBinding(Var(v + "_a")))
-          .func("molecule.core.util.fns/live", Seq(Var(v + "_a")))
+          .func(".matches ^String", Seq(Var(v + "_a"), Val(":?-.*")), ScalarBinding(Var(v + "_a_test")))
+          .func("=", Seq(Var(v + "_a_test"), Val(false)))
           .func("namespace", Seq(Var(v1)), ScalarBinding(Var(v + "_ns")))
           .func("!=", Seq(Var(v + "_ns"), Val("db.install")))
           .func("!=", Seq(Var(v + "_ns"), Val("db")))
