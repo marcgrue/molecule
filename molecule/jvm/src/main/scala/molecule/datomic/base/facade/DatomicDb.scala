@@ -14,7 +14,7 @@ trait DatomicDb {
 
   def pull(pattern: String, eid: Any): util.Map[_, _]
 
-  def datoms(o: Any, objects: Any*): java.lang.Iterable[Datom]
+//  def datoms(index: Any, objects: Any*): AnyRef
 
-  def indexRange(o: Any, o1: Any, o2: Any): java.lang.Iterable[Datom]
+//  def indexRange(attrId: String, start: Any, end: Any): AnyRef
 }

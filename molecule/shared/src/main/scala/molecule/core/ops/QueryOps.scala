@@ -157,12 +157,18 @@ object QueryOps extends Helpers with JavaUtil {
         .where(Var("id"), KW("db", "ident"), "idIdent")
         .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
         .func(".matches ^String",
-          Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|:?-.*)")),
+          Seq(Var("nsFull"), Val(
+            "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian" + // peer/client
+              "|db.entity|db.attr" + // client
+              "|:?-.*)" // molecule-admin prefix to mark
+          )),
           ScalarBinding(Var("sys")))
         .func("=", Seq(Var("sys"), Val(false)))
-        .func("molecule.core.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs")))
-        .func("first", Seq(Var("partNs")), ScalarBinding(Var("part")))
-        .func("second", Seq(Var("partNs")), ScalarBinding(Var("ns")))
+        .func(".contains ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
+        .func(".split ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("nsParts")))
+        .func("first", Seq(Var("nsParts")), ScalarBinding(Var("part0")))
+        .func("if", Seq(Var("isPart"), Var("part0"), Val("db.part/user")), ScalarBinding(Var("part")))
+        .func("last", Seq(Var("nsParts")), ScalarBinding(Var("ns")))
     )
 
     def schemaA: Query = q.schema

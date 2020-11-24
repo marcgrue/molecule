@@ -265,17 +265,18 @@ class LogTest extends CoreSpec {
       (t13, e2, ":Ns/refs1", e4, true)
     )
 
+    // Single parameter is `from`
+    Log(Some(t12)).t.get === Log(Some(t12), None).t.get
+
     // Start - t3 (exclusive)
     // Includes all Datomic database bootstrapping and schema transactions
     Log(None, Some(t3)).t.get.size === 426
 
-    // Start - end
-    // Molecule disallow returning from beginning to end (the whole database!)
-    (Log(None, None).t.get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
-      "Molecule not allowing returning from start to end (the whole database!).\n" +
-      "If you need this, please use raw Datomic access:\n" +
-      "`conn.datomicConn.log.txRange(tx1, tx2)`"
+    // Start - end !! Meaning the whole database!
+    Log(None, None).t.get.size === 457
+
+    // Start - End !!
+    Log().t.get.size === 457
   }
 
 

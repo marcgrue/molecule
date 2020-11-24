@@ -39,7 +39,7 @@ object Conn_Peer {
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  **/
+  * */
 class Conn_Peer(val peerConn: datomic.Connection)
   extends Conn with Helpers with BridgeDatomicFuture {
 
@@ -167,7 +167,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
     _testDb = None
   }
 
-  private def getAdhocDb: Database  = {
+  private def getAdhocDb: Database = {
     val baseDb : Database = _testDb.getOrElse(peerConn.db)
     val adhocDb: Database = _adhocDb.get match {
       case AsOf(TxLong(t))  => baseDb.asOf(t)
@@ -444,7 +444,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case Generic("AVET", attr, _, value) =>
         attr match {
           case "range" =>
-            ("indexRange", datomic.Database.AVET, value match {
+            ("indexRange", "", value match {
               case Eq(Seq(a, None, None))  => throw new MoleculeException(
                 "Molecule not allowing returning from start to end (the whole database!).\n" +
                   "If you need this, please use raw Datomic access:\n" +
@@ -476,7 +476,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
         })
 
       case Generic("Log", _, _, value) =>
-        ("txRange", datomic.Database.VAET, value match {
+        ("txRange", "", value match {
           case Eq(Seq(from: Int, until: Int))   => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
           case Eq(Seq(from: Int, until: Long))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
           case Eq(Seq(from: Int, until: Date))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
@@ -495,87 +495,88 @@ class Conn_Peer(val peerConn: datomic.Connection)
           case Eq(Seq(None, until: Long)) => Seq(null, until.asInstanceOf[Object])
           case Eq(Seq(None, until: Date)) => Seq(null, until.asInstanceOf[Object])
 
-          case Eq(Seq(None, None)) =>
-            throw new MoleculeException(
-              "Molecule not allowing returning from start to end (the whole database!).\n" +
-                "If you need this, please use raw Datomic access:\n" +
-                "`conn.datomicConn.log.txRange(tx1, tx2)`")
+          // All !!
+          case Eq(Seq(None, None)) => Seq(null, null)
 
-          case Eq(Seq(_, _)) => throw new MoleculeException("Args to Log can only be t, tx or txInstant of type Int/Long/Date")
+          // From until end
+          case Eq(Seq(from: Int))  => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Long)) => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Date)) => Seq(from.asInstanceOf[Object], null)
+
+          // All !!
+          case Eq(Nil) => Seq(null, null)
+
+          case Eq(_) => throw new MoleculeException("Args to Log can only be t, tx or txInstant of type Int/Long/Date")
         })
 
       case other => throw new MoleculeException(s"Only Index queries accepted (EAVT, AEVT, AVET, VAET, Log). Found `$other`")
     }
 
-
     val adhocDb = db
-    def date(d: Datom): Date = adhocDb.entity(this, d.tx).value(":db/txInstant").asInstanceOf[Date]
-    def ident(d: Datom): AnyRef = adhocDb.getDatomicDb.asInstanceOf[Database].ident(d.a).toString
-    def t(d: Datom): AnyRef = toT(d.tx).asInstanceOf[AnyRef]
-    def op(d: Datom): AnyRef = d.added.asInstanceOf[AnyRef]
 
-    def datomElement(attr: String): Datom => AnyRef = attr match {
-      case "e"         => (d: Datom) => d.e
-      case "a"         => (d: Datom) => ident(d)
-      case "v"         => (d: Datom) => d.v
-      case "t"         => (d: Datom) => t(d)
-      case "tx"        => (d: Datom) => d.tx
-      case "txInstant" => (d: Datom) => date(d)
-      case "op"        => (d: Datom) => op(d)
+    def datomElement(tOpt: Option[Long], attr: String): Datom => AnyRef = attr match {
+      case "e"                   => (d: Datom) => d.e
+      case "a"                   => (d: Datom) => adhocDb.getDatomicDb.asInstanceOf[Database].ident(d.a).toString
+      case "v"                   => (d: Datom) => d.v
+      case "t" if tOpt.isDefined => (_: Datom) => tOpt.get.asInstanceOf[AnyRef]
+      case "t"                   => (d: Datom) => toT(d.tx).asInstanceOf[AnyRef]
+      case "tx"                  => (d: Datom) => d.tx
+      case "txInstant"           => (d: Datom) => adhocDb.entity(this, d.tx).value(":db/txInstant").asInstanceOf[Date]
+      case "op"                  => (d: Datom) => d.added.asInstanceOf[AnyRef]
     }
 
     val attrs: Seq[String] = model.elements.tail.collect {
       case Generic(_, attr, _, _) => attr
     }
 
-    val datom2row: Datom => jList[AnyRef] = attrs.length match {
+    def datom2row(tOpt: Option[Long]): Datom => jList[AnyRef] = attrs.length match {
       case 1 =>
-        val x1 = datomElement(attrs.head)
+        val x1 = datomElement(tOpt, attrs.head)
         (d: Datom) => list(x1(d)).asInstanceOf[jList[AnyRef]]
 
       case 2 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
         (d: Datom) => list(x1(d), x2(d)).asInstanceOf[jList[AnyRef]]
 
       case 3 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
-        val x3 = datomElement(attrs(2))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
+        val x3 = datomElement(tOpt, attrs(2))
         (d: Datom) => list(x1(d), x2(d), x3(d)).asInstanceOf[jList[AnyRef]]
 
       case 4 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
-        val x3 = datomElement(attrs(2))
-        val x4 = datomElement(attrs(3))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
+        val x3 = datomElement(tOpt, attrs(2))
+        val x4 = datomElement(tOpt, attrs(3))
         (d: Datom) => list(x1(d), x2(d), x3(d), x4(d)).asInstanceOf[jList[AnyRef]]
 
       case 5 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
-        val x3 = datomElement(attrs(2))
-        val x4 = datomElement(attrs(3))
-        val x5 = datomElement(attrs(4))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
+        val x3 = datomElement(tOpt, attrs(2))
+        val x4 = datomElement(tOpt, attrs(3))
+        val x5 = datomElement(tOpt, attrs(4))
         (d: Datom) => list(x1(d), x2(d), x3(d), x4(d), x5(d)).asInstanceOf[jList[AnyRef]]
 
       case 6 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
-        val x3 = datomElement(attrs(2))
-        val x4 = datomElement(attrs(3))
-        val x5 = datomElement(attrs(4))
-        val x6 = datomElement(attrs(5))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
+        val x3 = datomElement(tOpt, attrs(2))
+        val x4 = datomElement(tOpt, attrs(3))
+        val x5 = datomElement(tOpt, attrs(4))
+        val x6 = datomElement(tOpt, attrs(5))
         (d: Datom) => list(x1(d), x2(d), x3(d), x4(d), x5(d), x6(d)).asInstanceOf[jList[AnyRef]]
 
       case 7 =>
-        val x1 = datomElement(attrs.head)
-        val x2 = datomElement(attrs(1))
-        val x3 = datomElement(attrs(2))
-        val x4 = datomElement(attrs(3))
-        val x5 = datomElement(attrs(4))
-        val x6 = datomElement(attrs(5))
-        val x7 = datomElement(attrs(6))
+        val x1 = datomElement(tOpt, attrs.head)
+        val x2 = datomElement(tOpt, attrs(1))
+        val x3 = datomElement(tOpt, attrs(2))
+        val x4 = datomElement(tOpt, attrs(3))
+        val x5 = datomElement(tOpt, attrs(4))
+        val x6 = datomElement(tOpt, attrs(5))
+        val x7 = datomElement(tOpt, attrs(6))
         (d: Datom) => list(x1(d), x2(d), x3(d), x4(d), x5(d), x6(d), x7(d)).asInstanceOf[jList[AnyRef]]
     }
 
@@ -583,18 +584,23 @@ class Conn_Peer(val peerConn: datomic.Connection)
     val jColl: jCollection[jList[AnyRef]] = new util.ArrayList[jList[AnyRef]]()
     api match {
       case "datoms"     =>
-        adhocDb.datoms(index, args: _*).forEach { datom =>
-          jColl.add(datom2row(datom))
+        val datom2row_ = datom2row(None)
+        adhocDb.asInstanceOf[DatomicDb_Peer].datoms(index, args: _*)
+          .asInstanceOf[java.lang.Iterable[Datom]].forEach { datom =>
+          jColl.add(datom2row_(datom))
         }
       case "indexRange" =>
-        adhocDb.indexRange(args.head, args(1), args(2)).forEach { datom =>
-          jColl.add(datom2row(datom))
+        val datom2row_ = datom2row(None)
+        adhocDb.asInstanceOf[DatomicDb_Peer].indexRange(args.head.toString, args(1), args(2))
+          .asInstanceOf[java.lang.Iterable[Datom]].forEach { datom =>
+          jColl.add(datom2row_(datom))
         }
       case "txRange"    =>
         peerConn.log.txRange(args.head, args(1)).forEach { txMap =>
           // Flatten transaction datoms to unified tuples return type
           txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]].forEach { datom =>
-            jColl.add(datom2row(datom))
+            val datom2row_ = datom2row(Some(txMap.get(datomic.Log.T).asInstanceOf[Long]))
+            jColl.add(datom2row_(datom))
           }
         }
     }

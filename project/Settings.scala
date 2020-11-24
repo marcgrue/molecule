@@ -77,7 +77,7 @@ object Settings {
 
 
       "org.specs2" %% "specs2-core" % "4.10.0",
-      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.2-SNAPSHOT"
+      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.3-SNAPSHOT"
     )
   )
 

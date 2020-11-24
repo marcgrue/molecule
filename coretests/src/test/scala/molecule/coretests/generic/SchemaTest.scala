@@ -1,4 +1,3 @@
-
 package molecule.coretests.generic
 
 import molecule.core.util.{expectCompileError, DatomicPeer}
@@ -7,6 +6,7 @@ import molecule.datomic.api.out3._
 
 
 class SchemaTest extends CoreSpec {
+
 
   "Partition schema values" >> {
 
@@ -101,49 +101,56 @@ class SchemaTest extends CoreSpec {
     }
   }
 
+  class SchemaSetup extends CoreSetup {
+    // Differing counts and ids for different systems
+    val List(attrCount, a1, a2, a3, card1count, card2count) = system match {
+      case DatomicPeer => List(74, 97, 99, 100, 32, 42)
+      case _           => List(71, 105, 107, 108, 31, 40)
+    }
+  }
 
   "Schema attributes" >> {
 
-    "id" in new CoreSetup {
+    "id" in new SchemaSetup {
 
-      Schema.id.get.size === 74
+      Schema.id.get.size === attrCount
 
       Schema.id.get(5) === List(97, 98, 99, 100, 101)
 
       Schema.id(97).get(5) === List(97)
       Schema.id(97, 98).get(5) === List(97, 98)
 
-      Schema.id.not(97).get.size === 73
-      Schema.id.not(97, 98).get.size === 72
+      Schema.id.not(97).get.size === attrCount - 1
+      Schema.id.not(97, 98).get.size === attrCount - 2
 
-      Schema.id(count).get === List(74)
+      Schema.id(count).get === List(attrCount)
 
 
       // Since all attributes have an id, a tacit `id_` makes no difference
-      Schema.id_.attr.get.size === 74
+      Schema.id_.attr.get.size === attrCount
       Schema.id_.attr.get(3) === List("floats", "double", "str1")
 
       // We can though filter by one or more tacit attribute ids
-      Schema.id_(97).attr.get === List("longMap")
-      Schema.id_(99, 100).attr.get === List("doubleMap", "boolMap")
+      Schema.id_(a1).attr.get === List("longMap")
+      Schema.id_(a2, a3).attr.get === List("doubleMap", "boolMap")
 
-      Schema.id_.not(97).attr.get.size === 73
-      Schema.id_.not(97, 98).attr.get.size === 72
+      Schema.id_.not(a1).attr.get.size === attrCount - 1
+      Schema.id_.not(a2, a3).attr.get.size === attrCount - 2
     }
 
 
-    "a" in new CoreSetup {
+    "a" in new SchemaSetup {
 
-      Schema.a.get.size === 74
+      Schema.a.get.size === attrCount
       Schema.a.get(3) === List(":Ns/double", ":Ns/doubleMap", ":Ref2/ints2")
 
       Schema.a(":Ns/str").get === List(":Ns/str")
       Schema.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
 
-      Schema.a.not(":Ns/str").get.size === 73
-      Schema.a.not(":Ns/str", ":Ns/int").get.size === 72
+      Schema.a.not(":Ns/str").get.size === attrCount - 1
+      Schema.a.not(":Ns/str", ":Ns/int").get.size === attrCount - 2
 
-      Schema.a(count).get === List(74)
+      Schema.a(count).get === List(attrCount)
 
 
       // Since all attributes have an `ident`, a tacit `ident_` makes no difference
@@ -172,7 +179,7 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "part when not defined" in new CoreSetup {
+    "part when not defined" in new SchemaSetup {
 
       // Default `db.part/user` partition name returned when no custom partitions are defined
       Schema.part.get === List("db.part/user")
@@ -181,7 +188,7 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "nsFull" in new CoreSetup {
+    "nsFull" in new SchemaSetup {
 
       // `nsfull` always starts with lowercase letter as used in Datomic queries
       // - when partitions are defined: concatenates `part` + `ns`
@@ -199,7 +206,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
-      Schema.nsFull_.attr.get.size === 74
+      Schema.nsFull_.attr.get.size === attrCount
 
       // We can though filter by one or more tacit namespace names
       Schema.nsFull_("Ref1").attr.get.sorted === List(
@@ -236,7 +243,7 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "ns" in new CoreSetup {
+    "ns" in new SchemaSetup {
 
       Schema.ns.get === List("Ns", "Ref4", "Ref2", "Ref3", "Ref1")
 
@@ -252,7 +259,7 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
-      Schema.ns_.attr.get.size === 74
+      Schema.ns_.attr.get.size === attrCount
 
       // We can though filter by one or more tacit namespace names
       Schema.ns_("Ref1").attr.get.sorted === List(
@@ -293,18 +300,21 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "attr" in new CoreSetup {
+    "attr" in new SchemaSetup {
 
-      Schema.attr.get.size === 74
-      Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
+      Schema.attr.get.size === attrCount
+      if (system == DatomicPeer)
+        Schema.attr.get(5) === List("floats", "double", "str1", "byte", "uri")
+      else
+        Schema.attr.get(5) === List("floats", "double", "str1", "uri", "dates")
 
       Schema.attr("str").get === List("str")
       Schema.attr("str", "int").get === List("str", "int")
 
-      Schema.attr.not("str").get.size === 73
-      Schema.attr.not("str", "int").get.size === 72
+      Schema.attr.not("str").get.size === attrCount - 1
+      Schema.attr.not("str", "int").get.size === attrCount - 2
 
-      Schema.attr(count).get === List(74)
+      Schema.attr(count).get === List(attrCount)
 
 
       // Since all attributes have an attribute name, a tacit `a_` makes no difference
@@ -333,7 +343,7 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "tpe" in new CoreSetup {
+    "tpe" in new SchemaSetup {
 
       // Datomic types of schema attributes
       // Note that attributes defined being of Scala type
@@ -341,24 +351,89 @@ class SchemaTest extends CoreSpec {
       // - `Float` are internally saved as type `double` in Datomic
       // Molecule transparently converts back and forth so that application code only have to consider the Scala type.
 
-      Schema.tpe.get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long",
-        "uri", "uuid", "bigint", "boolean", "instant"
-      )
+      if (system == DatomicPeer)
+        Schema.tpe.get.sorted === List(
+          "bigdec",
+          "bigint",
+          "boolean",
+          "bytes", // not in Client
+          "double",
+          "instant",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
+      else
+        Schema.tpe.get.sorted === List(
+          "bigdec",
+          "bigint",
+          "boolean",
+          "double",
+          "instant",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
 
       Schema.tpe("string").get === List("string")
       Schema.tpe("string", "long").get === List("string", "long")
 
-      Schema.tpe.not("instant").get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long",
-        "uri", "uuid", "bigint", "boolean"
-      )
-      Schema.tpe.not("instant", "boolean").get === List(
-        "ref", "bigdec", "string", "bytes", "double", "long",
-        "uri", "uuid", "bigint"
-      )
+      if (system == DatomicPeer) {
+        Schema.tpe.not("instant").get.sorted === List(
+          "bigdec",
+          "bigint",
+          "boolean",
+          "bytes",
+          "double",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
+        Schema.tpe.not("instant", "boolean").get.sorted === List(
+          "bigdec",
+          "bigint",
+          "bytes",
+          "double",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
+        Schema.tpe(count).get === List(11)
 
-      Schema.tpe(count).get === List(11)
+      } else {
+
+        // Client without bytes type
+        Schema.tpe.not("instant").get.sorted === List(
+          "bigdec",
+          "bigint",
+          "boolean",
+          "double",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
+        Schema.tpe.not("instant", "boolean").get.sorted === List(
+          "bigdec",
+          "bigint",
+          "double",
+          "long",
+          "ref",
+          "string",
+          "uri",
+          "uuid",
+        )
+        Schema.tpe(count).get === List(10)
+      }
 
 
       // Since all attributes have a value type, a tacit `tpe_` makes no difference
@@ -385,7 +460,7 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "card" in new CoreSetup {
+    "card" in new SchemaSetup {
 
       Schema.card.get === List("one", "many")
 
@@ -399,19 +474,19 @@ class SchemaTest extends CoreSpec {
 
 
       // Since all attributes have a cardinality, a tacit `card_` makes no difference
-      Schema.a.get.size === 74
-      Schema.card_.a.get.size === 74
+      Schema.a.get.size === attrCount
+      Schema.card_.a.get.size === attrCount
 
       // We can though filter by cardinality
-      Schema.card_("one").a.get.size === 32
-      Schema.card_("many").a.get.size === 42
+      Schema.card_("one").a.get.size === card1count
+      Schema.card_("many").a.get.size === card2count
 
       // Attributes of cardinality one or many, well that's all
-      Schema.card_("one", "many").a.get.size === 74
+      Schema.card_("one", "many").a.get.size === attrCount
 
       // Negate tacit namespace name
-      Schema.card_.not("one").a.get.size === 42 // many
-      Schema.card_.not("many").a.get.size === 32 // one
+      Schema.card_.not("one").a.get.size === card2count // many
+      Schema.card_.not("many").a.get.size === card1count // one
       Schema.card_.not("one", "many").a.get.size === 0
     }
   }
@@ -419,7 +494,7 @@ class SchemaTest extends CoreSpec {
 
   "Schema attribute options" >> {
 
-    "doc" in new CoreSetup {
+    "doc" in new SchemaSetup {
 
       // 2 core attributes are documented
       Schema.doc.get === List(
@@ -439,19 +514,22 @@ class SchemaTest extends CoreSpec {
       Schema.doc.not("Card one String attribute").get === List(
         "Card one Int attribute")
 
-      // Instead, use fulltext search for a whole word in doc texts
-      Schema.doc.contains("Int").get === List(
-        "Card one Int attribute"
-      )
-      Schema.doc.contains("attribute").get === List(
-        "Card one String attribute",
-        "Card one Int attribute"
-      )
-      // Fulltext search for multiple words not allowed
-      expectCompileError(
-        """m(Schema.doc.contains("Int", "String"))""",
-        "molecule.core.transform.exception.Model2QueryException: " +
-          "Fulltext search can only be performed with 1 search phrase.")
+      // Docs only searchable with Peer (requires fulltext search)
+      if (system == DatomicPeer) {
+        // Instead, use fulltext search for a whole word in doc texts
+        Schema.doc.contains("Int").get === List(
+          "Card one Int attribute"
+        )
+        Schema.doc.contains("attribute").get === List(
+          "Card one String attribute",
+          "Card one Int attribute"
+        )
+        // Fulltext search for multiple words not allowed
+        expectCompileError(
+          """m(Schema.doc.contains("Int", "String"))""",
+          "molecule.core.transform.exception.Model2QueryException: " +
+            "Fulltext search can only be performed with 1 search phrase.")
+      }
 
       // Count documented attributes
       Schema.doc(count).get === List(2)
@@ -459,7 +537,7 @@ class SchemaTest extends CoreSpec {
 
       // Use tacit `doc_` to filter documented attributes
       // All attributes
-      Schema.a.get.size === 74
+      Schema.a.get.size === attrCount
       // Documented attributes
       Schema.doc_.a.get.size === 2
 
@@ -469,9 +547,12 @@ class SchemaTest extends CoreSpec {
       Schema.doc_.not("Card one Int attribute").a.get === List(":Ns/str")
 
 
-      // Tacit fulltext search in doc texts
-      Schema.doc_.contains("Int").a.get === List(":Ns/int")
-      Schema.doc_.contains("one").a.get === List(":Ns/int", ":Ns/str")
+      // Docs only searchable with Peer (requires fulltext search)
+      if (system == DatomicPeer) {
+        // Tacit fulltext search in doc texts
+        Schema.doc_.contains("Int").a.get === List(":Ns/int")
+        Schema.doc_.contains("one").a.get === List(":Ns/int", ":Ns/str")
+      }
 
       // Get optional attribute doc text with `doc$`
       Schema.attr_("bool", "str").a.doc$.get === List(
@@ -491,54 +572,57 @@ class SchemaTest extends CoreSpec {
     }
 
 
-    "index" in new CoreSetup {
+    "index" in new SchemaSetup {
 
-      // All attributes are indexed
-      Schema.index.get === List(true) // no false
-      Schema.a.index.get.size === 74
+      // Index option only available in Peer
+      if (system == DatomicPeer) {
 
-      Schema.a.index(true).get.size === 74
-      Schema.a.index(false).get.size === 0
+        // All attributes are indexed
+        Schema.index.get === List(true) // no false
+        Schema.a.index.get.size === attrCount
 
-      Schema.a.index.not(true).get.size === 0
-      Schema.a.index.not(false).get.size === 74
+        Schema.a.index(true).get.size === attrCount
+        Schema.a.index(false).get.size === 0
 
-      // Count attribute indexing statuses (only true)
-      Schema.index(count).get === List(1)
+        Schema.a.index.not(true).get.size === 0
+        Schema.a.index.not(false).get.size === attrCount
 
-
-      // Using tacit `index_` is not that useful since all attributes are indexed by default
-      Schema.a.get.size === 74
-      Schema.index_.a.get.size === 74
-
-      Schema.index_(true).a.get.size === 74
-      Schema.index_.not(false).a.get.size === 74
+        // Count attribute indexing statuses (only true)
+        Schema.index(count).get === List(1)
 
 
-      // Get optional attribute indexing status with `index$`
-      Schema.attr_("bool", "str").a.index$.get === List(
-        (":Ns/str", Some(true)),
-        (":Ns/bool", Some(true)),
-      )
+        // Using tacit `index_` is not that useful since all attributes are indexed by default
+        Schema.a.get.size === attrCount
+        Schema.index_.a.get.size === attrCount
 
-      // Filter by applying optional attribute indexing status
-      val some = Some(true)
-      Schema.attr_("bool", "str").a.index$(some).get === List(
-        (":Ns/bool", Some(true)),
-        (":Ns/str", Some(true)),
-      )
-      Schema.attr_("bool", "str").a.index$(Some(true)).get === List(
-        (":Ns/bool", Some(true)),
-        (":Ns/str", Some(true)),
-      )
+        Schema.index_(true).a.get.size === attrCount
+        Schema.index_.not(false).a.get.size === attrCount
 
-      val none = None
-      Schema.attr_("bool", "str").a.index$(none).get === Nil
-      Schema.attr_("bool", "str").a.index$(None).get === Nil
+
+        // Get optional attribute indexing status with `index$`
+        Schema.attr_("bool", "str").a.index$.get === List(
+          (":Ns/str", Some(true)),
+          (":Ns/bool", Some(true)),
+        )
+
+        // Filter by applying optional attribute indexing status
+        val some = Some(true)
+        Schema.attr_("bool", "str").a.index$(some).get === List(
+          (":Ns/bool", Some(true)),
+          (":Ns/str", Some(true)),
+        )
+        Schema.attr_("bool", "str").a.index$(Some(true)).get === List(
+          (":Ns/bool", Some(true)),
+          (":Ns/str", Some(true)),
+        )
+
+        val none = None
+        Schema.attr_("bool", "str").a.index$(none).get === Nil
+        Schema.attr_("bool", "str").a.index$(None).get === Nil
+      }
     }
 
-
-    "unique" in new CoreSetup {
+    "unique" in new SchemaSetup {
 
       // Unique options
       Schema.unique.get === List("identity", "value")
@@ -567,10 +651,10 @@ class SchemaTest extends CoreSpec {
 
 
       // Get optional attribute indexing status with `index$`
-      Schema.attr_("str", "str2", "int2").a.unique$.get === List(
-        (":Ref2/str2", Some("identity")),
-        (":Ref2/int2", Some("value")),
+      Schema.attr_("str", "str2", "int2").a.unique$.get.sorted === List(
         (":Ns/str", None),
+        (":Ref2/int2", Some("value")),
+        (":Ref2/str2", Some("identity")),
       )
 
       // Filter by applying optional attribute uniqueness status
@@ -591,84 +675,88 @@ class SchemaTest extends CoreSpec {
       )
 
       // Number of non-unique attributes
-      Schema.a.unique$(None).get.size === 74 - 2
+      Schema.a.unique$(None).get.size === attrCount - 2
     }
 
 
-    "fulltext" in new CoreSetup {
+    "fulltext" in new SchemaSetup {
 
-      // Fulltext options
-      Schema.fulltext.get === List(true) // no false
+      // Fulltext option only available in Peer
+      if (system == DatomicPeer) {
 
-      // Count attribute fulltext statuses (only true)
-      Schema.fulltext(count).get === List(1)
+        // Fulltext options
+        Schema.fulltext.get === List(true) // no false
 
-      // Attributes with fulltext search
-      Schema.a.fulltext.get.sortBy(_._1) === List(
-        (":Ns/str", true),
-        (":Ns/strMap", true),
-        (":Ns/strs", true),
-        (":Ref1/str1", true),
-        (":Ref2/str2", true)
-      )
+        // Count attribute fulltext statuses (only true)
+        Schema.fulltext(count).get === List(1)
 
-      Schema.a.fulltext(true).get.size === 5
-      // Option is either true or non-asserted (nil/None), never false
-      Schema.a.fulltext(false).get.size === 0
+        // Attributes with fulltext search
+        Schema.a.fulltext.get.sortBy(_._1) === List(
+          (":Ns/str", true),
+          (":Ns/strMap", true),
+          (":Ns/strs", true),
+          (":Ref1/str1", true),
+          (":Ref2/str2", true)
+        )
 
-      Schema.a.fulltext.not(true).get.size === 0
-      Schema.a.fulltext.not(false).get.size === 5
+        Schema.a.fulltext(true).get.size === 5
+        // Option is either true or non-asserted (nil/None), never false
+        Schema.a.fulltext(false).get.size === 0
 
-
-      // Filter attributes with tacit `fulltext_` option
-      Schema.fulltext_.a.get.sorted === List(
-        ":Ns/str",
-        ":Ns/strMap",
-        ":Ns/strs",
-        ":Ref1/str1",
-        ":Ref2/str2"
-      )
-      Schema.fulltext_(true).a.get.sorted === List(
-        ":Ns/str",
-        ":Ns/strMap",
-        ":Ns/strs",
-        ":Ref1/str1",
-        ":Ref2/str2"
-      )
-      Schema.fulltext_.not(false).a.get.sorted === List(
-        ":Ns/str",
-        ":Ns/strMap",
-        ":Ns/strs",
-        ":Ref1/str1",
-        ":Ref2/str2"
-      )
+        Schema.a.fulltext.not(true).get.size === 0
+        Schema.a.fulltext.not(false).get.size === 5
 
 
-      // Get optional attribute fulltext status with `fulltext$`
-      Schema.attr_("bool", "str").a.fulltext$.get === List(
-        (":Ns/str", Some(true)),
-        (":Ns/bool", None),
-      )
+        // Filter attributes with tacit `fulltext_` option
+        Schema.fulltext_.a.get.sorted === List(
+          ":Ns/str",
+          ":Ns/strMap",
+          ":Ns/strs",
+          ":Ref1/str1",
+          ":Ref2/str2"
+        )
+        Schema.fulltext_(true).a.get.sorted === List(
+          ":Ns/str",
+          ":Ns/strMap",
+          ":Ns/strs",
+          ":Ref1/str1",
+          ":Ref2/str2"
+        )
+        Schema.fulltext_.not(false).a.get.sorted === List(
+          ":Ns/str",
+          ":Ns/strMap",
+          ":Ns/strs",
+          ":Ref1/str1",
+          ":Ref2/str2"
+        )
 
-      // Filter by applying optional attribute fulltext search status
-      val some = Some(true)
-      Schema.attr_("bool", "str").a.fulltext$(some).get === List(
-        (":Ns/str", Some(true)))
-      Schema.attr_("bool", "str").a.fulltext$(Some(true)).get === List(
-        (":Ns/str", Some(true)))
 
-      val none = None
-      Schema.attr_("bool", "str").a.fulltext$(none).get === List(
-        (":Ns/bool", None))
-      Schema.attr_("bool", "str").a.fulltext$(None).get === List(
-        (":Ns/bool", None))
+        // Get optional attribute fulltext status with `fulltext$`
+        Schema.attr_("bool", "str").a.fulltext$.get === List(
+          (":Ns/str", Some(true)),
+          (":Ns/bool", None),
+        )
 
-      // Number of attributes without fulltext search
-      Schema.a.fulltext$(None).get.size === 74 - 5
+        // Filter by applying optional attribute fulltext search status
+        val some = Some(true)
+        Schema.attr_("bool", "str").a.fulltext$(some).get === List(
+          (":Ns/str", Some(true)))
+        Schema.attr_("bool", "str").a.fulltext$(Some(true)).get === List(
+          (":Ns/str", Some(true)))
+
+        val none = None
+        Schema.attr_("bool", "str").a.fulltext$(none).get === List(
+          (":Ns/bool", None))
+        Schema.attr_("bool", "str").a.fulltext$(None).get === List(
+          (":Ns/bool", None))
+
+        // Number of attributes without fulltext search
+        Schema.a.fulltext$(None).get.size === attrCount - 5
+      }
     }
 
 
-    "isComponent" in new CoreSetup {
+    "isComponent" in new SchemaSetup {
 
       // Component status options - either true or non-asserted
       Schema.isComponent.get === List(true) // no false
@@ -712,30 +800,32 @@ class SchemaTest extends CoreSpec {
 
 
       // Get optional attribute component status with `isComponent$`
-      Schema.attr_("bool", "refSub1").a.isComponent$.get === List(
-        (":Ns/refSub1", Some(true)),
+      Schema.attr_("bool", "refSub1").a.isComponent$.get.sorted === List(
         (":Ns/bool", None),
+        (":Ns/refSub1", Some(true)),
       )
 
       // Filter by applying optional attribute component status
       val some = Some(true)
       Schema.attr_("bool", "refSub1").a.isComponent$(some).get === List(
         (":Ns/refSub1", Some(true)))
+
       Schema.attr_("bool", "refSub1").a.isComponent$(Some(true)).get === List(
         (":Ns/refSub1", Some(true)))
 
       val none = None
       Schema.attr_("bool", "refSub1").a.isComponent$(none).get === List(
         (":Ns/bool", None))
+
       Schema.attr_("bool", "refSub1").a.isComponent$(None).get === List(
         (":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.isComponent$(None).get.size === 74 - 4
+      Schema.a.isComponent$(None).get.size === attrCount - 4
     }
 
 
-    "noHistory" in new CoreSetup {
+    "noHistory" in new SchemaSetup {
 
       // No-history status options - either true or non-asserted
       Schema.noHistory.get === List(true) // no false
@@ -761,31 +851,33 @@ class SchemaTest extends CoreSpec {
 
 
       // Get optional attribute no-history status with `noHistory$`
-      Schema.attr_("bool", "ints2").a.noHistory$.get === List(
-        (":Ref2/ints2", Some(true)),
+      Schema.attr_("bool", "ints2").a.noHistory$.get.sorted === List(
         (":Ns/bool", None),
+        (":Ref2/ints2", Some(true)),
       )
 
       // Filter by applying optional attribute no-history status
       val some = Some(true)
       Schema.attr_("bool", "ints2").a.noHistory$(some).get === List(
         (":Ref2/ints2", Some(true)))
+
       Schema.attr_("bool", "ints2").a.noHistory$(Some(true)).get === List(
         (":Ref2/ints2", Some(true)))
 
       val none = None
       Schema.attr_("bool", "ints2").a.noHistory$(none).get === List(
         (":Ns/bool", None))
+
       Schema.attr_("bool", "ints2").a.noHistory$(None).get === List(
         (":Ns/bool", None))
 
       // Number of non-component attributes
-      Schema.a.noHistory$(None).get.size === 74 - 1
+      Schema.a.noHistory$(None).get.size === attrCount - 1
     }
   }
 
 
-  "enum" in new CoreSetup {
+  "enum" in new SchemaSetup {
 
     // Attribute/enum values in namespace `ref2`
     Schema.ns_("Ref2").attr.enum.get.sorted === List(
@@ -880,18 +972,25 @@ class SchemaTest extends CoreSpec {
   }
 
 
-  "t, tx, txInstant" in new CoreSetup {
+  "t, tx, txInstant" in new SchemaSetup {
 
     if (system == DatomicPeer) {
+      // OBS time t only implemented for Peer (dev-local can't convert from tx to t)
       // Schema transaction time t
       Schema.t.get === List(1000)
+
+      // Schema transaction entity id
+      Schema.tx.get === List(13194139534312L)
+
+      // Get tx wall clock time from Log for comparison with time from Schema query
+      Schema.txInstant.get === List(Log().txInstant.get.head)
+
+    } else {
+
+      // Schema transaction entity id
+      Schema.tx.get === List(13194139533318L)
+      // Get tx wall clock time from Log for comparison with time from Schema query
+      Schema.txInstant.get === List(Log().txInstant.get.head)
     }
-
-    // Schema transaction entity id
-    Schema.tx.get === List(13194139534312L)
-
-    // Get tx wall clock time from Log for comparison with time from Schema query
-    val txInstant = Log(Some(1000), Some(1001)).txInstant.get.head
-    Schema.txInstant.get === List(txInstant)
   }
 }

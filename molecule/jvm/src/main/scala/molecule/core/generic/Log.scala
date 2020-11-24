@@ -36,6 +36,10 @@ trait GenericLog {
       * @return Log builder object to add generic datom attributes
       */
     final def apply(from: Option[Any], until: Option[Any]): Log_0 = ???
+
+    final def apply(from: Option[Any]): Log_0 = ???
+
+    final def apply(): Log_0 = ???
   }
 }
 

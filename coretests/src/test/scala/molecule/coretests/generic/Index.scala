@@ -1,11 +1,13 @@
 package molecule.coretests.generic
 
 import molecule.core.exceptions.MoleculeException
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out5._
+import molecule.datomic.client.devLocal.facade.{Conn_DevLocal, DatomicDb_DevLocal}
+import molecule.datomic.peer.facade.{Conn_Peer, DatomicDb_Peer}
 
 
 class Index extends CoreSpec {
@@ -278,7 +280,6 @@ class Index extends CoreSpec {
       )
 
 
-
       // Attribute :Ns/int's historic entities, values and transactions
       // Note that retractions (false) takes precedence in T order
       AEVT(":Ns/int").e.v.t.op.getHistory === List(
@@ -441,8 +442,8 @@ class Index extends CoreSpec {
       // Args can be supplied as variables
 
       val attr = ":Ns/int"
-      val one = 1
-      val six = 6
+      val one  = 1
+      val six  = 6
 
       // All variables
       AVET.range(attr, Some(one), Some(six)).e.get === Seq(e1, e2)
@@ -451,9 +452,9 @@ class Index extends CoreSpec {
       AVET.range(":Ns/int", Some(one), Some(6)).e.get === Seq(e1, e2)
 
       // Optionals can be supplied as variables too
-      val from1 = Some(1)
+      val from1  = Some(1)
       val until6 = Some(6)
-      val end = None
+      val end    = None
       AVET.range(":Ns/int", from1, end).e.get === List(e1, e2)
       AVET.range(":Ns/int", from1, until6).e.get === List(e1, e2)
     }
@@ -557,16 +558,36 @@ class Index extends CoreSpec {
 
   "Raw access to all Datoms of Index" in new setup {
 
-    // Access all datoms (the entire database!) of an Index by raw access:
-    conn.db.datoms(datomic.Database.EAVT)
-      .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+    if (system == DatomicPeer) {
 
-    println("-------")
+      val connPeer = conn.asInstanceOf[Conn_Peer]
+      val db       = connPeer.db.asInstanceOf[DatomicDb_Peer]
 
-    // and with arguments:
-    conn.db.datoms(datomic.Database.EAVT, e1.asInstanceOf[AnyRef])
-      .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+      // Access all datoms (the entire database!) of an Index by raw access:
+      db.datoms(datomic.Database.EAVT)
+        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
 
-    ok
+      println("-------")
+
+      // and with arguments:
+      db.datoms(datomic.Database.EAVT, e1.asInstanceOf[AnyRef])
+        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
+
+    } else {
+
+      val connPeer = conn.asInstanceOf[Conn_DevLocal]
+      val db       = connPeer.db.asInstanceOf[DatomicDb_DevLocal]
+
+      // Access all datoms (the entire database!) of an Index by raw access:
+      db.datoms(":eavt")
+        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"))
+
+      println("-------")
+
+      // and with arguments:
+      db.datoms(":eavt", e1.asInstanceOf[AnyRef])
+        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"))
+    }
+
   }
 }
