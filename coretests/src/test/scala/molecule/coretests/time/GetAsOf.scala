@@ -1,5 +1,8 @@
 package molecule.coretests.time
 
+import java.util.{Collection => jCollection, List => jList}
+import datomic.Util.list
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
@@ -9,7 +12,7 @@ class GetAsOf extends CoreSpec {
 
   "t (from history)" in new CoreSetup {
 
-    val tx1 = Ns.str.int insert List(
+    val tx1            = Ns.str.int insert List(
       ("Ben", 42),
       ("Liz", 37),
     )
@@ -20,11 +23,11 @@ class GetAsOf extends CoreSpec {
     val tx3 = ben.retract
 
     // See history of Ben
-    Ns(ben).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
-      (42, tx1.t, true), // Insert:  42 asserted
-      (42, tx2.t, false), // Update:  42 retracted
-      (43, tx2.t, true), //          43 asserted
-      (43, tx3.t, false) // Retract: 43 retracted
+    Ns(ben).int.tx.op.getHistory.sortBy(r => (r._2, r._3)) === List(
+      (42, tx1.tx, true), // Insert:  42 asserted
+      (42, tx2.tx, false), // Update:  42 retracted
+      (43, tx2.tx, true), //          43 asserted
+      (43, tx3.tx, false) // Retract: 43 retracted
     )
 
     // Data after insertion
@@ -126,26 +129,21 @@ class GetAsOf extends CoreSpec {
   "Date" in new CoreSetup {
 
     val beforeInsert = new java.util.Date
-    // We slow down to allow new Date times to catch up (avoid using Date for precision times!)
-    Thread.sleep(1000)
 
     // Insert
-    val tx1 = Ns.str.int insert List(
-      ("Ben", 42),
-      ("Liz", 37),
-    )
-    val ben = tx1.eid
-    val afterInsert = new java.util.Date
-    Thread.sleep(1000)
+    val tx1         = Ns.str.int insert List(("Ben", 42), ("Liz", 37))
+    val ben         = tx1.eid
+    val afterInsert = tx1.inst
 
     // Update
-    val tx2 = Ns(ben).int(43).update
-    val afterUpdate = new java.util.Date
-    Thread.sleep(1000)
+    val afterUpdate = Ns(ben).int(43).update.inst
 
     // Retract
-    val tx3 = ben.retract
-    val afterRetract = new java.util.Date
+    val afterRetract = ben.retract.inst
+
+    // Let retraction register before querying
+    // (Peer is fast, and dates are only precise by the ms)
+    Thread.sleep(20)
 
     // No data yet before insert
     Ns.str.int.getAsOf(beforeInsert) === Nil
@@ -222,13 +220,17 @@ class GetAsOf extends CoreSpec {
     // Retract (tx report 3)
     val tx3 = ben.retract
 
-    val raw1: java.util.Collection[java.util.List[AnyRef]] = Ns.str.int.getRawAsOf(tx1)
-    raw1.toString === """[["Liz" 37], ["Ben" 42]]"""
-
-    val raw2: java.util.Collection[java.util.List[AnyRef]] = Ns.str.int.getRawAsOf(tx2)
-    raw2.toString === """[["Liz" 37], ["Ben" 43]]""" // Ben now 43
-
-    val raw3: java.util.Collection[java.util.List[AnyRef]] = Ns.str.int.getRawAsOf(tx3)
-    raw3.toString === """[["Liz" 37]]""" // Ben gone
+    // Different string representations for each system
+    if (system == DatomicPeer) {
+      // (java.util.HashSet returned)
+      Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37], ["Ben" 42]]"""
+      Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37], ["Ben" 43]]""" // Ben now 43
+      Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
+    } else {
+      // (clojure.lang.PersistentVector returned)
+      Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37] ["Ben" 42]]"""
+      Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37] ["Ben" 43]]""" // Ben now 43
+      Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
+    }
   }
 }
