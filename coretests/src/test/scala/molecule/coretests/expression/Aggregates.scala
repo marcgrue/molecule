@@ -497,9 +497,9 @@ class Aggregates extends CoreSpec {
     val e4 = Ns.ints(Seq(1, 2)).save.eid
     val e5 = Ns.ints(3).save.eid
 
-    Ns.e.ints(count).get.sorted === List(
+    Ns.e.ints(count).get.sortBy(_._2) === List(
+      (e5, 1),
       (e4, 2),
-      (e5, 1)
     )
   }
 
