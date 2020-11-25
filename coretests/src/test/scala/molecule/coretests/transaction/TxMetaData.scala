@@ -1,6 +1,7 @@
 package molecule.coretests.transaction
 
 import molecule.core.ops.exception.VerifyModelException
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out10._
@@ -49,13 +50,24 @@ class TxMetaData extends CoreSpec {
       Ns.int.Tx(Ns.str_(Nil)).get === List(6)
 
       // Transaction meta data expressions
-      Ns.int.Tx(Ns.str.contains("mandatory")).get.sortBy(_._1) === List(
-        (2, "str mandatory"),
-        (3, "attr mandatory")
-      )
-      Ns.int.<(3).Tx(Ns.str.contains("mandatory")).get === List(
+      Ns.int.<(3).Tx(Ns.str("str mandatory")).get === List(
         (2, "str mandatory")
       )
+      Ns.int.<(3).Tx(Ns.str.not("attr mandatory")).get === List(
+        (1, "str tacit"),
+        (2, "str mandatory")
+      )
+
+      // Fulltext search only available for Peer
+      if (system == DatomicPeer) {
+        Ns.int.Tx(Ns.str.contains("mandatory")).get.sortBy(_._1) === List(
+          (2, "str mandatory"),
+          (3, "attr mandatory")
+        )
+        Ns.int.<(3).Tx(Ns.str.contains("mandatory")).get === List(
+          (2, "str mandatory")
+        )
+      }
 
       // tx entity id can be returned too
       Ns.int.tx.Tx(Ns.str$).get.sortBy(_._1) === List(
@@ -66,9 +78,7 @@ class TxMetaData extends CoreSpec {
         (5, tx5, Some("attr optional with value")),
         (6, tx6, None) // attr optional without value
       )
-      //      Log(Some(tx1), Some(tx1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
-      Log(Some(t1), Some(t1 + 1)).tx.e.a.v.op.get.foreach(s => println("x " + s))
-
+      Log(Some(tx1), Some(tx2)).tx.e.a.v.op.get.foreach(s => println("x " + s))
     }
 
 
@@ -302,39 +312,41 @@ class TxMetaData extends CoreSpec {
   "Update" in new CoreSetup {
 
     // tx 1: save
-    val e = Ns.int(1).Tx(Ns.str("a")).save.eid
+    val txR1 = Ns.int(1).Tx(Ns.str("a")).save
+    val e    = txR1.eid
+    val tx1  = txR1.tx
 
     // tx2: Update without tx meta data
-    Ns(e).int(2).update
+    val tx2 = Ns(e).int(2).update.tx
 
     // tx3: Update with tx meta data
-    Ns(e).int(3).Tx(Ns.str("b")).update
+    val tx3 = Ns(e).int(3).Tx(Ns.str("b")).update.tx
 
 
     // History without tx meta data
-    Ns(e).int.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
+    Ns(e).int.tx.op.getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1036, true), // 1 asserted (save)
+      (1, tx1, true), // 1 asserted (save)
 
       // tx 2
-      (1, 1038, false), // 1 retracted
-      (2, 1038, true), // 2 asserted (update)
+      (1, tx2, false), // 1 retracted
+      (2, tx2, true), // 2 asserted (update)
 
       // tx 3
-      (2, 1039, false), // 2 retracted
-      (3, 1039, true) // 3 asserted (update)
+      (2, tx3, false), // 2 retracted
+      (3, tx3, true) // 3 asserted (update)
     )
 
     // History with tx meta data
-    Ns(e).int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._3)) === List(
+    Ns(e).int.tx.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._3)) === List(
       // tx 1
-      (1, 1036, true, "a"), // 1 asserted (save)
+      (1, tx1, true, "a"), // 1 asserted (save)
 
       // (tx2 has no tx meta data)
 
       // tx 3
-      (2, 1039, false, "b"), // 2 retracted
-      (3, 1039, true, "b") // 3 asserted (update)
+      (2, tx3, false, "b"), // 2 retracted
+      (3, tx3, true, "b") // 3 asserted (update)
     )
   }
 
@@ -344,12 +356,12 @@ class TxMetaData extends CoreSpec {
     val e = Ns.int(1).save.eid
 
     // Retract entity with tx meta data
-    e.Tx(Ns.str("meta")).retract
+    val tx2 = e.Tx(Ns.str("meta")).retract.tx
 
     // What was retracted and with what tx meta data
-    Ns.e.int.t.op.Tx(Ns.str).getHistory === List(
+    Ns.e.int.tx.op.Tx(Ns.str).getHistory === List(
       // 1 was retracted with tx meta data "meta"
-      (e, 1, 1038, false, "meta")
+      (e, 1, tx2, false, "meta")
     )
   }
 
@@ -369,20 +381,21 @@ class TxMetaData extends CoreSpec {
   "Multiple entities" in new CoreSetup {
 
     // Insert multiple entities with tx meta data
-    val List(e1, e2, e3, tx) = Ns.int.Tx(Ns.str_("a")) insert List(1, 2, 3) eids
+    val txR1                  = Ns.int.Tx(Ns.str_("a")) insert List(1, 2, 3)
+    val List(e1, e2, e3, tx1) = txR1.eids
 
     // Retract multiple entities with tx meta data
-    retract(Seq(e1, e2), Ns.str("b"))
+    val tx2 = retract(Seq(e1, e2), Ns.str("b")).tx
 
     // History with transaction data
-    Ns.int.t.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1036, true, "a"),
-      (2, 1036, true, "a"),
-      (3, 1036, true, "a"),
+    Ns.int.tx.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+      (1, tx1, true, "a"),
+      (2, tx1, true, "a"),
+      (3, tx1, true, "a"),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1040, false, "b"),
-      (2, 1040, false, "b")
+      (1, tx2, false, "b"),
+      (2, tx2, false, "b")
     )
 
     // Entities and int values that were retracted with tx meta data "b"
@@ -399,20 +412,20 @@ class TxMetaData extends CoreSpec {
   "Multiple entities with tx meta data including ref" in new CoreSetup {
 
     // Insert multiple entities with tx meta data including ref
-    val List(e1, e2, e3, tx, r1) = Ns.int.Tx(Ns.str_("a").Ref1.int1_(7)) insert List(1, 2, 3) eids
+    val List(e1, e2, e3, tx1, r1) = Ns.int.Tx(Ns.str_("a").Ref1.int1_(7)) insert List(1, 2, 3) eids
 
     // Add tx meta data to retracting multiple entities
-    retract(Seq(e1, e2), Ns.str("b").Ref1.int1(8))
+    val tx2 = retract(Seq(e1, e2), Ns.str("b").Ref1.int1(8)).tx
 
     // History with transaction data
-    Ns.int.t.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, 1036, true, "a", 7),
-      (2, 1036, true, "a", 7),
-      (3, 1036, true, "a", 7),
+    Ns.int.tx.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+      (1, tx1, true, "a", 7),
+      (2, tx1, true, "a", 7),
+      (3, tx1, true, "a", 7),
 
       // 1 and 2 were retracted with tx meta data "b"
-      (1, 1041, false, "b", 8),
-      (2, 1041, false, "b", 8)
+      (1, tx2, false, "b", 8),
+      (2, tx2, false, "b", 8)
     )
 
     // Entities and int values that was retracted in tx "b"

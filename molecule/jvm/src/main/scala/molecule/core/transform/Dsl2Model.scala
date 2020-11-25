@@ -14,9 +14,11 @@ import scala.reflect.macros.blackbox
 
 private[molecule] trait Dsl2Model extends Cast with Json {
   val c: blackbox.Context
+
   import c.universe._
 
   val x = DebugMacro("Dsl2Model", 901, 900)
+//  val x = DebugMacro("Dsl2Model", 40, 42)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -483,7 +485,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
     def resolveApply(tree: Tree, t: richTree, prev: Tree, p: richTree, attrStr: String, args: Tree): Seq[Element] = {
       if (t.isFirstNS) {
-        x(230, attrStr, genericType)
+        x(230, attrStr, genericType, args)
         tree match {
           case q"$prev.$nsFull.apply($pkg.?)"                            => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(Qm))))
           case q"$prev.$nsFull.apply($eid)" if t.isBiEdge                => traverseElement(prev, p, Generic(nsFull.toString(), "e_", genericType, Eq(Seq(extract(eid)))))
@@ -1313,14 +1315,21 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     }
 
     def resolveValues(tree: Tree, t: richTree = null): Seq[Any] = {
+      x(41, tree)
       val at: att = if (t == null) null else t.at
-      def resolve(tree0: Tree, values: Seq[Tree] = Seq.empty[Tree]): Seq[Tree] = tree0 match {
-        case q"$a.or($b)"                                            => resolve(b, resolve(a, values))
-        case q"${_}.string2Model($v)"                                => values :+ v
-        case q"scala.StringContext.apply(..$tokens).s(..$variables)" => abort(
-          "Can't use string interpolation for applied values. Please assign the interpolated value to a single variable and apply that instead.")
-        case Apply(_, vs)                                            => values ++ vs.flatMap(resolve(_))
-        case v                                                       => values :+ v
+      def resolve(tree0: Tree, values: Seq[Tree] = Seq.empty[Tree]): Seq[Tree] = {
+        x(42, tree0, tree0.raw)
+        tree0 match {
+          case q"$a.or($b)"                                            => resolve(b, resolve(a, values))
+          case q"${_}.string2Model($v)"                                => values :+ v
+          case q"scala.StringContext.apply(..$tokens).s(..$variables)" => abort(
+            "Can't use string interpolation for applied values. Please assign the interpolated value to a single variable and apply that instead.")
+          case q"$a.$b(..$c)"                                            =>
+            abort("Applying arguments with expressions are not allowed. Please set a variable to the result of the " +
+              "expression and apply the variable instead instead.")
+          case Apply(_, vs)                                            => values ++ vs.flatMap(resolve(_))
+          case v                                                       => values :+ v
+        }
       }
       def validateStaticEnums(value: Any, enumValues: Seq[String]) = {
         if (value != "?" && !value.toString.startsWith("__ident__") && !enumValues.contains(value.toString))

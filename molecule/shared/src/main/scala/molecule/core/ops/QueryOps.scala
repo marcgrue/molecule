@@ -649,11 +649,12 @@ object QueryOps extends Helpers with JavaUtil {
     // Java conversions ...........................................................
 
     private def cast(a: Any): AnyRef = a match {
-      case i: Int           => i.toLong.asInstanceOf[Object]
-      case f: Float         => f.toDouble.asInstanceOf[Object]
-      case bigI: BigInt     => bigI.bigInteger
-      case bigD: BigDecimal => bigD.bigDecimal
-      case other            => other.asInstanceOf[Object]
+      case i: Int                                => i.toLong.asInstanceOf[Object]
+      case f: Float                              => f.toDouble.asInstanceOf[Object]
+      case bigI: BigInt                          => bigI.bigInteger
+      case bigD: BigDecimal                      => bigD.bigDecimal
+      case s: String if s.startsWith("__enum__") => s.drop(8).asInstanceOf[Object]
+      case other                                 => other.asInstanceOf[Object]
     }
 
     def inputs: Seq[AnyRef] = q.i.inputs.map {

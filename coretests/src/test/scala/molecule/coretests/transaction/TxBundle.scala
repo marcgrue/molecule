@@ -1,5 +1,7 @@
 package molecule.coretests.transaction
 
+import datomicScala.Incorrect
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.datomic.api.out1._
@@ -37,29 +39,41 @@ class TxBundle extends CoreSpec {
     )
 
     // Can't transact conflicting datoms
-    (transactBundle(
-      Ns(e3).int(31).getUpdateTx,
-      Ns(e3).int(32).getUpdateTx
-    ) must throwA[java.util.concurrent.ExecutionException]).message ===
-      "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
-        ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
-        "{:d1 [17592186045455 :Ns/int 31 13194139534356 true],\n" +
-        " :d2 [17592186045455 :Ns/int 32 13194139534356 true]}\n"
+    // (different systems throws different exceptions)
+    if (system == DatomicPeer) {
+      (transactBundle(
+        Ns(e3).int(31).getUpdateTx,
+        Ns(e3).int(32).getUpdateTx
+      ) must throwA[java.util.concurrent.ExecutionException]).message ===
+        "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
+          ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
+          "{:d1 [17592186045455 :Ns/int 31 13194139534356 true],\n" +
+          " :d2 [17592186045455 :Ns/int 32 13194139534356 true]}\n"
+    } else {
+      (transactBundle(
+        Ns(e3).int(31).getUpdateTx,
+        Ns(e3).int(32).getUpdateTx
+      ) must throwA[Incorrect]).message === "Got the exception datomicScala.Incorrect: " +
+        "Two datoms in the same transaction conflict"
+    }
   }
 
 
   "Asynchronous" in new CoreSetup {
 
-    Await.result(
-      transactBundleAsync(
-        Ns.int(1).getSaveTx,
-        Ns.str("a").getSaveTx
-      ) map { txReport =>
-        Ns.int.get === List(1)
-        Ns.str.get === List("a")
-      },
-      2.seconds
-    )
+    // todo: Async implementation for systems other than Peer
+    if (system == DatomicPeer) {
+      Await.result(
+        transactBundleAsync(
+          Ns.int(1).getSaveTx,
+          Ns.str("a").getSaveTx
+        ) map { txReport =>
+          Ns.int.get === List(1)
+          Ns.str.get === List("a")
+        },
+        2.seconds
+      )
+    }
   }
 
 

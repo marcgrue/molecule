@@ -238,7 +238,7 @@ trait InputMolecule extends MoleculeBase {
           case Seq(enum, ident, getName, _, Funct("!=", _, _))        => (Nil, Nil,
             Seq(enum, ident, getName) ++ argss.map(args =>
               NotClauses(
-                args.map(arg => DataClause(ImplDS, e, kw, Val(Util.read(prefix.get + arg)), Empty, NoBinding))
+                args.map(arg => DataClause(ImplDS, e, kw, Val("__enum__" + prefix.get + arg), Empty, NoBinding))
               )
             )
           )
@@ -256,7 +256,7 @@ trait InputMolecule extends MoleculeBase {
             Nil,
             argss.map(args =>
               Rule(ruleName, Seq(e), args.map(arg =>
-                DataClause(ImplDS, e, kw, Val(Util.read(prefix.get + arg)), Empty, NoBinding)
+                DataClause(ImplDS, e, kw, Val("__enum__" + prefix.get + arg), Empty, NoBinding)
               ))),
             if (tacit) Seq(enum, RuleInvocation(ruleName, Seq(e))) else Seq(enum, ident, fn, RuleInvocation(ruleName, Seq(e)))
           )
@@ -363,9 +363,9 @@ trait InputMolecule extends MoleculeBase {
           // Qm
           case cls if nil && tacit             => (Nil, Nil, Seq(Funct("missing?", Seq(DS(), e, kw), NoBinding)))
           case cls if nil                      => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, cls)
-          case Seq(enum, _, _) if one && tacit => (Seq(InVar(ScalarBinding(Var(v_)), Seq(Seq(Util.read(prefix.get + args.head))))), Nil, Seq(enum))
+          case Seq(enum, _, _) if one && tacit => (Seq(InVar(ScalarBinding(Var(v_)), Seq(Seq("__enum__" + prefix.get + args.head)))), Nil, Seq(enum))
           case cls if one                      => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
-          case Seq(enum, _, _) if tacit        => (Seq(InVar(CollectionBinding(Var(v_)), Seq(args.map(arg => Util.read(prefix.get + arg))))), Nil, Seq(enum))
+          case Seq(enum, _, _) if tacit        => (Seq(InVar(CollectionBinding(Var(v_)), Seq(args.map(arg => "__enum__" + prefix.get + arg)))), Nil, Seq(enum))
           case cls                             => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, cls)
         }
 

@@ -288,7 +288,7 @@ class EnumCard1 extends CoreSpec {
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(Util.read(":Ns.enum/enum1"))))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq("__enum__:Ns.enum/enum1")))),
           List(),
           List(DS)),
         Where(List(
@@ -306,7 +306,7 @@ class EnumCard1 extends CoreSpec {
           List(
             InVar(
               CollectionBinding(Var("c")),
-              Seq(Seq(Util.read(":Ns.enum/enum1"), Util.read(":Ns.enum/enum2"))))),
+              Seq(Seq("__enum__:Ns.enum/enum1", "__enum__:Ns.enum/enum2")))),
           List(),
           List(DS)),
         Where(List(

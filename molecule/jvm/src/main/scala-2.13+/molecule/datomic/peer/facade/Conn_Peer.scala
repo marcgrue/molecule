@@ -1,22 +1,20 @@
 package molecule.datomic.peer.facade
 
-import java.{lang, util}
+import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
+import datomic.{Database, Datom, ListenableFuture, Peer}
+import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
-import datomic.{Connection, Database, Datom, ListenableFuture, Peer}
-import datomic.Connection.DB_AFTER
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers}
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
-import org.slf4j.LoggerFactory
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
@@ -396,12 +394,13 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
   // Datalog query execution
   def _query(model: Model, query: Query, _db: Option[DatomicDb] = None): jCollection[jList[AnyRef]] = {
-    val optimizedQuery         = QueryOptimizer(query)
-    val p                      = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
-    val rules                  = "[" + (query.i.rules map p mkString " ") + "]"
-    val adhocDb                = _db.getOrElse(db).getDatomicDb
-    val first                  = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
-    val allInputs: Seq[AnyRef] = first ++ QueryOps(query).inputs
+    val optimizedQuery  = QueryOptimizer(query)
+    val p               = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
+    val rules           = "[" + (query.i.rules map p mkString " ") + "]"
+    val adhocDb         = _db.getOrElse(db).getDatomicDb
+    val first           = if (query.i.rules.isEmpty) Seq(adhocDb) else Seq(adhocDb, rules)
+    val inputsEvaluated = QueryOpsClojure(query).inputsWithKeyword
+    val allInputs       = first ++ inputsEvaluated
     try {
       blocking {
         Peer.q(query.toMap, allInputs: _*)

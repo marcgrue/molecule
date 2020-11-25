@@ -157,7 +157,7 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding))))))
 
     inputMolecule(List(Set(enum2))).get === List(enum3)
     inputMolecule(List(Set(enum3))).get === Nil
@@ -175,8 +175,8 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding))))))
 
 
     // nothing omitted
@@ -192,8 +192,8 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum3")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum2, enum3))).get === List(enum3)
@@ -208,8 +208,8 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum3")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum1))).get.sorted === List(enum2, enum3)
@@ -224,7 +224,7 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum2))).get === List(enum3)
@@ -239,9 +239,9 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1), Set(enum3))).get === Nil
@@ -259,10 +259,10 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum3")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1, enum2), Set(enum2, enum3))).get === List(enum3)
@@ -277,11 +277,11 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum3")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum3"), Empty, NoBinding))))))
 
 
     inputMolecule(List(Set(enum1, enum2), Set(enum4, enum5))).get === List(enum2)
@@ -296,11 +296,11 @@ class EnumCard2tacit extends CoreSpec {
         DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
         Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum1")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum2")), Empty, NoBinding))),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum2"), Empty, NoBinding))),
         NotClauses(Seq(
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum4")), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val(Util.read(":Ns.enums/enum5")), Empty, NoBinding))))))
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum4"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Ns", "enums"), Val("__enum__:Ns.enums/enum5"), Empty, NoBinding))))))
   }
 
 

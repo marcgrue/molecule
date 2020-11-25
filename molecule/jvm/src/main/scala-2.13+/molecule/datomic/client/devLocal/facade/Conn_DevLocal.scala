@@ -5,6 +5,8 @@ import java.util.{Date, Collection => jCollection, List => jList}
 import molecule.core.facade.exception.DatomicFacadeException
 import datomic.Util._
 import datomic.db.DbId
+import datomic.Connection.DB_AFTER
+import datomic.Database
 import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
 import datomicScala.client.api.{sync, Datom}
 import molecule.core.api.DatomicEntity
@@ -15,7 +17,7 @@ import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers}
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -60,23 +62,42 @@ case class Conn_DevLocal(client: Client, dbName: String)
     _testDb = Some(clientConn.db.asOf(t))
   }
 
-  def testDbAsOf(d: Date): Unit = ???
+  def testDbAsOf(d: Date): Unit = {
+    _testDb = Some(clientConn.db.asOf(d))
+  }
 
-  def testDbAsOf(txR: TxReport): Unit = ???
+  def testDbAsOf(txR: TxReport): Unit = {
+    _testDb = Some(clientConn.db.asOf(txR.t))
+  }
 
-  def testDbAsOfNow: Unit = ???
+  def testDbAsOfNow: Unit = {
+    _testDb = Some(clientConn.db)
+  }
 
-  def testDbSince(t: Long): Unit = ???
+  def testDbSince(t: Long): Unit = {
+    _testDb = Some(clientConn.db.since(t))
+  }
 
-  def testDbSince(d: Date): Unit = ???
+  def testDbSince(d: Date): Unit = {
+    _testDb = Some(clientConn.db.since(d))
+  }
 
-  def testDbSince(txR: TxReport): Unit = ???
+  def testDbSince(txR: TxReport): Unit = {
+    _testDb = Some(clientConn.db.since(txR.t))
+  }
 
-  def testDbWith(txData: Seq[Seq[Statement]]*): Unit = ???
+  def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
+    val txDataJava: jList[jList[_]] = txData.flatten.flatten.map(_.toJava).asJava
+    _testDb = Some(Db(clientConn.db.`with`(clientConn.withDb, txDataJava)))
+  }
 
-  def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = ???
+  def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = {
+    _testDb = Some(Db(clientConn.db.`with`(clientConn.withDb, txDataJava)))
+  }
 
-  def useLiveDb: Unit = ???
+  def useLiveDb: Unit = {
+    _testDb = None
+  }
 
 
   private def getAdhocDb: Db = {
@@ -86,9 +107,8 @@ case class Conn_DevLocal(client: Client, dbName: String)
       case AsOf(TxDate(d))  => baseDb.asOf(d)
       case Since(TxLong(t)) => baseDb.since(t)
       case Since(TxDate(d)) => baseDb.since(d)
-      //      case With(tx)         => Db(baseDb.`with`(clientConn.db, tx))
-      case With(tx) => Db(baseDb.`with`(baseDb, tx))
-      case History  => baseDb.history
+      case With(tx)         => Db(baseDb.`with`(baseDb, tx))
+      case History          => baseDb.history
     }
     _adhocDb = None
     adhocDb
@@ -119,7 +139,8 @@ case class Conn_DevLocal(client: Client, dbName: String)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
-      val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb, javaStmts), stmtss)
+      //      val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb.get, javaStmts), stmtss)
+      val txReport = TxReport_DevLocal(_testDb.get.`with`(clientConn.withDb, javaStmts), stmtss)
 
       // Continue with updated in-memory db
       // todo: why can't we just say this? Or: why are there 2 db-after db objects?
@@ -213,12 +234,12 @@ case class Conn_DevLocal(client: Client, dbName: String)
   }
 
   def _query(model: Model, query: Query, _db: Option[DatomicDb]): jCollection[jList[AnyRef]] = {
-    val adhocDb        = _db.getOrElse(db).asInstanceOf[DatomicDb_DevLocal].clientDb
-    val optimizedQuery = QueryOptimizer(query)
-    val p              = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
-    val rules          = if (query.i.rules.isEmpty) Nil else
-      Seq("[" + (query.i.rules map p mkString " ") + "]")
-    val allInputs      = rules ++ QueryOps(query).inputs
+    val adhocDb         = _db.getOrElse(db).asInstanceOf[DatomicDb_DevLocal].clientDb
+    val optimizedQuery  = QueryOptimizer(query)
+    val p               = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
+    val rules           = if (query.i.rules.isEmpty) Nil else Seq("[" + (query.i.rules map p mkString " ") + "]")
+    val inputsEvaluated = QueryOpsClojure(query).inputsWithKeyword
+    val allInputs       = rules ++ inputsEvaluated
     try {
       blocking {
         clientDatomic.q(query.toMap, adhocDb, allInputs: _*)
@@ -300,8 +321,10 @@ case class Conn_DevLocal(client: Client, dbName: String)
 
           case Eq(Seq(_: Int, _))                       => throw intException
           case Eq(Seq(_, _: Int))                       => throw intException
-          case Eq(Seq(from: Long, _)) if from < txMin   => throw intException
-          case Eq(Seq(_, until: Long)) if until < txMin => throw intException
+          case Eq(Seq(from: Long, _)) if from < txMin   =>
+            throw intException
+          case Eq(Seq(_, until: Long)) if until < txMin =>
+            throw intException
 
           // All !!
           case Eq(Nil)             => Seq(None, None)
