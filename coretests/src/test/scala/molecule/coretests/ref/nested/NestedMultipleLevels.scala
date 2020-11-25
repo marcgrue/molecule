@@ -287,8 +287,7 @@ class NestedMultipleLevels extends CoreSpec {
       ))
     )
 
-    Ns.str.Refs1.*?(Ref1.int1.Refs2.*?(Ref2.int2.Refs3.*?(Ref3.int3))).get === List(
-      ("b", List()),
+    Ns.str.Refs1.*?(Ref1.int1.Refs2.*?(Ref2.int2.Refs3.*?(Ref3.int3))).get.sortBy(_._1) === List(
       ("a", List(
         (1, List(
           (11, List(111, 112)),
@@ -296,6 +295,7 @@ class NestedMultipleLevels extends CoreSpec {
         )),
         (2, List()),
       )),
+      ("b", List()),
     )
   }
 }

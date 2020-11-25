@@ -165,10 +165,10 @@ class NestedRef extends CoreSpec {
     )
 
     // Flat card many ref allowed in mandatory nested structure
-    Ns.str.Refs1.*(Ref1.int1.Refs2.int2).get === List(
+    Ns.str.Refs1.*(Ref1.int1.Refs2.int2).get.map(p => (p._1, p._2.sorted)) === List(
       ("a", List(
-        (1, 12),
         (1, 11),
+        (1, 12),
       ))
     )
 
@@ -190,7 +190,7 @@ class NestedRef extends CoreSpec {
     )
 
     // Implicit ref
-    Ns.str.Refs1.Refs2.*?(Ref2.int2).get === List(
+    Ns.str.Refs1.Refs2.*?(Ref2.int2).get.sortBy(_._2.size) === List(
       ("a", List()),
       ("a", List(11, 12))
     )
