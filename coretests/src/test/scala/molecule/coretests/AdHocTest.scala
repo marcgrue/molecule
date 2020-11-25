@@ -20,9 +20,6 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "adhoc" in new CoreSetup {
 
-    Ns.int(1).save.eid
-    Ns.int.get === List(1)
-
 
 
     ok

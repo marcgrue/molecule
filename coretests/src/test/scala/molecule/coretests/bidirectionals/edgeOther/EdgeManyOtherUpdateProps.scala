@@ -256,8 +256,11 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
 
       // replace
       CloseTo(annRex).inCommon.replace(humor -> sporty).update
-      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
+      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
+
+      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // remove
       CloseTo(annRex).inCommon.retract(patience).update
@@ -266,13 +269,19 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
 
       // add
       CloseTo(annRex).inCommon.assert(patience).update
-      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
+      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
+
+      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // Apply new values
       CloseTo(annRex).inCommon(sporty, humor).update
-      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Funny", "Sporty"), "Rex"))
-      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get === List((Seq("Funny", "Sporty"), "Ann"))
+      Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Rex"))
+
+      Animal.name_("Rex").CloseTo.InCommon.*(Quality.name)._CloseTo.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Ann"))
 
       // Retract all references
       CloseTo(annRex).inCommon().update

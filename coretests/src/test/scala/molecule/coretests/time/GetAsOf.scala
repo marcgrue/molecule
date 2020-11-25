@@ -129,6 +129,7 @@ class GetAsOf extends CoreSpec {
   "Date" in new CoreSetup {
 
     val beforeInsert = new java.util.Date
+    Thread.sleep(10)
 
     // Insert
     val tx1         = Ns.str.int insert List(("Ben", 42), ("Liz", 37))
@@ -143,7 +144,7 @@ class GetAsOf extends CoreSpec {
 
     // Let retraction register before querying
     // (Peer is fast, and dates are only precise by the ms)
-    Thread.sleep(20)
+    Thread.sleep(100)
 
     // No data yet before insert
     Ns.str.int.getAsOf(beforeInsert) === Nil

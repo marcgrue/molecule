@@ -38,7 +38,7 @@ object transactionModel extends JavaUtil {
   }
 
   private def eid(e: Any): String = {
-    val e1 = if (e.isInstanceOf[Long]) e + "L" else e.toString
+    val e1 = if (e.isInstanceOf[Long]) s"${e}L" else e.toString
     val pad = " " * (8 - e1.length)
     e1 + pad
   }

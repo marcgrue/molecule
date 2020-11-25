@@ -17,8 +17,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
   import c.universe._
 
-  val x = DebugMacro("Dsl2Model", 901, 900)
-//  val x = DebugMacro("Dsl2Model", 40, 42)
+    val x = DebugMacro("Dsl2Model", 901, 900)
+//  val x = DebugMacro("Dsl2Model", 40, 43)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -1317,18 +1317,25 @@ private[molecule] trait Dsl2Model extends Cast with Json {
     def resolveValues(tree: Tree, t: richTree = null): Seq[Any] = {
       x(41, tree)
       val at: att = if (t == null) null else t.at
+      def noAppliedExpression(expr: String): Nothing = abort(
+        s"Can't apply expression `$expr` here. Please assign expression to a variable and apply this instead."
+      )
       def resolve(tree0: Tree, values: Seq[Tree] = Seq.empty[Tree]): Seq[Tree] = {
         x(42, tree0, tree0.raw)
         tree0 match {
-          case q"$a.or($b)"                                            => resolve(b, resolve(a, values))
-          case q"${_}.string2Model($v)"                                => values :+ v
+          case q"$a.or($b)"             => resolve(b, resolve(a, values))
+          case q"${_}.string2Model($v)" => values :+ v
+
           case q"scala.StringContext.apply(..$tokens).s(..$variables)" => abort(
             "Can't use string interpolation for applied values. Please assign the interpolated value to a single variable and apply that instead.")
-          case q"$a.$b(..$c)"                                            =>
-            abort("Applying arguments with expressions are not allowed. Please set a variable to the result of the " +
-              "expression and apply the variable instead instead.")
-          case Apply(_, vs)                                            => values ++ vs.flatMap(resolve(_))
-          case v                                                       => values :+ v
+
+          // Preventing simple arithmetic operation
+          case q"$pre.$a.+(..$b)" => noAppliedExpression(s"$a + $b")
+          case q"$pre.$a.-(..$b)" => noAppliedExpression(s"$a - $b")
+          case q"$pre.$a.*(..$b)" => noAppliedExpression(s"$a * $b")
+          case q"$pre.$a./($b)"   => noAppliedExpression(s"$a / $b")
+          case Apply(_, vs)       => values ++ vs.flatMap(resolve(_))
+          case v                  => values :+ v
         }
       }
       def validateStaticEnums(value: Any, enumValues: Seq[String]) = {
