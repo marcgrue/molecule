@@ -29,12 +29,12 @@ case class DatomicDb_DevLocal(clientDb: Db) extends DatomicDb {
 
   def indexRange(
     attrId: String,
-    start: Option[Long],
-    end: Option[Long],
+    startValue: Option[Any], // inclusive
+    endValue: Option[Any], // exclusive
     timeout: Int = 0,
     offset: Int = 0,
     limit: Int = 1000
   ): jStream[ClientDatom] = {
-    clientDb.indexRange(attrId, start, end, timeout, offset, limit)
+    clientDb.indexRange(attrId, startValue, endValue, timeout, offset, limit)
   }
 }

@@ -19,46 +19,53 @@ class Datom extends CoreSpec {
 
   class setup extends CoreSetup {
 
-    // First entity
+    // Ensure that tx instants (Date) are at least a few ms apart
+    // for correct Date expression evaluations
+    val delay = 5
 
+    // First entity
     val txR1 = Ns.str("a").int(1).save
     val tx1  = txR1.tx
     val e1   = txR1.eid
     val t1   = txR1.t
     val d1   = txR1.inst
+    Thread.sleep(delay)
 
     val txR2 = Ns(e1).str("b").update
     val tx2  = txR2.tx
     val t2   = txR2.t
     val d2   = txR2.inst
+    Thread.sleep(delay)
 
     val txR3 = Ns(e1).int(3).update
     val tx3  = txR3.tx
     val t3   = txR3.t
     val d3   = txR3.inst
+    Thread.sleep(delay)
 
 
     // Second entity
-
     val txR4 = Ns.str("x").int(4).save
     val tx4  = txR4.tx
     val e2   = txR4.eid
     val t4   = txR4.t
     val d4   = txR4.inst
+    Thread.sleep(delay)
 
-    val txR5 = Ns(e2).int(5).update
+    val txR5 = Ns(e2).int(delay).update
     val tx5  = txR5.tx
     val t5   = txR5.t
     val d5   = txR5.inst
+    Thread.sleep(delay)
 
 
     // Third entity, a ref
-
     val txR6 = Ref1.str1("hello").save
     val r1   = txR6.eid
     val tx6  = txR6.tx
     val t6   = txR6.t
     val d6   = txR6.inst
+    Thread.sleep(delay)
 
     val txR7 = Ns(e2).ref1(r1).update
     val tx7  = txR7.tx
@@ -396,6 +403,9 @@ class Datom extends CoreSpec {
       Ns.int_.t(count).get === List(2)
     }
 
+    // OBS: Avoid using date expressions for precision expressions!
+    // Since the minimum fraction of Date is ms, it will be imprecise.
+    // For precise expressions, use t or tx.
     Ns.txInstant(d2).get === List(d2)
     Ns.txInstant(d2, d3).get.sorted === List(d2, d3).sorted
     Ns.txInstant.not(d2).get.sorted === List(d3, d4, d5, d6, d7).sorted

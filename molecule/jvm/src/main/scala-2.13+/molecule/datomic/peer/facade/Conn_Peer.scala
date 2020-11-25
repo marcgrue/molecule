@@ -445,10 +445,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
         attr match {
           case "range" =>
             ("indexRange", "", value match {
-              case Eq(Seq(a, None, None))  => throw new MoleculeException(
-                "Molecule not allowing returning from start to end (the whole database!).\n" +
-                  "If you need this, please use raw Datomic access:\n" +
-                  "`conn.db.datoms(datomic.Database.AVET)`")
+              case Eq(Seq(a, None, None))  => Seq(a.asInstanceOf[Object], null, null)
               case Eq(Seq(a, from, None))  => Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], null)
               case Eq(Seq(a, None, until)) => Seq(a.asInstanceOf[Object], null, until.asInstanceOf[Object])
               case Eq(Seq(a, from, until)) =>
@@ -585,14 +582,13 @@ class Conn_Peer(val peerConn: datomic.Connection)
     api match {
       case "datoms"     =>
         val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_Peer].datoms(index, args: _*)
-          .asInstanceOf[java.lang.Iterable[Datom]].forEach { datom =>
+        adhocDb.asInstanceOf[DatomicDb_Peer].datoms(index, args: _*).forEach { datom =>
           jColl.add(datom2row_(datom))
         }
       case "indexRange" =>
         val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_Peer].indexRange(args.head.toString, args(1), args(2))
-          .asInstanceOf[java.lang.Iterable[Datom]].forEach { datom =>
+        adhocDb.asInstanceOf[DatomicDb_Peer]
+          .indexRange(args.head.toString, args(1), args(2)).forEach { datom =>
           jColl.add(datom2row_(datom))
         }
       case "txRange"    =>

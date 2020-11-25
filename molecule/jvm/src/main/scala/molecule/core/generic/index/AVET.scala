@@ -36,8 +36,6 @@ trait GenericAVET {
       *  - From beginning if `from` is None
       *  - To end if `until` is None
       *
-      * Molecule doesn't allow both to be None since it would return the whole database.
-      * (Use Datomic raw access if that is needed)
       * */
     final def range(a: String, from: Option[Any], until: Option[Any]): AVET_0 = ???
   }

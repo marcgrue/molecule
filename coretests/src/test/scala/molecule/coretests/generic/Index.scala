@@ -109,25 +109,25 @@ class Index extends CoreSpec {
     "Current values" in new setup {
 
       // EAVT datom values of entity e1
-      EAVT(e1).e.a.v.t.get === List(
+      EAVT(e1).e.a.v.t.get.sortBy(_._4) === List(
         (e1, ":Ns/str", "b", t2),
-        (e1, ":Ns/int", 2, t3)
+        (e1, ":Ns/int", 2, t3),
       )
 
       // Freely order generic attributes as you like
-      EAVT(e1).t.v.e.a.get === List(
+      EAVT(e1).t.v.e.a.get.sortBy(_._1) === List(
         (t2, "b", e1, ":Ns/str"),
         (t3, 2, e1, ":Ns/int")
       )
 
       // No need to return the entity id that we filter by
-      EAVT(e1).a.v.t.get === List(
+      EAVT(e1).a.v.t.get.sortBy(_._3) === List(
         (":Ns/str", "b", t2),
         (":Ns/int", 2, t3)
       )
 
       // Attributes of entity e1
-      EAVT(e1).a.get === List(":Ns/str", ":Ns/int")
+      EAVT(e1).a.get.sorted === List(":Ns/int", ":Ns/str")
 
       // Values of e1
       EAVT(e1).v.get === List("b", 2)
@@ -155,32 +155,32 @@ class Index extends CoreSpec {
       // NOTE that retracted datoms take precedence for the same EAV values, meaning that
       // the transaction value is sorted after the operation (so he index seems actually sorted by
       // all 5 datom elements EAVOpT and not only EAVT)
-      EAVT(e1).e.a.v.t.op.getHistory === List(
-        (e1, ":Ns/str", "a", t2, false),
-        (e1, ":Ns/str", "a", t1, true),
-        (e1, ":Ns/str", "b", t2, true),
-        (e1, ":Ns/int", 1, t3, false),
+      EAVT(e1).e.a.v.t.op.getHistory.sortBy(p => (p._2, p._4, p._5)) === List(
         (e1, ":Ns/int", 1, t1, true),
-        (e1, ":Ns/int", 2, t3, true)
+        (e1, ":Ns/int", 1, t3, false),
+        (e1, ":Ns/int", 2, t3, true),
+        (e1, ":Ns/str", "a", t1, true),
+        (e1, ":Ns/str", "a", t2, false),
+        (e1, ":Ns/str", "b", t2, true),
       )
 
       // History of attribute :Ns/int values of entity e1
       // or
       // "What values has attribute :Ns/int of entity e1 had over time?"
       // - 1 was asserted in transaction t1, retracted in t3, and new value 2 asserted in t3
-      EAVT(e1, ":Ns/int").e.a.v.t.op.getHistory === List(
-        (e1, ":Ns/int", 1, t3, false),
+      EAVT(e1, ":Ns/int").e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
         (e1, ":Ns/int", 1, t1, true),
-        (e1, ":Ns/int", 2, t3, true)
+        (e1, ":Ns/int", 1, t3, false),
+        (e1, ":Ns/int", 2, t3, true),
       )
 
       // History of attribute :Ns/int value being 1 of entity e1
       // or
       // "What happened to entity e1's attribute :Ns/int value 1?"
       // - 1 was asserted in transaction t1 and then retracted in t3
-      EAVT(e1, ":Ns/int", 1).e.a.v.t.op.getHistory === List(
-        (e1, ":Ns/int", 1, t3, false),
+      EAVT(e1, ":Ns/int", 1).e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
         (e1, ":Ns/int", 1, t1, true),
+        (e1, ":Ns/int", 1, t3, false),
       )
 
       // History of attribute :Ns/int value being 1 of entity e1 in transaction t3
@@ -235,8 +235,6 @@ class Index extends CoreSpec {
         "molecule.core.transform.exception.Dsl2ModelException: " +
           "EAVT index attributes not allowed to have values applied.\n" +
           "EAVT index only accepts datom arguments: `EAVT(<e/a/v/t>)`.")
-
-      ok
     }
   }
 
@@ -249,19 +247,19 @@ class Index extends CoreSpec {
       // comparable to traditional column access style.
 
       // Attribute :Ns/int's entities, values and transactions
-      AEVT(":Ns/int").e.v.t.get === List(
+      AEVT(":Ns/int").e.v.t.get.sortBy(_._3) === List(
         (e1, 2, t3),
         (e2, 5, t5)
       )
 
       // Entities having :Ns/int asserted
-      AEVT(":Ns/int").e.get === List(e1, e2)
+      AEVT(":Ns/int").e.get.sorted === List(e1, e2).sorted
 
       // All values of attribute :Ns/int
-      AEVT(":Ns/int").v.get === List(2, 5)
+      AEVT(":Ns/int").v.get.map(_.asInstanceOf[Long]).sorted === List(2, 5)
 
       // All transactions where attribute :Ns/int is asserted
-      AEVT(":Ns/int").t.get === List(t3, t5)
+      AEVT(":Ns/int").t.get.sorted === List(t3, t5)
 
 
       // Attribute :Ns/int of entity e1's value and transaction
@@ -279,16 +277,14 @@ class Index extends CoreSpec {
         (e1, 2, t3)
       )
 
-
       // Attribute :Ns/int's historic entities, values and transactions
-      // Note that retractions (false) takes precedence in T order
-      AEVT(":Ns/int").e.v.t.op.getHistory === List(
-        (e1, 1, t3, false),
+      AEVT(":Ns/int").e.v.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
         (e1, 1, t1, true),
+        (e1, 1, t3, false),
         (e1, 2, t3, true),
-        (e2, 4, t5, false),
         (e2, 4, t4, true),
-        (e2, 5, t5, true)
+        (e2, 4, t5, false),
+        (e2, 5, t5, true),
       )
     }
 
@@ -336,13 +332,13 @@ class Index extends CoreSpec {
         (e2, t4, true)
       )
 
-      AEVT(":Ns/int").v.e.t.op.getHistory === List(
-        (1, e1, t3, false),
+      AEVT(":Ns/int").v.e.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
         (1, e1, t1, true),
+        (1, e1, t3, false),
         (2, e1, t3, true),
-        (4, e2, t5, false),
         (4, e2, t4, true),
-        (5, e2, t5, true)
+        (4, e2, t5, false),
+        (5, e2, t5, true),
       )
     }
 
@@ -417,11 +413,7 @@ class Index extends CoreSpec {
 
       // Start - end
       // Molecule disallow returning from beginning to end (the whole database!)
-      (AVET.range(":Ns/int", None, None).e.get must throwA[MoleculeException])
-        .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
-        "Molecule not allowing returning from start to end (the whole database!).\n" +
-        "If you need this, please use raw Datomic access:\n" +
-        "`conn.db.datoms(datomic.Database.AVET)`"
+      AVET.range(":Ns/int", None, None).e.get === List(e1, e2)
     }
 
 

@@ -983,14 +983,14 @@ class SchemaTest extends CoreSpec {
       Schema.tx.get === List(13194139534312L)
 
       // Get tx wall clock time from Log for comparison with time from Schema query
-      Schema.txInstant.get === List(Log().txInstant.get.head)
+      Schema.txInstant.get === List(Log().txInstant.get.last)
 
     } else {
 
       // Schema transaction entity id
       Schema.tx.get === List(13194139533318L)
       // Get tx wall clock time from Log for comparison with time from Schema query
-      Schema.txInstant.get === List(Log().txInstant.get.head)
+      Schema.txInstant.get === List(Log().txInstant.get.last)
     }
   }
 }

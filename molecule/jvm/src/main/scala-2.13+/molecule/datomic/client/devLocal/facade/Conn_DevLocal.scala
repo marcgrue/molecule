@@ -2,17 +2,12 @@ package molecule.datomic.client.devLocal.facade
 
 import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
-import clojure.lang.Keyword
 import molecule.core.facade.exception.DatomicFacadeException
-//import datomic.Datom
-//import datomic.{Connection, Database, Datom, Peer}
-//import datomic.Connection.DB_AFTER
-import datomic.Peer._
 import datomic.Util._
 import datomic.db.DbId
-import datomicScala.client.api
 import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
-import datomicScala.client.api.Datom
+import datomicScala.client.api.{sync, Datom}
+import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
@@ -22,13 +17,9 @@ import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
-import molecule.datomic.peer.facade.{DatomicDb_Peer, TxReport_Peer}
-import org.slf4j.LoggerFactory
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
-import datomicScala.client.api.sync
-import molecule.core.api.DatomicEntity
 
 
 /** Facade to Datomic dev-local connection.
@@ -61,9 +52,6 @@ case class Conn_DevLocal(client: Client, dbName: String)
 
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
-  //  def testDb(db: Db): Unit = {
-  //    _testDb = Some(db)
-  //  }
   def testDb(db: DatomicDb): Unit = {
     _testDb = Some(db.asInstanceOf[DatomicDb_DevLocal].clientDb)
   }
@@ -274,16 +262,13 @@ case class Conn_DevLocal(client: Client, dbName: String)
         attr match {
           case "range" =>
             ("indexRange", "", value match {
-              case Eq(Seq(a, None, None))  => throw new MoleculeException(
-                "Molecule not allowing returning from start to end (the whole database!).\n" +
-                  "If you need this, please use raw Datomic access:\n" +
-                  "`conn.db.datoms(datomic.Database.AVET)`")
-              case Eq(Seq(a, from, None))  => Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], null)
-              case Eq(Seq(a, None, until)) => Seq(a.asInstanceOf[Object], null, until.asInstanceOf[Object])
-              case Eq(Seq(a, from, until)) =>
-                if (from.getClass != until.getClass)
+              case Eq(Seq(a, None, None))                => Seq(a, None, None)
+              case Eq(Seq(a, from, None))                => Seq(a, Some(from), None)
+              case Eq(Seq(a, None, until))               => Seq(a, None, Some(until))
+              case Eq(Seq(attrId, startValue, endValue)) =>
+                if (startValue.getClass != endValue.getClass)
                   throw new MoleculeException("Please supply range arguments of same type as attribute.")
-                Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], until.asInstanceOf[Object])
+                Seq(attrId, Some(startValue), Some(endValue))
             })
           case _       =>
             ("datoms", ":avet", value match {
@@ -305,9 +290,10 @@ case class Conn_DevLocal(client: Client, dbName: String)
         })
 
       case Generic("Log", _, _, value) =>
+        val txMin        = 1234567890
         val intException = new DatomicFacadeException(
           "Dev local implementation doesn't accept time t. Please use tx or txInst (Date) instead.")
-        val txMin        = 1234567890
+
         ("txRange", ":vaet", value match {
           case Eq(Seq(_: Int))                     => throw intException
           case Eq(Seq(from: Long)) if from < txMin => throw intException
@@ -322,10 +308,18 @@ case class Conn_DevLocal(client: Client, dbName: String)
           case Eq(Seq(None, None)) => Seq(None, None)
 
           // From until end
-          case Eq(Seq(from)) => Seq(Some(from), None)
+          case Eq(Seq(from: Long)) => Seq(Some(from), None)
+          case Eq(Seq(from: Date)) => Seq(Some(from), None)
 
           // Range
-          case Eq(Seq(from, until)) => Seq(Some(from), Some(until))
+          case Eq(Seq(from: Long, None))        => Seq(Some(from), None)
+          case Eq(Seq(from: Date, None))        => Seq(Some(from), None)
+          case Eq(Seq(None, until: Long))       => Seq(None, Some(until))
+          case Eq(Seq(None, until: Date))       => Seq(None, Some(until))
+          case Eq(Seq(from: Long, until: Long)) => Seq(Some(from), Some(until))
+          case Eq(Seq(from: Long, until: Date)) => Seq(Some(from), Some(until))
+          case Eq(Seq(from: Date, until: Long)) => Seq(Some(from), Some(until))
+          case Eq(Seq(from: Date, until: Date)) => Seq(Some(from), Some(until))
 
           case Eq(_) => throw new MoleculeException("Args to Log can only be t, tx or txInstant of type Int/Long/Date")
         })
@@ -335,25 +329,22 @@ case class Conn_DevLocal(client: Client, dbName: String)
 
     val adhocDb = db
 
-    def attrName(e: Long): String = {
-      q(
-        """[:find  ?fullAttr
-          | :in $ ?e
-          | :where [?e ?a _]
-          |        [?a :db/ident ?ident]
-          |        [(str ?ident) ?fullAttr]]""".stripMargin, e
-      ).head.head.toString
+    lazy val ident = read(":db/ident")
+    def attrName(a: Any): String = {
+      db.pull("[:db/ident]", a).get(ident).toString
     }
 
+    lazy val defaultDate = new Date(0)
+    lazy val txInstant   = read(":db/txInstant")
     def date(tx: Long): Date = {
-      q(
-        """[:find ?txInstant :in $ ?e :where [?tx :db/txInstant ?txInstant]]""".stripMargin, tx
-      ).head.head.asInstanceOf[Date]
+      val raw = db.pull("[:db/txInstant]", tx)
+      // Some initial transactions lack tx time it seems, so there we default to time 0 (Thu Jan 01 01:00:00 CET 1970)
+      if (raw == null) defaultDate else raw.get(txInstant).asInstanceOf[Date]
     }
 
     def datomElement(tOpt: Option[Long], attr: String): Datom => Any = attr match {
       case "e"                   => (d: Datom) => d.e
-      case "a"                   => (d: Datom) => attrName(d.e)
+      case "a"                   => (d: Datom) => attrName(d.a)
       case "v"                   => (d: Datom) => d.v
       case "t" if tOpt.isDefined => (_: Datom) => tOpt.get // use provided t
       case "t"                   => (d: Datom) => getT(d.tx) // awful hack until some txToT method is available
@@ -369,8 +360,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
     def datom2row(tOpt: Option[Long]): Datom => jList[AnyRef] = attrs.length match {
       case 1 =>
         val x1 = datomElement(tOpt, attrs.head)
-        (d: Datom) =>
-          list(x1(d)).asInstanceOf[jList[AnyRef]]
+        (d: Datom) => list(x1(d)).asInstanceOf[jList[AnyRef]]
 
       case 2 =>
         val x1 = datomElement(tOpt, attrs.head)
@@ -423,18 +413,15 @@ case class Conn_DevLocal(client: Client, dbName: String)
     api match {
       case "datoms"     =>
         val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_DevLocal].datoms(index, args: _*)
-          .asInstanceOf[java.util.stream.Stream[Datom]].forEach { datom =>
+        adhocDb.asInstanceOf[DatomicDb_DevLocal].datoms(index, args: _*).forEach { datom =>
           jColl.add(datom2row_(datom))
         }
       case "indexRange" =>
-        val datom2row_ = datom2row(None)
-        val (arg1, arg2) = (args(1).asInstanceOf[Long], args(2).asInstanceOf[Long])
-
-        // todo - is it like this?
-        val start = if (arg1 == 0) None else Some(arg1)
-        val end   = if (arg1 == 0) None else Some(arg2)
-        adhocDb.asInstanceOf[DatomicDb_DevLocal].indexRange(args.head.toString, start, end)
+        val datom2row_              = datom2row(None)
+        val attrId    : String      = args.head.toString
+        val startValue: Option[Any] = args(1).asInstanceOf[Option[Any]]
+        val endValue  : Option[Any] = args(2).asInstanceOf[Option[Any]]
+        adhocDb.asInstanceOf[DatomicDb_DevLocal].indexRange(attrId, startValue, endValue)
           .asInstanceOf[java.util.stream.Stream[Datom]].forEach { datom =>
           jColl.add(datom2row_(datom))
         }

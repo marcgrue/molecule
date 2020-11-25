@@ -1,7 +1,8 @@
 package molecule.coretests.generic
 
 import molecule.core.exceptions.MoleculeException
-import molecule.core.util.expectCompileError
+import molecule.core.facade.exception.DatomicFacadeException
+import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out5._
@@ -12,7 +13,7 @@ class LogTest extends CoreSpec {
 
   class setup extends CoreSetup {
     // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
-    // the wall clock time since Date's are a bit unreliable for precision.
+    // the wall clock time since Date's are only precise to ms.
 
     // First entity
 
@@ -117,7 +118,8 @@ class LogTest extends CoreSpec {
       (t2, e1, ":Ns/str", "a", false)
     )
 
-    Log(Some(t1), Some(t4)).t.e.a.v.op.get === List(
+
+    Log(Some(tx1), Some(tx4)).t.e.a.v.op.get === List(
       (t1, tx1, ":db/txInstant", d1, true),
       (t1, e1, ":Ns/str", "a", true),
       (t1, e1, ":Ns/int", 1, true),
@@ -131,7 +133,7 @@ class LogTest extends CoreSpec {
       (t3, e1, ":Ns/int", 1, false)
     )
 
-    Log(Some(t2), Some(t4)).t.e.a.v.op.get === List(
+    Log(Some(tx2), Some(tx4)).t.e.a.v.op.get === List(
       (t2, tx2, ":db/txInstant", d2, true),
       (t2, e1, ":Ns/str", "b", true),
       (t2, e1, ":Ns/str", "a", false),
@@ -140,13 +142,19 @@ class LogTest extends CoreSpec {
       (t3, e1, ":Ns/int", 2, true),
       (t3, e1, ":Ns/int", 1, false)
     )
+
+    if (system == DatomicDevLocal) {
+      (Log(Some(t1), Some(t2)).t.get must throwA[DatomicFacadeException])
+        .message === "Got the exception molecule.core.facade.exception.DatomicFacadeException: " +
+        "Dev local implementation doesn't accept time t. Please use tx or txInst (Date) instead."
+    }
   }
 
 
   "Grouped" in new setup {
 
     //Resembling the original structure of the Datomic Log
-    val logMap = Log(Some(t1), Some(t4)).t.e.a.v.op.get.groupBy(_._1)
+    val logMap = Log(Some(tx1), Some(tx4)).t.e.a.v.op.get.groupBy(_._1)
 
     logMap === Map(
       t1 -> List(
@@ -177,33 +185,44 @@ class LogTest extends CoreSpec {
 
   "Args" in new setup {
 
-    // t - t
-    Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
+    // Time t only implemented for Peer
+    if (system == DatomicPeer) {
 
-    // t - tx
-    Log(Some(t1), Some(tx2)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
+      // t - t
+      Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
+        (t1, tx1, ":db/txInstant", d1, true),
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
+      )
 
-    // t - txInstant
-    Log(Some(t1), Some(d2)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
+      // t - tx
+      Log(Some(t1), Some(tx2)).t.e.a.v.op.get === List(
+        (t1, tx1, ":db/txInstant", d1, true),
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
+      )
 
-    // tx - t
-    Log(Some(tx1), Some(t2)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
+      // tx - t
+      Log(Some(tx1), Some(t2)).t.e.a.v.op.get === List(
+        (t1, tx1, ":db/txInstant", d1, true),
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
+      )
+
+      // t - txInstant
+      Log(Some(t1), Some(d2)).t.e.a.v.op.get === List(
+        (t1, tx1, ":db/txInstant", d1, true),
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
+      )
+
+      // txInstant - t
+      Log(Some(d1), Some(t2)).t.e.a.v.op.get === List(
+        (t1, tx1, ":db/txInstant", d1, true),
+        (t1, e1, ":Ns/str", "a", true),
+        (t1, e1, ":Ns/int", 1, true)
+      )
+    }
 
     // tx - tx
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.get === List(
@@ -219,12 +238,6 @@ class LogTest extends CoreSpec {
       (t1, e1, ":Ns/int", 1, true)
     )
 
-    // txInstant - t
-    Log(Some(d1), Some(t2)).t.e.a.v.op.get === List(
-      (t1, tx1, ":db/txInstant", d1, true),
-      (t1, e1, ":Ns/str", "a", true),
-      (t1, e1, ":Ns/int", 1, true)
-    )
 
     // txInstant - tx
     Log(Some(d1), Some(tx2)).t.e.a.v.op.get === List(
@@ -246,17 +259,23 @@ class LogTest extends CoreSpec {
       "molecule.core.transform.exception.Dsl2ModelException: Log attributes not allowed to have values applied.\n" +
         "Log only accepts range arguments: `Log(from, until)`.")
 
-    (Log(Some(t1), Some("unexpect string")).t.get must throwA[MoleculeException])
+
+    (Log(Some(tx1), Some("unexpect string")).tx.get must throwA[MoleculeException])
       .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Args to Log can only be t, tx or txInstant of type Int/Long/Date"
 
+    if (system == DatomicDevLocal) {
+      (Log(Some(t1), Some("unexpect string")).t.get must throwA[DatomicFacadeException])
+        .message === "Got the exception molecule.core.facade.exception.DatomicFacadeException: " +
+        "Dev local implementation doesn't accept time t. Please use tx or txInst (Date) instead."
+    }
   }
 
 
   "Start/End" in new setup {
 
-    // t12 (inclusive) - end
-    Log(Some(t12), None).t.e.a.v.op.get === List(
+    // tx12 (inclusive) - end
+    Log(Some(tx12), None).t.e.a.v.op.get === List(
       (t12, tx12, ":db/txInstant", d12, true),
       (t12, e2, ":Ns/ref1", e4, true),
       (t12, e2, ":Ns/ref1", e3, false),
@@ -266,17 +285,29 @@ class LogTest extends CoreSpec {
     )
 
     // Single parameter is `from`
-    Log(Some(t12)).t.get === Log(Some(t12), None).t.get
+    Log(Some(tx12)).t.get === Log(Some(tx12), None).t.get
 
-    // Start - t3 (exclusive)
-    // Includes all Datomic database bootstrapping and schema transactions
-    Log(None, Some(t3)).t.get.size === 426
+    if (system == DatomicPeer) {
+      // Start - t3 (exclusive)
+      // Includes all Datomic database bootstrapping and schema transactions
+      Log(None, Some(tx3)).t.get.size === 426
 
-    // Start - end !! Meaning the whole database!
-    Log(None, None).t.get.size === 457
+      // Start - end !! The whole database!
+      Log(None, None).t.get.size === 457
+      // Same as this shortcut
+      Log().t.get.size === 457
 
-    // Start - End !!
-    Log().t.get.size === 457
+    } else {
+
+      // Start - t3 (exclusive)
+      // Includes all Datomic database bootstrapping and schema transactions
+      Log(None, Some(tx3)).t.get.size === 552
+
+      // Start - end !! The whole database!
+      Log(None, None).t.get.size === 583
+      // Same as this shortcut
+      Log().t.get.size === 583
+    }
   }
 
 
@@ -286,48 +317,48 @@ class LogTest extends CoreSpec {
     Log(Some(tx1), Some(tx12)).t.get.distinct.size === 11
 
 
-    // Entities involved in t1-t2
-    Log(Some(t1), Some(t3)).e.get.distinct.sorted === List(tx1, tx2, e1)
+    // Entities involved in tx1-tx2
+    Log(Some(tx1), Some(tx3)).e.get.distinct.sorted === List(tx1, tx2, e1).sorted
 
-    // Entities involved in t1-t4
-    Log(Some(t1), Some(t5)).e.get.distinct.sorted === List(tx1, tx2, tx3, tx4, e1, e2)
-
-
-    // Attributes involved in transactions t1-t2
-    Log(Some(t1), Some(t3)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":db/txInstant")
-
-    // Attributes involved in transactions t1-t6
-    Log(Some(t1), Some(t7)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":Ref1/str1", ":db/txInstant")
+    // Entities involved in tx1-tx4
+    Log(Some(tx1), Some(tx5)).e.get.distinct.sorted === List(tx1, tx2, tx3, tx4, e1, e2).sorted
 
 
-    // Values asserted in transactions t1-t2
-    Log(Some(t1), Some(t3)).v.get.distinct === List(d1, "a", 1, d2, "b")
+    // Attributes involved in transactions tx1-tx2
+    Log(Some(tx1), Some(tx3)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":db/txInstant")
 
-    // Values asserted in transactions t1-t3
-    Log(Some(t1), Some(t4)).v.get.distinct === List(d1, "a", 1, d2, "b", d3, 2)
+    // Attributes involved in transactions tx1-tx6
+    Log(Some(tx1), Some(tx7)).a.get.distinct.sorted === List(":Ns/int", ":Ns/str", ":Ref1/str1", ":db/txInstant")
 
 
-    // Assertions and retractions in transactions t1-t2
-    Log(Some(t1), Some(t3)).op.get === List(true, true, true, true, true, false)
+    // Values asserted in transactions tx1-tx2
+    Log(Some(tx1), Some(tx3)).v.get.distinct === List(d1, "a", 1, d2, "b")
 
-    // Number of assertions and retractions in transactions t1-t2
-    Log(Some(t1), Some(t3)).op.get.groupBy {
+    // Values asserted in transactions tx1-tx3
+    Log(Some(tx1), Some(tx4)).v.get.distinct === List(d1, "a", 1, d2, "b", d3, 2)
+
+
+    // Assertions and retractions in transactions tx1-tx2
+    Log(Some(tx1), Some(tx3)).op.get === List(true, true, true, true, true, false)
+
+    // Number of assertions and retractions in transactions tx1-tx2
+    Log(Some(tx1), Some(tx3)).op.get.groupBy {
       case true  => "assertions"
       case false => "retractions"
     }.toList.sortBy(_._1).map { case (k, vs) => k -> vs.length } === List("assertions" -> 5, "retractions" -> 1)
 
-    // Number of assertions and retractions in transactions t1-t13
-    Log(Some(t1), Some(t13)).op.get.groupBy {
+    // Number of assertions and retractions in transactions tx1-tx13
+    Log(Some(tx1), Some(tx13)).op.get.groupBy {
       case true  => "assertions"
       case false => "retractions"
     }.toList.sortBy(_._1).map { case (k, vs) => k -> vs.length } === List("assertions" -> 28, "retractions" -> 7)
 
 
     // Transactions from wall clock time d1-d2
-    Log(Some(d1), Some(d3)).t.get.distinct.sorted === List(t1, t2)
+    Log(Some(d1), Some(d3)).tx.get.distinct.sorted === List(tx1, tx2)
 
     // Same as quering the history for all transactions within the time range
-    Ns.t.txInstant_.>=(d1).txInstant_.<(d3).getHistory === List(t1, t2)
+    Ns.tx.txInstant_.>=(d1).txInstant_.<(d3).getHistory === List(tx1, tx2)
   }
 
 
