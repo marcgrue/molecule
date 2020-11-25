@@ -1,6 +1,7 @@
 package molecule.coretests.json
 
 import molecule.core.macros.exception.NestedJsonException
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out5._
@@ -13,7 +14,7 @@ class NestedJson extends CoreSpec {
     (m(Ns.int.str.Refs1 *? Ref1.int1).getJson
       must throwA[NestedJsonException]).message ===
       "Got the exception molecule.core.macros.exception.NestedJsonException: " +
-      "Optional nested data as json not implemented"
+        "Optional nested data as json not implemented"
   }
 
 
@@ -272,118 +273,121 @@ class NestedJson extends CoreSpec {
         |]""".stripMargin
 
 
-    // Semi-nested A
-    Ns.str.Refs1.*(Ref1.int1.Refs2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "Ns.refs1": [
-        |   {"Ref1.int1": 1, "refs2.Ref2.int2": 11},
-        |   {"Ref1.int1": 1, "refs2.Ref2.int2": 12},
-        |   {"Ref1.int1": 2, "refs2.Ref2.int2": 22},
-        |   {"Ref1.int1": 2, "refs2.Ref2.int2": 21}]},
-        |{"Ns.str": "b", "Ns.refs1": [
-        |   {"Ref1.int1": 3, "refs2.Ref2.int2": 32},
-        |   {"Ref1.int1": 3, "refs2.Ref2.int2": 31},
-        |   {"Ref1.int1": 4, "refs2.Ref2.int2": 41},
-        |   {"Ref1.int1": 4, "refs2.Ref2.int2": 42}]}
-        |]""".stripMargin
+    // Ordering only stable with Peer
+    if (system == DatomicPeer) {
+
+      // Semi-nested A
+      Ns.str.Refs1.*(Ref1.int1.Refs2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "Ns.refs1": [
+          |   {"Ref1.int1": 1, "refs2.Ref2.int2": 11},
+          |   {"Ref1.int1": 1, "refs2.Ref2.int2": 12},
+          |   {"Ref1.int1": 2, "refs2.Ref2.int2": 22},
+          |   {"Ref1.int1": 2, "refs2.Ref2.int2": 21}]},
+          |{"Ns.str": "b", "Ns.refs1": [
+          |   {"Ref1.int1": 3, "refs2.Ref2.int2": 32},
+          |   {"Ref1.int1": 3, "refs2.Ref2.int2": 31},
+          |   {"Ref1.int1": 4, "refs2.Ref2.int2": 41},
+          |   {"Ref1.int1": 4, "refs2.Ref2.int2": 42}]}
+          |]""".stripMargin
+
+      // Semi-nested A without intermediary attr `int1`
+      Ns.str.Refs1.*(Ref1.Refs2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "Ns.refs1": [
+          |   {"refs2.Ref2.int2": 11},
+          |   {"refs2.Ref2.int2": 12},
+          |   {"refs2.Ref2.int2": 22},
+          |   {"refs2.Ref2.int2": 21}]},
+          |{"Ns.str": "b", "Ns.refs1": [
+          |   {"refs2.Ref2.int2": 31},
+          |   {"refs2.Ref2.int2": 32},
+          |   {"refs2.Ref2.int2": 41},
+          |   {"refs2.Ref2.int2": 42}]}
+          |]""".stripMargin
 
 
-    // Semi-nested A without intermediary attr `int1`
-    Ns.str.Refs1.*(Ref1.Refs2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "Ns.refs1": [
-        |   {"refs2.Ref2.int2": 11},
-        |   {"refs2.Ref2.int2": 12},
-        |   {"refs2.Ref2.int2": 22},
-        |   {"refs2.Ref2.int2": 21}]},
-        |{"Ns.str": "b", "Ns.refs1": [
-        |   {"refs2.Ref2.int2": 31},
-        |   {"refs2.Ref2.int2": 32},
-        |   {"refs2.Ref2.int2": 41},
-        |   {"refs2.Ref2.int2": 42}]}
-        |]""".stripMargin
+      // Semi-nested B
+      Ns.str.Refs1.int1.Refs2.*(Ref2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "refs1.Ref1.int1": 1, "Ref1.refs2": [
+          |   {"Ref2.int2": 11},
+          |   {"Ref2.int2": 12}]},
+          |{"Ns.str": "a", "refs1.Ref1.int1": 2, "Ref1.refs2": [
+          |   {"Ref2.int2": 21},
+          |   {"Ref2.int2": 22}]},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 3, "Ref1.refs2": [
+          |   {"Ref2.int2": 31},
+          |   {"Ref2.int2": 32}]},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 4, "Ref1.refs2": [
+          |   {"Ref2.int2": 41},
+          |   {"Ref2.int2": 42}]}
+          |]""".stripMargin
 
 
-    // Semi-nested B
-    Ns.str.Refs1.int1.Refs2.*(Ref2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "refs1.Ref1.int1": 1, "Ref1.refs2": [
-        |   {"Ref2.int2": 11},
-        |   {"Ref2.int2": 12}]},
-        |{"Ns.str": "a", "refs1.Ref1.int1": 2, "Ref1.refs2": [
-        |   {"Ref2.int2": 21},
-        |   {"Ref2.int2": 22}]},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 3, "Ref1.refs2": [
-        |   {"Ref2.int2": 31},
-        |   {"Ref2.int2": 32}]},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 4, "Ref1.refs2": [
-        |   {"Ref2.int2": 41},
-        |   {"Ref2.int2": 42}]}
-        |]""".stripMargin
+      // Semi-nested B without intermediary attr `int1`
+      Ns.str.Refs1.Refs2.*(Ref2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "Ref1.refs2": [
+          |   {"Ref2.int2": 11},
+          |   {"Ref2.int2": 12},
+          |   {"Ref2.int2": 21},
+          |   {"Ref2.int2": 22}]},
+          |{"Ns.str": "b", "Ref1.refs2": [
+          |   {"Ref2.int2": 31},
+          |   {"Ref2.int2": 32},
+          |   {"Ref2.int2": 41},
+          |   {"Ref2.int2": 42}]}
+          |]""".stripMargin
 
 
-    // Semi-nested B without intermediary attr `int1`
-    Ns.str.Refs1.Refs2.*(Ref2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "Ref1.refs2": [
-        |   {"Ref2.int2": 11},
-        |   {"Ref2.int2": 12},
-        |   {"Ref2.int2": 21},
-        |   {"Ref2.int2": 22}]},
-        |{"Ns.str": "b", "Ref1.refs2": [
-        |   {"Ref2.int2": 31},
-        |   {"Ref2.int2": 32},
-        |   {"Ref2.int2": 41},
-        |   {"Ref2.int2": 42}]}
-        |]""".stripMargin
+      // Tacit filter
+      m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).getJson ===
+        """[
+          |{"refs1.Ref1.int1": 1, "Ref1.refs2": [
+          |   {"Ref2.int2": 11},
+          |   {"Ref2.int2": 12}]},
+          |{"refs1.Ref1.int1": 2, "Ref1.refs2": [
+          |   {"Ref2.int2": 21},
+          |   {"Ref2.int2": 22}]}
+          |]""".stripMargin
+
+      // Tacit filters
+      m(Ns.str_("a").Refs1.int1_(2).Refs2 * Ref2.int2).getJson ===
+        """[
+          |{"Ref1.refs2": [
+          |   {"Ref2.int2": 21},
+          |   {"Ref2.int2": 22}]}
+          |]""".stripMargin
 
 
-    // Tacit filter
-    m(Ns.str_("a").Refs1.int1.Refs2 * Ref2.int2).getJson ===
-      """[
-        |{"refs1.Ref1.int1": 1, "Ref1.refs2": [
-        |   {"Ref2.int2": 11},
-        |   {"Ref2.int2": 12}]},
-        |{"refs1.Ref1.int1": 2, "Ref1.refs2": [
-        |   {"Ref2.int2": 21},
-        |   {"Ref2.int2": 22}]}
-        |]""".stripMargin
-
-    // Tacit filters
-    m(Ns.str_("a").Refs1.int1_(2).Refs2 * Ref2.int2).getJson ===
-      """[
-        |{"Ref1.refs2": [
-        |   {"Ref2.int2": 21},
-        |   {"Ref2.int2": 22}]}
-        |]""".stripMargin
+      // Flat
+      m(Ns.str.Refs1.int1.Refs2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "refs1.Ref1.int1": 2, "refs2.Ref2.int2": 21},
+          |{"Ns.str": "a", "refs1.Ref1.int1": 2, "refs2.Ref2.int2": 22},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 4, "refs2.Ref2.int2": 42},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 4, "refs2.Ref2.int2": 41},
+          |{"Ns.str": "a", "refs1.Ref1.int1": 1, "refs2.Ref2.int2": 12},
+          |{"Ns.str": "a", "refs1.Ref1.int1": 1, "refs2.Ref2.int2": 11},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 3, "refs2.Ref2.int2": 31},
+          |{"Ns.str": "b", "refs1.Ref1.int1": 3, "refs2.Ref2.int2": 32}
+          |]""".stripMargin
 
 
-    // Flat
-    m(Ns.str.Refs1.int1.Refs2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "refs1.Ref1.int1": 2, "refs2.Ref2.int2": 21},
-        |{"Ns.str": "a", "refs1.Ref1.int1": 2, "refs2.Ref2.int2": 22},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 4, "refs2.Ref2.int2": 42},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 4, "refs2.Ref2.int2": 41},
-        |{"Ns.str": "a", "refs1.Ref1.int1": 1, "refs2.Ref2.int2": 12},
-        |{"Ns.str": "a", "refs1.Ref1.int1": 1, "refs2.Ref2.int2": 11},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 3, "refs2.Ref2.int2": 31},
-        |{"Ns.str": "b", "refs1.Ref1.int1": 3, "refs2.Ref2.int2": 32}
-        |]""".stripMargin
-
-
-    // Flat without intermediary attr `int1`
-    m(Ns.str.Refs1.Refs2.int2).getJson ===
-      """[
-        |{"Ns.str": "a", "refs2.Ref2.int2": 21},
-        |{"Ns.str": "a", "refs2.Ref2.int2": 22},
-        |{"Ns.str": "b", "refs2.Ref2.int2": 41},
-        |{"Ns.str": "b", "refs2.Ref2.int2": 42},
-        |{"Ns.str": "a", "refs2.Ref2.int2": 11},
-        |{"Ns.str": "a", "refs2.Ref2.int2": 12},
-        |{"Ns.str": "b", "refs2.Ref2.int2": 31},
-        |{"Ns.str": "b", "refs2.Ref2.int2": 32}
-        |]""".stripMargin
+      // Flat without intermediary attr `int1`
+      m(Ns.str.Refs1.Refs2.int2).getJson ===
+        """[
+          |{"Ns.str": "a", "refs2.Ref2.int2": 21},
+          |{"Ns.str": "a", "refs2.Ref2.int2": 22},
+          |{"Ns.str": "b", "refs2.Ref2.int2": 41},
+          |{"Ns.str": "b", "refs2.Ref2.int2": 42},
+          |{"Ns.str": "a", "refs2.Ref2.int2": 11},
+          |{"Ns.str": "a", "refs2.Ref2.int2": 12},
+          |{"Ns.str": "b", "refs2.Ref2.int2": 31},
+          |{"Ns.str": "b", "refs2.Ref2.int2": 32}
+          |]""".stripMargin
+    }
   }
 
 
