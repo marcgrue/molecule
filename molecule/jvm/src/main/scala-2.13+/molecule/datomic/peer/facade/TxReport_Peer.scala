@@ -3,7 +3,7 @@ package molecule.datomic.peer.facade
 import java.util.{Date, List => jList, Map => jMap}
 import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
-import datomic.db.Datum
+import datomic.db.{Datum, DbId}
 import molecule.core.ast.transactionModel._
 import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.util.Debug
@@ -36,7 +36,8 @@ case class TxReport_Peer(
           s"Unexpected different counts of ${allIds.size} ids and ${flattenStmts.size} stmts."
         )
       val resolvedIds = flattenStmts.zip(allIds).collect {
-        case (Add(tempId, _, _, _), eid) if tempId.toString.take(6) == "#db/id" => eid
+        case (Add(_: DbId, _, _, _), eid)                                  => eid
+//        case (Add(tempId, _, _, _), eid) if tempId.toString.take(6) == "#db/id" => eid
         case (Add("datomic.tx", _, _, _), eid)                                  => eid
       }.distinct.toList
       resolvedIds

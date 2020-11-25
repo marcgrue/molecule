@@ -1,7 +1,7 @@
 package molecule.core.transform
 
 import java.util.Date
-import clojure.lang.Keyword
+import clojure.lang.{Keyword, PersistentArrayMap, PersistentVector}
 import datomic.Peer
 import datomic.Util.read
 import datomic.db.DbId
@@ -158,10 +158,10 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def getPairs(e: Any, a: String, key: String = "") = {
     val strs = if (key.isEmpty) {
-      val query   = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
+      val query = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
       conn.q(query, e.asInstanceOf[Object], read(a)).map(_.head)
     } else {
-      val query   = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
+      val query = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
       conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
     }
     strs.map {
@@ -178,8 +178,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     arg: Any,
     prefix: Option[String],
     bidirectional: GenericValue,
-    otherEdgeId: Option[AnyRef],
-    temp: Boolean = false
+    otherEdgeId: Option[AnyRef]
   ): Seq[Statement] = {
 
     def p(v: Any): Any = v match {
@@ -194,18 +193,22 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case other   => other
     }
 
-    def attrValues(id: Any, attr: String): List[AnyRef] = if (temp) Nil else {
-      val query = if (prefix.isDefined)
-        s"""[:find ?enums
-           | :in $$ ?id
-           | :where [?id $attr ?a]
-           |        [?a :db/ident ?b]
-           |        [(name ?b) ?enums]
-           |]""".stripMargin
-      else
-        s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
-      conn.q(query, id.asInstanceOf[Object]).map(_.head)
+    def attrValues(id: Any, attr: String): List[AnyRef] = {
+      if (id.isInstanceOf[DbId]) {
+        Nil
+      } else {
+        val query = if (prefix.isDefined)
+            s"""[:find ?enums
+               | :in $$ ?id
+               | :where [?id $attr ?a]
+               |        [?a :db/ident ?b]
+               |        [(name ?b) ?enums]
+               |]""".stripMargin
+        else
+          s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
+        conn.q(query, id.asInstanceOf[Object]).map(_.head)
+      }
     }
 
     def edgeAB(edge1: Any, targetAttr: String): (Any, Any) = {
@@ -230,14 +233,14 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       val result = conn.q(query, edgeA.asInstanceOf[Object]).map(_.head)
       result match {
         case List(edgeB) => edgeB.asInstanceOf[Object]
-        case Nil                =>
+        case Nil         =>
           val otherId = conn.entity(edgeA)
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
             s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
             s"\nSpooky id: $otherId" +
             "\n" + stmts.size + " statements so far:\n" + stmts.mkString("\n")
           )
-        case ids                =>
+        case ids         =>
           err("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
       }
     }
@@ -356,8 +359,11 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         retracts ++ adds
       }
 
-      case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card))) }
-      case ref          => {
+      case refs: Set[_] => refs.flatMap {
+        case ref: Long => Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
+      }
+
+      case ref => {
         val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, revRefAttr, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
       }
@@ -666,8 +672,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case Eq(newValues0) =>
         val newValues       = flatten(newValues0).distinct
-        val curValues       = if (e == "datomic.tx") Nil else
-          attrValues(e, a)
+        val curValues       = if (e == "datomic.tx") Nil else attrValues(e, a)
         val newValueStrings = newValues.map(_.toString)
         val curValueStrings = curValues.map(_.toString)
         val retracts        = if (card == 2 || (newValues.isEmpty && curValues.nonEmpty))
@@ -901,7 +906,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         (stmts0, forcedE0)
       else stmts0.last match {
         case Add("nsFull", _, backRef, _) => (stmts0.init, backRef)
-        case Add(_, _, _: DbId, _)     => (stmts0, 0)
+        case Add(_, _, _: DbId, _)        => (stmts0, 0)
         case Add(-1, _, _, _)             => (stmts0, 0)
         case _                            => (stmts0, stmts0.last.e)
       }
@@ -958,12 +963,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     val dataStmtss: Seq[Seq[Statement]] = dataRows.map(resolveStmts(genericStmts, _, 0))
     val txId                            = tempId("tx")
     val txStmtss  : Seq[Seq[Statement]] = Seq(genericTxStmts.foldLeft(Seq[Statement]()) {
-      case (stmts, Add("tx", a, Values(vs, prefix), bi)) if txRefAttr(stmts)      => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None, true)
-      case (stmts, Add("tx", a, Values(vs, prefix), bi))                          => valueStmts(stmts, txId, a, vs, prefix, bi, None, true)
-      case (stmts, Add("tx", a, refNs: String, bi)) if !refNs.startsWith("__")    => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None, true)
-      case (stmts, Add("txRef", a, Values(vs, prefix), bi)) if txRefAttr(stmts)   => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None, true)
-      case (stmts, Add("txRef", a, Values(vs, prefix), bi))                       => valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, None, true)
-      case (stmts, Add("txRef", a, refNs: String, bi)) if !refNs.startsWith("__") => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None, true)
+      case (stmts, Add("tx", a, Values(vs, prefix), bi)) if txRefAttr(stmts)      => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("tx", a, Values(vs, prefix), bi))                          => valueStmts(stmts, txId, a, vs, prefix, bi, None)
+      case (stmts, Add("tx", a, refNs: String, bi)) if !refNs.startsWith("__")    => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
+      case (stmts, Add("txRef", a, Values(vs, prefix), bi)) if txRefAttr(stmts)   => valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("txRef", a, Values(vs, prefix), bi))                       => valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, None)
+      case (stmts, Add("txRef", a, refNs: String, bi)) if !refNs.startsWith("__") => valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, None)
       case (_, unexpected)                                                        => err("insertStmts", "Unexpected insert statement: " + unexpected)
     })
     dataStmtss ++ (if (txStmtss.head.isEmpty) Nil else txStmtss)
@@ -974,22 +979,22 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     val txId = "datomic.tx"
     stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
       genericStmt match {
-        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1, true))
-        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB, true))
-        case Add("e", a, "__tempId", bi)                                                            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB, true))
-        case Add(e, a, "__tempId", bi)                                                              => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB, true))
-        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB, true))
-        case Add(e@("e" | "ec"), a, refNs: String, bi@BiEdgeRef(_, _)) if !refNs.startsWith("__")   => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB1, true))
-        case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB, true))
-        case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB, true))
-        case Add("v", a, Values(vs, prefix), bi)                                                    => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB, true))
+        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
+        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
+        case Add("e", a, "__tempId", bi)                                                            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
+        case Add(e, a, "__tempId", bi)                                                              => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
+        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB))
+        case Add(e@("e" | "ec"), a, refNs: String, bi@BiEdgeRef(_, _)) if !refNs.startsWith("__")   => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB1))
+        case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
+        case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
+        case Add("v", a, Values(vs, prefix), bi)                                                    => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
 
-        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)      => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB, true))
-        case Add("tx", a, Values(vs, prefix), bi)                          => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB, true))
-        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")    => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB, true))
-        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)   => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB, true))
-        case Add("txRef", a, Values(vs, prefix), bi)                       => (edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB, true))
-        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__") => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB, true))
+        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)      => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("tx", a, Values(vs, prefix), bi)                          => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
+        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")    => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)   => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi)                       => (edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__") => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
 
         case Add("nsFull", _, _, _)            => (edgeB, stmts)
         case Retract(_, _, _, _)               => (edgeB, stmts)

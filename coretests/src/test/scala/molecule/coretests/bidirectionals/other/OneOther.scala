@@ -79,7 +79,7 @@ class OneOther extends CoreSpec {
     Person.name.Pet.name insert List(
       ("Ben", "Rex"),
       ("Kim", "Zip")
-    ) eids
+    )
 
     // Bidirectional references have been inserted
     personPet.get.sorted === List(
@@ -163,8 +163,8 @@ class OneOther extends CoreSpec {
       personPet.get.sorted === List(
         ("Ben", "Guz")
       )
-      animalMaster.get.sorted === List(
-        ("Guz", "Ben")
+      animalMaster.get.map(p => Seq(p._1, p._2).sorted) === List(
+        Seq("Ben", "Guz")
       )
     }
   }

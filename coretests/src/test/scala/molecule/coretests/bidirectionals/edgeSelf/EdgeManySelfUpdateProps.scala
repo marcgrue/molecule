@@ -274,9 +274,10 @@ class EdgeManySelfUpdateProps extends CoreSpec {
 
       // replace
       Knows(annBen).inCommon.replace(humor -> sporty).update
-      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
-        ("Ann", List("Waiting ability", "Sporty")),
-        ("Ben", List("Waiting ability", "Sporty"))
+      inCommonOf("Ann" or "Ben").get
+        .map(p => (p._1, p._2.sorted)).sortBy(_._1) === List(
+        ("Ann", List("Sporty", "Waiting ability")),
+        ("Ben", List("Sporty", "Waiting ability"))
       )
 
       // remove
@@ -288,14 +289,16 @@ class EdgeManySelfUpdateProps extends CoreSpec {
 
       // add
       Knows(annBen).inCommon.assert(patience).update
-      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
-        ("Ann", List("Waiting ability", "Sporty")),
-        ("Ben", List("Waiting ability", "Sporty"))
+      inCommonOf("Ann" or "Ben").get
+        .map(p => (p._1, p._2.sorted)).sortBy(_._1) === List(
+        ("Ann", List("Sporty", "Waiting ability")),
+        ("Ben", List("Sporty", "Waiting ability"))
       )
 
       // Apply new values
       Knows(annBen).inCommon(sporty, humor).update
-      inCommonOf("Ann" or "Ben").get.sortBy(_._1) === List(
+      inCommonOf("Ann" or "Ben").get
+        .map(p => (p._1, p._2.sorted)).sortBy(_._1) === List(
         ("Ann", List("Funny", "Sporty")),
         ("Ben", List("Funny", "Sporty"))
       )

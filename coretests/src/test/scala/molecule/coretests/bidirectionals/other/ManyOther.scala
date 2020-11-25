@@ -394,7 +394,7 @@ class ManyOther extends CoreSpec {
 
       // Ann and Rex new buddies
       // Ann and Leo no longer buddies
-      animalBuddiesOf("Ann").get === List("Rex", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Rex")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List()
       personBuddiesOf("Rex").get === List("Ann")

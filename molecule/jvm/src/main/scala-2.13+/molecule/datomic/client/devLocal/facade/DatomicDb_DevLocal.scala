@@ -1,13 +1,12 @@
 package molecule.datomic.client.devLocal.facade
 
-import java.{lang, util}
+import java.util
+import java.util.stream.{Stream => jStream}
 import datomicScala.client.api.{Datom => ClientDatom}
-//import datomic.Datom
 import datomicScala.client.api.sync.Db
 import molecule.core.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 import scala.jdk.CollectionConverters._
-import java.util.stream.{Stream => jStream}
 
 case class DatomicDb_DevLocal(clientDb: Db) extends DatomicDb {
 

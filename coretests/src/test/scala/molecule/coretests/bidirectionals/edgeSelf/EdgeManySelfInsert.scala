@@ -29,7 +29,7 @@ class EdgeManySelfInsert extends CoreSpec {
       val Seq(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
       // Create Ann with multiple edges to existing target entities Ben and Joe
-      Person.name.Knows.*(Knows.weight.person).insert("Ann", List((7, ben), (8, joe))).eids
+      Person.name.Knows.*(Knows.weight.person).insert("Ann", List((7, ben), (8, joe)))
 
       // Bidirectional property edges have been inserted
       knownBy("Ann").get.head === List((7, "Ben"), (8, "Joe"))

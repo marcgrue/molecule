@@ -69,7 +69,7 @@ class ManySelf extends CoreSpec {
       val ben = Person.name.insert("Ben").eid
 
       // Save Ann with bidirectional ref to existing Ben
-      Person.name("Ann").friends(ben).save.eid
+      Person.name("Ann").friends(ben).save
 
       Person.name.Friends.name.get.sorted === List(
         ("Ann", "Ben"),
@@ -94,7 +94,7 @@ class ManySelf extends CoreSpec {
       val benJoe = Person.name.insert("Ben", "Joe").eids
 
       // Save Ann with bidirectional ref to existing Ben and Joe
-      Person.name("Ann").friends(benJoe).save.eid
+      Person.name("Ann").friends(benJoe).save
 
       friendsOf("Ann").get === List("Ben", "Joe")
       friendsOf("Ben").get === List("Ann")

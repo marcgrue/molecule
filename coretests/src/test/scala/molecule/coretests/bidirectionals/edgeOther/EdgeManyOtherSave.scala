@@ -68,7 +68,7 @@ class EdgeManyOtherSave extends CoreSpec {
       Person.name("Ann").closeTo(closeToGus, closeToLeo).save
 
       // Ann and Gus know each other with a weight of 7
-      animalsCloseTo("Ann").get === List(List((7, "Gus"), (8, "Leo")))
+      animalsCloseTo("Ann").get.map(_.sorted) === List(List((7, "Gus"), (8, "Leo")))
       personsCloseTo("Gus").get === List(List((7, "Ann")))
       personsCloseTo("Leo").get === List(List((8, "Ann")))
     }

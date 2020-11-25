@@ -256,8 +256,11 @@ class EdgeOneOtherUpdateProps extends CoreSpec {
 
       // replace
       Favorite(annRex).inCommon.replace(humor -> sporty).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
+
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // remove
       Favorite(annRex).inCommon.retract(patience).update
@@ -266,13 +269,19 @@ class EdgeOneOtherUpdateProps extends CoreSpec {
 
       // add
       Favorite(annRex).inCommon.assert(patience).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Sporty"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
+
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // Apply new values
       Favorite(annRex).inCommon(sporty, humor).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Funny", "Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Funny", "Sporty"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Rex"))
+
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+        .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Ann"))
 
       // Retract all references
       Favorite(annRex).inCommon().update
