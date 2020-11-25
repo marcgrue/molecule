@@ -1,5 +1,6 @@
 package molecule.coretests.input1
 
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out2._
@@ -136,21 +137,25 @@ class Input1StringIntro extends CoreSpec {
     // Only for String attributes having fulltext option defined in schema.
     "Fulltext search" in new CoreSetup {
 
-      // https://groups.google.com/forum/#!searchin/datomic/fulltext$20rule|sort:date/datomic/tOm__ftT27c/uTfU_ZsnJiIJ
+      // fulltext only implemented in Datomic Peer
+      if (system == DatomicPeer) {
 
-      Ns.str insert List("The quick fox jumps", "Ten slow monkeys")
-      val inputMolecule = m(Ns.str.contains(?))
+        // https://groups.google.com/forum/#!searchin/datomic/fulltext$20rule|sort:date/datomic/tOm__ftT27c/uTfU_ZsnJiIJ
 
-      inputMolecule(Nil).get === Nil
+        Ns.str insert List("The quick fox jumps", "Ten slow monkeys")
+        val inputMolecule = m(Ns.str.contains(?))
 
-      inputMolecule("jumps").get === List("The quick fox jumps")
+        inputMolecule(Nil).get === Nil
 
-      inputMolecule("jumps", "fox").get === List("The quick fox jumps")
-      inputMolecule("jumps" or "fox").get === List("The quick fox jumps")
-      inputMolecule(Seq("jumps", "fox")).get === List("The quick fox jumps")
+        inputMolecule("jumps").get === List("The quick fox jumps")
 
-      // Obs: only whole words are matched
-      inputMolecule("jump").get === Nil
+        inputMolecule("jumps", "fox").get === List("The quick fox jumps")
+        inputMolecule("jumps" or "fox").get === List("The quick fox jumps")
+        inputMolecule(Seq("jumps", "fox")).get === List("The quick fox jumps")
+
+        // Obs: only whole words are matched
+        inputMolecule("jump").get === Nil
+      }
     }
   }
 
@@ -181,45 +186,49 @@ class Input1StringIntro extends CoreSpec {
       m(Ns.int.strs_.not(?))(Set("b")).get.sorted === List(3)
     }
 
-
     // Only for String attributes having fulltext option defined in schema.
     "Fulltext search" in new CoreSetup {
-      Ns.int.strs insert List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys")),
-        (2, Set("lorem ipsum", "Going slow"))
-      )
-      val inputMolecule = m(Ns.int.strs.contains(?))
 
-      inputMolecule(Nil).get === Nil
+      // fulltext only implemented in Datomic Peer
+      if (system == DatomicPeer) {
 
-      inputMolecule(Set("slow")).get === List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys")),
-        (2, Set("lorem ipsum", "Going slow"))
-      )
+        Ns.int.strs insert List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys")),
+          (2, Set("lorem ipsum", "Going slow"))
+        )
+        val inputMolecule = m(Ns.int.strs.contains(?))
 
-      inputMolecule(Set("ipsum")).get === List(
-        (2, Set("lorem ipsum", "Going slow"))
-      )
+        inputMolecule(Nil).get === Nil
 
-      // Only 1 entity has a `strs` attribute with both values
-      inputMolecule(Set("fox", "slow")).get === List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys"))
-      )
+        inputMolecule(Set("slow")).get === List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys")),
+          (2, Set("lorem ipsum", "Going slow"))
+        )
 
-      inputMolecule(Set("fox"), Set("slow")).get === List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys")),
-        (2, Set("lorem ipsum", "Going slow"))
-      )
+        inputMolecule(Set("ipsum")).get === List(
+          (2, Set("lorem ipsum", "Going slow"))
+        )
 
-      inputMolecule(Set("fox") or Set("slow")).get === List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys")),
-        (2, Set("lorem ipsum", "Going slow"))
-      )
+        // Only 1 entity has a `strs` attribute with both values
+        inputMolecule(Set("fox", "slow")).get === List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys"))
+        )
 
-      inputMolecule(List(Set("fox"), Set("slow"))).get === List(
-        (1, Set("The quick fox jumps", "Ten slow monkeys")),
-        (2, Set("lorem ipsum", "Going slow"))
-      )
+        inputMolecule(Set("fox"), Set("slow")).get === List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys")),
+          (2, Set("lorem ipsum", "Going slow"))
+        )
+
+        inputMolecule(Set("fox") or Set("slow")).get === List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys")),
+          (2, Set("lorem ipsum", "Going slow"))
+        )
+
+        inputMolecule(List(Set("fox"), Set("slow"))).get === List(
+          (1, Set("The quick fox jumps", "Ten slow monkeys")),
+          (2, Set("lorem ipsum", "Going slow"))
+        )
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 package molecule.coretests.input1.resolution
 
+import datomic.Util
 import molecule.core.ast.query._
 import molecule.core.input.exception.InputMoleculeException
 import molecule.coretests.util.dsl.coreTest._
@@ -287,7 +288,7 @@ class EnumCard1 extends CoreSpec {
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":Ns.enum/enum1")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq(Util.read(":Ns.enum/enum1"))))),
           List(),
           List(DS)),
         Where(List(
@@ -303,7 +304,9 @@ class EnumCard1 extends CoreSpec {
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c")), Seq(Seq(":Ns.enum/enum1", ":Ns.enum/enum2")))),
+            InVar(
+              CollectionBinding(Var("c")),
+              Seq(Seq(Util.read(":Ns.enum/enum1"), Util.read(":Ns.enum/enum2"))))),
           List(),
           List(DS)),
         Where(List(

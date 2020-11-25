@@ -1,6 +1,7 @@
 package molecule.core.transform
 
 import java.util.{Date, UUID}
+import clojure.lang.Keyword
 import molecule.core.ast.query._
 import molecule.core.transform.exception.Query2StringException
 import molecule.core.util.Helpers
@@ -45,6 +46,7 @@ case class Query2String(q: Query) extends Helpers {
     case Val(v: BigDecimal) if v.toString.contains(".")  => v.toString + "M"
     case Val(v: BigDecimal)                              => v.toString + ".0M"
     case Val(date: Date)                                 => "#inst \"" + date2datomicStr(date) + "\""
+    case Val(kw: Keyword)                                => kw.toString
     case Val(v: UUID)                                    => "#uuid \"" + v + "\""
     case Val(v: String) if v.startsWith("__n__")         => v.drop(5) // JS number hack
     case Val(v: String) if v.startsWith("__enum__")      => v.drop(8) // clojure Keyword notation (clojure non-ScalaJS compatible)
