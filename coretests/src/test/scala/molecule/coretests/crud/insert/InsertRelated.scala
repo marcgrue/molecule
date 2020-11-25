@@ -122,9 +122,9 @@ class InsertRelated extends CoreSpec {
       ("b", None, 2)
     )
 
-    Ns.str.Ref1.str1$.Ref2.int2.get === List(
+    Ns.str.Ref1.str1$.Ref2.int2.get.sortBy(_._1) === List(
+      ("a", Some("aa"), 1),
       ("b", None, 2),
-      ("a", Some("aa"), 1)
     )
     Ns.str.Ref1.str1.Ref2.int2.get === List(
       ("a", "aa", 1)

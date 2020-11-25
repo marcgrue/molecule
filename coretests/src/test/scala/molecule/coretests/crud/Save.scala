@@ -16,9 +16,10 @@ import scala.concurrent.Future
 
 class Save extends CoreSpec with ClojureBridge {
 
-  // todo: remove when async implemented for other systems
-  if (system == DatomicPeer) {
-    "Async" in new CoreSetup {
+  "Async" in new CoreSetup {
+
+    // todo: remove when async implemented for other systems
+    if (system == DatomicPeer) {
 
       // Save asynchronously and return Future[TxReport]
       // Calls Datomic's transactAsync API
@@ -470,7 +471,7 @@ class Save extends CoreSpec with ClojureBridge {
       Ns.int(7).intMap$(none).save
       Ns.int(7).intMap.get === Nil
       Ns.int(7).intMap$.get.head === (7, None)
-      Ns.int.intMap$(none).get === List((6, None), (7, None))
+      Ns.int.intMap$(none).get.sortBy(_._1) === List((6, None), (7, None))
     }
   }
 }

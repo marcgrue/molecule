@@ -1,14 +1,16 @@
 package molecule.coretests.crud.update
 
 import java.util.concurrent.ExecutionException
+import datomicScala.Incorrect
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeer}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out1._
 
 class UpdateEnum extends CoreSpec {
+
 
   "Card-one values" >> {
 
@@ -120,12 +122,19 @@ class UpdateEnum extends CoreSpec {
       Ns(eid).enums.replace("enum3" -> "enum6", "enum4" -> "enum7").update
       Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
 
-      // Trying to use a non-existing enum not possibole
-      (Ns(eid).enums.replace("x" -> "enum9").update must throwA[ExecutionException])
-        .message === "Got the exception java.util.concurrent.ExecutionException: " +
-        "java.lang.IllegalArgumentException: :db.error/not-an-entity " +
-        """Unable to resolve entity: :Ns.enums/x in datom [17592186045453 :Ns/enums :Ns.enums/x]"""
-
+      // Different exceptions for each system
+      if (system == DatomicPeer) {
+        // Trying to use a non-existing enum not possibole
+        (Ns(eid).enums.replace("x" -> "enum9").update must throwA[ExecutionException])
+          .message === "Got the exception java.util.concurrent.ExecutionException: " +
+          "java.lang.IllegalArgumentException: :db.error/not-an-entity " +
+          s"Unable to resolve entity: :Ns.enums/x in datom [$eid :Ns/enums :Ns.enums/x]"
+      } else {
+        // Trying to use a non-existing enum not possibole
+        (Ns(eid).enums.replace("x" -> "enum9").update must throwA[Incorrect])
+          .message === "Got the exception datomicScala.Incorrect: " +
+          s"Unable to resolve entity: :Ns.enums/x in datom [$eid :Ns/enums :Ns.enums/x]"
+      }
 
       Ns.enums.get.head.toList.sorted === List("enum1", "enum2", "enum6", "enum7", "enum8")
 

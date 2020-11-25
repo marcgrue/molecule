@@ -29,7 +29,7 @@ class ApplyFloat extends CoreSpec {
 
       // `or`
       Ns.float.apply(1.0f or 2.0f).get === List(1.0f, 2.0f)
-      Ns.float.apply(1.0f or 2.0f or 3.0f).get === List(3.0f, 1.0f, 2.0f)
+      Ns.float.apply(1.0f or 2.0f or 3.0f).get.sorted === List(1.0f, 2.0f, 3.0f)
 
       // Seq
       Ns.float.apply().get === Nil
@@ -38,9 +38,9 @@ class ApplyFloat extends CoreSpec {
       Ns.float.apply(List(2.0f)).get === List(2.0f)
       Ns.float.apply(List(1.0f, 2.0f)).get === List(1.0f, 2.0f)
       Ns.float.apply(List(1.0f), List(2.0f)).get === List(1.0f, 2.0f)
-      Ns.float.apply(List(1.0f, 2.0f), List(3.0f)).get === List(3.0f, 1.0f, 2.0f)
-      Ns.float.apply(List(1.0f), List(2.0f, 3.0f)).get === List(3.0f, 1.0f, 2.0f)
-      Ns.float.apply(List(1.0f, 2.0f, 3.0f)).get === List(3.0f, 1.0f, 2.0f)
+      Ns.float.apply(List(1.0f, 2.0f), List(3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)
+      Ns.float.apply(List(1.0f), List(2.0f, 3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)
+      Ns.float.apply(List(1.0f, 2.0f, 3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)
     }
 
 

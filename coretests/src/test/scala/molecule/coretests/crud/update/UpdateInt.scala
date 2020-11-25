@@ -11,8 +11,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class UpdateInt extends CoreSpec {
 
-  if (system == DatomicPeer) {
-    "Async" in new CoreSetup {
+  "Async" in new CoreSetup {
+
+    // todo: remove when async implemented for other systems
+    if (system == DatomicPeer) {
 
       // Update data asynchronously. Internally calls Datomic's transactAsync API.
 

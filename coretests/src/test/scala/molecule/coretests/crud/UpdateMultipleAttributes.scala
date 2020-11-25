@@ -1,5 +1,6 @@
 package molecule.coretests.crud
 
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out4._
@@ -10,23 +11,27 @@ class UpdateMultipleAttributes extends CoreSpec {
 
   "Async" in new CoreSetup {
 
-    // Update multiple attributes of an entity asynchronously and return Future[TxReport]
-    // Calls Datomic's transactAsync API
+    // todo: remove when async implemented for other systems
+    if (system == DatomicPeer) {
 
-    // Initial data
-    Ns.int.str insertAsync List((1, "a"), (2, "b")) map { tx => // tx report from successful insert transaction
-      // 2 inserted entities
-      val List(e1, e2) = tx.eids
-      Ns.int.get === List((1, "a"), (2, "b"))
+      // Update multiple attributes of an entity asynchronously and return Future[TxReport]
+      // Calls Datomic's transactAsync API
 
-      // Update second entity asynchronously
-      Ns(e2).int(42).str("hello world").updateAsync.map { tx2 => // tx report from successful update transaction
-        // Current data
-        Ns.int.get === List((1, "a"), (42, "hello world"))
+      // Initial data
+      Ns.int.str insertAsync List((1, "a"), (2, "b")) map { tx => // tx report from successful insert transaction
+        // 2 inserted entities
+        val List(e1, e2) = tx.eids
+        Ns.int.get === List((1, "a"), (2, "b"))
+
+        // Update second entity asynchronously
+        Ns(e2).int(42).str("hello world").updateAsync.map { tx2 => // tx report from successful update transaction
+          // Current data
+          Ns.int.get === List((1, "a"), (42, "hello world"))
+        }
       }
-    }
 
-    // For brevity, the synchronous equivalent `update` is used in the following tests
+      // For brevity, the synchronous equivalent `update` is used in the following tests
+    }
   }
 
 
@@ -102,22 +107,22 @@ class UpdateMultipleAttributes extends CoreSpec {
 
 
   "Optional values - update or retract" in new CoreSetup {
-      val eid = Ns.int(1).str("a").save.eid
+    val eid = Ns.int(1).str("a").save.eid
 
-      // Both values updated
-      Ns(eid).int(2).str$(Some("b")).update
-      Ns.int.str$.get.head === (2, Some("b"))
+    // Both values updated
+    Ns(eid).int(2).str$(Some("b")).update
+    Ns.int.str$.get.head === (2, Some("b"))
 
-      // str retracted
-      Ns(eid).int(3).str$(None).update
-      Ns.int.str$.get.head === (3, None)
+    // str retracted
+    Ns(eid).int(3).str$(None).update
+    Ns.int.str$.get.head === (3, None)
 
-      // Reversing positions
+    // Reversing positions
 
-      Ns(eid).str$(Some("d")).int(4).update
-      Ns.str$.int.get.head === (Some("d"), 4)
+    Ns(eid).str$(Some("d")).int(4).update
+    Ns.str$.int.get.head === (Some("d"), 4)
 
-      Ns(eid).str$(None).int(5).update
-      Ns.str$.int.get.head === (None, 5)
+    Ns(eid).str$(None).int(5).update
+    Ns.str$.int.get.head === (None, 5)
   }
 }
