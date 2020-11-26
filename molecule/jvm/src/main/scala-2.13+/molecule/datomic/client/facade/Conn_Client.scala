@@ -1,4 +1,4 @@
-package molecule.datomic.client.devLocal.facade
+package molecule.datomic.client.facade
 
 import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
@@ -28,7 +28,7 @@ import scala.util.control.NonFatal
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
   * */
-case class Conn_DevLocal(client: Client, dbName: String)
+case class Conn_Client(client: Client, dbName: String)
   extends Conn with Helpers with BridgeDatomicFuture {
 
   val clientConn: sync.Connection = {
@@ -54,7 +54,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
   def testDb(db: DatomicDb): Unit = {
-    _testDb = Some(db.asInstanceOf[DatomicDb_DevLocal].clientDb)
+    _testDb = Some(db.asInstanceOf[DatomicDb_Client].clientDb)
   }
 
   def testDbAsOf(t: Long): Unit = {
@@ -116,13 +116,13 @@ case class Conn_DevLocal(client: Client, dbName: String)
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
       // Return singleton adhoc db
-      DatomicDb_DevLocal(getAdhocDb)
+      DatomicDb_Client(getAdhocDb)
     } else if (_testDb.isDefined) {
       // Test db
-      DatomicDb_DevLocal(_testDb.get)
+      DatomicDb_Client(_testDb.get)
     } else {
       // Live db
-      DatomicDb_DevLocal(clientConn.db)
+      DatomicDb_Client(clientConn.db)
     }
   }
 
@@ -134,12 +134,12 @@ case class Conn_DevLocal(client: Client, dbName: String)
     if (_adhocDb.isDefined) {
       // In-memory "transaction"
       val adHocDb = getAdhocDb
-      TxReport_DevLocal(adHocDb.`with`(adHocDb, javaStmts), stmtss)
+      TxReport_Client(adHocDb.`with`(adHocDb, javaStmts), stmtss)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
       //      val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb.get, javaStmts), stmtss)
-      val txReport = TxReport_DevLocal(_testDb.get.`with`(clientConn.withDb, javaStmts), stmtss)
+      val txReport = TxReport_Client(_testDb.get.`with`(clientConn.withDb, javaStmts), stmtss)
 
       // Continue with updated in-memory db
       // todo: why can't we just say this? Or: why are there 2 db-after db objects?
@@ -151,7 +151,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
     } else {
 
       // Live transaction
-      TxReport_DevLocal(clientConn.transact(javaStmts), stmtss)
+      TxReport_Client(clientConn.transact(javaStmts), stmtss)
     }
   }
 
@@ -198,13 +198,13 @@ case class Conn_DevLocal(client: Client, dbName: String)
   def transact(rawTxStmts: jList[_]): TxReport = {
     if (_testDb.isDefined) {
       // In-memory "transaction"
-      val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb, rawTxStmts))
+      val txReport = TxReport_Client(_testDb.get.`with`(_testDb, rawTxStmts))
       // Continue with updated in-memory db
       _testDb = Some(txReport.dbAfter.asOf(txReport.t))
       txReport
     } else {
       // Live transaction
-      TxReport_DevLocal(clientConn.transact(rawTxStmts))
+      TxReport_Client(clientConn.transact(rawTxStmts))
     }
   }
 
@@ -233,7 +233,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
   }
 
   def _query(model: Model, query: Query, _db: Option[DatomicDb]): jCollection[jList[AnyRef]] = {
-    val adhocDb         = _db.getOrElse(db).asInstanceOf[DatomicDb_DevLocal].clientDb
+    val adhocDb         = _db.getOrElse(db).asInstanceOf[DatomicDb_Client].clientDb
     val optimizedQuery  = QueryOptimizer(query)
     val p               = (expr: QueryExpr) => Query2String(optimizedQuery).p(expr)
     val rules           = if (query.i.rules.isEmpty) Nil else Seq("[" + (query.i.rules map p mkString " ") + "]")
@@ -435,7 +435,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
     api match {
       case "datoms"     =>
         val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_DevLocal].datoms(index, args: _*).forEach { datom =>
+        adhocDb.asInstanceOf[DatomicDb_Client].datoms(index, args: _*).forEach { datom =>
           jColl.add(datom2row_(datom))
         }
       case "indexRange" =>
@@ -443,7 +443,7 @@ case class Conn_DevLocal(client: Client, dbName: String)
         val attrId    : String      = args.head.toString
         val startValue: Option[Any] = args(1).asInstanceOf[Option[Any]]
         val endValue  : Option[Any] = args(2).asInstanceOf[Option[Any]]
-        adhocDb.asInstanceOf[DatomicDb_DevLocal].indexRange(attrId, startValue, endValue)
+        adhocDb.asInstanceOf[DatomicDb_Client].indexRange(attrId, startValue, endValue)
           .asInstanceOf[java.util.stream.Stream[Datom]].forEach { datom =>
           jColl.add(datom2row_(datom))
         }

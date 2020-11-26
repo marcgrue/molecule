@@ -9,7 +9,7 @@ import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.base.facade.Conn
-import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
+import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
@@ -98,7 +98,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicPeerServer =>
-        val devL = Datomic_DevLocal(client)
+        val devL = Datomic_Client(client)
         val conn = devL.connect(dbIdentifier)
         if (schema.partitions.size() > 0)
           conn.transact(devL.allowedDevLocalDefinitions(schema.partitions))
@@ -106,7 +106,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
         conn
 
       case DatomicDevLocal =>
-        Datomic_DevLocal(client).recreateDbFrom(schema, dbIdentifier)
+        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier)
 
       // case DatomicCloud      =>
       //   Datomic_Peer.recreateDbFrom(schema, dbIdentifier)

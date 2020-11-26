@@ -8,7 +8,7 @@ import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.Debug
 import molecule.datomic.base.facade.{Conn, TxReport}
-import molecule.datomic.client.devLocal.facade.{Conn_DevLocal, DatomicEntity_DevLocal}
+import molecule.datomic.client.facade.{Conn_Client, DatomicEntity_Client}
 import molecule.datomic.peer.facade.{Conn_Peer, DatomicEntity_Peer}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,8 +36,8 @@ trait EntityOps {
     * @return
     */
   implicit final def long2Entity(id: Long)(implicit conn: Conn): DatomicEntity = conn match {
-    case conn: Conn_Peer     => DatomicEntity_Peer(conn.peerConn.db.entity(id), conn, id)
-    case conn: Conn_DevLocal => DatomicEntity_DevLocal(conn, id)
+    case conn: Conn_Peer   => DatomicEntity_Peer(conn.peerConn.db.entity(id), conn, id)
+    case conn: Conn_Client => DatomicEntity_Client(conn, id)
   }
 
 

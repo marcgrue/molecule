@@ -7,7 +7,7 @@ import datomicScala.client.api.sync.{Client, Connection, Datomic}
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer, MoleculeSpec, System}
 import molecule.datomic.base.facade.Conn
-import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
+import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
 import molecule.examples.dayOfDatomic.schema.{AggregatesSchema, GraphSchema, ProductsOrderSchema, SocialNewsSchema}
 import org.specs2.specification.Scope
@@ -96,7 +96,7 @@ class ExampleSpec  extends MoleculeSpec with ClojureBridge {
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicDevLocal =>
-        Datomic_DevLocal(client).recreateDbFrom(schema, dbIdentifier)
+        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier)
 
       // case DatomicCloud      =>
       //   Datomic_Peer.recreateDbFrom(schema, dbIdentifier)

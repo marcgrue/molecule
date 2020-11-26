@@ -1,4 +1,4 @@
-package molecule.datomic.client.devLocal.facade
+package molecule.datomic.client.facade
 
 import java.util.{Date, UUID, Collection => jCollection}
 import clojure.lang.MapEntry
@@ -8,8 +8,8 @@ import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
 
-case class DatomicEntity_DevLocal(
-  conn: Conn_DevLocal,
+case class DatomicEntity_Client(
+  conn: Conn_Client,
   eid: Any,
   showKW: Boolean = true
 ) extends DatomicEntity(conn, eid) {
@@ -69,7 +69,7 @@ case class DatomicEntity_DevLocal(
       case i: java.lang.Integer     => i.toLong: Long
       case l: java.lang.Long        =>
         if (depth < maxDepth && key != ":db/id") {
-          val entityMap = DatomicEntity_DevLocal(conn, l).asMap(depth + 1, maxDepth)
+          val entityMap = DatomicEntity_Client(conn, l).asMap(depth + 1, maxDepth)
           // Return number if unintended entity map is returned
           if (
             entityMap.size == 1 // Empty entity (contains only :db/id)
@@ -105,7 +105,7 @@ case class DatomicEntity_DevLocal(
             m.get(ident).toString
 
           case m if depth < maxDepth =>
-            val ent = DatomicEntity_DevLocal(
+            val ent = DatomicEntity_Client(
               conn,
               m.iterator().next().asInstanceOf[MapEntry].getValue
             )

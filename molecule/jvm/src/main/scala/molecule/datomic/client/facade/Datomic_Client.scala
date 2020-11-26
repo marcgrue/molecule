@@ -1,4 +1,4 @@
-package molecule.datomic.client.devLocal.facade
+package molecule.datomic.client.facade
 
 import java.util.{List => jList, Map => jMap}
 import java.util
@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
   * @groupname database  Database operations
   * @groupprio 10
   * */
-case class Datomic_DevLocal(client: Client) extends ClojureBridge {
+case class Datomic_Client(client: Client) extends ClojureBridge {
 
   def getDatabaseNames(
     timeout: Int = 0,
@@ -49,8 +49,8 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  def connect(dbName: String): Conn_DevLocal = {
-    Conn_DevLocal(client, dbName)
+  def connect(dbName: String): Conn_Client = {
+    Conn_Client(client, dbName)
   }
 
   def allowedDevLocalDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
@@ -89,7 +89,7 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     * @param dbName Database name
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
-  def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_DevLocal = try {
+  def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_Client = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
     val conn = connect(dbName)
@@ -113,7 +113,7 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     * @param dbName     Optional String identifier of database (default empty string creates a randomUUID)
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
-  def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn_DevLocal = try {
+  def recreateDbFromRaw(schemaData: java.util.List[_], dbName: String): Conn_Client = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
     val conn = connect(dbName)
@@ -136,7 +136,7 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
   def transactSchema(
     schema: SchemaTransaction,
     dbName: String
-  ): Conn_DevLocal = try {
+  ): Conn_Client = try {
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
       conn.transact(allowedDevLocalDefinitions(schema.partitions))

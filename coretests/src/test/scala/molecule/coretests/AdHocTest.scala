@@ -11,7 +11,7 @@ import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.core.util.Helpers
 import molecule.datomic.api.in1_out6._
-import molecule.datomic.client.devLocal.facade.DatomicDb_DevLocal
+import molecule.datomic.client.facade.DatomicDb_Client
 import molecule.datomic.peer.facade.DatomicDb_Peer
 
 class AdHocTest extends CoreSpec with Helpers {
@@ -24,6 +24,8 @@ class AdHocTest extends CoreSpec with Helpers {
 
     Ns.int(1).save
     Ns.int.get === List(1)
+
+
 
     ok
   }

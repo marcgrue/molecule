@@ -1,4 +1,4 @@
-package molecule.datomic.client.devLocal.facade
+package molecule.datomic.client.facade
 
 import java.util.Date
 import datomic._
@@ -10,7 +10,7 @@ import molecule.core.util.Debug
 import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
 
-case class TxReport_DevLocal(
+case class TxReport_Client(
   clientTxReport: clientTxReport,
   stmtss: Seq[Seq[Statement]] = Nil
 ) extends TxReport {

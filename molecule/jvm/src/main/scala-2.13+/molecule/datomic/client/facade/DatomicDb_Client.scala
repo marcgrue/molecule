@@ -1,4 +1,4 @@
-package molecule.datomic.client.devLocal.facade
+package molecule.datomic.client.facade
 
 import java.util
 import java.util.stream.{Stream => jStream}
@@ -8,14 +8,14 @@ import molecule.core.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 import scala.jdk.CollectionConverters._
 
-case class DatomicDb_DevLocal(clientDb: Db) extends DatomicDb {
+case class DatomicDb_Client(clientDb: Db) extends DatomicDb {
 
   def getDatomicDb: AnyRef = clientDb.datomicDb
 
   def basisT: Long = clientDb.basisT
 
   def entity(conn: Conn, id: Any): DatomicEntity = {
-    DatomicEntity_DevLocal(conn.asInstanceOf[Conn_DevLocal], id)
+    DatomicEntity_Client(conn.asInstanceOf[Conn_Client], id)
   }
 
   def pull(pattern: String, eid: Any): util.Map[_, _] = {

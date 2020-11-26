@@ -9,7 +9,7 @@ import molecule.examples.dayOfDatomic.schema.{AggregatesSchema, GraphSchema, Pro
 import molecule.core.util.MoleculeSpec
 import molecule.datomic.peer.facade.Datomic_Peer._
 import datomic.Util._
-import molecule.datomic.client.devLocal.facade.Datomic_DevLocal
+import molecule.datomic.client.facade.Datomic_Client
 import scala.jdk.CollectionConverters._
 
 
