@@ -17,10 +17,13 @@ import molecule.datomic.peer.facade.DatomicDb_Peer
 class AdHocTest extends CoreSpec with Helpers {
 
 //  peerOnly = true
+  peerServerOnly = true
+
 
   "adhoc" in new CoreSetup {
 
-
+    Ns.int(1).save
+    Ns.int.get === List(1)
 
     ok
   }

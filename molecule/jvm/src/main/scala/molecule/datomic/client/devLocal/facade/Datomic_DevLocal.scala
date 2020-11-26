@@ -4,7 +4,7 @@ import java.util.{List => jList, Map => jMap}
 import java.util
 import datomic.Peer
 import datomic.Util.read
-import datomicClojure.ClojureBridge
+import datomicClient.ClojureBridge
 import datomicScala.client.api.sync.Client
 import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.schema.SchemaTransaction
@@ -49,13 +49,11 @@ case class Datomic_DevLocal(client: Client) extends ClojureBridge {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  def connect(dbName: String): Conn_DevLocal = try {
+  def connect(dbName: String): Conn_DevLocal = {
     Conn_DevLocal(client, dbName)
-  } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  private def allowedDevLocalDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
+  def allowedDevLocalDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
     val nss2     = new util.ArrayList[jMap[Object, Object]]()
     val bytes    = read(":db.type/bytes")
     val index    = read(":db/index")

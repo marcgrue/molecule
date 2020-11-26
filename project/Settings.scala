@@ -42,7 +42,7 @@ object Settings {
       user=<your-username>
       pass=<your-password>
     * */
-    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+//    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
 
     unmanagedSourceDirectories in Compile ++= {
       (unmanagedSourceDirectories in Compile).value.map { dir =>
@@ -71,14 +71,14 @@ object Settings {
     name := "molecule",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-
-      //      "com.datomic" % "datomic-free" % "0.9.5697",
-      "com.datomic" % "datomic-pro" % "1.0.6202",
-
-
       "org.specs2" %% "specs2-core" % "4.10.0",
-      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.3-SNAPSHOT"
-    )
+      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.5-SNAPSHOT",
+
+//            "com.datomic" % "datomic-free" % "0.9.5697",
+      "com.datomic" % "datomic-pro" % "1.0.6202",
+    ),
+    // Add this exclusion if datomic-pro is used to avoid conflicts
+    excludeDependencies ++= Seq(ExclusionRule("com.datomic", "datomic-free"))
   )
 
   // Proprietary Client dev-local dependency needed for tests

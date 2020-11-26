@@ -1,34 +1,33 @@
 package molecule.coretests.api
 
 import java.util.Date
+import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class Since extends CoreSpec {
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
+    val tx1: TxReport = Ns.int(1).save
+    Thread.sleep(1000)
+    val tx2: TxReport = Ns.int(2).save
+    Thread.sleep(1000)
+    val tx3: TxReport = Ns.int(3).save
 
-  val tx1: TxReport = Ns.int(1).save
-  Thread.sleep(1000)
-  val tx2: TxReport = Ns.int(2).save
-  Thread.sleep(1000)
-  val tx3: TxReport = Ns.int(3).save
+    val t1: Long = tx1.t
+    val t2: Long = tx2.t
+    val t3: Long = tx3.t
 
-  val t1: Long = tx1.t
-  val t2: Long = tx2.t
-  val t3: Long = tx3.t
-
-  val d1: Date = tx1.inst
-  val d2: Date = tx2.inst
-  val d3: Date = tx3.inst
+    val d1: Date = tx1.inst
+    val d2: Date = tx2.inst
+    val d3: Date = tx3.inst
+  }
 
 
-  "Since" >> {
+  "Since" in new Setup {
 
     Ns.int.getSince(t3) === List()
     Ns.int.getSince(t2) === List(3)
@@ -74,21 +73,37 @@ class Since extends CoreSpec {
     Ns.int.getIterableSince(d2).iterator.toList === Iterator(3).toList
     Ns.int.getIterableSince(d1).iterator.toList === Iterator(2, 3).toList
 
+    if (system == DatomicPeer) {
+      Ns.int.getRawSince(t3).toString === "[]"
+      Ns.int.getRawSince(t2).toString === "[[3]]"
+      Ns.int.getRawSince(t1).toString === "[[2], [3]]"
+      Ns.int.getRawSince(t1, 1).toString === "[[2]]"
 
-    Ns.int.getRawSince(t3).toString === "[]"
-    Ns.int.getRawSince(t2).toString === "[[3]]"
-    Ns.int.getRawSince(t1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(t1, 1).toString === "[[2]]"
+      Ns.int.getRawSince(tx3).toString === "[]"
+      Ns.int.getRawSince(tx2).toString === "[[3]]"
+      Ns.int.getRawSince(tx1).toString === "[[2], [3]]"
+      Ns.int.getRawSince(tx1, 1).toString === "[[2]]"
 
-    Ns.int.getRawSince(tx3).toString === "[]"
-    Ns.int.getRawSince(tx2).toString === "[[3]]"
-    Ns.int.getRawSince(tx1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(tx1, 1).toString === "[[2]]"
+      Ns.int.getRawSince(d3).toString === "[]"
+      Ns.int.getRawSince(d2).toString === "[[3]]"
+      Ns.int.getRawSince(d1).toString === "[[2], [3]]"
+      Ns.int.getRawSince(d1, 1).toString === "[[2]]"
+    } else {
+      Ns.int.getRawSince(t3).toString === "[]"
+      Ns.int.getRawSince(t2).toString === "[[3]]"
+      Ns.int.getRawSince(t1).toString === "[[2] [3]]"
+      Ns.int.getRawSince(t1, 1).toString === "[[2]]"
 
-    Ns.int.getRawSince(d3).toString === "[]"
-    Ns.int.getRawSince(d2).toString === "[[3]]"
-    Ns.int.getRawSince(d1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(d1, 1).toString === "[[2]]"
+      Ns.int.getRawSince(tx3).toString === "[]"
+      Ns.int.getRawSince(tx2).toString === "[[3]]"
+      Ns.int.getRawSince(tx1).toString === "[[2] [3]]"
+      Ns.int.getRawSince(tx1, 1).toString === "[[2]]"
+
+      Ns.int.getRawSince(d3).toString === "[]"
+      Ns.int.getRawSince(d2).toString === "[[3]]"
+      Ns.int.getRawSince(d1).toString === "[[2] [3]]"
+      Ns.int.getRawSince(d1, 1).toString === "[[2]]"
+    }
 
 
     Ns.int.getJsonSince(t3) === ""

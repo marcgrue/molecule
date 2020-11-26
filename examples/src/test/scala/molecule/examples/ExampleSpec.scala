@@ -1,9 +1,9 @@
 package molecule.examples
 
-import datomicClojure.ClojureBridge
+import datomicClient._
+import datomicClient.anomaly.CognitectAnomaly
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
-import datomicScala.CognitectAnomaly
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer, MoleculeSpec, System}
 import molecule.datomic.base.facade.Conn
@@ -72,7 +72,7 @@ class ExampleSpec  extends MoleculeSpec with ClojureBridge {
     } catch {
       case e: CognitectAnomaly =>
         println(e)
-        println(e.msg)
+        println(e.getMessage)
         throw e
       case t: Throwable        => throw t
     }

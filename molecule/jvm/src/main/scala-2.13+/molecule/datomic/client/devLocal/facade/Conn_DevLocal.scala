@@ -2,20 +2,17 @@ package molecule.datomic.client.devLocal.facade
 
 import java.util
 import java.util.{Date, Collection => jCollection, List => jList}
-import molecule.core.facade.exception.DatomicFacadeException
 import datomic.Util._
 import datomic.db.DbId
-import datomic.Connection.DB_AFTER
-import datomic.Database
-import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
 import datomicScala.client.api.{sync, Datom}
+import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.ops.QueryOps._
+import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
@@ -34,7 +31,9 @@ import scala.util.control.NonFatal
 case class Conn_DevLocal(client: Client, dbName: String)
   extends Conn with Helpers with BridgeDatomicFuture {
 
-  val clientConn: sync.Connection = client.connect(dbName)
+  val clientConn: sync.Connection = {
+    client.connect(dbName)
+  }
 
 
   // Temporary db for ad-hoc queries against time variation dbs

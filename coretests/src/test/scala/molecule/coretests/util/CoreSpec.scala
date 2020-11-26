@@ -1,9 +1,8 @@
 package molecule.coretests.util
 
-import datomicClojure.ClojureBridge
+import datomicClient.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
-import datomicScala.CognitectAnomaly
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
@@ -26,8 +25,11 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   // Do or skip looping input tests that take a few minutes
   val heavyInputTesting = false
 
-  var peerOnly     = false
-  var devLocalOnly = false
+  var peerOnly       = false
+  var devLocalOnly   = false
+  var peerServerOnly = false
+
+  var setupException = Option.empty[Throwable]
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {
@@ -35,6 +37,9 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
         fs.mapDescription(d => Text(s"$system: " + d.show))
     } else if (devLocalOnly) {
       step(setupDevLocal()) ^
+        fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (peerServerOnly) {
+      step(setupPeerServer()) ^
         fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
 
@@ -44,17 +49,17 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
       //          step(setupDevLocal()) ^
       //            fs.mapDescription(d => Text(s"$system: " + d.show))
 
+      //      step(setupPeer()) ^
+      //        fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+      //        step(setupDevLocal()) ^
+      //        fs.mapDescription(d => Text(s"$system: " + d.show))
+
       step(setupPeer()) ^
         fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^
+        fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupPeerServer()) ^
         fs.mapDescription(d => Text(s"$system: " + d.show))
-
-      //    step(setupPeer()) ^
-      //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-      //      step(setupDevLocal()) ^
-      //      fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-      //      step(setupPeerServer()) ^
-      //      fs.mapDescription(d => Text(s"$system: " + d.show))
     }
   }
 
@@ -65,37 +70,40 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   def setupPeerServer(): Unit = {
     system = DatomicPeerServer
-    //    client = Datomic.clientPeerServer("myaccesskey", "mysecret", "localhost:8998")
-    client = Datomic.clientPeerServer("myaccesskey", "mysecret", "datomic:mem://coretests")
-    //    asyncClient = AsyncDatomic.clientPeerServer("myaccesskey", "mysecret", "datomic:mem://coretests")
-    connection = try {
-      //      asyncClient.connect("coretests")
-      client.connect("coretests")
+    try {
+      client = Datomic.clientPeerServer("k", "s", "localhost:8998")
     } catch {
-      case e: CognitectAnomaly =>
-        println(e)
-        println(e.msg)
-        throw e
-      case t: Throwable        => throw t
+      case e: Throwable =>
+        // Catch error from setup (suppressed during setup)
+        setupException = Some(e)
     }
   }
 
+
   def setupDevLocal(): Unit = {
     system = DatomicDevLocal
-    client = Datomic.clientDevLocal("coretests")
-    //    asyncClient = AsyncDatomic.clientDevLocal("coretests")
+    client = Datomic.clientDevLocal("Some system name")
   }
 
-  def recreatedDbConn(
+  def freshConn(
     schema: SchemaTransaction,
     dbIdentifier: String = ""
-  ) = {
+  ): Conn = {
+
+    // Throw potential setup error
+    setupException.fold(())(throw _)
+
     system match {
       case DatomicPeer =>
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicPeerServer =>
-        Datomic_Peer.recreateDbFrom(schema)
+        val devL = Datomic_DevLocal(client)
+        val conn = devL.connect(dbIdentifier)
+        if (schema.partitions.size() > 0)
+          conn.transact(devL.allowedDevLocalDefinitions(schema.partitions))
+        conn.transact(devL.allowedDevLocalDefinitions(schema.namespaces))
+        conn
 
       case DatomicDevLocal =>
         Datomic_DevLocal(client).recreateDbFrom(schema, dbIdentifier)
@@ -107,12 +115,12 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   // Entry points
   class CoreSetup extends Scope {
-    implicit val conn: Conn = recreatedDbConn(CoreTestSchema)
+    implicit val conn: Conn = freshConn(CoreTestSchema, "coretests")
   }
   class BidirectionalSetup extends Scope {
-    implicit val conn = recreatedDbConn(BidirectionalSchema)
+    implicit val conn = freshConn(BidirectionalSchema, "bidirectional")
   }
   class PartitionSetup extends Scope {
-    implicit val conn = recreatedDbConn(PartitionTestSchema)
+    implicit val conn = freshConn(PartitionTestSchema, "coretests")
   }
 }
