@@ -7,14 +7,14 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeManySelfSave extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val knownBy = m(Person.name_(?).Knows.weight.Person.name)
   }
 
 
   "base/edge/target" >> {
 
-    "no nesting in save molecules" in new setup {
+    "no nesting in save molecules" in new Setup {
 
       (Person.name("Ann").Knows.*(Knows.weight(7)).Person.name("Ben").save must throwA[VerifyModelException])
         .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
@@ -31,7 +31,7 @@ class EdgeManySelfSave extends CoreSpec {
     // Since we can't nest in save-molecules, saves will be the same for cardinality one/many,
     // and the following two test will be the same as for tests in EdgeOneSelfSave
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       Person.name("Ann").Knows.weight(7).Person.name("Ben").save.eids
 
@@ -43,7 +43,7 @@ class EdgeManySelfSave extends CoreSpec {
     }
 
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -61,7 +61,7 @@ class EdgeManySelfSave extends CoreSpec {
 
   "base + edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       // Create edges to new target entities
       val knowsBen = Knows.weight(7).Person.name("Ben").save.eid
@@ -79,7 +79,7 @@ class EdgeManySelfSave extends CoreSpec {
       )
     }
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val List(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
@@ -103,7 +103,7 @@ class EdgeManySelfSave extends CoreSpec {
 
   // Edge consistency checks.
   // Any edge should always be connected to both a base and a target entity.
-  "base/edge - <missing target>" in new setup {
+  "base/edge - <missing target>" in new Setup {
     // Can't save edge missing the target namespace (`Person`)
     // The edge needs to be complete at all times to preserve consistency.
     (Person.name("Ann").Knows.weight(5).save must throwA[VerifyModelException])
@@ -111,7 +111,7 @@ class EdgeManySelfSave extends CoreSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
-  "<missing base> - edge - <missing target>" in new setup {
+  "<missing base> - edge - <missing target>" in new Setup {
     (Knows.weight(7).save must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace somewhere after edge property `Knows/weight`."

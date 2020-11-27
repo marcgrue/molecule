@@ -27,8 +27,8 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
          object $txFnContainer {
            // import molecule.datomic.peer.facade.Database_Peer
            // import molecule.datomic.peer.facade.Conn_Peer
-           // import molecule.datomic.client.devLocal.facade.Database_DevLocal
-           // import molecule.datomic.client.devLocal.facade.Conn_DevLocal
+           // import molecule.datomic.client.facade.Database_DevLocal
+           // import molecule.datomic.client.facade.Conn_Client
            // import datomicScala.client.api.sync.Db
            ..$typedTxFns
            ..${typedTxFns.map(untypedTxFn(_))}
@@ -61,7 +61,7 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
       //              conn.testDb(Database_Peer(db))
       //              c
       //            case db: datomic.core.db.Db =>
-      //              val c = conn0.asInstanceOf[Conn_DevLocal]
+      //              val c = conn0.asInstanceOf[Conn_Client]
       //              conn.testDb(Database_DevLocal(Db(db)))
       //              c
       //            case db                     => throw new RuntimeException(

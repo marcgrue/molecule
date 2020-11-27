@@ -7,7 +7,7 @@ import molecule.datomic.api.in1_out4._
 
 class EdgeManyOtherUpdate extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val ann = Person.name("Ann").save.eid
 
     val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
@@ -34,7 +34,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "add edges" in new setup {
+  "add edges" in new Setup {
 
     // vararg
     Person(ann).closeTo.assert(closeToBob, closeToDot).update
@@ -52,7 +52,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "replace edges" in new setup {
+  "replace edges" in new Setup {
 
     // current friends
     Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus, closeToZoe).update
@@ -80,7 +80,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "remove edges" in new setup {
+  "remove edges" in new Setup {
 
     // current friends
     Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus, closeToZoe).update
@@ -120,7 +120,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "apply edges" in new setup {
+  "apply edges" in new Setup {
 
     // current friends
     Person(ann).closeTo.assert(closeToBob, closeToDot, closeToGus).update
@@ -169,7 +169,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "retract edge" in new setup {
+  "retract edge" in new Setup {
 
     // current friends
     Person(ann).closeTo.assert(closeToBob, closeToDot).update
@@ -187,7 +187,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "retract base/target entity" in new setup {
+  "retract base/target entity" in new Setup {
 
     // current friends
     Person(ann).closeTo.assert(closeToBob, closeToDot).update
@@ -206,7 +206,7 @@ class EdgeManyOtherUpdate extends CoreSpec {
   }
 
 
-  "no nested in update molecules" in new setup {
+  "no nested in update molecules" in new Setup {
 
     // Can't update multiple values of cardinality-one attribute `name`
     (Person(ann).CloseTo.weight(7).Animal.name("Max", "Liz").update must throwA[VerifyModelException])

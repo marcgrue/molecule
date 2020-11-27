@@ -6,13 +6,13 @@ import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out5._
-import molecule.datomic.client.devLocal.facade.{Conn_DevLocal, DatomicDb_DevLocal}
+import molecule.datomic.client.facade.{Conn_Client, DatomicDb_Client}
 import molecule.datomic.peer.facade.{Conn_Peer, DatomicDb_Peer}
 
 
 class Index extends CoreSpec {
 
-  class setup extends CoreSetup {
+  class Setup extends CoreSetup {
     // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
     // the wall clock time since Date's are a bit unreliable for precision.
 
@@ -106,7 +106,7 @@ class Index extends CoreSpec {
     // still grouped together.
 
 
-    "Current values" in new setup {
+    "Current values" in new Setup {
 
       // EAVT datom values of entity e1
       EAVT(e1).e.a.v.t.get.sortBy(_._4) === List(
@@ -147,7 +147,7 @@ class Index extends CoreSpec {
       EAVT(e1).op.get === List(true, true)
     }
 
-    "History values" in new setup {
+    "History values" in new Setup {
 
       // History of attribute values of entity e1
       // Generic attribute `op` is interesting when looking at the history database since
@@ -193,7 +193,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Card many" in new setup {
+    "Card many" in new Setup {
 
       // Each value is asserted/retracted on its own
       EAVT(e4).a.v.t.get === List(
@@ -219,7 +219,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" in new setup {
+    "Only mandatory datom args" in new Setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -241,7 +241,7 @@ class Index extends CoreSpec {
 
   "AEVT" >> {
 
-    "Args" in new setup {
+    "Args" in new Setup {
 
       // The AEVT index provides efficient access to all values for a given attribute,
       // comparable to traditional column access style.
@@ -289,7 +289,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" in new setup {
+    "Only mandatory datom args" in new Setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -313,7 +313,7 @@ class Index extends CoreSpec {
 
   "AVET" >> {
 
-    "Basics" in new setup {
+    "Basics" in new Setup {
 
       // The AVET index provides efficient access to particular combinations of attribute and value.
 
@@ -343,7 +343,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" in new setup {
+    "Only mandatory datom args" in new Setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -367,7 +367,7 @@ class Index extends CoreSpec {
 
   "AVET Index range" >> {
 
-    "Basics" in new setup {
+    "Basics" in new Setup {
 
       // Apply attribute name and `from` + `until` value range arguments
 
@@ -379,7 +379,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg combinations" in new setup {
+    "Arg combinations" in new Setup {
 
       // `until` arg 5 is not included
       AVET.range(":Ns/int", Some(2), Some(5)).e.get === List(e1)
@@ -417,7 +417,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg types" in new setup {
+    "Arg types" in new Setup {
 
       // Different range types throw an exception
       (AVET.range(":Ns/int", Some(1), Some("y")).e.get must throwA[MoleculeException])
@@ -429,7 +429,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Arg variables" in new setup {
+    "Arg variables" in new Setup {
 
       // Args can be supplied as variables
 
@@ -452,7 +452,7 @@ class Index extends CoreSpec {
     }
 
 
-    "History" in new setup {
+    "History" in new Setup {
 
       // Attribute :Ns/int values from 1 to end
       AVET.range(":Ns/int", Some(1), None).v.e.t.op.getHistory === List(
@@ -501,7 +501,7 @@ class Index extends CoreSpec {
 
   "VAET" >> {
 
-    "Args" in new setup {
+    "Args" in new Setup {
 
       // e2 no longer points to e3
       VAET(e3).a.e.t.get === Nil
@@ -526,7 +526,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" in new setup {
+    "Only mandatory datom args" in new Setup {
 
       // Missing Index arguments
       expectCompileError(
@@ -548,7 +548,7 @@ class Index extends CoreSpec {
   }
 
 
-  "Raw access to all Datoms of Index" in new setup {
+  "Raw access to all Datoms of Index" in new Setup {
 
     if (system == DatomicPeer) {
 
@@ -567,8 +567,8 @@ class Index extends CoreSpec {
 
     } else {
 
-      val connPeer = conn.asInstanceOf[Conn_DevLocal]
-      val db       = connPeer.db.asInstanceOf[DatomicDb_DevLocal]
+      val connPeer = conn.asInstanceOf[Conn_Client]
+      val db       = connPeer.db.asInstanceOf[DatomicDb_Client]
 
       // Access all datoms (the entire database!) of an Index by raw access:
       db.datoms(":eavt")

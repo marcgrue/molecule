@@ -77,7 +77,8 @@ object Settings {
 //            "com.datomic" % "datomic-free" % "0.9.5697",
       "com.datomic" % "datomic-pro" % "1.0.6202",
     ),
-    // Add this exclusion if datomic-pro is used to avoid conflicts
+    // Add this exclusion if datomic-pro is used.
+    // Free is imported and conflicts with pro if this is not added:
     excludeDependencies ++= Seq(ExclusionRule("com.datomic", "datomic-free"))
   )
 

@@ -17,7 +17,7 @@ import molecule.datomic.api.out6._
   */
 class Datom extends CoreSpec {
 
-  class setup extends CoreSetup {
+  class Setup extends CoreSetup {
 
     // Ensure that tx instants (Date) are at least a few ms apart
     // for correct Date expression evaluations
@@ -76,7 +76,7 @@ class Datom extends CoreSpec {
 
   "Entities" >> {
 
-    "1 entity" in new setup {
+    "1 entity" in new Setup {
       // Several generic attributes can be asserted with a common entity id
       // Molecules with an applied entity id and only generic attributes
       // matches the Datom values of the entity
@@ -127,7 +127,7 @@ class Datom extends CoreSpec {
     }
 
 
-    "n entities" in new setup {
+    "n entities" in new Setup {
       Ns(e1, e2).tx.e.a.v.get.sortBy(_._1) === List(
         (tx2, e1, ":Ns/str", "b"),
         (tx3, e1, ":Ns/int", 3),
@@ -138,7 +138,7 @@ class Datom extends CoreSpec {
     }
 
 
-    "History" in new setup {
+    "History" in new Setup {
       Ns(e1, e2).tx.e.a.v.op.getHistory.sortBy(t => (t._1, t._3, t._5)) === List(
         (tx1, e1, ":Ns/int", 1, true),
         (tx1, e1, ":Ns/str", "a", true),
@@ -158,7 +158,7 @@ class Datom extends CoreSpec {
 
   "Attributes" >> {
 
-    "1 Attribute" in new setup {
+    "1 Attribute" in new Setup {
 
       Ns.int.e.get.sortBy(_._1) === List((3, e1), (5, e2))
       Ns.int.a.get === List((3, ":Ns/int"), (5, ":Ns/int"))
@@ -201,7 +201,7 @@ class Datom extends CoreSpec {
     }
 
 
-    "order of attribute types" in new setup {
+    "order of attribute types" in new Setup {
 
       // Generic entity id first is ok
       Ns.e.int.tx.get.sortBy(_._2) === List(
@@ -230,7 +230,7 @@ class Datom extends CoreSpec {
       )
     }
 
-    "Full scan" in new setup {
+    "Full scan" in new Setup {
 
       // Generic attributes without an entity id applied or custom attributes added would
       // cause a full scan of the whole database and is not allowed
@@ -259,7 +259,7 @@ class Datom extends CoreSpec {
     }
 
 
-    "Ref" in new setup {
+    "Ref" in new Setup {
 
       // Generic attributes after ref id
       Ns.Ref1.e.get === List(r1)
@@ -310,7 +310,7 @@ class Datom extends CoreSpec {
     }
 
 
-    "Tacit" in new setup {
+    "Tacit" in new Setup {
       expectCompileError(
         """m(Ns.int.tx_)""",
         "molecule.core.transform.exception.Dsl2ModelException: " +
@@ -320,7 +320,7 @@ class Datom extends CoreSpec {
   }
 
 
-  "Expressions, mandatory" in new setup {
+  "Expressions, mandatory" in new Setup {
 
     Ns.e(e1).get === List(e1)
     Ns.e(e1, e2).get.sorted === List(e1, e2).sorted
@@ -461,7 +461,7 @@ class Datom extends CoreSpec {
   }
 
 
-  "Expressions, tacit" in new setup {
+  "Expressions, tacit" in new Setup {
 
     Ns.int.a_(":Ns/int").get === List(3, 5)
     Ns.int.a_(":Ns/str").get === Nil
@@ -537,7 +537,7 @@ class Datom extends CoreSpec {
   }
 
 
-  "Multiple tx attributes" in new setup {
+  "Multiple tx attributes" in new Setup {
 
     // Tacit attributes can be followed by generic attributes
     Ns(e1).str_.tx.get.head === tx2
@@ -547,7 +547,7 @@ class Datom extends CoreSpec {
   }
 
 
-  "Optional tx data not allowed" in new setup {
+  "Optional tx data not allowed" in new Setup {
     expectCompileError(
       """m(Ns.int$.tx.str)""",
       "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")

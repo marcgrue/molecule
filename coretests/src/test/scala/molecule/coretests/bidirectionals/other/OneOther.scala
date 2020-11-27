@@ -9,12 +9,12 @@ import molecule.datomic.api.in1_out3._
 
 class OneOther extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val personPet    = m(Person.name.Pet.name)
     val animalMaster = m(Animal.name.Master.name)
   }
 
-  "Save new" in new setup {
+  "Save new" in new Setup {
 
     // Save Ben, Rex and bidirectional references between them
     val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
@@ -31,7 +31,7 @@ class OneOther extends CoreSpec {
   }
 
 
-  "Save new in reverse" in new setup {
+  "Save new in reverse" in new Setup {
 
     // Building from the other end gives the same result
 
@@ -50,7 +50,7 @@ class OneOther extends CoreSpec {
   }
 
 
-  "Save id" in new setup {
+  "Save id" in new Setup {
 
     val rex = Animal.name.insert("Rex").eid
 
@@ -73,7 +73,7 @@ class OneOther extends CoreSpec {
   }
 
 
-  "Insert new" in new setup {
+  "Insert new" in new Setup {
 
     // Insert 2 pairs of bidirectionally referenced entities
     Person.name.Pet.name insert List(
@@ -92,7 +92,7 @@ class OneOther extends CoreSpec {
     )
   }
 
-  "Insert id" in new setup {
+  "Insert id" in new Setup {
 
     val List(rex, zip) = Animal.name insert List("Rex", "Zip") eids
 
@@ -116,7 +116,7 @@ class OneOther extends CoreSpec {
 
   "Update new" >> {
 
-    "creating ref to new" in new setup {
+    "creating ref to new" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
       Person(ben).Pet.name("Rex").update
@@ -144,7 +144,7 @@ class OneOther extends CoreSpec {
     }
 
 
-    "replacing ref to new" in new setup {
+    "replacing ref to new" in new Setup {
 
       val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
@@ -172,7 +172,7 @@ class OneOther extends CoreSpec {
 
   "Update id" >> {
 
-    "creating ref to existing" in new setup {
+    "creating ref to existing" in new Setup {
 
       // Ben haven't got Rex yet
       val ben = Person.name.insert("Ben").eid
@@ -195,7 +195,7 @@ class OneOther extends CoreSpec {
     }
 
 
-    "replacing ref to other existing" in new setup {
+    "replacing ref to other existing" in new Setup {
 
       val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
@@ -222,7 +222,7 @@ class OneOther extends CoreSpec {
   }
 
 
-  "Update removing reference" in new setup {
+  "Update removing reference" in new Setup {
 
     val List(ben, rex) = Person.name("Ben").Pet.name("Rex").save.eids
 
@@ -242,7 +242,7 @@ class OneOther extends CoreSpec {
   }
 
 
-  "Retract" in new setup {
+  "Retract" in new Setup {
 
     val ben = Person.name.insert("Ben").eid
 

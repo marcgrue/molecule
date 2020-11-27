@@ -1,6 +1,7 @@
 package molecule.core.api.get
 
-import java.util.{Collection => jCollection, List => jList}
+import java.util.{Collections, Collection => jCollection, List => jList}
+import java.util
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
@@ -25,12 +26,17 @@ trait GetRaw { self: MoleculeBase =>
     *   Person.name.age.getRaw.toString === """[["Ben" 42], ["Liz" 37]]"""
     * }}}
     *
+    * Peer returns java.util.HashSet
+    * Client returns clojure.lang.PersistentVector
+    * We unify the type by copying to an ArrayList
+    *
     * @group get
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRaw(implicit* getAsyncRaw]] method.
     */
-  def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] = conn.query(_model, _query)
+  def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] =
+    new java.util.ArrayList[jList[AnyRef]](conn.query(_model, _query))
 
 
   /** Get `java.util.Collection` of n untyped rows matching molecule.
@@ -48,7 +54,8 @@ trait GetRaw { self: MoleculeBase =>
     getRaw(conn)
   } else {
     val jColl = conn.query(_model, _query)
-    val max = if (jColl.size < n) jColl.size else n
+    val size = jColl.size
+    val max = if (size < n) size else n
     val it = jColl.iterator
     val a = new java.util.ArrayList[jList[AnyRef]](max)
     var i = 0

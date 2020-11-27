@@ -1,6 +1,6 @@
 package molecule.coretests.transaction
 
-import datomicScala.Incorrect
+import datomicClient.anomaly.Incorrect
 import molecule.core.util.DatomicPeer
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest.Ns

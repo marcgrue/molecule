@@ -9,11 +9,11 @@ import molecule.datomic.api.in1_out3._
 
 class OneSelf extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val spouses = m(Person.name.Spouse.name)
   }
 
-  "Save new" in new setup {
+  "Save new" in new Setup {
 
     // Save Adam, Lisa and bidirectional references between them
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
@@ -33,7 +33,7 @@ class OneSelf extends CoreSpec {
     Person(lisa).Spouse.name_.Spouse.name.get.head === "Lisa"
   }
 
-  "Save id" in new setup {
+  "Save id" in new Setup {
 
     val lisa = Person.name.insert("Lisa").eid
 
@@ -54,7 +54,7 @@ class OneSelf extends CoreSpec {
   }
 
 
-  "Insert new" in new setup {
+  "Insert new" in new Setup {
 
     // Insert 2 pairs of bidirectionally referenced entities
     Person.name.Spouse.name insert List(
@@ -72,7 +72,7 @@ class OneSelf extends CoreSpec {
     )
   }
 
-  "Insert id" in new setup {
+  "Insert id" in new Setup {
 
     val List(lisa, nina) = Person.name insert List("Lisa", "Nina") eids
 
@@ -94,7 +94,7 @@ class OneSelf extends CoreSpec {
 
   "Update new" >> {
 
-    "creating ref to new" in new setup {
+    "creating ref to new" in new Setup {
 
       val adam = Person.name.insert("Adam").eid
 
@@ -108,7 +108,7 @@ class OneSelf extends CoreSpec {
     }
 
 
-    "replacing ref to new" in new setup {
+    "replacing ref to new" in new Setup {
 
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -132,7 +132,7 @@ class OneSelf extends CoreSpec {
 
   "Update id" >> {
 
-    "creating ref to existing" in new setup {
+    "creating ref to existing" in new Setup {
 
       // Adam and Lisa not married yet
       val adam = Person.name.insert("Adam").eid
@@ -153,7 +153,7 @@ class OneSelf extends CoreSpec {
     }
 
 
-    "replacing ref to other existing" in new setup {
+    "replacing ref to other existing" in new Setup {
 
       val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -176,7 +176,7 @@ class OneSelf extends CoreSpec {
   }
 
 
-  "Update removing reference" in new setup {
+  "Update removing reference" in new Setup {
 
     val List(adam, lisa) = Person.name("Adam").Spouse.name("Lisa").save.eids
 
@@ -194,7 +194,7 @@ class OneSelf extends CoreSpec {
   }
 
 
-  "Retract" in new setup {
+  "Retract" in new Setup {
 
     val adam = Person.name.insert("Adam").eid
 

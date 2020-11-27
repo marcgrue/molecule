@@ -93,6 +93,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
     // Throw potential setup error
     setupException.fold(())(throw _)
 
+        println(system)
     system match {
       case DatomicPeer =>
         Datomic_Peer.recreateDbFrom(schema)

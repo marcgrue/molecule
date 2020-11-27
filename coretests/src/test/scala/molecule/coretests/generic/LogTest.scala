@@ -11,7 +11,7 @@ import molecule.datomic.base.facade.TxReport
 
 class LogTest extends CoreSpec {
 
-  class setup extends CoreSetup {
+  class Setup extends CoreSetup {
     // Generally use `t` or `tx` to identify transaction and `txInstant` only to get
     // the wall clock time since Date's are only precise to ms.
 
@@ -97,7 +97,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Basics" in new setup {
+  "Basics" in new Setup {
 
     // Apply attribute name and `from` + `until` value range arguments
 
@@ -151,7 +151,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Grouped" in new setup {
+  "Grouped" in new Setup {
 
     //Resembling the original structure of the Datomic Log
     val logMap = Log(Some(tx1), Some(tx4)).t.e.a.v.op.get.groupBy(_._1)
@@ -183,7 +183,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Args" in new setup {
+  "Args" in new Setup {
 
     // Time t only implemented for Peer
     if (system == DatomicPeer) {
@@ -272,7 +272,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Start/End" in new setup {
+  "Start/End" in new Setup {
 
     // tx12 (inclusive) - end
     Log(Some(tx12), None).t.e.a.v.op.get === List(
@@ -311,7 +311,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "Queries" in new setup {
+  "Queries" in new Setup {
 
     // Number of transactions between tx1 and tx12
     Log(Some(tx1), Some(tx12)).t.get.distinct.size === 11
@@ -362,7 +362,7 @@ class LogTest extends CoreSpec {
   }
 
 
-  "History" in new setup {
+  "History" in new Setup {
 
     // Since we get the Log from the Connection and not the Database,
     // any time filter getter will make no difference

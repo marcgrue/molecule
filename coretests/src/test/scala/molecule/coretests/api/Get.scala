@@ -12,12 +12,11 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class Get extends CoreSpec {
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
+    Ns.int insert List(1, 2, 3)
+  }
 
-  Ns.int insert List(1, 2, 3)
-
-
-  "Sync" >> {
+  "Sync" in new Setup {
 
     Ns.int.get === List(1, 2, 3)
     Ns.int.getArray === Array(1, 2, 3)
@@ -41,7 +40,7 @@ class Get extends CoreSpec {
   }
 
 
-  "Async" >> {
+  "Async" in new Setup {
 
     // Variations on getting data with Future[Array[Int]]
 
@@ -49,7 +48,7 @@ class Get extends CoreSpec {
       result === Array(1, 2, 3)
 
       // Fast while loop
-      var i = 0
+      var i      = 0
       val length = result.length
       while (i < length) {
         println(result(i)) // Do stuff with row...

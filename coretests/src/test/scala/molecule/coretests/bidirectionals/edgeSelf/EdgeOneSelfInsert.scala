@@ -7,13 +7,13 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeOneSelfInsert extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val loveOf = m(Person.name_(?).Loves.weight.Person.name)
   }
 
   "base/edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       // Insert 1 pair of entities with bidirectional property edge between them
       Person.name.Loves.weight.Person.name.insert("Ann", 7, "Ben")
@@ -23,7 +23,7 @@ class EdgeOneSelfInsert extends CoreSpec {
       loveOf("Ben").get === List((7, "Ann"))
     }
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -39,7 +39,7 @@ class EdgeOneSelfInsert extends CoreSpec {
 
   "base + edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       // Create edges and Ben
       val List(lovesBen, benLoves, ben) = Loves.weight.Person.name.insert(7, "Ben").eids
@@ -89,7 +89,7 @@ class EdgeOneSelfInsert extends CoreSpec {
       )
     }
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -108,14 +108,14 @@ class EdgeOneSelfInsert extends CoreSpec {
   }
 
 
-  "base/edge - <missing target>" in new setup {
+  "base/edge - <missing target>" in new Setup {
     // Can't allow edge without ref to target entity
     (Person.name.Loves.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[edgeComplete]  Missing target namespace after edge namespace `Loves`."
   }
 
-  "<missing base> - edge - <missing target>" in new setup {
+  "<missing base> - edge - <missing target>" in new Setup {
     // Edge always have to have a ref to a target entity
     (Loves.weight.insert must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +

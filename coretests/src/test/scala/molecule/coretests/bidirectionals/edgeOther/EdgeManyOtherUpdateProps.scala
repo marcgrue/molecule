@@ -7,7 +7,7 @@ import molecule.datomic.api.out9._
 
 class EdgeManyOtherUpdateProps extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
 
     val love                  = Quality.name("Love").save.eid
     val List(patience, humor) = Quality.name.insert("Patience", "Humor").eids
@@ -26,7 +26,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
       .save eids
   }
 
-  "base data" in new setup {
+  "base data" in new Setup {
 
     // All edge properties have been inserted in both directions:
 
@@ -79,7 +79,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
 
   "Card-one" >> {
 
-    "value" in new setup {
+    "value" in new Setup {
 
       // Updating edge properties from the base entity is not allowed
       (Person(ann).CloseTo.howWeMet("inSchool").update must throwA[VerifyModelException])
@@ -106,7 +106,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
     }
 
 
-    "enum" in new setup {
+    "enum" in new Setup {
 
       // Current howWeMet enum value
       Person.name_("Ann").CloseTo.howWeMet.Animal.name.get === List(("inSchool", "Rex"))
@@ -124,7 +124,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
     }
 
 
-    "ref" in new setup {
+    "ref" in new Setup {
 
       // Current value
       Person.name_("Ann").CloseTo.CoreQuality.name._CloseTo.Animal.name.get === List(("Love", "Rex"))
@@ -165,7 +165,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
 
   "Card-many" >> {
 
-    "values" in new setup {
+    "values" in new Setup {
 
       // Current values
       Person.name_("Ann").CloseTo.commonInterests.Animal.name.get === List((Set("Food", "Travelling", "Walking"), "Rex"))
@@ -198,7 +198,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
     }
 
 
-    "enums" in new setup {
+    "enums" in new Setup {
 
       // Current enum values
       Person.name_("Ann").CloseTo.commonLicences.Animal.name.get === List((Set("climbing", "flying"), "Rex"))
@@ -232,7 +232,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
     }
 
 
-    "refs" in new setup {
+    "refs" in new Setup {
 
       // Current value
       Person.name_("Ann").CloseTo.InCommon.*(Quality.name)._CloseTo.Animal.name.get === List((Seq("Patience", "Humor"), "Rex"))
@@ -291,7 +291,7 @@ class EdgeManyOtherUpdateProps extends CoreSpec {
   }
 
 
-  "Map" in new setup {
+  "Map" in new Setup {
 
     // Current values
     Person.name_("Ann").CloseTo.commonScores.Animal.name.get === List((Map("baseball" -> 9, "golf" -> 7), "Rex"))

@@ -138,7 +138,7 @@ case class Conn_Client(client: Client, dbName: String)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
-      //      val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb.get, javaStmts), stmtss)
+      //      val txReport = TxReport_Client(_testDb.get.`with`(_testDb.get, javaStmts), stmtss)
       val txReport = TxReport_Client(_testDb.get.`with`(clientConn.withDb, javaStmts), stmtss)
 
       // Continue with updated in-memory db
@@ -162,13 +162,13 @@ case class Conn_Client(client: Client, dbName: String)
     //    if (_adhocDb.isDefined) {
     //      Future {
     //        val adHocDb = getAdhocDb
-    //        TxReport_DevLocal(adHocDb.`with`(adHocDb, javaStmts), stmtss)
+    //        TxReport_Client(adHocDb.`with`(adHocDb, javaStmts), stmtss)
     //      }
     //
     //    } else if (_testDb.isDefined) {
     //      Future {
     //        // In-memory "transaction"
-    //        val txReport = TxReport_DevLocal(_testDb.get.`with`(_testDb, javaStmts), stmtss)
+    //        val txReport = TxReport_Client(_testDb.get.`with`(_testDb, javaStmts), stmtss)
     //
     //        // Continue with updated in-memory db
     //        // todo: why can't we just say this? Or: why are there 2 db-after db objects?
@@ -191,7 +191,7 @@ case class Conn_Client(client: Client, dbName: String)
     //    }
 
     //    Future[TxReport]{}
-    //    Future(TxReport_DevLocal(TxReport_DevLocal()))
+    //    Future(TxReport_Client(TxReport_Client()))
     ???
   }
 

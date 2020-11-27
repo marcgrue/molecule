@@ -6,7 +6,7 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeOneOtherSave extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
     val favoritePersonOf = m(Animal.name_(?).Favorite.weight.Person.name)
   }
@@ -14,7 +14,7 @@ class EdgeOneOtherSave extends CoreSpec {
 
   "base/edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       Person.name("Ann").Favorite.weight(7).Animal.name("Rex").save.eids
 
@@ -24,7 +24,7 @@ class EdgeOneOtherSave extends CoreSpec {
     }
 
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val rex = Animal.name.insert("Rex").eid
 
@@ -40,7 +40,7 @@ class EdgeOneOtherSave extends CoreSpec {
 
   "base + edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       val favoriteRex = Favorite.weight(7).Animal.name("Rex").save.eid
 
@@ -50,7 +50,7 @@ class EdgeOneOtherSave extends CoreSpec {
       favoritePersonOf("Rex").get === List((7, "Ann"))
     }
 
-    "existing target" in new setup {
+    "existing target" in new Setup {
 
       val rex = Animal.name.insert("Rex").eid
 

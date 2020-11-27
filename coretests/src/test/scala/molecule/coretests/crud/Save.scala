@@ -1,9 +1,6 @@
 package molecule.coretests.crud
 
-import java.net.URI
-import datomic.Util.{list, read}
-import datomicClojure.ClojureBridge
-import molecule.core.ast.transactionModel
+import datomicClient.ClojureBridge
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.util.DatomicPeer
 import molecule.coretests.util.dsl.coreTest._

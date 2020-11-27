@@ -8,14 +8,14 @@ import molecule.datomic.api.in1_out3._
 
 class ManyOther extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val animalBuddiesOf = m(Person.name_(?).Buddies.name)
     val personBuddiesOf = m(Animal.name_(?).Buddies.name)
   }
 
   "Save" >> {
 
-    "1 new" in new setup {
+    "1 new" in new Setup {
 
       // Save Ann, Gus and bidirectional references between them
       Person.name("Ann").Buddies.name("Gus").save.eids
@@ -39,7 +39,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "n new" in new setup {
+    "n new" in new Setup {
 
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
@@ -73,7 +73,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "1 existing" in new setup {
+    "1 existing" in new Setup {
 
       val gus = Animal.name.insert("Gus").eid
 
@@ -97,7 +97,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "n existing" in new setup {
+    "n existing" in new Setup {
 
       val gusLeo = Animal.name.insert("Gus", "Leo").eids
 
@@ -113,7 +113,7 @@ class ManyOther extends CoreSpec {
 
   "Insert" >> {
 
-    "1 new" in new setup {
+    "1 new" in new Setup {
 
       // Insert two bidirectionally connected entities
       Person.name.Buddies.name.insert("Ann", "Gus")
@@ -123,7 +123,7 @@ class ManyOther extends CoreSpec {
       personBuddiesOf("Gus").get === List("Ann")
     }
 
-    "1 existing" in new setup {
+    "1 existing" in new Setup {
 
       val gus = Animal.name("Gus").save.eid
 
@@ -136,7 +136,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "multiple new" in new setup {
+    "multiple new" in new Setup {
 
       // Insert 2 pairs of entities with bidirectional references between them
       Person.name.Buddies.name insert List(
@@ -151,7 +151,7 @@ class ManyOther extends CoreSpec {
       personBuddiesOf("Leo").get === List("Bob")
     }
 
-    "multiple existing" in new setup {
+    "multiple existing" in new Setup {
 
       val List(gus, leo) = Animal.name.insert("Gus", "Leo").eids
 
@@ -169,7 +169,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "nested new" in new setup {
+    "nested new" in new Setup {
 
       // Insert molecules allow nested data structures. So we can conveniently
       // insert 2 entities each connected to 2 target entites
@@ -191,7 +191,7 @@ class ManyOther extends CoreSpec {
       )
     }
 
-    "nested existing" in new setup {
+    "nested existing" in new Setup {
 
       val List(gus, leo, rex) = Animal.name insert List("Gus", "Leo", "Rex") eids
 
@@ -217,7 +217,7 @@ class ManyOther extends CoreSpec {
 
   "Update" >> {
 
-    "assert" in new setup {
+    "assert" in new Setup {
 
       val ann                      = Person.name("Ann").save.eid
       val List(gus, leo, rex, zip) = Animal.name.insert("Gus", "Leo", "Rex", "Zip").eids
@@ -242,7 +242,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "retract" in new setup {
+    "retract" in new Setup {
 
       // Insert Ann and buddies
       val List(ann, gus, leo, rex, zip, zup) = Person.name.Buddies.*(Animal.name) insert List(
@@ -278,7 +278,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "replace 1" in new setup {
+    "replace 1" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name)
         .insert("Ann", List("Gus", "Leo")).eids
@@ -300,7 +300,7 @@ class ManyOther extends CoreSpec {
       personBuddiesOf("Rex").get === List("Ann")
     }
 
-    "replace multiple" in new setup {
+    "replace multiple" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name)
         .insert("Ann", List("Gus", "Leo")).eids
@@ -326,7 +326,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "replace all with 1" in new setup {
+    "replace all with 1" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -351,7 +351,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "replace all with multiple (apply varargs)" in new setup {
+    "replace all with multiple (apply varargs)" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -376,7 +376,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "replace all with multiple (apply Set)" in new setup {
+    "replace all with multiple (apply Set)" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -401,7 +401,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "remove all (apply no values)" in new setup {
+    "remove all (apply no values)" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -421,7 +421,7 @@ class ManyOther extends CoreSpec {
     }
 
 
-    "remove all (apply empty Set)" in new setup {
+    "remove all (apply empty Set)" in new Setup {
 
       val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
         ("Ann", List("Gus", "Leo"))
@@ -443,7 +443,7 @@ class ManyOther extends CoreSpec {
   }
 
 
-  "Retract" in new setup {
+  "Retract" in new Setup {
 
     val List(ann, gus, leo) = Person.name.Buddies.*(Animal.name) insert List(
       ("Ann", List("Gus", "Leo"))

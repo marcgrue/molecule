@@ -7,13 +7,13 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeManySelfInsert extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val knownBy = m(Person.name_(?).Knows.*(Knows.weight.Person.name))
   }
 
   "base/edge/target" >> {
 
-    "new targets" in new setup {
+    "new targets" in new Setup {
 
       // Create Ann with multiple edges to new target entities Ben and Joe
       Person.name.Knows.*(Knows.weight.Person.name).insert("Ann", List((7, "Ben"), (8, "Joe")))
@@ -24,7 +24,7 @@ class EdgeManySelfInsert extends CoreSpec {
       knownBy("Joe").get.head === List((8, "Ann"))
     }
 
-    "existing targets" in new setup {
+    "existing targets" in new Setup {
 
       val Seq(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
@@ -37,7 +37,7 @@ class EdgeManySelfInsert extends CoreSpec {
       knownBy("Joe").get.head === List((8, "Ann"))
     }
 
-    "nested edge only not allowed" in new setup {
+    "nested edge only not allowed" in new Setup {
 
       // Can't save nested edges without including target entity
       (Person.name.Knows.*(Knows.weight).Person.name insert List(
@@ -51,7 +51,7 @@ class EdgeManySelfInsert extends CoreSpec {
 
   "base + edge/target" >> {
 
-    "new targets" in new setup {
+    "new targets" in new Setup {
 
       // Create edges to new target entities
       val Seq(knowsBen, knowsJoe): Seq[Long] = Knows.weight.Person.name.insert(List((7, "Ben"), (8, "Joe"))).eids.grouped(3).map(_.head).toSeq
@@ -65,7 +65,7 @@ class EdgeManySelfInsert extends CoreSpec {
       knownBy("Joe").get.head === List((8, "Ann"))
     }
 
-    "existing targets" in new setup {
+    "existing targets" in new Setup {
 
       val Seq(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
@@ -85,7 +85,7 @@ class EdgeManySelfInsert extends CoreSpec {
 
   // Edge consistency checks
 
-  "base/edge - <missing target>" in new setup {
+  "base/edge - <missing target>" in new Setup {
 
     // Can't allow edge without ref to target entity
     (Person.name.Knows.weight.insert must throwA[VerifyModelException])
@@ -93,7 +93,7 @@ class EdgeManySelfInsert extends CoreSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `Knows`."
   }
 
-  "<missing base> - edge - <missing target>" in new setup {
+  "<missing base> - edge - <missing target>" in new Setup {
 
     // Edge always have to have a ref to a target entity
     (Knows.weight.insert must throwA[VerifyModelException])

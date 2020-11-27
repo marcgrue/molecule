@@ -1,7 +1,8 @@
 package molecule.coretests.crud.update
 
 import java.util.concurrent.ExecutionException
-import datomicScala.Incorrect
+import datomicClient.anomaly.Incorrect
+import datomicClient.anomaly.Incorrect
 import molecule.core.ops.exception.VerifyModelException
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{expectCompileError, DatomicPeer}

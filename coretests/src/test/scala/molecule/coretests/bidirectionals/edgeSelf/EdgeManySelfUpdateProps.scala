@@ -7,7 +7,7 @@ import molecule.datomic.api.in1_out9._
 
 class EdgeManySelfUpdateProps extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val love                    = Quality.name("Love").save.eid
     val List(patience, humor)   = Quality.name.insert("Patience", "Humor").eids
     val List(ann, annBen, _, _) = Person.name("Ann")
@@ -23,7 +23,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
       .save.eids
   }
 
-  "base data" in new setup {
+  "base data" in new Setup {
 
     // All edge properties have been saved in both directions
     Person.name.Knows
@@ -59,7 +59,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
 
   "Card-one" >> {
 
-    "value" in new setup {
+    "value" in new Setup {
 
       // Updating edge properties from the base entity is not allowed
       (Person(ann).Knows.howWeMet("inSchool").update must throwA[VerifyModelException])
@@ -89,7 +89,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
     }
 
 
-    "enum" in new setup {
+    "enum" in new Setup {
 
       // Current howWeMet enum value
       Person.name("Ann" or "Ben").Knows.howWeMet.get.sortBy(_._1) === List(
@@ -110,7 +110,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
     }
 
 
-    "ref" in new setup {
+    "ref" in new Setup {
 
       // Current value
       Person.name("Ann" or "Ben").Knows.CoreQuality.name.get.sortBy(_._1) === List(
@@ -156,7 +156,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
 
   "Card-many" >> {
 
-    "values" in new setup {
+    "values" in new Setup {
 
       val commonInterestsOf = m(Person.name(?).Knows.commonInterests)
 
@@ -200,7 +200,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
     }
 
 
-    "enums" in new setup {
+    "enums" in new Setup {
 
       val commonLicencesOf = m(Person.name(?).Knows.commonLicences)
 
@@ -244,7 +244,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
     }
 
 
-    "refs" in new setup {
+    "refs" in new Setup {
 
       val inCommonOf = m(Person.name(?).Knows.InCommon.*(Quality.name))
 
@@ -310,7 +310,7 @@ class EdgeManySelfUpdateProps extends CoreSpec {
   }
 
 
-  "Map" in new setup {
+  "Map" in new Setup {
 
     val commonScoresOf = m(Person.name(?).Knows.commonScores)
 

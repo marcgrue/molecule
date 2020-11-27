@@ -8,7 +8,7 @@ import molecule.datomic.api.in1_out9._
 
 class EdgeOneSelfUpdateProps extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val love                    = Quality.name("Love").save.eid
     val List(patience, humor)   = Quality.name.insert("Patience", "Humor").eids
     val List(ann, annBen, _, _) = Person.name("Ann")
@@ -24,7 +24,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
       .save.eids
   }
 
-  "base data" in new setup {
+  "base data" in new Setup {
 
     // All edge properties have been saved in both directions
     Person.name.Loves
@@ -61,7 +61,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
 
   "Card-one" >> {
 
-    "value" in new setup {
+    "value" in new Setup {
 
       // Updating edge properties from the base entity is not allowed
       (Person(ann).Loves.howWeMet("inSchool").update must throwA[VerifyModelException])
@@ -91,7 +91,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
     }
 
 
-    "enum" in new setup {
+    "enum" in new Setup {
 
       // Current howWeMet enum value
       Person.name("Ann" or "Ben").Loves.howWeMet.get.sortBy(_._1) === List(
@@ -112,7 +112,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
     }
 
 
-    "ref" in new setup {
+    "ref" in new Setup {
 
       // Current value
       Person.name("Ann" or "Ben").Loves.CoreQuality.name.get.sortBy(_._1) === List(
@@ -158,7 +158,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
 
   "Card-many" >> {
 
-    "values" in new setup {
+    "values" in new Setup {
 
       val commonInterestsOf = m(Person.name(?).Loves.commonInterests)
 
@@ -202,7 +202,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
     }
 
 
-    "enums" in new setup {
+    "enums" in new Setup {
 
       val commonLicencesOf = m(Person.name(?).Loves.commonLicences)
 
@@ -246,7 +246,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
     }
 
 
-    "refs" in new setup {
+    "refs" in new Setup {
 
       val inCommonOf = m(Person.name(?).Loves.InCommon.*(Quality.name))
 
@@ -312,7 +312,7 @@ class EdgeOneSelfUpdateProps extends CoreSpec {
   }
 
 
-  "Map" in new setup {
+  "Map" in new Setup {
 
     val commonScoresOf = m(Person.name(?).Loves.commonScores)
 

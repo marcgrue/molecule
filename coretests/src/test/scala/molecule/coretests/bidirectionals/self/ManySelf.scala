@@ -8,13 +8,13 @@ import molecule.datomic.api.in1_out3._
 
 class ManySelf extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val friendsOf = m(Person.name_(?).Friends.name)
   }
 
   "Save" >> {
 
-    "1 new" in new setup {
+    "1 new" in new Setup {
 
       // Save Ann, Ben and bidirectional references between them
       Person.name("Ann").Friends.name("Ben").save.eids
@@ -33,7 +33,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "n new" in new setup {
+    "n new" in new Setup {
 
       // Can't save multiple values to cardinality-one attribute
       // It could become unwieldy if different referenced attributes had different number of
@@ -64,7 +64,7 @@ class ManySelf extends CoreSpec {
       // Use `insert` for this or save existing entity ids (see below).
     }
 
-    "1 existing" in new setup {
+    "1 existing" in new Setup {
 
       val ben = Person.name.insert("Ben").eid
 
@@ -89,7 +89,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "n existing" in new setup {
+    "n existing" in new Setup {
 
       val benJoe = Person.name.insert("Ben", "Joe").eids
 
@@ -105,7 +105,7 @@ class ManySelf extends CoreSpec {
 
   "Insert" >> {
 
-    "1 new" in new setup {
+    "1 new" in new Setup {
 
       // Insert two bidirectionally connected entities
       Person.name.Friends.name.insert("Ann", "Ben")
@@ -115,7 +115,7 @@ class ManySelf extends CoreSpec {
       friendsOf("Ben").get === List("Ann")
     }
 
-    "1 existing" in new setup {
+    "1 existing" in new Setup {
 
       val ben = Person.name("Ben").save.eid
 
@@ -128,7 +128,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "multiple new" in new setup {
+    "multiple new" in new Setup {
 
       // Insert 2 pairs of entities with bidirectional references between them
       Person.name.Friends.name insert List(
@@ -144,7 +144,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "multiple existing" in new setup {
+    "multiple existing" in new Setup {
 
       val List(joe, tim) = Person.name.insert("Joe", "Tim").eids
 
@@ -162,7 +162,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "nested new" in new setup {
+    "nested new" in new Setup {
 
       // Insert molecules allow nested data structures. So we can conveniently
       // insert 2 entities each connected to 2 target entites
@@ -183,7 +183,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "nested existing" in new setup {
+    "nested existing" in new Setup {
 
       val List(ben, joe, tim) = Person.name insert List("Ben", "Joe", "Tim") eids
 
@@ -207,7 +207,7 @@ class ManySelf extends CoreSpec {
 
   "Update" >> {
 
-    "assert" in new setup {
+    "assert" in new Setup {
 
       val List(ann, ben, joe, liz, tom) = Person.name.insert("Ann", "Ben", "Joe", "Liz", "Tom").eids
 
@@ -231,7 +231,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "retract" in new setup {
+    "retract" in new Setup {
 
       // Insert Ann and friends
       val List(ann, ben, joe, liz, tom, ulf) = Person.name.Friends.*(Person.name) insert List(
@@ -267,7 +267,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "replace 1" in new setup {
+    "replace 1" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name)
         .insert("Ann", List("Ben", "Joe")).eids
@@ -289,7 +289,7 @@ class ManySelf extends CoreSpec {
       friendsOf("Tim").get === List("Ann")
     }
 
-    "replace multiple" in new setup {
+    "replace multiple" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name)
         .insert("Ann", List("Ben", "Joe")).eids
@@ -315,7 +315,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "replace all with 1" in new setup {
+    "replace all with 1" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -340,7 +340,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "replace all with multiple (apply varargs)" in new setup {
+    "replace all with multiple (apply varargs)" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -365,7 +365,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "replace all with multiple (apply Set)" in new setup {
+    "replace all with multiple (apply Set)" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -390,7 +390,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "remove all (apply no values)" in new setup {
+    "remove all (apply no values)" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -410,7 +410,7 @@ class ManySelf extends CoreSpec {
     }
 
 
-    "remove all (apply empty Set)" in new setup {
+    "remove all (apply empty Set)" in new Setup {
 
       val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
         ("Ann", List("Ben", "Joe"))
@@ -432,7 +432,7 @@ class ManySelf extends CoreSpec {
   }
 
 
-  "Retract" in new setup {
+  "Retract" in new Setup {
 
     val List(ann, ben, joe) = Person.name.Friends.*(Person.name) insert List(
       ("Ann", List("Ben", "Joe"))

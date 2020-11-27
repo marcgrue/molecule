@@ -6,7 +6,7 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeOneOtherUpdate extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val ann = Person.name("Ann").save.eid
 
     val favoriteAnimalOf = m(Person.name_(?).Favorite.weight.Animal.name)
@@ -14,7 +14,7 @@ class EdgeOneOtherUpdate extends CoreSpec {
   }
 
 
-  "apply edge to new target" in new setup {
+  "apply edge to new target" in new Setup {
 
     // New edge and new target entity
     Person(ann).Favorite.weight(5).Animal.name("Rex").update
@@ -38,7 +38,7 @@ class EdgeOneOtherUpdate extends CoreSpec {
   }
 
 
-  "apply edge to existing target" in new setup {
+  "apply edge to existing target" in new Setup {
 
     val List(rex, zup) = Animal.name.insert("Rex", "Zup").eids
 
@@ -57,7 +57,7 @@ class EdgeOneOtherUpdate extends CoreSpec {
   }
 
 
-  "retract edge" in new setup {
+  "retract edge" in new Setup {
 
     val List(_, annRex, _, _) = Person.name("Ann").Favorite.weight(5).Animal.name("Rex").save.eids
 
@@ -73,7 +73,7 @@ class EdgeOneOtherUpdate extends CoreSpec {
   }
 
 
-  "retract base/target entity" in new setup {
+  "retract base/target entity" in new Setup {
 
     val List(_, _, _, rex) = Person.name("Ann").Favorite.weight(5).Animal.name("Rex").save.eids
 

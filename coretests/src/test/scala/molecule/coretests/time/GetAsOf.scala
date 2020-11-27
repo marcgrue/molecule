@@ -221,17 +221,8 @@ class GetAsOf extends CoreSpec {
     // Retract (tx report 3)
     val tx3 = ben.retract
 
-    // Different string representations for each system
-    if (system == DatomicPeer) {
-      // (java.util.HashSet returned)
-      Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37], ["Ben" 42]]"""
-      Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37], ["Ben" 43]]""" // Ben now 43
-      Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
-    } else {
-      // (clojure.lang.PersistentVector returned)
-      Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37] ["Ben" 42]]"""
-      Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37] ["Ben" 43]]""" // Ben now 43
-      Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
-    }
+    Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37], ["Ben" 42]]"""
+    Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37], ["Ben" 43]]""" // Ben now 43
+    Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
   }
 }

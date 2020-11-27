@@ -7,14 +7,14 @@ import molecule.datomic.api.in1_out4._
 
 class EdgeManyOtherInsert extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
     val personsCloseTo = m(Animal.name_(?).CloseTo.*(CloseTo.weight.Person.name))
   }
 
   "base/edge/target" >> {
 
-    "new target" in new setup {
+    "new target" in new Setup {
 
       // Insert molecules allow nested data structures. So we can conveniently
       // insert 2 entities each connected to 2 target entites via property edges
@@ -26,7 +26,7 @@ class EdgeManyOtherInsert extends CoreSpec {
     }
 
 
-    "existing targets" in new setup {
+    "existing targets" in new Setup {
 
       val List(gus, leo) = Animal.name.insert("Gus", "Leo").eids
 
@@ -38,7 +38,7 @@ class EdgeManyOtherInsert extends CoreSpec {
       personsCloseTo("Leo").get === List(List((6, "Ann")))
     }
 
-    "nested edge only not allowed" in new setup {
+    "nested edge only not allowed" in new Setup {
 
       // Can't save nested edges without including target entity
       (Person.name.CloseTo.*(CloseTo.weight).Animal.name insert List(
@@ -52,7 +52,7 @@ class EdgeManyOtherInsert extends CoreSpec {
 
   "base + edge/target" >> {
 
-    "new targets" in new setup {
+    "new targets" in new Setup {
 
       // Create edges to new target entities
       val Seq(closeToGus, closeToLeo): Seq[Long] = CloseTo.weight.Animal.name.insert(List((7, "Gus"), (8, "Leo"))).eids.grouped(3).map(_.head).toSeq
@@ -66,7 +66,7 @@ class EdgeManyOtherInsert extends CoreSpec {
       personsCloseTo("Leo").get.head === List((8, "Ann"))
     }
 
-    "existing targets" in new setup {
+    "existing targets" in new Setup {
 
       val Seq(gus, leo) = Animal.name.insert("Gus", "Leo").eids
 
@@ -86,7 +86,7 @@ class EdgeManyOtherInsert extends CoreSpec {
 
   // Edge consistency checks
 
-  "base - edge - <missing target>" in new setup {
+  "base - edge - <missing target>" in new Setup {
 
     // Can't allow edge without ref to target entity
     (Person.name.CloseTo.weight.insert must throwA[VerifyModelException])
@@ -94,7 +94,7 @@ class EdgeManyOtherInsert extends CoreSpec {
       s"[edgeComplete]  Missing target namespace after edge namespace `CloseTo`."
   }
 
-  "<missing base> - edge - <missing target>" in new setup {
+  "<missing base> - edge - <missing target>" in new Setup {
 
     // Edge always have to have a ref to a target entity
     (CloseTo.weight.insert must throwA[VerifyModelException])

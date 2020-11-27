@@ -6,13 +6,13 @@ import molecule.datomic.api.in1_out3._
 
 class EdgeOneSelfUpdate extends CoreSpec {
 
-  class setup extends BidirectionalSetup {
+  class Setup extends BidirectionalSetup {
     val loveOf = m(Person.name_(?).Loves.weight.Person.name)
     val ann    = Person.name("Ann").save.eid
   }
 
 
-  "apply edge to new target" in new setup {
+  "apply edge to new target" in new Setup {
 
     // New edge and new target entity
     Person(ann).Loves.weight(5).Person.name("Ben").update
@@ -35,7 +35,7 @@ class EdgeOneSelfUpdate extends CoreSpec {
   }
 
 
-  "apply edge to existing target" in new setup {
+  "apply edge to existing target" in new Setup {
 
     val List(ben, joe) = Person.name.insert("Ben", "Joe").eids
 
@@ -54,7 +54,7 @@ class EdgeOneSelfUpdate extends CoreSpec {
   }
 
 
-  "retract edge" in new setup {
+  "retract edge" in new Setup {
 
     val List(_, annBen, _, _) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
 
@@ -70,7 +70,7 @@ class EdgeOneSelfUpdate extends CoreSpec {
   }
 
 
-  "retract base/target entity" in new setup {
+  "retract base/target entity" in new Setup {
 
     val List(_, _, _, ben) = Person.name("Ann").Loves.weight(5).Person.name("Ben").save.eids
 
