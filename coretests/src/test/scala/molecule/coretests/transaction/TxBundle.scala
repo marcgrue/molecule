@@ -53,7 +53,7 @@ class TxBundle extends CoreSpec {
       (transactBundle(
         Ns(e3).int(31).getUpdateTx,
         Ns(e3).int(32).getUpdateTx
-      ) must throwA[Incorrect]).message === "Got the exception datomicScala.Incorrect: " +
+      ) must throwA[Incorrect]).message === "Got the exception datomicClient.anomaly.Incorrect: " +
         "Two datoms in the same transaction conflict"
     }
   }

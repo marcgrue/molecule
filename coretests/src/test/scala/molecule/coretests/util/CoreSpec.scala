@@ -1,8 +1,10 @@
 package molecule.coretests.util
 
+import datomic.Util.{list, read}
 import datomicClient.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
+import molecule.core.api.TxFunctions.buildTxFnInstall
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
@@ -13,6 +15,8 @@ import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
+import molecule.datomic.api.in1_out6._
+import molecule.coretests.util.dsl.coreTest._
 
 class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   sequential
@@ -28,41 +32,27 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   var peerOnly       = false
   var devLocalOnly   = false
   var peerServerOnly = false
+  var omitPeerServer = true
 
   var setupException = Option.empty[Throwable]
+  var installSchema  = true // set to true to initiate Peer Server schema installation
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {
-      step(setupPeer()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show))
+      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else if (devLocalOnly) {
-      step(setupDevLocal()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show))
+      step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else if (peerServerOnly) {
-      step(setupPeerServer()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show))
+      step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (omitPeerServer) {
+      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
-
-      //      step(setupPeer()) ^
-      //        fs.mapDescription(d => Text(s"$system: " + d.show))
-
-      //          step(setupDevLocal()) ^
-      //            fs.mapDescription(d => Text(s"$system: " + d.show))
-
-      //      step(setupPeer()) ^
-      //        fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-      //        step(setupDevLocal()) ^
-      //        fs.mapDescription(d => Text(s"$system: " + d.show))
-
-      step(setupPeer()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupDevLocal()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupPeerServer()) ^
-        fs.mapDescription(d => Text(s"$system: " + d.show))
+      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     }
   }
-
 
   def setupPeer(): Unit = {
     system = DatomicPeer
@@ -74,11 +64,10 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
       client = Datomic.clientPeerServer("k", "s", "localhost:8998")
     } catch {
       case e: Throwable =>
-        // Catch error from setup (suppressed during setup)
+        // Catch error from setup (suppressed by specs2 during setup)
         setupException = Some(e)
     }
   }
-
 
   def setupDevLocal(): Unit = {
     system = DatomicDevLocal
@@ -93,17 +82,29 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
     // Throw potential setup error
     setupException.fold(())(throw _)
 
-        println(system)
     system match {
       case DatomicPeer =>
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicPeerServer =>
-        val devL = Datomic_Client(client)
-        val conn = devL.connect(dbIdentifier)
-        if (schema.partitions.size() > 0)
-          conn.transact(devL.allowedDevLocalDefinitions(schema.partitions))
-        conn.transact(devL.allowedDevLocalDefinitions(schema.namespaces))
+        val cl   = Datomic_Client(client)
+        val conn = cl.connect(dbIdentifier)
+        val log  = conn.clientConn.txRange(None, None)
+        // Check only once per test file
+        if (installSchema && log.isEmpty) {
+          println("Installing Peer Server schema...")
+          if (schema.partitions.size() > 0)
+            conn.transact(cl.allowedClientDefinitions(schema.partitions))
+          conn.transact(cl.allowedClientDefinitions(schema.namespaces))
+          installSchema = false
+        }
+        if (log.size > 1) {
+          throw new RuntimeException(
+            "Live Peer Server has been modified unexpectedly by a test that has " +
+              "switched back to live data. Please find and modify this test and " +
+              "restart the Peer server process to test again.")
+        }
+        conn.testDbAsOfNow
         conn
 
       case DatomicDevLocal =>

@@ -10,6 +10,7 @@ import molecule.datomic.api.out3._
 
 class GetAsOf extends CoreSpec {
 
+
   "t (from history)" in new CoreSetup {
 
     val tx1            = Ns.str.int insert List(
@@ -138,13 +139,14 @@ class GetAsOf extends CoreSpec {
 
     // Update
     val afterUpdate = Ns(ben).int(43).update.inst
+    Thread.sleep(10)
 
     // Retract
     val afterRetract = ben.retract.inst
 
     // Let retraction register before querying
     // (Peer is fast, and dates are only precise by the ms)
-    Thread.sleep(100)
+    Thread.sleep(10)
 
     // No data yet before insert
     Ns.str.int.getAsOf(beforeInsert) === Nil

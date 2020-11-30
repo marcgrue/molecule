@@ -2,224 +2,186 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.datomic.api.out1._
+import molecule.coretests.util.CoreSpec
+import molecule.datomic.api.out2._
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-class TestDbAsOf extends Specification with Scope {
+class TestDbAsOf extends CoreSpec {
 
-  sequential
+  // Since we already use a testDbAsOfNow for Peer Server, we don't test it here.
+  // You can though uncomment this to test with the Peer Server, but then you'll
+  // have to switch it back after and restart the Peer Server process in your terminal.
+  //  omitPeerServer = true
+  //  peerServerOnly = true
+  //  devLocalOnly = true
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
-  val tx1 = Ns.int(1).save
-  val eid = tx1.eid
-  val tx2 = Ns(eid).int(2).update
+  class Setup extends CoreSetup {
+    val txR1    = Ns.int(1).save
+    val eid     = txR1.eid
+    val counter = domain.Counter(eid)
+    val t1      = txR1.t
+    val date1   = txR1.inst
+    val txR2    = Ns(eid).int(2).update
+  }
 
 
   "Local molecules" >> {
 
-    "as of now" >> {
+    "as of now" in new Setup {
+      // Live state
+      Ns.int.get === List(2)
 
-      "Current live state" >> {
-        Ns.int.get === List(2)
-      }
+      // Use current state as a test db "branch"
+      conn.testDbAsOfNow
 
-      "Use test db for multiple queries/transactions" >> {
-        // Use current state as a test db "branch"
-        conn.testDbAsOfNow
+      // Test state is same as live state
+      Ns.int.get === List(2)
 
-        // Test state is same as live state
-        Ns.int.get === List(2)
+      // Update test db
+      Ns(eid).int(3).update
 
-        // Update test db
-        Ns(eid).int(3).update
+      // Updated test state
+      Ns.int.get === List(3)
 
-        // Updated test state
-        Ns.int.get === List(3)
-      }
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        Ns.int.get === List(2)
-      }
+      // Live state unchanged
+      Ns.int.get === List(2)
     }
 
+    "as of tx" in new Setup {
+      // Live state
+      Ns.int.get === List(2)
 
-    "as of tx" >> {
+      // Use state as of tx1 as a test db "branch"
+      conn.testDbAsOf(txR1)
 
-      "Current live state" >> {
-        Ns.int.get === List(2)
-      }
+      // Test state is now as of tx1!
+      Ns.int.get === List(1)
 
-      "Use test db for multiple queries/transactions" >> {
-        // Use state accumulated up to tx1 (inclusive) as a test db "branch"
-        conn.testDbAsOf(tx1)
+      // Updated test state
+      Ns(eid).int(3).update
 
-        // Test state is now as of tx1!
-        Ns.int.get === List(1)
+      // Updated test state
+      Ns.int.get === List(3)
 
-        // Updated test state
-        Ns(eid).int(3).update
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-        // Updated test state
-        Ns.int.get === List(3)
-      }
-
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        Ns.int.get === List(2)
-      }
+      // Live state unchanged
+      Ns.int.get === List(2)
     }
 
+    "as of t" in new Setup {
+      // Live state
+      Ns.int.get === List(2)
 
-    "as of t" >> {
+      // Use state as of t1 as a test db "branch"
+      conn.testDbAsOf(t1)
 
-      // Sequential transaction number t
-      val t1 = tx1.t
+      // Test state is now as of t1!
+      Ns.int.get === List(1)
 
+      // Update test db
+      Ns(eid).int(3).update
 
-      "Current live state" >> {
-        Ns.int.get === List(2)
-      }
+      // Updated test state
+      Ns.int.get === List(3)
 
-      "As of t" >> {
-        // Use state accumulated up to t1 (inclusive) as a test db "branch"
-        conn.testDbAsOf(t1)
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-        // Test state is now as of t1!
-        Ns.int.get === List(1)
-
-        // Update test db
-        Ns(eid).int(3).update
-
-        // Updated test state
-        Ns.int.get === List(3)
-      }
-
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        Ns.int.get === List(2)
-      }
+      // Live state unchanged
+      Ns.int.get === List(2)
     }
 
+    "as of date" in new Setup {
+      // Live state
+      Ns.int.get === List(2)
 
-    "as of date" >> {
+      // Use state as of date1 as a test db "branch"
+      conn.testDbAsOf(date1)
 
-      // Transaction date
-      val date1 = tx1.inst
+      // Test state is now as of date1!
+      Ns.int.get === List(1)
 
-      "Current live state" >> {
-        Ns.int.get === List(2)
-      }
+      // Update test db
+      Ns(eid).int(3).update
 
-      "As of date" >> {
-        // Use state accumulated up to date1 (inclusive) as a test db "branch"
-        conn.testDbAsOf(date1)
+      // Updated test state
+      Ns.int.get === List(3)
 
-        // Test state is now as of date1!
-        Ns.int.get === List(1)
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-        // Update test db
-        Ns(eid).int(3).update
-
-        // Updated test state
-        Ns.int.get === List(3)
-      }
-
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        Ns.int.get === List(2)
-      }
+      // Live state unchanged
+      Ns.int.get === List(2)
     }
   }
 
 
   "Molecules in domain objects" >> {
 
-    "as of now" >> {
+    "as of now" in new Setup {
+      // Live state
+      counter.value === 2
+      Ns.int.get === List(2)
 
-      // Some domain object
-      val counter = domain.Counter(eid)
+      // Use current state as a test db "branch"
+      conn.testDbAsOfNow
 
-      "Current live state" >> {
-        // Domain object molecules retrieves db value using the implicit connection parameter
-        counter.value === 2
-      }
+      // Test state is same as live state
+      // Notice that the test db value propagates to our domain object
+      // through the implicit conn parameter.
+      counter.value === 2
+      Ns.int.get === List(2)
 
-      "Use test db for multiple queries/transactions" >> {
-        // Use current state as a test db "branch"
-        conn.testDbAsOfNow
+      // Update test db through domain process
+      counter.incr
 
-        // Test state is same as live state
-        // Notice that the test db value propagates to our domain object
-        // through the implicit conn parameter.
-        counter.value === 2
+      // Updated test state
+      counter.value === 3
+      Ns.int.get === List(3)
 
-        // Update test db through domain process
-        counter.incr
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-        // Updated test state
-        counter.value === 3
-      }
-
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        counter.value === 2
-      }
+      // Live state unchanged
+      counter.value === 2
+      Ns.int.get === List(2)
     }
 
+    "as of tx" in new Setup {
+      // Live state
+      counter.value === 2
+      Ns.int.get === List(2)
 
-    "as of tx" >> {
+      // Use state as of tx1 as a test db "branch"
+      conn.testDbAsOf(txR1)
 
-      // Some domain object
-      val counter = domain.Counter(eid)
+      // Test state is now as of tx1!
+      // Notice that the test db value propagates to our domain object
+      // through the implicit conn parameter.
+      counter.value === 1
 
-      "Current live state" >> {
-        // Domain object molecules retrieves db value using the implicit connection parameter
-        counter.value === 2
-      }
+      // Update test db twice through domain process
+      counter.incr === 2
+      counter.incr === 3
 
-      "Use test db for multiple queries/transactions" >> {
-        // Use state accumulated up to tx1 (inclusive) as a test db "branch"
-        conn.testDbAsOf(tx1)
+      // Updated test state
+      counter.value === 3
+      Ns.int.get === List(3)
 
-        // Test state is now as of tx1!
-        // Notice that the test db value propagates to our domain object
-        // through the implicit conn parameter.
-        counter.value === 1
+      // Discard test db and go back to live db
+      conn.useLiveDb
 
-        // Update test db twice through domain process
-        counter.incr === 2
-        counter.incr === 3
-
-        // Updated test state
-        counter.value === 3
-      }
-
-      "Live db is unchanged" >> {
-        // Discard test db and go back to live db
-        conn.useLiveDb
-
-        // Current live state is correctly unchanged
-        counter.value === 2
-      }
+      // Live state unchanged
+      counter.value === 2
+      Ns.int.get === List(2)
     }
   }
 }

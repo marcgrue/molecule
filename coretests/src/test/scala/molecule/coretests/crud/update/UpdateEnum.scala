@@ -133,7 +133,7 @@ class UpdateEnum extends CoreSpec {
       } else {
         // Trying to use a non-existing enum not possibole
         (Ns(eid).enums.replace("x" -> "enum9").update must throwA[Incorrect])
-          .message === "Got the exception datomicScala.Incorrect: " +
+          .message === "Got the exception datomicClient.anomaly.Incorrect: " +
           s"Unable to resolve entity: :Ns.enums/x in datom [$eid :Ns/enums :Ns.enums/x]"
       }
 

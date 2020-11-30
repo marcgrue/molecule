@@ -53,7 +53,7 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     Conn_Client(client, dbName)
   }
 
-  def allowedDevLocalDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
+  def allowedClientDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
     val nss2     = new util.ArrayList[jMap[Object, Object]]()
     val bytes    = read(":db.type/bytes")
     val index    = read(":db/index")
@@ -94,8 +94,8 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     createDatabase(dbName)
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(allowedDevLocalDefinitions(schema.partitions))
-    conn.transact(allowedDevLocalDefinitions(schema.namespaces))
+      conn.transact(allowedClientDefinitions(schema.partitions))
+    conn.transact(allowedClientDefinitions(schema.namespaces))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
@@ -139,8 +139,8 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
   ): Conn_Client = try {
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(allowedDevLocalDefinitions(schema.partitions))
-    conn.transact(allowedDevLocalDefinitions(schema.namespaces))
+      conn.transact(allowedClientDefinitions(schema.partitions))
+    conn.transact(allowedClientDefinitions(schema.namespaces))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)

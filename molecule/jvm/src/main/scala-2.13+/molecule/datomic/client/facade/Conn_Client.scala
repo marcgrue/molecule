@@ -44,6 +44,9 @@ case class Conn_Client(client: Client, dbName: String)
   // (takes precedence over live db)
   protected var _testDb: Option[Db] = None
 
+  // Flag to indicate if special withDb is in use for testDb
+  protected var withDbInUse = false
+
   def usingTempDb(tempDb: TempDb): Conn = {
     _adhocDb = Some(tempDb)
     this
@@ -138,18 +141,23 @@ case class Conn_Client(client: Client, dbName: String)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
-      //      val txReport = TxReport_Client(_testDb.get.`with`(_testDb.get, javaStmts), stmtss)
-      val txReport = TxReport_Client(_testDb.get.`with`(clientConn.withDb, javaStmts), stmtss)
+
+      // Use special withDb
+      val withDb = if (withDbInUse) {
+        _testDb.get.`with`(_testDb.get, javaStmts)
+      } else {
+        _testDb.get.`with`(clientConn.withDb, javaStmts)
+      }
+      val txReport = TxReport_Client(withDb, stmtss)
+
+      // Special withDb now in use (important for consequent transaction calls)
+      withDbInUse = true
 
       // Continue with updated in-memory db
-      // todo: why can't we just say this? Or: why are there 2 db-after db objects?
-      //      val dbAfter = txReport.dbAfter
-      val dbAfter = txReport.dbAfter.asOf(txReport.t)
-      _testDb = Some(dbAfter)
+      _testDb = Some(txReport.dbAfter)
       txReport
 
     } else {
-
       // Live transaction
       TxReport_Client(clientConn.transact(javaStmts), stmtss)
     }
@@ -195,16 +203,28 @@ case class Conn_Client(client: Client, dbName: String)
     ???
   }
 
-  def transact(rawTxStmts: jList[_]): TxReport = {
+
+  def transact(javaStmts: jList[_]): TxReport = {
     if (_testDb.isDefined) {
       // In-memory "transaction"
-      val txReport = TxReport_Client(_testDb.get.`with`(_testDb, rawTxStmts))
+
+      // Use special withDb
+      val withDb   = if (withDbInUse) {
+        _testDb.get.`with`(_testDb.get, javaStmts)
+      } else {
+        _testDb.get.`with`(clientConn.withDb, javaStmts)
+      }
+      val txReport = TxReport_Client(withDb)
+
+      // Special withDb now in use (important for consequent transaction calls)
+      withDbInUse = true
+
       // Continue with updated in-memory db
-      _testDb = Some(txReport.dbAfter.asOf(txReport.t))
+      _testDb = Some(txReport.dbAfter)
       txReport
     } else {
       // Live transaction
-      TxReport_Client(clientConn.transact(rawTxStmts))
+      TxReport_Client(clientConn.transact(javaStmts))
     }
   }
 

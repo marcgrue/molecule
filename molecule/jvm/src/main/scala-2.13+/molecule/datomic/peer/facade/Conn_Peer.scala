@@ -215,8 +215,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
       val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), stmtss)
 
       // Continue with updated in-memory db
-      // todo: why can't we just say this? Or: why are there 2 db-after db objects?
-      //      val dbAfter = txReport.dbAfter
+      // For some reason we need to "cast" it to time t
       val dbAfter = txReport.dbAfter.asOf(txReport.t)
       _testDb = Some(dbAfter)
       txReport
@@ -243,8 +242,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
         val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), stmtss)
 
         // Continue with updated in-memory db
-        // todo: why can't we just say this? Or: why are there 2 db-after db objects?
-        //      val dbAfter = txReport.dbAfter
+        // For some reason we need to "cast" it to time t
         val dbAfter = txReport.dbAfter.asOf(txReport.t)
         _testDb = Some(dbAfter)
         txReport
