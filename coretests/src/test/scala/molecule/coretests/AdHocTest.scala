@@ -22,16 +22,11 @@ class AdHocTest extends CoreSpec with Helpers {
 
   "adhoc" in new CoreSetup {
 
+    val eid = Ns.bigInt(bigInt2).save.eid
 
-//    Ns.uri debugInsert uri1
-//    Ns.uri insert uri1
+    // Delete value (apply no value)
+    Ns(eid).bigInt().update
 
-//    com.cognitect.transit.impl.URIImpl
-
-//    m(Ns.uri)
-    Ns.uri insert uri1
-//    Ns.uri.debugGet
-    Ns.uri.get.head === uri1
 
   }
 }

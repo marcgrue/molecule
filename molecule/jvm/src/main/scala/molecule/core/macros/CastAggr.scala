@@ -8,7 +8,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
   import c.universe._
 
 
-  def castAggrInt: Int => Tree = (i: Int) => q"row.get($i).asInstanceOf[Int]"
+  def castAggrInt: Int => Tree = (i: Int) => q"row.get($i).toString.toInt"
   def castAggrDouble: Int => Tree = (i: Int) => q"row.get($i).asInstanceOf[Double]"
 
   def castAggrOneList(tpe: String): Int => Tree = tpe match {

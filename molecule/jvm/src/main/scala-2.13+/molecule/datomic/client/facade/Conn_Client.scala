@@ -242,7 +242,10 @@ case class Conn_Client(client: Client, dbName: String)
       case v               => v
     }
     blocking(
-      clientDatomic.q(query, clientConn.db, inputs.asInstanceOf[Seq[AnyRef]]: _*)
+      clientDatomic.q(
+        query,
+        db.asInstanceOf[DatomicDb_Client].clientDb,
+        inputs.asInstanceOf[Seq[AnyRef]]: _*)
     )
   }
 

@@ -199,12 +199,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         Nil
       } else {
         val query = if (prefix.isDefined)
-            s"""[:find ?enums
-               | :in $$ ?id
-               | :where [?id $attr ?a]
-               |        [?a :db/ident ?b]
-               |        [(name ?b) ?enums]
-               |]""".stripMargin
+          s"""[:find ?enums
+             | :in $$ ?id
+             | :where [?id $attr ?a]
+             |        [?a :db/ident ?b]
+             |        [(name ?b) ?enums]
+             |]""".stripMargin
         else
           s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
         conn.q(query, id.asInstanceOf[Object]).map(_.head)

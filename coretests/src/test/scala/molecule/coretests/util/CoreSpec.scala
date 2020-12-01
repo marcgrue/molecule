@@ -31,8 +31,8 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   var peerOnly       = false
   var devLocalOnly   = false
-  var peerServerOnly = true
-//  var peerServerOnly = false
+//  var peerServerOnly = true
+  var peerServerOnly = false
   var omitPeerServer = false
 
   var setupException = Option.empty[Throwable]
@@ -49,7 +49,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
-      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+//      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     }

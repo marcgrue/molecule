@@ -1,7 +1,9 @@
 package molecule.datomic.base.facade
 
 
+import java.net.URI
 import java.util.{Date, Collection => jCollection, List => jList}
+import com.cognitect.transit.impl.URIImpl
 import datomic.Database
 import datomicScala.client.api.sync.Db
 import molecule.core.api.DatomicEntity
@@ -19,7 +21,7 @@ import scala.jdk.CollectionConverters._
   *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
-  **/
+  * */
 trait Conn {
 
   def usingTempDb(tempDb: TempDb): Conn
@@ -42,7 +44,7 @@ trait Conn {
     */
   def testDbAsOf(t: Long): Unit
 
-    /** Use test database as of date.
+  /** Use test database as of date.
     *
     * @param d Date
     */
@@ -240,14 +242,18 @@ trait Conn {
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
     * */
-  def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]] =
-    qRaw(db, query, inputs).asScala.toList
+  def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]] = {
+    val r = qRaw(db, query, inputs).asScala.toList
       .map(_.asScala.toList
         .map {
           case set: clojure.lang.PersistentHashSet => set.asScala.toSet
+          case uriImpl: URIImpl                    => new URI(uriImpl.toString)
+          case bi: clojure.lang.BigInt             => BigInt(bi.toString)
           case other                               => other
         }
       )
+    r
+  }
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.

@@ -31,9 +31,6 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOneFloat(row: jList[_], i: Int): Float =
     row.get(i).asInstanceOf[jDouble].toFloat
 
-  protected def castOneBigInt(row: jList[_], i: Int): BigInt =
-    BigInt(row.get(i).toString)
-
   protected def castOneURI(row: jList[_], i: Int): URI = {
     row.get(i) match {
       case uriImpl: URIImpl => new URI(uriImpl.getValue)
@@ -41,8 +38,12 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     }
   }
 
+  protected def castOneBigInt(row: jList[_], i: Int): BigInt =
+    BigInt(row.get(i).toString)
+
   protected def castOneBigDecimal(row: jList[_], i: Int): BigDecimal =
-    BigDecimal(row.get(i).asInstanceOf[jBigDec].toString)
+    BigDecimal(row.get(i).toString)
+//    BigDecimal(row.get(i).asInstanceOf[jBigDec].toString)
 
   protected def castOne[T](row: jList[_], i: Int): T =
     row.get(i).asInstanceOf[T]
@@ -153,13 +154,15 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOptOneBigInt(row: jList[_], i: Int): Option[BigInt] = if (row.get(i) == null) {
     Option.empty[BigInt]
   } else {
-    Some(BigInt(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jBigInt].toString))
+    Some(BigInt(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.toString))
+//    Some(BigInt(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jBigInt].toString))
   }
 
   protected def castOptOneBigDecimal(row: jList[_], i: Int): Option[BigDecimal] = if (row.get(i) == null) {
     Option.empty[BigDecimal]
   } else {
-    Some(BigDecimal(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jBigDec].toString))
+    Some(BigDecimal(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.toString))
+//    Some(BigDecimal(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jBigDec].toString))
   }
 
   protected def castOptOne[T](row: jList[_], i: Int): Option[T] = if (row.get(i) == null) {
@@ -208,13 +211,20 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOptOneApplyBigInt(row: jList[_], i: Int): Option[BigInt] = if (row.get(i) == null) {
     Option.empty[BigInt]
   } else {
-    Some(BigInt(row.get(i).asInstanceOf[jBigInt].toString))
+    Some(
+      BigInt(row.get(i).toString)
+//      row.get(i) match {
+//        case bi: clojure.lang.BigInt => BigInt(bi.toString)
+//        case bi: java.math.BigInteger => BigInt(bi.toString)
+//      }
+    )
   }
 
   protected def castOptOneApplyBigDecimal(row: jList[_], i: Int): Option[BigDecimal] = if (row.get(i) == null) {
     Option.empty[BigDecimal]
   } else {
-    Some(BigDecimal(row.get(i).asInstanceOf[jBigDec].toString))
+    Some(BigDecimal(row.get(i).toString))
+//    Some(BigDecimal(row.get(i).asInstanceOf[jBigDec].toString))
   }
 
   // Datomic pull requests for optional value either returns `null` or a `jMap[<ident>, <value>]`
@@ -286,7 +296,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     val it  = row.get(i).asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
     var set = Set.empty[BigInt]
     while (it.hasNext)
-      set += BigInt(it.next.asInstanceOf[jBigInt].toString)
+      set += BigInt(it.next.toString)
+//      set += BigInt(it.next.asInstanceOf[jBigInt].toString)
     Some(set)
   }
 
@@ -296,7 +307,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     val it  = row.get(i).asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
     var set = Set.empty[BigDecimal]
     while (it.hasNext)
-      set += BigDecimal(it.next.asInstanceOf[jBigDec].toString)
+      set += BigDecimal(it.next.toString)
+//      set += BigDecimal(it.next.asInstanceOf[jBigDec].toString)
     Some(set)
   }
 
@@ -371,7 +383,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[BigInt]
     while (it.hasNext)
-      set += BigInt(it.next.asInstanceOf[jBigInt].toString)
+      set += BigInt(it.next.toString)
+//      set += BigInt(it.next.asInstanceOf[jBigInt].toString)
     Some(set)
   }
 
@@ -381,7 +394,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[BigDecimal]
     while (it.hasNext)
-      set += BigDecimal(it.next.asInstanceOf[jBigDec].toString)
+      set += BigDecimal(it.next.toString)
+//      set += BigDecimal(it.next.asInstanceOf[jBigDec].toString)
     Some(set)
   }
 
