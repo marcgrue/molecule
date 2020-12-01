@@ -88,22 +88,33 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
       case DatomicPeerServer =>
         val cl   = Datomic_Client(client)
-        val conn = cl.connect(dbIdentifier)
+        implicit val conn = cl.connect(dbIdentifier)
         val log  = conn.clientConn.txRange(None, None)
         // Check only once per test file
-        if (installSchema && log.isEmpty) {
+        val log2 = if (installSchema && log.isEmpty) {
           println("Installing Peer Server schema...")
           if (schema.partitions.size() > 0)
             conn.transact(cl.allowedClientDefinitions(schema.partitions))
           conn.transact(cl.allowedClientDefinitions(schema.namespaces))
           installSchema = false
-        }
-        if (log.size > 1) {
+
+          // Populate 3 initial txs to test time operations
+          Ref4.int4(1).save
+          Ref4.int4(2).save
+          Ref4.int4(3).save
+
+          // updated log
+          conn.clientConn.txRange(None, None)
+        } else log
+
+        if (log2.size > 4) {
           throw new RuntimeException(
-            "Live Peer Server has been modified unexpectedly by a test that has " +
-              "switched back to live data. Please find and modify this test and " +
-              "restart the Peer server process to test again.")
+            "Live Peer Server seems to have been modified unexpectedly by a test " +
+              "that has switched back to live data. Please find and modify this " +
+              "test and restart the Peer server process to test again.")
         }
+
+        // Always use an empty withDb
         conn.testDbAsOfNow
         conn
 

@@ -60,6 +60,7 @@ case class Conn_Client(client: Client, dbName: String)
     _testDb = Some(db.asInstanceOf[DatomicDb_Client].clientDb)
   }
 
+  // t or tx
   def testDbAsOf(t: Long): Unit = {
     _testDb = Some(clientConn.db.asOf(t))
   }
@@ -148,10 +149,10 @@ case class Conn_Client(client: Client, dbName: String)
       } else {
         _testDb.get.`with`(clientConn.withDb, javaStmts)
       }
+      withDbInUse = true
       val txReport = TxReport_Client(withDb, stmtss)
 
       // Special withDb now in use (important for consequent transaction calls)
-      withDbInUse = true
 
       // Continue with updated in-memory db
       _testDb = Some(txReport.dbAfter)

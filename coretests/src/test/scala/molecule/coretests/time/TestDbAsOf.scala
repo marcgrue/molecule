@@ -12,16 +12,14 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 class TestDbAsOf extends CoreSpec {
 
   // Since we already use a testDbAsOfNow for Peer Server, we don't test it here.
-  // You can though uncomment this to test with the Peer Server, but then you'll
-  // have to switch it back after and restart the Peer Server process in your terminal.
-  //  omitPeerServer = true
-  //  peerServerOnly = true
-  //  devLocalOnly = true
+  // See special TestDbAsOf_PeerServer
+  omitPeerServer = true
 
   class Setup extends CoreSetup {
     val txR1    = Ns.int(1).save
     val eid     = txR1.eid
     val counter = domain.Counter(eid)
+    val tx1      = txR1.tx
     val t1      = txR1.t
     val date1   = txR1.inst
     val txR2    = Ns(eid).int(2).update
@@ -42,6 +40,30 @@ class TestDbAsOf extends CoreSpec {
 
       // Update test db
       Ns(eid).int(3).update
+      Ns.int.get === List(3)
+
+      Ns.int(4).save
+      Ns.int.get === List(3, 4)
+
+      // Discard test db and go back to live db
+      conn.useLiveDb
+
+      // Live state unchanged
+      Ns.int.get === List(2)
+    }
+
+    "as of tx report" in new Setup {
+      // Live state
+      Ns.int.get === List(2)
+
+      // Use state as of tx1 as a test db "branch"
+      conn.testDbAsOf(txR1)
+
+      // Test state is now as of tx1!
+      Ns.int.get === List(1)
+
+      // Updated test state
+      Ns(eid).int(3).update
 
       // Updated test state
       Ns.int.get === List(3)
@@ -58,7 +80,7 @@ class TestDbAsOf extends CoreSpec {
       Ns.int.get === List(2)
 
       // Use state as of tx1 as a test db "branch"
-      conn.testDbAsOf(txR1)
+      conn.testDbAsOf(tx1)
 
       // Test state is now as of tx1!
       Ns.int.get === List(1)
@@ -161,7 +183,7 @@ class TestDbAsOf extends CoreSpec {
       Ns.int.get === List(2)
 
       // Use state as of tx1 as a test db "branch"
-      conn.testDbAsOf(txR1)
+      conn.testDbAsOf(tx1)
 
       // Test state is now as of tx1!
       // Notice that the test db value propagates to our domain object

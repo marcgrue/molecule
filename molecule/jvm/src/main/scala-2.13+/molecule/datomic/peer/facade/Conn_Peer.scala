@@ -6,6 +6,7 @@ import datomic.{Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
+import datomicScala.client.api.sync.Db
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}

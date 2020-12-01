@@ -3,6 +3,7 @@ package molecule.datomic.base.facade
 
 import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.Database
+import datomicScala.client.api.sync.Db
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
@@ -41,7 +42,7 @@ trait Conn {
     */
   def testDbAsOf(t: Long): Unit
 
-  /** Use test database as of date.
+    /** Use test database as of date.
     *
     * @param d Date
     */
