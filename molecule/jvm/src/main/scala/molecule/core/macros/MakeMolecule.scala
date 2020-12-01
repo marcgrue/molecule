@@ -28,7 +28,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           new $outMolecule
         """
       } else {
-        q"""
+        val t = q"""
           import molecule.core.ast.model._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
             final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
@@ -36,6 +36,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           }
           new $outMolecule
         """
+//        println(t)
+        t
       }
 
     } else if(isOptNested) {

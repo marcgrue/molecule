@@ -55,6 +55,7 @@ class Negation extends Base {
     Ns.int.not(ints).get.sorted === List(-2, -1, 0)
 
     // Same as
+    // Intellij shows error although it is fine
     Ns.int.!=(7).get.sorted === List(-2, -1, 0, 1, 2)
     Ns.int.!=(1).get.sorted === List(-2, -1, 0, 2)
     Ns.int.!=(-1, 0, 1).get.sorted === List(-2, 2)

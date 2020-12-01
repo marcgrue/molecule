@@ -26,7 +26,8 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     row.get(i).asInstanceOf[jLong].toInt
 
   protected def castOneInt2(row: jList[_], i: Int): Int =
-    row.get(i).asInstanceOf[java.lang.Integer].toInt
+    row.get(i).toString.toInt
+//    row.get(i).asInstanceOf[java.lang.Integer].toInt
 
   protected def castOneFloat(row: jList[_], i: Int): Float =
     row.get(i).asInstanceOf[jDouble].toFloat

@@ -21,7 +21,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrOneListBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrOneList[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrOneList[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrOneList[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrOneListURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneList[java.util.UUID](row, $i)"
   }
   def castAggrManyList(tpe: String): Int => Tree = tpe match {
@@ -34,7 +34,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrManyListBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrManyList[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrManyList[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrManyList[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrManyListURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrManyList[java.util.UUID](row, $i)"
   }
 
@@ -48,7 +48,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrOneListDistinctBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrOneListDistinct[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrOneListDistinct[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrOneListDistinct[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrOneListDistinctURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneListDistinct[java.util.UUID](row, $i)"
   }
   def castAggrManyListDistinct(tpe: String): Int => Tree = tpe match {
@@ -61,7 +61,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrManyListDistinctBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrManyListDistinct[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrManyListDistinct[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrManyListDistinct[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrManyListDistinctURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrManyListDistinct[java.util.UUID](row, $i)"
   }
 
@@ -75,7 +75,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrOneListRandBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrOneListRand[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrOneListRand[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrOneListRand[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrOneListRandURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneListRand[java.util.UUID](row, $i)"
   }
   def castAggrManyListRand(tpe: String): Int => Tree = tpe match {
@@ -88,7 +88,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrManyListRandBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrManyListRand[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrManyListRand[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrManyListRand[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrManyListRandURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrManyListRand[java.util.UUID](row, $i)"
   }
 
@@ -103,7 +103,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrSingleSampleBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrSingleSample[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrSingleSample[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrSingleSample[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrSingleSampleURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrSingleSample[java.util.UUID](row, $i)"
   }
 
@@ -117,7 +117,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castOneBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castOne[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castOne[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castOne[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castOneURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castOne[java.util.UUID](row, $i)"
   }
   def castAggrManySingle(tpe: String): Int => Tree = tpe match {
@@ -130,7 +130,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castAggrManySingleBigDecimal(row, $i)"
     case "java.util.Date" => (i: Int) => q"castAggrManySingle[java.util.Date](row, $i)"
     case "Boolean"        => (i: Int) => q"castAggrManySingle[Boolean](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castAggrManySingle[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castAggrManySingleURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrManySingle[java.util.UUID](row, $i)"
   }
 }

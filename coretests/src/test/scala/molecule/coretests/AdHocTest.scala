@@ -22,24 +22,18 @@ class AdHocTest extends CoreSpec with Helpers {
 //  peerServerOnly = true
 
 
-//  "adhoc" in new CoreSetup {
-  "adhoc" in new BidirectionalSetup {
+//  "adhoc" in new BidirectionalSetup {
+  "adhoc" in new CoreSetup {
 
-    val List(ann, annLovesBen, benLovesAnn, ben) =
-      Person.name("Ann").Loves.weight(7).Person.name("Ben").save.eids
-
-    // Bidirectional property edges have been saved
-    Person.name.Loves.weight.Person.name.get.sorted === List(
-      ("Ann", 7, "Ben"),
-      // Reverse edge:
-      ("Ben", 7, "Ann")
+    Ns.int.Ref1.str1 insert List(
+      (1, "a"),
+      (2, "b"),
+      (3, "c")
     )
 
-    ann.touchMax(1) === Map(
-      ":db/id" -> ann,
-      ":Person/loves" -> annLovesBen,
-      ":Person/name" -> "Ann"
-    )
+    Ns.e(count).int_.>(1).debugGet
+    Ns.e(count).int_.>(1).get.head === 2
+
 
     ok
   }

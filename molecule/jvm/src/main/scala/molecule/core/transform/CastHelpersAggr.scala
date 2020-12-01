@@ -5,6 +5,7 @@ import java.math.{BigDecimal => jBigDec, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List => jList, Map => jMap}
 import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
+import com.cognitect.transit.impl.URIImpl
 
 /** Core molecule interface defining actions that can be called on molecules.
   *
@@ -29,6 +30,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     var list = List.empty[Float]
     while (it.hasNext)
       list = list :+ it.next.asInstanceOf[jDouble].toFloat
+    list
+  }
+
+  protected def castAggrOneListURI(row: jList[_], i: Int): List[URI] = {
+    val it   = row.get(i).asInstanceOf[PersistentVector].iterator
+    var list = List.empty[URI]
+    while (it.hasNext)
+      list = list :+ (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
     list
   }
 
@@ -74,6 +86,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     List(set)
   }
 
+  protected def castAggrManyListURI(row: jList[_], i: Int): List[Set[URI]] = {
+    val it  = row.get(i).asInstanceOf[PersistentVector].iterator
+    var set = Set.empty[URI]
+    while (it.hasNext)
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
+    List(set)
+  }
+
   protected def castAggrManyListBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it  = row.get(i).asInstanceOf[PersistentVector].iterator
     var set = Set.empty[BigInt]
@@ -113,6 +136,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     var list = List.empty[Float]
     while (it.hasNext)
       list = list :+ it.next.asInstanceOf[jDouble].toFloat
+    list
+  }
+
+  protected def castAggrOneListDistinctURI(row: jList[_], i: Int): List[URI] = {
+    val it   = row.get(i).asInstanceOf[PersistentHashSet].iterator
+    var list = List.empty[URI]
+    while (it.hasNext)
+      list = list :+ (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
     list
   }
 
@@ -158,6 +192,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     List(set)
   }
 
+  protected def castAggrManyListDistinctURI(row: jList[_], i: Int): List[Set[URI]] = {
+    val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
+    var set = Set.empty[URI]
+    while (it.hasNext)
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
+    List(set)
+  }
+
   protected def castAggrManyListDistinctBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
     var set = Set.empty[BigInt]
@@ -197,6 +242,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     var list = List.empty[Float]
     while (it.hasNext)
       list = list :+ it.next.asInstanceOf[jDouble].toFloat
+    list
+  }
+
+  protected def castAggrOneListRandURI(row: jList[_], i: Int): List[URI] = {
+    val it   = row.get(i).asInstanceOf[LazySeq].iterator
+    var list = List.empty[URI]
+    while (it.hasNext)
+      list = list :+ (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
     list
   }
 
@@ -242,6 +298,17 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
     List(set)
   }
 
+  protected def castAggrManyListRandURI(row: jList[_], i: Int): List[Set[URI]] = {
+    val it  = row.get(i).asInstanceOf[LazySeq].iterator
+    var set = Set.empty[URI]
+    while (it.hasNext)
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
+    List(set)
+  }
+
   protected def castAggrManyListRandBigInt(row: jList[_], i: Int): List[Set[BigInt]] = {
     val it  = row.get(i).asInstanceOf[LazySeq].iterator
     var set = Set.empty[BigInt]
@@ -274,6 +341,12 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
   protected def castAggrSingleSampleFloat(row: jList[_], i: Int): Float =
     row.get(i).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[jDouble].toFloat
 
+  protected def castAggrSingleSampleURI(row: jList[_], i: Int): URI =
+    row.get(i).asInstanceOf[PersistentVector].iterator.next match {
+      case uriImpl: URIImpl => new URI(uriImpl.getValue)
+      case uri: URI         => uri
+    }
+
   protected def castAggrSingleSampleBigInt(row: jList[_], i: Int): BigInt =
     BigInt(row.get(i).asInstanceOf[PersistentVector].iterator.next.toString)
 
@@ -290,6 +363,12 @@ trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
 
   protected def castAggrManySingleFloat(row: jList[_], i: Int): Set[Float] =
     Set(row.get(i).asInstanceOf[jDouble].toFloat)
+
+  protected def castAggrManySingleURI(row: jList[_], i: Int): Set[URI] =
+    Set(row.get(i) match {
+      case uriImpl: URIImpl => new URI(uriImpl.getValue)
+      case uri: URI         => uri
+    })
 
   protected def castAggrManySingleBigInt(row: jList[_], i: Int): Set[BigInt] =
     Set(BigInt(row.get(i).toString))

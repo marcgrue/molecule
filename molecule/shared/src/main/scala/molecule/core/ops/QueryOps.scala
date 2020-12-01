@@ -437,7 +437,10 @@ object QueryOps extends Helpers with JavaUtil {
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w  = Var(if (i > 0) v + "_" + i else v + 2)
       val q1 = tpeS match {
-        case "BigInt"       => q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
+//        case "BigInt"       => q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
+        case "BigInt"       =>
+          q.func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
+            .func(".compareTo ^java.math.BigInteger", Seq(Var(v + "_casted"), qv), ScalarBinding(w))
         case "BigDecimal"   => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(w))
         case "java.net.URI" => qv match {
           case Val(arg) =>

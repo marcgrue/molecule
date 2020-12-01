@@ -20,7 +20,8 @@ trait CastHelpersOptNested[Tpl] extends Helpers {
     it.next.asInstanceOf[jLong].toInt
 
   protected def castOptNestedOneInt2(it: jIterator[_]): Int =
-    it.next.asInstanceOf[java.lang.Integer].toInt
+    it.next.toString.toInt
+//    it.next.asInstanceOf[java.lang.Integer].toInt
 
   protected def castOptNestedOneFloat(it: jIterator[_]): Float =
     it.next.asInstanceOf[jDouble].toFloat
