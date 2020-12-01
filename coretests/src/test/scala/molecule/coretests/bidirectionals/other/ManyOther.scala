@@ -294,7 +294,7 @@ class ManyOther extends CoreSpec {
       Person(ann).buddies.replace(gus -> rex).update
 
       // Ann now buddies with Rex instead of Gus
-      animalBuddiesOf("Ann").get === List("Leo", "Rex")
+      animalBuddiesOf("Ann").get.sorted === List("Leo", "Rex")
       personBuddiesOf("Gus").get === List()
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List("Ann")
@@ -307,7 +307,7 @@ class ManyOther extends CoreSpec {
 
       val List(rex, zip) = Animal.name.insert("Rex", "Zip").eids
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List()
@@ -318,7 +318,7 @@ class ManyOther extends CoreSpec {
 
       // Ann is now buddies with Rex and Zip instead of Gus and Leo
       // Gus and Leo are no longer buddies with Ann either
-      animalBuddiesOf("Ann").get === List("Zip", "Rex")
+      animalBuddiesOf("Ann").get.sorted === List("Rex", "Zip")
       personBuddiesOf("Gus").get === List()
       personBuddiesOf("Leo").get === List()
       personBuddiesOf("Rex").get === List("Ann")
@@ -333,7 +333,7 @@ class ManyOther extends CoreSpec {
       ) eids
       val rex                 = Animal.name.insert("Rex").eid
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Rex").get === List()
@@ -359,7 +359,7 @@ class ManyOther extends CoreSpec {
 
       val rex = Animal.name.insert("Rex").eid
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List()
@@ -369,7 +369,7 @@ class ManyOther extends CoreSpec {
 
       // Ann and Rex new buddies
       // Ann and Leo no longer buddies
-      animalBuddiesOf("Ann").get === List("Rex", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Rex")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List()
       personBuddiesOf("Rex").get === List("Ann")
@@ -384,7 +384,7 @@ class ManyOther extends CoreSpec {
 
       val rex = Animal.name.insert("Rex").eid
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
       personBuddiesOf("Rex").get === List()
@@ -407,7 +407,7 @@ class ManyOther extends CoreSpec {
         ("Ann", List("Gus", "Leo"))
       ) eids
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
 
@@ -427,7 +427,7 @@ class ManyOther extends CoreSpec {
         ("Ann", List("Gus", "Leo"))
       ) eids
 
-      animalBuddiesOf("Ann").get === List("Leo", "Gus")
+      animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
       personBuddiesOf("Gus").get === List("Ann")
       personBuddiesOf("Leo").get === List("Ann")
 
@@ -449,7 +449,7 @@ class ManyOther extends CoreSpec {
       ("Ann", List("Gus", "Leo"))
     ) eids
 
-    animalBuddiesOf("Ann").get === List("Leo", "Gus")
+    animalBuddiesOf("Ann").get.sorted === List("Gus", "Leo")
     personBuddiesOf("Gus").get === List("Ann")
     personBuddiesOf("Leo").get === List("Ann")
 

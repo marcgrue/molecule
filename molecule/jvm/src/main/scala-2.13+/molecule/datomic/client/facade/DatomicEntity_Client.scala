@@ -2,6 +2,7 @@ package molecule.datomic.client.facade
 
 import java.util.{Date, UUID, Collection => jCollection}
 import clojure.lang.MapEntry
+import datomicClient.anomaly.Fault
 import molecule.core.api.exception.EntityException
 import molecule.core.api.DatomicEntity
 import scala.jdk.CollectionConverters._
@@ -15,7 +16,7 @@ case class DatomicEntity_Client(
 ) extends DatomicEntity(conn, eid) {
 
   private def getThisLevel(eid: Any): Map[String, Any] = {
-    conn.q(
+    val res = conn.q(
       """[:find ?a2 ?v
         | :in $ ?eid
         | :where
@@ -25,6 +26,7 @@ case class DatomicEntity_Client(
         | ]""".stripMargin, eid)
       .map(l => (l.head.toString, l(1)))
       .toMap + (":db/id" -> eid)
+    res
   }
 
   lazy val map: Map[String, Any] = {
@@ -33,8 +35,10 @@ case class DatomicEntity_Client(
         case (k, v) => (k.toString, v)
       }
     } catch {
-      case _: StackOverflowError =>
-        // Fetch top level only for cyclic graphs
+      // Fetch top level only for cyclic graphs
+      case _: StackOverflowError                                    =>
+        getThisLevel(eid)
+      case Fault("java.lang.StackOverflowError with empty message") =>
         getThisLevel(eid)
 
       case e: Throwable => throw e
