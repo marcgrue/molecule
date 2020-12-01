@@ -31,8 +31,9 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   var peerOnly       = false
   var devLocalOnly   = false
-  var peerServerOnly = false
-  var omitPeerServer = true
+  var peerServerOnly = true
+//  var peerServerOnly = false
+  var omitPeerServer = false
 
   var setupException = Option.empty[Throwable]
   var installSchema  = true // set to true to initiate Peer Server schema installation

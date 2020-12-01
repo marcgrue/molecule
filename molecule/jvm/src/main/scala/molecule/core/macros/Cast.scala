@@ -1,9 +1,11 @@
 package molecule.core.macros
+
 import molecule.core.ops.TreeOps
 import scala.reflect.macros.blackbox
 
 private[molecule] trait Cast extends CastAggr with TreeOps {
   val c: blackbox.Context
+
   import c.universe._
 
   val y = DebugMacro("Cast", 1)
@@ -19,7 +21,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
     case "Double"         => (i: Int) => q"castOne[Double](row, $i)"
     case "java.util.Date" => (i: Int) => q"castOne[java.util.Date](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castOne[java.util.UUID](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castOne[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castOneURI(row, $i)"
     case "BigInt"         => (i: Int) => q"castOneBigInt(row, $i)"
     case "BigDecimal"     => (i: Int) => q"castOneBigDecimal(row, $i)"
     case "Any"            => (i: Int) => q"row.get($i)"
@@ -34,7 +36,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
     case "Double"         => (i: Int) => q"castMany[Double](row, $i)"
     case "java.util.Date" => (i: Int) => q"castMany[java.util.Date](row, $i)"
     case "java.util.UUID" => (i: Int) => q"castMany[java.util.UUID](row, $i)"
-    case "java.net.URI"   => (i: Int) => q"castMany[java.net.URI](row, $i)"
+    case "java.net.URI"   => (i: Int) => q"castManyURI(row, $i)"
     case "BigInt"         => (i: Int) => q"castManyBigInt(row, $i)"
     case "BigDecimal"     => (i: Int) => q"castManyBigDecimal(row, $i)"
   }
@@ -55,7 +57,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
         case "Double"         => (i: Int) => q"castOptOneDouble(row, $i)"
         case "java.util.Date" => (i: Int) => q"castOptOne[java.util.Date](row, $i)"
         case "java.util.UUID" => (i: Int) => q"castOptOne[java.util.UUID](row, $i)"
-        case "java.net.URI"   => (i: Int) => q"castOptOne[java.net.URI](row, $i)"
+        case "java.net.URI"   => (i: Int) => q"castOptOneURI(row, $i)"
         case "BigInt"         => (i: Int) => q"castOptOneBigInt(row, $i)"
         case "BigDecimal"     => (i: Int) => q"castOptOneBigDecimal(row, $i)"
       }
@@ -70,7 +72,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
         case "Double"         => (i: Int) => q"castOptManyDouble(row, $i)"
         case "java.util.Date" => (i: Int) => q"castOptMany[java.util.Date](row, $i)"
         case "java.util.UUID" => (i: Int) => q"castOptMany[java.util.UUID](row, $i)"
-        case "java.net.URI"   => (i: Int) => q"castOptMany[java.net.URI](row, $i)"
+        case "java.net.URI"   => (i: Int) => q"castOptManyURI(row, $i)"
         case "BigInt"         => (i: Int) => q"castOptManyBigInt(row, $i)"
         case "BigDecimal"     => (i: Int) => q"castOptManyBigDecimal(row, $i)"
       }
@@ -87,7 +89,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
       case "Double"         => (i: Int) => q"castOptOneApplyDouble(row, $i)"
       case "java.util.Date" => (i: Int) => q"castOptOneApply[java.util.Date](row, $i)"
       case "java.util.UUID" => (i: Int) => q"castOptOneApply[java.util.UUID](row, $i)"
-      case "java.net.URI"   => (i: Int) => q"castOptOneApply[java.net.URI](row, $i)"
+      case "java.net.URI"   => (i: Int) => q"castOptOneApplyURI(row, $i)"
       case "BigInt"         => (i: Int) => q"castOptOneApplyBigInt(row, $i)"
       case "BigDecimal"     => (i: Int) => q"castOptOneApplyBigDecimal(row, $i)"
     }
@@ -102,7 +104,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
       case "Double"         => (i: Int) => q"castOptManyApplyDouble(row, $i)"
       case "java.util.Date" => (i: Int) => q"castOptManyApply[java.util.Date](row, $i)"
       case "java.util.UUID" => (i: Int) => q"castOptManyApply[java.util.UUID](row, $i)"
-      case "java.net.URI"   => (i: Int) => q"castOptManyApply[java.net.URI](row, $i)"
+      case "java.net.URI"   => (i: Int) => q"castOptManyApplyURI(row, $i)"
       case "BigInt"         => (i: Int) => q"castOptManyApplyBigInt(row, $i)"
       case "BigDecimal"     => (i: Int) => q"castOptManyApplyBigDecimal(row, $i)"
     }

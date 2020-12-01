@@ -11,25 +11,26 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class AsOf extends CoreSpec {
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
 
-  val tx1: TxReport = Ns.int(1).save
-  // Since using Date's are not that precise (use tx.t or anything else instead!), we help separate the dates:
-  Thread.sleep(1000)
-  val tx2: TxReport = Ns.int(2).save
-  Thread.sleep(1000)
-  val tx3: TxReport = Ns.int(3).save
+    val tx1: TxReport = Ns.int(1).save
+    // Avoid date ms overlaps (use tx or t instead for precision)
+    Thread.sleep(100)
+    val tx2: TxReport = Ns.int(2).save
+    Thread.sleep(100)
+    val tx3: TxReport = Ns.int(3).save
 
-  val t1: Long = tx1.t
-  val t2: Long = tx2.t
-  val t3: Long = tx3.t
+    val t1: Long = tx1.t
+    val t2: Long = tx2.t
+    val t3: Long = tx3.t
 
-  val d1: Date = tx1.inst
-  val d2: Date = tx2.inst
-  val d3: Date = tx3.inst
+    val d1: Date = tx1.inst
+    val d2: Date = tx2.inst
+    val d3: Date = tx3.inst
+  }
 
 
-  "AsOf" >> {
+  "AsOf" in new Setup {
 
     Ns.int.getAsOf(t1) === List(1)
     Ns.int.getAsOf(t2) === List(1, 2)

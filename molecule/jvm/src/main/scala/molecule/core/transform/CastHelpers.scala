@@ -1,9 +1,11 @@
 package molecule.core.transform
+
 import java.lang.{Double => jDouble, Long => jLong}
 import java.math.{BigDecimal => jBigDec, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List => jList, Map => jMap}
 import clojure.lang.{Keyword, PersistentHashSet, PersistentVector}
+import com.cognitect.transit.impl.URIImpl
 
 /** Core molecule interface defining actions that can be called on molecules.
   *
@@ -32,6 +34,13 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
   protected def castOneBigInt(row: jList[_], i: Int): BigInt =
     BigInt(row.get(i).toString)
 
+  protected def castOneURI(row: jList[_], i: Int): URI = {
+    row.get(i) match {
+      case uriImpl: URIImpl => new URI(uriImpl.getValue)
+      case uri: URI         => uri
+    }
+  }
+
   protected def castOneBigDecimal(row: jList[_], i: Int): BigDecimal =
     BigDecimal(row.get(i).asInstanceOf[jBigDec].toString)
 
@@ -54,6 +63,18 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     var set = Set.empty[Float]
     while (it.hasNext)
       set += it.next.asInstanceOf[jDouble].toFloat
+    set
+  }
+
+  protected def castManyURI(row: jList[_], i: Int): Set[URI] = {
+    val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
+    var set = Set.empty[URI]
+    while (it.hasNext) {
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
+    }
     set
   }
 
@@ -118,6 +139,17 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     Some(row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jDouble].toDouble)
   }
 
+  protected def castOptOneURI(row: jList[_], i: Int): Option[URI] = if (row.get(i) == null) {
+    Option.empty[URI]
+  } else {
+    Some(
+      row.get(i).asInstanceOf[jMap[String, AnyRef]].values.iterator.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      }
+    )
+  }
+
   protected def castOptOneBigInt(row: jList[_], i: Int): Option[BigInt] = if (row.get(i) == null) {
     Option.empty[BigInt]
   } else {
@@ -160,6 +192,17 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     Option.empty[Double]
   } else {
     Some(row.get(i).asInstanceOf[jDouble].toDouble)
+  }
+
+  protected def castOptOneApplyURI(row: jList[_], i: Int): Option[URI] = if (row.get(i) == null) {
+    Option.empty[URI]
+  } else {
+    Some(
+      row.get(i) match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      }
+    )
   }
 
   protected def castOptOneApplyBigInt(row: jList[_], i: Int): Option[BigInt] = if (row.get(i) == null) {
@@ -221,6 +264,19 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     var set = Set.empty[Double]
     while (it.hasNext)
       set += it.next.asInstanceOf[jDouble].toDouble
+    Some(set)
+  }
+
+  protected def castOptManyURI(row: jList[_], i: Int): Option[Set[URI]] = if (row.get(i) == null) {
+    Option.empty[Set[URI]]
+  } else {
+    val it  = row.get(i).asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+    var set = Set.empty[URI]
+    while (it.hasNext)
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
     Some(set)
   }
 
@@ -293,6 +349,19 @@ trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
     var set = Set.empty[Double]
     while (it.hasNext)
       set += it.next.asInstanceOf[jDouble].toDouble
+    Some(set)
+  }
+
+  protected def castOptManyApplyURI(row: jList[_], i: Int): Option[Set[URI]] = if (row.get(i) == null) {
+    Option.empty[Set[URI]]
+  } else {
+    val it  = row.get(i).asInstanceOf[PersistentHashSet].iterator
+    var set = Set.empty[URI]
+    while (it.hasNext)
+      set += (it.next match {
+        case uriImpl: URIImpl => new URI(uriImpl.getValue)
+        case uri: URI         => uri
+      })
     Some(set)
   }
 

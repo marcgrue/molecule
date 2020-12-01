@@ -9,14 +9,14 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class History extends CoreSpec {
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
+    val tx1 = Ns.int(1).save
+    val e   = tx1.eid
+    val tx2 = Ns(e).int(2).update
+  }
 
-  val tx1 = Ns.int(1).save
-  val e = tx1.eid
-  val tx2 = Ns(e).int(2).update
 
-
-  "History" >> {
+  "History" in new Setup {
 
     Ns(e).int.t.op.getHistory.sortBy(t => (t._2, t._3)) === List(
       (1, tx1.t, true),

@@ -17,8 +17,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
   import c.universe._
 
-    val x = DebugMacro("Dsl2Model", 901, 900)
-//  val x = DebugMacro("Dsl2Model", 40, 43)
+  val x = DebugMacro("Dsl2Model", 901, 900)
+  //  val x = DebugMacro("Dsl2Model", 1, 900)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)

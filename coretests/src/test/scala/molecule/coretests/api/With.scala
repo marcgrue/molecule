@@ -11,18 +11,18 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class With extends CoreSpec {
 
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
+    Ns.int(1).save
 
-  Ns.int(1).save
+    val saveTx2 = Ns.int(2).getSaveTx
+    val saveTx3 = Ns.int(3).getSaveTx
 
-  val saveTx2 = Ns.int(2).getSaveTx
-  val saveTx3 = Ns.int(3).getSaveTx
-
-  val data = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:Ns/int 2} {:Ns/int 3}]"
-  val txData2_3 = Util.readAll(data).get(0).asInstanceOf[java.util.List[Object]]
+    val data      = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:Ns/int 2} {:Ns/int 3}]"
+    val txData2_3 = Util.readAll(data).get(0).asInstanceOf[java.util.List[Object]]
+  }
 
 
-  "With" >> {
+  "With" in new Setup {
 
     Ns.int.getWith(saveTx2) === List(1, 2)
     Ns.int.getWith(saveTx2, saveTx3) === List(1, 2, 3)

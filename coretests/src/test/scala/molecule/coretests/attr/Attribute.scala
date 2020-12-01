@@ -9,9 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Attribute extends CoreSpec {
 
   "Async" in new CoreSetup {
-
     Ns.int(1).save
-
     Ns.int.getAsync.map { result =>
       result === List(1)
     }
