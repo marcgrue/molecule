@@ -375,7 +375,6 @@ case class Conn_Client(client: Client, dbName: String)
       case other => throw new MoleculeException(s"Only Index queries accepted (EAVT, AEVT, AVET, VAET, Log). Found `$other`")
     }
 
-    val adhocDb = db
 
     lazy val attrNames: Array[String] = {
       // Since the number of definitions is limited we can quickly collect them
@@ -475,7 +474,7 @@ case class Conn_Client(client: Client, dbName: String)
       case "datoms" =>
         val datom2row_ : Datom => jList[AnyRef] = datom2row(None)
         val raw        : stream.Stream[Datom]   =
-          adhocDb.asInstanceOf[DatomicDb_Client].datoms(index, args, limit = -1)
+          db.asInstanceOf[DatomicDb_Client].datoms(index, args, limit = -1)
         raw.forEach { datom =>
           jColl.add(datom2row_(datom))
         }
@@ -486,7 +485,7 @@ case class Conn_Client(client: Client, dbName: String)
         val startValue : Option[Any]            = args(1).asInstanceOf[Option[Any]]
         val endValue   : Option[Any]            = args(2).asInstanceOf[Option[Any]]
         val raw        : stream.Stream[Datom]   =
-          adhocDb.asInstanceOf[DatomicDb_Client].indexRange(attrId, startValue, endValue, limit = -1)
+          db.asInstanceOf[DatomicDb_Client].indexRange(attrId, startValue, endValue, limit = -1)
         raw.asInstanceOf[java.util.stream.Stream[Datom]].forEach { datom =>
           jColl.add(datom2row_(datom))
         }

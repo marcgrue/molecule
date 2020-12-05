@@ -4,14 +4,12 @@ package molecule.datomic.base.facade
 import java.net.URI
 import java.util.{Date, Collection => jCollection, List => jList}
 import com.cognitect.transit.impl.URIImpl
-import datomic.{Database, Peer}
-import datomicScala.client.api.sync.Db
+import datomic.Peer
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
 import molecule.core.ast.tempDb.TempDb
 import molecule.core.ast.transactionModel.Statement
-import molecule.core.ops.QueryOps.txBase
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 
@@ -347,6 +345,4 @@ trait Conn {
 
   def _query(model: Model, query: Query, _db: Option[DatomicDb] = None): jCollection[jList[AnyRef]]
   def _index(model: Model): jCollection[jList[AnyRef]]
-
-
 }

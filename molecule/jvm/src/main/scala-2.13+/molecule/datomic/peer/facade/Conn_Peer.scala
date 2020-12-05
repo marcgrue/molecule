@@ -511,6 +511,8 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case other => throw new MoleculeException(s"Only Index queries accepted (EAVT, AEVT, AVET, VAET, Log). Found `$other`")
     }
 
+    // This one is important for Peer to keep db stable when
+    // mixing filters with getHistory!
     val adhocDb = db
 
     def datomElement(tOpt: Option[Long], attr: String): Datom => Any = attr match {

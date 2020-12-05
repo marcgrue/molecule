@@ -166,50 +166,52 @@ class Index extends CoreSpec {
       EAVT(e1).op.get === List(true, true)
     }
 
+
     "History values" in new Setup {
 
-      // History of attribute values of entity e1
-      // Generic attribute `op` is interesting when looking at the history database since
-      // it tells wether datoms were asserted (true) or retracted (false).
-      // NOTE that retracted datoms take precedence for the same EAV values, meaning that
-      // the transaction value is sorted after the operation (so he index seems actually sorted by
-      // all 5 datom elements EAVOpT and not only EAVT)
-      EAVT(e1).e.a.v.t.op.getHistory.sortBy(p => (p._2, p._4, p._5)) === List(
-        (e1, ":Ns/int", 1, t1, true),
-        (e1, ":Ns/int", 1, t3, false),
-        (e1, ":Ns/int", 2, t3, true),
-        (e1, ":Ns/str", "a", t1, true),
-        (e1, ":Ns/str", "a", t2, false),
-        (e1, ":Ns/str", "b", t2, true),
-      )
+      if (system != DatomicPeerServer) {
+        // History of attribute values of entity e1
+        // Generic attribute `op` is interesting when looking at the history database since
+        // it tells wether datoms were asserted (true) or retracted (false).
+        // NOTE that retracted datoms take precedence for the same EAV values, meaning that
+        // the transaction value is sorted after the operation (so he index seems actually sorted by
+        // all 5 datom elements EAVOpT and not only EAVT)
+        EAVT(e1).e.a.v.t.op.getHistory.sortBy(p => (p._2, p._4, p._5)) === List(
+          (e1, ":Ns/int", 1, t1, true),
+          (e1, ":Ns/int", 1, t3, false),
+          (e1, ":Ns/int", 2, t3, true),
+          (e1, ":Ns/str", "a", t1, true),
+          (e1, ":Ns/str", "a", t2, false),
+          (e1, ":Ns/str", "b", t2, true),
+        )
 
-      // History of attribute :Ns/int values of entity e1
-      // or
-      // "What values has attribute :Ns/int of entity e1 had over time?"
-      // - 1 was asserted in transaction t1, retracted in t3, and new value 2 asserted in t3
-      EAVT(e1, ":Ns/int").e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
-        (e1, ":Ns/int", 1, t1, true),
-        (e1, ":Ns/int", 1, t3, false),
-        (e1, ":Ns/int", 2, t3, true),
-      )
+        // History of attribute :Ns/int values of entity e1
+        // or
+        // "What values has attribute :Ns/int of entity e1 had over time?"
+        // - 1 was asserted in transaction t1, retracted in t3, and new value 2 asserted in t3
+        EAVT(e1, ":Ns/int").e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
+          (e1, ":Ns/int", 1, t1, true),
+          (e1, ":Ns/int", 1, t3, false),
+          (e1, ":Ns/int", 2, t3, true),
+        )
 
-      // History of attribute :Ns/int value being 1 of entity e1
-      // or
-      // "What happened to entity e1's attribute :Ns/int value 1?"
-      // - 1 was asserted in transaction t1 and then retracted in t3
-      EAVT(e1, ":Ns/int", 1).e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
-        (e1, ":Ns/int", 1, t1, true),
-        (e1, ":Ns/int", 1, t3, false),
-      )
+        // History of attribute :Ns/int value being 1 of entity e1
+        // or
+        // "What happened to entity e1's attribute :Ns/int value 1?"
+        // - 1 was asserted in transaction t1 and then retracted in t3
+        EAVT(e1, ":Ns/int", 1).e.a.v.t.op.getHistory.sortBy(p => (p._4, p._5)) === List(
+          (e1, ":Ns/int", 1, t1, true),
+          (e1, ":Ns/int", 1, t3, false),
+        )
 
-      // History of attribute :Ns/int value being 1 of entity e1 in transaction t3
-      // or
-      // "Was entity e1's attribute :Ns/int value 1 in transaction t1 asserted or retracted?"
-      // - 1 was asserted in transaction t1
-      if (system != DatomicPeerServer)
+        // History of attribute :Ns/int value being 1 of entity e1 in transaction t3
+        // or
+        // "Was entity e1's attribute :Ns/int value 1 in transaction t1 asserted or retracted?"
+        // - 1 was asserted in transaction t1
         EAVT(e1, ":Ns/int", 1, t1).e.a.v.t.op.getHistory === List(
           (e1, ":Ns/int", 1, t1, true)
         )
+      }
     }
 
 
@@ -239,15 +241,7 @@ class Index extends CoreSpec {
     }
 
 
-    "Only mandatory datom args" in new Setup {
-
-      //      // Missing Index arguments
-      //      expectCompileError(
-      //        "m(EAVT.e.a.v.t)",
-      //        "molecule.core.transform.exception.Dsl2ModelException: " +
-      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-      //          "  `conn.db.datoms(datomic.Database.EAVT)`")
+    "Datom args" in new Setup {
 
       // Applying values to Index attributes not allowed
       expectCompileError(
@@ -312,22 +306,12 @@ class Index extends CoreSpec {
 
     "Only mandatory datom args" in new Setup {
 
-      // Missing Index arguments
-      //      expectCompileError(
-      //        "m(AEVT.a.e.v.t)",
-      //        "molecule.core.transform.exception.Dsl2ModelException: " +
-      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-      //          "  `conn.db.datoms(datomic.Database.AEVT)`")
-
       // Applying values to Index attributes not allowed
       expectCompileError(
         """m(AEVT(":Ns/int").a.e.v(42).t)""",
         "molecule.core.transform.exception.Dsl2ModelException: " +
           "AEVT index attributes not allowed to have values applied.\n" +
           "AEVT index only accepts datom arguments: `AEVT(<a/e/v/t>)`.")
-
-      ok
     }
   }
 
@@ -374,8 +358,6 @@ class Index extends CoreSpec {
         "molecule.core.transform.exception.Dsl2ModelException: " +
           "AVET index attributes not allowed to have values applied.\n" +
           "AVET index only accepts datom arguments: `AVET(<a/v/e/t>)` or range arguments: `AVET.range(a, from, until)`.")
-
-//      ok
     }
   }
 
@@ -545,22 +527,12 @@ class Index extends CoreSpec {
 
     "Only mandatory datom args" in new Setup {
 
-      //      // Missing Index arguments
-      //      expectCompileError(
-      //        "m(VAET.v.a.e.t)",
-      //        "molecule.core.transform.exception.Dsl2ModelException: " +
-      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-      //          "  `conn.db.datoms(datomic.Database.VAET)`")
-
       // Applying values to Index attributes not allowed
       expectCompileError(
         "m(VAET(42L).v.a.e(77L).t)",
         "molecule.core.transform.exception.Dsl2ModelException: " +
           "VAET index attributes not allowed to have values applied.\n" +
           "VAET index only accepts datom arguments: `VAET(<v/a/e/t>)`.")
-
-      ok
     }
   }
 }
