@@ -1,24 +1,24 @@
 package molecule.coretests.util
 
+import clojure.lang.ILookup
 import datomic.Util.{list, read}
-import datomicClient.ClojureBridge
+import datomicClient.{ClojureBridge, Invoke}
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
-import molecule.core.api.TxFunctions.buildTxFnInstall
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.datomic.api.in1_out6._
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
-import molecule.datomic.api.in1_out6._
-import molecule.coretests.util.dsl.coreTest._
+import scala.collection.mutable
 
-class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
+abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   sequential
 
   var system     : System      = DatomicPeer
@@ -31,7 +31,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
   var peerOnly       = false
   var devLocalOnly   = false
-//  var peerServerOnly = true
+  //  var peerServerOnly = true
   var peerServerOnly = false
   var omitPeerServer = false
 
@@ -49,7 +49,7 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
-//      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     }
@@ -75,6 +75,12 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
     client = Datomic.clientDevLocal("Some system name")
   }
 
+  lazy val readE = read(":e")
+  lazy val readA = read(":a")
+  lazy val readV = read(":v")
+  lazy val readTx = read(":tx")
+  lazy val readOp = read(":added")
+
   def freshConn(
     schema: SchemaTransaction,
     dbIdentifier: String = ""
@@ -88,12 +94,12 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicPeerServer =>
-        val cl   = Datomic_Client(client)
-        val conn = cl.connect(dbIdentifier)
-        val log  = conn.clientConn.txRange(None, None)
+        val cl = Datomic_Client(client)
+        implicit val conn = cl.connect(dbIdentifier)
+        val log = conn.clientConn.txRange(None, None)
 
         // Check only once per test file
-        val log2 = if (installSchema && log.isEmpty) {
+        if (installSchema && log.isEmpty) {
           println("Installing Peer Server schema...")
           if (schema.partitions.size() > 0)
             conn.transact(cl.allowedClientDefinitions(schema.partitions))
@@ -102,21 +108,38 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
 
           // updated log
           conn.clientConn.txRange(None, None)
-        } else log
+        } else {
+          // Since we can't recreate a Peer Server from here, we apply this
+          // hack of simply retracting all entities created in previous tests.
+          val eids   = mutable.Set[Long]()
+          val datoms = Invoke.datoms(conn.db.getDatomicDb, ":eavt", list(), limit = -1)
+            .asInstanceOf[java.lang.Iterable[_]]
+          datoms.forEach { d =>
+            val da     = d.asInstanceOf[ILookup]
+            val eid    = da.valAt(readE).toString.toLong
+            val attrId = da.valAt(readA).toString.toInt
 
-        if (log2.size > 2) { // partition + attributes transactions (could be 1)
-          throw new RuntimeException(
-            "Live Peer Server seems to have been modified unexpectedly by a test " +
-              "that has switched back to live data. Please find and modify this " +
-              "test and restart the Peer server process to test again.")
+//            val v = da.valAt(readV).toString
+//            val tx = da.valAt(readTx).toString
+//            val op = da.valAt(readOp).toString
+            // Exclude txs and enum idents
+
+//            println(s"$eid  $attrId  $v   $tx   $op")
+
+            // todo: can't hardcode id switch...
+            if (eid > 15194139534365L && attrId != 10) {
+              eids += eid
+            }
+          }
+//          println("======= " + eids.size)
+          if (eids.nonEmpty) {
+            retract(eids)
+          }
         }
-
-        // Always use an empty withDb
-        conn.testDbAsOfNow
         conn
 
       case DatomicDevLocal =>
-        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier)
+        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier, false)
 
       // case DatomicCloud      =>
       //   Datomic_Peer.recreateDbFrom(schema, dbIdentifier)
@@ -131,6 +154,6 @@ class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
     implicit val conn = freshConn(BidirectionalSchema, "bidirectional")
   }
   class PartitionSetup extends Scope {
-    implicit val conn = freshConn(PartitionTestSchema, "coretests")
+    implicit val conn = freshConn(PartitionTestSchema, "partitions")
   }
 }

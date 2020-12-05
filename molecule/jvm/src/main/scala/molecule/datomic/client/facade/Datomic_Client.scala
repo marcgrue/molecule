@@ -2,6 +2,7 @@ package molecule.datomic.client.facade
 
 import java.util.{List => jList, Map => jMap}
 import java.util
+import clojure.lang.Keyword
 import datomic.Peer
 import datomic.Util.read
 import datomicClient.ClojureBridge
@@ -53,11 +54,21 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     Conn_Client(client, dbName)
   }
 
-  def allowedClientDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
+  def allowedClientDefinitions(
+    nss: jList[_],
+    isPeerServer: Boolean = true
+  ): util.List[jMap[Object, Object]] = {
     val nss2     = new util.ArrayList[jMap[Object, Object]]()
     val bytes    = read(":db.type/bytes")
     val index    = read(":db/index")
     val fulltext = read(":db/fulltext")
+    val checkNot = if (isPeerServer) {
+      (k: Any) => k == fulltext
+    } else {
+      // dev-local is indexing all attributes as default
+      (k: Any) => k == index || k == fulltext
+    }
+
     nss.asInstanceOf[jList[jMap[Object, Object]]].asScala.foreach { map0 =>
       val map1     : Map[Object, Object] = map0.asScala.toMap
       val validType: Boolean             = map1.collect {
@@ -66,7 +77,7 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
       if (validType) {
         val map2: jMap[Object, Object] = map1.filterNot {
           // Indexing and fulltext not implemented
-          case (k, _) => k == index || k == fulltext
+          case (k, _) => checkNot(k)
         }.asJava
         nss2.add(map2)
       }
@@ -89,13 +100,17 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     * @param dbName Database name
     * @return [[molecule.datomic.base.facade.Conn Conn]]
     */
-  def recreateDbFrom(schema: SchemaTransaction, dbName: String): Conn_Client = try {
+  def recreateDbFrom(
+    schema: SchemaTransaction,
+    dbName: String,
+    isPeerServer: Boolean = true
+  ): Conn_Client = try {
     deleteDatabase(dbName)
     createDatabase(dbName)
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(allowedClientDefinitions(schema.partitions))
-    conn.transact(allowedClientDefinitions(schema.namespaces))
+      conn.transact(allowedClientDefinitions(schema.partitions, isPeerServer))
+    conn.transact(allowedClientDefinitions(schema.namespaces, isPeerServer))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
@@ -135,12 +150,13 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     */
   def transactSchema(
     schema: SchemaTransaction,
-    dbName: String
+    dbName: String,
+    isPeerServer: Boolean = true
   ): Conn_Client = try {
     val conn = connect(dbName)
     if (schema.partitions.size() > 0)
-      conn.transact(allowedClientDefinitions(schema.partitions))
-    conn.transact(allowedClientDefinitions(schema.namespaces))
+      conn.transact(allowedClientDefinitions(schema.partitions, isPeerServer))
+    conn.transact(allowedClientDefinitions(schema.namespaces, isPeerServer))
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)

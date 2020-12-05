@@ -15,6 +15,9 @@ trait GenericEAVT {
   /** EAVT Index object to instantiate EAVT Index molecule. */
   object EAVT extends EAVT_0 with FirstNS {
 
+    /** Unfiltered EAVT Index fetching ALL datoms (!) */
+    final def apply                                     : EAVT_0 = ???
+
     /** Instantiate EAVT Index filtered by entity id. */
     final def apply(e: Long)                            : EAVT_0 = ???
 

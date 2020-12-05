@@ -72,7 +72,7 @@ object Settings {
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.specs2" %% "specs2-core" % "4.10.0",
-      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.4.5-SNAPSHOT",
+      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.2-SNAPSHOT",
 
 //            "com.datomic" % "datomic-free" % "0.9.5697",
       "com.datomic" % "datomic-pro" % "1.0.6202",

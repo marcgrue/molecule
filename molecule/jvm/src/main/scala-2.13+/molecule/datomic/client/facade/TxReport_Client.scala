@@ -56,12 +56,12 @@ case class TxReport_Client(
 
   override def toString =
     s"""TxReport {
-       |  dbBefore       : $dbBefore
-       |  dbBefore.basisT: ${dbBefore.basisT}
-       |  dbAfter        : $dbAfter
-       |  dbAfter.basisT : ${dbAfter.basisT}
-       |  txData         : $txDataRaw
-       |  tempids        : ${clientTxReport.tempIds}
+       |  dbBefore  : $dbBefore
+       |  dbBefore.t: ${dbBefore.t}
+       |  dbAfter   : $dbAfter
+       |  dbAfter.t : ${dbAfter.t}
+       |  txData    : $txDataRaw
+       |  tempids   : ${clientTxReport.tempIds}
        |}""".stripMargin
 
 
@@ -73,7 +73,7 @@ case class TxReport_Client(
   /** Get database value after transaction. */
   def dbAfter: Db = clientTxReport.dbAfter
 
-  def t: Long = dbAfter.basisT
+  def t: Long = dbAfter.t
 
   def tx: Long = Peer.toTx(t).asInstanceOf[Long]
 

@@ -1,6 +1,6 @@
 package molecule.coretests.generic
 
-import molecule.core.util.{expectCompileError, DatomicPeer}
+import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer, DatomicPeerServer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out6._
@@ -99,13 +99,10 @@ class Datom extends CoreSpec {
       Ns(e1).v.get === List("b", 3)
 
       // Transaction entity id
-      Ns(e1).tx.get === List(tx2, tx3)
+      Ns(e1).tx.get.sorted === List(tx2, tx3)
 
-      // `t` not directly accessible in Client
-      if (system == DatomicPeer) {
-        // Transaction time t
-        Ns(e1).t.get === List(t2, t3)
-      }
+      // Transaction time t
+      Ns(e1).t.get.sorted === List(t2, t3)
 
       // Transaction wall clock time as Date
       Ns(e1).txInstant.get.sorted === List(d2, d3)
@@ -164,8 +161,7 @@ class Datom extends CoreSpec {
       Ns.int.a.get === List((3, ":Ns/int"), (5, ":Ns/int"))
       Ns.int.v.get === List((3, 3), (5, 5))
       Ns.int.tx.get.sortBy(_._1) === List((3, tx3), (5, tx5))
-      if (system == DatomicPeer)
-        Ns.int.t.get === List((3, t3), (5, t5))
+      Ns.int.t.get.sortBy(_._1) === List((3, t3), (5, t5))
       Ns.int.txInstant.get.sortBy(_._1).toString === List((3, d3), (5, d5)).toString
       Ns.int.op.get === List((5, true), (3, true))
 
@@ -174,8 +170,7 @@ class Datom extends CoreSpec {
       Ns.int(5).a.get === List((5, ":Ns/int"))
       Ns.int(5).v.get === List((5, 5))
       Ns.int(5).tx.get === List((5, tx5))
-      if (system == DatomicPeer)
-        Ns.int(5).t.get === List((5, t5))
+      Ns.int(5).t.get === List((5, t5))
       Ns.int(5).txInstant.get.toString === List((5, d5)).toString
       Ns.int(5).op.get === List((5, true))
 
@@ -184,8 +179,7 @@ class Datom extends CoreSpec {
       Ns.int.<(4).a.get === List((3, ":Ns/int"))
       Ns.int.<(4).v.get === List((3, 3))
       Ns.int.<(4).tx.get === List((3, tx3))
-      if (system == DatomicPeer)
-        Ns.int.<(4).t.get === List((3, t3))
+      Ns.int.<(4).t.get === List((3, t3))
       Ns.int.<(4).txInstant.get.toString === List((3, d3)).toString
       Ns.int.<(4).op.get === List((3, true))
 
@@ -194,8 +188,7 @@ class Datom extends CoreSpec {
       Ns.int(max).a.get === List((5, ":Ns/int"))
       Ns.int(max).v.get === List((3, 3), (5, 5))
       Ns.int(max).tx.get === List((3, tx3), (5, tx5))
-      if (system == DatomicPeer)
-        Ns.int(max).t.get === List((3, t3), (5, t5))
+      Ns.int(max).t.get === List((3, t3), (5, t5))
       Ns.int(max).txInstant.get.sortBy(_._1).toString === List((3, d3), (5, d5)).toString
       Ns.int(max).op.get === List((5, true))
     }
@@ -267,8 +260,7 @@ class Datom extends CoreSpec {
       Ns.Ref1.v.get === List("hello")
       // `ref1` ref datom asserted in tx7
       Ns.Ref1.tx.get === List(tx7)
-      if (system == DatomicPeer)
-        Ns.Ref1.t.get === List(t7)
+      Ns.Ref1.t.get === List(t7)
       Ns.Ref1.txInstant.get.toString === List(d7).toString
       Ns.Ref1.op.get === List(true)
 
@@ -278,8 +270,7 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.v.get === List((5, "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.get === List((5, tx7))
-      if (system == DatomicPeer)
-        Ns.int.Ref1.t.get === List((5, t7))
+      Ns.int.Ref1.t.get === List((5, t7))
       Ns.int.Ref1.txInstant.get.toString === List((5, d7)).toString
       Ns.int.Ref1.op.get === List((5, true))
 
@@ -289,8 +280,7 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.v.str1.get === List((5, "hello", "hello"))
       // `ref1` ref datom asserted in tx7
       Ns.int.Ref1.tx.str1.get === List((5, tx7, "hello"))
-      if (system == DatomicPeer)
-        Ns.int.Ref1.t.str1.get === List((5, t7, "hello"))
+      Ns.int.Ref1.t.str1.get === List((5, t7, "hello"))
       Ns.int.Ref1.txInstant.str1.get.toString === List((5, d7, "hello")).toString
       Ns.int.Ref1.op.str1.get === List((5, true, "hello"))
 
@@ -300,8 +290,7 @@ class Datom extends CoreSpec {
       Ns.int.Ref1.str1.v.get === List((5, "hello", "hello"))
       // `str1` datom asserted in tx6
       Ns.int.Ref1.str1.tx.get === List((5, "hello", tx6))
-      if (system == DatomicPeer)
-        Ns.int.Ref1.str1.t.get === List((5, "hello", t6))
+      Ns.int.Ref1.str1.t.get === List((5, "hello", t6))
       Ns.int.Ref1.str1.txInstant.get.toString === List((5, "hello", d6)).toString
       Ns.int.Ref1.str1.op.get === List((5, "hello", true))
 
@@ -327,9 +316,8 @@ class Datom extends CoreSpec {
     Ns.e.not(e1).get.sorted === List(e2, r1).sorted
     Ns.e.not(e1, e2).get === List(r1)
 
-    if (system == DatomicPeer) {
-      // Functionality works in all systems, but only Peer creates successive
-      // entity id numbers.
+    if (system != DatomicDevLocal) {
+      // Dev-local entity numbers are not predictable
       Ns.e.>(e1).get.sorted === List(e2, r1).sorted
       Ns.e.>=(e1).get.sorted === List(e1, e2, r1).sorted
       Ns.e.<=(e2).get.sorted === List(e1, e2).sorted
@@ -362,8 +350,8 @@ class Datom extends CoreSpec {
     Ns.v("hello").get === List("hello")
     Ns.v("non-existing value").get === Nil
     Ns.v(3, "b").get === List("b", 3)
-    Ns.v.not(3).get === List("b", r1, 5, "x", "hello")
-    Ns.v.not(3, "b").get === List(r1, 5, "x", "hello")
+    Ns.v.not(3).get.sortBy(_.toString) === List(r1, 5, "b", "hello", "x").sortBy(_.toString)
+    Ns.v.not(3, "b").get.sortBy(_.toString) === List(r1, 5, "hello", "x").sortBy(_.toString)
     expectCompileError(
       """m(Ns.v.>(3))""",
       "molecule.core.transform.exception.Dsl2ModelException: " +
@@ -374,34 +362,27 @@ class Datom extends CoreSpec {
 
     // Note that no current datoms remains from tx1
     Ns.tx.not(tx3).get.sorted === List(tx2, tx4, tx5, tx6, tx7)
-
-    // If we ask the history database though, tx1 will show up too
-    Ns.tx.not(tx3).getHistory.sorted === List(tx1, tx2, tx4, tx5, tx6, tx7)
-
     Ns.tx.not(tx3, tx5).get.sorted === List(tx2, tx4, tx6, tx7)
     Ns.tx.>(tx3).get.sorted === List(tx4, tx5, tx6, tx7)
     Ns.tx.>=(tx3).get.sorted === List(tx3, tx4, tx5, tx6, tx7)
     Ns.tx.<=(tx3).get.sorted === List(tx2, tx3) // excludes tx1 per explanation above
-    Ns.tx.<=(tx3).getHistory.sorted === List(tx1, tx2, tx3) // includes tx1 too per explanation above
     Ns.tx.<(tx3).get === List(tx2)
     // Range of transaction entity ids
     Ns.tx_.>(tx2).tx.<=(tx4).get.sorted === List(tx3, tx4)
     Ns.int_.tx(count).get === List(2)
 
-    if (system == DatomicPeer) {
-      Ns.t(t3).get === List(t3)
-      Ns.t(t3, t5).get.sorted === List(t3, t5)
-      Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
-      Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
-      Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
-      Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
-      Ns.t.<=(t3).get.sorted === List(t2, t3)
-      Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
-      Ns.t.<(t3).get === List(t2)
-      // Range of transaction t's
-      Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
-      Ns.int_.t(count).get === List(2)
-    }
+    Ns.t(t3).get === List(t3)
+    Ns.t(t3, t5).get.sorted === List(t3, t5)
+    Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
+    Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
+    Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
+    Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
+    Ns.t.<=(t3).get.sorted === List(t2, t3)
+
+    Ns.t.<(t3).get === List(t2)
+    // Range of transaction t's
+    Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
+    Ns.int_.t(count).get === List(2)
 
     // OBS: Avoid using date expressions for precision expressions!
     // Since the minimum fraction of Date is ms, it will be imprecise.
@@ -413,7 +394,6 @@ class Datom extends CoreSpec {
     Ns.txInstant.>(d3).get.sorted === List(d4, d5, d6, d7).sorted
     Ns.txInstant.>=(d3).get.sorted === List(d3, d4, d5, d6, d7).sorted
     Ns.txInstant.<=(d3).get.sorted === List(d2, d3).sorted
-    Ns.txInstant.<=(d3).getHistory.sorted === List(d1, d2, d3).sorted
     Ns.txInstant.<(d3).get.sorted === List(d2)
     // Range of transaction entity ids
     Ns.txInstant_.>(d2).txInstant.<=(d4).get.sorted === List(d3, d4).sorted
@@ -423,34 +403,43 @@ class Datom extends CoreSpec {
     Ns.op(true).get === List(true)
     Ns.op(true, false).get === List(true)
     Ns.op(false).get === Nil
-    // History database contains retracted datoms
-    Ns.op(false).getHistory === List(false)
 
     Ns.op.not(true).get === Nil
     Ns.op.not(true, false).get === Nil
 
     // Comparing boolean values not that relevant, but hey, here we go:
     Ns.op.>(true).get === Nil
-    Ns.op.>(true).getHistory === Nil
     Ns.op.>(false).get === List(true)
-    Ns.op.>(false).getHistory === List(true)
 
     Ns.op.>=(true).get === List(true)
-    Ns.op.>=(true).getHistory === List(true)
     Ns.op.>=(false).get === List(true)
-    Ns.op.>=(false).getHistory === List(false, true)
 
     Ns.op.<=(true).get === List(true)
-    Ns.op.<=(true).getHistory === List(false, true)
     Ns.op.<=(false).get === Nil
-    Ns.op.<=(false).getHistory === List(false)
 
     Ns.op.<(true).get === Nil
-    Ns.op.<(true).getHistory === List(false)
     Ns.op.<(false).get === Nil
-    Ns.op.<(false).getHistory === Nil
 
     Ns.int_.op(count).get === List(1)
+
+    if (system != DatomicPeerServer) {
+      // If we ask the history database, tx1 will show up too
+      Ns.tx.not(tx3).getHistory.sorted === List(tx1, tx2, tx4, tx5, tx6, tx7)
+
+      Ns.tx.<=(tx3).getHistory.sorted === List(tx1, tx2, tx3) // includes tx1 too per explanation above
+      Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
+      Ns.txInstant.<=(d3).getHistory.sorted === List(d1, d2, d3).sorted
+      Ns.op(false).getHistory === List(false)
+      Ns.op.>(true).getHistory === Nil
+      Ns.op.>(false).getHistory === List(true)
+      Ns.op.>=(true).getHistory === List(true)
+      Ns.op.>=(false).getHistory === List(false, true)
+      Ns.op.<=(true).getHistory === List(false, true)
+      Ns.op.<=(false).getHistory === List(false)
+      Ns.op.<(true).getHistory === List(false)
+      Ns.op.<(false).getHistory === Nil
+    }
+
 
     // Generic attributes only allowed to aggregate `count`
     expectCompileError(
@@ -496,19 +485,17 @@ class Datom extends CoreSpec {
     Ns.int.tx_.>(tx2).tx_.<=(tx4).get === List(3)
     Ns.int.tx_.>(tx2).tx_.<=(tx5).get === List(3, 5)
 
-    if (system == DatomicPeer) {
-      Ns.int.t_(t3).get === List(3)
-      Ns.int.t_(t3, t5).get === List(3, 5)
-      Ns.int.t_.not(t3).get === List(5)
-      Ns.int.t_.not(t3, t5).get === Nil
-      Ns.int.t_.>(t3).get === List(5)
-      Ns.int.t_.>=(t3).get === List(3, 5)
-      Ns.int.t_.<=(t3).get === List(3)
-      Ns.int.t_.<(t3).get === Nil
-      // Int values withing range of transaction t's
-      Ns.int.t_.>(t2).t_.<=(t4).get === List(3)
-      Ns.int.t_.>(t2).t_.<=(t5).get === List(3, 5)
-    }
+    Ns.int.t_(t3).get === List(3)
+    Ns.int.t_(t3, t5).get === List(3, 5)
+    Ns.int.t_.not(t3).get === List(5)
+    Ns.int.t_.not(t3, t5).get === Nil
+    Ns.int.t_.>(t3).get === List(5)
+    Ns.int.t_.>=(t3).get === List(3, 5)
+    Ns.int.t_.<=(t3).get === List(3)
+    Ns.int.t_.<(t3).get === Nil
+    // Int values withing range of transaction t's
+    Ns.int.t_.>(t2).t_.<=(t4).get === List(3)
+    Ns.int.t_.>(t2).t_.<=(t5).get === List(3, 5)
 
     Ns.int.txInstant_(d3).get === List(3)
     Ns.int.txInstant_(d3, d5).get === List(3, 5)
@@ -528,7 +515,9 @@ class Datom extends CoreSpec {
     Ns.int.op_(false).get === Nil
 
     // Retracted numbers from history db!
-    Ns.int.op_(false).getHistory === List(1, 4)
+    // Since we can't recreate the Peer Server db history is accumulating
+    if (system != DatomicPeerServer)
+      Ns.int.op_(false).getHistory === List(1, 4)
 
     Ns.int.op_.not(true).get === Nil
     Ns.int.op_.not(false).get === List(3, 5)
@@ -552,10 +541,9 @@ class Datom extends CoreSpec {
       """m(Ns.int$.tx.str)""",
       "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`tx`).")
 
-    if (system == DatomicPeer)
-      expectCompileError(
-        """m(Ns.int$.t.str)""",
-        "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
+    expectCompileError(
+      """m(Ns.int$.t.str)""",
+      "molecule.core.transform.exception.Dsl2ModelException: Optional attributes (`int$`) can't be followed by generic transaction attributes (`t`).")
 
     expectCompileError(
       """m(Ns.int$.txInstant.str)""",

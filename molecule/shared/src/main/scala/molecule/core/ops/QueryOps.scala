@@ -29,6 +29,11 @@ object QueryOps extends Helpers with JavaUtil {
     if (s.contains(".")) s else s + ".0"
   }
 
+  // datomic.Peer.toTx(0) === 13194139533312L
+  // datomic.Peer.toTx(1) === 13194139533313L
+  // etc.
+  val txBase = 13194139533312L
+
   implicit class QueryOps(q: Query) {
 
     // Find ..........................................
@@ -156,14 +161,16 @@ object QueryOps extends Helpers with JavaUtil {
       q.where(Var("_"), KW("db.install", "attribute"), "id", "tx")
         .where(Var("id"), KW("db", "ident"), "idIdent")
         .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
+//        .func("java.util.regex.Pattern/matches ^String",
         .func(".matches ^String",
           Seq(Var("nsFull"), Val(
-            "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian" + // peer/client
+            "^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian" + // peer/client
               "|db.entity|db.attr" + // client
-              "|:?-.*)" // molecule-admin prefix to mark
+              "|:?-.*)" // molecule-admin prefix to mark retracted attributes
           )),
           ScalarBinding(Var("sys")))
         .func("=", Seq(Var("sys"), Val(false)))
+//        .func("clojure.string/includes? ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
         .func(".contains ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
         .func(".split ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("nsParts")))
         .func("first", Seq(Var("nsParts")), ScalarBinding(Var("part0")))
@@ -222,7 +229,8 @@ object QueryOps extends Helpers with JavaUtil {
     }
 
     def schemaT: Query = q.schema
-      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
+      .func("-", Seq(Var("tx"), Val(txBase)), ScalarBinding(Var("t")))
+//      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
 
     def schemaTxInstant: Query = q.schema
       .where("tx", "db", "txInstant", Var("txInstant"), "")
@@ -362,10 +370,12 @@ object QueryOps extends Helpers with JavaUtil {
     def datomT(e: String, v: String, v1: String): Query = {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
-          q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
+          q.func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
+//          q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
       } getOrElse
         q.datomTx(e, v, v1)
-          .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
+          .func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
+//          .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
     }
 
     def datomTxInstant(e: String, v: String, v1: String): Query = {

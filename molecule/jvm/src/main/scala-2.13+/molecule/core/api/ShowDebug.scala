@@ -15,13 +15,14 @@ import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
+import scala.util.control.Breaks.break
 
 
 /** Debug methods
   *
   * Call a debug method on a molecule to see the internal transformations and
   * produced transaction statements or sample data.
-  **/
+  * */
 trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
 
 
@@ -41,11 +42,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
   def debugGet(implicit conn: Conn): Unit = {
 
     def generic(): Unit = {
-      val rows = try {
-        conn._index(_model)
-      } catch {
-        case ex: Throwable => throw new MoleculeException("Problem accessing Datomic index. " + ex.getMessage)
-      }
+      val rows = conn._index(_model)
       val pE   = 14
       val pA   = 20
       val pV   = 50
@@ -60,29 +57,38 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
 
       var pad = 0
       def p(v: Any, i: Int): String = v.toString.padTo(i, ' ') + "   "
-      val n = _model.elements.tail.zipWithIndex.map {
-        case (Generic(_, "e", _, _), i)         => print(p("E", pE)); pad += pE + 3; i -> pE
-        case (Generic(_, "a", _, _), i)         => print(p("A", pA)); pad += pA + 3; i -> pA
-        case (Generic(_, "v", _, _), i)         => print(p("V", pV)); pad += pV + 3; i -> pV
-        case (Generic(_, "t", _, _), i)         => print(p("T", pT)); pad += pT + 3; i -> pT
-        case (Generic(_, "tx", _, _), i)        => print(p("Tx", pE)); pad += pE + 3; i -> pE
-        case (Generic(_, "txInstant", _, _), i) => print(p("TxInstant", pD)); pad += pD + 3; i -> pD
-        case (Generic(_, "op", _, _), i)        => print(p("Op", pT)); pad += pT + 3; i -> pT
-        case other                              => throw new MoleculeException("Unexpected element: " + other)
-      }.toMap
+      val n = {
+        val dataElements: Seq[Generic] = _model.elements.collect {
+          case e@Generic(_, attr, _, _)
+            if attr != "args_" && attr != "range" => e
+        }
+
+        //        _model.elements.zipWithIndex.map {
+        dataElements.zipWithIndex.map {
+          case (Generic(_, "e", _, _), i)         => print(p("E", pE)); pad += pE + 3; i -> pE
+          case (Generic(_, "a", _, _), i)         => print(p("A", pA)); pad += pA + 3; i -> pA
+          case (Generic(_, "v", _, _), i)         => print(p("V", pV)); pad += pV + 3; i -> pV
+          case (Generic(_, "t", _, _), i)         => print(p("T", pT)); pad += pT + 3; i -> pT
+          case (Generic(_, "tx", _, _), i)        => print(p("Tx", pE)); pad += pE + 3; i -> pE
+          case (Generic(_, "txInstant", _, _), i) => print(p("TxInstant", pD)); pad += pD + 3; i -> pD
+          case (Generic(_, "op", _, _), i)        => print(p("Op", pT)); pad += pT + 3; i -> pT
+          case other                              => throw new MoleculeException("Unexpected element: " + other)
+        }.toMap
+      }
 
       println()
       println("-----" + "-" * pad)
 
       var i = 0
       n.size match {
-        case 1 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0))) }
-        case 2 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1))) }
-        case 3 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2))) }
-        case 4 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3))) }
-        case 5 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4))) }
-        case 6 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5))) }
-        case 7 => rows.forEach { row => i += 1; println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5)) + p(row.get(6), n(6))) }
+        case 0 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2)) }}
+        case 1 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0))) }}
+        case 2 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1))) }}
+        case 3 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2))) }}
+        case 4 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3))) }}
+        case 5 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4))) }}
+        case 6 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5))) }}
+        case 7 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5)) + p(row.get(6), n(6))) }}
       }
 
       println("-----" + "-" * pad)
@@ -237,12 +243,12 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       // time and are therefore not present in this runtime process.
       Model2Query(_model)
 
-      val ins     = QueryOps(_query).inputs
-      val p       = (expr: QueryExpr) => Query2String(_query).p(expr)
-      val rules   = "[" + (_query.i.rules.map(p).mkString(" ")) + "]"
-      val db      = conn.db
-      val first   = if (_query.i.rules.isEmpty) Seq(db) else Seq(db, rules)
-      val rows    = try {
+      val ins   = QueryOps(_query).inputs
+      val p     = (expr: QueryExpr) => Query2String(_query).p(expr)
+      val rules = "[" + (_query.i.rules.map(p).mkString(" ")) + "]"
+      val db    = conn.db
+      val first = if (_query.i.rules.isEmpty) Seq(db) else Seq(db, rules)
+      val rows  = try {
         resolve(conn._query(_model, _query, Some(db)).asScala.take(500))
       } catch {
         case ex: Throwable =>
@@ -277,7 +283,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     }
 
     _model.elements.head match {
-      case Generic("eavt" | "aevt" | "avet" | "aevt" | "Log", _, _, _) => generic()
+      case Generic("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => generic()
       case _                                                           => data()
     }
   }

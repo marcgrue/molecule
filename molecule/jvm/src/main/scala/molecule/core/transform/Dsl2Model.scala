@@ -18,7 +18,7 @@ private[molecule] trait Dsl2Model extends Cast with Json {
   import c.universe._
 
   val x = DebugMacro("Dsl2Model", 901, 900)
-  //  val x = DebugMacro("Dsl2Model", 1, 900)
+  //    val x = DebugMacro("Dsl2Model", 1, 900)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -285,11 +285,6 @@ private[molecule] trait Dsl2Model extends Cast with Json {
 
       } else if (genericType != "datom") { // Indexes
         x(120, genericType, attrStr)
-        if (p.isFirstNS)
-          abort("Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-            "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-            s"  `conn.db.datoms(datomic.Database.${genericType.toUpperCase})`"
-          )
         resolveMandatoryGenericAttr(t, prev, p, attrStr)
 
       } else if (t.isEnum) {
@@ -778,6 +773,8 @@ private[molecule] trait Dsl2Model extends Cast with Json {
         x(93, genericType, attrStr)
         genericType match {
           case "schema" => resolveOpSchema(t, attrStr, value)
+          case _        => abort("Expressions on index attributes are not allowed. " +
+            "Please apply expression to full index result at runtime.")
         }
       } else if (t.isMapAttr) {
         x(94, attrStr, value)

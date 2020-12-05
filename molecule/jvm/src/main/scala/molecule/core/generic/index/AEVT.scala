@@ -15,16 +15,19 @@ trait GenericAEVT {
   /** AEVT Index object to start AEVT Index molecule. */
   object AEVT extends AEVT_0 with FirstNS {
 
-    /** Instantiate AVET Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
+    /** Unfiltered AEVT Index fetching ALL datoms (!) */
+    final def apply                                     : AEVT_0 = ???
+
+    /** Instantiate AEVT Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
     final def apply(a: String)                          : AEVT_0 = ???
 
-    /** Instantiate AVET Index filtered by attribute name and entity id. */
+    /** Instantiate AEVT Index filtered by attribute name and entity id. */
     final def apply(a: String, e: Long)                 : AEVT_0 = ???
 
-    /** Instantiate AVET Index filtered by attribute name, entity id and value. */
+    /** Instantiate AEVT Index filtered by attribute name, entity id and value. */
     final def apply(a: String, e: Long, v: Any)         : AEVT_0 = ???
 
-    /** Instantiate AVET Index filtered by attribute name, entity id, value and
+    /** Instantiate AEVT Index filtered by attribute name, entity id, value and
       * transaction entity id (`tx`) or point in time (`t`).*/
     final def apply(a: String, e: Long, v: Any, t: Long): AEVT_0 = ???
   }

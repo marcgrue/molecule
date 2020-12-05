@@ -15,6 +15,9 @@ trait GenericVAET {
   /** VAET Index object to start VAET reverse Index molecule. */
   object VAET extends VAET_0 with FirstNS {
 
+    /** Unfiltered VAET Index fetching ALL datoms (!) */
+    final def apply                                          : VAET_0 = ???
+
     /** Instantiate VAET reverse Index filtered by ref entity id value. */
     final def apply(refId: Long)                             : VAET_0 = ???
 

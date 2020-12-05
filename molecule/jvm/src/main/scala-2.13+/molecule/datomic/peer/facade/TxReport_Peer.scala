@@ -55,12 +55,12 @@ case class TxReport_Peer(
 
   override def toString =
     s"""TxReport {
-       |  dbBefore       : $dbBefore
-       |  dbBefore.basisT: ${dbBefore.basisT}
-       |  dbAfter        : $dbAfter
-       |  dbAfter.basisT : ${dbAfter.basisT}
-       |  txData         : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
-       |  tempids        : ${rawTxReport.get(TEMPIDS).asInstanceOf[AnyRef]}
+       |  dbBefore  : $dbBefore
+       |  dbBefore.t: ${dbBefore.basisT}
+       |  dbAfter   : $dbAfter
+       |  dbAfter.t : ${dbAfter.basisT}
+       |  txData    : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
+       |  tempids   : ${rawTxReport.get(TEMPIDS).asInstanceOf[AnyRef]}
        |}""".stripMargin
 
 

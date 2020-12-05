@@ -1,7 +1,7 @@
 package molecule.coretests.generic
 
 import molecule.core.exceptions.MoleculeException
-import molecule.core.util.{expectCompileError, DatomicPeer}
+import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer, DatomicPeerServer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
@@ -93,6 +93,25 @@ class Index extends CoreSpec {
     // https://docs.datomic.com/on-prem/indexes.html
   }
 
+
+  "All Datoms of Index" in new Setup {
+
+    system match {
+      case DatomicPeer =>
+        EAVT.a.get.size === 709
+        AEVT.a.get.size === 709
+        VAET.a.get.size === 349
+        AVET.a.get.size === 220
+
+      case DatomicDevLocal =>
+        EAVT.a.get.size === 569
+        AEVT.a.get.size === 569
+        VAET.a.get.size === 317
+        AVET.a.get.size === 569
+
+      case _ => // Peer Server (growing across tests, so we can't test deterministically here)
+    }
+  }
 
   "EAVT" >> {
 
@@ -187,9 +206,10 @@ class Index extends CoreSpec {
       // or
       // "Was entity e1's attribute :Ns/int value 1 in transaction t1 asserted or retracted?"
       // - 1 was asserted in transaction t1
-      EAVT(e1, ":Ns/int", 1, t1).e.a.v.t.op.getHistory === List(
-        (e1, ":Ns/int", 1, t1, true)
-      )
+      if (system != DatomicPeerServer)
+        EAVT(e1, ":Ns/int", 1, t1).e.a.v.t.op.getHistory === List(
+          (e1, ":Ns/int", 1, t1, true)
+        )
     }
 
 
@@ -221,13 +241,13 @@ class Index extends CoreSpec {
 
     "Only mandatory datom args" in new Setup {
 
-      // Missing Index arguments
-      expectCompileError(
-        "m(EAVT.e.a.v.t)",
-        "molecule.core.transform.exception.Dsl2ModelException: " +
-          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-          "  `conn.db.datoms(datomic.Database.EAVT)`")
+      //      // Missing Index arguments
+      //      expectCompileError(
+      //        "m(EAVT.e.a.v.t)",
+      //        "molecule.core.transform.exception.Dsl2ModelException: " +
+      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
+      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
+      //          "  `conn.db.datoms(datomic.Database.EAVT)`")
 
       // Applying values to Index attributes not allowed
       expectCompileError(
@@ -278,26 +298,27 @@ class Index extends CoreSpec {
       )
 
       // Attribute :Ns/int's historic entities, values and transactions
-      AEVT(":Ns/int").e.v.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
-        (e1, 1, t1, true),
-        (e1, 1, t3, false),
-        (e1, 2, t3, true),
-        (e2, 4, t4, true),
-        (e2, 4, t5, false),
-        (e2, 5, t5, true),
-      )
+      if (system != DatomicPeerServer)
+        AEVT(":Ns/int").e.v.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
+          (e1, 1, t1, true),
+          (e1, 1, t3, false),
+          (e1, 2, t3, true),
+          (e2, 4, t4, true),
+          (e2, 4, t5, false),
+          (e2, 5, t5, true),
+        )
     }
 
 
     "Only mandatory datom args" in new Setup {
 
       // Missing Index arguments
-      expectCompileError(
-        "m(AEVT.a.e.v.t)",
-        "molecule.core.transform.exception.Dsl2ModelException: " +
-          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-          "  `conn.db.datoms(datomic.Database.AEVT)`")
+      //      expectCompileError(
+      //        "m(AEVT.a.e.v.t)",
+      //        "molecule.core.transform.exception.Dsl2ModelException: " +
+      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
+      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
+      //          "  `conn.db.datoms(datomic.Database.AEVT)`")
 
       // Applying values to Index attributes not allowed
       expectCompileError(
@@ -327,31 +348,25 @@ class Index extends CoreSpec {
       AVET(":Ns/int", 2, e1, t3).op.get === List(true)
 
       // History of entities with attribute :Ns/int having value 4
-      AVET(":Ns/int", 4).e.t.op.getHistory === List(
-        (e2, t5, false),
-        (e2, t4, true)
-      )
+      if (system != DatomicPeerServer) {
+        AVET(":Ns/int", 4).e.t.op.getHistory === List(
+          (e2, t5, false),
+          (e2, t4, true)
+        )
 
-      AEVT(":Ns/int").v.e.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
-        (1, e1, t1, true),
-        (1, e1, t3, false),
-        (2, e1, t3, true),
-        (4, e2, t4, true),
-        (4, e2, t5, false),
-        (5, e2, t5, true),
-      )
+        AEVT(":Ns/int").v.e.t.op.getHistory.sortBy(p => (p._3, p._4)) === List(
+          (1, e1, t1, true),
+          (1, e1, t3, false),
+          (2, e1, t3, true),
+          (4, e2, t4, true),
+          (4, e2, t5, false),
+          (5, e2, t5, true),
+        )
+      }
     }
 
 
     "Only mandatory datom args" in new Setup {
-
-      // Missing Index arguments
-      expectCompileError(
-        "m(AVET.a.v.e.t)",
-        "molecule.core.transform.exception.Dsl2ModelException: " +
-          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-          "  `conn.db.datoms(datomic.Database.AVET)`")
 
       // Applying values to Index attributes not allowed
       expectCompileError(
@@ -360,7 +375,7 @@ class Index extends CoreSpec {
           "AVET index attributes not allowed to have values applied.\n" +
           "AVET index only accepts datom arguments: `AVET(<a/v/e/t>)` or range arguments: `AVET.range(a, from, until)`.")
 
-      ok
+//      ok
     }
   }
 
@@ -454,47 +469,49 @@ class Index extends CoreSpec {
 
     "History" in new Setup {
 
-      // Attribute :Ns/int values from 1 to end
-      AVET.range(":Ns/int", Some(1), None).v.e.t.op.getHistory === List(
-        (1, e1, t3, false),
-        (1, e1, t1, true),
-        (2, e1, t3, true),
-        (4, e2, t5, false),
-        (4, e2, t4, true),
-        (5, e2, t5, true)
-      )
+      if (system != DatomicPeerServer) {
+        // Attribute :Ns/int values from 1 to end
+        AVET.range(":Ns/int", Some(1), None).v.e.t.op.getHistory === List(
+          (1, e1, t3, false),
+          (1, e1, t1, true),
+          (2, e1, t3, true),
+          (4, e2, t5, false),
+          (4, e2, t4, true),
+          (5, e2, t5, true)
+        )
 
-      // Attribute :Ns/int values from 1 until 6
-      AVET.range(":Ns/int", Some(1), Some(6)).v.e.t.op.getHistory === List(
-        (1, e1, t3, false),
-        (1, e1, t1, true),
-        (2, e1, t3, true),
-        (4, e2, t5, false),
-        (4, e2, t4, true),
-        (5, e2, t5, true)
-      )
+        // Attribute :Ns/int values from 1 until 6
+        AVET.range(":Ns/int", Some(1), Some(6)).v.e.t.op.getHistory === List(
+          (1, e1, t3, false),
+          (1, e1, t1, true),
+          (2, e1, t3, true),
+          (4, e2, t5, false),
+          (4, e2, t4, true),
+          (5, e2, t5, true)
+        )
 
-      // Attribute :Ns/int values from 1 until 5 (5 not included)
-      AVET.range(":Ns/int", Some(1), Some(5)).v.e.t.op.getHistory === List(
-        (1, e1, t3, false),
-        (1, e1, t1, true),
-        (2, e1, t3, true),
-        (4, e2, t5, false),
-        (4, e2, t4, true)
-      )
+        // Attribute :Ns/int values from 1 until 5 (5 not included)
+        AVET.range(":Ns/int", Some(1), Some(5)).v.e.t.op.getHistory === List(
+          (1, e1, t3, false),
+          (1, e1, t1, true),
+          (2, e1, t3, true),
+          (4, e2, t5, false),
+          (4, e2, t4, true)
+        )
 
-      // Attribute :Ns/int values from 2 until 5 (1 and 5 not included)
-      AVET.range(":Ns/int", Some(2), Some(5)).v.e.t.op.getHistory === List(
-        (2, e1, t3, true),
-        (4, e2, t5, false),
-        (4, e2, t4, true)
-      )
+        // Attribute :Ns/int values from 2 until 5 (1 and 5 not included)
+        AVET.range(":Ns/int", Some(2), Some(5)).v.e.t.op.getHistory === List(
+          (2, e1, t3, true),
+          (4, e2, t5, false),
+          (4, e2, t4, true)
+        )
 
-      // Attribute :Ns/int values from 3 until 5 (1, 2 and 5 not included)
-      AVET.range(":Ns/int", Some(3), Some(5)).v.e.t.op.getHistory === List(
-        (4, e2, t5, false),
-        (4, e2, t4, true)
-      )
+        // Attribute :Ns/int values from 3 until 5 (1, 2 and 5 not included)
+        AVET.range(":Ns/int", Some(3), Some(5)).v.e.t.op.getHistory === List(
+          (4, e2, t5, false),
+          (4, e2, t4, true)
+        )
+      }
     }
   }
 
@@ -528,13 +545,13 @@ class Index extends CoreSpec {
 
     "Only mandatory datom args" in new Setup {
 
-      // Missing Index arguments
-      expectCompileError(
-        "m(VAET.v.a.e.t)",
-        "molecule.core.transform.exception.Dsl2ModelException: " +
-          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
-          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
-          "  `conn.db.datoms(datomic.Database.VAET)`")
+      //      // Missing Index arguments
+      //      expectCompileError(
+      //        "m(VAET.v.a.e.t)",
+      //        "molecule.core.transform.exception.Dsl2ModelException: " +
+      //          "Non-filtered Indexes returning the whole database not allowed in Molecule.\n" +
+      //          "  Please apply one or more arguments to the Index. For full indexes, use Datomic:\n" +
+      //          "  `conn.db.datoms(datomic.Database.VAET)`")
 
       // Applying values to Index attributes not allowed
       expectCompileError(
@@ -545,41 +562,5 @@ class Index extends CoreSpec {
 
       ok
     }
-  }
-
-
-  "Raw access to all Datoms of Index" in new Setup {
-
-    if (system == DatomicPeer) {
-
-      val connPeer = conn.asInstanceOf[Conn_Peer]
-      val db       = connPeer.db.asInstanceOf[DatomicDb_Peer]
-
-      // Access all datoms (the entire database!) of an Index by raw access:
-      db.datoms(datomic.Database.EAVT)
-        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
-
-      println("-------")
-
-      // and with arguments:
-      db.datoms(datomic.Database.EAVT, e1.asInstanceOf[AnyRef])
-        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added()}]"))
-
-    } else {
-
-      val connPeer = conn.asInstanceOf[Conn_Client]
-      val db       = connPeer.db.asInstanceOf[DatomicDb_Client]
-
-      // Access all datoms (the entire database!) of an Index by raw access:
-      db.datoms(":eavt")
-        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"))
-
-      println("-------")
-
-      // and with arguments:
-      db.datoms(":eavt", e1.asInstanceOf[AnyRef])
-        .forEach(d => println(s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"))
-    }
-
   }
 }

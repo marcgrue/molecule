@@ -15,6 +15,9 @@ trait GenericAVET {
   /** AVET Index object to start AVET Index molecule. */
   object AVET extends AVET_0 with FirstNS {
 
+    /** Unfiltered AVET Index fetching ALL datoms (!) */
+    final def apply                                     : AVET_0 = ???
+
     /** Instantiate AVET Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
     final def apply(a: String)                          : AVET_0 = ???
 

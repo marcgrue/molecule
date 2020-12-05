@@ -142,18 +142,12 @@ class LogTest extends CoreSpec {
       (t3, e1, ":Ns/int", 2, true),
       (t3, e1, ":Ns/int", 1, false)
     )
-
-    if (system == DatomicDevLocal) {
-      (Log(Some(t1), Some(t2)).t.get must throwA[DatomicFacadeException])
-        .message === "Got the exception molecule.core.facade.exception.DatomicFacadeException: " +
-        "Dev local implementation doesn't accept time t. Please use tx or txInst (Date) instead."
-    }
   }
 
 
   "Grouped" in new Setup {
 
-    //Resembling the original structure of the Datomic Log
+    // Resembling the original structure of the Datomic Log
     val logMap = Log(Some(tx1), Some(tx4)).t.e.a.v.op.get.groupBy(_._1)
 
     logMap === Map(
@@ -185,44 +179,34 @@ class LogTest extends CoreSpec {
 
   "Args" in new Setup {
 
-    // Time t only implemented for Peer
-    if (system == DatomicPeer) {
+    // t - t
+    Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
+      (t1, tx1, ":db/txInstant", d1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
+    )
 
-      // t - t
-      Log(Some(t1), Some(t2)).t.e.a.v.op.get === List(
-        (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":Ns/str", "a", true),
-        (t1, e1, ":Ns/int", 1, true)
-      )
+    // t - tx
+    Log(Some(t1), Some(tx2)).t.e.a.v.op.get === List(
+      (t1, tx1, ":db/txInstant", d1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
+    )
 
-      // t - tx
-      Log(Some(t1), Some(tx2)).t.e.a.v.op.get === List(
-        (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":Ns/str", "a", true),
-        (t1, e1, ":Ns/int", 1, true)
-      )
+    // t - txInstant
+    Log(Some(t1), Some(d2)).t.e.a.v.op.get === List(
+      (t1, tx1, ":db/txInstant", d1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
+    )
 
-      // tx - t
-      Log(Some(tx1), Some(t2)).t.e.a.v.op.get === List(
-        (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":Ns/str", "a", true),
-        (t1, e1, ":Ns/int", 1, true)
-      )
 
-      // t - txInstant
-      Log(Some(t1), Some(d2)).t.e.a.v.op.get === List(
-        (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":Ns/str", "a", true),
-        (t1, e1, ":Ns/int", 1, true)
-      )
-
-      // txInstant - t
-      Log(Some(d1), Some(t2)).t.e.a.v.op.get === List(
-        (t1, tx1, ":db/txInstant", d1, true),
-        (t1, e1, ":Ns/str", "a", true),
-        (t1, e1, ":Ns/int", 1, true)
-      )
-    }
+    // tx - t
+    Log(Some(tx1), Some(t2)).t.e.a.v.op.get === List(
+      (t1, tx1, ":db/txInstant", d1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
+    )
 
     // tx - tx
     Log(Some(tx1), Some(tx2)).t.e.a.v.op.get === List(
@@ -238,6 +222,13 @@ class LogTest extends CoreSpec {
       (t1, e1, ":Ns/int", 1, true)
     )
 
+
+    // txInstant - t
+    Log(Some(d1), Some(t2)).t.e.a.v.op.get === List(
+      (t1, tx1, ":db/txInstant", d1, true),
+      (t1, e1, ":Ns/str", "a", true),
+      (t1, e1, ":Ns/int", 1, true)
+    )
 
     // txInstant - tx
     Log(Some(d1), Some(tx2)).t.e.a.v.op.get === List(
@@ -260,22 +251,22 @@ class LogTest extends CoreSpec {
         "Log only accepts range arguments: `Log(from, until)`.")
 
 
-    (Log(Some(tx1), Some("unexpect string")).tx.get must throwA[MoleculeException])
+    (Log(Some(tx1), Some("unexpected string")).tx.get must throwA[MoleculeException])
       .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
-      "Args to Log can only be t, tx or txInstant of type Int/Long/Date"
+      "Args to Log can only be t, tx or txInstant of type Int/Long/Date. " +
+      s"Found: List($tx1, unexpected string)"
 
-    if (system == DatomicDevLocal) {
-      (Log(Some(t1), Some("unexpect string")).t.get must throwA[DatomicFacadeException])
-        .message === "Got the exception molecule.core.facade.exception.DatomicFacadeException: " +
-        "Dev local implementation doesn't accept time t. Please use tx or txInst (Date) instead."
-    }
+    (Log(Some(t1), Some("unexpected string")).t.get must throwA[MoleculeException])
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
+      "Args to Log can only be t, tx or txInstant of type Int/Long/Date. " +
+      s"Found: List($t1, unexpected string)"
   }
 
 
   "Start/End" in new Setup {
 
     // tx12 (inclusive) - end
-    Log(Some(tx12), None).t.e.a.v.op.get === List(
+    Log(Some(t12), None).t.e.a.v.op.get === List(
       (t12, tx12, ":db/txInstant", d12, true),
       (t12, e2, ":Ns/ref1", e4, true),
       (t12, e2, ":Ns/ref1", e3, false),
@@ -297,7 +288,7 @@ class LogTest extends CoreSpec {
       // Same as this shortcut
       Log().t.get.size === 457
 
-    } else {
+    } else if (system == DatomicDevLocal) {
 
       // Start - t3 (exclusive)
       // Includes all Datomic database bootstrapping and schema transactions
@@ -358,7 +349,7 @@ class LogTest extends CoreSpec {
     Log(Some(d1), Some(d3)).tx.get.distinct.sorted === List(tx1, tx2)
 
     // Same as quering the history for all transactions within the time range
-    Ns.tx.txInstant_.>=(d1).txInstant_.<(d3).getHistory === List(tx1, tx2)
+    Ns.tx.txInstant_.>=(d1).txInstant_.<(d3).getHistory.sorted === List(tx1, tx2)
   }
 
 

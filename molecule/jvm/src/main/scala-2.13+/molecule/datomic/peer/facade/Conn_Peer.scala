@@ -1,6 +1,6 @@
 package molecule.datomic.peer.facade
 
-import java.util
+import java.{lang, util}
 import java.util.{Date, Collection => jCollection, List => jList}
 import datomic.{Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
@@ -55,8 +55,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     _adhocDb = Some(tempDb)
     this
   }
-
-  def getT(tx: Long): Long = Peer.toT(tx)
 
   /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
@@ -423,85 +421,91 @@ class Conn_Peer(val peerConn: datomic.Connection)
     val (api, index, args) = model.elements.head match {
       case Generic("EAVT", _, _, value) =>
         ("datoms", datomic.Database.EAVT, value match {
-          case Eq(Seq(e))                => Seq(e.asInstanceOf[Object])
-          case Eq(Seq(e, a))             => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object])
-          case Eq(Seq(e, a, v))          => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object])
-          case Eq(Seq(e, a, v, d: Date)) => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object], d.asInstanceOf[Object])
-          case Eq(Seq(e, a, v, t))       => Seq(e.asInstanceOf[Object], a.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
+          case NoValue                   => Seq()
+          case Eq(Seq(e))                => Seq(e)
+          case Eq(Seq(e, a))             => Seq(e, a)
+          case Eq(Seq(e, a, v))          => Seq(e, a, v)
+          case Eq(Seq(e, a, v, d: Date)) => Seq(e, a, v, d)
+          case Eq(Seq(e, a, v, t))       => Seq(e, a, v, t)
         })
 
       case Generic("AEVT", _, _, value) =>
         ("datoms", datomic.Database.AEVT, value match {
-          case Eq(Seq(a))                => Seq(a.asInstanceOf[Object])
-          case Eq(Seq(a, e))             => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object])
-          case Eq(Seq(a, e, v))          => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object])
-          case Eq(Seq(a, e, v, d: Date)) => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object], d.asInstanceOf[Object])
-          case Eq(Seq(a, e, v, t))       => Seq(a.asInstanceOf[Object], e.asInstanceOf[Object], v.asInstanceOf[Object], t.asInstanceOf[Object])
+          case NoValue                   => Seq()
+          case EntValue                  => Seq()
+          case Eq(Seq(a))                => Seq(a)
+          case Eq(Seq(a, e))             => Seq(a, e)
+          case Eq(Seq(a, e, v))          => Seq(a, e, v)
+          case Eq(Seq(a, e, v, d: Date)) => Seq(a, e, v, d)
+          case Eq(Seq(a, e, v, t))       => Seq(a, e, v, t)
         })
 
       case Generic("AVET", attr, _, value) =>
         attr match {
           case "range" =>
             ("indexRange", "", value match {
-              case Eq(Seq(a, None, None))  => Seq(a.asInstanceOf[Object], null, null)
-              case Eq(Seq(a, from, None))  => Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], null)
-              case Eq(Seq(a, None, until)) => Seq(a.asInstanceOf[Object], null, until.asInstanceOf[Object])
+              case Eq(Seq(a, None, None))  => Seq(a, null, null)
+              case Eq(Seq(a, from, None))  => Seq(a, from, null)
+              case Eq(Seq(a, None, until)) => Seq(a, null, until)
               case Eq(Seq(a, from, until)) =>
                 if (from.getClass != until.getClass)
                   throw new MoleculeException("Please supply range arguments of same type as attribute.")
-                Seq(a.asInstanceOf[Object], from.asInstanceOf[Object], until.asInstanceOf[Object])
+                Seq(a, from, until)
             })
           case _       =>
             ("datoms", datomic.Database.AVET, value match {
-              case Eq(Seq(a))                => Seq(a.asInstanceOf[Object])
-              case Eq(Seq(a, v))             => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object])
-              case Eq(Seq(a, v, e))          => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object])
-              case Eq(Seq(a, v, e, d: Date)) => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object], d.asInstanceOf[Object])
-              case Eq(Seq(a, v, e, t))       => Seq(a.asInstanceOf[Object], v.asInstanceOf[Object], e.asInstanceOf[Object], t.asInstanceOf[Object])
+              case NoValue                   => Seq()
+              case Eq(Seq(a))                => Seq(a)
+              case Eq(Seq(a, v))             => Seq(a, v)
+              case Eq(Seq(a, v, e))          => Seq(a, v, e)
+              case Eq(Seq(a, v, e, d: Date)) => Seq(a, v, e, d)
+              case Eq(Seq(a, v, e, t))       => Seq(a, v, e, t)
             })
         }
 
       case Generic("VAET", _, _, value) =>
         ("datoms", datomic.Database.VAET, value match {
-          case Eq(Seq(v))                => Seq(v.asInstanceOf[Object])
-          case Eq(Seq(v, a))             => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object])
-          case Eq(Seq(v, a, e))          => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object])
-          case Eq(Seq(v, a, e, d: Date)) => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object], d.asInstanceOf[Object])
-          case Eq(Seq(v, a, e, t))       => Seq(v.asInstanceOf[Object], a.asInstanceOf[Object], e.asInstanceOf[Object], t.asInstanceOf[Object])
+          case NoValue                   => Seq()
+          case Eq(Seq(v))                => Seq(v)
+          case Eq(Seq(v, a))             => Seq(v, a)
+          case Eq(Seq(v, a, e))          => Seq(v, a, e)
+          case Eq(Seq(v, a, e, d: Date)) => Seq(v, a, e, d)
+          case Eq(Seq(v, a, e, t))       => Seq(v, a, e, t)
         })
 
       case Generic("Log", _, _, value) =>
         ("txRange", "", value match {
-          case Eq(Seq(from: Int, until: Int))   => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Int, until: Long))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Int, until: Date))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Long, until: Int))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Long, until: Long)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Long, until: Date)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Date, until: Int))  => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Date, until: Long)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
-          case Eq(Seq(from: Date, until: Date)) => Seq(from.asInstanceOf[Object], until.asInstanceOf[Object])
+          case Eq(Seq(from: Int, until: Int))   => Seq(from, until)
+          case Eq(Seq(from: Int, until: Long))  => Seq(from, until)
+          case Eq(Seq(from: Int, until: Date))  => Seq(from, until)
+          case Eq(Seq(from: Long, until: Int))  => Seq(from, until)
+          case Eq(Seq(from: Long, until: Long)) => Seq(from, until)
+          case Eq(Seq(from: Long, until: Date)) => Seq(from, until)
+          case Eq(Seq(from: Date, until: Int))  => Seq(from, until)
+          case Eq(Seq(from: Date, until: Long)) => Seq(from, until)
+          case Eq(Seq(from: Date, until: Date)) => Seq(from, until)
 
-          case Eq(Seq(from: Int, None))  => Seq(from.asInstanceOf[Object], null)
-          case Eq(Seq(from: Long, None)) => Seq(from.asInstanceOf[Object], null)
-          case Eq(Seq(from: Date, None)) => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Int, None))  => Seq(from, null)
+          case Eq(Seq(from: Long, None)) => Seq(from, null)
+          case Eq(Seq(from: Date, None)) => Seq(from, null)
 
-          case Eq(Seq(None, until: Int))  => Seq(null, until.asInstanceOf[Object])
-          case Eq(Seq(None, until: Long)) => Seq(null, until.asInstanceOf[Object])
-          case Eq(Seq(None, until: Date)) => Seq(null, until.asInstanceOf[Object])
+          case Eq(Seq(None, until: Int))  => Seq(null, until)
+          case Eq(Seq(None, until: Long)) => Seq(null, until)
+          case Eq(Seq(None, until: Date)) => Seq(null, until)
 
           // All !!
           case Eq(Seq(None, None)) => Seq(null, null)
 
           // From until end
-          case Eq(Seq(from: Int))  => Seq(from.asInstanceOf[Object], null)
-          case Eq(Seq(from: Long)) => Seq(from.asInstanceOf[Object], null)
-          case Eq(Seq(from: Date)) => Seq(from.asInstanceOf[Object], null)
+          case Eq(Seq(from: Int))  => Seq(from, null)
+          case Eq(Seq(from: Long)) => Seq(from, null)
+          case Eq(Seq(from: Date)) => Seq(from, null)
 
           // All !!
           case Eq(Nil) => Seq(null, null)
 
-          case Eq(_) => throw new MoleculeException("Args to Log can only be t, tx or txInstant of type Int/Long/Date")
+          case Eq(other) => throw new MoleculeException(
+            "Args to Log can only be t, tx or txInstant of type Int/Long/Date. Found: " + other)
         })
 
       case other => throw new MoleculeException(s"Only Index queries accepted (EAVT, AEVT, AVET, VAET, Log). Found `$other`")
@@ -509,19 +513,23 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
     val adhocDb = db
 
-    def datomElement(tOpt: Option[Long], attr: String): Datom => AnyRef = attr match {
+    def datomElement(tOpt: Option[Long], attr: String): Datom => Any = attr match {
       case "e"                   => (d: Datom) => d.e
       case "a"                   => (d: Datom) => adhocDb.getDatomicDb.asInstanceOf[Database].ident(d.a).toString
       case "v"                   => (d: Datom) => d.v
-      case "t" if tOpt.isDefined => (_: Datom) => tOpt.get.asInstanceOf[AnyRef]
-      case "t"                   => (d: Datom) => toT(d.tx).asInstanceOf[AnyRef]
+      case "t" if tOpt.isDefined => (_: Datom) => tOpt.get
+      case "t"                   => (d: Datom) => toT(d.tx)
       case "tx"                  => (d: Datom) => d.tx
       case "txInstant"           => (d: Datom) => adhocDb.entity(this, d.tx).value(":db/txInstant").asInstanceOf[Date]
-      case "op"                  => (d: Datom) => d.added.asInstanceOf[AnyRef]
+      case "op"                  => (d: Datom) => d.added
     }
 
-    val attrs: Seq[String] = model.elements.tail.collect {
-      case Generic(_, attr, _, _) => attr
+    //    val attrs: Seq[String] = model.elements.tail.collect {
+    //      case Generic(_, attr, _, _) => attr
+    //    }
+    val attrs: Seq[String] = model.elements.collect {
+      case Generic(_, attr, _, _)
+        if attr != "args_" && attr != "range" => attr
     }
 
     def datom2row(tOpt: Option[Long]): Datom => jList[AnyRef] = attrs.length match {
@@ -578,19 +586,28 @@ class Conn_Peer(val peerConn: datomic.Connection)
     // Convert Datoms to standard list of rows so that we can use the same Molecule query API
     val jColl: jCollection[jList[AnyRef]] = new util.ArrayList[jList[AnyRef]]()
     api match {
-      case "datoms"     =>
-        val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_Peer].datoms(index, args: _*).forEach { datom =>
+      case "datoms" =>
+        val datom2row_ : Datom => jList[AnyRef] = datom2row(None)
+        val raw        : lang.Iterable[Datom]   =
+          adhocDb.asInstanceOf[DatomicDb_Peer].datoms(index, args: _*)
+        raw.forEach { datom =>
           jColl.add(datom2row_(datom))
         }
+
       case "indexRange" =>
-        val datom2row_ = datom2row(None)
-        adhocDb.asInstanceOf[DatomicDb_Peer]
-          .indexRange(args.head.toString, args(1), args(2)).forEach { datom =>
+        val datom2row_ : Datom => jList[AnyRef] = datom2row(None)
+        val attrId     : String                 = args.head.toString
+        val startValue : Any                    = args(1)
+        val endValue   : Any                    = args(2)
+        val raw        : lang.Iterable[Datom]   =
+          adhocDb.asInstanceOf[DatomicDb_Peer].indexRange(attrId, startValue, endValue)
+        raw.forEach { datom =>
           jColl.add(datom2row_(datom))
         }
-      case "txRange"    =>
-        peerConn.log.txRange(args.head, args(1)).forEach { txMap =>
+
+      case "txRange" =>
+        val raw = peerConn.log.txRange(args.head, args(1))
+        raw.forEach { txMap =>
           // Flatten transaction datoms to unified tuples return type
           txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]].forEach { datom =>
             val datom2row_ = datom2row(Some(txMap.get(datomic.Log.T).asInstanceOf[Long]))

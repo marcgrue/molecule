@@ -1,12 +1,13 @@
 package molecule.coretests.generic
 
-import molecule.core.util.{expectCompileError, DatomicPeer}
+import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer, DatomicPeerServer}
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
 
 
 class SchemaTest extends CoreSpec {
 
+  peerServerOnly = true
 
   "Partition schema values" >> {
 
@@ -104,8 +105,10 @@ class SchemaTest extends CoreSpec {
   class SchemaSetup extends CoreSetup {
     // Differing counts and ids for different systems
     val List(attrCount, a1, a2, a3, card1count, card2count) = system match {
-      case DatomicPeer => List(74, 97, 99, 100, 32, 42)
-      case _           => List(71, 105, 107, 108, 31, 40)
+      case DatomicPeer       => List(74, 106, 108, 109, 32, 42)
+//      case DatomicPeer       => List(74, 97, 99, 100, 32, 42)
+      case DatomicDevLocal   => List(71, 105, 107, 108, 31, 40)
+      case DatomicPeerServer => List(71, 104, 106, 107, 31, 40)
     }
   }
 
@@ -974,23 +977,17 @@ class SchemaTest extends CoreSpec {
 
   "t, tx, txInstant" in new SchemaSetup {
 
-    if (system == DatomicPeer) {
-      // OBS time t only implemented for Peer (dev-local can't convert from tx to t)
+    // Peer and dev-local schema transaction was last transaction
+
+    if (system != DatomicPeerServer) {
       // Schema transaction time t
-      Schema.t.get === List(1000)
+      Schema.t.get === List(conn.db.t)
 
       // Schema transaction entity id
-      Schema.tx.get === List(13194139534312L)
+      Schema.tx.get === List(conn.db.tx)
 
-      // Get tx wall clock time from Log for comparison with time from Schema query
-      Schema.txInstant.get === List(Log().txInstant.get.last)
-
-    } else {
-
-      // Schema transaction entity id
-      Schema.tx.get === List(13194139533318L)
-      // Get tx wall clock time from Log for comparison with time from Schema query
-      Schema.txInstant.get === List(Log().txInstant.get.last)
+      // Schema transaction wall clock time
+      Schema.txInstant.get === List(conn.db.txInstant)
     }
   }
 }

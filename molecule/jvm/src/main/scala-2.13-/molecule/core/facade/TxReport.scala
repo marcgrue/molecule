@@ -45,12 +45,12 @@ case class TxReport(rawTxReport: jMap[_, _], stmtss: Seq[Seq[Statement]] = Nil) 
 
   override def toString =
     s"""TxReport {
-       |  dbBefore       : $dbBefore
-       |  dbBefore.basisT: ${dbBefore.basisT}
-       |  dbAfter        : $dbAfter
-       |  dbAfter.basisT : ${dbAfter.basisT}
-       |  txData         : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
-       |  tempids        : $tempids
+       |  dbBefore  : $dbBefore
+       |  dbBefore.t: ${dbBefore.basisT}
+       |  dbAfter   : $dbAfter
+       |  dbAfter.t : ${dbAfter.basisT}
+       |  txData    : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
+       |  tempids   : $tempids
        |}""".stripMargin
 
 
