@@ -42,9 +42,11 @@ class Partition extends CoreSpec {
   "Nested 2 levels without intermediary attribute values" in new PartitionSetup {
     m(lit_Book.title.Reviewers.Professions * gen_Profession.name) insert List(("book", List("Hacker", "Magician")))
 
-    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get === List(("book", List("Hacker", "Magician")))
+    m(lit_Book.title.Reviewers * gen_Person.Professions.name).get.map(r => (r._1, r._2.sorted)) ===
+      List(("book", List("Hacker", "Magician")))
     // Same as
-    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Hacker", "Magician")))
+    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get.map(r => (r._1, r._2.sorted)) ===
+      List(("book", List("Hacker", "Magician")))
   }
 
 
