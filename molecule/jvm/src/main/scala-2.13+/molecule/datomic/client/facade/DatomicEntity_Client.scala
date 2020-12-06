@@ -1,7 +1,9 @@
 package molecule.datomic.client.facade
 
+import java.net.URI
 import java.util.{Date, UUID, Collection => jCollection}
 import clojure.lang.MapEntry
+import com.cognitect.transit.impl.URIImpl
 import datomicClient.anomaly.Fault
 import molecule.core.api.exception.EntityException
 import molecule.core.api.DatomicEntity
@@ -88,7 +90,9 @@ case class DatomicEntity_Client(
       case d: Date                  => d
       case u: UUID                  => u
       case u: java.net.URI          => u
+      case u: URIImpl               => new URI(u.toString)
       case bi: java.math.BigInteger => BigInt(bi)
+      case bi: clojure.lang.BigInt  => BigInt(bi.toString)
       case bd: java.math.BigDecimal => BigDecimal(bd)
       case bytes: Array[Byte]       => bytes
 
@@ -115,7 +119,10 @@ case class DatomicEntity_Client(
             )
             tpe match {
               case "Map"  => ent.asMap(depth + 1, maxDepth)
-              case "List" => ent.asList(depth + 1, maxDepth)
+              case "List" => ent.asList(depth + 1, maxDepth) match {
+                case List((":db/id", _), (":db/ident", enum)) => enum
+                case other                                    => other
+              }
             }
 
           case m =>

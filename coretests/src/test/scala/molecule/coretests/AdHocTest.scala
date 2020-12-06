@@ -33,15 +33,6 @@ class AdHocTest extends CoreSpec with Helpers with ClojureBridge {
   //  "adhoc" in new PartitionSetup {
   "adhoc" in new CoreSetup {
 
-//    Ns.str debugInsert str1
-    Ns.str insert str1
-//    Ns.int insert 1
-
-
-//    val e = Ns.e.int_.get.head
-    val e = Ns.e.str_.get.head
-
-    println(e.touch)
 
 
     ok
