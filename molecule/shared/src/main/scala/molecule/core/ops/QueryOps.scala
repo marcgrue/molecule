@@ -161,7 +161,7 @@ object QueryOps extends Helpers with JavaUtil {
       q.where(Var("_"), KW("db.install", "attribute"), "id", "tx")
         .where(Var("id"), KW("db", "ident"), "idIdent")
         .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
-//        .func("java.util.regex.Pattern/matches ^String",
+        //        .func("java.util.regex.Pattern/matches ^String",
         .func(".matches ^String",
           Seq(Var("nsFull"), Val(
             "^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian" + // peer/client
@@ -170,7 +170,7 @@ object QueryOps extends Helpers with JavaUtil {
           )),
           ScalarBinding(Var("sys")))
         .func("=", Seq(Var("sys"), Val(false)))
-//        .func("clojure.string/includes? ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
+        //        .func("clojure.string/includes? ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
         .func(".contains ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart")))
         .func(".split ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("nsParts")))
         .func("first", Seq(Var("nsParts")), ScalarBinding(Var("part0")))
@@ -230,7 +230,7 @@ object QueryOps extends Helpers with JavaUtil {
 
     def schemaT: Query = q.schema
       .func("-", Seq(Var("tx"), Val(txBase)), ScalarBinding(Var("t")))
-//      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
+    //      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
 
     def schemaTxInstant: Query = q.schema
       .where("tx", "db", "txInstant", Var("txInstant"), "")
@@ -371,11 +371,11 @@ object QueryOps extends Helpers with JavaUtil {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
           q.func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
-//          q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
+        //          q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
       } getOrElse
         q.datomTx(e, v, v1)
           .func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
-//          .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
+      //          .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
     }
 
     def datomTxInstant(e: String, v: String, v1: String): Query = {
@@ -447,10 +447,25 @@ object QueryOps extends Helpers with JavaUtil {
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w  = Var(if (i > 0) v + "_" + i else v + 2)
       val q1 = tpeS match {
-//        case "BigInt"       => q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
-        case "BigInt"       =>
-          q.func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
-            .func(".compareTo ^java.math.BigInteger", Seq(Var(v + "_casted"), qv), ScalarBinding(w))
+        //        case "BigInt"       =>
+        //          q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
+        case "BigInt" =>
+//          val Var(v1) = qv
+          val aa      = qv match {
+            case Var(v1) => q
+              .func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
+              .func("biginteger", Seq(Var(v1)), ScalarBinding(Var(v1 + "_casted")))
+              .func(".compareTo ^java.math.BigInteger", Seq(Var(v + "_casted"), Var(v1 + "_casted")), ScalarBinding(w))
+
+            case Val(arg) => q
+              .func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
+              .func(".compareTo ^java.math.BigInteger", Seq(Var(v + "_casted"), Val(arg)), ScalarBinding(w))
+          }
+
+
+          val bb = aa
+          aa
+
         case "BigDecimal"   => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(w))
         case "java.net.URI" => qv match {
           case Val(arg) =>

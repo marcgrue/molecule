@@ -25,10 +25,10 @@ class ApplyFloat extends CoreSpec {
       // Varargs
       Ns.float.apply(1.0f).get === List(1.0f)
       Ns.float.apply(2.0f).get === List(2.0f)
-      Ns.float.apply(1.0f, 2.0f).get === List(1.0f, 2.0f)
+      Ns.float.apply(1.0f, 2.0f).get.sorted === List(1.0f, 2.0f)
 
       // `or`
-      Ns.float.apply(1.0f or 2.0f).get === List(1.0f, 2.0f)
+      Ns.float.apply(1.0f or 2.0f).get.sorted === List(1.0f, 2.0f)
       Ns.float.apply(1.0f or 2.0f or 3.0f).get.sorted === List(1.0f, 2.0f, 3.0f)
 
       // Seq
@@ -36,8 +36,8 @@ class ApplyFloat extends CoreSpec {
       Ns.float.apply(Nil).get === Nil
       Ns.float.apply(List(1.0f)).get === List(1.0f)
       Ns.float.apply(List(2.0f)).get === List(2.0f)
-      Ns.float.apply(List(1.0f, 2.0f)).get === List(1.0f, 2.0f)
-      Ns.float.apply(List(1.0f), List(2.0f)).get === List(1.0f, 2.0f)
+      Ns.float.apply(List(1.0f, 2.0f)).get.sorted === List(1.0f, 2.0f)
+      Ns.float.apply(List(1.0f), List(2.0f)).get.sorted === List(1.0f, 2.0f)
       Ns.float.apply(List(1.0f, 2.0f), List(3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)
       Ns.float.apply(List(1.0f), List(2.0f, 3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)
       Ns.float.apply(List(1.0f, 2.0f, 3.0f)).get.sorted === List(1.0f, 2.0f, 3.0f)

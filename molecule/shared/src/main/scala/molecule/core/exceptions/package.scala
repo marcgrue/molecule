@@ -24,7 +24,7 @@ package object exceptions {
   class QueryException(ex: Throwable,
                        model: Model,
                        query: Query,
-                       allInputs: Seq[_],
+                       ins: Seq[_],
                        p: QueryExpr => String,
                        chain: Seq[String] = Nil) extends MoleculeException(
     s"""
@@ -39,7 +39,7 @@ package object exceptions {
        |
        |RULES: ${if (query.i.rules.isEmpty) "none" else query.i.rules.map(p).mkString("[\n ", "\n ", "\n]")}
        |
-       |INPUTS: ${allInputs.zipWithIndex.map(e => "\n" + (e._2 + 1) + " " + e._1)}
+       |INPUTS: ${if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}: ${r._1}").mkString("\n")}
        |#############################################################################
    """.stripMargin, ex
   )

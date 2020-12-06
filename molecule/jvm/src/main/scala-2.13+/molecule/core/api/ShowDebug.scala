@@ -82,13 +82,13 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       var i = 0
       n.size match {
         case 0 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2)) }}
-        case 1 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0))) }}
-        case 2 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1))) }}
-        case 3 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2))) }}
-        case 4 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3))) }}
-        case 5 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4))) }}
-        case 6 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5))) }}
-        case 7 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5)) + p(row.get(6), n(6))) }}
+        case 1 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)))} }
+        case 2 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)))} }
+        case 3 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)))} }
+        case 4 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)))} }
+        case 5 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)))} }
+        case 6 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5)))} }
+        case 7 => rows.forEach { row => i += 1; if (i <= 500) { println(p(i, 2) + p(row.get(0), n(0)) + p(row.get(1), n(1)) + p(row.get(2), n(2)) + p(row.get(3), n(3)) + p(row.get(4), n(4)) + p(row.get(5), n(5)) + p(row.get(6), n(6)))} }
       }
 
       println("-----" + "-" * pad)
@@ -256,20 +256,8 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
       }
 
       val rulesOut: String = if (_query.i.rules.isEmpty) "none\n\n" else "[\n " + _query.i.rules.map(Query2String(_query).p(_)).mkString("\n ") + "\n]\n\n"
-      val inputs  : String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}").mkString("\n") + "\n\n"
-      val outs    : String = rows.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1.mkString("[", "  ", "]")}").mkString("\n")
-      // If resolution doesn't take place
-      //      println(
-      //        "\n--------------------------------------------------------------------------\n" +
-      //          _model + "\n\n-- Before variable resolution (if any) --\n" +
-      //          _query + "\n\n-- After variable resolution (if any) --\n" +
-      //          _query2 + "\n\n" +
-      //          _query2.datalog + "\n\n" +
-      //          "RULES: " + rulesOut +
-      //          "INPUTS: " + inputs +
-      //          "OUTPUTS:\n" + outs + "\n(showing up to 500 rows)" +
-      //          "\n--------------------------------------------------------------------------\n"
-      //      )
+      val inputs  : String = if (ins.isEmpty) "none\n\n" else "\n" + ins.zipWithIndex.map(r => s"${r._2 + 1}: ${r._1}").mkString("\n") + "\n\n"
+      val outs    : String = rows.zipWithIndex.map(r => s"${r._2 + 1}: ${r._1.mkString("[", "  ", "]")}").mkString("\n")
       println(
         "\n--------------------------------------------------------------------------\n" +
           _model + "\n\n" +

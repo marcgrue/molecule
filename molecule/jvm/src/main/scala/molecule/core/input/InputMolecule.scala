@@ -192,7 +192,7 @@ trait InputMolecule extends MoleculeBase {
       // Card-one/many
 
       val v_ = w.filter(_.isLetter)
-      def inGroup(v: String) = v.filter(_.isLetter) == v_
+      def inGroup(v: String) = v.filter(_.isLetter) == v_ || v == v_ + "_casted"
       val tacit = isTacit(nsFull, attr)
 
       val (before, clauses, after) = query.wh.clauses.foldLeft(Seq.empty[Clause], Seq.empty[Clause], Seq.empty[Clause]) {
@@ -267,9 +267,31 @@ trait InputMolecule extends MoleculeBase {
 
         case 2 => clauses match {
 
+          // BigInt has extra cast function
+          case Seq(_, Funct("biginteger", _, _), _, _, _) => {
+            clauses match {
+              // Neq(Seq(Qm))
+              case Seq(dc, _, _, _, Funct("!=", _, _)) if nil => (Nil, Nil, Seq(dc))
+              case Seq(dc, _, _, _, Funct("!=", _, _))        =>
+                (Nil, Nil,
+                  dc +: argss.map(args =>
+                    NotClauses(args.map(arg =>
+                      DataClause(ImplDS, e, kw, Val(arg), Empty, NoBinding))
+                    )
+                  )
+                )
+
+              // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
+              case Seq(dc, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))
+              case cls@Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+              case Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _))            => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+            }
+          }
+
           // Neq(Seq(Qm))
-          case Seq(dc, _, Funct("!=", _, _)) if nil                        => (Nil, Nil, Seq(dc))
-          case Seq(dc, _, Funct("!=", _, _)) if uri                        => (Nil, Nil,
+          case Seq(dc, _, Funct("!=", _, _)) if nil => (Nil, Nil, Seq(dc))
+
+          case Seq(dc, _, Funct("!=", _, _)) if uri => (Nil, Nil,
             dc +: argss.map { args =>
               val clauses = args.zipWithIndex.flatMap { case (arg, i) =>
                 val uriVar = Var(w + "_uri" + (i + 1))
@@ -281,7 +303,8 @@ trait InputMolecule extends MoleculeBase {
               NotJoinClauses(Seq(e), clauses)
             }
           )
-          case Seq(dc, Funct(name, _, _), Funct("!=", Seq(Var(v2), _), _)) => (Nil, Nil,
+
+          case Seq(dc, _, Funct("!=", _, _)) => (Nil, Nil,
             dc +: argss.map(args =>
               NotClauses(args.map(arg =>
                 DataClause(ImplDS, e, kw, Val(arg), Empty, NoBinding))
@@ -292,7 +315,7 @@ trait InputMolecule extends MoleculeBase {
           // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
           case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))
           case cls@Seq(_, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
-          case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _))           => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+          case Seq(_, _, Funct(">" | ">=" | "<" | "<=", _, _))            => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
 
           // Fulltext(Seq(Qm))
           case Seq(f@Funct("fulltext", _, _)) if nil => (Seq(InVar(CollectionBinding(v), Seq(Nil))), Nil, Seq(f))
@@ -376,28 +399,70 @@ trait InputMolecule extends MoleculeBase {
 
           case Nil if nsFull == "ns" && attr == "?" => (Nil, Nil, Seq(Funct("=", Seq(v, Val(args.head)), NoBinding)))
 
+          // BigInt has extra cast function
+          case Seq(_, Funct("biginteger", _, _), _, _, _) => {
+            clauses match {
+              // Neq(Seq(Qm)) BigInt
+              case Seq(dc, _, _, _, Funct("!=", _, _)) if nil =>
+                (Nil, Nil, Seq(dc))
+
+              case cls@Seq(_, _, _, _, Funct("!=", _, _)) if one =>
+                (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+
+              case Seq(dc,
+              Funct("biginteger", Seq(Var(v0)), ScalarBinding(Var(v0_casted))),
+              Funct("biginteger", Seq(Var(v1)), ScalarBinding(Var(v1_casted))),
+              Funct(fn, _, ScalarBinding(Var(v2))),
+              Funct("!=", _, _)
+              ) =>
+                val bigIntNegations = args.zipWithIndex.flatMap { case (arg, i) =>
+                  val suffix      = "_" + (i + 1)
+                  val inputCasted = if (i == 0)
+                    Seq(Funct("biginteger", Seq(Var(v0)), ScalarBinding(Var(v0_casted)))) else Nil
+
+                  inputCasted ++ Seq(
+                    Funct(s"biginteger $arg", Seq(), ScalarBinding(Var(v1_casted + suffix))),
+                    Funct(fn, Seq(Var(v0_casted), Var(v1_casted + suffix)), ScalarBinding(Var(v2 + suffix))),
+                    Funct("!=", Seq(Var(v2 + suffix), Val(0)), NoBinding)
+                  )
+                }
+                (Nil, Nil, dc +: bigIntNegations)
+
+              // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm) BigInt
+              case Seq(dc, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))
+              case cls@Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+              case Seq(_, _, _, _, Funct(">" | ">=" | "<" | "<=", _, _))            => throw new InputMoleculeException("Can't apply multiple values to comparison function.")
+            }
+          }
+
           // Neq(Seq(Qm))
-          case Seq(dc, _, Funct("!=", _, _)) if nil                                       => (Nil, Nil, Seq(dc))
-          case cls@Seq(_, _, Funct("!=", _, _)) if one                                    => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
-          case Seq(dc, Funct(n, Seq(v1, `v`), _), Funct("!=", _, _)) if uri               => (Nil, Nil,
-            dc +: args.zipWithIndex.flatMap { case (arg, i) =>
-              val (x, y) = (Var(v_ + "_" + (i + 1) + "a"), Var(v_ + "_" + (i + 1) + "b"))
-              Seq(
-                Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(x)),
-                Funct(n, Seq(v1, x), ScalarBinding(y)),
-                Funct("!=", Seq(y, Val(0)), NoBinding)
-              )
-            }
-          )
-          case Seq(dc, Funct(n, Seq(v1, `v`), ScalarBinding(Var(v2))), Funct("!=", _, _)) => (Nil, Nil,
-            dc +: args.zipWithIndex.flatMap { case (arg, i) =>
-              val vx = Var(v2 + "_" + (i + 1))
-              Seq(
-                Funct(n, Seq(v1, Val(arg)), ScalarBinding(vx)),
-                Funct("!=", Seq(vx, Val(0)), NoBinding)
-              )
-            }
-          )
+
+          case Seq(dc, _, Funct("!=", _, _)) if nil => (Nil, Nil, Seq(dc))
+
+          case cls@Seq(_, _, Funct("!=", _, _)) if one => (Seq(InVar(ScalarBinding(v), Seq(args))), Nil, cls)
+
+          case Seq(dc, Funct(fn, Seq(v1, `v`), _), Funct("!=", _, _)) if uri =>
+            (Nil, Nil,
+              dc +: args.zipWithIndex.flatMap { case (arg, i) =>
+                val (x, y) = (Var(v_ + "_" + (i + 1) + "a"), Var(v_ + "_" + (i + 1) + "b"))
+                Seq(
+                  Funct(s"""ground (java.net.URI. "$arg")""", Seq(Empty), ScalarBinding(x)),
+                  Funct(fn, Seq(v1, x), ScalarBinding(y)),
+                  Funct("!=", Seq(y, Val(0)), NoBinding)
+                )
+              }
+            )
+
+          case Seq(dc, Funct(fn, Seq(v1, `v`), ScalarBinding(Var(v2))), Funct("!=", _, _)) =>
+            (Nil, Nil,
+              dc +: args.zipWithIndex.flatMap { case (arg, i) =>
+                val vx = Var(v2 + "_" + (i + 1))
+                Seq(
+                  Funct(fn, Seq(v1, Val(arg)), ScalarBinding(vx)),
+                  Funct("!=", Seq(vx, Val(0)), NoBinding)
+                )
+              }
+            )
 
           // Gt(Qm), Ge(Qm), Lt(Qm), Le(Qm)
           case Seq(dc, _, Funct(">" | ">=" | "<" | "<=", _, _)) if nil    => (Nil, Nil, Seq(dc))

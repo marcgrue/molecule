@@ -129,9 +129,20 @@ abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
             // todo: can't hardcode id switch...
             if (eid > 15194139534365L && attrId != 10) {
               eids += eid
+
+              println(conn.db.pull("[*]", eid))
             }
           }
-//          println("======= " + eids.size)
+          println("======= " + eids.size)
+          println("======= " + eids)
+
+
+//          import scala.jdk.CollectionConverters._
+//
+//          val raw = Invoke.indexRange(conn.db.getDatomicDb, read(":eavt"), Some(15194139534365L))
+//            .asInstanceOf[java.lang.Iterable[_]]
+//          println(raw.iterator().asScala.size)
+
           if (eids.nonEmpty) {
             retract(eids)
           }

@@ -526,9 +526,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case "op"                  => (d: Datom) => d.added
     }
 
-    //    val attrs: Seq[String] = model.elements.tail.collect {
-    //      case Generic(_, attr, _, _) => attr
-    //    }
     val attrs: Seq[String] = model.elements.collect {
       case Generic(_, attr, _, _)
         if attr != "args_" && attr != "range" => attr

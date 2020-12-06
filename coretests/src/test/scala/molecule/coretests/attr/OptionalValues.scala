@@ -178,10 +178,11 @@ class OptionalValues extends CoreSpec {
     }
 
     "Ref with sub components" in new CoreSetup {
-      Ns.int.refsSub1$ insert Seq((1, Some(Set(3L, 4L))), (2, None))
+      val List(r3, r4) = Ref1.int1.insert(3, 4).eids
+      Ns.int.refsSub1$ insert Seq((1, Some(Set(r3, r4))), (2, None))
 
-      Ns.int.refsSub1$.get.sortBy(_._1) === List((1, Some(Set(3L, 4L))), (2, None))
-      Ns.int.refsSub1.get === List((1, Set(3L, 4L)))
+      Ns.int.refsSub1$.get.sortBy(_._1) === List((1, Some(Set(r3, r4))), (2, None))
+      Ns.int.refsSub1.get === List((1, Set(r3, r4)))
     }
   }
 

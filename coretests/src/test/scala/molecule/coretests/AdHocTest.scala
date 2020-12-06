@@ -16,6 +16,7 @@ import molecule.datomic.api.in1_out6._
 import molecule.datomic.client.facade.DatomicDb_Client
 import molecule.datomic.peer.facade.DatomicDb_Peer
 import molecule.coretests.bidirectionals.dsl.bidirectional._
+import molecule.datomic.api.in1_out2.m
 import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
 import scala.util.Random
@@ -33,23 +34,16 @@ class AdHocTest extends CoreSpec with Helpers with ClojureBridge {
   "adhoc" in new CoreSetup {
 
 
-//    AEVT.e.a.v.t.debugGet
+    Ns.int.refsSub1.debugGet
 
-//    EAVT.a.get.size === 686
-//    AEVT.a.get.size === 686
-//    VAET.a.get.size === 347
-//    AVET.a.get.size === 197
-//
-//    EAVT.a.get.size === 546
-//    AEVT.a.get.size === 546
-//    VAET.a.get.size === 315
-//    AVET.a.get.size === 546
+    Ns.int.str.insert(1, "a")
+    Ns.int.insert(2)
 
-    println(EAVT.a.get.size)
-    println(AEVT.a.get.size)
-    println(VAET.a.get.size)
-    println(AVET.a.get.size)
+    // Int mandatory, String optional
+    Ns.int.str$.get.sortBy(_._1) === List((1, Some("a")), (2, None))
 
+    // Int and String mandatory
+    Ns.int.str.get === List((1, "a"))
 
     ok
   }

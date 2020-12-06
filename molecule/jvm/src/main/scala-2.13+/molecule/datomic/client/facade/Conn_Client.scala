@@ -238,6 +238,7 @@ case class Conn_Client(client: Client, dbName: String)
     val inputs = inputs0.map {
       case it: Iterable[_] => it.asJava
       case dbId: DbId      => dbId.idx.toString
+      case bi: BigInt      => new java.math.BigInteger(bi.toString)
       case v               => v
     }
     blocking(
@@ -262,6 +263,8 @@ case class Conn_Client(client: Client, dbName: String)
     val rules           = if (query.i.rules.isEmpty) Nil else Seq("[" + (query.i.rules map p mkString " ") + "]")
     val inputsEvaluated = QueryOpsClojure(query).inputsWithKeyword
     val allInputs       = rules ++ inputsEvaluated
+
+
     try {
       blocking {
         clientDatomic.q(query.toMap, adhocDb, allInputs: _*)

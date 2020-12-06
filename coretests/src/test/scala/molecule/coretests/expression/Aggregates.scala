@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.core.util.expectCompileError
+import molecule.core.util.{expectCompileError, DatomicPeerServer}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
@@ -94,8 +94,13 @@ class Aggregates extends CoreSpec {
   "avg" in new AggregateSetup {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
-    Ns.float(avg).get.head === 2.1999999999999997 // datomic precision
-    Ns.double(avg).get.head === 2.1999999999999997 // datomic precision
+
+    // For precision, please use Double type instead of Float
+    if (system == DatomicPeerServer)
+      Ns.float(avg).get.head === 2.2
+    else
+      Ns.float(avg).get.head === 2.1999999999999997
+    Ns.double(avg).get.head === 2.1999999999999997
   }
 
 
