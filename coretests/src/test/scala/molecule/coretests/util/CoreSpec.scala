@@ -124,7 +124,7 @@ abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
               //              println(conn.db.pull("[*]", eid))
             }
           }
-          println("======= " + eids.size)
+          //          println("======= " + eids.size)
 
           if (eids.nonEmpty) {
             retract(eids)
