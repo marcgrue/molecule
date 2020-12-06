@@ -1,6 +1,6 @@
 package molecule.coretests.json
 
-import molecule.core.util.DatomicPeer
+import molecule.core.util.{DatomicPeer, DatomicPeerServer}
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
@@ -147,11 +147,19 @@ class NestedTypes extends CoreSpec {
          |   {"Ref1.int1": 1}]}
          |]""".stripMargin
 
-    Ns.uris.Refs1.*(Ref1.int1).getJson ===
-      s"""[
-         |{"Ns.uris": ["$uri1", "$uri2"], "Ns.refs1": [
-         |   {"Ref1.int1": 1}]}
-         |]""".stripMargin
+    if (system == DatomicPeerServer) {
+      Ns.uris.Refs1.*(Ref1.int1).getJson ===
+        s"""[
+           |{"Ns.uris": ["$uri2", "$uri1"], "Ns.refs1": [
+           |   {"Ref1.int1": 1}]}
+           |]""".stripMargin
+    } else {
+      Ns.uris.Refs1.*(Ref1.int1).getJson ===
+        s"""[
+           |{"Ns.uris": ["$uri1", "$uri2"], "Ns.refs1": [
+           |   {"Ref1.int1": 1}]}
+           |]""".stripMargin
+    }
 
     Ns.enums.Refs1.*(Ref1.int1).getJson ===
       s"""[
@@ -427,25 +435,25 @@ class NestedTypes extends CoreSpec {
         |   {"Ref1.int1": 2}]}
         |]""".stripMargin
 
-    if (system == DatomicPeer) {
-      // Bug, where only one boolean value is returned
-      Ns.int(6).bools$.Refs1.*(Ref1.int1).getJson ===
-        """[
-          |{"Ns.int": 6, "Ns.bools": null, "Ns.refs1": [
-          |   {"Ref1.int1": 1}]},
-          |{"Ns.int": 6, "Ns.bools": [true], "Ns.refs1": [
-          |   {"Ref1.int1": 2}]}
-          |]""".stripMargin
-    } else {
-      // Correct output
-      Ns.int(6).bools$.Refs1.*(Ref1.int1).getJson ===
-        """[
-          |{"Ns.int": 6, "Ns.bools": null, "Ns.refs1": [
-          |   {"Ref1.int1": 1}]},
-          |{"Ns.int": 6, "Ns.bools": [false, true], "Ns.refs1": [
-          |   {"Ref1.int1": 2}]}
-          |]""".stripMargin
-    }
+    //    if (system == DatomicPeer) {
+    //      // Bug, where only one boolean value is returned
+    //      Ns.int(6).bools$.Refs1.*(Ref1.int1).getJson ===
+    //        """[
+    //          |{"Ns.int": 6, "Ns.bools": null, "Ns.refs1": [
+    //          |   {"Ref1.int1": 1}]},
+    //          |{"Ns.int": 6, "Ns.bools": [true], "Ns.refs1": [
+    //          |   {"Ref1.int1": 2}]}
+    //          |]""".stripMargin
+    //    } else {
+    // Correct output
+    Ns.int(6).bools$.Refs1.*(Ref1.int1).getJson ===
+      """[
+        |{"Ns.int": 6, "Ns.bools": null, "Ns.refs1": [
+        |   {"Ref1.int1": 1}]},
+        |{"Ns.int": 6, "Ns.bools": [false, true], "Ns.refs1": [
+        |   {"Ref1.int1": 2}]}
+        |]""".stripMargin
+    //    }
 
     Ns.int(7).dates$.Refs1.*(Ref1.int1).getJson ===
       s"""[

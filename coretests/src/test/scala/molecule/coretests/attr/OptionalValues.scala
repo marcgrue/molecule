@@ -85,10 +85,11 @@ class OptionalValues extends CoreSpec {
     }
 
     "Ref Long" in new CoreSetup {
-      Ns.int.ref1$ insert List((1, Some(3L)), (2, None))
+      val r3 = Ref1.int1(3).save.eid
+      Ns.int.ref1$ insert List((1, Some(r3)), (2, None))
 
-      Ns.int.ref1$.get.sortBy(_._1) === List((1, Some(3L)), (2, None))
-      Ns.int.ref1.get === List((1, 3L))
+      Ns.int.ref1$.get.sortBy(_._1) === List((1, Some(r3)), (2, None))
+      Ns.int.ref1.get === List((1, r3))
     }
   }
 
@@ -171,10 +172,11 @@ class OptionalValues extends CoreSpec {
     }
 
     "Ref" in new CoreSetup {
-      Ns.int.refs1$ insert Seq((1, Some(Set(3L, 4L))), (2, None))
+      val List(r3, r4) = Ref1.int1.insert(3, 4).eids
+      Ns.int.refs1$ insert Seq((1, Some(Set(r3, r4))), (2, None))
 
-      Ns.int.refs1$.get.sortBy(_._1) === List((1, Some(Set(3L, 4L))), (2, None))
-      Ns.int.refs1.get === List((1, Set(3L, 4L)))
+      Ns.int.refs1$.get.sortBy(_._1) === List((1, Some(Set(r3, r4))), (2, None))
+      Ns.int.refs1.get === List((1, Set(r3, r4)))
     }
 
     "Ref with sub components" in new CoreSetup {

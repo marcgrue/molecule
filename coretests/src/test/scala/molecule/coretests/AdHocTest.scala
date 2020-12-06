@@ -25,7 +25,7 @@ import scala.util.Random
 class AdHocTest extends CoreSpec with Helpers with ClojureBridge {
 
 //  peerOnly = true
-  peerServerOnly = true
+//  peerServerOnly = true
 //  devLocalOnly = true
 
 
@@ -33,17 +33,16 @@ class AdHocTest extends CoreSpec with Helpers with ClojureBridge {
   //  "adhoc" in new PartitionSetup {
   "adhoc" in new CoreSetup {
 
+//    Ns.str debugInsert str1
+    Ns.str insert str1
+//    Ns.int insert 1
 
-    Ns.int.refsSub1.debugGet
 
-    Ns.int.str.insert(1, "a")
-    Ns.int.insert(2)
+//    val e = Ns.e.int_.get.head
+    val e = Ns.e.str_.get.head
 
-    // Int mandatory, String optional
-    Ns.int.str$.get.sortBy(_._1) === List((1, Some("a")), (2, None))
+    println(e.touch)
 
-    // Int and String mandatory
-    Ns.int.str.get === List((1, "a"))
 
     ok
   }
