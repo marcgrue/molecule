@@ -16,8 +16,8 @@ import scala.jdk.CollectionConverters._
   * */
 trait Datomic_Peer {
 
-  def getDatabaseNames(protocol: String = "mem"): List[String] = {
-    Peer.getDatabaseNames(s"datomic:$protocol://*").asScala.toList
+  def getDatabaseNames(protocol: String = "mem", host: String = "localhost:4334/"): List[String] = {
+    Peer.getDatabaseNames(s"datomic:$protocol://$host*").asScala.toList
   }
 
   def createDatabase(dbIdentifier: String, protocol: String = "mem"): Boolean = try {

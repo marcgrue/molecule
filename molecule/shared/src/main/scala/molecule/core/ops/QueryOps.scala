@@ -447,11 +447,8 @@ object QueryOps extends Helpers with JavaUtil {
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w  = Var(if (i > 0) v + "_" + i else v + 2)
       val q1 = tpeS match {
-        //        case "BigInt"       =>
-        //          q.func(".compareTo ^java.math.BigInteger", Seq(Var(v), qv), ScalarBinding(w))
         case "BigInt" =>
-//          val Var(v1) = qv
-          val aa      = qv match {
+          qv match {
             case Var(v1) => q
               .func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
               .func("biginteger", Seq(Var(v1)), ScalarBinding(Var(v1 + "_casted")))
@@ -460,12 +457,9 @@ object QueryOps extends Helpers with JavaUtil {
             case Val(arg) => q
               .func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
               .func(".compareTo ^java.math.BigInteger", Seq(Var(v + "_casted"), Val(arg)), ScalarBinding(w))
+
+            case other => throw new IllegalArgumentException("Unexpected QueryValue for BigInt resolution: " + other)
           }
-
-
-          val bb = aa
-          aa
-
         case "BigDecimal"   => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(w))
         case "java.net.URI" => qv match {
           case Val(arg) =>

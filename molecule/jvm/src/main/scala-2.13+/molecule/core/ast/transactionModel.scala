@@ -38,7 +38,7 @@ object transactionModel extends JavaUtil {
   }
 
   private def eid(e: Any): String = {
-    val e1 = if (e.isInstanceOf[Long]) s"${e}L" else e.toString
+    val e1  = if (e.isInstanceOf[Long]) s"${e}L" else e.toString
     val pad = " " * (8 - e1.length)
     e1 + pad
   }
@@ -76,6 +76,10 @@ object transactionModel extends JavaUtil {
     val a      = ""
     val v      = ""
     val gv     = NoValue
+
+    override def toString: String = {
+      s"""list(":db/retractEntity", ${eid(e)})"""
+    }
   }
 
   trait AbstractValue

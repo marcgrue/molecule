@@ -16,7 +16,7 @@ class TwoStepQueries extends CoreSpec {
 
     // 1. Ns strings with "r2" references
     // "a" and "b"
-    val strs_with_r2s = Ns.str.Refs1.str1_("r2").get.toSeq
+    val strs_with_r2s = Ns.str.Refs1.str1_("r2").get
 
     // 2. Ns strings having but omitting "r2" reference
     Ns.str(strs_with_r2s).Refs1.*(Ref1.str1.not("r2")).get === List(

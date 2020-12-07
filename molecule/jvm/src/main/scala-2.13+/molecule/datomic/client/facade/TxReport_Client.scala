@@ -43,16 +43,12 @@ case class TxReport_Client(
     }
   }
 
-  private def txDataRaw: String = {
-    clientTxReport.txData.iterator().asScala
-      .map(datom2string)
-      .mkString(",\n                   ")
-  }
+  private def txDataRaw: List[Datom] = clientTxReport.txData.iterator().asScala.toList
 
   private def datom2string(d: Datom) =
     s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"
 
-  def debug: Unit = Debug("TxReport", 1)(1, stmtss, clientTxReport)
+  def debug: Unit = Debug("TxReport", 1)(1, stmtss, this)
 
   override def toString =
     s"""TxReport {
@@ -60,10 +56,11 @@ case class TxReport_Client(
        |  dbBefore.t: ${dbBefore.t}
        |  dbAfter   : $dbAfter
        |  dbAfter.t : ${dbAfter.t}
-       |  txData    : $txDataRaw
+       |  txData    : ${txDataRaw.map(datom2string).mkString("\n              ")}
        |  tempids   : ${clientTxReport.tempIds}
        |}""".stripMargin
 
+//       |  eids      : ${eids}
 
   def eid: Long = eids.head
 

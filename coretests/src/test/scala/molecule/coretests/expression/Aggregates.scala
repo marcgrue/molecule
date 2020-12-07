@@ -95,11 +95,17 @@ class Aggregates extends CoreSpec {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
 
+
+
+    def round(value: Double, decimals: Int) = {
+      val factor = scala.math.pow(10, decimals)
+      (value * factor).round / factor.toDouble
+    }
+
+    round(Ns.float(avg).get.head, 6) === 2.2
+
     // For precision, please use Double type instead of Float
-    if (system == DatomicPeerServer)
-      Ns.float(avg).get.head === 2.2
-    else
-      Ns.float(avg).get.head === 2.1999999999999997
+    round(Ns.double(avg).get.head, 6) === 2.2
     Ns.double(avg).get.head === 2.1999999999999997
   }
 

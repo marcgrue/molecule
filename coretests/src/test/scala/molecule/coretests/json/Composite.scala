@@ -67,7 +67,7 @@ class Composite extends CoreSpec {
 
 
   "2 + 3 (2 + 1tx)" in new CoreSetup {
-    Ref2.int2.str2 + Ref1.int1.str1.Tx(Ref3.str3_("Tx meta data")) insert Seq(
+    Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str_("Tx meta data")) insert Seq(
       ((1, "a"), (11, "aa")),
       ((2, "b"), (22, "bb"))
     )
@@ -79,25 +79,25 @@ class Composite extends CoreSpec {
         |]""".stripMargin
 
     // .. including transaction meta data
-    m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ref3.str3)).getJson ===
+    m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str)).getJson ===
       """[
-        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ref3.str3": "Tx meta data"}],
-        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ref3.str3": "Tx meta data"}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ns.str": "Tx meta data"}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ns.str": "Tx meta data"}]
         |]""".stripMargin
   }
 
 
   "2 + 3 (2 + 2tx with ref)" in new CoreSetup {
-    Ref2.int2.str2 + Ref1.int1.str1.Tx(Ref3.str3_("Tx meta data").Ref4.int4_(42)) insert Seq(
+    Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str_("Tx meta data").Ref1.int1_(42)) insert Seq(
       ((1, "a"), (11, "aa")),
       ((2, "b"), (22, "bb"))
     )
 
     // Note how ref attr in tx meta data has both a `tx` and `ref1` prefix
-    m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ref3.str3.Ref4.int4)).getJson ===
+    m(Ref2.int2.str2 + Ref1.int1.str1.Tx(Ns.str.Ref1.int1)).getJson ===
       """[
-        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ref3.str3": "Tx meta data", "tx.ref4.Ref4.int4": 42}],
-        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ref3.str3": "Tx meta data", "tx.ref4.Ref4.int4": 42}]
+        |[{"Ref2.int2": 1, "Ref2.str2": "a"}, {"Ref1.int1": 11, "Ref1.str1": "aa", "tx.Ns.str": "Tx meta data", "tx.ref1.Ref1.int1": 42}],
+        |[{"Ref2.int2": 2, "Ref2.str2": "b"}, {"Ref1.int1": 22, "Ref1.str1": "bb", "tx.Ns.str": "Tx meta data", "tx.ref1.Ref1.int1": 42}]
         |]""".stripMargin
   }
 

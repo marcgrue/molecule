@@ -169,7 +169,7 @@ class CompositeArities extends CoreSpec {
     // Composite of Molecule2 + Molecule1 + Tx meta data
     // Note that tx meta attributes have underscore/are tacit in order not to affect the type of input
     val List(e1, e2, txId) = Ref2.int2.str2 +
-      Ref1.str1.int1.Tx(Ref3.str3_("Tx meta data")) insert Seq(
+      Ref1.str1.int1.Tx(Ns.str_("Tx meta data")) insert Seq(
       ((1, "a"), ("aa", 11)),
       ((2, "b"), ("bb", 22))
     ) eids
@@ -192,7 +192,7 @@ class CompositeArities extends CoreSpec {
     txId.touchList === List(
       ":db/id" -> txId,
       ":db/txInstant" -> txId(":db/txInstant"),
-      ":Ref3/str3" -> "Tx meta data",
+      ":Ns/str" -> "Tx meta data",
     )
 
     // Queries via one namespace
@@ -202,7 +202,7 @@ class CompositeArities extends CoreSpec {
     )
     // .. including transaction meta data
     // Note how transaction meta data is fetched for all entities ("rows") saved in the same transaction
-    Ref2.int2.str2.Tx(Ref3.str3).get.sorted === List(
+    Ref2.int2.str2.Tx(Ns.str).get.sorted === List(
       (1, "a", "Tx meta data"),
       (2, "b", "Tx meta data")
     )
@@ -213,14 +213,14 @@ class CompositeArities extends CoreSpec {
       ("bb", 22)
     )
     // .. including transaction meta data
-    Ref1.str1.int1.Tx(Ref3.str3).get.sorted === List(
+    Ref1.str1.int1.Tx(Ns.str).get.sorted === List(
       ("aa", 11, "Tx meta data"),
       ("bb", 22, "Tx meta data")
     )
 
     // Transaction meta data alone can be accessed through tacit attributes of namespaces
-    Ref2.int2_.Tx(Ref3.str3).get === List("Tx meta data")
-    Ref1.int1_.Tx(Ref3.str3).get === List("Tx meta data")
+    Ref2.int2_.Tx(Ns.str).get === List("Tx meta data")
+    Ref1.int1_.Tx(Ns.str).get === List("Tx meta data")
 
 
     // Composite query
@@ -229,7 +229,7 @@ class CompositeArities extends CoreSpec {
       ((2, "b"), ("bb", 22))
     )
     // .. including transaction meta data
-    m(Ref2.int2.str2 + Ref1.str1.int1.Tx(Ref3.str3)).get.sorted === List(
+    m(Ref2.int2.str2 + Ref1.str1.int1.Tx(Ns.str)).get.sorted === List(
       ((1, "a"), ("aa", 11, "Tx meta data")),
       ((2, "b"), ("bb", 22, "Tx meta data"))
     )

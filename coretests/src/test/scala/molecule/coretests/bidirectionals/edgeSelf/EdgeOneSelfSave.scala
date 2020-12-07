@@ -7,8 +7,6 @@ import molecule.datomic.api.out3._
 
 class EdgeOneSelfSave extends CoreSpec {
 
-//  devLocalOnly = true
-
   "base/edge/target" >> {
 
     "new target" in new BidirectionalSetup {

@@ -123,7 +123,6 @@ class Datom extends CoreSpec {
       )
     }
 
-
     "n entities" in new Setup {
       Ns(e1, e2).tx.e.a.v.get.sortBy(_._1) === List(
         (tx2, e1, ":Ns/str", "b"),
@@ -133,7 +132,6 @@ class Datom extends CoreSpec {
         (tx7, e2, ":Ns/ref1", r1)
       )
     }
-
 
     "History" in new Setup {
       Ns(e1, e2).tx.e.a.v.op.getHistory.sortBy(t => (t._1, t._3, t._5)) === List(
@@ -311,135 +309,127 @@ class Datom extends CoreSpec {
 
   "Expressions, mandatory" in new Setup {
 
-    Ns.e(e1).get === List(e1)
-    Ns.e(e1, e2).get.sorted === List(e1, e2).sorted
-    Ns.e.not(e1).get.sorted === List(e2, r1).sorted
-    Ns.e.not(e1, e2).get === List(r1)
+    if (system != DatomicPeerServer) {
 
-    if (system != DatomicDevLocal) {
-      // Dev-local entity numbers are not predictable
+      Ns.e(e1).get === List(e1)
+      Ns.e(e1, e2).get.sorted === List(e1, e2).sorted
+
+      Ns.e.not(e1).get.sorted === List(e2, r1).sorted
+      Ns.e.not(e1, e2).get === List(r1)
       Ns.e.>(e1).get.sorted === List(e2, r1).sorted
       Ns.e.>=(e1).get.sorted === List(e1, e2, r1).sorted
       Ns.e.<=(e2).get.sorted === List(e1, e2).sorted
       Ns.e.<(e2).get === List(e1)
-    } else {
-      println(Ns.e.>(e1).get)
-      println(Ns.e.>=(e1).get)
-      println(Ns.e.<=(e2).get)
-      println(Ns.e.<(e2).get)
-    }
 
-    // Only `e` before first custom attribute is allowed
-    Ns.e(count).int_.get === List(2)
-    Ns.int_.e(count).get === List(2)
+      // Only `e` before first custom attribute is allowed
+      Ns.e(count).int_.get === List(2)
+      Ns.int_.e(count).get === List(2)
 
-    Ns.a(":Ns/str").get === List(":Ns/str")
-    Ns.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
-    Ns.a.not(":Ns/str").get === List(":Ns/int", ":Ref1/str1", ":Ns/ref1")
-    Ns.a.not(":Ns/str", ":Ns/ref1").get === List(":Ns/int", ":Ref1/str1")
-    Ns.a.>(":Ns/str").get === List(":Ref1/str1")
-    Ns.a.>=(":Ns/str").get === List(":Ref1/str1", ":Ns/str")
-    Ns.a.<=(":Ns/str").get === List(":Ns/int", ":Ns/ref1", ":Ns/str")
-    Ns.a.<(":Ns/str").get === List(":Ns/int", ":Ns/ref1")
-    // Range of attribute names
-    Ns.a_.>(":Ns/int").a.<=(":Ns/str").get === List(":Ns/ref1", ":Ns/str")
+      Ns.a(":Ns/str").get === List(":Ns/str")
+      Ns.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
+      Ns.a.not(":Ns/str").get.sorted === List(":Ns/int", ":Ref1/str1", ":Ns/ref1")
+      Ns.a.not(":Ns/str", ":Ns/ref1").get === List(":Ns/int", ":Ref1/str1")
+      Ns.a.>(":Ns/str").get === List(":Ref1/str1")
+      Ns.a.>=(":Ns/str").get === List(":Ref1/str1", ":Ns/str")
+      Ns.a.<=(":Ns/str").get === List(":Ns/int", ":Ns/ref1", ":Ns/str")
+      Ns.a.<(":Ns/str").get === List(":Ns/int", ":Ns/ref1")
+      // Range of attribute names
+      Ns.a_.>(":Ns/int").a.<=(":Ns/str").get === List(":Ns/ref1", ":Ns/str")
 
-    Ns.int_.a(count).get === List(1)
+      Ns.int_.a(count).get === List(1)
 
-    Ns.v(3).get === List(3)
-    Ns.v("hello").get === List("hello")
-    Ns.v("non-existing value").get === Nil
-    Ns.v(3, "b").get === List("b", 3)
-    Ns.v.not(3).get.sortBy(_.toString) === List(r1, 5, "b", "hello", "x").sortBy(_.toString)
-    Ns.v.not(3, "b").get.sortBy(_.toString) === List(r1, 5, "hello", "x").sortBy(_.toString)
-    expectCompileError(
-      """m(Ns.v.>(3))""",
-      "molecule.core.transform.exception.Dsl2ModelException: " +
-        "Can't compare generic values being of different types. Found: v.>(3)")
+      Ns.v(3).get === List(3)
+      Ns.v("hello").get === List("hello")
+      Ns.v("non-existing value").get === Nil
+      Ns.v(3, "b").get === List("b", 3)
+      Ns.v.not(3).get.sortBy(_.toString) === List(r1, 5, "b", "hello", "x").sortBy(_.toString)
+      Ns.v.not(3, "b").get.sortBy(_.toString) === List(r1, 5, "hello", "x").sortBy(_.toString)
+      expectCompileError(
+        """m(Ns.v.>(3))""",
+        "molecule.core.transform.exception.Dsl2ModelException: " +
+          "Can't compare generic values being of different types. Found: v.>(3)")
 
-    Ns.tx(tx3).get === List(tx3)
-    Ns.tx(tx3, tx5).get.sorted === List(tx3, tx5)
+      Ns.tx(tx3).get === List(tx3)
+      Ns.tx(tx3, tx5).get.sorted === List(tx3, tx5)
 
-    // Note that no current datoms remains from tx1
-    Ns.tx.not(tx3).get.sorted === List(tx2, tx4, tx5, tx6, tx7)
-    Ns.tx.not(tx3, tx5).get.sorted === List(tx2, tx4, tx6, tx7)
-    Ns.tx.>(tx3).get.sorted === List(tx4, tx5, tx6, tx7)
-    Ns.tx.>=(tx3).get.sorted === List(tx3, tx4, tx5, tx6, tx7)
-    Ns.tx.<=(tx3).get.sorted === List(tx2, tx3) // excludes tx1 per explanation above
-    Ns.tx.<(tx3).get === List(tx2)
-    // Range of transaction entity ids
-    Ns.tx_.>(tx2).tx.<=(tx4).get.sorted === List(tx3, tx4)
-    Ns.int_.tx(count).get === List(2)
-
-    Ns.t(t3).get === List(t3)
-    Ns.t(t3, t5).get.sorted === List(t3, t5)
-    Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
-    Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
-    Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
-    Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
-    Ns.t.<=(t3).get.sorted === List(t2, t3)
-
-    Ns.t.<(t3).get === List(t2)
-    // Range of transaction t's
-    Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
-    Ns.int_.t(count).get === List(2)
-
-    // OBS: Avoid using date expressions for precision expressions!
-    // Since the minimum fraction of Date is ms, it will be imprecise.
-    // For precise expressions, use t or tx.
-    Ns.txInstant(d2).get === List(d2)
-    Ns.txInstant(d2, d3).get.sorted === List(d2, d3).sorted
-    Ns.txInstant.not(d2).get.sorted === List(d3, d4, d5, d6, d7).sorted
-    Ns.txInstant.not(d2, d3).get.sorted === List(d4, d5, d6, d7).sorted
-    Ns.txInstant.>(d3).get.sorted === List(d4, d5, d6, d7).sorted
-    Ns.txInstant.>=(d3).get.sorted === List(d3, d4, d5, d6, d7).sorted
-    Ns.txInstant.<=(d3).get.sorted === List(d2, d3).sorted
-    Ns.txInstant.<(d3).get.sorted === List(d2)
-    // Range of transaction entity ids
-    Ns.txInstant_.>(d2).txInstant.<=(d4).get.sorted === List(d3, d4).sorted
-    Ns.int_.txInstant(count).get === List(2)
-
-    // No current datoms are retracted
-    Ns.op(true).get === List(true)
-    Ns.op(true, false).get === List(true)
-    Ns.op(false).get === Nil
-
-    Ns.op.not(true).get === Nil
-    Ns.op.not(true, false).get === Nil
-
-    // Comparing boolean values not that relevant, but hey, here we go:
-    Ns.op.>(true).get === Nil
-    Ns.op.>(false).get === List(true)
-
-    Ns.op.>=(true).get === List(true)
-    Ns.op.>=(false).get === List(true)
-
-    Ns.op.<=(true).get === List(true)
-    Ns.op.<=(false).get === Nil
-
-    Ns.op.<(true).get === Nil
-    Ns.op.<(false).get === Nil
-
-    Ns.int_.op(count).get === List(1)
-
-    if (system != DatomicPeerServer) {
-      // If we ask the history database, tx1 will show up too
+      // Note that no current datoms remains from tx1
+      Ns.tx.not(tx3).get.sorted === List(tx2, tx4, tx5, tx6, tx7)
+      // If we ask the history database, tx1 will show up though
       Ns.tx.not(tx3).getHistory.sorted === List(tx1, tx2, tx4, tx5, tx6, tx7)
 
+      Ns.tx.not(tx3, tx5).get.sorted === List(tx2, tx4, tx6, tx7)
+      Ns.tx.>(tx3).get.sorted === List(tx4, tx5, tx6, tx7)
+      Ns.tx.>=(tx3).get.sorted === List(tx3, tx4, tx5, tx6, tx7)
+      Ns.tx.<=(tx3).get.sorted === List(tx2, tx3) // excludes tx1 per explanation above
       Ns.tx.<=(tx3).getHistory.sorted === List(tx1, tx2, tx3) // includes tx1 too per explanation above
-      Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
-      Ns.txInstant.<=(d3).getHistory.sorted === List(d1, d2, d3).sorted
-      Ns.op(false).getHistory === List(false)
-      Ns.op.>(true).getHistory === Nil
-      Ns.op.>(false).getHistory === List(true)
-      Ns.op.>=(true).getHistory === List(true)
-      Ns.op.>=(false).getHistory === List(false, true)
-      Ns.op.<=(true).getHistory === List(false, true)
-      Ns.op.<=(false).getHistory === List(false)
-      Ns.op.<(true).getHistory === List(false)
-      Ns.op.<(false).getHistory === Nil
-    }
+      Ns.tx.<(tx3).get === List(tx2)
+      // Range of transaction entity ids
+      Ns.tx_.>(tx2).tx.<=(tx4).get.sorted === List(tx3, tx4)
+      Ns.int_.tx(count).get === List(2)
 
+
+      Ns.t(t3).get === List(t3)
+      Ns.t(t3, t5).get.sorted === List(t3, t5)
+      Ns.t.not(t3).get.sorted === List(t2, t4, t5, t6, t7)
+      Ns.t.not(t3, t5).get.sorted === List(t2, t4, t6, t7)
+      Ns.t.>(t3).get.sorted === List(t4, t5, t6, t7)
+      Ns.t.>=(t3).get.sorted === List(t3, t4, t5, t6, t7)
+      Ns.t.<=(t3).get.sorted === List(t2, t3)
+      Ns.t.<=(t3).getHistory.sorted === List(t1, t2, t3)
+
+      Ns.t.<(t3).get === List(t2)
+      // Range of transaction t's
+      Ns.t_.>(t2).t.<=(t4).get.sorted === List(t3, t4)
+      Ns.int_.t(count).get === List(2)
+
+      // OBS: Avoid using date expressions for precision expressions!
+      // Since the minimum fraction of Date is ms, it will be imprecise.
+      // For precise expressions, use t or tx.
+      Ns.txInstant(d2).get === List(d2)
+      Ns.txInstant(d2, d3).get.sorted === List(d2, d3).sorted
+      Ns.txInstant.not(d2).get.sorted === List(d3, d4, d5, d6, d7).sorted
+      Ns.txInstant.not(d2, d3).get.sorted === List(d4, d5, d6, d7).sorted
+      Ns.txInstant.>(d3).get.sorted === List(d4, d5, d6, d7).sorted
+      Ns.txInstant.>=(d3).get.sorted === List(d3, d4, d5, d6, d7).sorted
+      Ns.txInstant.<=(d3).get.sorted === List(d2, d3).sorted
+      Ns.txInstant.<=(d3).getHistory.sorted === List(d1, d2, d3).sorted
+      Ns.txInstant.<(d3).get.sorted === List(d2)
+      // Range of transaction entity ids
+      Ns.txInstant_.>(d2).txInstant.<=(d4).get.sorted === List(d3, d4).sorted
+      Ns.int_.txInstant(count).get === List(2)
+
+      // No current datoms are retracted
+      Ns.op(true).get === List(true)
+      Ns.op(true, false).get === List(true)
+      Ns.op(false).get === Nil
+      Ns.op(false).getHistory === List(false)
+
+      Ns.op.not(true).get === Nil
+      Ns.op.not(true, false).get === Nil
+
+      // Comparing boolean values not that relevant, but hey, here we go:
+      Ns.op.>(true).get === Nil
+      Ns.op.>(true).getHistory === Nil
+      Ns.op.>(false).get === List(true)
+      Ns.op.>(false).getHistory === List(true)
+
+      Ns.op.>=(true).get === List(true)
+      Ns.op.>=(true).getHistory === List(true)
+      Ns.op.>=(false).get === List(true)
+      Ns.op.>=(false).getHistory === List(false, true)
+
+      Ns.op.<=(true).get === List(true)
+      Ns.op.<=(true).getHistory === List(false, true)
+      Ns.op.<=(false).get === Nil
+      Ns.op.<=(false).getHistory === List(false)
+
+      Ns.op.<(true).get === Nil
+      Ns.op.<(true).getHistory === List(false)
+      Ns.op.<(false).get === Nil
+      Ns.op.<(false).getHistory === Nil
+
+      Ns.int_.op(count).get === List(1)
+    }
 
     // Generic attributes only allowed to aggregate `count`
     expectCompileError(

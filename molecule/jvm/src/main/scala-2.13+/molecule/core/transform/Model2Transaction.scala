@@ -721,7 +721,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def flatten(vs: Seq[Any]): Seq[Any] = vs.flatMap {
     case set: Set[_] => set.toSeq
-    case v           => List(v)
+    case v           => Seq(v)
   }
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {

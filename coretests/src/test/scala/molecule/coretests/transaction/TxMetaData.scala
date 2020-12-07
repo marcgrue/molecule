@@ -1,7 +1,7 @@
 package molecule.coretests.transaction
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.DatomicPeer
+import molecule.core.util.{DatomicPeer, DatomicPeerServer}
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out10._
@@ -78,7 +78,6 @@ class TxMetaData extends CoreSpec {
         (5, tx5, Some("attr optional with value")),
         (6, tx6, None) // attr optional without value
       )
-      Log(Some(tx1), Some(tx2)).tx.e.a.v.op.get.foreach(s => println("x " + s))
     }
 
 
@@ -359,10 +358,17 @@ class TxMetaData extends CoreSpec {
     val tx2 = e.Tx(Ns.str("meta")).retract.tx
 
     // What was retracted and with what tx meta data
-    Ns.e.int.tx.op.Tx(Ns.str).getHistory === List(
-      // 1 was retracted with tx meta data "meta"
-      (e, 1, tx2, false, "meta")
-    )
+    if (system == DatomicPeerServer) {
+      Ns.e.int.tx.op.Tx(Ns.str).getHistory.filter(_._3 >= basisTx) === List(
+        // 1 was retracted with tx meta data "meta"
+        (e, 1, tx2, false, "meta")
+      )
+    } else {
+      Ns.e.int.tx.op.Tx(Ns.str).getHistory === List(
+        // 1 was retracted with tx meta data "meta"
+        (e, 1, tx2, false, "meta")
+      )
+    }
   }
 
 
@@ -378,6 +384,7 @@ class TxMetaData extends CoreSpec {
     Ns.int.get === List(3)
   }
 
+
   "Multiple entities" in new CoreSetup {
 
     // Insert multiple entities with tx meta data
@@ -387,25 +394,54 @@ class TxMetaData extends CoreSpec {
     // Retract multiple entities with tx meta data
     val tx2 = retract(Seq(e1, e2), Ns.str("b")).tx
 
-    // History with transaction data
-    Ns.int.tx.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, tx1, true, "a"),
-      (2, tx1, true, "a"),
-      (3, tx1, true, "a"),
+    if (system == DatomicPeerServer) {
+      val (t1, t2) = (conn.getT(tx1), conn.getT(tx2))
 
-      // 1 and 2 were retracted with tx meta data "b"
-      (1, tx2, false, "b"),
-      (2, tx2, false, "b")
-    )
+      // History with transaction data
+      Ns.int.tx.t.op.Tx(Ns.str).getHistory
+        .filter(_._2 >= basisTx)
+        .sortBy(r => (r._2, r._1, r._4)) === List(
+        (1, tx1, t1, true, "a"),
+        (2, tx1, t1, true, "a"),
+        (3, tx1, t1, true, "a"),
 
-    // Entities and int values that were retracted with tx meta data "b"
-    Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (e1, 1, false, "b"),
-      (e2, 2, false, "b")
-    )
+        // 1 and 2 were retracted with tx meta data "b"
+        (1, tx2, t2, false, "b"),
+        (2, tx2, t2, false, "b")
+      )
 
-    // Or: What int values were retracted with tx meta data "b"?
-    Ns.int.op_(false).Tx(Ns.str_("b")).getHistory === List(1, 2)
+      // Entities and int values that were retracted with tx meta data "b"
+      Ns.e.int.tx.op(false).Tx(Ns.str("b")).getHistory.filter(_._3 >= basisTx).sortBy(_._2) === List(
+        (e1, 1, tx2, false, "b"),
+        (e2, 2, tx2, false, "b")
+      )
+
+      // Or: What int values were retracted with tx meta data "b"?
+      Ns.int.tx.op_(false).Tx(Ns.str_("b")).getHistory.filter(_._2 >= basisTx).sortBy(_._1) === List(
+        (1, tx2),
+        (2, tx2)
+      )
+    } else {
+      // History with transaction data
+      Ns.int.tx.op.Tx(Ns.str).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+        (1, tx1, true, "a"),
+        (2, tx1, true, "a"),
+        (3, tx1, true, "a"),
+
+        // 1 and 2 were retracted with tx meta data "b"
+        (1, tx2, false, "b"),
+        (2, tx2, false, "b")
+      )
+
+      // Entities and int values that were retracted with tx meta data "b"
+      Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+        (e1, 1, false, "b"),
+        (e2, 2, false, "b")
+      )
+
+      // Or: What int values were retracted with tx meta data "b"?
+      Ns.int.op_(false).Tx(Ns.str_("b")).getHistory === List(1, 2)
+    }
   }
 
 
@@ -417,33 +453,67 @@ class TxMetaData extends CoreSpec {
     // Add tx meta data to retracting multiple entities
     val tx2 = retract(Seq(e1, e2), Ns.str("b").Ref1.int1(8)).tx
 
-    // History with transaction data
-    Ns.int.tx.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (1, tx1, true, "a", 7),
-      (2, tx1, true, "a", 7),
-      (3, tx1, true, "a", 7),
+    if (system == DatomicPeerServer) {
+      // History with transaction data
+      Ns.int.tx.op.Tx(Ns.str.Ref1.int1).getHistory.filter(_._2 >= basisTx).sortBy(r => (r._2, r._1, r._3)) === List(
+        (1, tx1, true, "a", 7),
+        (2, tx1, true, "a", 7),
+        (3, tx1, true, "a", 7),
 
-      // 1 and 2 were retracted with tx meta data "b"
-      (1, tx2, false, "b", 8),
-      (2, tx2, false, "b", 8)
-    )
+        // 1 and 2 were retracted with tx meta data "b"
+        (1, tx2, false, "b", 8),
+        (2, tx2, false, "b", 8)
+      )
 
-    // Entities and int values that was retracted in tx "b"
-    Ns.e.int.op(false).Tx(Ns.str("b").Ref1.int1(8)).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
-      (e1, 1, false, "b", 8),
-      (e2, 2, false, "b", 8)
-    )
+      // Entities and int values that was retracted in tx "b"
+      Ns.e.int.tx.op(false).Tx(Ns.str("b").Ref1.int1(8)).getHistory.filter(_._3 >= basisTx).sortBy(_._2) === List(
+        (e1, 1, tx2, false, "b", 8),
+        (e2, 2, tx2, false, "b", 8)
+      )
 
-    // Or: What int values where retracted in tx "b"?
-    Ns.int.op_(false).Tx(Ns.str_("b").Ref1.int1_(8)).getHistory === List(1, 2)
+      // Or: What int values where retracted in tx "b"?
+      Ns.int.tx.op_(false).Tx(Ns.str_("b").Ref1.int1_(8)).getHistory.filter(_._2 >= basisTx).sortBy(_._1) === List(
+        (1, tx2),
+        (2, tx2)
+      )
 
-    // OBS: Note how referenced tx meta data is not asserted directly with the tx entity:
-    Ns.e.int.op(false).Tx(Ref1.int1(8)).getHistory === Nil
-    // While Ns.str is:
-    Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(_._2) === List(
-      (e1, 1, false, "b"),
-      (e2, 2, false, "b")
-    )
+      // OBS: Note how referenced tx meta data is not asserted directly with the tx entity:
+      Ns.e.int.tx.op(false).Tx(Ref1.int1(8)).getHistory.filter(_._3 >= basisTx) === Nil
+      // While Ns.str is:
+      Ns.e.int.tx.op(false).Tx(Ns.str("b")).getHistory.filter(_._3 >= basisTx).sortBy(_._2) === List(
+        (e1, 1, tx2, false, "b"),
+        (e2, 2, tx2, false, "b")
+      )
+    } else {
+
+      // History with transaction data
+      Ns.int.tx.op.Tx(Ns.str.Ref1.int1).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+        (1, tx1, true, "a", 7),
+        (2, tx1, true, "a", 7),
+        (3, tx1, true, "a", 7),
+
+        // 1 and 2 were retracted with tx meta data "b"
+        (1, tx2, false, "b", 8),
+        (2, tx2, false, "b", 8)
+      )
+
+      // Entities and int values that was retracted in tx "b"
+      Ns.e.int.op(false).Tx(Ns.str("b").Ref1.int1(8)).getHistory.sortBy(r => (r._2, r._1, r._3)) === List(
+        (e1, 1, false, "b", 8),
+        (e2, 2, false, "b", 8)
+      )
+
+      // Or: What int values where retracted in tx "b"?
+      Ns.int.op_(false).Tx(Ns.str_("b").Ref1.int1_(8)).getHistory === List(1, 2)
+
+      // OBS: Note how referenced tx meta data is not asserted directly with the tx entity:
+      Ns.e.int.op(false).Tx(Ref1.int1(8)).getHistory === Nil
+      // While Ns.str is:
+      Ns.e.int.op(false).Tx(Ns.str("b")).getHistory.sortBy(_._2) === List(
+        (e1, 1, false, "b"),
+        (e2, 2, false, "b")
+      )
+    }
   }
 
 
