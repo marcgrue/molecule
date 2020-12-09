@@ -1,15 +1,21 @@
 package molecule.coretests.api
 
 import java.io.FileReader
+import java.util
+import java.util.Collections
 import datomic.Util
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out1._
+import molecule.datomic.client.facade.Conn_Client
 import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class With extends CoreSpec {
+
+  //  peerServerOnly = true
+//  devLocalOnly = true
 
   class Setup extends CoreSetup {
     Ns.int(1).save
@@ -17,8 +23,13 @@ class With extends CoreSpec {
     val saveTx2 = Ns.int(2).getSaveTx
     val saveTx3 = Ns.int(3).getSaveTx
 
-    val data      = new FileReader("coretests/resources/save2-3.dtm") // contains: "[{:Ns/int 2} {:Ns/int 3}]"
-    val txData2_3 = Util.readAll(data).get(0).asInstanceOf[java.util.List[Object]]
+    // Tx data from edn file
+    // contains: "[{:Ns/int 2} {:Ns/int 3}]"
+    val data      = new FileReader("coretests/resources/save2-3.dtm")
+    // Need to pass an unmodifieableList
+    val txData2_3 = Collections.unmodifiableList(
+      Util.readAll(data).get(0).asInstanceOf[java.util.List[Object]]
+    )
   }
 
 
@@ -27,7 +38,8 @@ class With extends CoreSpec {
     Ns.int.getWith(saveTx2) === List(1, 2)
     Ns.int.getWith(saveTx2, saveTx3) === List(1, 2, 3)
 
-    // Note how the parameter for number of rows returned is first (since we need the vararg for tx molecules last)
+    // Note how the parameter for number of rows returned is first (since we
+    // need the vararg for tx molecules last)
     Ns.int.getWith(2, saveTx2, saveTx3) === List(1, 2)
 
     Ns.int.getWith(txData2_3) === List(1, 2, 3)

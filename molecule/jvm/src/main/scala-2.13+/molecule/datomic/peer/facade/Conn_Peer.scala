@@ -173,7 +173,8 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case Since(TxDate(d)) => baseDb.since(d)
       case With(tx)         => {
         val txReport = TxReport_Peer(baseDb.`with`(tx))
-        txReport.dbAfter.asOf(txReport.t)
+        val db = txReport.dbAfter.asOf(txReport.t)
+        db
       }
       case History          => baseDb.history()
     }

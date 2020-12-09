@@ -13,10 +13,11 @@ class GetAsOf extends CoreSpec {
 
   "t (from history)" in new CoreSetup {
 
-    val tx1            = Ns.str.int insert List(
+    val tx1 = Ns.str.int insert List(
       ("Ben", 42),
       ("Liz", 37),
     )
+
     val List(ben, liz) = tx1.eids
 
     val tx2 = Ns(ben).int(43).update

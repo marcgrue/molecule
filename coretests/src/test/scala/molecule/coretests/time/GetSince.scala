@@ -2,21 +2,17 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out1._
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import molecule.datomic.peer.facade.Datomic_Peer._
 
-class GetSince extends Specification with Scope {
+class GetSince extends CoreSpec {
 
-  sequential
-
-  class Setup extends Scope {
-    implicit val conn = recreateDbFrom(CoreTestSchema)
-  }
 
   "List" >> {
-    "Appended" in new Setup {
+    "Appended" in new CoreSetup {
 
       val tx1 = Ns.int(1).save
       val tx2 = Ns.int(2).save
@@ -32,7 +28,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "Appended and updated" in new Setup {
+    "Appended and updated" in new CoreSetup {
 
       val tx1 = Ns.int(1).save
       val tx2 = Ns.int(2).save
@@ -51,7 +47,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "Appended and retracted" in new Setup {
+    "Appended and retracted" in new CoreSetup {
 
       val tx1 = Ns.int(1).save
       val tx2 = Ns.int(2).save
@@ -72,7 +68,7 @@ class GetSince extends Specification with Scope {
 
   "Iterable" >> {
 
-    "t" in new Setup {
+    "t" in new CoreSetup {
 
       // 3 transaction times `t`
       val t1 = Ns.str("Ann").save.t
@@ -93,7 +89,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "tx report" in new Setup {
+    "tx report" in new CoreSetup {
 
       // Get tx reports for 3 transactions
       val tx1 = Ns.str("Ann").save
@@ -114,7 +110,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "date" in new Setup {
+    "date" in new CoreSetup {
 
       // Transact 3 times (`inst` retrieves transaction time from tx report)
       val date1 = Ns.str("Ann").save.inst
@@ -138,7 +134,7 @@ class GetSince extends Specification with Scope {
 
   "Raw" >> {
 
-    "t" in new Setup {
+    "t" in new CoreSetup {
 
       // 3 transaction times `t`
       val t1 = Ns.str("Ann").save.t
@@ -160,7 +156,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "tx report" in new Setup {
+    "tx report" in new CoreSetup {
 
       // Get tx reports for 3 transactions
       val tx1 = Ns.str("Ann").save
@@ -182,7 +178,7 @@ class GetSince extends Specification with Scope {
     }
 
 
-    "date" in new Setup {
+    "date" in new CoreSetup {
 
       // Transact 3 times (`inst` retrieves transaction time from tx report)
       val date1 = Ns.str("Ann").save.inst

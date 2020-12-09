@@ -3,10 +3,8 @@ package molecule.coretests.api
 import java.util.Date
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class AsOf extends CoreSpec {

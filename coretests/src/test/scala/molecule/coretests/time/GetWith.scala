@@ -2,161 +2,98 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out2._
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import molecule.datomic.peer.facade.Datomic_Peer._
 
-class GetWith extends Specification with Scope {
+class GetWith extends CoreSpec {
 
-  // Run tests in order (otherwise all messes up)
-  sequential
-
-  // Create new db from schema
-  implicit val conn = recreateDbFrom(CoreTestSchema)
-
-  // Current state
-  val eid = Ns.str("a").int(1).save.eid
-
-
-  "getSaveTx" >> {
-
-    "1 with 1" >> {
-      Ns.int.getWith(
-        Ns.int(2).getSaveTx
-      ) === List(
-        1,
-        2
-      )
-
-      // Current state unchanged
-      Ns.int.get === List(1)
-
-      Ns.int.getWith(
-        Ns.str("b").getSaveTx
-      ) === List(
-        1
-      )
-    }
-
-    "1 with n" >> {
-      Ns.int.getWith(
-        Ns.str("b").int(2).getSaveTx
-      ) === List(
-        1,
-        2
-      )
-
-      Ns.str.getWith(
-        Ns.str("b").int(2).getSaveTx
-      ) === List(
-        "a",
-        "b"
-      )
-    }
-
-    "n with 1" >> {
-      Ns.str$.int.getWith(
-        Ns.int(2).getSaveTx
-      ).sortBy(_._2) === List(
-        (Some("a"), 1),
-        (None, 2)
-      )
-    }
-
-    "n with n" >> {
-      Ns.str.int.getWith(
-        Ns.str("b").int(2).getSaveTx
-      ).sortBy(_._2) === List(
-        ("a", 1),
-        ("b", 2)
-      )
-    }
+  class Setup extends CoreSetup {
+    // Current state
+    val eid = Ns.str("a").int(1).save.eid
   }
 
 
-  "getInsertTx" >> {
+  "getSaveTx" in new Setup {
 
-    "1 with 1" >> {
-      Ns.int.getWith(
-        Ns.int.getInsertTx(
-          2,
-          3
-        )
-      ) === List(
-        1,
-        2,
-        3
-      )
-    }
+    Ns.int.getWith(Ns.int(2).getSaveTx) === List(1, 2)
 
-    "1 with n" >> {
-      Ns.str.getWith(
-        Ns.str$.int.getInsertTx(Seq(
-          (Some("b"), 2),
-          (None, 3)
-        ))
-      ) === List(
-        "a",
-        "b"
-      )
+    Ns.int.getWith(Ns.str("b").getSaveTx) === List(1)
 
-    }
+    Ns.int.getWith(Ns.str("b").int(2).getSaveTx) === List(1, 2)
 
-    "n with 1" >> {
-      Ns.str$.int.getWith(
-        Ns.int.getInsertTx(
-          2,
-          3
-        )
-      ).sortBy(_._2) === List(
-        (Some("a"), 1),
-        (None, 2),
-        (None, 3)
-      )
-    }
+    Ns.str.getWith(Ns.str("b").int(2).getSaveTx) === List("a", "b")
 
-    "n with n" >> {
-      Ns.str$.int.getWith(
-        Ns.str$.int.getInsertTx(Seq(
-          (Some("b"), 2),
-          (None, 3)
-        ))
-      ).sortBy(_._2) === List(
-        (Some("a"), 1),
+    Ns.str$.int.getWith(
+      Ns.int(2).getSaveTx
+    ).sortBy(_._2) === List((Some("a"), 1), (None, 2))
+
+    Ns.str.int.getWith(
+      Ns.str("b").int(2).getSaveTx
+    ).sortBy(_._2) === List(("a", 1), ("b", 2))
+
+    // Current state unchanged
+    Ns.str.int.get === List(("a", 1))
+  }
+
+
+  "getInsertTx" in new Setup {
+
+    Ns.int.getWith(
+      Ns.int.getInsertTx(2, 3)
+    ) === List(1, 2, 3)
+
+    Ns.str.getWith(
+      Ns.str$.int.getInsertTx(Seq(
         (Some("b"), 2),
         (None, 3)
-      )
-    }
+      ))
+    ) === List("a", "b")
+
+    Ns.str$.int.getWith(
+      Ns.int.getInsertTx(2, 3)
+    ).sortBy(_._2) === List(
+      (Some("a"), 1),
+      (None, 2),
+      (None, 3)
+    )
+
+    Ns.str$.int.getWith(
+      Ns.str$.int.getInsertTx(Seq(
+        (Some("b"), 2),
+        (None, 3)
+      ))
+    ).sortBy(_._2) === List(
+      (Some("a"), 1),
+      (Some("b"), 2),
+      (None, 3)
+    )
+
+    // Current state unchanged
+    Ns.str.int.get === List(("a", 1))
   }
 
 
-  "getUpdateTx" >> {
+  "getUpdateTx" in new Setup {
 
-    "1 with 1" >> {
-      Ns.int.getWith(Ns(eid).int(2).getUpdateTx) === List(2)
+    Ns.int.getWith(Ns(eid).int(2).getUpdateTx) === List(2)
 
-      // Current state unchanged
-      Ns.int.get === List(1)
-    }
+    Ns.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(2)
 
-    "1 with n" >> {
-      Ns.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(2)
+    Ns.str.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List("b")
 
-      Ns.str.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List("b")
-    }
+    Ns.str.int.getWith(Ns(eid).int(2).getUpdateTx) === List(("a", 2))
 
-    "n with 1" >> {
-      Ns.str.int.getWith(Ns(eid).int(2).getUpdateTx) === List(("a", 2))
-    }
+    Ns.str.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(("b", 2))
 
-    "n with n" >> {
-      Ns.str.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(("b", 2))
-    }
+    // Current state unchanged
+    Ns.str.int.get === List(("a", 1))
   }
 
 
-  "getRetractTx" >> {
+  "getRetractTx" in new Setup {
 
     val eid2: Long = Ns.str("b").int(2).save.eid
 
@@ -179,7 +116,7 @@ class GetWith extends Specification with Scope {
   }
 
 
-  "Combination example" >> {
+  "Combination example" in new Setup {
 
     // Clean initial state
     Ns.e.str_.get.map(_.retract)
@@ -220,9 +157,9 @@ class GetWith extends Specification with Scope {
       ("Pete", 24) // Inserted
     )
 
-    val saveJohn = Ns.str("John").int(44).getSaveTx
+    val saveJohn      = Ns.str("John").int(44).getSaveTx
     val insertMembers = Ns.str.int getInsertTx List(("Lisa", 23), ("Pete", 24))
-    val updateFred = Ns(fred).int(43).getUpdateTx
+    val updateFred    = Ns(fred).int(43).getUpdateTx
 
     Ns.str.int.getWith(
       saveJohn,

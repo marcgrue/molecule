@@ -7,7 +7,6 @@ import molecule.datomic.api.out5._
 
 class TestDbAsOf_PeerServer extends CoreSpec {
 
-  // Since we testDbAsOfNow for Peer Server, we organize the tests a bit differently.
   peerServerOnly = true
 
   class Setup extends CoreSetup {

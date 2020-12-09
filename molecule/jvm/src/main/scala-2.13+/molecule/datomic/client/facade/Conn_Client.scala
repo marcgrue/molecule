@@ -1,12 +1,12 @@
 package molecule.datomic.client.facade
 
 import java.util
-import java.util.{stream, Date, Collection => jCollection, List => jList}
+import java.util.{stream, Collections, Date, Collection => jCollection, List => jList}
 import datomic.Util._
 import datomic.db.DbId
 import datomic.Peer
 import datomicScala.client.api.{sync, Datom}
-import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
+import datomicScala.client.api.sync.{Client, Connection, Db, Datomic => clientDatomic, TxReport => clientTxReport}
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
@@ -17,6 +17,7 @@ import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure, Timer}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
+import molecule.datomic.peer.facade.TxReport_Peer
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
@@ -32,10 +33,7 @@ import scala.util.control.NonFatal
 case class Conn_Client(client: Client, dbName: String)
   extends Conn with Helpers with BridgeDatomicFuture {
 
-  val clientConn: sync.Connection = {
-    client.connect(dbName)
-  }
-
+  val clientConn: sync.Connection = client.connect(dbName)
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
@@ -59,45 +57,76 @@ case class Conn_Client(client: Client, dbName: String)
     _testDb = Some(db.asInstanceOf[DatomicDb_Client].clientDb)
   }
 
-  // t or tx
-  def testDbAsOf(t: Long): Unit = {
-    _testDb = Some(clientConn.db.asOf(t))
-  }
-
-  def testDbAsOf(d: Date): Unit = {
-    _testDb = Some(clientConn.db.asOf(d))
-  }
-
-  def testDbAsOf(txR: TxReport): Unit = {
-    _testDb = Some(clientConn.db.asOf(txR.t))
-  }
-
   def testDbAsOfNow: Unit = {
     _testDb = Some(clientConn.db)
   }
 
-  def testDbSince(t: Long): Unit = {
-    _testDb = Some(clientConn.db.since(t))
+  // Temporary as-of delimiter
+  private var nowTx                    = 0L
+  private var asOfT                    = Option.empty[Long]
+  private var asOfD                    = Option.empty[Date]
+  private val testTxs: jList[jList[_]] = new util.ArrayList[jList[_]]()
+
+  def testDbAsOf(txR: TxReport): Unit = {
+    nowTx = Peer.toTx(clientConn.db.t).asInstanceOf[Long]
+    asOfT = Some(txR.t)
+    asOfD = None
+    _testDb = Some(clientConn.db.asOf(txR.t))
+  }
+  def testDbAsOf(tOrTx: Long): Unit = {
+    nowTx = clientConn.db.t
+    val d = clientConn.db.sinceTimePoint.get._3
+    println(d.toInstant)
+    asOfT = Some(tOrTx)
+    asOfD = None
+    _testDb = Some(clientConn.db.asOf(tOrTx))
+  }
+  def testDbAsOf(d: Date): Unit = {
+    nowTx = clientConn.db.t
+    asOfT = None
+    asOfD = Some(d)
+    _testDb = Some(clientConn.db.asOf(d))
   }
 
-  def testDbSince(d: Date): Unit = {
-    _testDb = Some(clientConn.db.since(d))
-  }
+
+  // Temporary since delimiter
+  private var sinceT = Option.empty[Long]
+  private var sinceD = Option.empty[Date]
 
   def testDbSince(txR: TxReport): Unit = {
-    _testDb = Some(clientConn.db.since(txR.t))
+    sinceT = Some(txR.t)
+    sinceD = None
+    _testDb = Some(clientConn.db)
+  }
+  def testDbSince(tOrTx: Long): Unit = {
+    sinceT = Some(tOrTx)
+    sinceD = None
+    _testDb = Some(clientConn.db)
+  }
+  def testDbSince(d: Date): Unit = {
+    sinceT = None
+    sinceD = Some(d)
+    _testDb = Some(clientConn.db)
   }
 
   def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
     val txDataJava: jList[jList[_]] = txData.flatten.flatten.map(_.toJava).asJava
-    _testDb = Some(Db(clientConn.db.`with`(clientConn.withDb, txDataJava)))
+    _testDb = Some(clientConn.db.`with`(clientConn.withDb, txDataJava).dbAfter)
+    withDbInUse = true
   }
 
   def testDbWith(txDataJava: jList[jList[AnyRef]]): Unit = {
-    _testDb = Some(Db(clientConn.db.`with`(clientConn.withDb, txDataJava)))
+    _testDb = Some(clientConn.db.`with`(clientConn.withDb, txDataJava).dbAfter)
+    withDbInUse = true
   }
 
   def useLiveDb: Unit = {
+    nowTx = 0L
+    testTxs.clear()
+    asOfT = None
+    asOfD = None
+    sinceT = None
+    sinceD = None
     _testDb = None
   }
 
@@ -109,20 +138,51 @@ case class Conn_Client(client: Client, dbName: String)
       case AsOf(TxDate(d))  => baseDb.asOf(d)
       case Since(TxLong(t)) => baseDb.since(t)
       case Since(TxDate(d)) => baseDb.since(d)
-      case With(tx)         => Db(baseDb.`with`(baseDb, tx))
+      case With(tx)         => baseDb.`with`(clientConn.withDb, tx).dbAfter
       case History          => baseDb.history
     }
     _adhocDb = None
     adhocDb
   }
 
+  import molecule.datomic.api.out6._
+
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
-      // Return singleton adhoc db
+      // Adhoc db
       DatomicDb_Client(getAdhocDb)
+
     } else if (_testDb.isDefined) {
       // Test db
-      DatomicDb_Client(_testDb.get)
+
+      if (asOfT.isDefined) {
+        if (testTxs.isEmpty) {
+          DatomicDb_Client(_testDb.get.asOf(asOfT.get))
+        } else {
+          val asOfDb = _testDb.get.asOf(asOfT.get)
+          val withDb = asOfDb.`with`(clientConn.withDb, testTxs).dbAfter//.asOf(asOfT.get)
+//          val withDb = _testDb.get.`with`(_testDb.get, list()).dbAfter
+
+          DatomicDb_Client(withDb)
+
+
+//          val a = DatomicDb_Client(_testDb.`with`(asOfDb, testTxs).dbAfter)
+        }
+
+//        DatomicDb_Client(_testDb.get.asOf(asOfT.get))
+
+      } else if (asOfD.isDefined)
+        DatomicDb_Client(_testDb.get.asOf(asOfD.get))
+
+      else if (sinceT.isDefined)
+        DatomicDb_Client(_testDb.get.since(sinceT.get))
+
+      else if (sinceD.isDefined)
+        DatomicDb_Client(_testDb.get.since(sinceD.get))
+
+      else
+        DatomicDb_Client(_testDb.get)
+
     } else {
       // Live db
       DatomicDb_Client(clientConn.db)
@@ -134,6 +194,13 @@ case class Conn_Client(client: Client, dbName: String)
 
   def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
     val javaStmts: jList[jList[_]] = toJava(stmtss)
+
+    // todo: only when needed...
+    //    println(testTxs)
+    testTxs.addAll(javaStmts)
+    println("----------")
+    println(testTxs)
+
     if (_adhocDb.isDefined) {
       // In-memory "transaction"
       val adHocDb = getAdhocDb
@@ -143,11 +210,11 @@ case class Conn_Client(client: Client, dbName: String)
       // In-memory "transaction"
 
       // Use special withDb
-      val withDb = if (withDbInUse) {
+      val withDb = if (withDbInUse)
         _testDb.get.`with`(_testDb.get, javaStmts)
-      } else {
+      else
         _testDb.get.`with`(clientConn.withDb, javaStmts)
-      }
+
       withDbInUse = true
       val txReport = TxReport_Client(withDb, stmtss)
 

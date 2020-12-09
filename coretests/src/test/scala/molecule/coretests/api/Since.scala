@@ -3,20 +3,19 @@ package molecule.coretests.api
 import java.util.Date
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class Since extends CoreSpec {
 
   class Setup extends CoreSetup {
 
+    // Ensure Date ms precision
     val tx1: TxReport = Ns.int(1).save
-    Thread.sleep(1000)
+    Thread.sleep(10)
     val tx2: TxReport = Ns.int(2).save
-    Thread.sleep(1000)
+    Thread.sleep(10)
     val tx3: TxReport = Ns.int(3).save
 
     val t1: Long = tx1.t
@@ -31,8 +30,8 @@ class Since extends CoreSpec {
 
   "Since" in new Setup {
 
-//    Ns.int.getSince(t3) === List()
-//    Ns.int.getSince(t2) === List(3)
+    Ns.int.getSince(t3) === List()
+    Ns.int.getSince(t2) === List(3)
     Ns.int.getSince(t1) === List(2, 3)
     Ns.int.getSince(t1, 1) === List(2)
 

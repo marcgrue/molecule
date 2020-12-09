@@ -2,9 +2,7 @@ package molecule.coretests.api
 
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.api.out3._
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class History extends CoreSpec {

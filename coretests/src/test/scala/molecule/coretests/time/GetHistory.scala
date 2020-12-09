@@ -2,40 +2,39 @@ package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out6._
 import org.specs2.mutable.Specification
 import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-class GetHistory extends Specification {
-  sequential
+class GetHistory extends CoreSpec {
 
-  // Create new db from schema
-  implicit val conn = recreateDbFrom(CoreTestSchema)
+  class Setup extends CoreSetup {
 
-  // First entity - 3 transactions
-  val tx1 = Ns.str("a").int(1).save
-  val e1  = tx1.eid
-  val t1  = tx1.t
+    // First entity - 3 transactions
+    val tx1 = Ns.str("a").int(1).save
+    val e1  = tx1.eid
+    val t1  = tx1.t
 
-  val tx2 = Ns(e1).str("b").update
-  val t2  = tx2.t
+    val tx2 = Ns(e1).str("b").update
+    val t2  = tx2.t
 
-  val tx3 = Ns(e1).int(2).update
-  val t3  = tx3.t
+    val tx3 = Ns(e1).int(2).update
+    val t3  = tx3.t
 
 
-  // Second entity - 2 transactions
+    // Second entity - 2 transactions
 
-  val tx4 = Ns.str("x").int(4).save
-  val e2  = tx4.eid
-  val t4  = tx4.t
+    val tx4 = Ns.str("x").int(4).save
+    val e2  = tx4.eid
+    val t4  = tx4.t
 
-  val tx5 = Ns(e2).int(5).update
-  val t5  = tx5.t
+    val tx5 = Ns(e2).int(5).update
+    val t5  = tx5.t
+  }
 
-
-  "1 entity, 1 attr" >> {
+  "1 entity, 1 attr" in new Setup {
 
     // Current values are always the last asserted value
     Ns(e1).int.op_(true).get === List(2)
@@ -85,7 +84,7 @@ class GetHistory extends Specification {
   }
 
 
-  "Multiple domain attrs" >> {
+  "Multiple domain attrs" in new Setup {
 
     // Mixing the "timeline" of two user-defined "domain" attributes gives
     // us some redundant repetition from unified attribute values.
@@ -185,7 +184,7 @@ class GetHistory extends Specification {
   }
 
 
-  "Multiple attrs" >> {
+  "Multiple attrs" in new Setup {
 
     // We _can_ combine multiple attrs with generic attributes in a history
     // query but then two individual attribute history "timelines" of changes
@@ -203,7 +202,7 @@ class GetHistory extends Specification {
     )
   }
 
-  "Entity history" >> {
+  "Entity history" in new Setup {
 
     // Instead of building a history of an entity with multiple fixed attributes
     // as a molecule we can also look for _any_ attribute involved in an entity's history:
@@ -264,7 +263,7 @@ class GetHistory extends Specification {
   }
 
 
-  "Tacit generic attrs" >> {
+  "Tacit generic attrs" in new Setup {
 
     // Transaction dates
     val date2 = tx2.inst
