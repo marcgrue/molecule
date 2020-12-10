@@ -10,8 +10,12 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class GetHistory extends CoreSpec {
 
-  class Setup extends CoreSetup {
+  // Since peer-server accumulates data across tests, we don't test history
+  // here, although it works fine on a fresh/stable db
+  omitPeerServer = true
 
+
+  class Setup extends CoreSetup {
     // First entity - 3 transactions
     val tx1 = Ns.str("a").int(1).save
     val e1  = tx1.eid
@@ -33,6 +37,7 @@ class GetHistory extends CoreSpec {
     val tx5 = Ns(e2).int(5).update
     val t5  = tx5.t
   }
+
 
   "1 entity, 1 attr" in new Setup {
 
@@ -62,7 +67,7 @@ class GetHistory extends CoreSpec {
     )
 
     // int history with entity
-    Ns.e.int.t.op.getHistory.sortBy(t => (t1, t._3, t._4)) === List(
+    Ns.e.int.t.op.getHistory.sortBy(t => (t._1, t._3, t._4)) === List(
       // e1
       (e1, 1, t1, true),
       (e1, 1, t3, false),
@@ -188,17 +193,17 @@ class GetHistory extends CoreSpec {
 
     // We _can_ combine multiple attrs with generic attributes in a history
     // query but then two individual attribute history "timelines" of changes
-    // are unified which is much less useful:
-    Ns(e1).str.t.op.int.t.op.getHistory === List(
-      ("b", t2, true, 1, t3, false),
-      ("a", t2, false, 1, t3, false),
+    // are unified which is quite little use:
+    Ns(e1).str.t.op.int.t.op.getHistory.sortBy(t => (t._2, t._1, t._5, t._6)) === List(
       ("a", t1, true, 1, t1, true),
-      ("b", t2, true, 2, t3, true),
-      ("b", t2, true, 1, t1, true),
       ("a", t1, true, 1, t3, false),
-      ("a", t2, false, 2, t3, true),
       ("a", t1, true, 2, t3, true),
       ("a", t2, false, 1, t1, true),
+      ("a", t2, false, 1, t3, false),
+      ("a", t2, false, 2, t3, true),
+      ("b", t2, true, 1, t1, true),
+      ("b", t2, true, 1, t3, false),
+      ("b", t2, true, 2, t3, true),
     )
   }
 
@@ -208,27 +213,27 @@ class GetHistory extends CoreSpec {
     // as a molecule we can also look for _any_ attribute involved in an entity's history:
 
     // All attribute assertions/retractions of entity e1
-    Ns(e1).a.v.t.op.getHistory.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op.getHistory.sortBy(t => (t._1, t._3, t._4)) === List(
       (":Ns/int", 1, t1, true),
+      (":Ns/int", 1, t3, false),
+      (":Ns/int", 2, t3, true),
       (":Ns/str", "a", t1, true),
       (":Ns/str", "a", t2, false),
       (":Ns/str", "b", t2, true),
-      (":Ns/int", 1, t3, false),
-      (":Ns/int", 2, t3, true),
     )
 
     // All attribute assertions of entity e1
-    Ns(e1).a.v.t.op(true).getHistory.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op(true).getHistory.sortBy(t => (t._1, t._3, t._4)) === List(
       (":Ns/int", 1, t1, true),
+      (":Ns/int", 2, t3, true),
       (":Ns/str", "a", t1, true),
       (":Ns/str", "b", t2, true),
-      (":Ns/int", 2, t3, true)
     )
 
     // All attribute retractions of entity e1
-    Ns(e1).a.v.t.op(false).getHistory.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t.op(false).getHistory.sortBy(t => (t._1, t._3, t._4)) === List(
+      (":Ns/int", 1, t3, false),
       (":Ns/str", "a", t2, false),
-      (":Ns/int", 1, t3, false)
     )
 
     // All attribute assertions/retractions of entity e1 at t2
@@ -239,7 +244,7 @@ class GetHistory extends CoreSpec {
     )
 
     // All attribute retractions of entity e1 at t2
-    Ns(e1).a.v.t(t2).op(false).getHistory.sortBy(t => (t._3, t._4)) === List(
+    Ns(e1).a.v.t(t2).op(false).getHistory === List(
       // str value "a" was retracted at t2
       (":Ns/str", "a", t2, false)
     )
@@ -271,28 +276,28 @@ class GetHistory extends CoreSpec {
     val date5 = tx5.inst
 
     // Entities with retractions
-    Ns.e.a.v.t.op_(false).getHistory.sortBy(t => (t._1, t._4)) === List(
+    Ns.e.a.v.t.op_(false).getHistory.sortBy(_._4) === List(
       (e1, ":Ns/str", "a", t2),
       (e1, ":Ns/int", 1, t3),
       (e2, ":Ns/int", 4, t5)
     )
 
-    Ns.e.a.v.txInstant.op_(false).getHistory.sortBy(t => (t._1, t._4)) === List(
-      (e1, ":Ns/str", "a", date2),
+    Ns.e.a.v.txInstant.op_(false).getHistory.sortBy(t => (t._2, t._4)) === List(
       (e1, ":Ns/int", 1, date3),
-      (e2, ":Ns/int", 4, date5)
+      (e2, ":Ns/int", 4, date5),
+      (e1, ":Ns/str", "a", date2),
     )
 
     // Entities involved in transaction t2
     // Note how the transaction itself is included
-    Ns.e.a.v.t_(t2).op.getHistory.sortBy(t => (t._1, t._4)) === List(
+    Ns.e.a.v.t_(t2).op.getHistory.sortBy(_._4) === List(
       (e1, ":Ns/str", "a", false),
       (e1, ":Ns/str", "b", true)
     )
 
     // Using transaction date
     // Entities involved in transaction as of date2
-    Ns.e.a.v.txInstant_(date2).op.getHistory.sortBy(t => (t._1, t._4)) === List(
+    Ns.e.a.v.txInstant_(date2).op.getHistory.sortBy(_._4) === List(
       (e1, ":Ns/str", "a", false),
       (e1, ":Ns/str", "b", true)
     )

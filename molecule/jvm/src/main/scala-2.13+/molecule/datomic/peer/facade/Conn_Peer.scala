@@ -14,7 +14,7 @@ import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
 import molecule.core.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure, Timer}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -56,95 +56,63 @@ class Conn_Peer(val peerConn: datomic.Connection)
     this
   }
 
-  /** Flag to indicate if live database is used */
   def liveDbUsed: Boolean = _adhocDb.isEmpty && _testDb.isEmpty
 
-  /** Manually apply a database to use.
-    *
-    * @param db
-    */
   def testDb(db: DatomicDb): Unit = {
     _testDb = Some(db.asInstanceOf[DatomicDb_Peer].peerDb)
   }
 
-  /** Use test database as of time t / tx id.
-    *
-    * @param t Long Time t or tx id
-    */
-  def testDbAsOf(t: Long): Unit = {
-    _testDb = Some(peerConn.db.asOf(t))
+  // Reverse datoms from next timePoint after as-of t until end
+  private def cleanFrom(nextTimePoint: Any): Unit = {
+    _testDb = Some(peerConn.db)
+    val array    = peerConn.log.txRange(nextTimePoint, null).iterator().asScala.toArray
+    val txInstId = db.pull("[:db/id]", ":db/txInstant").get(read(":db/id"))
+    def op(datom: Datom) = if (datom.added) ":db/retract" else ":db/add"
+    var stmts: jList[jList[_]] = new util.ArrayList[jList[_]]()
+    val size                   = array.length
+    var i                      = size - 1
+    // Reverse datoms backwards from last to timePoint right after as-of t
+    while (i >= 0) {
+      val datoms = array(i).get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+      stmts = new util.ArrayList[jList[_]](datoms.size())
+      datoms.forEach { datom =>
+        // Don't reverse timestamps
+        if (datom.a != txInstId) {
+          stmts.add(list(op(datom), datom.e, datom.a, datom.v))
+        }
+      }
+      // Update in-memory with-db
+      val txReport = TxReport_Peer(_testDb.get.`with`(stmts))
+      _testDb = Some(txReport.dbAfter.asOf(txReport.t))
+      i -= 1
+    }
   }
 
-  /** Use test database as of date.
-    *
-    * @param d Date
-    */
+  def testDbAsOf(tOrTx: Long): Unit = cleanFrom(tOrTx + 1)
+
+  def testDbAsOf(txR: TxReport): Unit = cleanFrom(txR.t + 1)
+
   def testDbAsOf(d: Date): Unit = {
-    _testDb = Some(peerConn.db.asOf(d))
+    // Cleanup everything 1 ms after this date/time
+    cleanFrom(new Date(d.toInstant.plusMillis(1).toEpochMilli))
   }
 
-  /** Use test database as of transaction report.
-    *
-    * @param txR Transaction report
-    */
-  def testDbAsOf(txR: TxReport): Unit = {
-    _testDb = Some(peerConn.db.asOf(txR.t))
-  }
-
-  /** Use test database as of now. */
   def testDbAsOfNow: Unit = {
     _testDb = Some(peerConn.db)
   }
 
-  /** Use test database since time t.
-    *
-    * @param t Long
-    */
   def testDbSince(t: Long): Unit = {
     _testDb = Some(peerConn.db.since(t))
   }
 
-  /** Use test database since date.
-    *
-    * @param d Date
-    */
   def testDbSince(d: Date): Unit = {
     _testDb = Some(peerConn.db.since(d))
   }
 
-  /** Use test database since transaction report.
-    *
-    * @param txR Transaction report
-    */
   def testDbSince(txR: TxReport): Unit = {
     _testDb = Some(peerConn.db.since(txR.t))
   }
 
-
-  /** Use test database with temporary transaction data.
-    * <br><br>
-    * Transaction data can be supplied from any molecule:
-    * {{{
-    *   val benId = Person.name("Ben").save.eid
-    *
-    *   // Use temporary db with given transaction data applied
-    *   conn.testDbWith(
-    *     Person.name("liz").getSaveTx
-    *   )
-    *
-    *   // Query using temporary database including Liz
-    *   Person.name.get === List("Ben", "Liz")
-    *
-    *   // Multiple transactions can be applied
-    *   conn.testDbWith(
-    *     Person.name("Joe").getSaveTx,
-    *     benId.getRetractTx
-    *   )
-    *   Person.name.get === List("Liz", "Joe")
-    * }}}
-    *
-    * @param txData List of List of transaction [[molecule.core.ast.transactionModel.Statement Statement]]'s
-    */
   def testDbWith(txData: Seq[Seq[Statement]]*): Unit = {
     val txDataJava: jList[jList[_]] = txData.flatten.flatten.map(_.toJava).asJava
     _testDb = Some(peerConn.db.`with`(txDataJava).get(DB_AFTER).asInstanceOf[Database])
@@ -155,11 +123,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     _testDb = Some(peerConn.db.`with`(txDataJava).get(DB_AFTER).asInstanceOf[Database])
   }
 
-  /* testDbHistory not implemented.
-   * Instead, use `testDbAsOfNow`, make changes and get historic data with getHistory calls.
-   * */
-
-  /** Get out of test mode and back to live db. */
   def useLiveDb: Unit = {
     _testDb = None
   }
@@ -173,7 +136,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case Since(TxDate(d)) => baseDb.since(d)
       case With(tx)         => {
         val txReport = TxReport_Peer(baseDb.`with`(tx))
-        val db = txReport.dbAfter.asOf(txReport.t)
+        val db       = txReport.dbAfter.asOf(txReport.t)
         db
       }
       case History          => baseDb.history()
@@ -182,7 +145,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     adhocDb
   }
 
-  /** Get current test/live db. Test db has preference. */
   def db: DatomicDb = {
     if (_adhocDb.isDefined) {
       // Return singleton adhoc db
@@ -198,34 +160,29 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
   def entity(id: Any): DatomicEntity = db.entity(this, id)
 
-  /** Transact Seq of Seqs of [[Statement]]s
-    *
-    * @param stmtss
-    * @return [[TxReport TxReport]]
-    */
-  def transact(stmtss: Seq[Seq[Statement]]): TxReport = {
-    val javaStmts: jList[jList[_]] = toJava(stmtss)
 
+  def transact(scalaStmts: Seq[Seq[Statement]]): TxReport = {
+    transact(toJava(scalaStmts), scalaStmts)
+  }
+
+  def transact(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil): TxReport = {
     if (_adhocDb.isDefined) {
       // In-memory "transaction"
-      TxReport_Peer(getAdhocDb.`with`(javaStmts), stmtss)
+      TxReport_Peer(getAdhocDb.`with`(javaStmts), scalaStmts)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
-      val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), stmtss)
-
+      val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts))
       // Continue with updated in-memory db
       // For some reason we need to "cast" it to time t
-      val dbAfter = txReport.dbAfter.asOf(txReport.t)
-      _testDb = Some(dbAfter)
+      _testDb = Some(txReport.dbAfter.asOf(txReport.t))
       txReport
 
     } else {
       // Live transaction
-      TxReport_Peer(peerConn.transact(javaStmts).get, stmtss)
+      TxReport_Peer(peerConn.transact(javaStmts).get)
     }
   }
-
 
   def transactAsync(stmtss: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
@@ -261,43 +218,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     }
   }
 
-  /** Transact edn files or other raw transaction data.
-    * {{{
-    *   val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
-    *   val rawTxStmts = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
-    *
-    *   // transact
-    *   val result: TxReport = conn.transact(rawTxStmts)
-    * }}}
-    *
-    * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return [[TxReport TxReport]]
-    */
-  def transact(rawTxStmts: jList[_]): TxReport = {
-    if (_testDb.isDefined) {
-      // In-memory "transaction"
-      val txReport = TxReport_Peer(_testDb.get.`with`(rawTxStmts))
-      // Continue with updated in-memory db
-      _testDb = Some(txReport.dbAfter.asOf(txReport.t))
-      txReport
-    } else {
-      // Live transaction
-      TxReport_Peer(peerConn.transact(rawTxStmts).get)
-    }
-  }
-
-  /** Asynchronously transact edn files or other raw transaction data.
-    * {{{
-    *   val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
-    *   val rawTxStmts = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
-    *
-    *   // transact
-    *   val result: Future[TxReport] = conn.transactAsync(rawTxStmts)
-    * }}}
-    *
-    * @param rawTxStmts Raw transaction data, typically from edn file.
-    * @return Future with [[TxReport TxReport]] with result of transaction
-    */
   def transactAsync(rawTxStmts: jList[_])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
 
@@ -326,41 +246,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     }
   }
 
-
-  /** Query Datomic directly with db value and optional Scala inputs and get raw Java result.
-    * {{{
-    *   // Sample data
-    *   Ns.str.int.get === List(
-    *     ("Liz", 37),
-    *     ("Ben", 42),
-    *   )
-    *
-    *   // Get some Datomic query from debug output
-    *   Ns.str.int.debugGet // shows datomic query...
-    *
-    *   // Paste Datomic query into `q` call and use some db value
-    *   conn.q(conn.db,
-    *          """[:find  ?b ?c
-    *            | :where [?a :Ns/str ?b]
-    *            |        [?a :Ns/int ?c]]""".stripMargin)
-    *       .toString === """[["Liz" 37], ["Ben" 42]]"""
-    *
-    *   // Modify Datomic query to see result, for instance
-    *   // by adding input to query and applying input value
-    *   conn.q(conn.db,
-    *          """[:find  ?b ?c
-    *            | :in    $ ?c
-    *            | :where [?a :Ns/str ?b]
-    *            |        [?a :Ns/int ?c]]""".stripMargin,
-    *          Seq(42) // input values in list
-    *    ).toString === """[["Ben" 42]]"""
-    * }}}
-    *
-    * @param db      Any Datomic Database value (could be asOf(x) etc)
-    * @param query   Datomic query string
-    * @param inputs0 Seq of optional input(s) to query
-    * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
   def qRaw(db: DatomicDb, query: String, inputs0: Seq[Any]): jCollection[jList[AnyRef]] = {
     val inputs = inputs0.map {
       case it: Iterable[_] => it.asJava
@@ -369,22 +254,6 @@ class Conn_Peer(val peerConn: datomic.Connection)
     blocking(Peer.q(query, db.getDatomicDb +: inputs.asInstanceOf[Seq[AnyRef]]: _*))
   }
 
-
-  /** Query Datomic with Model and Query to get raw Java data.
-    * <br><br>
-    * Will transparently relegate query depending on Model to:
-    *
-    * - Datalog query execution
-    * - Datoms API accessing index
-    * - Log API accessing log
-    *
-    * Return type (tuple matching the molecule) is the same for all 3 APIs so that
-    * application code can query and access data of all molecules the same way.
-    *
-    * @param model [[molecule.core.ast.model.Model Model]] instance
-    * @param query [[molecule.core.ast.query.Query Query]] instance
-    * @return java.util.Collection[java.util.List[AnyRef]]
-    * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]] = model.elements.head match {
     case Generic("Log" | "EAVT" | "AEVT" | "AVET" | "VAET", _, _, _) => _index(model)
     case _                                                           => _query(model, query)
@@ -514,6 +383,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
     // This one is important for Peer to keep db stable when
     // mixing filters with getHistory!
+    // todo:
     val adhocDb = db
 
     def datomElement(tOpt: Option[Long], attr: String): Datom => Any = attr match {

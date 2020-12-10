@@ -37,6 +37,9 @@ trait Conn {
     */
   def testDb(db: DatomicDb): Unit
 
+  /** Use test database as of now. */
+  def testDbAsOfNow: Unit
+
   /** Use test database as of time t / tx id.
     *
     * @param t Long Time t or tx id
@@ -54,9 +57,6 @@ trait Conn {
     * @param txR Transaction report
     */
   def testDbAsOf(txR: TxReport): Unit
-
-  /** Use test database as of now. */
-  def testDbAsOfNow: Unit
 
   /** Use test database since time t.
     *
@@ -127,14 +127,6 @@ trait Conn {
   def transact(stmtss: Seq[Seq[Statement]]): TxReport
 
 
-  /** Asynchronously transact Seq of Seqs of [[Statement]]s
-    *
-    * @param stmtss
-    * @return [[TxReport TxReport]]
-    */
-  def transactAsync(stmtss: Seq[Seq[Statement]])
-                   (implicit ec: ExecutionContext): Future[TxReport]
-
   /** Transact edn files or other raw transaction data.
     * {{{
     *   val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
@@ -147,8 +139,16 @@ trait Conn {
     * @param rawTxStmts Raw transaction data, typically from edn file.
     * @return [[TxReport TxReport]]
     */
-  def transact(rawTxStmts: jList[_]): TxReport
+  def transact(rawTxStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil): TxReport
 
+
+  /** Asynchronously transact Seq of Seqs of [[Statement]]s
+    *
+    * @param stmtss
+    * @return [[TxReport TxReport]]
+    */
+  def transactAsync(stmtss: Seq[Seq[Statement]])
+                   (implicit ec: ExecutionContext): Future[TxReport]
 
   /** Asynchronously transact edn files or other raw transaction data.
     * {{{

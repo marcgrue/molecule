@@ -15,8 +15,13 @@ class TestDbSince extends CoreSpec {
     val e3   = txR3.eid
   }
 
+  // Seems like a bug that we can't apply filter to with-db with peer-server
+  omitPeerServer = true
 
   "since: input types" in new Setup {
+
+    // Ensure to match dates beeing at least 1 ms apart
+    Thread.sleep(1)
     val txR4 = Ns.int(4).save
     val txR5 = Ns.int(5).save
 

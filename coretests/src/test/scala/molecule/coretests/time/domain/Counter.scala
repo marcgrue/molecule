@@ -15,7 +15,7 @@ case class Counter(eid: Long) {
 
   // Mutate domain data
   def incr(implicit conn: Conn): Int = {
-    val next = value + 1
+    val next = value + 10
     Ns(eid).int(next).update
     next
   }
