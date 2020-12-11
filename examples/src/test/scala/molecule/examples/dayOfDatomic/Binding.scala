@@ -1,5 +1,5 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.MoleculeSpec
+import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.api.in2_out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.examples.dayOfDatomic.schema._

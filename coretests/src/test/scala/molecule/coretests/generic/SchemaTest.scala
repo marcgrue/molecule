@@ -1,6 +1,7 @@
 package molecule.coretests.generic
 
-import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer, DatomicPeerServer}
+import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer}
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
 

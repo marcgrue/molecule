@@ -1,7 +1,7 @@
 package molecule.coretests.crud.updateMap
 
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.expectCompileError
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out1._

@@ -1,5 +1,5 @@
 package molecule.examples.mbrainz
-import molecule.core.util.MoleculeSpec
+import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper

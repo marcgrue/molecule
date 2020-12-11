@@ -4,7 +4,7 @@ import molecule.datomic.api.out1._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.expectCompileError
+import molecule.core.util.testing.expectCompileError
 
 class UpdateMapString extends CoreSpec {
 

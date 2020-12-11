@@ -1,19 +1,19 @@
-package molecule.core.util
+package molecule.core.util.testing
+
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.Model
 import molecule.core.ast.query._
 import molecule.core.ast.transactionModel._
-import molecule.core.exceptions.MoleculeException
-import molecule.datomic.base.facade.Conn
 import molecule.core.input.InputMolecule
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.{Model2Transaction, Query2String}
+import molecule.core.util.{MoleculeSpecException, RegexMatching}
+import molecule.datomic.base.facade.Conn
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable._
-import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
+import scala.concurrent.duration._
 import scala.language.postfixOps
-
 
 trait MoleculeSpec extends Specification with RegexMatching {
 

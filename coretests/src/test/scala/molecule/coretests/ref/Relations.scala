@@ -1,7 +1,7 @@
 package molecule.coretests.ref
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.expectCompileError
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out4._

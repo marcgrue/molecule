@@ -1,9 +1,9 @@
 package molecule.coretests.equality
 
+import molecule.core.util.testing.expectCompileError
 import molecule.datomic.api.out4._
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
-import molecule.core.util.expectCompileError
 
 class ApplyString extends CoreSpec {
 

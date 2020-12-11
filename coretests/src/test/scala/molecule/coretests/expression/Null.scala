@@ -1,6 +1,6 @@
 package molecule.coretests.expression
 
-import molecule.core.util.expectCompileError
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.dsl.coreTest.Ns
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out2._

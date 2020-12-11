@@ -1,7 +1,8 @@
 package molecule.coretests.attr
 
 import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.{expectCompileError, DatomicPeer}
+import molecule.core.util.DatomicPeer
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out5._

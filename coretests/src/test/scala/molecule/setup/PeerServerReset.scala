@@ -1,9 +1,10 @@
 package molecule.setup
 
+import molecule.core.util.testing.TxCountSchema
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import molecule.coretests.nested.schema.NestedSchema
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
-import molecule.coretests.util.schema.{CoreTestSchema, TxCountSchema}
+import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.mutable.Specification
 

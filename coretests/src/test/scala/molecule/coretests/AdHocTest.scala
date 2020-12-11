@@ -13,7 +13,7 @@ import molecule.datomic.api
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.coretests.util.schema.CoreTestSchema
-import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer, Helpers, Timer}
+import molecule.core.util.{DatomicDevLocal, DatomicPeer, DatomicPeerServer, Helpers}
 import molecule.datomic.api.in1_out6._
 import molecule.datomic.client.facade.{Conn_Client, DatomicDb_Client}
 import molecule.datomic.peer.facade.{DatomicDb_Peer, TxReport_Peer}

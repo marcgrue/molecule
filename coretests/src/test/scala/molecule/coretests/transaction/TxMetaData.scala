@@ -399,7 +399,7 @@ class TxMetaData extends CoreSpec {
 
       // History with transaction data
       Ns.int.tx.t.op.Tx(Ns.str).getHistory
-        .filter(_._2 >= basisTx)
+        .filter(_._2 >= basisTx) // Allow accumulating peer-server tests too
         .sortBy(r => (r._2, r._1, r._4)) === List(
         (1, tx1, t1, true, "a"),
         (2, tx1, t1, true, "a"),

@@ -2,7 +2,8 @@ package molecule.coretests.generic
 
 import molecule.core.exceptions.MoleculeException
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.util.{expectCompileError, DatomicDevLocal, DatomicPeer}
+import molecule.core.util.{DatomicDevLocal, DatomicPeer}
+import molecule.core.util.testing.expectCompileError
 import molecule.coretests.util.CoreSpec
 import molecule.coretests.util.dsl.coreTest._
 import molecule.datomic.api.out5._

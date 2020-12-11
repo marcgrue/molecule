@@ -4,45 +4,34 @@ import datomic.Peer
 import datomicClient.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.{Client, Connection, Datomic}
-import molecule.core.ast.transactionModel.{Retract, RetractEntity, Statement}
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
+import molecule.core.util.testing.MoleculeSpec
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
 import molecule.coretests.nested.schema.NestedSchema
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
-import molecule.coretests.util.dsl.txCount._
-import molecule.coretests.util.schema.{CoreTestSchema, TxCountSchema}
-import molecule.datomic.api.in1_out6._
+import molecule.coretests.util.schema.CoreTestSchema
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
+import molecule.testing.TestPeerServer
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
-import scala.collection.mutable
 
 
-abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
+abstract class CoreSpec extends MoleculeSpec {
   sequential
-
-  var system     : System      = DatomicPeer
-  var client     : Client      = null // set in setup
-  var asyncClient: AsyncClient = null // set in setup
-  var connection : Connection  = null // set in setup
-
-  var basisT: Long = 0L
-  def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
-
-  // Do or skip looping input tests that take a few minutes
+  var system: System    = DatomicPeer
+  var client: Client    = null // set in setup
+  var peerOnly          = false
+  var devLocalOnly      = false
+  var peerServerOnly    = false
+  var omitPeerServer    = false
   val heavyInputTesting = false
-
-  var peerOnly       = false
-  var devLocalOnly   = false
-  //  var peerServerOnly = true
-  var peerServerOnly = false
-  var omitPeerServer = false
-
-  var setupException = Option.empty[Throwable]
-  var installSchema  = true // set to true to initiate Peer Server schema installation
+  var setupException    = Option.empty[Throwable]
+  var doInstallSchema   = true // set to true to initiate Peer Server schema installation
+  var basisT: Long      = 0L
+  def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
 
   override def map(fs: => Fragments): Fragments = {
     if (peerOnly) {
@@ -81,73 +70,20 @@ abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
     client = Datomic.clientDevLocal("Some system name")
   }
 
-  def freshConn(
-    schema: SchemaTransaction,
-    dbIdentifier: String = ""
-  ): Conn = {
-
+  def freshConn(schema: SchemaTransaction, dbIdentifier: String = ""): Conn = {
     // Throw potential setup error
     setupException.fold(())(throw _)
-
     system match {
       case DatomicPeer =>
         Datomic_Peer.recreateDbFrom(schema)
 
       case DatomicPeerServer =>
-        val cl          = Datomic_Client(client)
-        val dataConn    = cl.connect(dbIdentifier)
-        val txCountConn = cl.connect("txCount")
-        val log         = dataConn.clientConn.txRange(Some(1000), Some(1002))
-        val empty       = if (installSchema) log.isEmpty else false
-
-        // Check only once per test file
-        if (installSchema && empty) {
-          println("Installing Peer Server schema...")
-          if (schema.partitions.size() > 0)
-            dataConn.transact(cl.allowedClientDefinitions(schema.partitions))
-          dataConn.transact(cl.allowedClientDefinitions(schema.namespaces))
-          basisT = dataConn.db.t + 1
-          txCountConn.transact(cl.allowedClientDefinitions(TxCountSchema.namespaces))
-          TxCount.db(dbIdentifier).basisT(basisT).save(txCountConn)
-          installSchema = false
-
-        } else {
-          basisT = TxCount.db_(dbIdentifier).basisT.get(txCountConn).head
-          //          println(s"basisT: $dbIdentifier  " + basisT)
-
-          // Since we can't recreate a Peer Server from here, we simply retract
-          // all datoms created in previous tests.
-          val cleanupRetractions = mutable.Set.empty[Statement]
-          Log(Some(basisT)).e.a.v.get(dataConn).foreach {
-            case (_, ":db/txInstant", _)            => // Can't change tx time
-            case (_, ":TxCount/basisT", _)          => // Keep basisT
-            case (tx, a, v) if tx < 17000000000000L => cleanupRetractions += Retract(tx, a, v)
-            case (e, _, _)                          => cleanupRetractions += RetractEntity(e)
-          }
-          val retractionCount = cleanupRetractions.size
-
-          //          Log(Some(basisT)).t.op.e.a.v.get(dataConn) foreach println
-          //          println("-------------------")
-          //          cleanupRetractions.toSeq.sortBy(_.e.toString.toLong) foreach println
-          //          println("-------------------")
-          //          println(s"Retraction count: $retractionCount")
-
-          if (retractionCount > 100)
-            throw new RuntimeException(s"Unexpectedly gathered $retractionCount retractions...")
-
-          if (retractionCount > 0) {
-            val txd = dataConn.transact(Seq(cleanupRetractions.toSeq))
-            //            println(txd)
-
-            val tx = TxCount.e.db_(dbIdentifier).get(txCountConn).head
-            basisT = dataConn.db.t + 1
-            TxCount(tx).basisT(basisT).update(txCountConn)
-            //            println(s"basisT: $tx  $basisT  " + TxCount.db(dbIdentifier).basisT.get(txCountConn).head)
-          } else {
-            //            println("No rectractions necessary (could be a reload) ...")
-          }
-        }
-        dataConn
+        val (conn, newBasisT) = TestPeerServer.getCleanPeerServerConn(
+          client, dbIdentifier, doInstallSchema, schema, basisT
+        )
+        basisT = newBasisT
+        doInstallSchema = false
+        conn
 
       case DatomicDevLocal =>
         Datomic_Client(client).recreateDbFrom(schema, dbIdentifier, false)

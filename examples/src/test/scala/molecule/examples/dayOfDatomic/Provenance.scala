@@ -1,6 +1,6 @@
 package molecule.examples.dayOfDatomic
 import molecule.core.ast.model._
-import molecule.core.util.MoleculeSpec
+import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.api.out7._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import scala.language.reflectiveCalls

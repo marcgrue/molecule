@@ -1,7 +1,7 @@
 package molecule.examples.mbrainz.dayOfDatomic
 
 import java.util.UUID
-import molecule.core.util.MoleculeSpec
+import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import scala.language.postfixOps

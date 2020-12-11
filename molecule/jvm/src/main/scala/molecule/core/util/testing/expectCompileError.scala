@@ -1,7 +1,8 @@
-package molecule.core.util
+package molecule.core.util.testing
 
+import molecule.core.util.MacroHelpers
 import scala.language.experimental.macros
-import scala.reflect.macros.{TypecheckException, blackbox}
+import scala.reflect.macros.{blackbox, TypecheckException}
 
 // Modified `illTyped` macro by Stefan Zeiger (@StefanZeiger)
 // See also shapeless.test.illTyped
