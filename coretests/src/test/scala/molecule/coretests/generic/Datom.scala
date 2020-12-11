@@ -316,10 +316,14 @@ class Datom extends CoreSpec {
 
       Ns.e.not(e1).get.sorted === List(e2, r1).sorted
       Ns.e.not(e1, e2).get === List(r1)
-      Ns.e.>(e1).get.sorted === List(e2, r1).sorted
-      Ns.e.>=(e1).get.sorted === List(e1, e2, r1).sorted
-      Ns.e.<=(e2).get.sorted === List(e1, e2).sorted
-      Ns.e.<(e2).get === List(e1)
+
+      // Eids not deterministic with dev-local
+      if (system != DatomicDevLocal) {
+        Ns.e.>(e1).get.sorted === List(e2, r1).sorted
+        Ns.e.>=(e1).get.sorted === List(e1, e2, r1).sorted
+        Ns.e.<=(e2).get.sorted === List(e1, e2).sorted
+        Ns.e.<(e2).get === List(e1)
+      }
 
       // Only `e` before first custom attribute is allowed
       Ns.e(count).int_.get === List(2)

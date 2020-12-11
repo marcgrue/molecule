@@ -74,12 +74,23 @@ class Aggregates extends CoreSpec {
       (bigDec3, Set(bigDec2, bigDec4)))
   }
 
+  def round(value: Double, decimals: Int) = {
+    val factor = scala.math.pow(10, decimals)
+    (value * factor).round / factor.toDouble
+  }
 
   "sum" in new AggregateSetup {
     Ns.int(sum).get.head === (1 + 2 + 3)
     Ns.long(sum).get.head === 6L
     Ns.float(sum).get.head === 6.6f
-    Ns.double(sum).get.head === 6.6
+
+    // Peer server seems more picky with precision
+    // For full precision, please use BigDecimal or save as Long and divide
+    if (system == DatomicPeerServer)
+      round(Ns.double(sum).get.head, 6) === 6.6
+    //      Ns.double(sum).get.head === 6.6000000000000005
+    else
+      Ns.double(sum).get.head === 6.6
   }
 
 
@@ -94,19 +105,18 @@ class Aggregates extends CoreSpec {
   "avg" in new AggregateSetup {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
+    if (system == DatomicPeerServer)
+      round(Ns.float(avg).get.head, 6) === 2.2
+    //          Ns.float(avg).get.head === 2.2
+    else
+      Ns.float(avg).get.head === 2.1999999999999997
 
-
-
-    def round(value: Double, decimals: Int) = {
-      val factor = scala.math.pow(10, decimals)
-      (value * factor).round / factor.toDouble
-    }
-
-    round(Ns.float(avg).get.head, 6) === 2.2
-
-    // For precision, please use Double type instead of Float
-    round(Ns.double(avg).get.head, 6) === 2.2
-    Ns.double(avg).get.head === 2.1999999999999997
+    // Peer server seems more picky with precision
+    // For full precision, please use BigDecimal or save as Long and divide
+    if (system == DatomicPeerServer)
+      round(Ns.double(avg).get.head, 6) === 2.2
+    else
+      Ns.double(avg).get.head === 2.1999999999999997
   }
 
 

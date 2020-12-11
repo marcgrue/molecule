@@ -26,16 +26,14 @@ import scala.util.Random
 
 class AdHocTest extends CoreSpec with Helpers with ClojureBridge {
 
-  peerOnly = true
-  //    peerServerOnly = true
-  //    devLocalOnly = true
+  //  peerOnly = true
+  //  peerServerOnly = true
+  //  devLocalOnly = true
 
 
   //  "adhoc" in new BidirectionalSetup {
   //  "adhoc" in new PartitionSetup {
   "adhoc" in new CoreSetup {
-
-
 
 
     ok

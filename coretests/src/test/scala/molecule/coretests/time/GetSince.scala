@@ -110,7 +110,9 @@ class GetSince extends CoreSpec {
 
       // Transact 3 times (`inst` retrieves transaction time from tx report)
       val date1 = Ns.str("Ann").save.inst
+      Thread.sleep(5)
       val date2 = Ns.str("Ben").save.inst
+      Thread.sleep(5)
       val date3 = Ns.str("Cay").save.inst
 
       // Current values
@@ -178,9 +180,9 @@ class GetSince extends CoreSpec {
 
       // Transact 3 times (`inst` retrieves transaction time from tx report)
       val date1 = Ns.str("Ann").save.inst
-      Thread.sleep(1)
+      Thread.sleep(5)
       val date2 = Ns.str("Ben").save.inst
-      Thread.sleep(1)
+      Thread.sleep(5)
       val date3 = Ns.str("Cay").save.inst
 
       // Current values
