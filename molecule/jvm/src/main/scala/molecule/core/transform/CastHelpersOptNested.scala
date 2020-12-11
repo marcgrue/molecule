@@ -12,7 +12,7 @@ import molecule.core.util.Helpers
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpersOptNested[Tpl] extends Helpers {
+trait CastHelpersOptNested extends Helpers {
 
   // card one
 

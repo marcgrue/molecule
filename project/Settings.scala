@@ -34,16 +34,6 @@ object Settings {
       "my.datomic.com" at "https://my.datomic.com/repo"
     ),
 
-    /*
-    If using datomic-pro/starter, create a ~/.sbt/.credentials file with the following content:
-      realm=Datomic Maven Repo
-      host=my.datomic.com
-      id=my.datomic.com
-      user=<your-username>
-      pass=<your-password>
-    * */
-//    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
-
     unmanagedSourceDirectories in Compile ++= {
       (unmanagedSourceDirectories in Compile).value.map { dir =>
         CrossVersion.partialVersion(scalaVersion.value) match {
@@ -67,27 +57,41 @@ object Settings {
     )
   )
 
-  val jvm: Seq[Def.Setting[_]] = Seq(
-    name := "molecule",
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.specs2" %% "specs2-core" % "4.10.0",
-      "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.2-SNAPSHOT",
-
-//            "com.datomic" % "datomic-free" % "0.9.5697",
-      "com.datomic" % "datomic-pro" % "1.0.6202",
-    ),
-    // Add this exclusion if datomic-pro is used.
-    // Free is imported and conflicts with pro if this is not added:
-    excludeDependencies ++= Seq(ExclusionRule("com.datomic", "datomic-free"))
-  )
+  val useDatomicPro            = true
+  val jvm: Seq[Def.Setting[_]] = {
+    Seq(
+      name := "molecule",
+      libraryDependencies ++= Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+        "org.specs2" %% "specs2-core" % "4.10.0",
+        "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.2-SNAPSHOT",
+      )
+    ) ++ (
+      if (useDatomicPro)
+        Seq(
+          libraryDependencies += "com.datomic" % "datomic-pro" % "1.0.6222",
+          excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
+          /*
+          If using datomic-pro/starter, create a ~/.sbt/.credentials file with the following content:
+            realm=Datomic Maven Repo
+            host=my.datomic.com
+            id=my.datomic.com
+            user=<your-username>
+            pass=<your-password>
+          * */
+          credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+        )
+      else
+        Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
+      )
+  }
 
   // Proprietary Client dev-local dependency needed for tests
   // Please download from https://cognitect.com/dev-tools and install locally per included instructions
   val tests: Seq[Def.Setting[_]] = Seq(
     resolvers ++= Seq(Resolver.mavenLocal),
     libraryDependencies ++= Seq(
-      "com.datomic" % "dev-local" % "0.9.225"
+      "com.datomic" % "dev-local" % "0.9.229"
     )
   )
 

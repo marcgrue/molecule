@@ -1,22 +1,20 @@
 package molecule.coretests.ref.nested
 
 import molecule.coretests.nested.dsl.nested._
-import molecule.coretests.nested.schema.NestedSchema
+import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out3._
-import org.specs2.mutable.Specification
-import molecule.datomic.peer.facade.Datomic_Peer._
 
-class NestedBranches extends Specification {
-  sequential
+class NestedBranches extends CoreSpec {
 
-  def branchA[T](leafs: Seq[T]): (Int, String, Seq[T]) = (1, "a", leafs)
-  def branchB[T](leafs: Seq[T]): (Int, String, Seq[T]) = (2, "b", leafs)
-  val leaf  = List((10, "a"))
-  val leafs = List((20, "b"), (21, "bb"))
+  class Setup extends NestedSetup {
+    def branchA[T](leafs: Seq[T]): (Int, String, Seq[T]) = (1, "a", leafs)
+    def branchB[T](leafs: Seq[T]): (Int, String, Seq[T]) = (2, "b", leafs)
+    val leaf  = List((10, "a"))
+    val leafs = List((20, "b"), (21, "bb"))
+  }
 
-  implicit val conn = recreateDbFrom(NestedSchema)
 
-  "1 level deep" >> {
+  "1 level deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1))
@@ -35,7 +33,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "2 levels deep" >> {
+  "2 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(
@@ -72,7 +70,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "3 levels deep" >> {
+  "3 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(
@@ -193,7 +191,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "4 levels deep" >> {
+  "4 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(
@@ -405,7 +403,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "5 levels deep" >> {
+  "5 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(
@@ -741,7 +739,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "6 levels deep" >> {
+  "6 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(
@@ -1240,7 +1238,7 @@ class NestedBranches extends Specification {
   }
 
 
-  "7 levels deep" >> {
+  "7 levels deep" in new Setup {
     val nested = m(
       Ns0.i0.s0.R1.*(
         Ns1.i1.s1.R2.*(

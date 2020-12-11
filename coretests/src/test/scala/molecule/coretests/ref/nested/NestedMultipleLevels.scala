@@ -78,191 +78,180 @@ class NestedMultipleLevels extends CoreSpec {
       ("B", List())
     )
 
+    // optional - optional
+    Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2$)).get === List(
+      ("A", List(
+        (1, Some("a1"), List(
+          (11, Some("a11")),
+          (12, None),
+        )),
+        (2, None, List(
+          (21, Some("a21")),
+          (22, None),
+        )),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2$)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, Some("a1"), List(
+          (11, Some("a11")),
+          (12, None),
+        )),
+        (2, None, List(
+          (21, Some("a21")),
+          (22, None),
+        )),
+        (3, Some("a3"), List()),
+        (4, None, List()),
+      )),
+      ("B", List()),
+    )
 
-    "optional - optional" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2$)).get === List(
-        ("A", List(
-          (1, Some("a1"), List(
-            (11, Some("a11")),
-            (12, None),
-          )),
-          (2, None, List(
-            (21, Some("a21")),
-            (22, None),
-          )),
+    // optional - mandatory
+    Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2)).get === List(
+      ("A", List(
+        (1, Some("a1"), List(
+          (11, "a11"),
         )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2$)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, Some("a1"), List(
-            (11, Some("a11")),
-            (12, None),
-          )),
-          (2, None, List(
-            (21, Some("a21")),
-            (22, None),
-          )),
-          (3, Some("a3"), List()),
-          (4, None, List()),
+        (2, None, List(
+          (21, "a21"),
         )),
-      )
-    }
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, Some("a1"), List(
+          (11, "a11"),
+        )),
+        (2, None, List(
+          (21, "a21"),
+        )),
+        (3, Some("a3"), List()),
+        (4, None, List()),
+      )),
+      ("B", List()),
+    )
 
-    "optional - mandatory" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2)).get === List(
-        ("A", List(
-          (1, Some("a1"), List(
-            (11, "a11"),
-          )),
-          (2, None, List(
-            (21, "a21"),
-          )),
-        )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, Some("a1"), List(
-            (11, "a11"),
-          )),
-          (2, None, List(
-            (21, "a21"),
-          )),
-          (3, Some("a3"), List()),
-          (4, None, List()),
-        )),
-      )
-    }
+    // optional - tacit
+    Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2_)).get === List(
+      ("A", List(
+        (1, Some("a1"), List(11)),
+        (2, None, List(21)),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2_)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, Some("a1"), List(11)),
+        (2, None, List(21)),
+        (3, Some("a3"), List()),
+        (4, None, List()),
+      )),
+      ("B", List()),
+    )
 
-    "optional - tacit" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1$.Refs2.*(Ref2.int2.str2_)).get === List(
-        ("A", List(
-          (1, Some("a1"), List(11)),
-          (2, None, List(21)),
+    // mandatory - optional
+    Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2$)).get === List(
+      ("A", List(
+        (1, "a1", List(
+          (11, Some("a11")),
+          (12, None),
         )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1$.Refs2.*?(Ref2.int2.str2_)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, Some("a1"), List(11)),
-          (2, None, List(21)),
-          (3, Some("a3"), List()),
-          (4, None, List()),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2$)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, "a1", List(
+          (11, Some("a11")),
+          (12, None),
         )),
-      )
-    }
+        (3, "a3", List()),
+      )),
+      ("B", List()),
+    )
 
-    "mandatory - optional" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2$)).get === List(
-        ("A", List(
-          (1, "a1", List(
-            (11, Some("a11")),
-            (12, None),
-          )),
+    // mandatory - mandatory
+    Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2)).get === List(
+      ("A", List(
+        (1, "a1", List(
+          (11, "a11"),
         )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2$)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, "a1", List(
-            (11, Some("a11")),
-            (12, None),
-          )),
-          (3, "a3", List()),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, "a1", List(
+          (11, "a11"),
         )),
-      )
-    }
+        (3, "a3", List()),
+      )),
+      ("B", List()),
+    )
 
-    "mandatory - mandatory" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2)).get === List(
-        ("A", List(
-          (1, "a1", List(
-            (11, "a11"),
-          )),
-        )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, "a1", List(
-            (11, "a11"),
-          )),
-          (3, "a3", List()),
-        )),
-      )
-    }
+    // mandatory - tacit
+    Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2_)).get === List(
+      ("A", List(
+        (1, "a1", List(11)),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2_)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, "a1", List(11)),
+        (3, "a3", List()),
+      )),
+      ("B", List()),
+    )
 
-    "mandatory - tacit" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1.Refs2.*(Ref2.int2.str2_)).get === List(
-        ("A", List(
-          (1, "a1", List(11)),
+    // tacit - optional
+    Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2$)).get === List(
+      ("A", List(
+        (1, List(
+          (11, Some("a11")),
+          (12, None),
         )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1.Refs2.*?(Ref2.int2.str2_)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, "a1", List(11)),
-          (3, "a3", List()),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2$)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, List(
+          (11, Some("a11")),
+          (12, None),
         )),
-      )
-    }
+        (3, List()),
+      )),
+      ("B", List()),
+    )
 
+    // tacit - mandatory
+    Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2)).get === List(
+      ("A", List(
+        (1, List(
+          (11, "a11"),
+        )),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, List(
+          (11, "a11"),
+        )),
+        (3, List()),
+      )),
+      ("B", List()),
+    )
 
-    "tacit - optional" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2$)).get === List(
-        ("A", List(
-          (1, List(
-            (11, Some("a11")),
-            (12, None),
-          )),
-        )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2$)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, List(
-            (11, Some("a11")),
-            (12, None),
-          )),
-          (3, List()),
-        )),
-      )
-    }
-
-    "tacit - mandatory" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2)).get === List(
-        ("A", List(
-          (1, List(
-            (11, "a11"),
-          )),
-        )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, List(
-            (11, "a11"),
-          )),
-          (3, List()),
-        )),
-      )
-    }
-
-    "tacit - tacit" >> {
-      Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2_)).get === List(
-        ("A", List(
-          (1, List(11)),
-        )),
-      )
-      Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2_)).get === List(
-        ("B", List()),
-        ("A", List(
-          (1, List(11)),
-          (3, List()),
-        )),
-      )
-    }
+    // tacit - tacit
+    Ns.str.Refs1.*(Ref1.int1.str1_.Refs2.*(Ref2.int2.str2_)).get === List(
+      ("A", List(
+        (1, List(11)),
+      )),
+    )
+    Ns.str.Refs1.*?(Ref1.int1.str1_.Refs2.*?(Ref2.int2.str2_)).get.sortBy(_._1) === List(
+      ("A", List(
+        (1, List(11)),
+        (3, List()),
+      )),
+      ("B", List()),
+    )
   }
 
 

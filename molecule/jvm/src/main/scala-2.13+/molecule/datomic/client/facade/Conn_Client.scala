@@ -1,23 +1,21 @@
 package molecule.datomic.client.facade
 
 import java.util
-import java.util.{stream, Collections, Date, Collection => jCollection, List => jList}
+import java.util.{stream, Date, Collection => jCollection, List => jList}
 import datomic.Util._
 import datomic.db.DbId
 import datomic.Peer
 import datomicScala.client.api.{sync, Datom}
-import datomicScala.client.api.sync.{Client, Connection, Db, Datomic => clientDatomic, TxReport => clientTxReport}
+import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure, Timer}
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
-import molecule.datomic.peer.facade.TxReport_Peer
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
@@ -202,18 +200,18 @@ case class Conn_Client(client: Client, dbName: String)
       // Special withDb now in use (important for consequent transaction calls)
       withDbInUse = true
 
-      val txReport = TxReport_Client(withDb)
+      val txReport = TxReport_Client(withDb, scalaStmts)
       _testDb = Some(txReport.dbAfter)
       txReport
 
     } else {
       // Live transaction
-      TxReport_Client(clientConn.transact(javaStmts))
+      TxReport_Client(clientConn.transact(javaStmts), scalaStmts)
     }
   }
 
 
-  def transactAsync(stmtss: Seq[Seq[Statement]])
+  def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
     //    val javaStmts: jList[jList[_]] = toJava(stmtss)
     //
@@ -253,7 +251,8 @@ case class Conn_Client(client: Client, dbName: String)
     ???
   }
 
-  def transactAsync(rawTxStmts: jList[_])(implicit ec: ExecutionContext): Future[TxReport] = {
+  def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
+                   (implicit ec: ExecutionContext): Future[TxReport] = {
     ???
   }
 

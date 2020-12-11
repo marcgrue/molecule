@@ -13,7 +13,7 @@ import com.cognitect.transit.impl.URIImpl
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpers[Tpl] extends CastHelpersAggr[Tpl] {
+trait CastHelpers[Tpl] extends CastHelpersAggr {
 
 
   // Standard row cast interface to be materialized by macro

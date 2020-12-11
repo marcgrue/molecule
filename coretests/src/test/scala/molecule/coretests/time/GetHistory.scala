@@ -1,11 +1,8 @@
 package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.in1_out6._
-import org.specs2.mutable.Specification
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
 class GetHistory extends CoreSpec {
@@ -67,7 +64,7 @@ class GetHistory extends CoreSpec {
     )
 
     // int history with entity
-    Ns.e.int.t.op.getHistory.sortBy(t => (t._1, t._3, t._4)) === List(
+    Ns.e.int.t.op.getHistory.sortBy(t => (t._2, t._3, t._4)) === List(
       // e1
       (e1, 1, t1, true),
       (e1, 1, t3, false),

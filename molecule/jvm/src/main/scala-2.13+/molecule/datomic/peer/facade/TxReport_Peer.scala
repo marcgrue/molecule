@@ -15,7 +15,7 @@ case class TxReport_Peer(
   stmtss: Seq[Seq[Statement]] = Nil
 ) extends TxReport {
 
-  def eids: List[Long] = {
+  lazy val eids: List[Long] = {
     val allIds = {
       val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
       var a      = Array.empty[Long]
@@ -36,15 +36,14 @@ case class TxReport_Peer(
           s"Unexpected different counts of ${allIds.size} ids and ${flattenStmts.size} stmts."
         )
       val resolvedIds = flattenStmts.zip(allIds).collect {
-        case (Add(_: DbId, _, _, _), eid)                                  => eid
-//        case (Add(tempId, _, _, _), eid) if tempId.toString.take(6) == "#db/id" => eid
-        case (Add("datomic.tx", _, _, _), eid)                                  => eid
+        case (Add(_: DbId, _, _, _), eid)      => eid
+        case (Add("datomic.tx", _, _, _), eid) => eid
       }.distinct.toList
       resolvedIds
     }
   }
 
-  private def txDataRaw: List[Datum] =
+  private lazy val txDataRaw: List[Datum] =
     rawTxReport.get(Connection.TX_DATA)
       .asInstanceOf[jList[_]].asScala.toList.asInstanceOf[List[Datum]]
 
@@ -59,22 +58,22 @@ case class TxReport_Peer(
        |  dbBefore.t: ${dbBefore.basisT}
        |  dbAfter   : $dbAfter
        |  dbAfter.t : ${dbAfter.basisT}
-       |  txData    : ${txDataRaw.map(datom2string).mkString(",\n                   ")}
+       |  txData    : ${txDataRaw.map(datom2string).mkString(",\n              ")}
        |  tempids   : ${rawTxReport.get(TEMPIDS).asInstanceOf[AnyRef]}
+       |  eids      : $eids
        |}""".stripMargin
 
-
-  def eid: Long = eids.head
+  lazy val eid: Long = eids.head
 
   /** Get database value before transaction. */
-  def dbBefore: Database = rawTxReport.get(Connection.DB_BEFORE).asInstanceOf[Database]
+  lazy val dbBefore: Database = rawTxReport.get(Connection.DB_BEFORE).asInstanceOf[Database]
 
   /** Get database value after transaction. */
-  def dbAfter: Database = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
+  lazy val dbAfter: Database = rawTxReport.get(Connection.DB_AFTER).asInstanceOf[Database]
 
-  def t: Long = dbAfter.basisT
+  lazy val t: Long = dbAfter.basisT
 
-  def tx: Long = Peer.toTx(t).asInstanceOf[Long]
+  lazy val tx: Long = Peer.toTx(t).asInstanceOf[Long]
 
-  def inst: Date = dbAfter.entity(tx).get(":db/txInstant").asInstanceOf[Date]
+  lazy val inst: Date = dbAfter.entity(tx).get(":db/txInstant").asInstanceOf[Date]
 }

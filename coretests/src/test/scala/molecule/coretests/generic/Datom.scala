@@ -327,7 +327,7 @@ class Datom extends CoreSpec {
 
       Ns.a(":Ns/str").get === List(":Ns/str")
       Ns.a(":Ns/str", ":Ns/int").get === List(":Ns/int", ":Ns/str")
-      Ns.a.not(":Ns/str").get.sorted === List(":Ns/int", ":Ref1/str1", ":Ns/ref1")
+      Ns.a.not(":Ns/str").get.sorted === List(":Ns/int", ":Ns/ref1", ":Ref1/str1")
       Ns.a.not(":Ns/str", ":Ns/ref1").get === List(":Ns/int", ":Ref1/str1")
       Ns.a.>(":Ns/str").get === List(":Ref1/str1")
       Ns.a.>=(":Ns/str").get === List(":Ref1/str1", ":Ns/str")

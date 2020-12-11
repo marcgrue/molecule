@@ -6,7 +6,6 @@ import datomic.{Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
-import datomicScala.client.api.sync.Db
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
@@ -14,7 +13,7 @@ import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
 import molecule.core.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure, Timer}
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -172,7 +171,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
     } else if (_testDb.isDefined) {
       // In-memory "transaction"
-      val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts))
+      val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), scalaStmts)
       // Continue with updated in-memory db
       // For some reason we need to "cast" it to time t
       _testDb = Some(txReport.dbAfter.asOf(txReport.t))
@@ -180,51 +179,28 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
     } else {
       // Live transaction
-      TxReport_Peer(peerConn.transact(javaStmts).get)
+      TxReport_Peer(peerConn.transact(javaStmts).get, scalaStmts)
     }
   }
 
-  def transactAsync(stmtss: Seq[Seq[Statement]])
+  def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-    val javaStmts: jList[jList[_]] = toJava(stmtss)
+    val javaStmts: jList[jList[_]] = toJava(scalaStmts)
+    transactAsync(javaStmts, scalaStmts)
+  }
+
+  def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
+                   (implicit ec: ExecutionContext): Future[TxReport] = {
 
     if (_adhocDb.isDefined) {
       Future {
-        TxReport_Peer(getAdhocDb.`with`(javaStmts), stmtss)
+        TxReport_Peer(getAdhocDb.`with`(javaStmts), scalaStmts)
       }
 
     } else if (_testDb.isDefined) {
       Future {
         // In-memory "transaction"
-        val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), stmtss)
-
-        // Continue with updated in-memory db
-        // For some reason we need to "cast" it to time t
-        val dbAfter = txReport.dbAfter.asOf(txReport.t)
-        _testDb = Some(dbAfter)
-        txReport
-      }
-
-    } else {
-      // Live transaction
-      val moleculeInvocationFuture = try {
-        bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
-      } catch {
-        case NonFatal(ex) => Future.failed(ex)
-      }
-      moleculeInvocationFuture map { moleculeInvocationResult: java.util.Map[_, _] =>
-        TxReport_Peer(moleculeInvocationResult, stmtss)
-      }
-    }
-  }
-
-  def transactAsync(rawTxStmts: jList[_])
-                   (implicit ec: ExecutionContext): Future[TxReport] = {
-
-    if (_testDb.isDefined) {
-      Future {
-        // In-memory "transaction"
-        val txReport = TxReport_Peer(_testDb.get.`with`(rawTxStmts))
+        val txReport = TxReport_Peer(_testDb.get.`with`(javaStmts), scalaStmts)
 
         // Continue with updated in-memory db
         // todo: why can't we just say this? Or: why are there 2 db-after db objects?
@@ -236,12 +212,12 @@ class Conn_Peer(val peerConn: datomic.Connection)
     } else {
       // Live transaction
       val moleculeInvocationFuture = try {
-        bridgeDatomicFuture(peerConn.transactAsync(rawTxStmts))
+        bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
       } catch {
         case NonFatal(ex) => Future.failed(ex)
       }
       moleculeInvocationFuture map { moleculeInvocationResult: java.util.Map[_, _] =>
-        TxReport_Peer(moleculeInvocationResult)
+        TxReport_Peer(moleculeInvocationResult, scalaStmts)
       }
     }
   }

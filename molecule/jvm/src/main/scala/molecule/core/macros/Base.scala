@@ -135,7 +135,6 @@ private[molecule] trait Base extends Dsl2Model {
             q"""
                lazy val $itX = {
                  val valueMap = it0.next.asInstanceOf[PersistentArrayMap]
-//                 println("valueMap: " + valueMap)
                  if (${casts.size} != $refIndex + valueMap.size)
                    throw new RuntimeException("Missing value in: " + valueMap)
                  valueMap.valIterator()
@@ -144,7 +143,6 @@ private[molecule] trait Base extends Dsl2Model {
           }
           q"""
             val vs0 = sub.next.asInstanceOf[PersistentArrayMap]
-//            println("vs0        : " + vs0)
             val it0 = vs0.valIterator()
             ..$extraIterators
            """
@@ -169,11 +167,14 @@ private[molecule] trait Base extends Dsl2Model {
               case ((checks, outputs), (_, i)) =>
                 (checks, outputs :+ q"t.${TermName(s"_${i + 1}")}")
             }
+
+            val outputs2 = if (lastLevel == level) outputs else
+              outputs :+ q"t.${TermName(s"_${casts.length + 1}")}"
+
             q"""
               val t = $subTuple
-//              println("tuple: " + t)
               if (Seq(..$checks).forall(_.nonEmpty))
-                subTuples :+ (..$outputs)
+                subTuples :+ (..$outputs2)
               else
                 subTuples
              """
@@ -204,7 +205,6 @@ private[molecule] trait Base extends Dsl2Model {
                 } catch {
                   case e: Throwable =>
                     // Discard non-matching tuple on this level
-//                    println("Discarded value - " + e)
                     subTuples
                 }
               }

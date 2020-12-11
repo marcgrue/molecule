@@ -121,10 +121,10 @@ trait Conn {
 
   /** Transact Seq of Seqs of [[Statement]]s
     *
-    * @param stmtss
+    * @param scalaStmts
     * @return [[TxReport TxReport]]
     */
-  def transact(stmtss: Seq[Seq[Statement]]): TxReport
+  def transact(scalaStmts: Seq[Seq[Statement]]): TxReport
 
 
   /** Transact edn files or other raw transaction data.
@@ -136,18 +136,18 @@ trait Conn {
     *   val result: TxReport = conn.transact(rawTxStmts)
     * }}}
     *
-    * @param rawTxStmts Raw transaction data, typically from edn file.
+    * @param javaStmts Raw transaction data, typically from edn file.
     * @return [[TxReport TxReport]]
     */
-  def transact(rawTxStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil): TxReport
+  def transact(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil): TxReport
 
 
   /** Asynchronously transact Seq of Seqs of [[Statement]]s
     *
-    * @param stmtss
+    * @param scalaStmts
     * @return [[TxReport TxReport]]
     */
-  def transactAsync(stmtss: Seq[Seq[Statement]])
+  def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport]
 
   /** Asynchronously transact edn files or other raw transaction data.
@@ -159,10 +159,10 @@ trait Conn {
     *   val result: Future[TxReport] = conn.transactAsync(rawTxStmts)
     * }}}
     *
-    * @param rawTxStmts Raw transaction data, typically from edn file.
+    * @param javaStmts Raw transaction data, typically from edn file.
     * @return Future with [[TxReport TxReport]] with result of transaction
     */
-  def transactAsync(rawTxStmts: jList[_])
+  def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
                    (implicit ec: ExecutionContext): Future[TxReport]
 
 

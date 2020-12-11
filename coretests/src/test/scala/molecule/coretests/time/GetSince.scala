@@ -1,12 +1,8 @@
 package molecule.coretests.time
 
 import molecule.coretests.util.dsl.coreTest._
-import molecule.coretests.util.schema.CoreTestSchema
 import molecule.coretests.util.CoreSpec
 import molecule.datomic.api.out1._
-import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 class GetSince extends CoreSpec {
 
@@ -182,7 +178,9 @@ class GetSince extends CoreSpec {
 
       // Transact 3 times (`inst` retrieves transaction time from tx report)
       val date1 = Ns.str("Ann").save.inst
+      Thread.sleep(1)
       val date2 = Ns.str("Ben").save.inst
+      Thread.sleep(1)
       val date3 = Ns.str("Cay").save.inst
 
       // Current values

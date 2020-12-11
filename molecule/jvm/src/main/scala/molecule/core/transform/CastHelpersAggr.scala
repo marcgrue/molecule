@@ -13,7 +13,7 @@ import com.cognitect.transit.impl.URIImpl
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpersAggr[Tpl] extends CastHelpersOptNested[Tpl] {
+trait CastHelpersAggr extends CastHelpersOptNested {
 
   // card one
 

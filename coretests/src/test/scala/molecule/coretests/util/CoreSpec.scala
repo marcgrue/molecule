@@ -8,6 +8,7 @@ import molecule.core.ast.transactionModel.{Retract, RetractEntity, Statement}
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
 import molecule.coretests.bidirectionals.schema.BidirectionalSchema
+import molecule.coretests.nested.schema.NestedSchema
 import molecule.coretests.schemaDef.schema.PartitionTestSchema
 import molecule.coretests.util.dsl.txCount._
 import molecule.coretests.util.schema.{CoreTestSchema, TxCountSchema}
@@ -165,5 +166,8 @@ abstract class CoreSpec extends MoleculeSpec with CoreData with ClojureBridge {
   }
   class PartitionSetup extends Scope {
     implicit val conn = freshConn(PartitionTestSchema, "partitions")
+  }
+  class NestedSetup extends Scope {
+    implicit val conn = freshConn(NestedSchema, "nested")
   }
 }
