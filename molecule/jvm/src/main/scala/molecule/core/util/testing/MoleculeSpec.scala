@@ -39,7 +39,7 @@ trait MoleculeSpec extends Specification with RegexMatching {
           if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> ("#db/id[:db.part/user -" + (1000001 + idStmts.size) + "]"))
         case r"#db/id\[:db.part/tx -\d{7}\]"   =>
           if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> ("#db/id[:db.part/tx   -" + (1000001 + idStmts.size) + "]"))
-        case r"(\d{14})$id"                    =>
+        case r"(\d{14,16})$id"                    =>
           if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> (id + "                "))
         case r"#db/id\[:(\w+)$part -\d{7}\]"   =>
           if (idStmts.contains(rawId)) idStmts else idStmts ++ Map(rawId -> (s"#db/id[:$part -" + (1000001 + idStmts.size) + "]"))

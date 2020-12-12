@@ -82,11 +82,11 @@ class SeattleTransformationTests extends ExampleSpec {
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val(":Community.type/twitter"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/twitter"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding)))
       ) -->
       """[:find  ?b
-        | :where [?a :Community/type ":Community.type/twitter"]
+        | :where [?a :Community/type :Community.type/twitter]
         |        [?a :Community/name ?b]]""".stripMargin
 
 
@@ -155,13 +155,12 @@ class SeattleTransformationTests extends ExampleSpec {
         Find(List(
           Var("b"))),
         Where(List(
-          DataClause(ImplDS, Var("d"), KW("District", "region", ""), Val(":District.region/ne"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("District", "region", ""), Val("__enum__:District.region/ne"), Empty, NoBinding),
           DataClause(ImplDS, Var("c"), KW("Neighborhood", "district", "District"), Var("d"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding)))
-      ) -->
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding)))) -->
       """[:find  ?b
-        | :where [?d :District/region ":District.region/ne"]
+        | :where [?d :District/region :District.region/ne]
         |        [?c :Neighborhood/district ?d]
         |        [?a :Community/neighborhood ?c]
         |        [?a :Community/name ?b]]""".stripMargin
@@ -239,7 +238,7 @@ class SeattleTransformationTests extends ExampleSpec {
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/twitter")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq("__enum__:Community.type/twitter")))),
           List(),
           List(DS)),
         Where(List(
@@ -452,8 +451,8 @@ class SeattleTransformationTests extends ExampleSpec {
           Var("b"))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/email_list"))),
-            InVar(ScalarBinding(Var("d")), Seq(Seq(":Community.orgtype/community")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq("__enum__:Community.type/email_list"))),
+            InVar(ScalarBinding(Var("d")), Seq(Seq("__enum__:Community.orgtype/community")))),
           List(),
           List(DS)),
         Where(List(
@@ -534,20 +533,20 @@ class SeattleTransformationTests extends ExampleSpec {
           List(),
           List(
             Rule("rule1", Seq(Var("a")), Seq(
-              DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/email_list"), Empty, NoBinding),
-              DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Val(":Community.orgtype/community"), Empty, NoBinding))),
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), KW("Community.type", "email_list", ""), Empty, NoBinding),
+              DataClause(ImplDS, Var("a"), KW("Community", "orgtype", ""), KW("Community.orgtype", "community", ""), Empty, NoBinding))),
             Rule("rule1", Seq(Var("a")), Seq(
-              DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/website"), Empty, NoBinding),
-              DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Val(":Community.orgtype/commercial"), Empty, NoBinding)))),
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), KW("Community.type", "website", ""), Empty, NoBinding),
+              DataClause(ImplDS, Var("a"), KW("Community", "orgtype", ""), KW("Community.orgtype", "commercial", ""), Empty, NoBinding)))),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
-          DataClause(ImplDS, Var("a"), KW("Community", "type"), Var("c"), Empty, NoBinding),
-          DataClause(ImplDS, Var("c"), KW("db", "ident"), Var("c1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Var("c"), Empty, NoBinding),
+          DataClause(ImplDS, Var("c"), KW("db", "ident", ""), Var("c1"), Empty, NoBinding),
           Funct("name", Seq(Var("c1")), ScalarBinding(Var("c2"))),
           RuleInvocation("rule1", Seq(Var("a"))),
-          DataClause(ImplDS, Var("a"), KW("Community", "orgtype"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("db", "ident"), Var("d1"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "orgtype", ""), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("db", "ident", ""), Var("d1"), Empty, NoBinding),
           Funct("name", Seq(Var("d1")), ScalarBinding(Var("d2")))))
       ) -->
       """[:find  ?b ?c2 ?d2
@@ -565,11 +564,11 @@ class SeattleTransformationTests extends ExampleSpec {
         |List(
         |  1 datomic.db.Db@xxx
         |  2 [[(rule1 ?a)
-        |   [?a :Community/type ":Community.type/email_list"]
-        |   [?a :Community/orgtype ":Community.orgtype/community"]]
+        |   [?a :Community/type :Community.type/email_list]
+        |   [?a :Community/orgtype :Community.orgtype/community]]
         |     [(rule1 ?a)
-        |   [?a :Community/type ":Community.type/website"]
-        |   [?a :Community/orgtype ":Community.orgtype/commercial"]]]
+        |   [?a :Community/type :Community.type/website]
+        |   [?a :Community/orgtype :Community.orgtype/commercial]]]
         |)""".stripMargin
   }
 
@@ -728,14 +727,14 @@ class SeattleTransformationTests extends ExampleSpec {
               Funct("fulltext", Seq(DS(""), KW("Community", "category", ""), Val("food")), RelationBinding(List(Var("a"), Var("a_1"))))))),
           List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val(":Community.type/website"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/website"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "category", ""), Var("d"), Empty, NoBinding),
           RuleInvocation("rule1", Seq(Var("a")))))
       ) -->
       """[:find  ?b (distinct ?d)
         | :in    $ %
-        | :where [?a :Community/type ":Community.type/website"]
+        | :where [?a :Community/type :Community.type/website]
         |        [?a :Community/name ?b]
         |        [?a :Community/category ?d]
         |        (rule1 ?a)]
@@ -791,7 +790,7 @@ class SeattleTransformationTests extends ExampleSpec {
           AggrExpr("distinct", Seq(), Var("d")))),
         In(
           List(
-            InVar(ScalarBinding(Var("c")), Seq(Seq(":Community.type/website")))),
+            InVar(ScalarBinding(Var("c")), Seq(Seq("__enum__:Community.type/website")))),
           List(
             Rule("rule1", Seq(Var("a")), Seq(
               Funct("fulltext", Seq(DS(""), KW("Community", "category", ""), Val("food")), RelationBinding(List(Var("a"), Var("d1_1"))))))),
@@ -830,14 +829,17 @@ class SeattleTransformationTests extends ExampleSpec {
       Query(
         Find(List(
           Var("b"))),
-        In(List(), List(
-          Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/twitter"), Empty))),
-          Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/facebook_page"), Empty)))), List(DS)),
+        In(
+          List(),
+          List(
+            Rule("rule1", Seq(Var("a")), Seq(
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/twitter"), Empty, NoBinding))),
+            Rule("rule1", Seq(Var("a")), Seq(
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/facebook_page"), Empty, NoBinding)))),
+          List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
-          RuleInvocation("rule1", List(Var("a")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
+          RuleInvocation("rule1", Seq(Var("a")))))
       ) -->
       """[:find  ?b
         | :in    $ %
@@ -847,8 +849,8 @@ class SeattleTransformationTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
-        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type :Community.type/twitter]]
+        |     [(rule1 ?a) [?a :Community/type :Community.type/facebook_page]]]
         |)""".stripMargin
 
 
@@ -863,19 +865,22 @@ class SeattleTransformationTests extends ExampleSpec {
         Find(List(
           Var("b"),
           Var("e2"))),
-        In(List(), List(
-          Rule("rule1", List(Var("d")), List(
-            DataClause(ImplDS, Var("d"), KW("District", "region"), Val(":District.region/ne"), Empty))),
-          Rule("rule1", List(Var("d")), List(
-            DataClause(ImplDS, Var("d"), KW("District", "region"), Val(":District.region/sw"), Empty)))), List(DS)),
+        In(
+          List(),
+          List(
+            Rule("rule1", Seq(Var("d")), Seq(
+              DataClause(ImplDS, Var("d"), KW("District", "region", ""), Val("__enum__:District.region/ne"), Empty, NoBinding))),
+            Rule("rule1", Seq(Var("d")), Seq(
+              DataClause(ImplDS, Var("d"), KW("District", "region", ""), Val("__enum__:District.region/sw"), Empty, NoBinding)))),
+          List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty, NoBinding),
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
           DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("c"), Empty, NoBinding),
           DataClause(ImplDS, Var("c"), KW("Neighborhood", "district", "District"), Var("d"), Empty, NoBinding),
-          DataClause(ImplDS, Var("d"), KW("District", "region"), Var("e"), Empty, NoBinding),
-          DataClause(ImplDS, Var("e"), KW("db", "ident"), Var("e1"), Empty, NoBinding),
-          Funct("name", List(Var("e1")), ScalarBinding(Var("e2"))),
-          RuleInvocation("rule1", List(Var("d")))))
+          DataClause(ImplDS, Var("d"), KW("District", "region", ""), Var("e"), Empty, NoBinding),
+          DataClause(ImplDS, Var("e"), KW("db", "ident", ""), Var("e1"), Empty, NoBinding),
+          Funct("name", Seq(Var("e1")), ScalarBinding(Var("e2"))),
+          RuleInvocation("rule1", Seq(Var("d")))))
       ) -->
       """[:find  ?b ?e2
         | :in    $ %
@@ -890,8 +895,8 @@ class SeattleTransformationTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?d) [?d :District/region ":District.region/ne"]]
-        |     [(rule1 ?d) [?d :District/region ":District.region/sw"]]]
+        |  2 [[(rule1 ?d) [?d :District/region :District.region/ne]]
+        |     [(rule1 ?d) [?d :District/region :District.region/sw]]]
         |)""".stripMargin
 
 
@@ -907,24 +912,26 @@ class SeattleTransformationTests extends ExampleSpec {
       Query(
         Find(List(
           Var("b"))),
-        In(List(), List(
-          Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/twitter"), Empty))),
-          Rule("rule1", List(Var("a")), List(
-            DataClause(ImplDS, Var("a"), KW("Community", "type"), Val(":Community.type/facebook_page"), Empty))),
-
-          Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/sw"), Empty))),
-          Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/s"), Empty))),
-          Rule("rule2", List(Var("e")), List(
-            DataClause(ImplDS, Var("e"), KW("District", "region"), Val(":District.region/se"), Empty)))), List(DS)),
+        In(
+          List(),
+          List(
+            Rule("rule1", Seq(Var("a")), Seq(
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/twitter"), Empty, NoBinding))),
+            Rule("rule1", Seq(Var("a")), Seq(
+              DataClause(ImplDS, Var("a"), KW("Community", "type", ""), Val("__enum__:Community.type/facebook_page"), Empty, NoBinding))),
+            Rule("rule2", Seq(Var("e")), Seq(
+              DataClause(ImplDS, Var("e"), KW("District", "region", ""), Val("__enum__:District.region/sw"), Empty, NoBinding))),
+            Rule("rule2", Seq(Var("e")), Seq(
+              DataClause(ImplDS, Var("e"), KW("District", "region", ""), Val("__enum__:District.region/s"), Empty, NoBinding))),
+            Rule("rule2", Seq(Var("e")), Seq(
+              DataClause(ImplDS, Var("e"), KW("District", "region", ""), Val("__enum__:District.region/se"), Empty, NoBinding)))),
+          List(DS)),
         Where(List(
-          DataClause(ImplDS, Var("a"), KW("Community", "name"), Var("b"), Empty),
-          RuleInvocation("rule1", List(Var("a"))),
-          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty),
-          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty),
-          RuleInvocation("rule2", List(Var("e")))))
+          DataClause(ImplDS, Var("a"), KW("Community", "name", ""), Var("b"), Empty, NoBinding),
+          RuleInvocation("rule1", Seq(Var("a"))),
+          DataClause(ImplDS, Var("a"), KW("Community", "neighborhood", "Neighborhood"), Var("d"), Empty, NoBinding),
+          DataClause(ImplDS, Var("d"), KW("Neighborhood", "district", "District"), Var("e"), Empty, NoBinding),
+          RuleInvocation("rule2", Seq(Var("e")))))
       ) -->
       """[:find  ?b
         | :in    $ %
@@ -937,11 +944,11 @@ class SeattleTransformationTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
-        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/sw"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/s"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/se"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type :Community.type/twitter]]
+        |     [(rule1 ?a) [?a :Community/type :Community.type/facebook_page]]
+        |     [(rule2 ?e) [?e :District/region :District.region/sw]]
+        |     [(rule2 ?e) [?e :District/region :District.region/s]]
+        |     [(rule2 ?e) [?e :District/region :District.region/se]]]
         |)""".stripMargin
 
 
@@ -1003,8 +1010,8 @@ class SeattleTransformationTests extends ExampleSpec {
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c")), Seq(Seq(":Community.type/twitter", ":Community.type/facebook_page"))),
-            InVar(CollectionBinding(Var("f")), Seq(Seq(":District.region/sw", ":District.region/s", ":District.region/se")))),
+            InVar(CollectionBinding(Var("c")), Seq(Seq("__enum__:Community.type/twitter", "__enum__:Community.type/facebook_page"))),
+            InVar(CollectionBinding(Var("f")), Seq(Seq("__enum__:District.region/sw", "__enum__:District.region/s", "__enum__:District.region/se")))),
           List(),
           List(DS)),
         Where(List(
@@ -1047,8 +1054,8 @@ class SeattleTransformationTests extends ExampleSpec {
           Var("b"))),
         In(
           List(
-            InVar(CollectionBinding(Var("c")), Seq(Seq(":Community.type/twitter", ":Community.type/facebook_page"))),
-            InVar(CollectionBinding(Var("f")), Seq(Seq(":District.region/sw", ":District.region/s", ":District.region/se")))),
+            InVar(CollectionBinding(Var("c")), Seq(Seq("__enum__:Community.type/twitter", "__enum__:Community.type/facebook_page"))),
+            InVar(CollectionBinding(Var("f")), Seq(Seq("__enum__:District.region/sw", "__enum__:District.region/s", "__enum__:District.region/se")))),
           List(),
           List(DS)),
         Where(List(
@@ -1086,26 +1093,28 @@ class SeattleTransformationTests extends ExampleSpec {
           Var("txInstant"))),
         Where(List(
           Funct("=", Seq(Var("sys"), Val(false)), NoBinding),
-          Funct("molecule.core.util.fns/live", Seq(Var("nsFull")), NoBinding),
           DataClause(ImplDS, Var("_"), KW("db.install", "attribute", ""), Var("id"), Var("tx"), NoBinding),
           DataClause(ImplDS, Var("id"), KW("db", "ident", ""), Var("idIdent"), NoBinding, NoBinding),
           Funct("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull"))),
-          Funct(".matches ^String", Seq(Var("nsFull"), Val("(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)")), ScalarBinding(Var("sys"))),
-          Funct("molecule.core.util.fns/partNs", Seq(Var("nsFull")), ScalarBinding(Var("partNs"))),
-          Funct("first", Seq(Var("partNs")), ScalarBinding(Var("part"))),
-          Funct("second", Seq(Var("partNs")), ScalarBinding(Var("ns"))),
+          Funct(".matches ^String", Seq(Var("nsFull"), Val("^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|:?-.*)")), ScalarBinding(Var("sys"))),
+          Funct(".contains ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("isPart"))),
+          Funct(".split ^String", Seq(Var("nsFull"), Val("_")), ScalarBinding(Var("nsParts"))),
+          Funct("first", Seq(Var("nsParts")), ScalarBinding(Var("part0"))),
+          Funct("if", Seq(Var("isPart"), Var("part0"), Val("db.part/user")), ScalarBinding(Var("part"))),
+          Funct("last", Seq(Var("nsParts")), ScalarBinding(Var("ns"))),
           DataClause(ImplDS, Var("tx"), KW("db", "txInstant", ""), Var("txInstant"), Empty, NoBinding)))
       ) -->
       """[:find  ?txInstant
         | :where [(= ?sys false)]
-        |        [(molecule.core.util.fns/live ?nsFull)]
         |        [_ :db.install/attribute ?id ?tx]
         |        [?id :db/ident ?idIdent]
         |        [(namespace ?idIdent) ?nsFull]
-        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
-        |        [(molecule.core.util.fns/partNs ?nsFull) ?partNs]
-        |        [(first ?partNs) ?part]
-        |        [(second ?partNs) ?ns]
+        |        [(.matches ^String ?nsFull "^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|:?-.*)") ?sys]
+        |        [(.contains ^String ?nsFull "_") ?isPart]
+        |        [(.split ^String ?nsFull "_") ?nsParts]
+        |        [(first ?nsParts) ?part0]
+        |        [(if ?isPart ?part0 "db.part/user") ?part]
+        |        [(last ?nsParts) ?ns]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 

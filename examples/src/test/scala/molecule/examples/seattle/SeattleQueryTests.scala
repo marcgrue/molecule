@@ -34,7 +34,7 @@ class SeattleQueryTests extends ExampleSpec {
     // Names of twitter communities
     m(Community.name.type_("twitter")) -->
       """[:find  ?b
-        | :where [?a :Community/type ":Community.type/twitter"]
+        | :where [?a :Community/type :Community.type/twitter]
         |        [?a :Community/name ?b]]""".stripMargin
 
 
@@ -68,7 +68,7 @@ class SeattleQueryTests extends ExampleSpec {
     // Ref's are modelled as "Bond"'s (between Atoms)
     m(Community.name.Neighborhood.District.region_("ne")) -->
       """[:find  ?b
-        | :where [?d :District/region ":District.region/ne"]
+        | :where [?d :District/region :District.region/ne]
         |        [?c :Neighborhood/district ?d]
         |        [?a :Community/neighborhood ?c]
         |        [?a :Community/name ?b]]""".stripMargin
@@ -244,11 +244,11 @@ class SeattleQueryTests extends ExampleSpec {
         |List(
         |  1 datomic.db.Db@xxx
         |  2 [[(rule1 ?a)
-        |   [?a :Community/type ":Community.type/email_list"]
-        |   [?a :Community/orgtype ":Community.orgtype/community"]]
+        |   [?a :Community/type :Community.type/email_list]
+        |   [?a :Community/orgtype :Community.orgtype/community]]
         |     [(rule1 ?a)
-        |   [?a :Community/type ":Community.type/website"]
-        |   [?a :Community/orgtype ":Community.orgtype/commercial"]]]
+        |   [?a :Community/type :Community.type/website]
+        |   [?a :Community/orgtype :Community.orgtype/commercial]]]
         |)""".stripMargin
   }
 
@@ -313,7 +313,7 @@ class SeattleQueryTests extends ExampleSpec {
     m(Community.name.type_("website").category contains "food") -->
       """[:find  ?b (distinct ?d)
         | :in    $ %
-        | :where [?a :Community/type ":Community.type/website"]
+        | :where [?a :Community/type :Community.type/website]
         |        [?a :Community/name ?b]
         |        [?a :Community/category ?d]
         |        (rule1 ?a)]
@@ -363,8 +363,8 @@ class SeattleQueryTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
-        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type :Community.type/twitter]]
+        |     [(rule1 ?a) [?a :Community/type :Community.type/facebook_page]]]
         |)""".stripMargin
 
 
@@ -379,8 +379,8 @@ class SeattleQueryTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?d) [?d :District/region ":District.region/ne"]]
-        |     [(rule1 ?d) [?d :District/region ":District.region/sw"]]]
+        |  2 [[(rule1 ?d) [?d :District/region :District.region/ne]]
+        |     [(rule1 ?d) [?d :District/region :District.region/sw]]]
         |)""".stripMargin
 
 
@@ -397,11 +397,11 @@ class SeattleQueryTests extends ExampleSpec {
         |INPUTS:
         |List(
         |  1 datomic.db.Db@xxx
-        |  2 [[(rule1 ?a) [?a :Community/type ":Community.type/twitter"]]
-        |     [(rule1 ?a) [?a :Community/type ":Community.type/facebook_page"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/sw"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/s"]]
-        |     [(rule2 ?e) [?e :District/region ":District.region/se"]]]
+        |  2 [[(rule1 ?a) [?a :Community/type :Community.type/twitter]]
+        |     [(rule1 ?a) [?a :Community/type :Community.type/facebook_page]]
+        |     [(rule2 ?e) [?e :District/region :District.region/sw]]
+        |     [(rule2 ?e) [?e :District/region :District.region/s]]
+        |     [(rule2 ?e) [?e :District/region :District.region/se]]]
         |)""".stripMargin
 
 
@@ -446,14 +446,15 @@ class SeattleQueryTests extends ExampleSpec {
     m(Schema.txInstant) -->
       """[:find  ?txInstant
         | :where [(= ?sys false)]
-        |        [(molecule.core.util.fns/live ?nsFull)]
         |        [_ :db.install/attribute ?id ?tx]
         |        [?id :db/ident ?idIdent]
         |        [(namespace ?idIdent) ?nsFull]
-        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian)") ?sys]
-        |        [(molecule.core.util.fns/partNs ?nsFull) ?partNs]
-        |        [(first ?partNs) ?part]
-        |        [(second ?partNs) ?ns]
+        |        [(.matches ^String ?nsFull "^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|:?-.*)") ?sys]
+        |        [(.contains ^String ?nsFull "_") ?isPart]
+        |        [(.split ^String ?nsFull "_") ?nsParts]
+        |        [(first ?nsParts) ?part0]
+        |        [(if ?isPart ?part0 "db.part/user") ?part]
+        |        [(last ?nsParts) ?ns]
         |        [?tx :db/txInstant ?txInstant]]""".stripMargin
   }
 
