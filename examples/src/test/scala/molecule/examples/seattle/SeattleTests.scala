@@ -4,41 +4,40 @@ import java.io.FileReader
 import datomic.Util
 import molecule.datomic.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
+import molecule.examples.ExampleSpec
 
-class SeattleTests extends SeattleSpec {
 
-  val (
-    c1, n1, d1,
-    c2,
-    c3
-    ) = (
-    17592186045666L, 17592186045667L, 17592186045668L,
-    17592186045669L,
-    17592186045672L
-  )
+class SeattleTests extends ExampleSpec {
 
-  "A first query" >> {
+  devLocalOnly = true
+
+  "A first query" in new SeattleSetup {
     // A Community-name molecule
     val communities = m(Community.e.name_)
 
-    // Community entity ids
-    communities.get(3) === List(c1, c2, c3)
+    // We have 150 communities
     communities.get.size === 150
   }
 
 
-  "Getting an entity's attribute values" >> {
+  "Getting an entity's attribute values" in new SeattleSetup {
 
     // Using the entity api
 
-    // Get a community id
-    val communityId: Long = Community.e.name_.get.head
+    // Get a community id and its related entities
+    val (communityId, n1, d1) =
+      Community.e.name_("Greenlake Community Wiki")
+        .Neighborhood.e.District.e.get.head
 
     // Use the community id to touch all the entity's attribute values
     // Note that since we have transacted lowercase-namespaced
     // attribute names, all are lower case when touching entities directly on the database.
     communityId.touch === Map(
-      ":Community/category" -> List("services", "for sale", "events"),
+      ":Community/category" -> List(
+        "events",
+        "for sale",
+        "services",
+      ),
       ":Community/type" -> ":Community.type/wiki",
       ":Community/neighborhood" -> Map(
         ":db/id" -> n1,
@@ -49,16 +48,17 @@ class SeattleTests extends SeattleSpec {
         ":Neighborhood/name" -> "Green Lake"),
       ":Community/orgtype" -> ":Community.orgtype/community",
       ":Community/name" -> "Greenlake Community Wiki",
-      ":db/id" -> c1,
+      ":db/id" -> communityId,
       ":Community/url" -> "http://greenlake.wetpaint.com/")
 
     // We can also retrive a single (optional) attribute value
-    val untyped: Any            = communityId(":community/name")
-    val typed  : Option[String] = communityId.get[String](":community/name")
+    val untyped: Option[Any]    = communityId(":community/name")
+    val typed  : Option[String] = communityId[String](":community/name")
 
     communityId(":Community/name") === Some("Greenlake Community Wiki")
     communityId(":Community/url") === Some("http://greenlake.wetpaint.com/")
-    communityId(":Community/category") === Some(Set("services", "for sale", "events"))
+    communityId.apply[List[String]](":Community/category").get.sorted === List(
+      "events", "for sale", "services")
     communityId(":Community/emptyOrBogusAttribute") === None
 
     // We can also use the entity id to query for an attribute value
@@ -66,7 +66,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Querying _for_ attribute values" >> {
+  "Querying _for_ attribute values" in new SeattleSetup {
 
     // When querying directly we can omit the implicit `m` method to create the molecule:
 
@@ -86,7 +86,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Querying _by_ attribute values" >> {
+  "Querying _by_ attribute values" in new SeattleSetup {
 
     // Find attributes with a certain applied value
     Community.name.`type`("twitter").get(3).sortBy(_._1) === List(
@@ -130,7 +130,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Querying across references" >> {
+  "Querying across references" in new SeattleSetup {
 
     // Communities in north eastern region
     Community.name.Neighborhood.District.region_("ne").get(3) === List(
@@ -146,7 +146,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Advanced queries - parameterizing queries" >> {
+  "Advanced queries - parameterizing queries" in new SeattleSetup {
 
     /** ******* Single input parameter ************************* */
 
@@ -248,7 +248,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Invoking functions in queries" >> {
+  "Invoking functions in queries" in new SeattleSetup {
 
     val beforeC = List("Ballard Blog", "Beach Drive Blog", "Beacon Hill Blog")
 
@@ -261,7 +261,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Querying with fulltext search" >> {
+  "Querying with fulltext search" in new SeattleSetup {
 
     val communitiesWith = m(Community.name.contains(?))
     communitiesWith("Wallingford").get === List("KOMO Communities - Wallingford")
@@ -284,7 +284,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Querying with rules (logical OR)" >> {
+  "Querying with rules (logical OR)" in new SeattleSetup {
 
     // Social media
     Community.name.type_("twitter" or "facebook_page").get(3) === List(
@@ -315,7 +315,7 @@ class SeattleTests extends SeattleSpec {
       .get.sorted === southernSocialMedia
   }
 
-  "Bonus: Cardinality-many queries" >> {
+  "Bonus: Cardinality-many queries" in new SeattleSetup {
 
     // What communities are both about restaurants AND shopping?
     Community.name.category_("restaurants" and "shopping").get === List("Ballard Gossip Girl")
@@ -364,7 +364,7 @@ class SeattleTests extends SeattleSpec {
   }
 
 
-  "Working with time" in new SeattleSetup {
+  "Working with time" in new SeattleSetup(true) { // Use lower-case nss to match dtm import
 
     val schemaTxT = Schema.t.get.head
     val dataTxT   = Community.name_.t.get.head

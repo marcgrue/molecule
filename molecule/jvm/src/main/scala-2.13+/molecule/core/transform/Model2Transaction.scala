@@ -222,7 +222,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         (edge1, edge2)
       else if (s1 < s2)
         (edge2, edge1)
-      else if (conn.entity(edge1).value(targetAttr) == null)
+      else if (conn.entity(edge1).rawValue(targetAttr) == null)
         (edge2, edge1)
       else
         (edge1, edge2)

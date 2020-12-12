@@ -1,19 +1,19 @@
 package molecule.examples.dayOfDatomic
+
 import molecule.datomic.api.out4._
 import molecule.examples.dayOfDatomic.schema.{Graph2Schema, GraphSchema}
 import org.specs2.mutable.Specification
 import molecule.datomic.peer.facade.Datomic_Peer._
+import molecule.examples.ExampleSpec
 
 
-class Graph extends Specification {
+class Graph extends ExampleSpec {
 
   // See http://docs.neo4j.org/chunked/stable/cypher-cookbook-hyperedges.html
 
-  "Simple hyperedge" >> {
+  "Simple hyperedge" in new GraphSetup {
 
     import molecule.examples.dayOfDatomic.dsl.graph._
-
-    implicit val conn = recreateDbFrom(GraphSchema)
 
     val List(r1, r2) = Role.name insert List("Role1", "Role2") eids
 
@@ -112,15 +112,13 @@ class Graph extends Specification {
   }
 
 
-  "Advanced hyperedge" >> {
+  // Load graph 2 where RoleInGroup references multiple Roles
+  "Advanced hyperedge" in new Graph2Setup {
 
     import molecule.examples.dayOfDatomic.dsl.graph2._
 
-    // Load graph 2 where RoleInGroup references multiple Roles
-    implicit val conn = recreateDbFrom(Graph2Schema, "Graph2")
-
     val List(r1, r2, r3, r4, r5, r6) = Role.name insert List("Role1", "Role2", "Role3", "Role4", "Role5", "Role6") eids
-    val List(g1, g2, g3) = Group.name.roles insert List(
+    val List(g1, g2, g3)             = Group.name.roles insert List(
       ("Group1", Set(r1, r2, r5)),
       ("Group2", Set(r2, r3, r4)),
       ("Group3", Set(r3, r4, r5, r6))
@@ -161,7 +159,7 @@ class Graph extends Specification {
 
     // .. or we could use the full SelfJoin notation
     User.name_("User1").RoleInGroup.Group.name._RoleInGroup.Roles.name._RoleInGroup._User.Self
-        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.Roles.name_(unify).get.sorted === List(
+      .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.Roles.name_(unify).get.sorted === List(
       ("Group1", "Role2"),
       ("Group2", "Role3"))
 
@@ -173,7 +171,7 @@ class Graph extends Specification {
       ("Group2", 1))
     // .. or
     User.name_("User1").RoleInGroup.Group.name._RoleInGroup.roles(count)._User.Self
-        .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.roles_(unify).get.sortBy(_._1) === List(
+      .name_("User2").RoleInGroup.Group.name_(unify)._RoleInGroup.roles_(unify).get.sortBy(_._1) === List(
       ("Group1", 1),
       ("Group2", 1))
 

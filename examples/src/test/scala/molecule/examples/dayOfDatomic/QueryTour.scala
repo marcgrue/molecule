@@ -1,12 +1,12 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.testing.MoleculeSpec
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import scala.language.postfixOps
 
 // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html
 
-class QueryTour extends MoleculeSpec {
+class QueryTour extends ExampleSpec {
 
   "Queries and joins" in new SocialNewsSetup {
 
@@ -88,7 +88,7 @@ class QueryTour extends MoleculeSpec {
 
 
     // 12. Requesting an Attribute value
-    editor.get(":User/firstName") === Some("Ed")
+    editor.apply(":User/firstName") === Some("Ed")
     editor.apply(":User/firstName") === "Ed"
     editor(":unrecognizedKey") === "Ed"
 

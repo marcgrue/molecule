@@ -1,9 +1,7 @@
 package molecule.coretests.util
 
 import datomic.Peer
-import datomicClient.ClojureBridge
-import datomicScala.client.api.async.AsyncClient
-import datomicScala.client.api.sync.{Client, Connection, Datomic}
+import datomicScala.client.api.sync.{Client, Datomic}
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util._
 import molecule.core.util.testing.MoleculeSpec
@@ -19,7 +17,7 @@ import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 
 
-abstract class CoreSpec extends MoleculeSpec {
+abstract class CoreSpec extends MoleculeSpec with CoreData {
   sequential
   var system: System    = DatomicPeer
   var client: Client    = null // set in setup
@@ -27,9 +25,9 @@ abstract class CoreSpec extends MoleculeSpec {
   var devLocalOnly      = false
   var peerServerOnly    = false
   var omitPeerServer    = false
+  var omitDevLocal      = false
   val heavyInputTesting = false
   var setupException    = Option.empty[Throwable]
-  var doInstallSchema   = true // set to true to initiate Peer Server schema installation
   var basisT: Long      = 0L
   def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
 
@@ -43,6 +41,9 @@ abstract class CoreSpec extends MoleculeSpec {
     } else if (omitPeerServer) {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (omitDevLocal) {
+      step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
@@ -70,7 +71,7 @@ abstract class CoreSpec extends MoleculeSpec {
     client = Datomic.clientDevLocal("Some system name")
   }
 
-  def freshConn(schema: SchemaTransaction, dbIdentifier: String = ""): Conn = {
+  def freshConn(schema: SchemaTransaction, dbIdentifier: String): Conn = {
     // Throw potential setup error
     setupException.fold(())(throw _)
     system match {
@@ -79,14 +80,13 @@ abstract class CoreSpec extends MoleculeSpec {
 
       case DatomicPeerServer =>
         val (conn, newBasisT) = TestPeerServer.getCleanPeerServerConn(
-          client, dbIdentifier, doInstallSchema, schema, basisT
+          client, dbIdentifier, schema, basisT
         )
         basisT = newBasisT
-        doInstallSchema = false
         conn
 
       case DatomicDevLocal =>
-        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier, false)
+        Datomic_Client(client).recreateDbFrom(schema, dbIdentifier)
 
       // case DatomicCloud      =>
       //   Datomic_Peer.recreateDbFrom(schema, dbIdentifier)

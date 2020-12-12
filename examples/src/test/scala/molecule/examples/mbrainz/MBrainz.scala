@@ -1,5 +1,6 @@
 package molecule.examples.mbrainz
-import molecule.core.util.testing.MoleculeSpec
+
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
@@ -14,8 +15,15 @@ import molecule.datomic.peer.facade.Datomic_Peer._
   cd [datomic-download]
   bin/transactor config/samples/dev-transactor-template.properties
 
-  [first time (replace full path):]
-  bin/datomic restore-db file:///Users/mg/lib/datomic/datomic-free-0.9.5697/mbrainz-1968-1973 datomic:free://localhost:4334/mbrainz-1968-1973
+  first time (replace full path), free version:
+  bin/datomic restore-db \
+    file:///Users/mg/lib/datomic/datomic-free-0.9.5697/mbrainz-1968-1973 \
+    datomic:free://localhost:4334/mbrainz-1968-1973
+
+  first time (replace full path), pro version:
+  bin/datomic restore-db \
+    file:///Users/mg/lib/datomic/datomic-free-0.9.5697/mbrainz-1968-1973 \
+    datomic:dev://localhost:4334/mbrainz-1968-1973
 
   Remember to add -Xmx2g -server to IDE compiler settings ("Additional build process VM options)
   Also, ensure the same java version is used in IDE
@@ -26,20 +34,18 @@ import molecule.datomic.peer.facade.Datomic_Peer._
   https://github.com/Datomic/mbrainz-sample/wiki/Queries
 */
 
-class MBrainz extends MoleculeSpec {
-  sequential
+class MBrainz extends ExampleSpec {
 
-//  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
-  implicit val conn = connect("localhost:4334/mbrainz-1968-1973", "free")
-
-  if (Schema.a(":Artist/name").get.isEmpty) {
-    // Add uppercase-namespaced attribute names so that we can access the externally
-    // transacted lowercase names with uppercase names of the molecule code.
-    conn.transact(MBrainzSchemaLowerToUpper.namespaces)
+  class Setup extends MBrainzSetup {
+    if (Schema.a(":Artist/name").get.isEmpty) {
+      // Add uppercase-namespaced attribute names so that we can access the externally
+      // transacted lowercase names with uppercase names of the molecule code.
+      conn.transact(MBrainzSchemaLowerToUpper.namespaces)
+    }
   }
 
 
-  "Data" >> {
+  "Data" in new Setup {
 
     // What are the titles of all the tracks John Lennon played on? (showing 5)
     Track.name.Artists.name_("John Lennon").get.sorted.take(5) === List(
@@ -90,7 +96,7 @@ class MBrainz extends MoleculeSpec {
 
 
   //  // Todo: model as graph with bidirectional relationships
-  //  "Collaboration" >> {
+  //  "Collaboration" in new Setup {
   //
   //    // Who collaborated with one of the Beatles?
   //    // Repeated attributes was translated to transitive lookups - model graph instead... todo
@@ -119,7 +125,7 @@ class MBrainz extends MoleculeSpec {
   //  }
 
 
-  "2-step querying" >> {
+  "2-step querying" in new Setup {
     // Which artists have songs that might be covers of The Who (or vice versa)?
 
     // 2-step querying:

@@ -1,6 +1,6 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule.core.util.testing.MoleculeSpec
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
 import molecule.examples.gremlin.dsl.modernGraph1._
 import molecule.examples.gremlin.schema.ModernGraph1Schema
@@ -25,10 +25,10 @@ import molecule.datomic.peer.facade.Datomic_Peer._
   examples/src/main/scala/molecule/examples/gremlin/schema/ModernGraphDefinition1.scala
 */
 
-class Friends extends MoleculeSpec {
+class Friends extends ExampleSpec {
 
-  class BidirectionalSelfRefSetup extends Scope {
-    implicit val conn = recreateDbFrom(ModernGraph1Schema)
+  class BidirectionalSelfRefSetup extends ModernGraph1Setup {
+//    implicit val conn = recreateDbFrom(ModernGraph1Schema)
 
     /*
       Sample bidirectional friendships graph (with extra vadas--peter friendship added for more fun examples)

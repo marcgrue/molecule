@@ -1,4 +1,5 @@
 package molecule.examples
+
 import java.util
 import java.util.{List => jList, Map => jMap}
 import clojure.lang.Keyword
@@ -8,36 +9,27 @@ import molecule.examples.dayOfDatomic.dsl.graph.User
 import molecule.examples.dayOfDatomic.schema.{AggregatesSchema, GraphSchema, ProductsOrderSchema}
 import molecule.datomic.peer.facade.Datomic_Peer._
 import datomic.Util._
-import molecule.core.util.testing.MoleculeSpec
+import molecule.datomic.api.in2_out8.m
+import molecule.examples.ExampleSpec
 import molecule.datomic.client.facade.Datomic_Client
+import molecule.examples.seattle.dsl.seattle.Community
 import scala.jdk.CollectionConverters._
 
 
-class ExampleAdHoc extends MoleculeSpec {
+class ExampleAdHoc extends ExampleSpec {
+
+  devLocalOnly = true
 
 
-  "example adhoc" >> {
+  "example adhoc" in new SeattleSetup {
 
 
-
-    println(AggregatesSchema.namespaces.getClass)
-
-    val nss = AggregatesSchema.namespaces.asInstanceOf[jList[jMap[Any, Any]]]
-
-    println(nss)
-
-    val nss2 = new util.ArrayList[jMap[Any, Any]]()
-
-    nss.forEach { map =>
-      nss2.add(
-        map.asScala.filterNot(_._1 == read(":db/index")).asJava
-      )
-    }
-
-    println(nss2)
+    val typeAndOrgtype2 = m(Community.name.`type`(?).orgtype(?))
 
 
+    // Logic AND pairs separated by OR
+    typeAndOrgtype2.apply(("email_list" and "community") or ("website" and "commercial")).get(5)
 
-      ok
+    ok
   }
 }

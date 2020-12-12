@@ -369,7 +369,7 @@ class Conn_Peer(val peerConn: datomic.Connection)
       case "t" if tOpt.isDefined => (_: Datom) => tOpt.get
       case "t"                   => (d: Datom) => toT(d.tx)
       case "tx"                  => (d: Datom) => d.tx
-      case "txInstant"           => (d: Datom) => adhocDb.entity(this, d.tx).value(":db/txInstant").asInstanceOf[Date]
+      case "txInstant"           => (d: Datom) => adhocDb.entity(this, d.tx).rawValue(":db/txInstant").asInstanceOf[Date]
       case "op"                  => (d: Datom) => d.added
     }
 

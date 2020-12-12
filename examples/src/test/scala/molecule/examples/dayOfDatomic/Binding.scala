@@ -1,30 +1,33 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.testing.MoleculeSpec
+
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.in2_out3._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 import molecule.examples.dayOfDatomic.schema._
 import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-class Binding extends MoleculeSpec {
+class Binding extends ExampleSpec {
 
-  implicit val conn = recreateDbFrom(SocialNewsSchema, "Binding")
+//  implicit val conn = recreateDbFrom(SocialNewsSchema, "Binding")
 
-  // Input molecules returning only the entity id (`e`).
-  // (Underscore-suffixed attribute names are not returned in the result set)
-  val personFirst = m(User.e.firstName_(?))
-  val person      = m(User.e.firstName_(?).lastName_(?))
+  class Setup extends SocialNewsSetup {
+    // Input molecules returning only the entity id (`e`).
+    // (Underscore-suffixed attribute names are not returned in the result set)
+    val personFirst = m(User.e.firstName_(?))
+    val person      = m(User.e.firstName_(?).lastName_(?))
 
-  // Get inserted entity ids
-  val List(stewartBrand, johnStewart, stuartSmalley, stuartHalloway) = User.firstName.lastName insert List(
-    ("Stewart", "Brand"),
-    ("John", "Stewart"),
-    ("Stuart", "Smalley"),
-    ("Stuart", "Halloway")
-  ) eids
+    // Get inserted entity ids
+    val List(stewartBrand, johnStewart, stuartSmalley, stuartHalloway) = User.firstName.lastName insert List(
+      ("Stewart", "Brand"),
+      ("John", "Stewart"),
+      ("Stuart", "Smalley"),
+      ("Stuart", "Halloway")
+    ) eids
+  }
 
 
-  "Binding queries" >> {
+  "Binding queries" in new Setup {
 
     // Find all the Stewart first names
     personFirst("Stewart").get === List(stewartBrand)
@@ -44,7 +47,7 @@ class Binding extends MoleculeSpec {
   }
 
 
-  "Binding (continued..)" >> {
+  "Binding (continued..)" in new Setup {
 
     // Bind vars
     person("John", "Stewart").get === List(johnStewart)
@@ -53,7 +56,7 @@ class Binding extends MoleculeSpec {
     person(("John", "Stewart")).get === List(johnStewart)
 
     // Bind collection
-    personFirst(List("John", "Stuart")).get === List(johnStewart, stuartSmalley,  stuartHalloway)
+    personFirst(List("John", "Stuart")).get === List(johnStewart, stuartSmalley, stuartHalloway)
 
     // Bind relation
     person(("John", "Stewart"), ("Stuart", "Halloway")).get === List(johnStewart, stuartHalloway)

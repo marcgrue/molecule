@@ -44,8 +44,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
   def keySet: Set[String]
   def keys: List[String]
 
-  def apply(key: String): Any
-  def value(key: String): Any
+  def rawValue(key: String): Any
 
   /** Get typed attribute value of entity.
     * <br><br>
@@ -73,22 +72,35 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @tparam T Type of attribute
     * @return Optional typed attribute value
     */
-  def get[T](key: String): Option[T] = {
-    value(key) match {
-      case null => Option.empty[T]
+  def apply[T](key: String): Option[T] = {
+    try {
+      rawValue(key) match {
+        case None       => None
+        case Some(v: T) =>
+          Some(v)
+        case Some(v)    =>
+          Some(v.asInstanceOf[T])
+        case null       => Option.empty[T]
 
-      case results: clojure.lang.PersistentHashSet => results.asScala.head match {
-        case _: datomic.Entity =>
-          Some(results.asScala.toList
-            .map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long])
-            .sorted.asInstanceOf[T])
+        case results: clojure.lang.PersistentHashSet =>
+          results.asScala.head match {
+          case _: datomic.Entity =>
+            Some(results.asScala.toList
+              .map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long])
+              .sorted.asInstanceOf[T])
 
-        case _ => Some(results.asScala.toList.map(v1 =>
-          toScala(key, Some(v1))).toSet.asInstanceOf[T]
-        )
+          case _ =>
+            Some(results.asScala.toList.map(v1 =>
+            toScala(key, Some(v1))).asInstanceOf[T]
+//            toScala(key, Some(v1))).toSet.asInstanceOf[T]
+          )
+        }
+
+        case result =>
+          Some(toScala(key, Some(result)).asInstanceOf[T])
       }
-
-      case result => Some(toScala(key, Some(result)).asInstanceOf[T])
+    } catch {
+      case _: NoSuchElementException => Option.empty[T]
     }
   }
 
@@ -129,8 +141,8 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @param kws Further namespaced attribute names
     * @return List of optional unchecked/untyped attribute values
     */
-  def get(kw1: String, kw2: String, kws: String*): List[Option[Any]] = {
-    (kw1 +: kw2 +: kws.toList) map get[Any]
+  def apply(kw1: String, kw2: String, kws: String*): List[Option[Any]] = {
+    (kw1 +: kw2 +: kws.toList) map apply[Any]
   }
 
 
@@ -628,7 +640,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     val builder    = Map.newBuilder[String, Any]
     val keysSorted = keys.sortWith((x, y) => x.toLowerCase < y.toLowerCase)
     if (keysSorted.head != ":db/id")
-      builder += ":db/id" -> value(":db/id")
+      builder += ":db/id" -> rawValue(":db/id")
     keysSorted.foreach { key =>
       val scalaValue  = toScala(key, None, depth, maxDepth)
       val sortedValue = scalaValue match {
@@ -658,7 +670,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     val keys2      = keys
     val keysSorted = keys2.sortWith((x, y) => x.toLowerCase < y.toLowerCase)
     if (keysSorted.head != ":db/id")
-      builder += ":db/id" -> value(":db/id")
+      builder += ":db/id" -> rawValue(":db/id")
     keysSorted.foreach { key =>
       val scalaValue  = toScala(key, None, depth, maxDepth, "List")
       val sortedValue = scalaValue match {

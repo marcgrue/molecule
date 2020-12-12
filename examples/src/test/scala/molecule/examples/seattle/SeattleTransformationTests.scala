@@ -3,13 +3,14 @@ import molecule.core.ast.model._
 import molecule.core.ast.query._
 import molecule.datomic.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
+import molecule.examples.ExampleSpec
 import scala.language.reflectiveCalls
 
 
-class SeattleTransformationTests extends SeattleSpec {
+class SeattleTransformationTests extends ExampleSpec {
 
 
-  "A first query" >> {
+  "A first query" in new SeattleSetup(true) {
 
     // Testing that a molecule goes correctly through 3 transformations:
 
@@ -44,7 +45,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Querying _for_ attribute values" >> {
+  "Querying _for_ attribute values" in new SeattleSetup {
 
     // Multiple attributes
     m(Community.name.url.category) -->
@@ -69,7 +70,7 @@ class SeattleTransformationTests extends SeattleSpec {
         |        [?a :Community/category ?d]]""".stripMargin
   }
 
-  "Querying _by_ attribute values" >> {
+  "Querying _by_ attribute values" in new SeattleSetup {
 
     // Names of twitter communities
     m(Community.name.type_("twitter")) -->
@@ -139,7 +140,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Querying across references" >> {
+  "Querying across references" in new SeattleSetup {
 
     // Communities in north eastern region
     // Ref's are modelelled as "Bond"'s (between Atoms)
@@ -196,7 +197,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Advanced queries - parameterizing queries" >> {
+  "Advanced queries - parameterizing queries" in new SeattleSetup {
 
     /** ******* Single input parameter **************************/
 
@@ -573,7 +574,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Invoking functions in queries" >> {
+  "Invoking functions in queries" in new SeattleSetup {
 
     m(Community.name < "C") -->
       Model(List(
@@ -646,7 +647,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Querying with fulltext search" >> {
+  "Querying with fulltext search" in new SeattleSetup {
 
     m(Community.name contains "Wallingford") -->
       Model(List(
@@ -817,7 +818,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Querying with rules (logical OR)" >> {
+  "Querying with rules (logical OR)" in new SeattleSetup {
 
     // Social media
 
@@ -1074,7 +1075,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Working with time" >> {
+  "Working with time" in new SeattleSetup {
 
     m(Schema.txInstant) -->
       Model(List(
@@ -1109,7 +1110,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Manipulating data - insert" >> {
+  "Manipulating data - insert" in new SeattleSetup {
 
     /** Insert data into molecule and save ***********************************************/
 
@@ -1201,7 +1202,7 @@ class SeattleTransformationTests extends SeattleSpec {
   }
 
 
-  "Manipulating data - update/retract" >> {
+  "Manipulating data - update/retract" in new SeattleSetup {
 
     val belltownId = Community.e.name_("belltown").get.head
 

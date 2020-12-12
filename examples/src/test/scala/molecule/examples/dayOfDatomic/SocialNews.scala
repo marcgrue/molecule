@@ -1,10 +1,10 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.testing.MoleculeSpec
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
 
 
-class SocialNews extends MoleculeSpec {
+class SocialNews extends ExampleSpec {
 
   "Social News" in new SocialNewsSetup {
 

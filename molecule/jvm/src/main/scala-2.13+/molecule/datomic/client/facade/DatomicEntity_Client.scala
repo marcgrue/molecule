@@ -51,8 +51,11 @@ case class DatomicEntity_Client(
   def keySet: Set[String] = map.keySet
   def keys: List[String] = map.keySet.toList
 
-  def apply(key: String): Any = map(key)
-  def value(key: String): Any = map(key)
+  def rawValue(key: String): Any = {
+    val raw = map.apply(key)
+    val b = raw
+    b
+  }
 
   def isAttrDef(entityMap: Map[String, Any]): Boolean = {
     entityMap.keys.toList.intersect(List(
@@ -70,7 +73,9 @@ case class DatomicEntity_Client(
     maxDepth: Int = 5,
     tpe: String = "Map"
   ): Any = {
-    vOpt.getOrElse(value(key)) match {
+    vOpt.getOrElse(rawValue(key)) match {
+      case Some(v)                  =>
+        v
       case s: java.lang.String      => s
       case i: java.lang.Integer     => i.toLong: Long
       case l: java.lang.Long        =>
@@ -100,7 +105,7 @@ case class DatomicEntity_Client(
         kw.toString
 
       case kw: clojure.lang.Keyword =>
-        conn.db.entity(conn, kw).value(":db/id")
+        conn.db.entity(conn, kw).rawValue(":db/id")
 
       case set: clojure.lang.PersistentHashSet =>
         set.asScala.toList.map(v1 =>
@@ -152,6 +157,7 @@ case class DatomicEntity_Client(
           override def toString = col.toString
         }
 
+      case None => throw new EntityException("Unexpectedly received null")
       case null => throw new EntityException("Unexpectedly received null")
 
       case unexpected => throw new EntityException(

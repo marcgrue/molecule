@@ -26,7 +26,7 @@ trait MoleculeSpec extends Specification with RegexMatching {
     Await.result(awaitable, 10.seconds)
 
 
-  def formatTx(tx: Seq[Statement]) = {
+  def formatTx(tx: Seq[Statement]): String = {
     val longestAction = tx.map(stmt => stmt.action.length).max
     val longestAttr   = tx.map(stmt => stmt.a.toString.length).max
     val longestValue  = tx.map(stmt => stmt.v.toString.length).max
@@ -60,7 +60,7 @@ trait MoleculeSpec extends Specification with RegexMatching {
     tx2.map(l => l.mkString("List(", ",  ", ")")).mkString("List(\n  ", ",\n  ", "\n)")
   }
 
-  def formatInputs(query: Query) = {
+  def formatInputs(query: Query): String = {
     val rules     = if (query.i.rules.isEmpty) ""
     else {
       val p = (expr: QueryExpr) => Query2String(query).p(expr)

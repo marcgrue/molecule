@@ -17,8 +17,11 @@ case class DatomicEntity_Peer(
   def keySet: Set[String] = entity.keySet().asScala.toSet
   def keys: List[String] = entity.keySet().asScala.toList
 
-  def apply(key: String): Any = entity.get(key)
-  def value(key: String): Any = entity.get(key)
+  def rawValue(key: String): Any = {
+    val raw = entity.get(key)
+    val b = raw
+    b
+  }
 
   private[molecule] def toScala(
     key: String,
@@ -27,7 +30,7 @@ case class DatomicEntity_Peer(
     maxDepth: Int = 5,
     tpe: String = "Map"
   ): Any = {
-    vOpt.getOrElse(value(key)) match {
+    vOpt.getOrElse(rawValue(key)) match {
       case s: java.lang.String      => s
       case i: java.lang.Integer     => i.toLong: Long
       case l: java.lang.Long        => l: Long
@@ -45,7 +48,7 @@ case class DatomicEntity_Peer(
         if (showKW)
           kw.toString
         else
-          conn.db.entity(conn, kw).value(":db/id")
+          conn.db.entity(conn, kw).rawValue(":db/id")
 
       case e: datomic.Entity =>
         if (depth < maxDepth) {

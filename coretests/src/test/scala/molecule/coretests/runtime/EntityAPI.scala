@@ -219,14 +219,18 @@ class EntityAPI extends CoreSpec {
 
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
+    val typed  : Option[String] = eid[String](":Ns/str")
+    val untyped: Option[Any]    = eid(":Ns/str")
+
     // Level 1
-    eid.get[String](":Ns/str") === Some("Ben")
-    eid.get[Int](":Ns/int") === Some(42)
+    eid[String](":Ns/str") === Some("Ben")
+    eid[Int](":Ns/int") === Some(42)
 
     // Level 2
-    // Type casting necessary to get right value type from Map[String, Any]
-    val refMap = eid.get[Map[String, Any]](":Ns/ref1").getOrElse(Map.empty[String, Any])
-    refId.get[String](":Ref1/str1") === Some("Hollywood Rd")
+    refId[Long](":Ref1/str1") === Some("Hollywood Rd")
+
+    // Non-existing attribute returns None
+    eid.apply[Any](":Ns/non-existing-attribute") === None
   }
 
 
@@ -234,7 +238,7 @@ class EntityAPI extends CoreSpec {
 
     val List(eid, refId) = Ns.str.int.Ref1.str1.insert("Ben", 42, "Hollywood Rd").eids
 
-    eid.get(":Ns/str", ":Ns/int", ":Ns/ref1") === List(
+    eid(":Ns/str", ":Ns/int", ":Ns/ref1") === List(
       Some("Ben"),
       Some(42),
       Some(
@@ -251,7 +255,7 @@ class EntityAPI extends CoreSpec {
     optName: Option[String]@unchecked,
     optAge: Option[Int]@unchecked,
     optAddress: Option[Map[String, Any]]@unchecked
-    ) = eid.get(
+    ) = eid(
       ":Ns/str",
       ":Ns/int",
       ":Ns/ref1"

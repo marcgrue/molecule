@@ -1,24 +1,23 @@
 package molecule.examples.dayOfDatomic
-import molecule.core.util.testing.MoleculeSpec
+
 import molecule.datomic.api.out3._
 import molecule.examples.dayOfDatomic.dsl.aggregates._
-import molecule.examples.dayOfDatomic.schema.AggregatesSchema
+import molecule.examples.ExampleSpec
 import scala.language.postfixOps
-import molecule.datomic.peer.facade.Datomic_Peer._
 
-class Aggregates extends MoleculeSpec {
+class Aggregates extends ExampleSpec {
 
-  implicit val conn = recreateDbFrom(AggregatesSchema, "Aggregates")
+  class Setup extends AggregateSetup {
+    val planets  = Seq("Sun", "Jupiter", "Saturn", "Uranus", "Neptune", "Earth", "Venus", "Mars", "Ganymede", "Titan", "Mercury", "Callisto", "Io", "Moon", "Europa", "Triton", "Eris")
+    val radiuses = Seq(696000.0, 69911.0, 58232.0, 25362.0, 24622.0, 6371.0, 6051.8, 3390.0, 2631.2, 2576.0, 2439.7, 2410.3, 1821.5, 1737.1, 1561.0, 1353.4, 1163.0)
+    val url      = "http://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size"
 
-  val planets  = Seq("Sun", "Jupiter", "Saturn", "Uranus", "Neptune", "Earth", "Venus", "Mars", "Ganymede", "Titan", "Mercury", "Callisto", "Io", "Moon", "Europa", "Triton", "Eris")
-  val radiuses = Seq(696000.0, 69911.0, 58232.0, 25362.0, 24622.0, 6371.0, 6051.8, 3390.0, 2631.2, 2576.0, 2439.7, 2410.3, 1821.5, 1737.1, 1561.0, 1353.4, 1163.0)
-  val url      = "http://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size"
-
-  // Insert data with tx meta data
-  Obj.name.meanRadius.Tx(Data.source_(url)) insert (planets zip radiuses)
+    // Insert data with tx meta data
+    Obj.name.meanRadius.Tx(Data.source_(url)) insert (planets zip radiuses)
+  }
 
 
-  "Aggregated Attributes" >> {
+  "Aggregated Attributes" in new Setup {
 
     // Maximum value(s)
     Obj.meanRadius(max).get.head === 696000.0
@@ -63,7 +62,7 @@ class Aggregates extends MoleculeSpec {
   }
 
 
-  "Aggregate Calculations" >> {
+  "Aggregate Calculations" in new Setup {
 
     Obj.name(count).get.head === 17
 
@@ -85,7 +84,7 @@ class Aggregates extends MoleculeSpec {
   }
 
 
-  "Schema aggregations" >> {
+  "Schema aggregations" in new Setup {
 
     // What is the average length of a schema name?
     val attrs = Schema.a.get
@@ -111,7 +110,7 @@ class Aggregates extends MoleculeSpec {
   }
 
 
-  "Monsters" >> {
+  "Monsters" in new Setup {
 
     Monster.name.heads insert List(
       ("Cerberus", 3),

@@ -1,7 +1,7 @@
 package molecule.examples.mbrainz.dayOfDatomic
 
 import java.util.UUID
-import molecule.core.util.testing.MoleculeSpec
+import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import scala.language.postfixOps
@@ -11,22 +11,19 @@ import molecule.datomic.peer.facade.Datomic_Peer._
   https://github.com/Datomic/day-of-datomic/blob/master/tutorial/pull.clj
 */
 
-class Pull extends MoleculeSpec {
-  sequential
+class Pull extends ExampleSpec {
 
-//  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
-  implicit val conn = connect("localhost:4334/mbrainz-1968-1973", "free")
-
-  val ledZeppelin = Artist.e.name_("Led Zeppelin").get.head
-  val mccartney = Artist.e.name_("Paul McCartney").get.head
-  val darkSideOfTheMoon = Release.e.name_("The Dark Side of the Moon").get.head
-
-  val dylanHarrisonSessions = Release.e.name_("Dylan–Harrison Sessions").get.head
-  val dylanHarrisonCd = Release(dylanHarrisonSessions).media.get.head.head
-  val ghostRiders = Release(dylanHarrisonSessions).Media.Tracks.e.position_(11).get.head
+  class Setup extends MBrainzSetup {
+    val ledZeppelin           = Artist.e.name_("Led Zeppelin").get.head
+    val mccartney             = Artist.e.name_("Paul McCartney").get.head
+    val darkSideOfTheMoon     = Release.e.name_("The Dark Side of the Moon").get.head
+    val dylanHarrisonSessions = Release.e.name_("Dylan–Harrison Sessions").get.head
+    val dylanHarrisonCd       = Release(dylanHarrisonSessions).media.get.head.head
+    val ghostRiders           = Release(dylanHarrisonSessions).Media.Tracks.e.position_(11).get.head
+  }
 
 
-  "attribute name" >> {
+  "attribute name" in new Setup {
     conn.db.pull("[:artist/name :artist/gid]", ledZeppelin).toString ===
       """{:artist/name "Led Zeppelin", :artist/gid #uuid "678d88b2-87b0-403b-b63d-5da7465aecc3"}"""
 
@@ -41,7 +38,7 @@ class Pull extends MoleculeSpec {
   }
 
 
-  "reverse lookup" >> {
+  "reverse lookup" in new Setup {
     // (show first 3 country entities...)
     conn.db.pull("[:artist/_country]", ":country/GB").toString.take(93) ===
       """{:artist/_country [{:db/id 527765581342226} {:db/id 527765581342413} {:db/id 527765581343048}"""
@@ -52,7 +49,7 @@ class Pull extends MoleculeSpec {
   }
 
 
-  "component defaults" >> {
+  "component defaults" in new Setup {
     conn.db.pull("[:release/media]", darkSideOfTheMoon).toString.take(255) ===
       """{:release/media [{:db/id 927987813884021, :Medium/tracks [{:db/id 927987813884022, :Track/artists [{:db/id 646512837142669}], :Track/artistCredit "Pink Floyd", :Track/position 7, :Track/name "Us and Them", :Track/duration 469853} {:db/id 927987813884023, """
 
@@ -62,7 +59,7 @@ class Pull extends MoleculeSpec {
   }
 
 
-  "reverse component lookup" >> {
+  "reverse component lookup" in new Setup {
     conn.db.pull("[:release/_media]", dylanHarrisonCd).toString ===
       """{:release/_media {:db/id 17592186070949}}"""
 
@@ -70,7 +67,7 @@ class Pull extends MoleculeSpec {
   }
 
 
-  "map specification" >> {
+  "map specification" in new Setup {
     conn.db.pull(
       "[:track/name {:track/artists [:db/id :artist/name]}]",
       ghostRiders
@@ -78,22 +75,22 @@ class Pull extends MoleculeSpec {
       """{:track/name "Ghost Riders in the Sky", :track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}"""
 
 
-//    Release.name_("Dylan–Harrison Sessions").Media.Tracks.position_(11).name.Artists.e.name.debugGet
+    //    Release.name_("Dylan–Harrison Sessions").Media.Tracks.position_(11).name.Artists.e.name.debugGet
 
     Release.name_("Dylan–Harrison Sessions")
       .Media.Tracks.position_(11).name.Artists.*(Artist.e.name).get === List(
       ("Ghost Riders in the Sky", List(
-        (646512837145512L,  "George Harrison"),
-        (721279627832670L,  "Bob Dylan")
+        (646512837145512L, "George Harrison"),
+        (721279627832670L, "Bob Dylan")
       ))
     )
 
 
-//    Release.name_("Dylan–Harrison Sessions")
-//      .Media.Tracks.position_(11).name.artists$.debugGet
+    //    Release.name_("Dylan–Harrison Sessions")
+    //      .Media.Tracks.position_(11).name.artists$.debugGet
 
 
-//    Artist.e.name_("Led Zeppelin").gid$.debugGet
+    //    Artist.e.name_("Led Zeppelin").gid$.debugGet
 
     conn.q(
       """[:find  ?a (pull ?a_gid1 [:Artist/gid])
@@ -166,14 +163,13 @@ class Pull extends MoleculeSpec {
         42.asInstanceOf[Object]
       )
     ).toString ===
-    """List(List(One Too Many Mornings, {:track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}), """ +
-    """List(Ghost Riders in the Sky, {:track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}))"""
+      """List(List(One Too Many Mornings, {:track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}), """ +
+        """List(Ghost Riders in the Sky, {:track/artists [{:db/id 646512837145512, :artist/name "George Harrison"} {:db/id 721279627832670, :artist/name "Bob Dylan"}]}))"""
 
 
-//    println(dylanHarrisonSessions.touchQuoted)
+    //    println(dylanHarrisonSessions.touchQuoted)
 
     ok
 
   }
-
-  }
+}

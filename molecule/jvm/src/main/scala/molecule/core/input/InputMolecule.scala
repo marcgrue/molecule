@@ -222,7 +222,8 @@ trait InputMolecule extends MoleculeBase {
       val one                = args.size == 1
       val uri                = if (nil) false else args.head.isInstanceOf[URI]
 
-      val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) = card match {
+      val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) =
+        card match {
 
         // Applying entity ids to Namespace: `m(Ns(?).int).apply(42L)`
         case 2 if attr == "e_" => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, clauses)
@@ -230,7 +231,8 @@ trait InputMolecule extends MoleculeBase {
 
         // Card-many enum attribute ...................................................................
 
-        case 2 if prefix.isDefined => clauses match {
+        case 2 if prefix.isDefined =>
+          clauses match {
 
           // Neq(Seq(Qm))
           case Seq(enum, _, _, _, Funct("!=", _, _)) if nil && tacit  => (Nil, Nil, Seq(enum))

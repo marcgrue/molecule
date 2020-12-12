@@ -8,7 +8,6 @@ import molecule.datomic.api.out3._
 
 class SchemaTest extends CoreSpec {
 
-  peerServerOnly = true
 
   "Partition schema values" >> {
 

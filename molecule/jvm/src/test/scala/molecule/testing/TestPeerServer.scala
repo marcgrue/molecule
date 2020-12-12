@@ -14,7 +14,6 @@ object TestPeerServer {
   def getCleanPeerServerConn(
     client: Client,
     dbIdentifier: String,
-    doInstallSchema: Boolean,
     schema: SchemaTransaction,
     basisT0: Long
   ): (Conn_Client, Long) = {
@@ -23,10 +22,8 @@ object TestPeerServer {
     val dataConn    = cl.connect(dbIdentifier)
     val txCountConn = cl.connect("txCount")
     val log         = dataConn.clientConn.txRange(Some(1000), Some(1002))
-    val empty       = if (doInstallSchema) log.isEmpty else false
 
-    // Check only once per test file
-    if (doInstallSchema && empty) {
+    if (log.isEmpty) {
       println("Installing Peer Server schema...")
       if (schema.partitions.size() > 0)
         dataConn.transact(cl.allowedClientDefinitions(schema.partitions))
@@ -34,7 +31,6 @@ object TestPeerServer {
       basisT = dataConn.db.t + 1
       txCountConn.transact(cl.allowedClientDefinitions(TxCountSchema.namespaces))
       TxCount.db(dbIdentifier).basisT(basisT).save(txCountConn)
-      //      doInstallSchema = false
 
     } else {
       basisT = TxCount.db_(dbIdentifier).basisT.get(txCountConn).head
@@ -57,7 +53,7 @@ object TestPeerServer {
       //          println("-------------------")
       //          println(s"Retraction count: $retractionCount")
 
-      if (retractionCount > 100)
+      if (retractionCount > 1000)
         throw new RuntimeException(s"Unexpectedly gathered $retractionCount retractions...")
 
       if (retractionCount > 0) {

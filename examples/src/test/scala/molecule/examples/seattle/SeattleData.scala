@@ -1,6 +1,6 @@
 package molecule.examples.seattle
 
-import molecule.core.util.testing.MoleculeSpec
+import molecule.examples.ExampleSpec
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.api.out8._
 import molecule.examples.seattle.dsl.seattle._
@@ -8,35 +8,41 @@ import molecule.examples.seattle.schema._
 import org.specs2.specification.Scope
 import molecule.datomic.peer.facade.Datomic_Peer._
 
-trait SeattleSpec extends MoleculeSpec {
+//trait SeattleSpec extends ExampleSpec {
+case class SeattleData(conn0: Conn, lowerCaseNs: Boolean) {
 
-  class SeattleSetup extends Scope {
-    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
+  //  class SeattleSetup extends Scope {
+  //    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
+  //
+  //    // Add lowercase-namespaced attribute names so that we can import data with those names
+  //    conn.transact(SeattleSchemaUpperToLower.namespaces)
+  //
+  //    // Insert data
+  //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
+  //  }
+  //
+  //  def loadSeattle(version: Int): Conn = {
+  //    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
+  //
+  //    // Insert data
+  //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
+  //
+  //    conn
+  //  }
+  //
+  //
+  //  implicit val conn = loadSeattle(1)
 
+
+  implicit val conn = conn0
+
+  if (lowerCaseNs) {
     // Add lowercase-namespaced attribute names so that we can import data with those names
     conn.transact(SeattleSchemaUpperToLower.namespaces)
-
-    // Insert data
-    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
   }
 
-  def loadSeattle(version: Int): Conn = {
-    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
-
-    // Insert data
-    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
-
-    conn
-  }
-
-
-  implicit val conn = loadSeattle(1)
-
-  lazy val seattleData0 = List(
-    ("15th Ave Community", "http://groups.yahoo.com/group/15thAve_Community/", "email_list", Some("community"), Some(Set("15th avenue residents", "xx")), "Capitol Hill", "East", Some("e"))
-  )
-
-  lazy val seattleData = List(
+  // Insert data
+  Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert  List(
     ("15th Ave Community", "http://groups.yahoo.com/group/15thAve_Community/", "email_list", Some("community"), Some(Set("15th avenue residents")), "Capitol Hill", "East", Some("e")),
     ("Admiral Neighborhood Association", "http://groups.yahoo.com/group/AdmiralNeighborhood/", "email_list", Some("community"), Some(Set("neighborhood association")), "Admiral (West Seattle)", "Southwest", Some("sw")),
     ("Alki News", "http://groups.yahoo.com/group/alkibeachcommunity/", "email_list", Some("community"), Some(Set("members of the Alki Community Council and residents of the Alki Beach neighborhood")), "Alki", "Southwest", Some("sw")),
@@ -202,14 +208,14 @@ trait SeattleSpec extends MoleculeSpec {
   )
 
 
-//    // Extractor
-//    val dataFromFile = Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region.hl.map { rec =>
-//      rec.toList.map {
-//        case set: Set[_] => set.map("\"" + _.toString + "\"")
-//        case other       => "\"" + other.toString + "\""
-//      }
-//    }.map(e => e.mkString("\n(", ", ", ")"))
-//    println(dataFromFile)
-//    println()
-//    println(seattleData.map(_._1).sorted.mkString("\n"))
+  //    // Extractor
+  //    val dataFromFile = Community.name.url.`type`.orgtype.category.Neighborhood.name.District.name.region.hl.map { rec =>
+  //      rec.toList.map {
+  //        case set: Set[_] => set.map("\"" + _.toString + "\"")
+  //        case other       => "\"" + other.toString + "\""
+  //      }
+  //    }.map(e => e.mkString("\n(", ", ", ")"))
+  //    println(dataFromFile)
+  //    println()
+  //    println(seattleData.map(_._1).sorted.mkString("\n"))
 }

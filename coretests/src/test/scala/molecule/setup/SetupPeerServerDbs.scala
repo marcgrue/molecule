@@ -9,12 +9,13 @@ import molecule.datomic.peer.facade.Datomic_Peer
 import org.specs2.mutable.Specification
 
 
-class PeerServerReset extends Specification {
+class SetupPeerServerDbs extends Specification {
   sequential
 
   // 1. Stop Peer Server process (ctrl-c), if running.
+  // 2. Start transactor
 
-  // 2. Run test here to create databases needed for tests
+  // 3. Run test here to create databases needed for tests
   "Create databases for peer-server" >> {
 
     val pro = true
@@ -35,15 +36,26 @@ class PeerServerReset extends Specification {
     dbs.contains("nested") === true
   }
 
-  // 3. Start Peer Server:
+  // 4. Start Peer Server:
 
-  // via localhost
-  // bin/run -m datomic.peer-server -h localhost -p 8998 -a k,s -d txCount,datomic:dev://txCount -d coretests,datomic:dev://coretests -d bidirectional,datomic:dev://bidirectional -d partitions,datomic:dev://partitions -d nested,datomic:dev://nested
+  /*
+    // via localhost
+    bin/run -m datomic.peer-server -h localhost -p 8998 -a k,s \
+    -d txCount,datomic:dev://txCount \
+    -d coretests,datomic:dev://coretests \
+    -d bidirectional,datomic:dev://bidirectional \
+    -d partitions,datomic:dev://partitions \
+    -d nested,datomic:dev://nested
 
-  // or
+    // or
 
-  // in-mem
-  // bin/run -m datomic.peer-server -a k,s -d txCount,datomic:mem://txCount -d coretests,datomic:mem://coretests -d bidirectional,datomic:mem://bidirectional -d partitions,datomic:mem://partitions -d nested,datomic:mem://nested
+    // in-mem
+    bin/run -m datomic.peer-server -a k,s \
+    -d txCount,datomic:mem://txCount \
+    -d coretests,datomic:mem://coretests \
+    -d bidirectional,datomic:mem://bidirectional \
+    -d partitions,datomic:mem://partitions \
+    -d nested,datomic:mem://nested
 
-
+   */
 }
