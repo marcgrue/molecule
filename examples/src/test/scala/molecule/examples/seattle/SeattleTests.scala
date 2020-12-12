@@ -31,11 +31,7 @@ class SeattleTests extends ExampleSpec {
 
     // Use the community id to touch all the entity's attribute values
     communityId.touch === Map(
-      ":Community/category" -> List(
-        "events",
-        "for sale",
-        "services",
-      ),
+      ":Community/category" -> List("events", "for sale", "services"),
       ":Community/type" -> ":Community.type/wiki",
       ":Community/neighborhood" -> Map(
         ":db/id" -> n1,

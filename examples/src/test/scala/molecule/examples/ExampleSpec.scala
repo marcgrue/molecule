@@ -150,8 +150,8 @@ class ExampleSpec extends MoleculeSpec {
   class ProductsSetup extends Scope {
     implicit val conn = getConn(ProductsOrderSchema, "productsOrder")
   }
-  class SeattleSetup(lowerCaseNs: Boolean = false) extends SeattleData(
-    getConn(SeattleSchema, "seattle"), lowerCaseNs) with Scope
+  class SeattleSetup extends SeattleData(
+    getConn(SeattleSchema, "seattle")) with Scope
 
   class MBrainzSetup extends Scope {
     //  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))

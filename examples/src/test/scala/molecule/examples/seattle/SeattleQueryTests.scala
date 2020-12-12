@@ -8,7 +8,7 @@ import scala.language.reflectiveCalls
 class SeattleQueryTests extends ExampleSpec {
 
 
-  "A first query" in new SeattleSetup(true) {
+  "A first query" in new SeattleSetup {
 
     // Query of molecule
     m(Community.name) --> {

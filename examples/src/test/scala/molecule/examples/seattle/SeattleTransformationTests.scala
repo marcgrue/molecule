@@ -10,7 +10,7 @@ import scala.language.reflectiveCalls
 class SeattleTransformationTests extends ExampleSpec {
 
 
-  "A first query" in new SeattleSetup(true) {
+  "A first query" in new SeattleSetup {
 
     // Testing that a molecule goes correctly through 3 transformations:
 

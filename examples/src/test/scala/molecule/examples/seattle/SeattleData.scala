@@ -1,45 +1,12 @@
 package molecule.examples.seattle
 
-import molecule.examples.ExampleSpec
-import molecule.datomic.base.facade.Conn
 import molecule.datomic.api.out8._
+import molecule.datomic.base.facade.Conn
 import molecule.examples.seattle.dsl.seattle._
-import molecule.examples.seattle.schema._
-import org.specs2.specification.Scope
-import molecule.datomic.peer.facade.Datomic_Peer._
 
-//trait SeattleSpec extends ExampleSpec {
-case class SeattleData(conn0: Conn, lowerCaseNs: Boolean) {
-
-  //  class SeattleSetup extends Scope {
-  //    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
-  //
-  //    // Add lowercase-namespaced attribute names so that we can import data with those names
-  //    conn.transact(SeattleSchemaUpperToLower.namespaces)
-  //
-  //    // Insert data
-  //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
-  //  }
-  //
-  //  def loadSeattle(version: Int): Conn = {
-  //    implicit val conn: Conn = recreateDbFrom(SeattleSchema)
-  //
-  //    // Insert data
-  //    Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert seattleData
-  //
-  //    conn
-  //  }
-  //
-  //
-  //  implicit val conn = loadSeattle(1)
-
+case class SeattleData(conn0: Conn) {
 
   implicit val conn = conn0
-
-  if (lowerCaseNs) {
-    // Add lowercase-namespaced attribute names so that we can import data with those names
-    conn.transact(SeattleSchemaUpperToLower.namespaces)
-  }
 
   // Insert data
   Community.name.url.`type`.orgtype$.category$.Neighborhood.name.District.name.region$ insert  List(
