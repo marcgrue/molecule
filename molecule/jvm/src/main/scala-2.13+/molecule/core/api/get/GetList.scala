@@ -1,6 +1,7 @@
 package molecule.core.api.get
 
-import java.util.{List => jList}
+import java.util.{Collections, List => jList}
+import clojure.lang.{APersistentVector, PersistentVector}
 import molecule.core.api.Molecule
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
@@ -235,7 +236,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport)* getAsyncAsOf]] method.
-    **/
+    * */
   def getAsOf(tx: TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
@@ -285,7 +286,7 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncAsOf]] method.
-    **/
+    * */
   def getAsOf(tx: TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
@@ -694,8 +695,9 @@ trait GetList[Tpl] extends GetArray[Tpl] { self: Molecule[Tpl] =>
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncWith(txData:java\.util\.List[_])* getAsyncWith]] method.
     */
-  def getWith(txData: java.util.List[_])(implicit conn: Conn): List[Tpl] =
+  def getWith(txData: java.util.List[_])(implicit conn: Conn): List[Tpl] = {
     get(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
+  }
 
 
   /** Get `List` of n rows as tuples matching molecule with applied raw transaction data.

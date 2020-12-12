@@ -63,9 +63,6 @@ trait InputMolecule extends MoleculeBase {
     case Placeholder(_, _, v, enumPrefix) => (v, enumPrefix.getOrElse(""))
   }
 
-  protected def pre[T](enumPrefix: Option[String], arg: T): Any =
-    if (enumPrefix.isDefined) enumPrefix.get + arg.toString else arg
-
   protected def isTacit(nsFull: String, attr: String): Boolean = {
     val nsFull_                = nsFull + "_"
     val (attr_, attrK, attrK_) = (attr + "_", attr + "K", attr + "K_")
@@ -130,14 +127,17 @@ trait InputMolecule extends MoleculeBase {
   }
 
   protected def dataClause(e: String, kw: KW, enumPrefix: Option[String], arg: Any, i: Int): Seq[Clause] = arg match {
-    case value: java.net.URI =>
+    case value: java.net.URI       =>
       val uriVar = Var(e + "_uri" + i)
       Seq(
         Funct(s"""ground (java.net.URI. "$value")""", Nil, ScalarBinding(uriVar)),
         DataClause(ImplDS, Var(e), kw, uriVar, Empty, NoBinding)
       )
-    case value               => Seq(
-      DataClause(ImplDS, Var(e), kw, Val(pre(enumPrefix, arg)), Empty, NoBinding)
+    case _ if enumPrefix.isDefined => Seq(
+      DataClause(ImplDS, Var(e), kw, KW(enumPrefix.get.init.tail, arg.toString), Empty, NoBinding)
+    )
+    case _                         => Seq(
+      DataClause(ImplDS, Var(e), kw, Val(arg), Empty, NoBinding)
     )
   }
 
@@ -222,8 +222,7 @@ trait InputMolecule extends MoleculeBase {
       val one                = args.size == 1
       val uri                = if (nil) false else args.head.isInstanceOf[URI]
 
-      val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) =
-        card match {
+      val (newIns, newRules, newClauses): (Seq[Input], Seq[Rule], Seq[Clause]) = card match {
 
         // Applying entity ids to Namespace: `m(Ns(?).int).apply(42L)`
         case 2 if attr == "e_" => (Seq(InVar(CollectionBinding(v), Seq(args))), Nil, clauses)
@@ -231,8 +230,7 @@ trait InputMolecule extends MoleculeBase {
 
         // Card-many enum attribute ...................................................................
 
-        case 2 if prefix.isDefined =>
-          clauses match {
+        case 2 if prefix.isDefined => clauses match {
 
           // Neq(Seq(Qm))
           case Seq(enum, _, _, _, Funct("!=", _, _)) if nil && tacit  => (Nil, Nil, Seq(enum))

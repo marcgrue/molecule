@@ -286,8 +286,6 @@ case class Conn_Client(client: Client, dbName: String)
     val rules           = if (query.i.rules.isEmpty) Nil else Seq("[" + (query.i.rules map p mkString " ") + "]")
     val inputsEvaluated = QueryOpsClojure(query).inputsWithKeyword
     val allInputs       = rules ++ inputsEvaluated
-
-
     try {
       blocking {
         clientDatomic.q(query.toMap, adhocDb, allInputs: _*)

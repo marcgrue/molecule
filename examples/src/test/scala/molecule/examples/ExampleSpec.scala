@@ -25,6 +25,7 @@ class ExampleSpec extends MoleculeSpec {
   var peerOnly          = false
   var devLocalOnly      = false
   var peerServerOnly    = false
+  var omitPeer      = false
   var omitPeerServer    = false
   var omitDevLocal      = false
   val heavyInputTesting = false
@@ -39,6 +40,9 @@ class ExampleSpec extends MoleculeSpec {
       step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else if (peerServerOnly) {
       step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
+    } else if (omitPeer) {
+      step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else if (omitPeerServer) {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
         step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))

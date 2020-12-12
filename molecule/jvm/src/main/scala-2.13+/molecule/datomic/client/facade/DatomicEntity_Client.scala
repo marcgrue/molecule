@@ -10,7 +10,6 @@ import molecule.core.api.DatomicEntity
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
-
 case class DatomicEntity_Client(
   conn: Conn_Client,
   eid: Any,
@@ -51,11 +50,8 @@ case class DatomicEntity_Client(
   def keySet: Set[String] = map.keySet
   def keys: List[String] = map.keySet.toList
 
-  def rawValue(key: String): Any = {
-    val raw = map.apply(key)
-    val b = raw
-    b
-  }
+  def rawValue(key: String): Any = map.apply(key)
+
 
   def isAttrDef(entityMap: Map[String, Any]): Boolean = {
     entityMap.keys.toList.intersect(List(
@@ -73,9 +69,9 @@ case class DatomicEntity_Client(
     maxDepth: Int = 5,
     tpe: String = "Map"
   ): Any = {
-    vOpt.getOrElse(rawValue(key)) match {
-      case Some(v)                  =>
-        v
+    val value = vOpt.getOrElse(rawValue(key))
+    value match {
+      case Some(v)                  => v
       case s: java.lang.String      => s
       case i: java.lang.Integer     => i.toLong: Long
       case l: java.lang.Long        =>
@@ -123,7 +119,13 @@ case class DatomicEntity_Client(
               m.iterator().next().asInstanceOf[MapEntry].getValue
             )
             tpe match {
-              case "Map"  => ent.asMap(depth + 1, maxDepth)
+              case "Map" =>
+                val map = ent.asMap(depth + 1, maxDepth)
+                if (map.contains(":db/ident"))
+                  map(":db/ident") // enum
+                else
+                  map
+
               case "List" => ent.asList(depth + 1, maxDepth) match {
                 case List((":db/id", _), (":db/ident", enum)) => enum
                 case other                                    => other
@@ -131,7 +133,8 @@ case class DatomicEntity_Client(
             }
 
           case m =>
-            m.iterator().next().asInstanceOf[MapEntry].getValue.asInstanceOf[Long]
+            val id = m.iterator().next().asInstanceOf[MapEntry].getValue.asInstanceOf[Long]
+            conn.db.entity(conn, id).apply(":db/ident").getOrElse(id)
         }
       }
 

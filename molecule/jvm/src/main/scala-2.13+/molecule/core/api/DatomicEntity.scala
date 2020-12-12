@@ -76,10 +76,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     try {
       rawValue(key) match {
         case None       => None
-        case Some(v: T) =>
-          Some(v)
-        case Some(v)    =>
-          Some(v.asInstanceOf[T])
+        case Some(v)    => Some(v.asInstanceOf[T])
         case null       => Option.empty[T]
 
         case results: clojure.lang.PersistentHashSet =>
@@ -92,7 +89,6 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
           case _ =>
             Some(results.asScala.toList.map(v1 =>
             toScala(key, Some(v1))).asInstanceOf[T]
-//            toScala(key, Some(v1))).toSet.asInstanceOf[T]
           )
         }
 

@@ -18,17 +18,11 @@ import scala.jdk.CollectionConverters._
 
 class ExampleAdHoc extends ExampleSpec {
 
-  devLocalOnly = true
-
+  //  devLocalOnly = true
+  //  omitPeer = true
 
   "example adhoc" in new SeattleSetup {
 
-
-    val typeAndOrgtype2 = m(Community.name.`type`(?).orgtype(?))
-
-
-    // Logic AND pairs separated by OR
-    typeAndOrgtype2.apply(("email_list" and "community") or ("website" and "commercial")).get(5)
 
     ok
   }

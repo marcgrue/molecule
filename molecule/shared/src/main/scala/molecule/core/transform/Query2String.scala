@@ -113,7 +113,7 @@ case class Query2String(q: Query) extends Helpers {
       case ((acc, _), (pull: Pull, 0)) => (acc + " " + p(pull), 1)
       case ((acc, _), (pull: Pull, _)) => (acc + "\n        " + p(pull), 1)
       case ((acc, 1), (o, _))          => (acc + "\n        " + p(o), 0)
-      case ((acc, 0), (o, _))          => (acc + " " + p(o), 0)
+      case ((acc, _), (o, _))          => (acc + " " + p(o), 0)
     }._1
     lazy val finds      = ":find " + outputs
     lazy val firstParts = List(finds, p(q.wi), p(q.i)).filter(_.trim.nonEmpty)

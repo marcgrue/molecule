@@ -1,0 +1,326 @@
+[
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000451], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000452], :Neighborhood/name "Beacon Hill", :Neighborhood/district #db/id[:db.part/user -1000451]}
+{:Community/category ["community members"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/email_list, :db/id #db/id[:db.part/user -1000453], :Community/name "nbeaconhillneighbors", :Community/url "http://groups.yahoo.com/group/nbeaconhillneighbors/", :Community/neighborhood #db/id[:db.part/user -1000452]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000454], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000455], :Neighborhood/name "Rainier Valley", :Neighborhood/district #db/id[:db.part/user -1000454]}
+{:Community/category ["services portal"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000456], :Community/name "New Holly Neighborhood Campus", :Community/url "http://www.newholly.org/", :Community/neighborhood #db/id[:db.part/user -1000455]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000457], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000458], :Neighborhood/name "Rainier Beach", :Neighborhood/district #db/id[:db.part/user -1000457]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000459], :Community/name "New Rainier Vista", :Community/url "http://newrainiervista.com/public/about/", :Community/neighborhood #db/id[:db.part/user -1000458]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000460], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000461], :Neighborhood/name "Beacon Hill", :Neighborhood/district #db/id[:db.part/user -1000460]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000462], :Community/name "North Beacon Hill", :Community/url "http://north-beacon-hill.blogspot.com/", :Community/neighborhood #db/id[:db.part/user -1000461]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000463], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000464], :Neighborhood/name "Beacon Hill", :Neighborhood/district #db/id[:db.part/user -1000463]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000465], :Community/name "North Beacon Hill Council", :Community/url "http://www.cityofseattle.net/commnty/Beacon/groups/nbhc/", :Community/neighborhood #db/id[:db.part/user -1000464]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000466], :District/name "East"}
+{:db/id #db/id[:db.part/user -1000467], :Neighborhood/name "Capitol Hill", :Neighborhood/district #db/id[:db.part/user -1000466]}
+{:Community/category ["meeting notes" "relevant news"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000468], :Community/name "North Capitol Hill Neighborhood Association", :Community/url "http://www.nchna.com/", :Community/neighborhood #db/id[:db.part/user -1000467]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000469], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000470], :Neighborhood/name "Delridge", :Neighborhood/district #db/id[:db.part/user -1000469]}
+{:Community/category ["events calendar"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000471], :Community/name "North Delridge Neighborhood Council", :Community/url "http://ndnc.org/", :Community/neighborhood #db/id[:db.part/user -1000470]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000472], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000473], :Neighborhood/name "Northgate", :Neighborhood/district #db/id[:db.part/user -1000472]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000474], :Community/name "Northgate Chamber of Commerce", :Community/url "http://www.northgatechamber.com/", :Community/neighborhood #db/id[:db.part/user -1000473]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000475], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000476], :Neighborhood/name "Northwest", :Neighborhood/district #db/id[:db.part/user -1000475]}
+{:Community/category ["district council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000477], :Community/name "Northwest District Council", :Community/url "http://www.nwdistrictcouncil.org/", :Community/neighborhood #db/id[:db.part/user -1000476]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000478], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000479], :Neighborhood/name "High Point", :Neighborhood/district #db/id[:db.part/user -1000478]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000480], :Community/name "Official Website of the High Point Neighborhood", :Community/url "http://www.highpointneighborhood.org/", :Community/neighborhood #db/id[:db.part/user -1000479]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000481], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000482], :Neighborhood/name "Othello", :Neighborhood/district #db/id[:db.part/user -1000481]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000483], :Community/name "Othello Neighborhood Association", :Community/url "http://othello.talkspot.com/", :Community/neighborhood #db/id[:db.part/user -1000482]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000484], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000485], :Neighborhood/name "Phinney Ridge", :Neighborhood/district #db/id[:db.part/user -1000484]}
+{:Community/category ["association news and events"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000486], :Community/name "Phinney Neighborhood Association", :Community/url "http://phinneycenter.blogspot.com/", :Community/neighborhood #db/id[:db.part/user -1000485]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000487], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000488], :Neighborhood/name "Phinney Ridge", :Neighborhood/district #db/id[:db.part/user -1000487]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000489], :Community/name "Phinney Neighborhood Association", :Community/url "http://www.facebook.com/group.php?gid=42314991794", :Community/neighborhood #db/id[:db.part/user -1000488]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000490], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000491], :Neighborhood/name "Phinney Ridge", :Neighborhood/district #db/id[:db.part/user -1000490]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000492], :Community/name "Phinney Neighborhood Association", :Community/url "http://www.phinneycenter.org/", :Community/neighborhood #db/id[:db.part/user -1000491]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000493], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000494], :Neighborhood/name "Phinney Ridge", :Neighborhood/district #db/id[:db.part/user -1000493]}
+{:Community/category ["news" "events" "food" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000495], :Community/name "PhinneyWood", :Community/url "http://www.phinneywood.com/", :Community/neighborhood #db/id[:db.part/user -1000494]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000496], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000497], :Neighborhood/name "Pinehurst", :Neighborhood/district #db/id[:db.part/user -1000496]}
+{:Community/category ["news" "events" "issues"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000498], :Community/name "Pinehurst Seattle", :Community/url "http://pinehurstseattle.org", :Community/neighborhood #db/id[:db.part/user -1000497]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000499], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000500], :Neighborhood/name "Pinehurst", :Neighborhood/district #db/id[:db.part/user -1000499]}
+{:Community/category ["news" "events" "issues"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000501], :Community/name "Pinehurst Seattle", :Community/url "http://twitter.com/pinehurstsea", :Community/neighborhood #db/id[:db.part/user -1000500]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000502], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000503], :Neighborhood/name "Pinehurst", :Neighborhood/district #db/id[:db.part/user -1000502]}
+{:Community/category ["news" "events" "issues"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000504], :Community/name "Pinehurst Seattle", :Community/url "http://www.facebook.com/#!/group.php?gid=53590206898&v=wall&ref=search", :Community/neighborhood #db/id[:db.part/user -1000503]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000505], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000506], :Neighborhood/name "Pioneer Square", :Neighborhood/district #db/id[:db.part/user -1000505]}
+{:Community/category ["community organization"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000507], :Community/name "Pioneer Square Community Association", :Community/url "http://www.pioneersquare.org/", :Community/neighborhood #db/id[:db.part/user -1000506]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000508], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000509], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000508]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000510], :Community/name "Queen Anne Chamber of Commerce", :Community/url "http://qachamber.org/", :Community/neighborhood #db/id[:db.part/user -1000509]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000511], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000512], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000511]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000513], :Community/name "Queen Anne Community Council", :Community/url "http://www.qacc.net/", :Community/neighborhood #db/id[:db.part/user -1000512]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000514], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000515], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000514]}
+{:Community/category ["news" "local issues"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000516], :Community/name "Queen Anne Examiner", :Community/url "http://www.examiner.com/x-8856-Seattle-Queen-Anne-Hill-Examiner", :Community/neighborhood #db/id[:db.part/user -1000515]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000517], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000518], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000517]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000519], :Community/name "Queen Anne Helpline", :Community/url "http://queenannehelpline.org/index.php", :Community/neighborhood #db/id[:db.part/user -1000518]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000520], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000521], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000520]}
+{:Community/category ["historical society"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000522], :Community/name "Queen Anne Historical Society", :Community/url "http://www.qahistory.org/", :Community/neighborhood #db/id[:db.part/user -1000521]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000523], :District/name "Magnolia/Queen Anne"}
+{:db/id #db/id[:db.part/user -1000524], :Neighborhood/name "Queen Anne", :Neighborhood/district #db/id[:db.part/user -1000523]}
+{:Community/category ["news" "events" "reviews"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000525], :Community/name "Queen Anne View", :Community/url "http://www.queenanneview.com/", :Community/neighborhood #db/id[:db.part/user -1000524]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000526], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000527], :Neighborhood/name "Rainier Beach", :Neighborhood/district #db/id[:db.part/user -1000526]}
+{:Community/category ["news" "events" "issues"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000528], :Community/name "Rainier Beach Community Empowerment Coalition", :Community/url "http://twitter.com/rainierbeach", :Community/neighborhood #db/id[:db.part/user -1000527]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000529], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000530], :Neighborhood/name "Rainier Beach", :Neighborhood/district #db/id[:db.part/user -1000529]}
+{:Community/category ["news" "events" "issues"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000531], :Community/name "Rainier Beach Community Empowerment Coalition", :Community/url "http://www.rbcoalition.org/", :Community/neighborhood #db/id[:db.part/user -1000530]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000532], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000533], :Neighborhood/name "Rainier Valley", :Neighborhood/district #db/id[:db.part/user -1000532]}
+{:Community/category ["historical society"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000534], :Community/name "Rainier Valley Historical Society", :Community/url "http://www.rainiervalleyhistory.org/", :Community/neighborhood #db/id[:db.part/user -1000533]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000535], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000536], :Neighborhood/name "Rainier Valley", :Neighborhood/district #db/id[:db.part/user -1000535]}
+{:Community/category ["news" "events" "911 blotter" "food" "reviews"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000537], :Community/name "Rainier Valley Post", :Community/url "http://www.rainiervalleypost.com/", :Community/neighborhood #db/id[:db.part/user -1000536]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000538], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000539], :Neighborhood/name "Ravenna", :Neighborhood/district #db/id[:db.part/user -1000538]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "food" "shopping"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000540], :Community/name "Ravenna Blog", :Community/url "http://twitter.com/ravennablog", :Community/neighborhood #db/id[:db.part/user -1000539]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000541], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000542], :Neighborhood/name "Ravenna", :Neighborhood/district #db/id[:db.part/user -1000541]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "food" "shopping"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000543], :Community/name "Ravenna Blog", :Community/url "http://www.facebook.com/pages/Ravenna-Blog/116280421718247", :Community/neighborhood #db/id[:db.part/user -1000542]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000544], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000545], :Neighborhood/name "Ravenna", :Neighborhood/district #db/id[:db.part/user -1000544]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "food" "shopping"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000546], :Community/name "Ravenna Blog", :Community/url "http://www.ravennablog.com/", :Community/neighborhood #db/id[:db.part/user -1000545]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000547], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000548], :Neighborhood/name "Ravenna", :Neighborhood/district #db/id[:db.part/user -1000547]}
+{:Community/category ["community association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000549], :Community/name "Ravenna-Bryant Community Association", :Community/url "http://www.facebook.com/pages/Ravenna-Bryant-Community-Association/153638664651035", :Community/neighborhood #db/id[:db.part/user -1000548]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000550], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000551], :Neighborhood/name "Ravenna", :Neighborhood/district #db/id[:db.part/user -1000550]}
+{:Community/category ["community association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000552], :Community/name "Ravenna-Bryant Community Association", :Community/url "http://www.ravennabryant.org/", :Community/neighborhood #db/id[:db.part/user -1000551]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000553], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000554], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000553]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000555], :Community/name "Roosevelt Neighborhood Association", :Community/url "http://rooseveltseattle.org/default.aspx", :Community/neighborhood #db/id[:db.part/user -1000554]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000556], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000557], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000556]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000558], :Community/name "Roosevelt Neighborhood Association", :Community/url "http://www.facebook.com/group.php?gid=178766520060", :Community/neighborhood #db/id[:db.part/user -1000557]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000559], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000560], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000559]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000561], :Community/name "Roosevelt Neighbors' Alliance", :Community/url "http://www.rooseveltneighborsalliance.org/main/Roosevelt_Neighbors_Alliance.html", :Community/neighborhood #db/id[:db.part/user -1000560]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000562], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000563], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000562]}
+{:Community/category ["news" "events"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000564], :Community/name "Roosevelt Seattle", :Community/url "http://twitter.com/roosieseattle", :Community/neighborhood #db/id[:db.part/user -1000563]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000565], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000566], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000565]}
+{:Community/category ["news" "events" "human interest" "criminal activity"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000567], :Community/name "Rosiehood", :Community/url "http://twitter.com/Roosiehood", :Community/neighborhood #db/id[:db.part/user -1000566]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000568], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000569], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000568]}
+{:Community/category ["news" "events" "human interest" "criminal activity"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000570], :Community/name "Rosiehood", :Community/url "http://www.facebook.com/pages/Roosevelt-Neighborhood-Blog/133948283288085", :Community/neighborhood #db/id[:db.part/user -1000569]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000571], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000572], :Neighborhood/name "Roosevelt", :Neighborhood/district #db/id[:db.part/user -1000571]}
+{:Community/category ["news" "events" "human interest" "criminal activity"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000573], :Community/name "Rosiehood", :Community/url "http://www.roosiehood.com/", :Community/neighborhood #db/id[:db.part/user -1000572]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000574], :District/name "Lake Union"}
+{:db/id #db/id[:db.part/user -1000575], :Neighborhood/name "South Lake Union", :Neighborhood/district #db/id[:db.part/user -1000574]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000576], :Community/name "S Lake Union Friends and Neighbors Community Council", :Community/url "http://www.slufan.org/", :Community/neighborhood #db/id[:db.part/user -1000575]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000577], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000578], :Neighborhood/name "International District", :Neighborhood/district #db/id[:db.part/user -1000577]}
+{:Community/category ["public development authority"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000579], :Community/name "SCIPDA", :Community/url "http://www.scidpda.org/", :Community/neighborhood #db/id[:db.part/user -1000578]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000580], :District/name "East"}
+{:db/id #db/id[:db.part/user -1000581], :Neighborhood/name "Capitol Hill", :Neighborhood/district #db/id[:db.part/user -1000580]}
+{:Community/category ["college"], :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000582], :Community/name "Seattle Central Community College", :Community/url "http://seattlecentral.edu/", :Community/neighborhood #db/id[:db.part/user -1000581]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000583], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000584], :Neighborhood/name "International District", :Neighborhood/district #db/id[:db.part/user -1000583]}
+{:Community/category ["food" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000585], :Community/name "Seattle Chinatown Guide", :Community/url "http://www.chinatownconnection.com/seattle-chinatown-international-district.htm", :Community/neighborhood #db/id[:db.part/user -1000584]}
+{:District/region :District.region/s, :db/id #db/id[:db.part/user -1000586], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000587], :Neighborhood/name "Industrial District", :Neighborhood/district #db/id[:db.part/user -1000586]}
+{:Community/category ["seattle industry"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000588], :Community/name "Seattle Industry", :Community/url "http://www.seattleindustry.org/", :Community/neighborhood #db/id[:db.part/user -1000587]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000589], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000590], :Neighborhood/name "Othello", :Neighborhood/district #db/id[:db.part/user -1000589]}
+{:Community/category ["shared community group website"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000591], :Community/name "Seattle's Othello Neighborhood", :Community/url "http://othelloneighborhood.org/default.aspx", :Community/neighborhood #db/id[:db.part/user -1000590]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000592], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000593], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000592]}
+{:Community/category ["senior center"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000594], :Community/name "Senior Center West Seattle", :Community/url "http://www.sc-ws.org/", :Community/neighborhood #db/id[:db.part/user -1000593]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000595], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000596], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000595]}
+{:Community/category ["senior sevices"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000597], :Community/name "Senior Services", :Community/url "http://www.seniorservices.org/", :Community/neighborhood #db/id[:db.part/user -1000596]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000598], :District/name "Ballard"}
+{:db/id #db/id[:db.part/user -1000599], :Neighborhood/name "Ballard", :Neighborhood/district #db/id[:db.part/user -1000598]}
+{:Community/category ["news" "weather" "events" "criminal activity"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000600], :Community/name "Shilshole Blog", :Community/url "http://shilsholecommunity.org/", :Community/neighborhood #db/id[:db.part/user -1000599]}
+{:District/region :District.region/s, :db/id #db/id[:db.part/user -1000601], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000602], :Neighborhood/name "SoDo", :Neighborhood/district #db/id[:db.part/user -1000601]}
+{:Community/category ["business association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000603], :Community/name "SoDo Business Association", :Community/url "http://www.sodobusinessassociation.org/", :Community/neighborhood #db/id[:db.part/user -1000602]}
+{:District/region :District.region/s, :db/id #db/id[:db.part/user -1000604], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000605], :Neighborhood/name "Industrial District", :Neighborhood/district #db/id[:db.part/user -1000604]}
+{:Community/category ["business association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000606], :Community/name "SoDo Business Association", :Community/url "http://www.sodobusinessassociation.org/", :Community/neighborhood #db/id[:db.part/user -1000605]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000607], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000608], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000607]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000609], :Community/name "Solid Ground", :Community/url "http://www.facebook.com/pages/Solid-Ground/20665239656", :Community/neighborhood #db/id[:db.part/user -1000608]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000610], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000611], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000610]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000612], :Community/name "Solid Ground", :Community/url "http://www.solid-ground.org/Pages/Default.aspx", :Community/neighborhood #db/id[:db.part/user -1000611]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000613], :District/name "Lake Union"}
+{:db/id #db/id[:db.part/user -1000614], :Neighborhood/name "South Lake Union", :Neighborhood/district #db/id[:db.part/user -1000613]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000615], :Community/name "South Lake Union Chamber of Commerce", :Community/url "http://www.sluchamber.org/", :Community/neighborhood #db/id[:db.part/user -1000614]}
+{:District/region :District.region/s, :db/id #db/id[:db.part/user -1000616], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000617], :Neighborhood/name "South Park", :Neighborhood/district #db/id[:db.part/user -1000616]}
+{:Community/category ["neighborhood info"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/myspace, :db/id #db/id[:db.part/user -1000618], :Community/name "South Park Seattle", :Community/url "http://www.myspace.com/southparkseattle", :Community/neighborhood #db/id[:db.part/user -1000617]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000619], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000620], :Neighborhood/name "Rainier Valley", :Neighborhood/district #db/id[:db.part/user -1000619]}
+{:Community/category ["district council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000621], :Community/name "Southeast District Council", :Community/url "http://sedcseattle.wordpress.com/", :Community/neighborhood #db/id[:db.part/user -1000620]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000622], :District/name "Central"}
+{:db/id #db/id[:db.part/user -1000623], :Neighborhood/name "Central District", :Neighborhood/district #db/id[:db.part/user -1000622]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/email_list, :db/id #db/id[:db.part/user -1000624], :Community/name "Squire Park Community Council", :Community/url "http://groups.yahoo.com/group/squirepark/", :Community/neighborhood #db/id[:db.part/user -1000623]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000625], :District/name "Central"}
+{:db/id #db/id[:db.part/user -1000626], :Neighborhood/name "Central District", :Neighborhood/district #db/id[:db.part/user -1000625]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000627], :Community/name "Squire Park Community Council", :Community/url "http://www.squireparkseattle.com/", :Community/neighborhood #db/id[:db.part/user -1000626]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000628], :District/name "Ballard"}
+{:db/id #db/id[:db.part/user -1000629], :Neighborhood/name "Ballard", :Neighborhood/district #db/id[:db.part/user -1000628]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/wiki, :db/id #db/id[:db.part/user -1000630], :Community/name "Sustainable Ballard", :Community/url "http://sustainableballard.org/wiki/index.php?title=Welcome_to_Sustainable_Ballard!", :Community/neighborhood #db/id[:db.part/user -1000629]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000631], :District/name "Ballard"}
+{:db/id #db/id[:db.part/user -1000632], :Neighborhood/name "Crown Hill", :Neighborhood/district #db/id[:db.part/user -1000631]}
+{:Community/category ["community group" "has mailing list"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000633], :Community/name "Sustainable Crown Hill", :Community/url "http://sustainablecrownhill.org/wp/", :Community/neighborhood #db/id[:db.part/user -1000632]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000634], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000635], :Neighborhood/name "Phinney Ridge", :Neighborhood/district #db/id[:db.part/user -1000634]}
+{:Community/category ["susainability"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000636], :Community/name "Sustainable Greenwood/Phinney", :Community/url "http://web.me.com/annecann1/iWeb/Site/Home.html", :Community/neighborhood #db/id[:db.part/user -1000635]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000637], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000638], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000637]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/ning, :db/id #db/id[:db.part/user -1000639], :Community/name "Sustainable Northeast Seattle", :Community/url "http://sustainableneseattle.ning.com/", :Community/neighborhood #db/id[:db.part/user -1000638]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000640], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000641], :Neighborhood/name "Junction", :Neighborhood/district #db/id[:db.part/user -1000640]}
+{:Community/category ["neighborhood association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000642], :Community/name "The Junction: Downtown West Seattle", :Community/url "http://www.wsjunction.com/", :Community/neighborhood #db/id[:db.part/user -1000641]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000643], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000644], :Neighborhood/name "Laurelhurst", :Neighborhood/district #db/id[:db.part/user -1000643]}
+{:Community/category ["news" "events"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000645], :Community/name "The Laurelhurst Blog", :Community/url "http://thelaurelhurstblog.blogspot.com/", :Community/neighborhood #db/id[:db.part/user -1000644]}
+{:District/region :District.region/n, :db/id #db/id[:db.part/user -1000646], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000647], :Neighborhood/name "Maple Leaf", :Neighborhood/district #db/id[:db.part/user -1000646]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000648], :Community/name "The Maple Leafer", :Community/url "http://twitter.com/themapleleafer", :Community/neighborhood #db/id[:db.part/user -1000647]}
+{:District/region :District.region/n, :db/id #db/id[:db.part/user -1000649], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000650], :Neighborhood/name "Maple Leaf", :Neighborhood/district #db/id[:db.part/user -1000649]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000651], :Community/name "The Maple Leafer", :Community/url "http://www.facebook.com/pages/The-Maple-Leafer/110782042284727", :Community/neighborhood #db/id[:db.part/user -1000650]}
+{:District/region :District.region/n, :db/id #db/id[:db.part/user -1000652], :District/name "North"}
+{:db/id #db/id[:db.part/user -1000653], :Neighborhood/name "Maple Leaf", :Neighborhood/district #db/id[:db.part/user -1000652]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000654], :Community/name "The Maple Leafer", :Community/url "http://www.themapleleafer.com/", :Community/neighborhood #db/id[:db.part/user -1000653]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000655], :District/name "Lake Union"}
+{:db/id #db/id[:db.part/user -1000656], :Neighborhood/name "South Lake Union", :Neighborhood/district #db/id[:db.part/user -1000655]}
+{:Community/category ["news" "events" "personalized profile pages"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000657], :Community/name "The South Lake Union Community Blog", :Community/url "http://www.thesouthlake.com/", :Community/neighborhood #db/id[:db.part/user -1000656]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000658], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000659], :Neighborhood/name "Thornton Creek", :Neighborhood/district #db/id[:db.part/user -1000658]}
+{:Community/category ["community group"], :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000660], :Community/name "Thornton Creek Alliance", :Community/url "http://www.scn.org/tca/", :Community/neighborhood #db/id[:db.part/user -1000659]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000661], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000662], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000661]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000663], :Community/name "U District Daily", :Community/url "http://www.udistrictdaily.com/", :Community/neighborhood #db/id[:db.part/user -1000662]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000664], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000665], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000664]}
+{:Community/category ["business association"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000666], :Community/name "University District Business Improvement Area", :Community/url "http://www.udistrictchamber.org/UDBIA/index.html", :Community/neighborhood #db/id[:db.part/user -1000665]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000667], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000668], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000667]}
+{:Community/category ["food bank"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000669], :Community/name "University District Food Bank", :Community/url "http://www.facebook.com/pages/Seattle-WA/University-District-Food-Bank/47523824407", :Community/neighborhood #db/id[:db.part/user -1000668]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000670], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000671], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000670]}
+{:Community/category ["food bank"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000672], :Community/name "University District Food Bank", :Community/url "http://www.udistrictfoodbank.org/", :Community/neighborhood #db/id[:db.part/user -1000671]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000673], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000674], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000673]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000675], :Community/name "University District Seattle", :Community/url "http://www.udistrictchamber.org/GUCC/GUCC.html", :Community/neighborhood #db/id[:db.part/user -1000674]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000676], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000677], :Neighborhood/name "University District", :Neighborhood/district #db/id[:db.part/user -1000676]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000678], :Community/name "University District Service Fund", :Community/url "http://www.udistrictchamber.org/udistrictservicefund/index.html", :Community/neighborhood #db/id[:db.part/user -1000677]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000679], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000680], :Neighborhood/name "Greenwood", :Neighborhood/district #db/id[:db.part/user -1000679]}
+{:Community/category ["park issues" "events" "neighborhood-issues" "neighborhood-planning"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000681], :Community/name "Vision Greenwood Park Seattle", :Community/url "http://www.facebook.com/pages/Vision-Greenwood-Park-Seattle/165995713450762", :Community/neighborhood #db/id[:db.part/user -1000680]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000682], :District/name "Ballard"}
+{:db/id #db/id[:db.part/user -1000683], :Neighborhood/name "Crown Hill", :Neighborhood/district #db/id[:db.part/user -1000682]}
+{:Community/category ["neighborhood group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000684], :Community/name "Walkable Crown Hill", :Community/url "http://walkablecrownhill.org/", :Community/neighborhood #db/id[:db.part/user -1000683]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000685], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000686], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000685]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000687], :Community/name "Wallingford Chamber of Commerce", :Community/url "http://wallingfordchamber.org/", :Community/neighborhood #db/id[:db.part/user -1000686]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000688], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000689], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000688]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000690], :Community/name "Wallingford Community Council", :Community/url "http://wallingford.org/get-involved/community-council/", :Community/neighborhood #db/id[:db.part/user -1000689]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000691], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000692], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000691]}
+{:Community/category ["news" "events" "advice"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000693], :Community/name "Wallingford Seattle Blog", :Community/url "http://twitter.com/wallingford", :Community/neighborhood #db/id[:db.part/user -1000692]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000694], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000695], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000694]}
+{:Community/category ["news" "events" "advice"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000696], :Community/name "Wallingford Seattle Blog", :Community/url "http://wallingfordseattle.tumblr.com/", :Community/neighborhood #db/id[:db.part/user -1000695]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000697], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000698], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000697]}
+{:Community/category ["neighborhood group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000699], :Community/name "Wallingford.org", :Community/url "http://www.wallingford.org/", :Community/neighborhood #db/id[:db.part/user -1000698]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000700], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000701], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000700]}
+{:Community/category ["news" "events"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000702], :Community/name "Wallyhood - Wallingford Seattle Blog", :Community/url "http://twitter.com/wallyhood", :Community/neighborhood #db/id[:db.part/user -1000701]}
+{:District/region :District.region/nw, :db/id #db/id[:db.part/user -1000703], :District/name "Northwest"}
+{:db/id #db/id[:db.part/user -1000704], :Neighborhood/name "Wallingford", :Neighborhood/district #db/id[:db.part/user -1000703]}
+{:Community/category ["news" "events"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000705], :Community/name "Wallyhood - Wallingford Seattle Blog", :Community/url "http://www.wallyhood.org/", :Community/neighborhood #db/id[:db.part/user -1000704]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000706], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000707], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000706]}
+{:Community/category ["block watch"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000708], :Community/name "Wedgwood Block Watch", :Community/url "http://www.wedgwoodcc.org/wwbw/", :Community/neighborhood #db/id[:db.part/user -1000707]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000709], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000710], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000709]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000711], :Community/name "Wedgwood Community Council", :Community/url "http://www.wedgwoodcc.org/", :Community/neighborhood #db/id[:db.part/user -1000710]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000712], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000713], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000712]}
+{:Community/category ["community council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000714], :Community/name "Wedgwood Community Council", :Community/url "http://www.facebook.com/pages/Wedgwood-Community-Council/146730522040662", :Community/neighborhood #db/id[:db.part/user -1000713]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000715], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000716], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000715]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000717], :Community/name "Wedgwood View", :Community/url "http://twitter.com/wedgwoodview", :Community/neighborhood #db/id[:db.part/user -1000716]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000718], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000719], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000718]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000720], :Community/name "Wedgwood View", :Community/url "http://www.facebook.com/pages/Wedgwood-View/331236446338", :Community/neighborhood #db/id[:db.part/user -1000719]}
+{:District/region :District.region/ne, :db/id #db/id[:db.part/user -1000721], :District/name "Northeast"}
+{:db/id #db/id[:db.part/user -1000722], :Neighborhood/name "Wedgwood", :Neighborhood/district #db/id[:db.part/user -1000721]}
+{:Community/category ["news" "events" "human interest" "criminal activity" "shopping"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000723], :Community/name "Wedgwood View", :Community/url "http://www.wedgwoodview.com/", :Community/neighborhood #db/id[:db.part/user -1000722]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000724], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000725], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000724]}
+{:Community/category ["profile page for West Seattle Blog"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000726], :Community/name "West Seattle Blog", :Community/url "http://www.facebook.com/westseattleblog", :Community/neighborhood #db/id[:db.part/user -1000725]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000727], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000728], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000727]}
+{:Community/category ["chamber of commerce"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000729], :Community/name "West Seattle Chamber of Commerce", :Community/url "http://www.wschamber.com/", :Community/neighborhood #db/id[:db.part/user -1000728]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000730], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000731], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000730]}
+{:Community/category ["online newspaper"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/twitter, :db/id #db/id[:db.part/user -1000732], :Community/name "West Seattle Herald", :Community/url "http://twitter.com/westseattleher", :Community/neighborhood #db/id[:db.part/user -1000731]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000733], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000734], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000733]}
+{:Community/category ["online newspaper"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/facebook_page, :db/id #db/id[:db.part/user -1000735], :Community/name "West Seattle Herald", :Community/url "http://www.facebook.com/wsherald", :Community/neighborhood #db/id[:db.part/user -1000734]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000736], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000737], :Neighborhood/name "West Seattle", :Neighborhood/district #db/id[:db.part/user -1000736]}
+{:Community/category ["online newspaper"], :Community/orgtype :Community.orgtype/commercial, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000738], :Community/name "West Seattle Herald", :Community/url "http://www.westseattleherald.com/", :Community/neighborhood #db/id[:db.part/user -1000737]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000739], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000740], :Neighborhood/name "Westwood", :Neighborhood/district #db/id[:db.part/user -1000739]}
+{:Community/category ["neighborhood council"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000741], :Community/name "Westwood Neighborhood Council", :Community/url "http://www.scn.org/neighbors/westwood/", :Community/neighborhood #db/id[:db.part/user -1000740]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000742], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000743], :Neighborhood/name "White Center", :Neighborhood/district #db/id[:db.part/user -1000742]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000744], :Community/name "White Center Community Development Association", :Community/url "http://www.wccda.org/home", :Community/neighborhood #db/id[:db.part/user -1000743]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000745], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000746], :Neighborhood/name "White Center", :Neighborhood/district #db/id[:db.part/user -1000745]}
+{:Community/category ["nonprofit"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000747], :Community/name "White Center Community Development Association blog", :Community/url "http://twitter.com/whitecentercda", :Community/neighborhood #db/id[:db.part/user -1000746]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000748], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000749], :Neighborhood/name "White Center", :Neighborhood/district #db/id[:db.part/user -1000748]}
+{:Community/category ["news" "events" "food"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/blog, :db/id #db/id[:db.part/user -1000750], :Community/name "White Center Now", :Community/url "http://whitecenternow.com/", :Community/neighborhood #db/id[:db.part/user -1000749]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000751], :District/name "Southwest"}
+{:db/id #db/id[:db.part/user -1000752], :Neighborhood/name "White Center", :Neighborhood/district #db/id[:db.part/user -1000751]}
+{:Community/category ["tech resources"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000753], :Community/name "White Center Technology Programs", :Community/url "http://technology.program.googlepages.com/", :Community/neighborhood #db/id[:db.part/user -1000752]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000754], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000755], :Neighborhood/name "International District", :Neighborhood/district #db/id[:db.part/user -1000754]}
+{:Community/category ["museum"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000756], :Community/name "Wing Luke Asian Museum", :Community/url "http://www.wingluke.org/", :Community/neighborhood #db/id[:db.part/user -1000755]}
+{:District/region :District.region/sw, :db/id #db/id[:db.part/user -1000757], :District/name "Delridge"}
+{:db/id #db/id[:db.part/user -1000758], :Neighborhood/name "Delridge", :Neighborhood/district #db/id[:db.part/user -1000757]}
+{:Community/category ["arts"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000759], :Community/name "Youngstown Cultural Arts Center", :Community/url "http://youngstownarts.org", :Community/neighborhood #db/id[:db.part/user -1000758]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000760], :District/name "East"}
+{:db/id #db/id[:db.part/user -1000761], :Neighborhood/name "Capitol Hill", :Neighborhood/district #db/id[:db.part/user -1000760]}
+{:Community/category ["dining" "events" "nightlife" "shopping"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000762], :Community/name "Your Capitol Hill", :Community/url "http://www.yourcapitolhill.com/", :Community/neighborhood #db/id[:db.part/user -1000761]}
+{:District/region :District.region/s, :db/id #db/id[:db.part/user -1000763], :District/name "Greater Duwamish"}
+{:db/id #db/id[:db.part/user -1000764], :Neighborhood/name "South Park", :Neighborhood/district #db/id[:db.part/user -1000763]}
+{:Community/category ["community members"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/email_list, :db/id #db/id[:db.part/user -1000765], :Community/name "yoursouthpark", :Community/url "http://groups.yahoo.com/group/yoursouthpark/", :Community/neighborhood #db/id[:db.part/user -1000764]}
+{:District/region :District.region/w, :db/id #db/id[:db.part/user -1000766], :District/name "Downtown"}
+{:db/id #db/id[:db.part/user -1000767], :Neighborhood/name "International District", :Neighborhood/district #db/id[:db.part/user -1000766]}
+{:Community/category ["ethnic/cultural-interest" "seniors" "youth"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000768], :Community/name "Helping Link", :Community/url "http://www.helpinglink.org/", :Community/neighborhood #db/id[:db.part/user -1000767]}
+{:District/region :District.region/e, :db/id #db/id[:db.part/user -1000769], :District/name "East"}
+{:db/id #db/id[:db.part/user -1000770], :Neighborhood/name "Madison Park", :Neighborhood/district #db/id[:db.part/user -1000769]}
+{:Community/category ["community group"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000771], :Community/name "MLK FAME Community Center", :Community/url "http://www.mlkfame.com/", :Community/neighborhood #db/id[:db.part/user -1000770]}
+{:District/region :District.region/se, :db/id #db/id[:db.part/user -1000772], :District/name "Southeast"}
+{:db/id #db/id[:db.part/user -1000773], :Neighborhood/name "Jackson Place", :Neighborhood/district #db/id[:db.part/user -1000772]}
+{:Community/category ["neighborhood-issues" "neighborhood-planning"], :Community/orgtype :Community.orgtype/community, :Community/type :Community.type/website, :db/id #db/id[:db.part/user -1000774], :Community/name "Jackson Place Community Council", :Community/url "http://www.jacksonplace.org", :Community/neighborhood #db/id[:db.part/user -1000773]}
+]

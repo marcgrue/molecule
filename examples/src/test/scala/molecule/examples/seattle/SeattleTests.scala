@@ -2,6 +2,7 @@ package molecule.examples.seattle
 
 import java.io.FileReader
 import datomic.Util
+import molecule.core.util.DatomicPeer
 import molecule.datomic.api.in2_out8._
 import molecule.examples.seattle.dsl.seattle._
 import molecule.examples.ExampleSpec
@@ -9,7 +10,6 @@ import molecule.examples.ExampleSpec
 
 class SeattleTests extends ExampleSpec {
 
-  devLocalOnly = true
 
   "A first query" in new SeattleSetup {
     // A Community-name molecule
@@ -30,8 +30,6 @@ class SeattleTests extends ExampleSpec {
         .Neighborhood.e.District.e.get.head
 
     // Use the community id to touch all the entity's attribute values
-    // Note that since we have transacted lowercase-namespaced
-    // attribute names, all are lower case when touching entities directly on the database.
     communityId.touch === Map(
       ":Community/category" -> List(
         "events",
@@ -262,25 +260,26 @@ class SeattleTests extends ExampleSpec {
 
 
   "Querying with fulltext search" in new SeattleSetup {
+    // Datomic only implements fulltext search for Peer
+    if (system == DatomicPeer) {
+      val communitiesWith = m(Community.name.contains(?))
+      communitiesWith("Wallingford").get === List("KOMO Communities - Wallingford")
 
-    val communitiesWith = m(Community.name.contains(?))
-    communitiesWith("Wallingford").get === List("KOMO Communities - Wallingford")
+      // Fulltext search on many-attribute (`category`)
 
+      val foodWebsites         = List(
+        ("Community Harvest of Southwest Seattle", Set("sustainable food")),
+        ("InBallard", Set("nightlife", "food", "shopping", "services")))
+      val foodShoppingWebsites = List(
+        ("InBallard", Set("nightlife", "food", "shopping", "services")))
 
-    // Fulltext search on many-attribute (`category`)
+      m(Community.name.type_("website").category.contains("food")).get === foodWebsites
+      m(Community.name.type_("website").category.contains("food", "shopping")).get === foodShoppingWebsites
 
-    val foodWebsites         = List(
-      ("Community Harvest of Southwest Seattle", Set("sustainable food")),
-      ("InBallard", Set("nightlife", "food", "shopping", "services")))
-    val foodShoppingWebsites = List(
-      ("InBallard", Set("nightlife", "food", "shopping", "services")))
-
-    m(Community.name.type_("website").category.contains("food")).get === foodWebsites
-    m(Community.name.type_("website").category.contains("food", "shopping")).get === foodShoppingWebsites
-
-    val typeAndCategory = m(Community.name.type_(?).category contains ?)
-    typeAndCategory("website", Set("food")).get === foodWebsites
-    typeAndCategory("website", Set("food", "shopping")).get === foodShoppingWebsites
+      val typeAndCategory = m(Community.name.type_(?).category contains ?)
+      typeAndCategory("website", Set("food")).get === foodWebsites
+      typeAndCategory("website", Set("food", "shopping")).get === foodShoppingWebsites
+    }
   }
 
 
@@ -364,7 +363,7 @@ class SeattleTests extends ExampleSpec {
   }
 
 
-  "Working with time" in new SeattleSetup(true) { // Use lower-case nss to match dtm import
+  "Working with time" in new SeattleSetup {
 
     val schemaTxT = Schema.t.get.head
     val dataTxT   = Community.name_.t.get.head
@@ -381,7 +380,7 @@ class SeattleTests extends ExampleSpec {
     communities.getSince(dataTxT).size === 0
 
     // Imagining the future
-    val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data1a.dtm")
+    val data_rdr2 = new FileReader("examples/resources/seattle/seattle-data2upper.dtm")
     val newDataTx = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
 
     // future db
@@ -414,7 +413,7 @@ class SeattleTests extends ExampleSpec {
       .District.name("myDistrict").region("nw").save
 
     // Confirm all data is inserted
-    Community.name.contains("AAA").url.`type`.orgtype.category.Neighborhood.name.District.name.region.get(1) === List(
+    Community.name("AAA").url.`type`.orgtype.category.Neighborhood.name.District.name.region.get(1) === List(
       ("AAA", "myUrl", "twitter", "personal", Set("my", "favorites"), "myNeighborhood", "myDistrict", "nw"))
 
     // Now we have one more community
@@ -435,7 +434,8 @@ class SeattleTests extends ExampleSpec {
     Community.name.url.insert(Seq(("Com A", "A.com"), ("Com B", "B.com")))
 
     // Confirm that new entities have been inserted
-    Community.name.contains("Com").get.sorted === List("Com A", "Com B")
+    Community.name("Com A").get === List("Com A")
+    Community.name("Com B").get === List("Com B")
     Community.e.name_.get.size === 154
 
 
@@ -457,7 +457,8 @@ class SeattleTests extends ExampleSpec {
     insertCommunity(newCommunitiesData)
 
     // Data has been added
-    Community.name.contains("DDD").url.`type`.orgtype.category.Neighborhood.name.District.name.region.get === newCommunitiesData
+    if (system == DatomicPeer) // Only Peer has fulltext search
+      Community.name.contains("DDD").url.`type`.orgtype.category.Neighborhood.name.District.name.region.get === newCommunitiesData
     Community.e.name_.get.size === 157
 
     // 4 new categories added (these are facts, not entities)
