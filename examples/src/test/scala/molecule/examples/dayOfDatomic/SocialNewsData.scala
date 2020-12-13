@@ -2,18 +2,10 @@ package molecule.examples.dayOfDatomic
 import molecule.datomic.api.out3._
 import molecule.datomic.base.facade.Conn
 import molecule.examples.dayOfDatomic.dsl.socialNews._
-import molecule.examples.dayOfDatomic.schema._
-import org.specs2.specification.Scope
 import scala.language.postfixOps
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 
-//class SocialNewsSetup extends Scope {
-//trait SocialNewsSetup { implicit conn: Conn =>
 case class SocialNewsData(conn0: Conn) {
-
-  // 1-2. Make db
-//  implicit val conn = recreateDbFrom(SocialNewsSchema)
   implicit val conn = conn0
 
   // Add Stories

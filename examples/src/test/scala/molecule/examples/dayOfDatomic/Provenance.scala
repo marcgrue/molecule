@@ -37,8 +37,8 @@ class Provenance extends ExampleSpec {
         |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/title     ,  Keep Chocolate Love Atomic                                   ),
         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/user   ,  $stu                                               ),
-        |  List(:db/add,  #db/id[:db.part/tx   -1000003],  :MetaData/usecase,  AddStories                                                   )
+        |  List(:db/add,  datomic.tx,  :MetaData/user   ,  $stu                                               ),
+        |  List(:db/add,  datomic.tx,  :MetaData/usecase,  AddStories                                                   )
         |)""".stripMargin
 
     // Two story entities and one transaction entity is created

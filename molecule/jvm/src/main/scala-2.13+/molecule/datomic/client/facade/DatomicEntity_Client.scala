@@ -2,11 +2,13 @@ package molecule.datomic.client.facade
 
 import java.net.URI
 import java.util.{Date, UUID, Collection => jCollection}
-import clojure.lang.MapEntry
+import clojure.lang.{MapEntry, PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
+import datomic.Util
 import datomicClient.anomaly.Fault
 import molecule.core.api.exception.EntityException
 import molecule.core.api.DatomicEntity
+import molecule.core.util.RegexMatching
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
@@ -14,7 +16,7 @@ case class DatomicEntity_Client(
   conn: Conn_Client,
   eid: Any,
   showKW: Boolean = true
-) extends DatomicEntity(conn, eid) {
+) extends DatomicEntity(conn, eid) with RegexMatching {
 
   private def getThisLevel(eid: Any): Map[String, Any] = {
     val res = conn.q(
@@ -50,7 +52,20 @@ case class DatomicEntity_Client(
   def keySet: Set[String] = map.keySet
   def keys: List[String] = map.keySet.toList
 
-  def rawValue(key: String): Any = map.apply(key)
+  def rawValue(key: String): Any = {
+    key match {
+      case r":[^/]+/_.+" =>
+        // reverse lookup
+        Some(
+          conn.db.pull(s"[$key]", eid)
+            .asInstanceOf[PersistentArrayMap].values().iterator().next()
+            .asInstanceOf[PersistentVector].asScala.toList
+            .map(_.asInstanceOf[PersistentArrayMap].get(Util.read(":db/id")).asInstanceOf[Long])
+        )
+
+      case k => map.apply(k)
+    }
+  }
 
 
   def isAttrDef(entityMap: Map[String, Any]): Boolean = {

@@ -1,8 +1,8 @@
 package molecule.datomic.client.facade
 
 import java.util.Date
-import datomic._
 import datomic.db.DbId
+import datomic.Peer
 import datomicScala.client.api.sync.{Db, TxReport => clientTxReport}
 import datomicScala.client.api.Datom
 import molecule.core.ast.transactionModel._
@@ -19,25 +19,37 @@ case class TxReport_Client(
   lazy val eids: List[Long] = {
     val allIds = {
       val datoms = clientTxReport.txData.iterator
-      var a      = Array.empty[Long]
+      var ids    = Array.empty[Long]
       var i      = 0
       datoms.next() // skip first transaction time datom
       while (datoms.hasNext) {
-        a = a :+ datoms.next.e
+        val datom = datoms.next
+        if (datom.added) // only asserted datoms
+          ids = ids :+ datom.e
         i += 1
       }
-      a.toList
+      ids.toList
     }
     if (stmtss.isEmpty) {
       allIds.distinct
     } else {
-      val flattenStmts = stmtss.flatten
-      if (!(allIds.size == flattenStmts.size || allIds.distinct.size == flattenStmts.size))
+      val assertStmts = stmtss.flatten.filterNot(_.isInstanceOf[RetractEntity])
+
+      //        println("-------------------------------------------")
+      //        txDataRaw.map(datom2string) foreach println
+      //        println("--------")
+      //        allIds foreach println
+      //        println("--------")
+      //        stmtss foreach println
+      //        println("--------")
+      //        assertStmts foreach println
+
+      if (allIds.size != assertStmts.size) {
         throw new DatomicFacadeException(
-          s"Unexpected different counts of ${allIds.size} ids " +
-            s"(${allIds.distinct.size} distinct) and ${flattenStmts.size} stmts."
+          s"Unexpected different counts of ${allIds.size} ids and ${assertStmts.size} stmts."
         )
-      val resolvedIds = flattenStmts.zip(allIds).collect {
+      }
+      val resolvedIds = assertStmts.zip(allIds).collect {
         case (Add(_: DbId, _, _, _), eid)      => eid
         case (Add("datomic.tx", _, _, _), eid) => eid
       }.distinct.toList
@@ -62,6 +74,13 @@ case class TxReport_Client(
        |  tempids   : ${clientTxReport.tempIds}
        |  eids      : $eids
        |}""".stripMargin
+
+  def printEidStats() = {
+    s"""
+       |
+       |  txData    : ${txDataRaw.map(datom2string).mkString("\n              ")}
+       |  tempids   : ${clientTxReport.tempIds}""".stripMargin
+  }
 
   lazy val eid: Long = eids.head
 

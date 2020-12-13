@@ -18,24 +18,36 @@ case class TxReport_Peer(
   lazy val eids: List[Long] = {
     val allIds = {
       val datoms = rawTxReport.get(Connection.TX_DATA).asInstanceOf[jList[_]].iterator
-      var a      = Array.empty[Long]
+      var ids    = Array.empty[Long]
       var i      = 0
       datoms.next() // skip first transaction time datom
       while (datoms.hasNext) {
-        a = a :+ datoms.next.asInstanceOf[Datom].e().asInstanceOf[Long]
+        val datom = datoms.next.asInstanceOf[Datom]
+        if (datom.added()) // only asserted datoms
+          ids = ids :+ datom.e().asInstanceOf[Long]
         i += 1
       }
-      a.toList
+      ids.toList
     }
     if (stmtss.isEmpty) {
       allIds.distinct
     } else {
-      val flattenStmts = stmtss.flatten
-      if (allIds.size != flattenStmts.size)
+      val assertStmts = stmtss.flatten.filterNot(_.isInstanceOf[RetractEntity])
+
+      //      println("-------------------------------------------")
+      //      txDataRaw.map(datom2string) foreach println
+      //      println("--------")
+      //      allIds foreach println
+      //      println("--------")
+      //      stmtss foreach println
+      //      println("--------")
+      //      assertStmts foreach println
+
+      if (allIds.size != assertStmts.size)
         throw new DatomicFacadeException(
-          s"Unexpected different counts of ${allIds.size} ids and ${flattenStmts.size} stmts."
+          s"Unexpected different counts of ${allIds.size} ids and ${assertStmts.size} stmts."
         )
-      val resolvedIds = flattenStmts.zip(allIds).collect {
+      val resolvedIds = assertStmts.zip(allIds).collect {
         case (Add(_: DbId, _, _, _), eid)      => eid
         case (Add("datomic.tx", _, _, _), eid) => eid
       }.distinct.toList

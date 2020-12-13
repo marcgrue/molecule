@@ -6,6 +6,7 @@ import molecule.examples.dayOfDatomic.dsl.socialNews._
 
 class SocialNews extends ExampleSpec {
 
+
   "Social News" in new SocialNewsSetup {
 
     // Add underscore to attribute name to _not_ return it's value (and keep it as a search attribute)
@@ -49,10 +50,10 @@ class SocialNews extends ExampleSpec {
     User.email.upVotes.get.head === ("stuarthalloway@datomic.com", Set(paulGrahamStory))
 
     // Current upVotes
-    User.email.upVotes$.get === List(
-      ("stuarthalloway@datomic.com", Some(Set(paulGrahamStory))),
+    User.email.upVotes$.get.sortBy(_._1) === List(
       ("editor@example.com", None),
-      ("john@example.com", None)
+      ("john@example.com", None),
+      ("stuarthalloway@datomic.com", Some(Set(paulGrahamStory))),
     )
   }
 }

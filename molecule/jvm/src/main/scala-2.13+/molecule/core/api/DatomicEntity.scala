@@ -74,23 +74,24 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     */
   def apply[T](key: String): Option[T] = {
     try {
-      rawValue(key) match {
-        case None       => None
-        case Some(v)    => Some(v.asInstanceOf[T])
-        case null       => Option.empty[T]
+      val rawV = rawValue(key)
+      rawV match {
+        case None    => None
+        case Some(v) => Some(v.asInstanceOf[T])
+        case null    => Option.empty[T]
 
         case results: clojure.lang.PersistentHashSet =>
           results.asScala.head match {
-          case _: datomic.Entity =>
-            Some(results.asScala.toList
-              .map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long])
-              .sorted.asInstanceOf[T])
+            case _: datomic.Entity =>
+              Some(results.asScala.toList
+                .map(_.asInstanceOf[datomic.Entity].get(":db/id").asInstanceOf[Long])
+                .sorted.asInstanceOf[T])
 
-          case _ =>
-            Some(results.asScala.toList.map(v1 =>
-            toScala(key, Some(v1))).asInstanceOf[T]
-          )
-        }
+            case _ =>
+              Some(results.asScala.toList.map(v1 =>
+                toScala(key, Some(v1))).asInstanceOf[T]
+              )
+          }
 
         case result =>
           Some(toScala(key, Some(result)).asInstanceOf[T])

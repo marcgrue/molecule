@@ -88,9 +88,8 @@ class QueryTour extends ExampleSpec {
 
 
     // 12. Requesting an Attribute value
-    editor.apply(":User/firstName") === Some("Ed")
-    editor.apply(":User/firstName") === "Ed"
-    editor(":unrecognizedKey") === "Ed"
+    editor(":User/firstName") === Some("Ed")
+    editor(":unrecognizedKey") === None
 
     // Or as query
     User(editor).firstName.get.head === "Ed"
@@ -109,7 +108,7 @@ class QueryTour extends ExampleSpec {
     // 14. Navigating backwards
 
     // The editors comments (Comments pointing to the Editor entity)
-    editor(":Comment/_author") === List(c2, c4, c5, c7, c11)
+    editor(":Comment/_author") === Some(List(c2, c4, c5, c7, c11))
 
     // .. almost same as: (here, only matching data is returned)
     // Comments of editor
@@ -118,24 +117,12 @@ class QueryTour extends ExampleSpec {
 
     // 15. Navigating Deeper with entity api
 
-    // Todo: using the entity api like this is clumsy. Find a better way...
-
-    // Comments to the editors comments (with mapping)
-    editor(":Comment/_author").asInstanceOf[List[Long]]
-      .map(_(":Parent/comment")).asInstanceOf[List[Map[String, Any]]]
-      .map(_.head._2) === List(c3, c6, c8, c12)
-
-    // Comments to the editors comments (with `for` comprehension)
-    (for {
-      editorComment <- editor(":Comment/_author").asInstanceOf[List[Long]]
-      editorCommentComment <- editorComment(":Parent/comment").asInstanceOf[Option[Map[String, Any]]]
-    } yield editorCommentComment.head._2) === List(c3, c6, c8, c12)
-
-    // todo - make some nice entity traversal dsl instead of this...
-//    (for {
-//      comments <- editor.apply[Seq[Long]](":Comment/_author").get
-//      subComments <- comments.apply[Map[String, Any]](":Parent/comment").get
-//    } yield subComments._2) === List(c3, c6, c8, c12)
+    // Comments to the editors comments (with entity api)
+    (for{
+      a <- editor.apply[List[Long]](":Comment/_author").get
+      b <- a.apply[Map[String, Long]](":Parent/comment")
+      c <- b.get(":db/id")
+    } yield c) === List(c3, c6, c8, c12)
 
     // Comments to the editors comments (with query)
     m(Comment.author_(editor) + Parent.comment).get.sorted === List(c3, c6, c8, c12)
@@ -194,7 +181,7 @@ class QueryTour extends ExampleSpec {
     // Auditing ................................................................
 
     // 20. Querying Across All time (sort by transactions)
-    User(ed).firstName.tx.op.getHistory.sortBy(_._2) === List(
+    User(ed).firstName.tx.op.getHistory.sortBy(t => (t._2, t._3)) === List(
       ("Ed", tx2, true),
       ("Ed", tx3, false),
       ("Edward", tx3, true)

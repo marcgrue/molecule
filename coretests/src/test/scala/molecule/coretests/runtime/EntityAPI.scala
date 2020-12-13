@@ -6,7 +6,7 @@ import molecule.datomic.api.out3._
 
 class EntityAPI extends CoreSpec {
 
-  // See also molecule.examples.dayOfDatomic.ProductsAndOrders
+   // See also molecule.examples.dayOfDatomic.ProductsAndOrders
 
   "touch Map" in new CoreSetup {
 
@@ -268,5 +268,21 @@ class EntityAPI extends CoreSpec {
 
     name === "Ben"
     street === "Hollywood Rd"
+  }
+
+
+  "Reverse lookup" in new CoreSetup {
+
+    val r = Ref1.int1(10).save.eid
+
+    // 3 entities pointing to r
+    val eids = Ns.int.ref1.insert(List((1, r), (2, r), (3, r))).eids.sorted
+
+    // get entities pointing to r
+    r(":Ns/_ref1") === Some(eids)
+
+    // Alternatively we can get the entities type safely with a query
+    Ns.e.ref1_(r).get.sorted === eids
+
   }
 }
