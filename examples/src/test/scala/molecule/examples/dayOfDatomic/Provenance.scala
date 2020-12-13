@@ -1,5 +1,7 @@
 package molecule.examples.dayOfDatomic
+
 import molecule.core.ast.model._
+import molecule.core.util.DatomicPeerServer
 import molecule.examples.ExampleSpec
 import molecule.datomic.api.out7._
 import molecule.examples.dayOfDatomic.dsl.socialNews._
@@ -33,24 +35,24 @@ class Provenance extends ExampleSpec {
       ) -->
       //       operation     temp id (dummy values)         attribute          value
       s"""List(
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/title     ,  ElastiCache in 6 minutes                                     ),
-        |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/title     ,  Keep Chocolate Love Atomic                                   ),
-        |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
-        |  List(:db/add,  datomic.tx,  :MetaData/user   ,  $stu                                               ),
-        |  List(:db/add,  datomic.tx,  :MetaData/usecase,  AddStories                                                   )
-        |)""".stripMargin
+         |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/title     ,  ElastiCache in 6 minutes                                     ),
+         |  List(:db/add,  #db/id[:db.part/user -1000001],  :Story/url       ,  http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html),
+         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/title     ,  Keep Chocolate Love Atomic                                   ),
+         |  List(:db/add,  #db/id[:db.part/user -1000002],  :Story/url       ,  http://blog.datomic.com/2012/08/atomic-chocolate.html        ),
+         |  List(:db/add,  datomic.tx,  :MetaData/user   ,  $stu                                               ),
+         |  List(:db/add,  datomic.tx,  :MetaData/usecase,  AddStories                                                   )
+         |)""".stripMargin
 
     // Two story entities and one transaction entity is created
     val List(elasticacheStory, chocolateStory, stuTxId) = stuTx.eids
 
     // Now we have 5 stories - the two last from the transaction above
-    Story.title.url.tx.get.sortBy(_._3) === List(
+    Story.title.url.tx.get.sortBy(t => (t._3, t._1)) === List(
+      ("Beating the Averages", "http://www.paulgraham.com/avg.html", tx1),
       ("Clojure Rationale", "http://clojure.org/rationale", tx1),
       ("Teach Yourself Programming in Ten Years", "http://norvig.com/21-days.html", tx1),
-      ("Beating the Averages", "http://www.paulgraham.com/avg.html", tx1),
+      ("ElastiCache in 6 minutes", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", stuTxId),
       ("Keep Chocolate Love Atomic", "http://blog.datomic.com/2012/08/atomic-chocolate.html", stuTxId),
-      ("ElastiCache in 6 minutes", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", stuTxId)
     )
 
     // We can also traverse the generated entity ids to see what is saved
@@ -127,7 +129,7 @@ class Provenance extends ExampleSpec {
     )
 
     // Stories added by a user with email "stuarthalloway@datomic.com"
-    Story.title.Tx(MetaData.User.email_("stuarthalloway@datomic.com")).get .sorted=== List(
+    Story.title.Tx(MetaData.User.email_("stuarthalloway@datomic.com")).get.sorted === List(
       "ElastiCache in 6 minutes",
       "Keep Chocolate Love Atomic"
     )
@@ -153,20 +155,22 @@ class Provenance extends ExampleSpec {
     // Title before (using database as of the first transaction)
     Story.url_(ecURL).title.getAsOf(stuTx.inst).head === "ElastiCache in 6 minutes"
 
-    // Who changed the title and when? Using the history database
-    Story.url_(ecURL).title.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._3, r._2)) === List(
-      ("ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"), // Stu adds the story
-      ("ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"), // retraction automatically added by Datomic
-      ("ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed")   // Ed's update of the title
-    )
+    if (system != DatomicPeerServer) {
+      // Who changed the title and when? Using the history database
+      Story.url_(ecURL).title.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._3, r._2)) === List(
+        ("ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"), // Stu adds the story
+        ("ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"), // retraction automatically added by Datomic
+        ("ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed") // Ed's update of the title
+      )
 
-    // Entire attributes history of ElastiCache story _entity_
-    Story(elasticacheStory).a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._4, r._3)) === List(
-      (":Story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
-      (":Story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
-      (":Story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
-      (":Story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
-    )
+      // Entire attributes history of ElastiCache story _entity_
+      Story(elasticacheStory).a.v.op.tx.Tx(MetaData.usecase.User.firstName).getHistory.sortBy(r => (r._4, r._3)) === List(
+        (":Story/title", "ElastiCache in 6 minutes", true, stuTxId, "AddStories", "Stu"),
+        (":Story/url", "http://blog.datomic.com/2012/09/elasticache-in-5-minutes.html", true, stuTxId, "AddStories", "Stu"),
+        (":Story/title", "ElastiCache in 6 minutes", false, edTxId, "UpdateStory", "Ed"),
+        (":Story/title", "ElastiCache in 5 minutes", true, edTxId, "UpdateStory", "Ed"),
+      )
+    }
 
     // Stories with latest use case meta date
     Story.title.Tx(MetaData.usecase).get.sortBy(_._1) === List(
