@@ -1,38 +1,14 @@
 package molecule.examples.mbrainz
 
+import molecule.core.util.DatomicPeer
+import molecule.datomic.api.in1_out4._
 import molecule.examples.ExampleSpec
-import molecule.datomic.api.out4._
 import molecule.examples.mbrainz.dsl.mBrainz._
 import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
 import scala.language.postfixOps
-import molecule.datomic.peer.facade.Datomic_Peer._
 
-/*
-  Download free Datomic version to your machine and download the mbrainz-sample data set (see links below)
 
-  Start Datomic transactor first (replace first part of path to where you have the datomic download):
-
-  cd [datomic-download]
-  bin/transactor config/samples/dev-transactor-template.properties
-
-  first time (replace full path), free version:
-  bin/datomic restore-db \
-    file:///Users/mg/lib/datomic/datomic-free-0.9.5697/mbrainz-1968-1973 \
-    datomic:free://localhost:4334/mbrainz-1968-1973
-
-  first time (replace full path), pro version:
-  bin/datomic restore-db \
-    file:///Users/mg/lib/datomic/datomic-free-0.9.5697/mbrainz-1968-1973 \
-    datomic:dev://localhost:4334/mbrainz-1968-1973
-
-  Remember to add -Xmx2g -server to IDE compiler settings ("Additional build process VM options)
-  Also, ensure the same java version is used in IDE
-
-  See:
-  http://blog.datomic.com/2013/07/datomic-musicbrainz-sample-database.html
-  https://github.com/Datomic/mbrainz-sample
-  https://github.com/Datomic/mbrainz-sample/wiki/Queries
-*/
+// See instructions in examples/README to setup testing mbrainz
 
 class MBrainz extends ExampleSpec {
 
@@ -40,6 +16,7 @@ class MBrainz extends ExampleSpec {
     if (Schema.a(":Artist/name").get.isEmpty) {
       // Add uppercase-namespaced attribute names so that we can access the externally
       // transacted lowercase names with uppercase names of the molecule code.
+      println("Converting nss from lower to upper..")
       conn.transact(MBrainzSchemaLowerToUpper.namespaces)
     }
   }
@@ -77,16 +54,17 @@ class MBrainz extends ExampleSpec {
       (1970, "Instant Karma! / Who Has Seen the Wind?", "Instant Karma!"),
     )
 
-    // What are the titles, artists, album names, and release years of all tracks having the word "always" in their titles?
-    Release.year.name.Media.Tracks.name.contains("always").Artists.name
-      .get(5).sortBy(t => (t._1, t._2, t._3)) === List(
-      (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"),
-      (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
-      (1971, "Hot Rocks 1964-1971", "You Can’t Always Get What You Want", "The Rolling Stones"),
-      (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
-      (1972, "You'll Always Be a Friend", "You'll Always Be a Friend", "Hot Chocolate"),
-    )
-
+    if (system == DatomicPeer) {
+      // What are the titles, artists, album names, and release years of all tracks having the word "always" in their titles?
+      Release.year.name.Media.Tracks.name.contains("always").Artists.name
+        .get(5).sortBy(t => (t._1, t._2, t._3)) === List(
+        (1968, "Signed, Sealed and Delivered", "I Want to Be With You Always", "Lefty Frizzell"),
+        (1970, "Check Out Your Mind!", "You'll Always Be Mine", "The Impressions"),
+        (1971, "Hot Rocks 1964-1971", "You Can’t Always Get What You Want", "The Rolling Stones"),
+        (1972, "Always on My Mind / That Ain't Right", "Always on My Mind", "Brenda Lee"),
+        (1972, "You'll Always Be a Friend", "You'll Always Be a Friend", "Hot Chocolate"),
+      )
+    }
 
     // Gender distribution
     Artist.gender_("male").e(count).get === List(1325)
@@ -132,7 +110,9 @@ class MBrainz extends ExampleSpec {
     // First get songs of The Who
     val whoSongs = Track.name.not("Outro", "[outro]", "Intro", "[intro]").Artists.name_("The Who").get
     // Then get songs with same titles by other artists (using output from first query)
-    Track.name(whoSongs).Artists.name.not("The Who").get(5) === List(
+    // Note that we use the long list of whoSongs as input instead of applying
+    // it directly to the track name attribute which would explode the query.
+    m(Track.name(?).Artists.name.not("The Who"))(whoSongs).get(5) === List(
       ("The Last Time", "The Rolling Stones"),
       ("Overture", "Lionel Bart"),
       ("Sensation", "London Symphony Orchestra"),

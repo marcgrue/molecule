@@ -25,12 +25,14 @@ class ExampleSpec extends MoleculeSpec {
   var peerOnly          = false
   var devLocalOnly      = false
   var peerServerOnly    = false
-  var omitPeer      = false
+  var omitPeer          = false
   var omitPeerServer    = false
   var omitDevLocal      = false
   val heavyInputTesting = false
-  var setupException    = Option.empty[Throwable]
-  var basisT: Long      = 0L
+
+  // Catch error from setup (suppressed by specs2 during setup)
+  var setupException = Option.empty[Throwable]
+  var basisT: Long   = 0L
   def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
 
   override def map(fs: => Fragments): Fragments = {
@@ -51,34 +53,37 @@ class ExampleSpec extends MoleculeSpec {
         step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
+        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     }
   }
 
   def setupPeer(): Unit = {
     system = DatomicPeer
   }
-
   def setupPeerServer(): Unit = {
     system = DatomicPeerServer
     try {
       client = Datomic.clientPeerServer("k", "s", "localhost:8998")
     } catch {
-      case e: Throwable =>
-        // Catch error from setup (suppressed by specs2 during setup)
-        setupException = Some(e)
+      case e: Throwable => setupException = Some(e)
     }
   }
-
   def setupDevLocal(): Unit = {
     system = DatomicDevLocal
     try {
-      client = Datomic.clientDevLocal("Some system name 2")
+      client = Datomic.clientDevLocal(
+        // "system" - folder where samples reside
+        "datomic-samples",
+        // "storage-dir" - absolute path to where "system" is
+        "/Users/mg/lib/datomic/datomic-pro-1.0.6222"
+      )
+      //            client = Datomic.clientDevLocal("samples", "/Users/mg/lib/datomic/datomic-pro-1.0.6222")
+//      client.deleteDatabase("mbrainz-1968-1973")
+      //                  client.createDatabase("mbrainz-1968-1973")
+      println(client.listDatabases())
     } catch {
-      case e: Throwable =>
-        // Catch error from setup (suppressed by specs2 during setup)
-        setupException = Some(e)
+      case e: Throwable => setupException = Some(e)
     }
   }
 
@@ -109,22 +114,13 @@ class ExampleSpec extends MoleculeSpec {
           Datomic_Client(client).connect(db)
 
       case DatomicDevLocal =>
-        if (recreateDb) {
+        if (recreateDb)
           Datomic_Client(client).recreateDbFrom(schema, db)
-        } else
+        else
           Datomic_Client(client).connect(db)
 
       // case DatomicCloud      =>
       //   Datomic_Peer.recreateDbFrom(schema, dbIdentifier)
-    }
-  }
-
-  def existingConn(uri: String, protocol: String, db: String): Conn = {
-    // Throw potential setup error
-    setupException.fold(())(throw _)
-    system match {
-      case DatomicPeer => Datomic_Peer.connect(uri, protocol)
-      case _           => Datomic_Client(client).connect(db)
     }
   }
 
@@ -142,10 +138,10 @@ class ExampleSpec extends MoleculeSpec {
     implicit val conn = getConn(Graph2Schema, "graph2")
   }
   class ModernGraph1Setup extends Scope {
-    implicit val conn = getConn(ModernGraph1Schema, "modernGraph1Schema")
+    implicit val conn = getConn(ModernGraph1Schema, "modernGraph1")
   }
   class ModernGraph2Setup extends Scope {
-    implicit val conn = getConn(ModernGraph2Schema, "modernGraph2Schema")
+    implicit val conn = getConn(ModernGraph2Schema, "modernGraph2")
   }
   class ProductsSetup extends Scope {
     implicit val conn = getConn(ProductsOrderSchema, "productsOrder")
@@ -154,8 +150,15 @@ class ExampleSpec extends MoleculeSpec {
     getConn(SeattleSchema, "seattle")) with Scope
 
   class MBrainzSetup extends Scope {
-    //  implicit val conn = Conn(Peer.connect("datomic:free://localhost:4334/mbrainz-1968-1973"))
-//    implicit val conn = existingConn("localhost:4334/mbrainz-1968-1973", "dev", "mbrainz-1968-1973")
-    implicit val conn = getConn(MBrainzSchema, "mbrainz-1968-1973", false, "localhost:4334/mbrainz-1968-1973", "dev")
+    val dbName = if (system == DatomicDevLocal)
+      "mbrainz-subset" // dev-local
+    else
+      "mbrainz-1968-1973" // peer and peer-server
+    implicit val conn = getConn(MBrainzSchema,
+      dbName,
+      false, // don't recreate db
+      "localhost:4334/mbrainz-1968-1973", // peer uri to transactor
+      "dev" // protocol for :pro - could be "free" for Datomic :free
+    )
   }
 }

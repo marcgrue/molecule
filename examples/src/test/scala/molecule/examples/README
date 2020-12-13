@@ -1,0 +1,71 @@
+
+
+How to get the example databases and mBrainz sample data up and running:
+
+################################################################################
+
+### STEP 1 - download datomic --------------------------------------------------
+
+Download pro/starter/free Datomic version to your machine if you haven't already.
+
+
+### STEP 2 - start transactor --------------------------------------------------
+
+Start Datomic transactor first (replace path to where you have the datomic download):
+
+cd <datomic-distribution>
+bin/transactor config/samples/dev-transactor-template.properties
+
+Create new tab in terminal to do various operations with transactor running in previous tab
+
+
+### STEP 3 - install samples ---------------------------------------------------
+
+# Install samples for dev-local
+wget https://datomic-samples.s3.amazonaws.com/datomic-samples-2020-07-07.zip
+unzip datomic-samples-2020-07-07.zip
+rm datomic-samples-2020-07-07.zip
+
+# Install mbrainz-1968-1973 special sample for peer and peer-server
+wget https://s3.amazonaws.com/mbrainz/datomic-mbrainz-1968-1973-backup-2017-07-20.tar -O mbrainz.tar
+tar -xvf mbrainz.tar -C datomic-samples
+rm mbrainz.tar
+bin/datomic restore-db file://`pwd`/datomic-samples/mbrainz-1968-1973 datomic:dev://localhost:4334/mbrainz-1968-1973
+
+
+### STEP 4 - create sample dbs -------------------------------------------------
+
+Run test in SetupPeerServerDbs to create sample databases. Necessary before starting
+the peer server so that it can "see" the mbrainz-subset db
+
+
+### STEP 5 - start peer server -------------------------------------------------
+
+bin/run -m datomic.peer-server -h localhost -p 8998 -a k,s \
+-d txCount,datomic:mem://txCount \
+-d aggregates,datomic:mem://aggregates \
+-d socialNews,datomic:mem://socialNews \
+-d graph,datomic:mem://graph \
+-d graph2,datomic:mem://graph2 \
+-d modernGraph1,datomic:mem://modernGraph1 \
+-d modernGraph2,datomic:mem://modernGraph2 \
+-d productsOrder,datomic:mem://productsOrder \
+-d seattle,datomic:mem://seattle \
+-d mbrainz-1968-1973,datomic:dev://localhost:4334/mbrainz-1968-1973 \
+-d mbrainz-subset,datomic:dev://localhost:4334/mbrainz-subset
+
+################################################################################
+
+
+
+// for Datomic free version, use "free" protocol instead of "dev":
+bin/datomic restore-db file://`pwd`/samples/mbrainz-1968-1973 datomic:free://localhost:4334/mbrainz-1968-1973
+
+On order for Intellij to be happy, set VM option -Xmx2G
+Preferences > Build, Execution, Deployment > Compiler > Scala Compiler > Scala Compiler Server / VM options
+Note that the java version (like 1.8) here is the same as in your terminal that you get from `java -version`
+
+See:
+http://blog.datomic.com/2013/07/datomic-musicbrainz-sample-database.html
+https://github.com/Datomic/mbrainz-sample
+https://github.com/Datomic/mbrainz-sample/wiki/Queries

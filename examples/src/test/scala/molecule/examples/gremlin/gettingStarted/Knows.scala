@@ -1,11 +1,8 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
+import molecule.examples.ExampleSpec
 import molecule.examples.gremlin.dsl.modernGraph2._
-import molecule.examples.gremlin.schema.ModernGraph2Schema
-import org.specs2.specification.Scope
-import molecule.datomic.peer.facade.Datomic_Peer._
 
 /*
   Bidirectional property edge - expanding on the Gremlin tutorial at:
@@ -36,7 +33,6 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 class Knows extends ExampleSpec {
 
   class BidirectionalPropertyEdgeSetup extends ModernGraph2Setup {
-//    implicit val conn = recreateDbFrom(ModernGraph2Schema)
 
     /*
       Sample bidirectional friendship graph (with extra vadas--peter friendship added for more fun examples)
@@ -86,17 +82,17 @@ class Knows extends ExampleSpec {
 
     // Marko knows (entity ids)
     // g.V(1).outE('knows')
-    Person(marko).Knows.person.get === Seq(josh, vadas)
+    Person(marko).Knows.person.get.sorted === Seq(josh, vadas).sorted
 
     // Marko knows (by name)
     // g.V(1).outE('knows').inV().values('name')
     // g.V(1).out('knows').values('name')
     Person(marko).Knows.Person.name.get === Seq("vadas", "josh")
-    Person(marko).Knows.person.get === Seq(josh, vadas)
+    Person(marko).Knows.person.get.sorted === Seq(josh, vadas).sorted
 
     // We can uniformly query in the other direction too
     // vadas and josh also know marko
-    Person(vadas).Knows.person.get === Seq(peter, marko)
+    Person(vadas).Knows.person.get.sorted === Seq(peter, marko).sorted
     Person(josh).Knows.person.get === Seq(marko)
 
     // "Markos knows older than 30"
@@ -156,11 +152,11 @@ class Knows extends ExampleSpec {
   "What else could we ask?" in new BidirectionalPropertyEdgeSetup {
 
     // What friends does each person have (nested lists)
-    m(Person.name.Knows * Person.name).get === List(
-      ("marko", List("vadas", "josh")),
-      ("vadas", List("marko", "peter")),
+    m(Person.name.Knows * Person.name).get.map(t => (t._1, t._2.sorted)).sortBy(_._1) === List(
       ("josh", List("marko")),
-      ("peter", List("vadas"))
+      ("marko", List("josh", "vadas")),
+      ("peter", List("vadas")),
+      ("vadas", List("marko", "peter")),
     )
 
     // Who has most friends
@@ -206,17 +202,19 @@ class Knows extends ExampleSpec {
     )
 
     // Same, nested
-    m(
-      Person.name("marko").Knows.*(
-        Person.name.Knows.*(
-          Person.name))).get === List(
-      (
-        "marko",
-        List(
-          ("vadas", List("marko", "peter")),
-          ("josh", List("marko")))
+    Person.name("marko").Knows.*(
+      Person.name.Knows.*(
+        Person.name)).get
+      .map(t1 => (t1._1, t1._2.map(t2 => (t2._1, t2._2.sorted)).sortBy(_._1))) ===
+      List(
+        (
+          "marko",
+          List(
+            ("josh", List("marko")),
+            ("vadas", List("marko", "peter")),
+          )
         )
-    )
+      )
 
     // Marko's friends and their friends (excluding marko)
     Person.name("marko").Knows.Person.name.Knows.Person.name.not("marko").get === List(
@@ -242,10 +240,12 @@ class Knows extends ExampleSpec {
     Person(marko).Knows.weight_.>(0.8).Person.name.get === List("josh")
 
     // Well-known friends heavily involved in projects
-    Person(marko).Knows.weight_.>(0.8).Person.name.Created.weight_.>(0.8).Software.name.get === List(("josh", "ripple"))
+    Person(marko).Knows.weight_.>(0.8).Person.name.Created.weight_.>(0.8).Software.name.get ===
+      List(("josh", "ripple"))
 
     // Friends of friends' side projects
-    Person(marko).Knows.Person.Knows.Person.name.not("marko").Created.weight.<(0.5).Software.name.get === List(("peter", 0.2, "lop"))
+    Person(marko).Knows.Person.Knows.Person.name.not("marko").Created.weight.<(0.5).Software.name.get ===
+      List(("peter", 0.2, "lop"))
 
     // .. or elaborated:
     Person(marko) // marko entity
@@ -255,8 +255,8 @@ class Knows extends ExampleSpec {
       .Software.name // name of software created
       .get === List((
       "peter", // peter is a friend of vadas who is a friend of marko
-        0.2, // peter participated with a weight of 0.2 in creating
-        "lop" // the software "lop"
-        ))
+      0.2, // peter participated with a weight of 0.2 in creating
+      "lop" // the software "lop"
+    ))
   }
 }
