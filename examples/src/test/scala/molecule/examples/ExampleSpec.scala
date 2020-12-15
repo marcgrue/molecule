@@ -11,7 +11,7 @@ import molecule.datomic.peer.facade.Datomic_Peer
 import molecule.examples.dayOfDatomic.schema._
 import molecule.examples.dayOfDatomic.SocialNewsData
 import molecule.examples.gremlin.schema.{ModernGraph1Schema, ModernGraph2Schema}
-import molecule.examples.mbrainz.schema.MBrainzSchema
+import molecule.examples.mbrainz.schema.{MBrainzSchema, MBrainzSchemaLowerToUpper}
 import molecule.examples.seattle.SeattleData
 import molecule.examples.seattle.schema.SeattleSchema
 import molecule.testing.TestPeerServer
@@ -81,7 +81,7 @@ class ExampleSpec extends MoleculeSpec {
       //            client = Datomic.clientDevLocal("samples", "/Users/mg/lib/datomic/datomic-pro-1.0.6222")
 //      client.deleteDatabase("mbrainz-1968-1973")
       //                  client.createDatabase("mbrainz-1968-1973")
-      println(client.listDatabases())
+//      println(client.listDatabases())
     } catch {
       case e: Throwable => setupException = Some(e)
     }
@@ -160,5 +160,12 @@ class ExampleSpec extends MoleculeSpec {
       "localhost:4334/mbrainz-1968-1973", // peer uri to transactor
       "dev" // protocol for :pro - could be "free" for Datomic :free
     )
+    import molecule.datomic.api.out1._
+    if (Schema.a(":Artist/name").get.isEmpty) {
+      // Add uppercase-namespaced attribute names so that we can access the externally
+      // transacted lowercase names with uppercase names of the molecule code.
+      println("Converting nss from lower to upper..")
+      conn.transact(MBrainzSchemaLowerToUpper.namespaces)
+    }
   }
 }

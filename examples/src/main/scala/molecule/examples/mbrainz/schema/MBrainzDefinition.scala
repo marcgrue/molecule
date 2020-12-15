@@ -1,4 +1,5 @@
 package molecule.examples.mbrainz.schema
+
 import molecule.core.schema.definition._
 
 @InOut(3, 8)
@@ -82,15 +83,10 @@ object MBrainzDefinition {
   //  }
 
   trait Track {
-    val position = oneLong
-    //    val positionX     = oneLong
-    //    val position     = manyString
-    //    val position     = oneString
-
-    val duration = oneLong
-    //    val artistCredit = oneString.fulltext
-    val name     = oneString.fulltext
-    val artists  = many[Artist]
-    //    val artists      = many[Release]
+    val position     = oneLong
+    val duration     = oneLong
+    val artistCredit = oneString.fulltext
+    val name         = oneString.fulltext
+    val artists      = many[Artist]
   }
 }

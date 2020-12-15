@@ -259,7 +259,7 @@ case class Conn_Client(client: Client, dbName: String)
 
   def qRaw(db: DatomicDb, query: String, inputs0: Seq[Any]): jCollection[jList[AnyRef]] = {
     val inputs = inputs0.map {
-      case it: Iterable[_] => it.asJava
+      case it: Iterable[_] => it.toList.asJava
       case dbId: DbId      => dbId.idx.toString
       case bi: BigInt      => new java.math.BigInteger(bi.toString)
       case v               => v
@@ -268,7 +268,8 @@ case class Conn_Client(client: Client, dbName: String)
       clientDatomic.q(
         query,
         db.asInstanceOf[DatomicDb_Client].clientDb,
-        inputs.asInstanceOf[Seq[AnyRef]]: _*)
+        inputs.asInstanceOf[Seq[AnyRef]]: _*
+      )
     )
   }
 

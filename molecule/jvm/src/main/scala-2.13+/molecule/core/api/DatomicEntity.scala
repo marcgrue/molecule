@@ -9,7 +9,7 @@ import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
-import molecule.core.util.Debug
+import molecule.core.util.{Debug, Quoted}
 import molecule.core.util.fns.date2str
 import molecule.datomic.base.api.EntityOps
 import molecule.datomic.base.facade.{Conn, TxReport}
@@ -37,7 +37,7 @@ import scala.language.existentials
   *               the attribute keyword (like `:Ns.enum/enumValue`) or its
   *               representation as a Long number
   */
-abstract class DatomicEntity(conn: Conn, eid: Any) {
+abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
 
   // Get ================================================================
 
@@ -400,7 +400,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @group touch
     * @return String
     */
-  def touchQuoted: String = format(asMap(1, 5))
+  def touchQuoted: String = quote(asMap(1, 5))
 
   /** Get entity graph to some depth as Map-string (for presentation).
     * <br><br>
@@ -438,7 +438,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @group touch
     * @return String
     */
-  def touchQuotedMax(maxDepth: Int): String = format(asMap(1, maxDepth))
+  def touchQuotedMax(maxDepth: Int): String = quote(asMap(1, maxDepth))
 
 
   /** Get entity graph as List.
@@ -525,7 +525,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @group touch
     * @return String
     */
-  def touchListQuoted: String = format(asList(1, 5))
+  def touchListQuoted: String = quote(asList(1, 5))
 
   /** Get entity graph to some depth as List-string (for tests).
     *
@@ -559,7 +559,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     * @group touch
     * @return String
     */
-  def touchListQuotedMax(maxDepth: Int): String = format(asList(1, maxDepth))
+  def touchListQuotedMax(maxDepth: Int): String = quote(asList(1, maxDepth))
 
 
   private[molecule] def toScala(
@@ -570,66 +570,6 @@ abstract class DatomicEntity(conn: Conn, eid: Any) {
     tpe: String = "Map"
   ): Any
 
-
-  protected def format(value: Any): String = {
-    val sb = new StringBuilder
-    def traverse(value: Any, tabs: Int): Unit = {
-      val t = "  " * tabs
-      var i = 0
-      value match {
-        case s: String                => sb.append(s""""$s"""")
-        case l: Long                  =>
-          if (l > Int.MaxValue) sb.append(s"${l}L") else sb.append(l) // Int/Long hack
-        case d: Double                => sb.append(d)
-        case f: Float                 => sb.append(f)
-        case bi: java.math.BigInteger => sb.append(bi)
-        case bd: java.math.BigDecimal => sb.append(bd)
-        case b: Boolean               => sb.append(b)
-        case d: Date                  => sb.append(s""""${date2str(d)}"""")
-        case u: UUID                  => sb.append(s""""$u"""")
-        case u: java.net.URI          => sb.append(s""""$u"""")
-        case s: Set[_]                =>
-          sb.append("Set(")
-          s.foreach { v =>
-            if (i > 0) sb.append(s",\n$t") else sb.append(s"\n$t")
-            traverse(v, tabs + 1)
-            i += 1
-          }
-          sb.append(")")
-        case l: Seq[_]                =>
-          sb.append("List(")
-          l.foreach {
-            case (k, v) =>
-              if (i > 0) sb.append(s",\n$t") else sb.append(s"\n$t")
-              sb.append(s""""$k" -> """)
-              traverse(v, tabs + 1)
-              i += 1
-            case v      =>
-              if (i > 0) sb.append(s", ")
-              traverse(v, tabs) // no line break
-              i += 1
-          }
-          sb.append(")")
-        case m: Map[_, _]             =>
-          sb.append("Map(")
-          m.foreach { case (k, v) =>
-            if (i > 0) sb.append(s",\n$t") else sb.append(s"\n$t")
-            sb.append(s""""$k" -> """)
-            traverse(v, tabs + 1)
-            i += 1
-          }
-          sb.append(")")
-        case (k: String, v: Any)      =>
-          sb.append(s""""$k" -> """)
-          traverse(v, tabs)
-        case other                    =>
-          throw new EntityException(
-            "Unexpected element traversed in Entity#format: " + other)
-      }
-    }
-    traverse(value, 1)
-    sb.result()
-  }
 
   lazy protected val ident = Keyword.intern("db", "ident")
 

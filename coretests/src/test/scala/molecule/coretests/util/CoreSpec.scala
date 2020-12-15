@@ -46,8 +46,8 @@ abstract class CoreSpec extends MoleculeSpec with CoreData {
         step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     } else {
       step(setupPeer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
-        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
+        step(setupPeerServer()) ^ fs.mapDescription(d => Text(s"$system: " + d.show)) ^
+        step(setupDevLocal()) ^ fs.mapDescription(d => Text(s"$system: " + d.show))
     }
   }
 

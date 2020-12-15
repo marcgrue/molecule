@@ -4,7 +4,6 @@ import molecule.core.util.DatomicPeer
 import molecule.datomic.api.in1_out4._
 import molecule.examples.ExampleSpec
 import molecule.examples.mbrainz.dsl.mBrainz._
-import molecule.examples.mbrainz.schema.MBrainzSchemaLowerToUpper
 import scala.language.postfixOps
 
 
@@ -12,17 +11,8 @@ import scala.language.postfixOps
 
 class MBrainz extends ExampleSpec {
 
-  class Setup extends MBrainzSetup {
-    if (Schema.a(":Artist/name").get.isEmpty) {
-      // Add uppercase-namespaced attribute names so that we can access the externally
-      // transacted lowercase names with uppercase names of the molecule code.
-      println("Converting nss from lower to upper..")
-      conn.transact(MBrainzSchemaLowerToUpper.namespaces)
-    }
-  }
 
-
-  "Data" in new Setup {
+  "Data" in new MBrainzSetup {
 
     // What are the titles of all the tracks John Lennon played on? (showing 5)
     Track.name.Artists.name_("John Lennon").get.sorted.take(5) === List(
@@ -74,7 +64,7 @@ class MBrainz extends ExampleSpec {
 
 
   //  // Todo: model as graph with bidirectional relationships
-  //  "Collaboration" in new Setup {
+  //  "Collaboration" in new MBrainzSetup {
   //
   //    // Who collaborated with one of the Beatles?
   //    // Repeated attributes was translated to transitive lookups - model graph instead... todo
@@ -103,7 +93,7 @@ class MBrainz extends ExampleSpec {
   //  }
 
 
-  "2-step querying" in new Setup {
+  "2-step querying" in new MBrainzSetup {
     // Which artists have songs that might be covers of The Who (or vice versa)?
 
     // 2-step querying:

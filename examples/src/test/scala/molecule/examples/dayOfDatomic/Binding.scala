@@ -9,7 +9,7 @@ import molecule.datomic.peer.facade.Datomic_Peer._
 
 class Binding extends ExampleSpec {
 
-//  implicit val conn = recreateDbFrom(SocialNewsSchema, "Binding")
+  //  implicit val conn = recreateDbFrom(SocialNewsSchema, "Binding")
 
   class Setup extends SocialNewsSetup {
     // Input molecules returning only the entity id (`e`).
@@ -18,12 +18,13 @@ class Binding extends ExampleSpec {
     val person      = m(User.e.firstName_(?).lastName_(?))
 
     // Get inserted entity ids
-    val List(stewartBrand, johnStewart, stuartSmalley, stuartHalloway) = User.firstName.lastName insert List(
-      ("Stewart", "Brand"),
-      ("John", "Stewart"),
-      ("Stuart", "Smalley"),
-      ("Stuart", "Halloway")
-    ) eids
+    val List(stewartBrand, johnStewart, stuartSmalley, stuartHalloway) =
+      User.firstName.lastName insert List(
+        ("Stewart", "Brand"),
+        ("John", "Stewart"),
+        ("Stuart", "Smalley"),
+        ("Stuart", "Halloway")
+      ) eids
   }
 
 
@@ -59,7 +60,8 @@ class Binding extends ExampleSpec {
     person(("John", "Stewart")).get === List(johnStewart)
 
     // Bind collection
-    personFirst(List("John", "Stuart")).get === List(johnStewart, stuartSmalley, stuartHalloway)
+    personFirst(List("John", "Stuart")).get.sorted ===
+      List(johnStewart, stuartSmalley, stuartHalloway).sorted
 
     // Bind relation
     person(("John", "Stewart"), ("Stuart", "Halloway")).get === List(johnStewart, stuartHalloway)
