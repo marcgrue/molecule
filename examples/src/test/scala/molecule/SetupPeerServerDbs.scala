@@ -1,11 +1,12 @@
-package molecule.examples
+package molecule
 
 import molecule.core.util.testing.TxCountSchema
 import molecule.datomic.peer.facade.Datomic_Peer
-import molecule.examples.dayOfDatomic.schema._
-import molecule.examples.gremlin.schema.{ModernGraph1Schema, ModernGraph2Schema}
-import molecule.examples.mbrainz.schema.MBrainzSchema
-import molecule.examples.seattle.schema.SeattleSchema
+import molecule.examples.datomic.dayOfDatomic.schema._
+import molecule.examples.datomic.mbrainz.schema.MBrainzSchema
+import molecule.examples.datomic.seattle.schema.SeattleSchema
+import molecule.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
+import moleculeBuildInfo.BuildInfo
 import org.specs2.mutable.Specification
 
 class SetupPeerServerDbs extends Specification {
@@ -17,8 +18,7 @@ class SetupPeerServerDbs extends Specification {
   // 3. Run test here to create databases needed for tests
   "Create databases for peer-server" >> {
 
-    val pro      = true
-    val protocol = if (pro) "dev" else "free"
+    val protocol = if (BuildInfo.useDatomicPro) "dev" else "free"
 
     Datomic_Peer.recreateDbFrom(TxCountSchema, "localhost:4334/txCount", protocol)
     Datomic_Peer.recreateDbFrom(AggregatesSchema, "localhost:4334/aggregates", protocol)

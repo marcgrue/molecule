@@ -6,7 +6,7 @@ import molecule.datomic.api.out3._
 
 class EntityAPI extends CoreSpec {
 
-   // See also molecule.examples.dayOfDatomic.ProductsAndOrders
+   // See also molecule.examples.datomic.dayOfDatomic.ProductsAndOrders
 
   "touch Map" in new CoreSetup {
 

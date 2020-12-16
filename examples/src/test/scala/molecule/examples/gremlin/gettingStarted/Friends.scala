@@ -1,11 +1,10 @@
 package molecule.examples.gremlin.gettingStarted
 
-import molecule.examples.ExampleSpec
 import molecule.datomic.api.out4._
-import molecule.examples.gremlin.dsl.modernGraph1._
-import molecule.examples.gremlin.schema.ModernGraph1Schema
+import molecule.examples.gremlin.gettingStarted.dsl.modernGraph1._
 import org.specs2.specification.Scope
 import molecule.datomic.peer.facade.Datomic_Peer._
+import molecule.ExampleSpec
 
 /*
   Bidirectional references - comparing with Gremlin tutorial at:

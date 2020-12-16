@@ -18,8 +18,8 @@ class SetupPeerServerDbs extends Specification {
   // 3. Run test here to create databases needed for tests
   "Create databases for peer-server" >> {
 
-    val pro = true
-    val protocol = if(pro) "dev" else "free"
+    val pro      = true
+    val protocol = if (pro) "dev" else "free"
 
     Datomic_Peer.recreateDbFrom(TxCountSchema, "localhost:4334/txCount", protocol)
     Datomic_Peer.recreateDbFrom(CoreTestSchema, "localhost:4334/coretests", protocol)

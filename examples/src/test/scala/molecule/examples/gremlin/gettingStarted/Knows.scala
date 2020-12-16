@@ -1,8 +1,8 @@
 package molecule.examples.gremlin.gettingStarted
 
 import molecule.datomic.api.out4._
-import molecule.examples.ExampleSpec
-import molecule.examples.gremlin.dsl.modernGraph2._
+import molecule.examples.gremlin.gettingStarted.dsl.modernGraph2._
+import molecule.ExampleSpec
 
 /*
   Bidirectional property edge - expanding on the Gremlin tutorial at:

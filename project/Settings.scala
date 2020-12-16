@@ -44,10 +44,13 @@ object Settings {
     }
   )
 
+  // Use Datomic Pro/Pro-starter (true) or Datomic free (false)
+  val useDatomicPro = true
+
   val shared: Seq[Def.Setting[_]] = Seq(
     name := "molecule",
     moduleName := "molecule",
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "useDatomicPro" -> useDatomicPro),
     buildInfoPackage := "moleculeBuildInfo"
   )
 
@@ -57,14 +60,13 @@ object Settings {
     )
   )
 
-  val useDatomicPro            = true
   val jvm: Seq[Def.Setting[_]] = {
     Seq(
       name := "molecule",
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
         "org.specs2" %% "specs2-core" % "4.10.0",
-        "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.3",
+        "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.3"
       )
     ) ++ (
       if (useDatomicPro)
@@ -113,10 +115,10 @@ object Settings {
     moduleName := "molecule-examples",
     moleculeMakeJars := true,
     moleculeSchemas := Seq(
-      "molecule/examples/dayOfDatomic",
-      "molecule/examples/gremlin",
-      "molecule/examples/mbrainz",
-      "molecule/examples/seattle"
+      "molecule/examples/datomic/dayOfDatomic",
+      "molecule/examples/datomic/mbrainz",
+      "molecule/examples/datomic/seattle",
+      "molecule/examples/gremlin/gettingStarted"
     )
   )
 }

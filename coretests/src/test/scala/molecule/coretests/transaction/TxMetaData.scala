@@ -8,7 +8,7 @@ import molecule.datomic.api.out10._
 
 class TxMetaData extends CoreSpec {
 
-  // See molecule.examples.dayOfDatomic.Provenance for more examples
+  // See molecule.examples.datomic.dayOfDatomic.Provenance for more examples
 
   "Save" >> {
 
