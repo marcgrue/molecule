@@ -6,7 +6,7 @@ import sbtmolecule.MoleculePlugin.autoImport.{moleculeMakeJars, moleculeSchemas}
 
 object Settings {
 
-  // Used by `coretests` and `examples` too that are not ScalaJS transpiled
+
   val base: Seq[Def.Setting[_]] = Seq(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
@@ -44,13 +44,21 @@ object Settings {
     }
   )
 
-  // Use Datomic Pro/Pro-starter (true) or Datomic free (false)
-  val useDatomicPro = true
+  // Datomic settings
+  val datomicProtocol = "dev" // dev = starter/pro. Can be "free" also.
+  val datomicPath     = "/Users/mg/lib/datomic" // path to your datomic downloads
+  val datomicPro      = "1.0.6222"
+  val datomicFree     = "0.9.5697"
 
   val shared: Seq[Def.Setting[_]] = Seq(
-    name := "molecule",
-    moduleName := "molecule",
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "useDatomicPro" -> useDatomicPro),
+    name := "shared",
+    moduleName := "shared",
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion,
+      "datomicProtocol" -> datomicProtocol,
+      "datomicPath" -> datomicPath,
+      "datomicPro" -> datomicPro,
+      "datomicFree" -> datomicFree
+    ),
     buildInfoPackage := "moleculeBuildInfo"
   )
 
@@ -62,16 +70,17 @@ object Settings {
 
   val jvm: Seq[Def.Setting[_]] = {
     Seq(
-      name := "molecule",
+      name := "jvm",
+      moduleName := "jvm",
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
         "org.specs2" %% "specs2-core" % "4.10.0",
         "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.3"
       )
     ) ++ (
-      if (useDatomicPro)
+      if (datomicProtocol == "dev")
         Seq(
-          libraryDependencies += "com.datomic" % "datomic-pro" % "1.0.6222",
+          libraryDependencies += "com.datomic" % "datomic-pro" % datomicPro,
           excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
           /*
           If using datomic-pro/starter, create a ~/.sbt/.credentials file with the following content:
@@ -84,7 +93,7 @@ object Settings {
           credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
         )
       else
-        Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
+        Seq(libraryDependencies += "com.datomic" % "datomic-free" % datomicFree)
       )
   }
 
@@ -100,25 +109,19 @@ object Settings {
 
   // Molecule boilerplate code generation settings -----------------
 
-  lazy val moleculeCoretests: Seq[Def.Setting[_]] = Seq(
-    moduleName := "molecule-coretests",
+  lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
+    moduleName := "moleculeTests",
     moleculeMakeJars := true,
     moleculeSchemas := Seq(
-      "molecule/coretests/bidirectionals",
-      "molecule/coretests/nested",
-      "molecule/coretests/schemaDef",
-      "molecule/coretests/util"
-    )
-  )
+      "molecule/tests/core/base",
+      "molecule/tests/core/bidirectionals",
+      "molecule/tests/core/nested",
+      "molecule/tests/core/schemaDef",
 
-  lazy val moleculeExamples: Seq[Def.Setting[_]] = Seq(
-    moduleName := "molecule-examples",
-    moleculeMakeJars := true,
-    moleculeSchemas := Seq(
-      "molecule/examples/datomic/dayOfDatomic",
-      "molecule/examples/datomic/mbrainz",
-      "molecule/examples/datomic/seattle",
-      "molecule/examples/gremlin/gettingStarted"
+      "molecule/tests/examples/datomic/dayOfDatomic",
+      "molecule/tests/examples/datomic/mbrainz",
+      "molecule/tests/examples/datomic/seattle",
+      "molecule/tests/examples/gremlin/gettingStarted"
     )
   )
 }

@@ -11,19 +11,12 @@ lazy val molecule = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(Settings.js)
   .jvmSettings(Settings.jvm)
 
-lazy val moleculeJS  = molecule.js.enablePlugins(TzdbPlugin)
-lazy val moleculeJVM = molecule.jvm
+lazy val js  = molecule.js.enablePlugins(TzdbPlugin)
+lazy val jvm = molecule.jvm
 
 
-lazy val moleculeCoretests = project.in(file("coretests"))
-  .dependsOn(moleculeJVM)
+lazy val moleculeTests = project.in(file("moleculeTests"))
+  .dependsOn(jvm)
   .settings(Settings.base ++ Settings.jvm ++ Settings.tests ++ Publish.not)
 // Un-comment to re-create molecule lib jars if schemas change
-//  .enablePlugins(MoleculePlugin).settings(Settings.moleculeCoretests)
-
-
-lazy val moleculeExamples = project.in(file("examples"))
-  .dependsOn(moleculeJVM)
-  .settings(Settings.base ++ Settings.jvm ++ Settings.tests ++ Publish.not)
-// Un-comment to re-create molecule lib jars if schemas change
-//  .enablePlugins(MoleculePlugin).settings(Settings.moleculeExamples)
+//  .enablePlugins(MoleculePlugin).settings(Settings.moleculeTests)

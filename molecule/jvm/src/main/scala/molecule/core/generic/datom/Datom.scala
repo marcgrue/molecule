@@ -2,7 +2,7 @@
 * AUTO-GENERATED Molecule DSL boilerplate code for namespace `Datom`
 *
 * To change:
-* 1. edit schema definition file in `molecule.coretests.generic.schema/`
+* 1. edit schema definition file in `molecule.tests.core.generic.schema/`
 * 2. `sbt compile` in terminal
 * 3. Refresh and re-compile project in IDE
 */

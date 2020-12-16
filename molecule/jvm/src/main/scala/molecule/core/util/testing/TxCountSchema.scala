@@ -2,7 +2,7 @@
 * AUTO-GENERATED Molecule DSL schema boilerplate code
 *
 * To change:
-* 1. edit schema definition file in `molecule.coretests.util.schema/`
+* 1. edit schema definition file in `molecule.tests.core.base.schema/`
 * 2. `sbt compile` in terminal
 * 3. Refresh and re-compile project in IDE
 */

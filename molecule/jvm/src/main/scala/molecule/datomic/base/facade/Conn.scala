@@ -3,9 +3,9 @@ package molecule.datomic.base.facade
 
 import java.net.URI
 import java.util.{Date, Collection => jCollection, List => jList, Map => jMap}
-import clojure.lang.{MapEntry, PersistentArrayMap, PersistentVector}
+import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
-import datomic.{Peer, Util}
+import datomic.Peer
 import molecule.core.api.DatomicEntity
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
