@@ -348,12 +348,13 @@ class ApplyDouble extends TestSpec {
     Ns.int.double.>=(int2).get === res2
     Ns.int.double.<=(int1).get.sortBy(_._1) === res1
 
-    Ns.int.double(long1).get.sortBy(_._1) === res1
-    Ns.int.double.not(long2).get.sortBy(_._1) === res1
-    Ns.int.double.<(long2).get.sortBy(_._1) === res1
-    Ns.int.double.>(long1).get === res2
-    Ns.int.double.>=(long2).get === res2
-    Ns.int.double.<=(long1).get.sortBy(_._1) === res1
+    // Widening conversion from Long to Double is deprecated because it loses precision
+    Ns.int.double(long1.toDouble).get.sortBy(_._1) === res1
+    Ns.int.double.not(long2.toDouble).get.sortBy(_._1) === res1
+    Ns.int.double.<(long2.toDouble).get.sortBy(_._1) === res1
+    Ns.int.double.>(long1.toDouble).get === res2
+    Ns.int.double.>=(long2.toDouble).get === res2
+    Ns.int.double.<=(long1.toDouble).get.sortBy(_._1) === res1
 
     Ns.int.double(float1).get.sortBy(_._1) === res1
     Ns.int.double.not(float2).get.sortBy(_._1) === res1
@@ -393,12 +394,12 @@ class ApplyDouble extends TestSpec {
     Ns.int.double_.>=(int2).get === res2t
     Ns.int.double_.<=(int1).get.sorted === res1t
 
-    Ns.int.double_(long1).get.sorted === res1t
-    Ns.int.double_.not(long2).get.sorted === res1t
-    Ns.int.double_.<(long2).get.sorted === res1t
-    Ns.int.double_.>(long1).get === res2t
-    Ns.int.double_.>=(long2).get === res2t
-    Ns.int.double_.<=(long1).get.sorted === res1t
+    Ns.int.double_(long1.toDouble).get.sorted === res1t
+    Ns.int.double_.not(long2.toDouble).get.sorted === res1t
+    Ns.int.double_.<(long2.toDouble).get.sorted === res1t
+    Ns.int.double_.>(long1.toDouble).get === res2t
+    Ns.int.double_.>=(long2.toDouble).get === res2t
+    Ns.int.double_.<=(long1.toDouble).get.sorted === res1t
 
     Ns.int.double_(float1).get.sorted === res1t
     Ns.int.double_.not(float2).get.sorted === res1t
@@ -461,12 +462,12 @@ class ApplyDouble extends TestSpec {
     Ns.int.doubles.>=(int2).get === res2
     Ns.int.doubles.<=(int1).get.sortBy(_._1) === res1
 
-    Ns.int.doubles(long1).get.sortBy(_._1) === res1
-    Ns.int.doubles.not(long2).get.sortBy(_._1) === res1
-    Ns.int.doubles.<(long2).get.sortBy(_._1) === res1
-    Ns.int.doubles.>(long1).get === res2
-    Ns.int.doubles.>=(long2).get === res2
-    Ns.int.doubles.<=(long1).get.sortBy(_._1) === res1
+    Ns.int.doubles(long1.toDouble).get.sortBy(_._1) === res1
+    Ns.int.doubles.not(long2.toDouble).get.sortBy(_._1) === res1
+    Ns.int.doubles.<(long2.toDouble).get.sortBy(_._1) === res1
+    Ns.int.doubles.>(long1.toDouble).get === res2
+    Ns.int.doubles.>=(long2.toDouble).get === res2
+    Ns.int.doubles.<=(long1.toDouble).get.sortBy(_._1) === res1
 
     Ns.int.doubles(float1).get.sortBy(_._1) === res1
     Ns.int.doubles.not(float2).get.sortBy(_._1) === res1
@@ -506,12 +507,12 @@ class ApplyDouble extends TestSpec {
     Ns.int.doubles_.>=(int2).get === res2t
     Ns.int.doubles_.<=(int1).get.sorted === res1t
 
-    Ns.int.doubles_(long1).get.sorted === res1t
-    Ns.int.doubles_.not(long2).get.sorted === res1t
-    Ns.int.doubles_.<(long2).get.sorted === res1t
-    Ns.int.doubles_.>(long1).get === res2t
-    Ns.int.doubles_.>=(long2).get === res2t
-    Ns.int.doubles_.<=(long1).get.sorted === res1t
+    Ns.int.doubles_(long1.toDouble).get.sorted === res1t
+    Ns.int.doubles_.not(long2.toDouble).get.sorted === res1t
+    Ns.int.doubles_.<(long2.toDouble).get.sorted === res1t
+    Ns.int.doubles_.>(long1.toDouble).get === res2t
+    Ns.int.doubles_.>=(long2.toDouble).get === res2t
+    Ns.int.doubles_.<=(long1.toDouble).get.sorted === res1t
 
     Ns.int.doubles_(float1).get.sorted === res1t
     Ns.int.doubles_.not(float2).get.sorted === res1t

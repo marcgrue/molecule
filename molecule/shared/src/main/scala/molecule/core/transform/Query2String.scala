@@ -2,6 +2,7 @@ package molecule.core.transform
 
 import java.util.{Date, UUID}
 import molecule.core.ast.query._
+import molecule.core.exceptions.MoleculeException
 import molecule.core.transform.exception.Query2StringException
 import molecule.core.util.Helpers
 import scala.language.implicitConversions
@@ -114,6 +115,8 @@ case class Query2String(q: Query) extends Helpers {
       case ((acc, _), (pull: Pull, _)) => (acc + "\n        " + p(pull), 1)
       case ((acc, 1), (o, _))          => (acc + "\n        " + p(o), 0)
       case ((acc, _), (o, _))          => (acc + " " + p(o), 0)
+
+      case v => throw new MoleculeException("Unexpected multiline value: " + v)
     }._1
     lazy val finds      = ":find " + outputs
     lazy val firstParts = List(finds, p(q.wi), p(q.i)).filter(_.trim.nonEmpty)

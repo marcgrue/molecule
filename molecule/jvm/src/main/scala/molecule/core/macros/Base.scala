@@ -1,5 +1,7 @@
 package molecule.core.macros
+
 import molecule.core.ast.model._
+import molecule.core.exceptions.MoleculeException
 import molecule.core.transform.Dsl2Model
 import scala.collection.immutable
 import scala.collection.mutable.ListBuffer
@@ -8,7 +10,9 @@ import scala.reflect.macros.blackbox
 
 private[molecule] trait Base extends Dsl2Model {
   val c: blackbox.Context
+
   import c.universe._
+
   val w = DebugMacro("Base", 1)
 
   def mapIdents(idents: Seq[Any]): Seq[(String, Tree)] = idents.flatMap {
@@ -117,6 +121,7 @@ private[molecule] trait Base extends Dsl2Model {
         case ((0, acc, 0), (cast, i)) if level == 0 => (0, acc :+ cast(i), 0)
         case ((0, acc, 0), (cast, _))               => (0, acc :+ cast(0), 0)
         case ((1, acc, refIndex), (cast, _))        => (1, acc :+ cast(level * 100 + refIndex), refIndex)
+        case cast                                   => abort("Unexpected cast data: " + cast)
       }._2
     }
 

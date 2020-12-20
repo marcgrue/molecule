@@ -118,6 +118,23 @@ serve all the sample databases used by the tests:
 Now you can run molecule tests or projects against peer, peer-server and 
 dev-local (cloud).
 
+## Test
+Test in IDE or with sbt:
+```
+sbt
+
+// Single test
+sbt:molecule> testOnly molecule.tests.core.ref.TwoStepQueries
+
+// Group of tests (works only with peer, so set `tests` to 1 in TestSpec)
+sbt:molecule> testOnly molecule.tests.core.ref.*
+
+// All tests (works only with peer, so set `tests` to 1 in TestSpec)
+sbt:molecule> test 
+```
+Using sbt is about twice as fast and therefore preferable
+when running all tests. Remember to ctrl-c the sbt process when switching to
+test in IDE to avoid process locks.
 
 ## Further info
 

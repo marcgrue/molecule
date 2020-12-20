@@ -8,8 +8,7 @@ import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
-import molecule.setup.CoreData
-import molecule.testing.TestPeerServer
+import molecule.setup.{CoreData, TestPeerServer}
 import molecule.tests.core.base.schema.CoreTestSchema
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 import molecule.tests.core.nested.schema.NestedSchema

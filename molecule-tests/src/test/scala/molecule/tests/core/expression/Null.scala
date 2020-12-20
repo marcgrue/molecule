@@ -35,7 +35,7 @@ class Null extends TestSpec {
     expectCompileError(
       "m(Ns.str.int_(Seq.empty[Int]))",
       "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-        "\ncode : scala.collection.immutable.Seq.empty[Int]" +
+        "\ncode : scala.`package`.Seq.empty[Int]" +
         "\nclass: class scala.reflect.internal.Trees$TypeApply" +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +
         "\nTry to assign the expression to a variable and apply the variable instead."
@@ -77,7 +77,7 @@ class Null extends TestSpec {
     expectCompileError(
       "m(Ns.int.ints_(Seq.empty[Int]))",
       "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-        "\ncode : scala.collection.immutable.Seq.empty[Int]" +
+        "\ncode : scala.`package`.Seq.empty[Int]" +
         "\nclass: class scala.reflect.internal.Trees$TypeApply" +
         "\nMaybe you are applying some Scala expression to a molecule attribute?" +
         "\nTry to assign the expression to a variable and apply the variable instead."

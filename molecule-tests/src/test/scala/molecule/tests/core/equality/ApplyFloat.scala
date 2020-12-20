@@ -332,19 +332,21 @@ class ApplyFloat extends TestSpec {
     Ns.int.float.<=(1L).get.sortBy(_._1) === res1
 
 
-    Ns.int.float(int1).get.sortBy(_._1) === res1
-    Ns.int.float.not(int2).get.sortBy(_._1) === res1
-    Ns.int.float.<(int2).get.sortBy(_._1) === res1
-    Ns.int.float.>(int1).get === res2
-    Ns.int.float.>=(int2).get === res2
-    Ns.int.float.<=(int1).get.sortBy(_._1) === res1
+    // Widening conversion from Int to Float is deprecated because it loses precision
+    Ns.int.float(int1.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.not(int2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.<(int2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.>(int1.toFloat).get === res2
+    Ns.int.float.>=(int2.toFloat).get === res2
+    Ns.int.float.<=(int1.toFloat).get.sortBy(_._1) === res1
 
-    Ns.int.float(long1).get.sortBy(_._1) === res1
-    Ns.int.float.not(long2).get.sortBy(_._1) === res1
-    Ns.int.float.<(long2).get.sortBy(_._1) === res1
-    Ns.int.float.>(long1).get === res2
-    Ns.int.float.>=(long2).get === res2
-    Ns.int.float.<=(long1).get.sortBy(_._1) === res1
+    // Widening conversion from Long to Float is deprecated because it loses precision.
+    Ns.int.float(long1.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.not(long2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.<(long2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.float.>(long1.toFloat).get === res2
+    Ns.int.float.>=(long2.toFloat).get === res2
+    Ns.int.float.<=(long1.toFloat).get.sortBy(_._1) === res1
 
     // Tacit
 
@@ -363,19 +365,19 @@ class ApplyFloat extends TestSpec {
     Ns.int.float_.<=(1L).get.sorted === res1t
 
 
-    Ns.int.float_(int1).get.sorted === res1t
-    Ns.int.float_.not(int2).get.sorted === res1t
-    Ns.int.float_.<(int2).get.sorted === res1t
-    Ns.int.float_.>(int1).get === res2t
-    Ns.int.float_.>=(int2).get === res2t
-    Ns.int.float_.<=(int1).get.sorted === res1t
+    Ns.int.float_(int1.toFloat).get.sorted === res1t
+    Ns.int.float_.not(int2.toFloat).get.sorted === res1t
+    Ns.int.float_.<(int2.toFloat).get.sorted === res1t
+    Ns.int.float_.>(int1.toFloat).get === res2t
+    Ns.int.float_.>=(int2.toFloat).get === res2t
+    Ns.int.float_.<=(int1.toFloat).get.sorted === res1t
 
-    Ns.int.float_(long1).get.sorted === res1t
-    Ns.int.float_.not(long2).get.sorted === res1t
-    Ns.int.float_.<(long2).get.sorted === res1t
-    Ns.int.float_.>(long1).get === res2t
-    Ns.int.float_.>=(long2).get === res2t
-    Ns.int.float_.<=(long1).get.sorted === res1t
+    Ns.int.float_(long1.toFloat).get.sorted === res1t
+    Ns.int.float_.not(long2.toFloat).get.sorted === res1t
+    Ns.int.float_.<(long2.toFloat).get.sorted === res1t
+    Ns.int.float_.>(long1.toFloat).get === res2t
+    Ns.int.float_.>=(long2.toFloat).get === res2t
+    Ns.int.float_.<=(long1.toFloat).get.sorted === res1t
   }
 
 
@@ -415,19 +417,19 @@ class ApplyFloat extends TestSpec {
     Ns.int.floats.<=(1L).get.sortBy(_._1) === res1
 
 
-    Ns.int.floats(int1).get.sortBy(_._1) === res1
-    Ns.int.floats.not(int2).get.sortBy(_._1) === res1
-    Ns.int.floats.<(int2).get.sortBy(_._1) === res1
-    Ns.int.floats.>(int1).get === res2
-    Ns.int.floats.>=(int2).get === res2
-    Ns.int.floats.<=(int1).get.sortBy(_._1) === res1
+    Ns.int.floats(int1.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.not(int2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.<(int2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.>(int1.toFloat).get === res2
+    Ns.int.floats.>=(int2.toFloat).get === res2
+    Ns.int.floats.<=(int1.toFloat).get.sortBy(_._1) === res1
 
-    Ns.int.floats(long1).get.sortBy(_._1) === res1
-    Ns.int.floats.not(long2).get.sortBy(_._1) === res1
-    Ns.int.floats.<(long2).get.sortBy(_._1) === res1
-    Ns.int.floats.>(long1).get === res2
-    Ns.int.floats.>=(long2).get === res2
-    Ns.int.floats.<=(long1).get.sortBy(_._1) === res1
+    Ns.int.floats(long1.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.not(long2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.<(long2.toFloat).get.sortBy(_._1) === res1
+    Ns.int.floats.>(long1.toFloat).get === res2
+    Ns.int.floats.>=(long2.toFloat).get === res2
+    Ns.int.floats.<=(long1.toFloat).get.sortBy(_._1) === res1
 
     // Tacit
 
@@ -446,18 +448,18 @@ class ApplyFloat extends TestSpec {
     Ns.int.floats_.<=(1L).get.sorted === res1t
 
 
-    Ns.int.floats_(int1).get.sorted === res1t
-    Ns.int.floats_.not(int2).get.sorted === res1t
-    Ns.int.floats_.<(int2).get.sorted === res1t
-    Ns.int.floats_.>(int1).get === res2t
-    Ns.int.floats_.>=(int2).get === res2t
-    Ns.int.floats_.<=(int1).get.sorted === res1t
+    Ns.int.floats_(int1.toFloat).get.sorted === res1t
+    Ns.int.floats_.not(int2.toFloat).get.sorted === res1t
+    Ns.int.floats_.<(int2.toFloat).get.sorted === res1t
+    Ns.int.floats_.>(int1.toFloat).get === res2t
+    Ns.int.floats_.>=(int2.toFloat).get === res2t
+    Ns.int.floats_.<=(int1.toFloat).get.sorted === res1t
 
-    Ns.int.floats_(long1).get.sorted === res1t
-    Ns.int.floats_.not(long2).get.sorted === res1t
-    Ns.int.floats_.<(long2).get.sorted === res1t
-    Ns.int.floats_.>(long1).get === res2t
-    Ns.int.floats_.>=(long2).get === res2t
-    Ns.int.floats_.<=(long1).get.sorted === res1t
+    Ns.int.floats_(long1.toFloat).get.sorted === res1t
+    Ns.int.floats_.not(long2.toFloat).get.sorted === res1t
+    Ns.int.floats_.<(long2.toFloat).get.sorted === res1t
+    Ns.int.floats_.>(long1.toFloat).get === res2t
+    Ns.int.floats_.>=(long2.toFloat).get === res2t
+    Ns.int.floats_.<=(long1.toFloat).get.sorted === res1t
   }
 }

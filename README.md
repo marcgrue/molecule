@@ -78,13 +78,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.4.1
+sbt.version=1.4.5
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.9.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.10.1")
 ```
 
 `build.sbt`:
@@ -99,8 +99,8 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.8",
-      "com.datomic" % "datomic-free" % "0.9.5697"
+      "org.scalamolecule" %% "molecule" % "0.23.0",
+      "com.datomic" % "datomic-free" % "0.9.5697" // or pro (see README_pro)
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
@@ -116,8 +116,8 @@ an example of how Molecule is used both on the server and client side.
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.9.0")
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.10.1")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.1")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 ```
 
@@ -138,7 +138,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.22.8",
+      "org.scalamolecule" %% "molecule" % "0.23.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -147,7 +147,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.22.8")
+      ("org.scalamolecule" %%% "molecule" % "0.23.0")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -158,21 +158,6 @@ compiled to javascript).
 
 Molecule is available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).
 
-## Test
-Test in IDE or with `sbt` (Scala 2.13.2):
-```
-sbt
-
-// All tests
-sbt:molecule> test 
-
-// All JS or JVM tests
-sbt:molecule> moleculeJS/test
-sbt:molecule> moleculeJVM/test
-
-// Single test
-sbt:molecule> testOnly molecule.coretests.expression.Comparison
-```
 
 #### Author
 Marc Grue

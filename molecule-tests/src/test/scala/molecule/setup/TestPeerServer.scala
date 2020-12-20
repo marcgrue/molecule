@@ -1,12 +1,12 @@
-package molecule.testing
+package molecule.setup
 
 import datomicScala.client.api.sync.Client
 import molecule.core.ast.transactionModel.{Retract, RetractEntity, Statement}
 import molecule.core.schema.SchemaTransaction
 import molecule.core.util.testing.{TxCount, TxCountSchema}
+import molecule.datomic.api.out3._
 import molecule.datomic.client.facade.{Conn_Client, Datomic_Client}
 import scala.collection.mutable
-import molecule.datomic.api.out3._
 
 
 object TestPeerServer {

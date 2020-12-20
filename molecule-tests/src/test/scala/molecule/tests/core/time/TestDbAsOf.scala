@@ -7,8 +7,6 @@ import molecule.tests.core.time.domain.Counter
 
 
 class TestDbAsOf extends TestSpec {
-//  peerOnly = true
-//    devLocalOnly = true
 
   class Setup extends CoreSetup {
     val txR1    = Ns.int(1).save

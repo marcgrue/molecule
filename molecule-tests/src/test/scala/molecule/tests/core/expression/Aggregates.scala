@@ -8,7 +8,7 @@ import molecule.TestSpec
 
 class Aggregates extends TestSpec {
 
-  class AggregateSetup extends CoreSetup {
+  class Setup extends CoreSetup {
 
     // We pair cardinality many attribute values with card-one's
     // too to be able to group by cardinality one values
@@ -80,7 +80,7 @@ class Aggregates extends TestSpec {
     (value * factor).round / factor.toDouble
   }
 
-  "sum" in new AggregateSetup {
+  "sum" in new Setup {
     Ns.int(sum).get.head === (1 + 2 + 3)
     Ns.long(sum).get.head === 6L
     Ns.float(sum).get.head === 6.6f
@@ -95,7 +95,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "median" in new AggregateSetup {
+  "median" in new Setup {
     Ns.int(median).get.head === 2
     Ns.long(median).get.head === 2L
     Ns.float(median).get.head === 2.2f
@@ -103,7 +103,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "avg" in new AggregateSetup {
+  "avg" in new Setup {
     Ns.int(avg).get.head === (1 + 2 + 3) / 3
     Ns.long(avg).get.head === 2
     if (system == DatomicPeerServer)
@@ -121,7 +121,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "variance" in new AggregateSetup {
+  "variance" in new Setup {
     Ns.int(variance).get.head === 0.6666666666666666
     Ns.long(variance).get.head === 0.6666666666666666
     Ns.float(variance).get.head === 0.8066666666666665
@@ -129,7 +129,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "stddev" in new AggregateSetup {
+  "stddev" in new Setup {
     Ns.int(stddev).get.head === 0.816496580927726
     Ns.long(stddev).get.head === 0.816496580927726
     Ns.float(stddev).get.head === 0.8981462390204986
@@ -137,7 +137,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "min" in new AggregateSetup {
+  "min" in new Setup {
 
     // card one
 
@@ -239,7 +239,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "max" in new AggregateSetup {
+  "max" in new Setup {
 
     // card one
 
@@ -354,7 +354,7 @@ class Aggregates extends TestSpec {
   val bigDecs = Seq(bigDec1, bigDec2, bigDec3)
 
 
-  "rand" in new AggregateSetup {
+  "rand" in new Setup {
     strs.contains(Ns.str(rand).get.head) === true
     ints.contains(Ns.int(rand).get.head) === true
     longs.contains(Ns.long(rand).get.head) === true
@@ -383,7 +383,7 @@ class Aggregates extends TestSpec {
   }
 
 
-  "sample" in new AggregateSetup {
+  "sample" in new Setup {
     strs.contains(Ns.str(sample).get.head) === true
     ints.contains(Ns.int(sample).get.head) === true
     longs.contains(Ns.long(sample).get.head) === true
@@ -525,7 +525,7 @@ class Aggregates extends TestSpec {
     )
   }
 
-  "Map attributes can't use aggregates" in new AggregateSetup {
+  "Map attributes can't use aggregates" in new Setup {
     expectCompileError(
       "m(Ns.intMap(min))",
       "molecule.core.ops.exception.VerifyRawModelException: Only expression keywords `not` and `unify` can be applied to Map attributes."

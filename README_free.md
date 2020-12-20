@@ -55,6 +55,24 @@ While the transactor is running, create a new tab/process in the terminal to run
 
 Now you can run molecule tests or projects against Datomic free.
 
+## Test
+Test in IDE or with sbt:
+```
+sbt
+
+// Single test
+sbt:molecule> testOnly molecule.tests.core.ref.TwoStepQueries
+
+// Group of tests (works only with peer, so set `tests` to 1 in TestSpec)
+sbt:molecule> testOnly molecule.tests.core.ref.*
+
+// All tests (works only with peer, so set `tests` to 1 in TestSpec)
+sbt:molecule> test
+```
+Using sbt is about twice as fast and therefore preferable
+when running all tests. Remember to ctrl-c the sbt process when switching to
+test in IDE to avoid process locks.
+
 
 ## Further info
 

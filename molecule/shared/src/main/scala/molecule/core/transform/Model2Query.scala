@@ -15,7 +15,7 @@ import molecule.core.util.Helpers
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
@@ -290,6 +290,7 @@ object Model2Query extends Helpers {
       case a@Atom(_, _, _, 4, _, _, _, _) if opt            => resolveAtomKeyedMapOptional(q, e, a)
       case a@Atom(_, _, _, 4, _, _, _, key :: Nil) if tacit => resolveAtomKeyedMapTacit(q, e, a, v, v1, v2, key)
       case a@Atom(_, _, _, 4, _, _, _, key :: Nil)          => resolveAtomKeyedMapMandatory(q, e, a, v, v1, v2, v3, key)
+      case a                                                => abort("Unexpected Atom: " + a)
     }
   }
 
@@ -1029,6 +1030,8 @@ object Model2Query extends Helpers {
           case DataClause(ds, e@Var(_), a, v, tx, op) =>
             // Add i to variables
             Seq(DataClause(ds, vi(e), a, queryValue(v), queryTerm(tx), queryTerm(op)))
+
+          case dc => abort("Unexpected DataClause: " + dc)
         }
         def makeSelfJoinClauses(expr: QueryExpr): Seq[Clause] = expr match {
           case dc: DataClause                                      => dataClauses(dc)

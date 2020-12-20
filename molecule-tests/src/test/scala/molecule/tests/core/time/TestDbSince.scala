@@ -17,7 +17,12 @@ class TestDbSince extends TestSpec {
   }
 
   // Seems like a bug that we can't apply filter to with-db with peer-server
-  tests = 13
+  // respect base setting
+  tests match {
+    case 1 =>
+    case 3 =>
+    case _ => tests = 13
+  }
 
   "since: input types" in new Setup {
 

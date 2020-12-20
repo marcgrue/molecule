@@ -9,8 +9,12 @@ class GetHistory extends TestSpec {
 
   // Since peer-server accumulates data across tests, we don't test history
   // here, although it works fine on a fresh/stable db
-  tests = 13
-
+  // respect base setting
+  tests match {
+    case 1 =>
+    case 3 =>
+    case _ => tests = 13
+  }
 
   class Setup extends CoreSetup {
     // First entity - 3 transactions

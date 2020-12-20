@@ -50,9 +50,7 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
   }
 
-  def connect(dbName: String): Conn_Client = {
-    Conn_Client(client, dbName)
-  }
+  def connect(dbName: String): Conn_Client = Conn_Client(client, dbName)
 
   def allowedClientDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
     val nss2     = new util.ArrayList[jMap[Object, Object]]()
@@ -107,7 +105,8 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     conn.transact(allowedClientDefinitions(schema.namespaces))
     conn
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.getMessage)
+    //      throw new DatomicFacadeException(e.getCause.toString)
   }
 
   /** Deletes existing database (!) and creates a new empty db with schema from schema data structure.
