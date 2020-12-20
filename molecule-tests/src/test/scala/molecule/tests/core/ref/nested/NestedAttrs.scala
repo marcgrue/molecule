@@ -26,6 +26,7 @@ class NestedAttrs extends TestSpec {
         (1, List(1)),
       )
 
+      // Optional nested
       m(Ns.int.Refs1 *? Ref1.int1.str1$).get.sortBy(_._1) === List(
         (1, List((1, Some("a")), (2, None))),
         (2, List())

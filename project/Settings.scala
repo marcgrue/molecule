@@ -1,17 +1,16 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import sbt.Keys._
 import sbt._
-import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, buildInfoKeys, buildInfoPackage}
-import sbtmolecule.MoleculePlugin.autoImport.{moleculeMakeJars, moleculeSchemas}
+import sbt.Keys._
+import sbtbuildinfo.BuildInfoPlugin.autoImport.{buildInfoKeys, buildInfoPackage, BuildInfoKey}
 
-object Settings {
+object Settings extends SettingsDatomic with SettingsMolecule {
 
 
   val base: Seq[Def.Setting[_]] = Seq(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.23.0-SNAPSHOT",
+    version in ThisBuild := "0.23.0-SNAPSHOT",
     crossScalaVersions := Seq("2.12.12", "2.13.3"),
     scalaVersion in ThisBuild := "2.13.3",
 
@@ -31,7 +30,8 @@ object Settings {
       ("datomic" at "http://files.datomic.com/maven").withAllowInsecureProtocol(true),
       ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true),
       // If using datomic-pro/starter
-      "my.datomic.com" at "https://my.datomic.com/repo"
+      "my.datomic.com" at "https://my.datomic.com/repo",
+      Resolver.mavenLocal
     ),
 
     unmanagedSourceDirectories in Compile ++= {
@@ -44,20 +44,18 @@ object Settings {
     }
   )
 
-  // Datomic settings
-  val datomicProtocol = "dev" // dev = starter/pro. Can be "free" also.
-  val datomicPath     = "/Users/mg/lib/datomic" // path to your datomic downloads
-  val datomicPro      = "1.0.6222"
-  val datomicFree     = "0.9.5697"
 
   val shared: Seq[Def.Setting[_]] = Seq(
     name := "shared",
     moduleName := "shared",
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion,
+    buildInfoKeys := Seq[BuildInfoKey](
+      name, version, scalaVersion, sbtVersion,
       "datomicProtocol" -> datomicProtocol,
-      "datomicPath" -> datomicPath,
-      "datomicPro" -> datomicPro,
-      "datomicFree" -> datomicFree
+      "datomicHome" -> datomicHome,
+      "datomicProVersions" -> datomicProVersions,
+      "datomicProVersion" -> datomicProVersion,
+      "datomicDevLocalVersions" -> datomicDevLocalVersions,
+      "datomicDevLocalVersion" -> datomicDevLocalVersion,
     ),
     buildInfoPackage := "moleculeBuildInfo"
   )
@@ -68,6 +66,7 @@ object Settings {
     )
   )
 
+
   val jvm: Seq[Def.Setting[_]] = {
     Seq(
       name := "jvm",
@@ -77,51 +76,22 @@ object Settings {
         "org.specs2" %% "specs2-core" % "4.10.0",
         "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.3"
       )
-    ) ++ (
-      if (datomicProtocol == "dev")
-        Seq(
-          libraryDependencies += "com.datomic" % "datomic-pro" % datomicPro,
-          excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
-          /*
-          If using datomic-pro/starter, create a ~/.sbt/.credentials file with the following content:
-            realm=Datomic Maven Repo
-            host=my.datomic.com
-            id=my.datomic.com
-            user=<your-username>
-            pass=<your-password>
-          * */
-          credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
-        )
-      else
-        Seq(libraryDependencies += "com.datomic" % "datomic-free" % datomicFree)
+    ) ++ (if (datomicProtocol == "free") {
+      Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
+    } else {
+      Seq(
+        libraryDependencies += "com.datomic" % "datomic-pro" % datomicProVersion,
+        excludeDependencies += ExclusionRule("com.datomic", "datomic-free")
       )
+    })
   }
 
-  // Proprietary Client dev-local dependency needed for tests
+  // Proprietary Client dev-local dependency needed for tests against dev-local
   // Please download from https://cognitect.com/dev-tools and install locally per included instructions
   val tests: Seq[Def.Setting[_]] = Seq(
-    resolvers ++= Seq(Resolver.mavenLocal),
+    resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
-      "com.datomic" % "dev-local" % "0.9.229"
-    )
-  )
-
-
-  // Molecule boilerplate code generation settings -----------------
-
-  lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
-    moduleName := "moleculeTests",
-    moleculeMakeJars := true,
-    moleculeSchemas := Seq(
-      "molecule/tests/core/base",
-      "molecule/tests/core/bidirectionals",
-      "molecule/tests/core/nested",
-      "molecule/tests/core/schemaDef",
-
-      "molecule/tests/examples/datomic/dayOfDatomic",
-      "molecule/tests/examples/datomic/mbrainz",
-      "molecule/tests/examples/datomic/seattle",
-      "molecule/tests/examples/gremlin/gettingStarted"
+      "com.datomic" % "dev-local" % datomicDevLocalVersion
     )
   )
 }

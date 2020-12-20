@@ -2,7 +2,7 @@
 
 
 Molecule is a type safe and intuitive Scala meta-DSL for the
-[Datomic][datomic] database. 
+[Datomic][datomic] database.
 
 Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [Molecule forum](https://groups.google.com/forum/#!forum/molecule-dsl)
 
@@ -10,10 +10,10 @@ Visit [ScalaMolecule.org](http://ScalaMolecule.org) to learn more or visit the [
 
 ## A meta-DSL
 
-Molecule is a "meta-DSL" in the sense that _your domain terms_ form the tokens of your queries and 
-transactions. 
+Molecule is a "meta-DSL" in the sense that _your domain terms_ form the tokens of your queries and
+transactions.
 
-So instead of fitting in your domain terms between commands like `SELECT name, age FROM Person` etc, 
+So instead of fitting in your domain terms between commands like `SELECT name, age FROM Person` etc,
 or other query constructs in other database languages, you directly use your domain terms as tokens:
 
 ```scala
@@ -29,7 +29,7 @@ trait Person {
   val age  = oneInt
 }
 ```
-When you compile your project with `sbt compile`, Molecule generates the necessary boilerplate code 
+When you compile your project with `sbt compile`, Molecule generates the necessary boilerplate code
 in order to be able to write the more intuitive query. Since the types of each attribute `name` and
 `age` is encoded in the schema definition we'll also get typed data back from our query.
 
@@ -45,12 +45,12 @@ Molecule offers both a synchronous and an asynchronous API for all query getters
 
 
 ## Producing Datalog
-Molecule transform "molecules" like `Person.name.age.get` to [Datalog](https://docs.datomic.com/on-prem/query.html) queries 
+Molecule transform "molecules" like `Person.name.age.get` to [Datalog](https://docs.datomic.com/on-prem/query.html) queries
 for Datomic. The returned untyped data from Datomic is then casted by Molecule to the expected Scala type.
 
 All queries are prepared at compile time by macros. So there is no overhead at runtime when running the queries.
 
-   
+
 ## Getting started
 
 - [Introduction](http://www.scalamolecule.org/manual/quick-start/introduction/) to Datomic/Molecule
@@ -73,7 +73,7 @@ All queries are prepared at compile time by macros. So there is no overhead at r
 Molecule is currently available for Scala (JVM, version 8 and later) and Scala.js (JavaScript).
 Scala 2.12 and Scala 2.13 are supported.
 
-Add the following to your build files: 
+Add the following to your build files:
 
 `project/build.properties`:
 
@@ -109,7 +109,7 @@ lazy val yourProject = project.in(file("app"))
 ## Molecule in a Scala.js project
 
 Molecule AST's and other generic interfaces have been ported to Scala.js so
-that you can also work with Molecule on the client side. 
+that you can also work with Molecule on the client side.
 See the [molecule-admin](https://github.com/scalamolecule/molecule-admin) project for
 an example of how Molecule is used both on the server and client side.
 
@@ -153,7 +153,7 @@ lazy val yourProjectJS = yourProject.js
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not 
+Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not
 compiled to javascript).
 
 Molecule is available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).

@@ -21,7 +21,7 @@ class TxRaw extends TestSpec {
 
     if (system == DatomicPeer) {
       // Add raw data from external file with edn transactional data
-      val data = new FileReader("moleculeTests/resources/tests/core/time/save2-3.dtm")
+      val data = new FileReader("molecule-tests/resources/tests/core/time/save2-3.dtm")
       // contains: "[{:Ns/int 2} {:Ns/int 3}]"
       conn.transact(Util.readAll(data).get(0).asInstanceOf[java.util.List[AnyRef]])
 

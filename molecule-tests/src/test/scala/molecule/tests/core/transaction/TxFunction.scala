@@ -156,7 +156,7 @@ class TxFunction extends TestSpec {
   import TxFunctionExamples._
 
   // Only Peer systems and ion systems can use tx functions
-  // (ion tx fns not impl yet)
+  // (ion tx fns not impl since AWS/Clojure infrastructure might not be viable for molecule)
   tests = 1
 
   "Synchronous / Asynchronous" in new CoreSetup {

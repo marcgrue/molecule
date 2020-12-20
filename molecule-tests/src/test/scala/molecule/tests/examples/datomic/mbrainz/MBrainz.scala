@@ -7,7 +7,7 @@ import molecule.TestSpec
 import scala.language.postfixOps
 
 
-// See instructions in examples/README to setup testing mbrainz
+// See instructions in examples/README_pro.md to setup testing mbrainz
 
 class MBrainz extends TestSpec {
 

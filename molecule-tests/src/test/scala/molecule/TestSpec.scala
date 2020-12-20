@@ -14,12 +14,12 @@ import molecule.tests.core.base.schema.CoreTestSchema
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 import molecule.tests.core.nested.schema.NestedSchema
 import molecule.tests.core.schemaDef.schema.PartitionTestSchema
-import molecule.tests.examples.datomic.dayOfDatomic.SocialNewsData
 import molecule.tests.examples.datomic.dayOfDatomic.schema._
+import molecule.tests.examples.datomic.dayOfDatomic.SocialNewsData
 import molecule.tests.examples.datomic.mbrainz.schema.{MBrainzSchema, MBrainzSchemaLowerToUpper}
-import molecule.tests.examples.datomic.seattle.SeattleData
 import molecule.tests.examples.datomic.seattle.schema.SeattleSchema
 import molecule.tests.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
+import molecule.tests.examples.datomic.seattle.SeattleData
 import moleculeBuildInfo.BuildInfo._
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
@@ -33,11 +33,6 @@ class TestSpec extends MoleculeSpec with CoreData {
   var setupException    = Option.empty[Throwable]
   var basisT: Long      = 0L
   def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
-
-  val datomicHome = datomicProtocol match {
-    case "dev"  => datomicPath + "/datomic-pro-" + datomicPro
-    case "free" => datomicPath + "/datomic-free-" + datomicFree
-  }
 
   // What systems to test
   // 1: Peer   2: Peer-server   3: Dev-local
@@ -76,6 +71,7 @@ class TestSpec extends MoleculeSpec with CoreData {
       case e: Throwable => setupException = Some(e)
     }
   }
+
 
   def getConn(
     schema: SchemaTransaction,
@@ -116,42 +112,42 @@ class TestSpec extends MoleculeSpec with CoreData {
 
   // Entry points, coretests
   class CoreSetup extends Scope {
-    implicit val conn: Conn = getConn(CoreTestSchema, "coretests")
+    implicit val conn: Conn = getConn(CoreTestSchema, "m_coretests")
   }
   class BidirectionalSetup extends Scope {
-    implicit val conn = getConn(BidirectionalSchema, "bidirectional")
+    implicit val conn = getConn(BidirectionalSchema, "m_bidirectional")
   }
   class PartitionSetup extends Scope {
-    implicit val conn = getConn(PartitionTestSchema, "partitions")
+    implicit val conn = getConn(PartitionTestSchema, "m_partitions")
   }
   class NestedSetup extends Scope {
-    implicit val conn = getConn(NestedSchema, "nested")
+    implicit val conn = getConn(NestedSchema, "m_nested")
   }
 
   // Entry points, examples
   class AggregateSetup extends Scope {
-    implicit val conn = getConn(AggregatesSchema, "aggregates")
+    implicit val conn = getConn(AggregatesSchema, "m_aggregates")
   }
   class SocialNewsSetup extends SocialNewsData(
-    getConn(SocialNewsSchema, "socialNews")) with Scope
+    getConn(SocialNewsSchema, "m_socialNews")) with Scope
 
   class GraphSetup extends Scope {
-    implicit val conn = getConn(GraphSchema, "graph")
+    implicit val conn = getConn(GraphSchema, "m_graph")
   }
   class Graph2Setup extends Scope {
-    implicit val conn = getConn(Graph2Schema, "graph2")
+    implicit val conn = getConn(Graph2Schema, "m_graph2")
   }
   class ModernGraph1Setup extends Scope {
-    implicit val conn = getConn(ModernGraph1Schema, "modernGraph1")
+    implicit val conn = getConn(ModernGraph1Schema, "m_modernGraph1")
   }
   class ModernGraph2Setup extends Scope {
-    implicit val conn = getConn(ModernGraph2Schema, "modernGraph2")
+    implicit val conn = getConn(ModernGraph2Schema, "m_modernGraph2")
   }
   class ProductsSetup extends Scope {
-    implicit val conn = getConn(ProductsOrderSchema, "productsOrder")
+    implicit val conn = getConn(ProductsOrderSchema, "m_productsOrder")
   }
   class SeattleSetup extends SeattleData(
-    getConn(SeattleSchema, "seattle")) with Scope
+    getConn(SeattleSchema, "m_seattle")) with Scope
 
   class MBrainzSetup extends Scope {
     val dbName = if (system == DatomicDevLocal)

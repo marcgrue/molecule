@@ -376,7 +376,7 @@ class SeattleTests extends TestSpec {
     communities.getSince(dataTxT).size === 0
 
     // Imagining the future
-    val data_rdr2 = new FileReader("moleculeTests/resources/tests/examples/seattle/seattle-data2upper.dtm")
+    val data_rdr2 = new FileReader("molecule-tests/resources/tests/examples/seattle/seattle-data2upper.dtm")
     val newDataTx = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
 
     // future db

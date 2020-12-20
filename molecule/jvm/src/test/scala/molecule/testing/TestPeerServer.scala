@@ -20,7 +20,7 @@ object TestPeerServer {
     var basisT = basisT0
     val cl          = Datomic_Client(client)
     val dataConn    = cl.connect(dbIdentifier)
-    val txCountConn = cl.connect("txCount")
+    val txCountConn = cl.connect("m_txCount")
     val log         = dataConn.clientConn.txRange(Some(1000), Some(1002))
 
     if (log.isEmpty) {

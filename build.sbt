@@ -15,8 +15,9 @@ lazy val js  = molecule.js.enablePlugins(TzdbPlugin)
 lazy val jvm = molecule.jvm
 
 
-lazy val moleculeTests = project.in(file("moleculeTests"))
+lazy val moleculeTests = project.in(file("molecule-tests"))
   .dependsOn(jvm)
   .settings(Settings.base ++ Settings.jvm ++ Settings.tests ++ Publish.not)
+//  .settings(Settings.base ++ Settings.jvm ++ Settings.tests ++ Publish.not)
 // Un-comment to re-create molecule lib jars if schemas change
 //  .enablePlugins(MoleculePlugin).settings(Settings.moleculeTests)

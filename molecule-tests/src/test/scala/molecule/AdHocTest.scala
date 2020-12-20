@@ -2,13 +2,11 @@ package molecule
 
 import datomicClient.ClojureBridge
 import molecule.core.util.Helpers
+import molecule.datomic.api.out3.m
+import molecule.tests.core.base.dsl.coreTest._
 
 
 class AdHocTest extends TestSpec with Helpers with ClojureBridge {
-
-  //  peerOnly = true
-  //  peerServerOnly = true
-  //  devLocalOnly = true
 
 
   "adhoc" in new CoreSetup {
@@ -17,7 +15,6 @@ class AdHocTest extends TestSpec with Helpers with ClojureBridge {
 
     ok
   }
-
 
   //  "adhoc" in new BidirectionalSetup {
   //import molecule.tests.core.bidirectionals.dsl.bidirectional._
@@ -36,10 +33,10 @@ class AdHocTest extends TestSpec with Helpers with ClojureBridge {
   //  }
 
 
-//  "example adhoc" in new SocialNewsSetup {
-//
-//
-//
-//    ok
-//  }
+  //  "example adhoc" in new SocialNewsSetup {
+  //
+  //
+  //
+  //    ok
+  //  }
 }
