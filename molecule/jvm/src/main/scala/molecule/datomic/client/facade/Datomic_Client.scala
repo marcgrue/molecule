@@ -106,7 +106,6 @@ case class Datomic_Client(client: Client) extends ClojureBridge {
     conn
   } catch {
     case e: Throwable => throw new DatomicFacadeException(e.getMessage)
-    //      throw new DatomicFacadeException(e.getCause.toString)
   }
 
   /** Deletes existing database (!) and creates a new empty db with schema from schema data structure.

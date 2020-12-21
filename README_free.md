@@ -70,8 +70,10 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 sbt:molecule> test
 ```
 Using sbt is about twice as fast and therefore preferable
-when running all tests. Remember to ctrl-c the sbt process when switching to
-test in IDE to avoid process locks.
+when running all tests (for peer system only though). 
+
+Remember to ctrl-c the sbt process when switching back to 
+testing in IDE to avoid process locks.
 
 
 ## Further info
