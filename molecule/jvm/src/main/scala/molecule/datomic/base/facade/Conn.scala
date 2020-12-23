@@ -6,13 +6,12 @@ import java.util.{Date, Collection => jCollection, List => jList, Map => jMap}
 import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 import datomic.Peer
-import molecule.core.api.DatomicEntity
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
 import molecule.core.ast.tempDb.TempDb
 import molecule.core.ast.transactionModel.Statement
+import molecule.datomic.base.api.DatomicEntity
 import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
 
 
 /** Facade to Datomic Connection.
@@ -242,26 +241,7 @@ trait Conn {
     * @param inputs Seq of optional input(s) to query
     * @return List[List[AnyRef]]
     * */
-  def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]] = {
-    val raw = qRaw(db, query, inputs)
-    if (raw.isInstanceOf[PersistentVector]
-      && !raw.asInstanceOf[PersistentVector].isEmpty
-      && raw.asInstanceOf[PersistentVector].nth(0).isInstanceOf[PersistentArrayMap]) {
-      raw.asInstanceOf[jCollection[jMap[_, _]]].asScala.toList.map { rows =>
-        rows.asScala.toList.map { case (k, v) => k.toString -> v }
-      }
-    } else {
-      raw.asScala.toList
-        .map(_.asScala.toList
-          .map {
-            case set: clojure.lang.PersistentHashSet => set.asScala.toSet
-            case uriImpl: URIImpl                    => new URI(uriImpl.toString)
-            case bi: clojure.lang.BigInt             => BigInt(bi.toString)
-            case other                               => other
-          }
-        )
-    }
-  }
+  def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]]
 
 
   /** Query Datomic directly with optional Scala inputs and get raw Java result.

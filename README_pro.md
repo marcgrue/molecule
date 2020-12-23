@@ -131,6 +131,11 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 
 // All tests (works only with peer, so set `tests` to 1 in TestSpec)
 sbt:molecule> test 
+
+// Test against scala 2.12
+sbt:molecule> ++2.12.12; test
+sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.*
+sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.TwoStepQueries
 ```
 Using sbt is about twice as fast and therefore preferable
 when running all tests. Remember to ctrl-c the sbt process when switching to

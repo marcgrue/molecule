@@ -3,7 +3,7 @@ package molecule.datomic.base.facade
 import java.util
 import java.util.Date
 import datomic.Datom
-import molecule.core.api.DatomicEntity
+import molecule.datomic.base.api.DatomicEntity
 
 trait DatomicDb {
 

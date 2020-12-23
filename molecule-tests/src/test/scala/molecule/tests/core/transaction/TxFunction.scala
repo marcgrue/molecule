@@ -8,6 +8,7 @@ import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out3._
 import molecule.datomic.base.facade.Conn
 import molecule.TestSpec
+import moleculeBuildInfo.BuildInfo
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -41,9 +42,9 @@ import scala.concurrent.duration._
 * FREE
 * The Free version can't set the classpath variable so we need to provide the tx functions manually
 * by making a jar of our classes, move it to the transactor lib folder and start the transactor:
-* > cd ~/molecule/molecule/coretests/target/scala-2.13/test-classes  [path to your compiled classes]
+* > cd <project-path>/molecule-tests/target/scala-2.13/test-classes  [path to your compiled classes]
 * > jar cvf scala-fns.jar .
-* > mv ~/molecule/molecule/coretests/target/scala-2.13/test-classes/scala-fns.jar DATOMIC_HOME/lib/
+* > mv <project-path>/molecule-tests/target/scala-2.13/test-classes/scala-fns.jar DATOMIC_HOME/lib/
 * > bin/transactor ...
 * */
 @TxFns
@@ -85,7 +86,8 @@ object TxFunctionExamples {
   def withdraw(from: Long, amount: Int)(implicit conn: Conn): Seq[Seq[Statement]] = {
     val curFromBalance = Ns(from).int.get.headOption.getOrElse(0)
     if (curFromBalance < amount)
-      throw new TxFnException(s"Can't transfer $amount from account $from having a balance of only $curFromBalance.")
+      throw new TxFnException(
+        s"Can't transfer $amount from account $from having a balance of only $curFromBalance.")
 
     val newFromBalance = curFromBalance - amount
     Ns(from).int(newFromBalance).getUpdateTx
@@ -159,224 +161,228 @@ class TxFunction extends TestSpec {
   // (ion tx fns not impl since AWS/Clojure infrastructure might not be viable for molecule)
   tests = 1
 
-  "Synchronous / Asynchronous" in new CoreSetup {
+  // tx functions only implemented for scala 2.13
+  if (BuildInfo.scalaVersion.startsWith("2.13")) {
 
-    // Transaction functions can be invoked both synchronously and asynchronously
-    // with `transact(...)` or transactAsync(...)`
+    "Synchronous / Asynchronous" in new CoreSetup {
 
-    // Example from https://www.youtube.com/watch?v=8fY687k7DMA
-    // Existing data
-    val e = Ns.int(100).save.eid
+      // Transaction functions can be invoked both synchronously and asynchronously
+      // with `transact(...)` or transactAsync(...)`
 
-    // Synchronous, blocking tx fn call
-    transactFn(inc(e, 10))
+      // Example from https://www.youtube.com/watch?v=8fY687k7DMA
+      // Existing data
+      val e = Ns.int(100).save.eid
 
-    // Value is updated
-    Ns.int.get.head === 110
+      // Synchronous, blocking tx fn call
+      transactFn(inc(e, 10))
 
-    // todo: Async implementation for systems other than Peer
-    if (system == DatomicPeer) {
-      // Asynchronous, non-blocking tx fn call (uses Datomic's asynchronous api)
-      Await.result(
-        transactFnAsync(inc(e, 15)) map { txReport =>
-          Ns.int.get.head === 125
-        },
-        2.seconds
-      )
+      // Value is updated
+      Ns.int.get.head === 110
+
+      // todo: Async implementation for systems other than Peer
+      if (system == DatomicPeer) {
+        // Asynchronous, non-blocking tx fn call (uses Datomic's asynchronous api)
+        Await.result(
+          transactFnAsync(inc(e, 15)) map { txReport =>
+            Ns.int.get.head === 125
+          },
+          2.seconds
+        )
+      }
+
+      // All examples can be synchronous/asynchronous. For brevity,
+      // sync calls are used in the following tests
     }
 
-    // All examples can be synchronous/asynchronous. For brevity,
-    // sync calls are used in the following tests
-  }
+
+    "Atomic constraints" in new CoreSetup {
+
+      val fromAccount  = Ns.int(100).save.eid
+      val toAccount    = Ns.int(700).save.eid
+      val tooBigAmount = 200
+
+      (transactFn(transfer(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
+        .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
+        s"Can't transfer 200 from account $fromAccount having a balance of only 100."
+
+      // Live data unchanged
+      Ns(fromAccount).int.get.head === 100
+      Ns(toAccount).int.get.head === 700
+
+      val okAmount = 20
+      // Atomicity is guaranteed:
+      // Balance check and saving of new values within same transaction boundary
+      transactFn(transfer(fromAccount, toAccount, okAmount))
+
+      // Live data changed
+      Ns(fromAccount).int.get.head === 80
+      Ns(toAccount).int.get.head === 720
+    }
 
 
-  "Atomic constraints" in new CoreSetup {
+    "Composing multiple tx functions" in new CoreSetup {
 
-    val fromAccount  = Ns.int(100).save.eid
-    val toAccount    = Ns.int(700).save.eid
-    val tooBigAmount = 200
+      // (identical effect as in previous test)
 
-    (transactFn(transfer(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
-      .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
-      s"Can't transfer 200 from account $fromAccount having a balance of only 100."
+      val fromAccount  = Ns.int(100).save.eid
+      val toAccount    = Ns.int(700).save.eid
+      val tooBigAmount = 200
 
-    // Live data unchanged
-    Ns(fromAccount).int.get.head === 100
-    Ns(toAccount).int.get.head === 700
+      (transactFn(transferComposed(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
+        .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
+        s"Can't transfer 200 from account $fromAccount having a balance of only 100."
 
-    val okAmount = 20
-    // Atomicity is guaranteed:
-    // Balance check and saving of new values within same transaction boundary
-    transactFn(transfer(fromAccount, toAccount, okAmount))
+      // Live data unchanged
+      Ns(fromAccount).int.get.head === 100
+      Ns(toAccount).int.get.head === 700
 
-    // Live data changed
-    Ns(fromAccount).int.get.head === 80
-    Ns(toAccount).int.get.head === 720
-  }
+      val okAmount = 20
+      // `transferComposed` calls two sub tx functions and still guarantees atomicity
+      transactFn(transferComposed(fromAccount, toAccount, okAmount))
+
+      // Live data changed
+      Ns(fromAccount).int.get.head === 80
+      Ns(toAccount).int.get.head === 720
+    }
+
+    /**
+      * The two following tests fail when running in sbt and succeed when running in IDE
+      *
+      * [error]  org.codehaus.commons.compiler.CompileException:
+      * File org.codehaus.commons.compiler.jdk.SimpleCompiler$1[simplecompiler], Line 1, Column 0:
+      * package datomic does not exist (compiler.err.doesnt.exist) (TxMethods.scala:320)
+      *
+      * `datomic` doesn't seem to be on the classpath and might be related to some of those issues:
+      */
+    "Tx fn + 1 tx meta data molecule" in new CoreSetup {
+
+      val fromAccount = Ns.int(100).save.eid
+      val toAccount   = Ns.int(700).save.eid
+      val amount      = 20
+
+      // Add 1 tx meta data molecule to tx function transaction
+      transactFn(transfer(fromAccount, toAccount, amount), Ref2.str2("Tx meta data..."))
+
+      // Live data changed and tx meta data added
+      // Both account entities share the same transaction meta data
+      Ns(fromAccount).int.Tx(Ref2.str2).get.head === (80, "Tx meta data...")
+      Ns(toAccount).int.Tx(Ref2.str2).get.head === (720, "Tx meta data...")
+    }
 
 
-  "Composing multiple tx functions" in new CoreSetup {
+    "Tx fn + 2 tx meta data molecules" in new CoreSetup {
 
-    // (identical effect as in previous test)
+      val fromAccount = Ns.int(100).save.eid
+      val toAccount   = Ns.int(700).save.eid
+      val amount      = 20
 
-    val fromAccount  = Ns.int(100).save.eid
-    val toAccount    = Ns.int(700).save.eid
-    val tooBigAmount = 200
+      // Add 2 tx meta data molecules to tx function transaction
+      transactFn(transfer(fromAccount, toAccount, amount), Ref2.str2("Tx meta data..."), Ref1.int1(12345))
 
-    (transactFn(transferComposed(fromAccount, toAccount, tooBigAmount)) must throwA[TxFnException])
-      .message === s"Got the exception molecule.core.macros.exception.TxFnException: " +
-      s"Can't transfer 200 from account $fromAccount having a balance of only 100."
+      // Live data changed
+      Ns(fromAccount).int.get.head === 80
+      Ns(toAccount).int.get.head === 720
 
-    // Live data unchanged
-    Ns(fromAccount).int.get.head === 100
-    Ns(toAccount).int.get.head === 700
+      // Both account entities share the same transaction meta data
+      Ns(fromAccount).int.Tx(Ref2.str2).Tx(Ref1.int1).get.head === (80, "Tx meta data...", 12345)
+      Ns(toAccount).int.Tx(Ref2.str2).Tx(Ref1.int1).get.head === (720, "Tx meta data...", 12345)
 
-    val okAmount = 20
-    // `transferComposed` calls two sub tx functions and still guarantees atomicity
-    transactFn(transferComposed(fromAccount, toAccount, okAmount))
+      // Partial tx meta data queries
+      Ns(fromAccount).int.Tx(Ref2.str2).get.head === (80, "Tx meta data...")
+      Ns(toAccount).int.Tx(Ref1.int1).get.head === (720, 12345)
+    }
 
-    // Live data changed
-    Ns(fromAccount).int.get.head === 80
-    Ns(toAccount).int.get.head === 720
-  }
 
-  /**
-    * The two following tests fail when running in sbt and succeed when running in IDE
-    *
-    * [error]  org.codehaus.commons.compiler.CompileException:
-    * File org.codehaus.commons.compiler.jdk.SimpleCompiler$1[simplecompiler], Line 1, Column 0:
-    * package datomic does not exist (compiler.err.doesnt.exist) (TxMethods.scala:320)
-    *
-    * `datomic` doesn't seem to be on the classpath and might be related to some of those issues:
+    "Constructor" in new CoreSetup {
+
+      // Use tx function as a data constructor enforcing some integrity checks
+
+      // Existing user
+      Ns.str("Ben").int(28).save
+
+      (transactFn(addUser("Ben", 22)) must throwA[TxFnException])
+        .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
+        "Username `Ben` is already taken. Please choose another username."
+
+      // Age validation in tx fn
+      (transactFn(addUser("Liz", 17)) must throwA[TxFnException])
+        .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
+        "Users have to be at least 18 years old to register."
+
+      // Successful User construction with all validation rules satisfied
+      // Construction is atomic - only a fully valid User can be saved.
+      transactFn(addUser("Ann", 28))
+      Ns.str("Ann").int(28).get.size === 1
+    }
+
+
+    "Constructor with partial validation" in new CoreSetup {
+
+      // Use tx function as a data constructor enforcing some integrity checks inside the
+      // tx fun and some validation outside the tx function.
+
+      // Existing user
+      Ns.str("Ben").int(28).save
+
+      (transactFn(addUserPartiallyChecked("Ben", 22)) must throwA[TxFnException])
+        .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
+        "Username `Ben` is already taken. Please choose another username."
+
+      // Age validation outside tx fn
+      // - saves transactor workload
+      // - gives up on encapsulating validation atomically
+      // An unvalid User could be saved if application code doesn't check the age for instance:
+      transactFn(addUserPartiallyChecked("Liz", 17))
+
+      // Under-age Liz is wrongly saved
+      Ns.str("Liz").int(17).get.size === 1
+
+      // If age is validated in application code, we can of course construct a valid User
+      transactFn(addUserPartiallyChecked("Ann", 28))
+      Ns.str("Ann").int(28).get.size === 1
+
+      // If validation not dependent on db lookup is taken care of in application code, it can
+      // save workload on the transactor to move it outside tx functions.
+    }
+
+
+    "Debugging tx fn call" in new CoreSetup {
+
+      val e = Ns.int(100).save.eid
+
+      // Print potential result of tx fn call to `with` branch of current db without affecting live db.
+      debugTransactFn(inc(e, 10))
+      // 1st group: Empty list of additional statements since only the tx fn was called.
+      //            If calling tx fn with molecule having attributes, the attribute statements will show here
+      // 2nd group: tx timestamp
+      //            Addition of new value 110
+      //            Retraction of old value 100
+      /*
+      ## 1 ## TxReport
+      ========================================================================
+      1          List(
+      )
+      ------------------------------------------------
+      2          List(
+        1    1     added: true ,   t: 13194139534344,   e: 13194139534344,   a: 50,   v: Wed Nov 07 10:48:56 CET 2018
+
+        2    2     added: true ,   t: 13194139534344,   e: 17592186045445,   a: 64,   v: 110
+             3     added: false,  -t: 13194139534344,  -e: 17592186045445,  -a: 64,  -v: 100)
+      ========================================================================
     */
-  "Tx fn + 1 tx meta data molecule (OBS: fails with sbt, but succeeds with IDE!)" in new CoreSetup {
 
-    val fromAccount = Ns.int(100).save.eid
-    val toAccount   = Ns.int(700).save.eid
-    val amount      = 20
-
-    // Add 1 tx meta data molecule to tx function transaction
-    transactFn(transfer(fromAccount, toAccount, amount), Ref2.str2("Tx meta data..."))
-
-    // Live data changed and tx meta data added
-    // Both account entities share the same transaction meta data
-    Ns(fromAccount).int.Tx(Ref2.str2).get.head === (80, "Tx meta data...")
-    Ns(toAccount).int.Tx(Ref2.str2).get.head === (720, "Tx meta data...")
-  }
+      // Live data unchanged
+      Ns.int.get.head === 100
 
 
-  "Tx fn + 2 tx meta data molecules (OBS: fails with sbt, but succeeds with IDE!)" in new CoreSetup {
+      // Invoke tx function
+      val txReport = transactFn(inc(e, 10))
 
-    val fromAccount = Ns.int(100).save.eid
-    val toAccount   = Ns.int(700).save.eid
-    val amount      = 20
+      // Print debug info from result of tx fn execution (will show the same as `debugTransact(...)`
+      txReport.debug
 
-    // Add 2 tx meta data molecules to tx function transaction
-    transactFn(transfer(fromAccount, toAccount, amount), Ref2.str2("Tx meta data..."), Ref1.int1(12345))
-
-    // Live data changed
-    Ns(fromAccount).int.get.head === 80
-    Ns(toAccount).int.get.head === 720
-
-    // Both account entities share the same transaction meta data
-    Ns(fromAccount).int.Tx(Ref2.str2).Tx(Ref1.int1).get.head === (80, "Tx meta data...", 12345)
-    Ns(toAccount).int.Tx(Ref2.str2).Tx(Ref1.int1).get.head === (720, "Tx meta data...", 12345)
-
-    // Partial tx meta data queries
-    Ns(fromAccount).int.Tx(Ref2.str2).get.head === (80, "Tx meta data...")
-    Ns(toAccount).int.Tx(Ref1.int1).get.head === (720, 12345)
-  }
-
-
-  "Constructor" in new CoreSetup {
-
-    // Use tx function as a data constructor enforcing some integrity checks
-
-    // Existing user
-    Ns.str("Ben").int(28).save
-
-    (transactFn(addUser("Ben", 22)) must throwA[TxFnException])
-      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
-      "Username `Ben` is already taken. Please choose another username."
-
-    // Age validation in tx fn
-    (transactFn(addUser("Liz", 17)) must throwA[TxFnException])
-      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
-      "Users have to be at least 18 years old to register."
-
-    // Successful User construction with all validation rules satisfied
-    // Construction is atomic - only a fully valid User can be saved.
-    transactFn(addUser("Ann", 28))
-    Ns.str("Ann").int(28).get.size === 1
-  }
-
-
-  "Constructor with partial validation" in new CoreSetup {
-
-    // Use tx function as a data constructor enforcing some integrity checks inside the
-    // tx fun and some validation outside the tx function.
-
-    // Existing user
-    Ns.str("Ben").int(28).save
-
-    (transactFn(addUserPartiallyChecked("Ben", 22)) must throwA[TxFnException])
-      .message === "Got the exception molecule.core.macros.exception.TxFnException: " +
-      "Username `Ben` is already taken. Please choose another username."
-
-    // Age validation outside tx fn
-    // - saves transactor workload
-    // - gives up on encapsulating validation atomically
-    // An unvalid User could be saved if application code doesn't check the age for instance:
-    transactFn(addUserPartiallyChecked("Liz", 17))
-
-    // Under-age Liz is wrongly saved
-    Ns.str("Liz").int(17).get.size === 1
-
-    // If age is validated in application code, we can of course construct a valid User
-    transactFn(addUserPartiallyChecked("Ann", 28))
-    Ns.str("Ann").int(28).get.size === 1
-
-    // If validation not dependent on db lookup is taken care of in application code, it can
-    // save workload on the transactor to move it outside tx functions.
-  }
-
-
-  "Debugging tx fn call" in new CoreSetup {
-
-    val e = Ns.int(100).save.eid
-
-    // Print potential result of tx fn call to `with` branch of current db without affecting live db.
-    debugTransactFn(inc(e, 10))
-    // 1st group: Empty list of additional statements since only the tx fn was called.
-    //            If calling tx fn with molecule having attributes, the attribute statements will show here
-    // 2nd group: tx timestamp
-    //            Addition of new value 110
-    //            Retraction of old value 100
-    /*
-    ## 1 ## TxReport
-    ========================================================================
-    1          List(
-    )
-    ------------------------------------------------
-    2          List(
-      1    1     added: true ,   t: 13194139534344,   e: 13194139534344,   a: 50,   v: Wed Nov 07 10:48:56 CET 2018
-
-      2    2     added: true ,   t: 13194139534344,   e: 17592186045445,   a: 64,   v: 110
-           3     added: false,  -t: 13194139534344,  -e: 17592186045445,  -a: 64,  -v: 100)
-    ========================================================================
-  */
-
-    // Live data unchanged
-    Ns.int.get.head === 100
-
-
-    // Invoke tx function
-    val txReport = transactFn(inc(e, 10))
-
-    // Print debug info from result of tx fn execution (will show the same as `debugTransact(...)`
-    txReport.debug
-
-    // Live data has been changed
-    Ns.int.get.head === 110
+      // Live data has been changed
+      Ns.int.get.head === 110
+    }
   }
 }

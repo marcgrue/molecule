@@ -8,21 +8,21 @@ import molecule.core.util.testing.MoleculeSpec
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.Datomic_Client
 import molecule.datomic.peer.facade.Datomic_Peer
-import molecule.setup.{CoreData, TestPeerServer}
+import molecule.setup.CleanPeerServer
+import molecule.setup.core.CoreData
+import molecule.setup.examples.datomic.dayOfDatomic.SocialNewsData
+import molecule.setup.examples.datomic.seattle.SeattleData
 import molecule.tests.core.base.schema.CoreTestSchema
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 import molecule.tests.core.nested.schema.NestedSchema
 import molecule.tests.core.schemaDef.schema.PartitionTestSchema
 import molecule.tests.examples.datomic.dayOfDatomic.schema._
-import molecule.tests.examples.datomic.dayOfDatomic.SocialNewsData
 import molecule.tests.examples.datomic.mbrainz.schema.{MBrainzSchema, MBrainzSchemaLowerToUpper}
 import molecule.tests.examples.datomic.seattle.schema.SeattleSchema
 import molecule.tests.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
-import molecule.tests.examples.datomic.seattle.SeattleData
 import moleculeBuildInfo.BuildInfo._
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
-import scala.jdk.CollectionConverters._
 
 class TestSpec extends MoleculeSpec with CoreData {
   sequential
@@ -33,15 +33,18 @@ class TestSpec extends MoleculeSpec with CoreData {
   var basisT: Long      = 0L
   def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
 
-  // What systems to test
+  // What systems to test (can be a single, two or three systems in any order)
   // 1: Peer   2: Peer-server   3: Dev-local
   var tests = 123
+  def addSystem(fs: => Fragments, system: String) = fs.mapDescription {
+    case Text(t)    => Text(s"$system        $t")
+    case otherDescr => otherDescr
+  }
   override def map(fs: => Fragments): Fragments = {
-    val show = fs.mapDescription(d => Text(s"$system: " + d.show))
-    tests.toString.chars.iterator().asScala.map(_.toInt).map {
-      case 49 => step(setupPeer()) ^ show
-      case 50 => step(setupPeerServer()) ^ show
-      case 51 => step(setupDevLocal()) ^ show
+    tests.toString.getBytes.map {
+      case 49 => step(setupPeer()) ^ addSystem(fs, "peer       ")
+      case 50 => step(setupPeerServer()) ^ addSystem(fs, "peer-server")
+      case 51 => step(setupDevLocal()) ^ addSystem(fs, "dev-local  ")
     }.reduce(_ ^ _)
   }
 
@@ -90,7 +93,7 @@ class TestSpec extends MoleculeSpec with CoreData {
 
       case DatomicPeerServer =>
         if (recreateDb) {
-          val (conn, newBasisT) = TestPeerServer.getCleanPeerServerConn(
+          val (conn, newBasisT) = CleanPeerServer.getCleanPeerServerConn(
             client, db, schema, basisT
           )
           basisT = newBasisT

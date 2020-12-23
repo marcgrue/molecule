@@ -8,7 +8,7 @@ import molecule.core.ast.transactionModel.Statement
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.{CastHelpers, JsonBuilder, Model2Transaction}
 import molecule.core.util.Debug
-import molecule.datomic.base.api.EntityOps
+import molecule.datomic.base.api.{DatomicEntity, EntityOps}
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
@@ -77,7 +77,7 @@ import scala.language.implicitConversions
   * </table>
   *
   * @tparam Tpl Type of molecule (tuple of its attribute types)
-  * @see For retract ("delete") methods, see [[EntityOps EntityOps]] and [[molecule.core.api.DatomicEntity Entity]].
+  * @see For retract ("delete") methods, see [[EntityOps EntityOps]] and [[DatomicEntity Entity]].
   * @see Manual: [[http://www.scalamolecule.org/manual/crud/get/ get]],
   *      [[http://www.scalamolecule.org/manual/time/ time]],
   *      [[http://www.scalamolecule.org/manual/time/asof-since/ asOf/since]],

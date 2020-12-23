@@ -1,6 +1,5 @@
 package molecule.datomic.base.api
 
-import molecule.core.api.DatomicEntity
 import molecule.core.ast.MoleculeBase
 import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
@@ -19,9 +18,9 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait EntityOps {
 
-  /** Long -> [[molecule.core.api.DatomicEntity Entity]] api implicit.
+  /** Long -> [[DatomicEntity Entity]] api implicit.
     * <br><br>
-    * Convenience implicit to allow calling [[molecule.core.api.DatomicEntity Entity]] methods directly on entity Long value.
+    * Convenience implicit to allow calling [[DatomicEntity Entity]] methods directly on entity Long value.
     * {{{
     *   // Get entity id of Ben
     *   val benId = Person.e.name_("Ben").get.head

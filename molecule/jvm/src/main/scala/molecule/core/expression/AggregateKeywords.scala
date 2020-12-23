@@ -1,6 +1,5 @@
 package molecule.core.expression
 
-
 /** Aggregate keywords to mark aggregate expressions on attributes.
   * {{{
   *   // Aggregates on any attribute type

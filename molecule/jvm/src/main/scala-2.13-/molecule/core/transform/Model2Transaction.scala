@@ -1,19 +1,22 @@
 package molecule.core.transform
+
 import java.util.Date
-import datomic._
-import molecule.core.api.DatomicEntity
+import clojure.lang.{Keyword, PersistentArrayMap, PersistentVector}
+import datomic.Peer
+import datomic.Util.read
+import datomic.db.DbId
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
-import molecule.datomic.base.facade.Conn
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{Debug, Helpers}
+import molecule.datomic.base.facade.Conn
 import scala.collection.JavaConverters._
 
 
 /** Model to transaction transformation.
   *
   * @see [[http://www.scalamolecule.org/dev/transformation/]]
-  **/
+  * */
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)
 
@@ -142,26 +145,24 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   private def tempId(attr: String): AnyRef = attr match {
     case null                 => err("__tempId", "Attribute name unexpectedly null.")
-    case "tx"                 => Peer.tempid(":db.part/tx")
-    case s if s.contains('_') => Peer.tempid(":" + attr.substring(1).split("(?=_)").head) // extract "partition" from ":partition_Namespace/attr"
-    case _                    => Peer.tempid(":db.part/user")
+    case "tx"                 => "datomic.tx"
+    case s if s.contains('_') => Peer.tempid(read(":" + attr.substring(1).split("(?=_)").head)) // extract "partition" from ":partition_Namespace/attr"
+    case _                    => Peer.tempid(read(":db.part/user"))
   }
 
   // Lookup if key is already populated
   def pairStrs(e: Any, a: String, key: String) = {
     val query = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-    Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
+    conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
   }
 
   def getPairs(e: Any, a: String, key: String = "") = {
     val strs = if (key.isEmpty) {
-      val query  = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object]).asScala.map(_.get(0))
-      result
+      val query = "[:find ?v :in $ ?e ?a :where [?e ?a ?v]]"
+      conn.q(query, e.asInstanceOf[Object], read(a)).map(_.head)
     } else {
-      val query  = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
-      val result = Peer.q(query, conn.db, e.asInstanceOf[Object], a.asInstanceOf[Object], key.asInstanceOf[Object]).asScala.map(_.get(0))
-      result
+      val query = "[:find ?v :in $ ?e ?a ?key :where [?e ?a ?v][(.startsWith ^String ?v ?key)]]"
+      conn.q(query, e.asInstanceOf[Object], read(a), key.asInstanceOf[Object]).map(_.head)
     }
     strs.map {
       case str: String =>
@@ -182,7 +183,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def p(v: Any): Any = v match {
       case f: Float              => f.toString.toDouble
-      case _ if prefix.isDefined => prefix.get + v
+      case _ if prefix.isDefined => Keyword.intern(prefix.get.tail.init, v.toString)
       case bd: BigDecimal        => bd + 0.0 // ensure decimal digits
       case _                     => v
     }
@@ -192,32 +193,36 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case other   => other
     }
 
-    def attrValues(id: Any, attr: String) = {
-      val query = if (prefix.isDefined)
-        s"""[:find ?enums
-           | :in $$ ?id
-           | :where [?id $attr ?a]
-           |        [?a :db/ident ?b]
-           |        [(name ?b) ?enums]
-           |]""".stripMargin
-      else
-        s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
 
-      Peer.q(query, conn.db, id.asInstanceOf[Object]).asScala.map(_.get(0))
+    def attrValues(id: Any, attr: String): List[AnyRef] = {
+      if (id.isInstanceOf[DbId]) {
+        Nil
+      } else {
+        val query = if (prefix.isDefined)
+          s"""[:find ?enums
+             | :in $$ ?id
+             | :where [?id $attr ?a]
+             |        [?a :db/ident ?b]
+             |        [(name ?b) ?enums]
+             |]""".stripMargin
+        else
+          s"[:find ?values :in $$ ?id :where [?id $attr ?values]]"
+        conn.q(query, id.asInstanceOf[Object]).map(_.head)
+      }
     }
 
     def edgeAB(edge1: Any, targetAttr: String): (Any, Any) = {
       val edge2 = otherEdge(edge1)
 
       // Edges to other ns already has one ref extra in one direction
-      val s1 = conn.db.entity(edge1).keySet().size()
-      val s2 = conn.db.entity(edge2).keySet().size()
+      val s1 = conn.entity(edge1).keys.size
+      val s2 = conn.entity(edge2).keys.size
 
       if (s1 > s2)
         (edge1, edge2)
       else if (s1 < s2)
         (edge2, edge1)
-      else if (conn.db.entity(edge1).apply(targetAttr) == null)
+      else if (conn.entity(edge1).rawValue(targetAttr) == null)
         (edge2, edge1)
       else
         (edge1, edge2)
@@ -225,17 +230,17 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     def otherEdge(edgeA: Any): AnyRef = {
       val query  = s"[:find ?edgeB :in $$ ?edgeA :where [?edgeA :molecule_Meta/otherEdge ?edgeB]]"
-      val result = Peer.q(query, conn.db, edgeA.asInstanceOf[Object]).asScala.map(_.get(0))
+      val result = conn.q(query, edgeA.asInstanceOf[Object]).map(_.head)
       result match {
-        case Seq(edgeB) => edgeB.asInstanceOf[Object]
-        case Nil        =>
-          val otherId = Entity(conn.db.entity(edgeA), conn, edgeA.asInstanceOf[Object])
+        case List(edgeB) => edgeB.asInstanceOf[Object]
+        case Nil         =>
+          val otherId = conn.entity(edgeA)
           err("valueStmts:biEdgeRef", s"Supplied id $edgeA doesn't appear to be a property edge id (couldn't find reverse edge id). " +
             s"Could it be another entity?:\n" + otherId.touchQuotedMax(2) +
             s"\nSpooky id: $otherId" +
             "\n" + stmts.size + " statements so far:\n" + stmts.mkString("\n")
           )
-        case ids        =>
+        case ids         =>
           err("valueStmts:biEdgeRef", "Unexpectedly found multiple reverse edge ids:\n" + ids.mkString("\n"))
       }
     }
@@ -273,12 +278,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
     def biSelf(card: Int): Iterable[Statement] = arg match {
 
       case AssertValue(refs) => refs.flatMap { case ref: Long =>
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, a, e)) else Nil
         if (ref == e) err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same")
         reverseRetracts ++ Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card)))
       }
 
-      case ReplaceValue(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+      case ReplaceValue(oldNew) => attrValues(e, a).flatMap { case revRef =>
         oldNew.flatMap {
           case (oldRef, newRef) if oldRef == revRef => Seq(
             // This entity e now has ref to newRef instead of oldRef
@@ -295,7 +300,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case Eq(newRefs) => {
         if (newRefs.contains(e)) err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-        val oldRefs  = attrValues(e, a).toSeq
+        val oldRefs  = attrValues(e, a)
         val retracts = oldRefs.flatMap {
           case oldRef if newRefs.contains(oldRef) => Nil
           case obsoleteRef                        => Seq(Retract(obsoleteRef, a, e), Retract(e, a, obsoleteRef))
@@ -309,7 +314,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card))) }
       case ref          => {
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, a, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, a, e, Card(card)), Add(e, a, ref, Card(card)))
       }
     }
@@ -321,11 +326,11 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case AssertValue(refs) => refs.flatMap { case ref: Long =>
         if (ref == e) err("valueStmts:biOther", "Current entity and referenced entity ids can't be the same")
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, a, e)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, a, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
       }
 
-      case ReplaceValue(oldNew) => attrValues(e, a).toSeq.flatMap { case revRef =>
+      case ReplaceValue(oldNew) => attrValues(e, a).flatMap { case revRef =>
         oldNew.flatMap {
           case (oldRef, newRef) if oldRef == revRef => Seq(
             // This entity e now has ref to newRef instead of oldRef
@@ -342,7 +347,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case Eq(newRefs) => {
         if (newRefs.contains(e)) err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-        val oldRefs  = attrValues(e, a).toSeq
+        val oldRefs  = attrValues(e, a)
         val retracts = oldRefs.flatMap {
           case oldRef if newRefs.contains(oldRef) => Nil
           case obsoleteRef                        => Seq(Retract(obsoleteRef, revRefAttr, e), Retract(e, a, obsoleteRef))
@@ -354,9 +359,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         retracts ++ adds
       }
 
-      case refs: Set[_] => refs.flatMap { case ref: Long => Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card))) }
-      case ref          => {
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(revRef => Retract(revRef, revRefAttr, e)) else Nil
+      case refs: Set[_] => refs.flatMap {
+        case ref: Long => Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
+      }
+
+      case ref => {
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(revRef => Retract(revRef, revRefAttr, e)) else Nil
         reverseRetracts ++ Seq(Add(ref, revRefAttr, e, Card(card)), Add(e, a, ref, Card(card)))
       }
     }
@@ -392,7 +400,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         if (newEdges.contains(e))
           err("valueStmts:biEdgeRefAttr", "Current entity and referenced entity ids can't be the same.")
         checkDupValues(newEdges, "biEdgeRefAttr", "apply")
-        val oldEdges = attrValues(e, a).toSeq
+        val oldEdges = attrValues(e, a)
         val retracts = oldEdges.flatMap {
           case oldEdgeA if newEdges.contains(oldEdgeA) => Nil
           case oldEdgeA                                => Seq(RetractEntity(oldEdgeA))
@@ -415,7 +423,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case edge: Long =>
         val (edgeA, edgeB)  = edgeAB(edge, targetAttr)
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(oldEdgeA => RetractEntity(oldEdgeA)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(oldEdgeA => RetractEntity(oldEdgeA)) else Nil
         reverseRetracts ++ Seq(Add(edgeB, targetAttr, e, Card(card)), Add(e, a, edgeA, Card(card)))
     }
 
@@ -428,7 +436,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         if (newEdges.contains(e))
           err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
         checkDupValues(newEdges, "biEdgeRef", "apply")
-        val oldEdges = attrValues(e, a).toSeq
+        val oldEdges = attrValues(e, a)
         val retracts = oldEdges.flatMap {
           case oldEdgeA if newEdges.contains(oldEdgeA) => Nil
           case oldEdgeA                                => Seq(RetractEntity(oldEdgeA))
@@ -448,7 +456,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case edgeA => {
         val edgeB           = otherEdgeId getOrElse err("valueStmts:biEdgeRef", "Missing id of other edge.")
-        val reverseRetracts = if (card == 1) attrValues(e, a).toSeq.map(oldEdgeA => RetractEntity(oldEdgeA)) else Nil
+        val reverseRetracts = if (card == 1) attrValues(e, a).map(oldEdgeA => RetractEntity(oldEdgeA)) else Nil
         reverseRetracts ++ Seq(
           // Interlink edge entities so that we later know which other one to update
           Add(edgeA, ":molecule_Meta/otherEdge", edgeB, Card(card)),
@@ -473,7 +481,6 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
         case AssertMapPairs(newPairs) =>
           checkDupKeys(newPairs, "biEdgeProp", "assert")
-          //          val curPairs: Map[(String, String), String] = getPairs(edgeA, a)
           val curPairs = getPairs(edgeA, a)
           val curKeys  = curPairs.keys
           newPairs.flatMap {
@@ -554,7 +561,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case Eq(newValues) =>
           if (newValues.contains(e))
             err("valueStmts:biSelfRef", "Current entity and referenced entity ids can't be the same.")
-          val curValues       = attrValues(edgeA, a).toSeq
+          val curValues       = attrValues(edgeA, a)
           val newValueStrings = newValues.map(_.toString)
           val curValueStrings = curValues.map(_.toString)
           val retracts        = curValues.flatMap {
@@ -665,7 +672,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
       case Eq(newValues0) =>
         val newValues       = flatten(newValues0).distinct
-        val curValues       = if (e == "datomic.tx") Nil else attrValues(e, a).toSeq
+        val curValues       = if (e == "datomic.tx") Nil else attrValues(e, a)
         val newValueStrings = newValues.map(_.toString)
         val curValueStrings = curValues.map(_.toString)
         val retracts        = if (card == 2 || (newValues.isEmpty && curValues.nonEmpty))
@@ -714,7 +721,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def flatten(vs: Seq[Any]): Seq[Any] = vs.flatMap {
     case set: Set[_] => set.toSeq
-    case v           => List(v)
+    case v           => Seq(v)
   }
 
   def splitStmts(): (Seq[Statement], Seq[Statement]) = stmtsModel.foldLeft(Seq.empty[Statement], Seq.empty[Statement]) {
@@ -727,7 +734,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       case BiTargetRef(_, _) => {
         val lastEdgeNs = attr.split("/").head
         stmts.reverse.collectFirst {
-          case Add(e: db.DbId, a, _, _) if a.startsWith(lastEdgeNs) => e
+          case Add(e: DbId, a, _, _) if a.startsWith(lastEdgeNs) => e
         } getOrElse err("lastE", s"Couldn't find namespace `$lastEdgeNs` in any previous Add statements:\n" + stmts.mkString("\n"))
       }
       case _                 => {
@@ -754,7 +761,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
       stmts.last.v
   }
 
-  def eidV(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.isInstanceOf[db.DbId]
+  def eidV(stmts: Seq[Statement]): Boolean = stmts.nonEmpty && stmts.last.v.isInstanceOf[DbId]
 
   def matchDataStmt(stmts: Seq[Statement], genericStmt: Statement, arg: Any, cur: Int, next: Int, forcedE: Any, edgeB: Option[AnyRef])
   : (Int, Option[AnyRef], Seq[Statement]) = genericStmt match {
@@ -899,7 +906,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         (stmts0, forcedE0)
       else stmts0.last match {
         case Add("nsFull", _, backRef, _) => (stmts0.init, backRef)
-        case Add(_, _, _: db.DbId, _)     => (stmts0, 0)
+        case Add(_, _, _: DbId, _)        => (stmts0, 0)
         case Add(-1, _, _, _)             => (stmts0, 0)
         case _                            => (stmts0, stmts0.last.e)
       }
@@ -912,7 +919,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         case (_, Add("nsFull", nsFull, "", bi)) =>
           // Back reference - with mandatory previous ref
           val backRef = stmts.reverse.collectFirst {
-            case Add(e: db.DbId, a, _, _) if a.startsWith(nsFull) => e
+            case Add(e: DbId, a, _, _) if a.startsWith(nsFull) => e
           } getOrElse err("resolveStmts", s"Couldn't find namespace `$nsFull` in any previous Add statements.\n" + stmts.mkString("\n"))
           (cur, edgeB, stmts :+ Add("nsFull", nsFull, backRef, bi))
 
@@ -942,7 +949,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
     if (stmts1.isEmpty) {
       Seq.empty[Statement]
-    } else if (stmts1.last.v.isInstanceOf[db.DbId]) {
+    } else if (stmts1.last.v.isInstanceOf[DbId]) {
       stmts1.init
     } else {
       stmts1
@@ -1025,7 +1032,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
           if (addStmts.isEmpty)
             (edgeB, Nil, e.asInstanceOf[Long]) // pass eid so that we have it for subsequent stmts
           else
-          (edgeB, addStmts, 0L)
+            (edgeB, addStmts, 0L)
         case Retract("e", a, Values(vs, prefix), bi)                                     => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, vs, prefix, bi, edgeB), 0L)
         case Retract(e, a, Values(vs, prefix), bi)                                       => (edgeB, valueStmts(stmts, e, a, vs, prefix, bi, edgeB), 0L)
         case Add(_, a, "__arg", _)                                                       => err("updateStmts", s"Attribute `$a` needs a value applied")

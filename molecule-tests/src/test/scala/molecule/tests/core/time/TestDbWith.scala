@@ -1,11 +1,8 @@
 package molecule.tests.core.time
 
-import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
-import org.specs2.mutable._
-import molecule.datomic.peer.facade.Datomic_Peer._
+import molecule.tests.core.base.dsl.coreTest._
 import molecule.TestSpec
-import molecule.tests.core.time.domain
 import molecule.tests.core.time.domain.Crud
 
 

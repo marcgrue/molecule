@@ -34,10 +34,14 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
            ..${typedTxFns.map(untypedTxFn(_))}
          }
        """
-      case _                                          => c.abort(c.enclosingPosition, s"No self-type allowed in @TxFns-annotated container.")
+
+      case _ =>
+        c.abort(c.enclosingPosition, s"No self-type allowed in @TxFns-annotated container.")
     }
 
-    case _ => c.abort(c.enclosingPosition, s"Only object definition containing tx functions should be annotated with @TxFns")
+    case _ => c.abort(
+      c.enclosingPosition,
+      s"Only object definition containing tx functions should be annotated with @TxFns")
   }
 
   def untypedTxFn(element: Tree): Tree = element match {

@@ -6,14 +6,15 @@ import datomic.{Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
-import molecule.core.api.DatomicEntity
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
+import molecule.core.facade.Conn_Datomic
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
+import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
 import scala.concurrent.{blocking, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -39,7 +40,7 @@ object Conn_Peer {
   *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
   * */
 class Conn_Peer(val peerConn: datomic.Connection)
-  extends Conn with Helpers with BridgeDatomicFuture {
+  extends Conn_Datomic with Helpers with BridgeDatomicFuture {
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)

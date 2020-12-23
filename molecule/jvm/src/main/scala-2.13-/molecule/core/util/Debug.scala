@@ -1,5 +1,6 @@
 package molecule.core.util
 import java.util.{List => jList}
+import molecule.datomic.base.facade.TxReport
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import scala.collection.mutable.ArrayBuffer
@@ -33,14 +34,12 @@ private[molecule] case class Debug(
           ids = Set()
         }
         val pad1   = if (i == 0) "" else "  " * level
-        val pad2   = if (i < 10) "          " else "         "
-        //        val indent = if (i == 0) "" else pad1 + i + pad2
         val indent = if (i == 0) "" else pad1
         val max    = level >= maxLevel
         x match {
           case Add(e, a, stmts: Seq[_], bi) =>
             val biStr = if (showBi && bi != NoValue) s"      <$bi>" else ""
-            indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + s"List($biStr\n" +
+            indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a) + s"list($biStr\n" +
               stmts.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
 
           case add@Add(e, a, v, bi) =>
@@ -48,14 +47,14 @@ private[molecule] case class Debug(
             //            if (i < 3)
             //              indent + ":db/add" + padS(10, ":db/add") + e + padS(32, e.toString) + a + padS(20, a.toString) + v + biStr
             //            else
-            indent + add + ","
+            indent + add //+ ","
 
           case ret@Retract(e, a, v, bi) =>
             //            val biStr = if (showBi && bi != NoValue) padS(60, v.toString) + "   " + bi else ""
             //            if (i < 3)
             //              indent + ":db/retract" + padS(10, ":db/retract") + e + padS(34, e.toString) + a + padS(20, a.toString) + v + biStr
             //            else
-            indent + ret + ","
+            indent + ret //+ ","
 
           case RetractEntity(e) =>
             indent + ":db/retractEntity" + padS(22, ":db/retractEntity") + e
@@ -65,14 +64,38 @@ private[molecule] case class Debug(
             indent + action + padS(13, action.toString) + e + padS(34, e.toString) + a + padS(26, a.toString) + "   " + v
           }
 
-          case l: List[_] if max        => indent + "List(" + l.mkString(",   ") + ")"
-          case l: List[_]               => indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case l: jList[_] if max       => indent + "JavaList(" + l.asScala.mkString(",   ") + ")"
           case l: jList[_]              => indent + "JavaList(\n" + l.asScala.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case l: ArrayBuffer[_] if max => indent + "ArrayBuffer(" + l.zipWithIndex.mkString(",   ") + ")"
           case l: ArrayBuffer[_]        => indent + "ArrayBuffer(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case l: Map[_, _] if max      => indent + "Map(" + l.mkString(",   ") + ")"
           case l: Map[_, _]             => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+
+          case l: Iterable[_] =>
+            l.headOption match {
+              case None                         =>
+                indent + "List()"
+
+              case Some(stmt: Statement) =>
+                if (stmt.v.isInstanceOf[AbstractValue]) {
+                  if (max)
+                    indent + "List(" + l.mkString(",   ") + ")"
+                  else
+                    indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString(",\n") + ")"
+                } else {
+                  // Enable copy/paste for datomic.Util.list to raw transactions
+                  if (max)
+                    indent + "list(" + l.mkString(",   ") + ")"
+                  else
+                    indent + "list(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString(",\n") + ")"
+                }
+
+              case _ if max =>
+                indent + "List(" + l.mkString(",   ") + ")"
+              case _        =>
+                indent + "List(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString(",\n") + ")"
+            }
+
           case Nested(bond, nested)     => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case TxMetaData(elements)     => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
           case Composite(elements)      => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
@@ -100,6 +123,7 @@ private[molecule] case class Debug(
             indent + s"$a -> " + bb
           }
 
+          // Peer Datom
           case d: datomic.db.Datum => {
             val (entitySep, no) = if (lastId == 0L) ("", 1) else if (lastId != d.e) ("\n", ids.size + 1) else ("", "")
             lastId = d.e
@@ -112,7 +136,22 @@ private[molecule] case class Debug(
             entitySep + pad1 + no + pad3 + i + pad4 + datum.mkString(",  " + r)
           }
 
-          case value => indent + value //+ s" TYPE: " + (if(value == null) "Null" else value.getClass)
+          // Client Datom
+          case d: datomicScala.client.api.Datom => {
+            val (entitySep, no) = if (lastId == 0L) ("", 1) else if (lastId != d.e) ("\n", ids.size + 1) else ("", "")
+            lastId = d.e
+            ids += d.e
+            val pad3  = " " * (5 - no.toString.length)
+            val pad4  = " " * (6 - i.toString.length)
+            val added = if (d.added) "true " else "false"
+            val r     = if (d.added) " " else "-"
+            val datum = List("added: " + added, "t: " + d.tx, "e: " + d.e, "a: " + d.a, "v: " + d.v)
+            entitySep + pad1 + no + pad3 + i + pad4 + datum.mkString(",  " + r)
+          }
+
+          case txReport: TxReport => txReport.toString
+
+          case value => indent + value //+ s" TYPE: " + (if (value == null) "Null" else value.getClass)
         }
       }
 

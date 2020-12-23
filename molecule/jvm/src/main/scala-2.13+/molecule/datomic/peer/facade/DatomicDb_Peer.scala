@@ -3,7 +3,7 @@ package molecule.datomic.peer.facade
 import java.{lang, util}
 import java.util.Date
 import datomic.{Database, Peer, Util, Datom => PeerDatom}
-import molecule.core.api.DatomicEntity
+import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 
 case class DatomicDb_Peer(peerDb: Database) extends DatomicDb {

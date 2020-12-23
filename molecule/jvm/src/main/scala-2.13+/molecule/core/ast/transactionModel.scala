@@ -25,8 +25,7 @@ object transactionModel extends JavaUtil {
       case f: Float           => f.toDouble
       case bigInt: BigInt     => bigInt.bigInteger
       case bigDec: BigDecimal => bigDec.bigDecimal
-      //      case kw: Keyword        => kw
-      case other => other
+      case other              => other
     }).asInstanceOf[Object]
 
     // Convert actions and attribute names to Clojure Keywords

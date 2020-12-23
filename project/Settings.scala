@@ -1,7 +1,7 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt._
 import sbt.Keys._
-import sbtbuildinfo.BuildInfoPlugin.autoImport.{buildInfoKeys, buildInfoPackage, BuildInfoKey}
+import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 object Settings extends SettingsDatomic with SettingsMolecule {
 
@@ -18,7 +18,8 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       "-feature",
       "-language:implicitConversions",
       "-deprecation",
-      "-language:postfixOps"
+      "-language:postfixOps",
+      "-language:higherKinds"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Seq("-Ymacro-annotations")
       case _             => Nil
@@ -46,8 +47,6 @@ object Settings extends SettingsDatomic with SettingsMolecule {
 
 
   val shared: Seq[Def.Setting[_]] = Seq(
-    name := "shared",
-    moduleName := "shared",
     buildInfoKeys := Seq[BuildInfoKey](
       name, version, scalaVersion, sbtVersion,
       "datomicProtocol" -> datomicProtocol,
@@ -55,10 +54,11 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       "datomicProVersions" -> datomicProVersions,
       "datomicProVersion" -> datomicProVersion,
       "datomicDevLocalVersions" -> datomicDevLocalVersions,
-      "datomicDevLocalVersion" -> datomicDevLocalVersion,
+      "datomicDevLocalVersion" -> datomicDevLocalVersion
     ),
     buildInfoPackage := "moleculeBuildInfo"
   )
+
 
   val js: Seq[Def.Setting[_]] = Seq(
     libraryDependencies ++= Seq(
@@ -69,12 +69,10 @@ object Settings extends SettingsDatomic with SettingsMolecule {
 
   val jvm: Seq[Def.Setting[_]] = {
     Seq(
-      name := "jvm",
-      moduleName := "jvm",
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
         "org.specs2" %% "specs2-core" % "4.10.0",
-        "org.scalamolecule" % "datomic-client-api-java-scala" % "0.5.4-SNAPSHOT"
+        "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.5.4-SNAPSHOT"
       )
     ) ++ (if (datomicProtocol == "free") {
       Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
@@ -92,6 +90,20 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
       "com.datomic" % "dev-local" % datomicDevLocalVersion
-    )
+    ),
+
+    // Use molecule jars in lib/2.13 and lib/2.12 depending on tested scala version
+    unmanagedBase := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
+        case _             => file(unmanagedBase.value.getPath ++ "/2.12")
+      }
+    },
+
+    // Let IntelliJ detect created jars in unmanaged lib directory
+    exportJars := true,
+
+    // Run sbt tests for all systems sequentially to avoid data locks with db
+    parallelExecution in Test := false
   )
 }

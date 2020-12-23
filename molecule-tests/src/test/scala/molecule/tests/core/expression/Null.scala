@@ -31,15 +31,27 @@ class Null extends TestSpec {
     Ns.int(emptyList).get === Nil
 
 
-    // Can't apply empty Iterable constructor or other expressions
-    expectCompileError(
-      "m(Ns.str.int_(Seq.empty[Int]))",
-      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-        "\ncode : scala.`package`.Seq.empty[Int]" +
-        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-        "\nTry to assign the expression to a variable and apply the variable instead."
-    )
+    // Can't apply empty Iterable constructor or other expressions (won't compile)
+    // Ns.str.int_(Seq.empty[Int])
+
+    //    // 2.13 compile error
+    //    expectCompileError(
+    //      "m(Ns.str.int_(Seq.empty[Int]))",
+    //      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+    //        "\ncode : scala.`package`.Seq.empty[Int]" +
+    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+    //        "\nTry to assign the expression to a variable and apply the variable instead."
+    //    )
+    //    // 2.12 compile error
+    //    expectCompileError(
+    //      "m(Ns.str.int_(Seq.empty[Int]))",
+    //      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+    //        "\ncode : scala.collection.Seq.empty[Int]" +
+    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+    //        "\nTry to assign the expression to a variable and apply the variable instead."
+    //    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.str.int_(?)).apply(Nil).get === List("d")
@@ -74,14 +86,26 @@ class Null extends TestSpec {
 
 
     // Can't apply empty Iterable constructor or any Scala expression
-    expectCompileError(
-      "m(Ns.int.ints_(Seq.empty[Int]))",
-      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-        "\ncode : scala.`package`.Seq.empty[Int]" +
-        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-        "\nTry to assign the expression to a variable and apply the variable instead."
-    )
+    // Ns.int.ints_(Seq.empty[Int])
+
+    //    // 2.13 compile error
+    //    expectCompileError(
+    //      "m(Ns.int.ints_(Seq.empty[Int]))",
+    //      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+    //        "\ncode : scala.`package`.Seq.empty[Int]" +
+    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+    //        "\nTry to assign the expression to a variable and apply the variable instead."
+    //    )
+    //    // 2.12 compile error
+    //    expectCompileError(
+    //      "m(Ns.int.ints_(Seq.empty[Int]))",
+    //      "molecule.core.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
+    //        "\ncode : scala.collection.Seq.empty[Int]" +
+    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
+    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
+    //        "\nTry to assign the expression to a variable and apply the variable instead."
+    //    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.int.ints_(?)).apply(Nil).get === List(40)

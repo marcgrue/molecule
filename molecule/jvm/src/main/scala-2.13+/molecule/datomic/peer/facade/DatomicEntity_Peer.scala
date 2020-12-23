@@ -2,7 +2,7 @@ package molecule.datomic.peer.facade
 
 import java.util.{Date, UUID, Collection => jCollection}
 import molecule.core.api.exception.EntityException
-import molecule.core.api.DatomicEntity
+import molecule.datomic.base.api.DatomicEntity
 import scala.jdk.CollectionConverters._
 import scala.language.existentials
 

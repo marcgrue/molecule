@@ -704,9 +704,8 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
     * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncList.getAsyncWith(txData:java\.util\.List[_])* getAsyncWith]] method.
     */
-  def getWith(txData: java.util.List[_])(implicit conn: Conn): List[Tpl] = {
+  def getWith(txData: java.util.List[_])(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
-  }
 
 
   /** Get `List` of n rows as tuples matching molecule with applied raw transaction data.

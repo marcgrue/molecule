@@ -6,7 +6,7 @@ import java.util.Date
 import datomic.{Peer, Util}
 import datomicScala.client.api.{Datom => ClientDatom}
 import datomicScala.client.api.sync.Db
-import molecule.core.api.DatomicEntity
+import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 import scala.jdk.CollectionConverters._
 
