@@ -23,11 +23,13 @@ class LogTest extends TestSpec {
     val t1             = txR1.t
     val d1             = txR1.inst
 
+    Thread.sleep(5) // make sure to separate dates a few ms
     val txR2 = Ns(e1).str("b").update
     val tx2  = txR2.tx
     val t2   = txR2.t
     val d2   = txR2.inst
 
+    Thread.sleep(5)
     val txR3 = Ns(e1).int(2).update
     val tx3  = txR3.tx
     val t3   = txR3.t
@@ -36,12 +38,14 @@ class LogTest extends TestSpec {
 
     // Second entity
 
+    Thread.sleep(5)
     val txR4 = Ns.str("x").int(4).save
     val tx4  = txR4.tx
     val e2   = txR4.eid
     val t4   = txR4.t
     val d4   = txR4.inst
 
+    Thread.sleep(5)
     val txR5 = Ns(e2).int(5).update
     val tx5  = txR5.tx
     val t5   = txR5.t
@@ -50,12 +54,14 @@ class LogTest extends TestSpec {
 
     // Relationship
 
+    Thread.sleep(5)
     val txR6 = Ref1.str1("hello").save
     val tx6  = txR6.tx
     val t6   = txR6.t
     val d6   = txR6.inst
     val e3   = txR6.eid
 
+    Thread.sleep(5)
     // e2 points to e3
     val txR7 = Ns(e2).ref1(e3).update
     val tx7  = txR7.tx

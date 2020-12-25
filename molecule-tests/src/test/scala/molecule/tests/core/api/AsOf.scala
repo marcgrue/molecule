@@ -5,9 +5,10 @@ import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
 import molecule.TestSpec
+import molecule.core.util.JavaUtil
 
 
-class AsOf extends TestSpec {
+class AsOf extends TestSpec with JavaUtil {
 
   class Setup extends CoreSetup {
 
@@ -75,20 +76,20 @@ class AsOf extends TestSpec {
     Ns.int.getIterableAsOf(d3).iterator.toList === Iterator(1, 2, 3).toList
 
 
-    Ns.int.getRawAsOf(t1).toString === "[[1]]"
-    Ns.int.getRawAsOf(t2).toString === "[[1], [2]]"
-    Ns.int.getRawAsOf(t3).toString === "[[1], [2], [3]]"
-    Ns.int.getRawAsOf(t3, 2).toString === "[[1], [2]]"
+    Ns.int.getRawAsOf(t1).ints === List(1)
+    Ns.int.getRawAsOf(t2).ints === List(1, 2)
+    Ns.int.getRawAsOf(t3).ints === List(1, 2, 3)
+    Ns.int.getRawAsOf(t3, 2).ints === List(1, 2)
 
-    Ns.int.getRawAsOf(tx1).toString === "[[1]]"
-    Ns.int.getRawAsOf(tx2).toString === "[[1], [2]]"
-    Ns.int.getRawAsOf(tx3).toString === "[[1], [2], [3]]"
-    Ns.int.getRawAsOf(tx3, 2).toString === "[[1], [2]]"
+    Ns.int.getRawAsOf(tx1).ints === List(1)
+    Ns.int.getRawAsOf(tx2).ints === List(1, 2)
+    Ns.int.getRawAsOf(tx3).ints === List(1, 2, 3)
+    Ns.int.getRawAsOf(tx3, 2).ints === List(1, 2)
 
-    Ns.int.getRawAsOf(d1).toString === "[[1]]"
-    Ns.int.getRawAsOf(d2).toString === "[[1], [2]]"
-    Ns.int.getRawAsOf(d3).toString === "[[1], [2], [3]]"
-    Ns.int.getRawAsOf(d3, 2).toString === "[[1], [2]]"
+    Ns.int.getRawAsOf(d1).ints === List(1)
+    Ns.int.getRawAsOf(d2).ints === List(1, 2)
+    Ns.int.getRawAsOf(d3).ints === List(1, 2, 3)
+    Ns.int.getRawAsOf(d3, 2).ints === List(1, 2)
 
 
     Ns.int.getJsonAsOf(t1) ===

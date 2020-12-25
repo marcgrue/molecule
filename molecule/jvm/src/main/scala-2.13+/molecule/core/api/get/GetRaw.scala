@@ -36,7 +36,7 @@ trait GetRaw { self: MoleculeBase =>
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncRaw.getAsyncRaw(implicit* getAsyncRaw]] method.
     */
   def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] =
-    new java.util.ArrayList[jList[AnyRef]](conn.query(_model, _query))
+    conn.query(_model, _query)
 
 
   /** Get `java.util.Collection` of n untyped rows matching molecule.

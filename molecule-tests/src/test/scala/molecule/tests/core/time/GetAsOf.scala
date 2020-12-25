@@ -2,13 +2,13 @@ package molecule.tests.core.time
 
 import java.util.{Collection => jCollection, List => jList}
 import datomic.Util.list
-import molecule.core.util.DatomicPeer
+import molecule.core.util.{DatomicPeer, JavaUtil}
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
 
 
-class GetAsOf extends TestSpec {
+class GetAsOf extends TestSpec with JavaUtil {
 
 
   "t (from history)" in new CoreSetup {
@@ -224,8 +224,8 @@ class GetAsOf extends TestSpec {
     // Retract (tx report 3)
     val tx3 = ben.retract
 
-    Ns.str.int.getRawAsOf(tx1).toString === """[["Liz" 37], ["Ben" 42]]"""
-    Ns.str.int.getRawAsOf(tx2).toString === """[["Liz" 37], ["Ben" 43]]""" // Ben now 43
-    Ns.str.int.getRawAsOf(tx3).toString === """[["Liz" 37]]""" // Ben gone
+    Ns.str.int.getRawAsOf(tx1).strInts === List(("Liz", 37), ("Ben", 42))
+    Ns.str.int.getRawAsOf(tx2).strInts === List(("Liz", 37), ("Ben", 43)) // Ben now 43
+    Ns.str.int.getRawAsOf(tx3).strInts === List(("Liz", 37)) // Ben gone
   }
 }

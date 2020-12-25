@@ -3,8 +3,9 @@ package molecule.tests.core.time
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
+import molecule.core.util.JavaUtil
 
-class GetSince extends TestSpec {
+class GetSince extends TestSpec with JavaUtil {
 
 
   "List" >> {
@@ -144,13 +145,13 @@ class GetSince extends TestSpec {
 
       // Ben and Cay added since transaction time t1
       val raw1: java.util.Collection[java.util.List[AnyRef]] = Ns.str.getRawSince(t1)
-      raw1.toString === """[["Ben"], ["Cay"]]"""
+      raw1.strs === List("Ben", "Cay")
 
       // Cay added since transaction time t2
-      Ns.str.getRawSince(t2).toString === """[["Cay"]]"""
+      Ns.str.getRawSince(t2).strs === List("Cay")
 
       // Nothing added since transaction time t3
-      Ns.str.getRawSince(t3).toString === """[]"""
+      Ns.str.getRawSince(t3).strs === Nil
     }
 
 
@@ -166,13 +167,13 @@ class GetSince extends TestSpec {
 
       // Ben and Cay added since tx1
       val raw1: java.util.Collection[java.util.List[AnyRef]] = Ns.str.getRawSince(tx1)
-      raw1.toString === """[["Ben"], ["Cay"]]"""
+      raw1.strs === List("Ben", "Cay")
 
       // Cay added since tx2
-      Ns.str.getRawSince(tx2).toString === """[["Cay"]]"""
+      Ns.str.getRawSince(tx2).strs === List("Cay")
 
       // Nothing added since tx3
-      Ns.str.getRawSince(tx3).toString === """[]"""
+      Ns.str.getRawSince(tx3).strs === Nil
     }
 
 
@@ -186,16 +187,16 @@ class GetSince extends TestSpec {
       val date3 = Ns.str("Cay").save.inst
 
       // Current values
-      Ns.str.getIterable.iterator.toList === List("Ann", "Ben", "Cay")
+      Ns.str.getRaw.strs === List("Ann", "Ben", "Cay")
 
       // Ben and Cay added since human time 1
-      Ns.str.getIterableSince(date1).iterator.toList === List("Ben", "Cay")
+      Ns.str.getRawSince(date1).strs === List("Ben", "Cay")
 
       // Cay added since human time 2
-      Ns.str.getIterableSince(date2).iterator.toList === List("Cay")
+      Ns.str.getRawSince(date2).strs === List("Cay")
 
       // Nothing added since human time 3
-      Ns.str.getIterableSince(date3).iterator.toList === Nil
+      Ns.str.getRawSince(date3).strs === Nil
     }
   }
 }

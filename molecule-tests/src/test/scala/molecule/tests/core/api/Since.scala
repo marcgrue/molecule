@@ -5,9 +5,10 @@ import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
 import molecule.TestSpec
+import molecule.core.util.JavaUtil
 
 
-class Since extends TestSpec {
+class Since extends TestSpec with JavaUtil {
 
   class Setup extends CoreSetup {
 
@@ -75,20 +76,20 @@ class Since extends TestSpec {
     Ns.int.getIterableSince(d1).iterator.toList === Iterator(2, 3).toList
 
 
-    Ns.int.getRawSince(t3).toString === "[]"
-    Ns.int.getRawSince(t2).toString === "[[3]]"
-    Ns.int.getRawSince(t1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(t1, 1).toString === "[[2]]"
+    Ns.int.getRawSince(t3).ints === List()
+    Ns.int.getRawSince(t2).ints === List(3)
+    Ns.int.getRawSince(t1).ints === List(2, 3)
+    Ns.int.getRawSince(t1, 1).ints === List(2)
 
-    Ns.int.getRawSince(tx3).toString === "[]"
-    Ns.int.getRawSince(tx2).toString === "[[3]]"
-    Ns.int.getRawSince(tx1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(tx1, 1).toString === "[[2]]"
+    Ns.int.getRawSince(tx3).ints === List()
+    Ns.int.getRawSince(tx2).ints === List(3)
+    Ns.int.getRawSince(tx1).ints === List(2, 3)
+    Ns.int.getRawSince(tx1, 1).ints === List(2)
 
-    Ns.int.getRawSince(d3).toString === "[]"
-    Ns.int.getRawSince(d2).toString === "[[3]]"
-    Ns.int.getRawSince(d1).toString === "[[2], [3]]"
-    Ns.int.getRawSince(d1, 1).toString === "[[2]]"
+    Ns.int.getRawSince(d3).ints === List()
+    Ns.int.getRawSince(d2).ints === List(3)
+    Ns.int.getRawSince(d1).ints === List(2, 3)
+    Ns.int.getRawSince(d1, 1).ints === List(2)
 
 
     Ns.int.getJsonSince(t3) === ""
