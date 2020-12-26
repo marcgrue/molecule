@@ -185,13 +185,11 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
   def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-    val javaStmts: jList[jList[_]] = toJava(scalaStmts)
-    transactAsync(javaStmts, scalaStmts)
+    transactAsync(toJava(scalaStmts), scalaStmts)
   }
 
   def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-
     if (_adhocDb.isDefined) {
       Future {
         TxReport_Peer(getAdhocDb.`with`(javaStmts), scalaStmts)
