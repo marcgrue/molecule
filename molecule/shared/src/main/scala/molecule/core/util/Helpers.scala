@@ -1,4 +1,5 @@
 package molecule.core.util
+
 import java.net.URI
 import java.time._
 import java.time.format.DateTimeFormatter
@@ -58,6 +59,8 @@ trait Helpers extends DateHandling {
 
   final protected def tupleToSeq(arg: Any): Seq[Any] = arg match {
     case l: Seq[_]  => l
+    case Some(v)    => Seq(v)
+    case None       => Seq()
     case p: Product => p match {
       case t: (_, _)                                                             => Seq(t._1, t._2)
       case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)

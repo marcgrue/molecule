@@ -40,7 +40,7 @@ you can compile molecule with this flag: `sbt compile -Dfree=true`
 
 Start Datomic transactor (update path/version number):
 
-    cd /Users/mg/lib/datomic/datomic-free-0.9.5697
+    cd <path-to-datomic-downloads>/datomic-free-0.9.5697
     bin/transactor config/samples/dev-transactor-template.properties
 
 While the transactor is running, create a new tab/process in the terminal to run the next steps:

@@ -11,12 +11,11 @@ import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.facade.Conn_Datomic
 import molecule.core.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.api.DatomicEntity
-import molecule.datomic.base.facade.{Conn, DatomicDb, TxReport}
-import scala.concurrent.{blocking, ExecutionContext, Future}
+import molecule.datomic.base.facade.{Conn, Conn_Datomic, DatomicDb, TxReport}
+import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 

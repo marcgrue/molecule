@@ -5,7 +5,6 @@ import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 object Settings extends SettingsDatomic with SettingsMolecule {
 
-
   val base: Seq[Def.Setting[_]] = Seq(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
@@ -34,7 +33,6 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       "my.datomic.com" at "https://my.datomic.com/repo",
       Resolver.mavenLocal
     ),
-
     unmanagedSourceDirectories in Compile ++= {
       (unmanagedSourceDirectories in Compile).value.map { dir =>
         CrossVersion.partialVersion(scalaVersion.value) match {
@@ -44,7 +42,6 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       }
     }
   )
-
 
   val shared: Seq[Def.Setting[_]] = Seq(
     buildInfoKeys := Seq[BuildInfoKey](
@@ -59,20 +56,18 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     buildInfoPackage := "moleculeBuildInfo"
   )
 
-
   val js: Seq[Def.Setting[_]] = Seq(
     libraryDependencies ++= Seq(
       "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
     )
   )
 
-
   val jvm: Seq[Def.Setting[_]] = {
     Seq(
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        "org.specs2" %% "specs2-core" % "4.10.0",
-        "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.5.4-SNAPSHOT"
+        "org.specs2" %% "specs2-core" % "4.10.5",
+        "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.6.2-SNAPSHOT"
       )
     ) ++ (if (datomicProtocol == "free") {
       Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
@@ -84,15 +79,14 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     })
   }
 
-  // Proprietary Client dev-local dependency needed for tests against dev-local
-  // Please download from https://cognitect.com/dev-tools and install locally per included instructions
   val tests: Seq[Def.Setting[_]] = Seq(
-    resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
+      // Proprietary Client dev-local dependency needed for tests against dev-local
+      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
       "com.datomic" % "dev-local" % datomicDevLocalVersion
     ),
 
-    // Use molecule jars in lib/2.13 and lib/2.12 depending on tested scala version
+    // Find scala version specific jars in respective libs
     unmanagedBase := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")

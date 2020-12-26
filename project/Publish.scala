@@ -1,4 +1,4 @@
-import sbt.Keys.{baseDirectory, description, developers, doc, homepage, isSnapshot, licenses, packageDoc, pomIncludeRepository, publish, publishArtifact, publishLocal, publishMavenStyle, publishTo, scalacOptions, scmInfo, skip, sources, version}
+import sbt.Keys._
 import sbt._
 
 

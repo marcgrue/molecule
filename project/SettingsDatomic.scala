@@ -1,7 +1,7 @@
 import sbt._
 
-trait SettingsDatomic {
 
+trait SettingsDatomic {
 
   // Replace with path to your Datomic downloads directory
   val datomicDownloadsDir = "/Users/mg/lib/datomic"

@@ -9,7 +9,7 @@ trait SettingsMolecule {
   // molecule databases
 
   lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
-    moduleName := "molecule-tests",
+    moduleName := "moleculeTests",
     moleculeMakeJars := true,
     moleculeSchemas := Seq(
       "molecule/tests/core/base",

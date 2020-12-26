@@ -63,7 +63,7 @@ of these flags:
 
 Start Datomic transactor (update path/version number):
 
-    cd /Users/mg/lib/datomic/datomic-pro-1.0.6222
+    cd <path-to-datomic-downloads>/datomic-pro-1.0.6222
     bin/transactor config/samples/dev-transactor-template.properties
 
 While the transactor is running, create a new tab/process in the terminal to run the next steps:
@@ -88,7 +88,7 @@ Run commands below to perform these 3 operations:
 
 ## STEP 6 - Create molecule samples (once)
 
-Run `molecule.setup.RecreateTestDbs` in molecule-tests to create sample databases. 
+Run `molecule.setup.RecreateTestDbs` in moleculeTests to create sample databases. 
 This is necessary before starting the peer server so that it can "see" the 
 mbrainz-subset db.
 
