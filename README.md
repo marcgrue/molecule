@@ -78,13 +78,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.4.5
+sbt.version=1.4.6
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.10.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.11.0")
 ```
 
 `build.sbt`:
@@ -99,7 +99,7 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.0-SNAPSHOT",
+      "org.scalamolecule" %% "molecule" % "0.23.0",
       "com.datomic" % "datomic-free" % "0.9.5697" // or pro (see README_pro)
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -138,7 +138,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.0-SNAPSHOT",
+      "org.scalamolecule" %% "molecule" % "0.23.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -147,7 +147,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.23.0-SNAPSHOT")
+      ("org.scalamolecule" %%% "molecule" % "0.23.0")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
