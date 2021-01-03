@@ -26,7 +26,7 @@ abstract class Datomic_Client(val client: Client, val clientAsync: AsyncClient)
 
   protected def checkNotLambda: Any => Boolean
 
-  protected def allowedClientDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
+  def allowedClientDefinitions(nss: jList[_]): util.List[jMap[Object, Object]] = {
     val nss2     = new util.ArrayList[jMap[Object, Object]]()
     val bytes    = read(":db.type/bytes")
     val checkNot = checkNotLambda
