@@ -19,10 +19,6 @@ import scala.language.higherKinds
   *     (("Battle of Waterloo", "Ben Bridge"), ("History", 5), "Bestseller Publications Inc.")
   *   )
   * }}}
-  * @see [[http://www.scalamolecule.org/manual/relationships/composites/ Manual]]
-  *     | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/Composite.scala composite]],
-  *     [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/json/Composite.scala#L1 composite json]]
-  *
   */
 trait Composite extends NS
 

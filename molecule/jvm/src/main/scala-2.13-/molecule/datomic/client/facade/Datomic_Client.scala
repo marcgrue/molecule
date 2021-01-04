@@ -10,10 +10,8 @@ import molecule.core.facade.exception.DatomicFacadeException
 import molecule.core.schema.SchemaTransaction
 import scala.collection.JavaConverters._
 
-
-/**
+/** Base Datomic facade for client api (peer-server/cloud/dev-local).
  *
- * @see [[http://www.scalamolecule.org/manual/schema/transaction/ Manual]]
  * @groupname database  Database operations
  * @groupprio 10
  *
@@ -54,7 +52,7 @@ abstract class Datomic_Client(val client: Client, val clientAsync: AsyncClient)
    * @group database
    * @param schema sbt-plugin auto-generated Transaction file path.to.schema.YourDomainSchema
    * @param dbName Database name
-   * @return
+   * @return [[Conn_Client]]
    */
   def transactSchema(schema: SchemaTransaction, dbName: String): Conn_Client = try {
     val conn = connect(dbName)

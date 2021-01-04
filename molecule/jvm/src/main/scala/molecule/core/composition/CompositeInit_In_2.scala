@@ -22,8 +22,6 @@ import scala.language.higherKinds
   *       (("Battle of Waterloo", "Ben Bridge", "Joe Moe"), ("History", 5))
   *     )
   * }}}
-  * @see [[http://www.scalamolecule.org/manual/relationships/composites/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/Composite.scala Tests]]
   */
 trait CompositeInit_In_2 extends NS
 

@@ -55,8 +55,6 @@ import molecule.core.input.exception.InputMolecule_2_Exception
   *   profAge(Seq("doctor", "teacher"), Seq(37, 32)).get.sorted === List("Ann", "Ben", "Joe")
   * }}}
   *
-  * @see [[molecule.core.input.InputMolecule]]
-  *      | [[http://www.scalamolecule.org/manual/attributes/parameterized/ Manual]]
   * @tparam I1 Type of input matching first attribute with `?` marker (profession: String)
   * @tparam I2 Type of input matching second attribute with `?` marker (age: Int)
   */

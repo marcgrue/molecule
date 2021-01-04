@@ -75,9 +75,6 @@ package molecule.core.generic
   *   Schema.enum_.a(count).get === List(2)
   * }}}
   *
-  * @see [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/generic/SchemaTest.scala#L1 Tests]]
-  *     for more Schema query examples.
-  *
   * @note Schema attributes defined in Datomic's bootstrap process that are not related
   *       to the current database are transparently filtered out from all Schema queries.
   */

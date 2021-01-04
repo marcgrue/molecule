@@ -10,8 +10,6 @@ package molecule.core.expression
   *   Schema.ns("myNamepace").a(count).get.head === 3  // count of attributes in MyNamespace
   * }}}
   *
-  * @see [[http://www.scalamolecule.org/manual/attributes/aggregates/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/Keywordstests/src/test/scala/molecule/Keywordstests/expression/Aggregates.scala#L1 Tests]]
   * @groupname aggregates Aggregate keywords
   * @groupdesc aggregates Keywords applied to attributes that return aggregated value(s).
   * @groupprio aggregates 30

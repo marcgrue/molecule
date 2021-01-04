@@ -15,7 +15,6 @@ import scala.collection.JavaConverters._
 
 /** Model to transaction transformation.
   *
-  * @see [[http://www.scalamolecule.org/dev/transformation/]]
   * */
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
   val x = Debug("Model2Transaction", 1, 51, false, 6)

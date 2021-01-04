@@ -78,34 +78,6 @@ import scala.language.implicitConversions
   *
   * @tparam Tpl Type of molecule (tuple of its attribute types)
   * @see For retract ("delete") methods, see [[EntityOps EntityOps]] and [[DatomicEntity Entity]].
-  * @see Manual: [[http://www.scalamolecule.org/manual/crud/get/ get]],
-  *      [[http://www.scalamolecule.org/manual/time/ time]],
-  *      [[http://www.scalamolecule.org/manual/time/asof-since/ asOf/since]],
-  *      [[http://www.scalamolecule.org/manual/time/history/ history]],
-  *      [[http://www.scalamolecule.org/manual/time/with/ with]],
-  *      [[http://www.scalamolecule.org/manual/crud/getjson/ getJson]],
-  *      [[http://www.scalamolecule.org/manual/time/testing/ debug/test]],
-  *      [[http://www.scalamolecule.org/manual/crud/save/ save]],
-  *      [[http://www.scalamolecule.org/manual/crud/insert/ insert]],
-  *      [[http://www.scalamolecule.org/manual/crud/update/ update]],
-  *      [[http://www.scalamolecule.org/manual/crud/retract/ retract]]
-  * @see Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/attr/Attribute.scala#L1 get]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/GetAsOf.scala#L1 asOf]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/GetSince.scala#L1 since]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/GetHistory.scala#L1 history]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/GetWith.scala#L1 with]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 test asOf]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 test since]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 test with]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/json/Attributes.scala#L1 getJson]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Save.scala#L1 save]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Insert.scala#L1 insert]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 retract]],
-  * @see [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/update update]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/updateMap update map]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/UpdateRef.scala#L1 update ref]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/UpdateMultipleAttributes.scala#L1 update multiple attributes]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/UpdateMultipleEntities.scala#L1 update multiple entities]]
   * @groupname get
   * @groupprio get 10
   * @groupname getAsync

@@ -72,9 +72,6 @@ trait GenericVAET {
   *  - '''`txInstant`''' - Transaction wall clock time (java.util.Date)
   *  - '''`op`''' - Operation status: assertion (true) / retraction (false)
   *
-  * @see [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/generic/Index.scala#L1 Tests]]
-  *     for more Index query examples.
-  *
   * @note The Molecule Index API's don't allow returning the whole Index/the whole database.
   *       So omitting arguments constructing the Index object (like `VAET.v.a.e.t.get`)
   *       will throw an exception.<br>

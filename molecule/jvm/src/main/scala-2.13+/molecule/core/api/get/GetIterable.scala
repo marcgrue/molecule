@@ -106,7 +106,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(t:Long)* getAsyncIterableAsOf]] method.
     */
   def getIterableAsOf(t: Long)(implicit conn: Conn): Iterable[Tpl] =
@@ -163,7 +162,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(tx:molecule\.facade\.TxReport)* getAsyncIterableAsOf]] method.
     */
   def getIterableAsOf(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
@@ -226,7 +224,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
     */
   def getIterableAsOf(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
@@ -267,7 +264,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableSince(t:Long)* getAsyncIterableSince]] method.
     */
   def getIterableSince(t: Long)(implicit conn: Conn): Iterable[Tpl] =
@@ -305,7 +301,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableSince(tx:molecule\.facade\.TxReport)* getAsyncIterableSince]] method.
     */
   def getIterableSince(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
@@ -338,7 +333,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
     */
   def getIterableSince(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
@@ -374,7 +368,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableWith(txMolecules* getAsyncIterableWith]] method.
     */
   def getIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Iterable[Tpl] =
@@ -400,7 +393,6 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableWith(txData:java\.util\.List[_])* getAsyncIterableWith]] method.
     */
   def getIterableWith(txData: java.util.List[_])(implicit conn: Conn): Iterable[Tpl] =

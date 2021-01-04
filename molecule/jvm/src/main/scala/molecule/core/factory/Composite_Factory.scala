@@ -14,8 +14,6 @@ import scala.language.{higherKinds, implicitConversions}
   * "sub-molecules" are tied together with `+` methods to form a composite molecule.
   * <br><br>
   * For brevity, only arity 1 and 2 method signatures are shown. Arity 3-22 follow the same pattern.
-  * @see [[http://www.scalamolecule.org/manual/relationships/composites/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/Composite.scala#L1 Tests]]
   * @groupname composite Implicit factory methods to create composite molecules.
   * @groupprio composite 60
   */

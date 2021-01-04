@@ -6,7 +6,9 @@ import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 import scala.collection.JavaConverters._
 
-
+/** Base class for Datomic connection facade
+ *
+ */
 trait Conn_Datomic extends Conn {
 
   def q(db: DatomicDb, query: String, inputs: Seq[Any]): List[List[AnyRef]] = {

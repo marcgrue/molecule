@@ -20,7 +20,6 @@ import scala.language.experimental.macros
   * <br><br>
   * For brevity, only arity 1 and 2 method signatures are shown. Arity 3-22 follow the same pattern.
   *
-  * @see [[http://www.scalamolecule.org/manual/quick-start/introduction/ Manual]]
   * @groupname molecule Implicit factory methods to create molecules.
   * @groupprio molecule 50
   */

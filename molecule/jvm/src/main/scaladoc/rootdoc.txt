@@ -2,7 +2,6 @@
 
 Documentation/API for the Molecule library - a meta DSL for the [[https://www.datomic.com Datomic]] database.
 
-[[http://www.scalamolecule.org Manual]] |
 [[http://www.scalamolecule.org scalamolecule.org]] |
 [[https://github.com/scalamolecule/molecule Github]] |
 [[https://groups.google.com/forum/#!forum/molecule-dsl Forum]]

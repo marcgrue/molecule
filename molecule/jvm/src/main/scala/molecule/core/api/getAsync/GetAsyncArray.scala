@@ -86,7 +86,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArrayAsOf(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(t)(conn, tplType))
@@ -114,7 +113,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArrayAsOf(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(t, n)(conn, tplType))
@@ -142,7 +140,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
   def getAsyncArrayAsOf(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(tx.t)(conn, tplType))
@@ -173,7 +170,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
   def getAsyncArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(tx.t, n)(conn, tplType))
@@ -195,7 +191,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArrayAsOf(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(date)(conn, tplType))
@@ -220,7 +215,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArrayAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(date, n)(conn, tplType))
@@ -247,7 +241,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArraySince(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(t)(conn, tplType))
@@ -275,7 +268,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArraySince(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(t, n)(conn, tplType))
@@ -302,7 +294,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArraySince(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(tx.t)(conn, tplType))
@@ -332,7 +323,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     **/
   def getAsyncArraySince(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(tx.t, n)(conn, tplType))
@@ -354,7 +344,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArraySince(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(date)(conn, tplType))
@@ -379,7 +368,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncArraySince(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(date, n)(conn, tplType))
@@ -405,7 +393,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncArrayWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayWith(txMolecules: _*)(conn, tplType))
@@ -431,7 +418,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncArrayWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayWith(n, txMolecules: _*)(conn, tplType))
@@ -453,7 +439,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncArrayWith(txData: java.util.List[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayWith(txData)(conn, tplType))
@@ -478,7 +463,6 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncArrayWith(txData: java.util.List[_], n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayWith(txData, n)(conn, tplType))

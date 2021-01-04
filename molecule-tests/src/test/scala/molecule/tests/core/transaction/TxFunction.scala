@@ -42,9 +42,9 @@ import scala.concurrent.duration._
 * FREE
 * The Free version can't set the classpath variable so we need to provide the tx functions manually
 * by making a jar of our classes, move it to the transactor lib folder and start the transactor:
-* > cd <project-path>/moleculeTests/target/scala-2.13/test-classes  [path to your compiled classes]
+* > cd <project-path>/molecule-tests/target/scala-2.13/test-classes  [path to your compiled classes]
 * > jar cvf scala-fns.jar .
-* > mv <project-path>/moleculeTests/target/scala-2.13/test-classes/scala-fns.jar DATOMIC_HOME/lib/
+* > mv <project-path>/molecule-tests/target/scala-2.13/test-classes/scala-fns.jar DATOMIC_HOME/lib/
 * > bin/transactor ...
 * */
 @TxFns

@@ -53,10 +53,9 @@ All queries are prepared at compile time by macros. So there is no overhead at r
 
 ## Getting started
 
-- [Introduction](http://www.scalamolecule.org/manual/quick-start/introduction/) to Datomic/Molecule
-- [Quick-start](http://www.scalamolecule.org/manual/): define a schema and create a new Datomic database
-- [Setup](http://www.scalamolecule.org/manual/setup/): populate a Datomic database with Molecule
-- [Molecule Seattle tutorial](http://www.scalamolecule.org/resources/tutorials/seattle/) examples of using Molecule
+- [Introduction](http://www.scalamolecule.org/intro/) to Datomic/Molecule
+- [Setup](http://www.scalamolecule.org/setup/): populate a Datomic database with Molecule
+- [Molecule Seattle tutorial](http://www.scalamolecule.org/community/seattle/) examples of using Molecule
 
 
 ## Try demo project
@@ -70,8 +69,7 @@ All queries are prepared at compile time by macros. So there is no overhead at r
 
 ## Molecule in Scala project
 
-Molecule is currently available for Scala (JVM, version 8 and later) and Scala.js (JavaScript).
-Scala 2.12 and Scala 2.13 are supported.
+Molecule is currently available for Scala (JVM, version 8 and later) and Scala.js (JavaScript). Scala 2.12 and Scala 2.13 are supported.
 
 Add the following to your build files:
 
@@ -108,10 +106,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Molecule in a Scala.js project
 
-Molecule AST's and other generic interfaces have been ported to Scala.js so
-that you can also work with Molecule on the client side.
-See the [molecule-admin](https://github.com/scalamolecule/molecule-admin) project for
-an example of how Molecule is used both on the server and client side.
+Molecule AST's and other generic interfaces have been ported to Scala.js so that you can also work with Molecule on the client side. See the [molecule-admin](https://github.com/scalamolecule/molecule-admin) project for an example of how Molecule is used both on the server and client side.
 
 `project/buildinfo.sbt`:
 
@@ -153,8 +148,7 @@ lazy val yourProjectJS = yourProject.js
     moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
-Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not
-compiled to javascript).
+Note how we exclude the Datomic dependency on the js side (since Datomic is obviously not compiled to javascript).
 
 Molecule is available at [maven]((https://repo1.maven.org/maven2/org/scalamolecule/)).
 

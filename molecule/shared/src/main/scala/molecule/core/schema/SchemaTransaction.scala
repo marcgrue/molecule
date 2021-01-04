@@ -2,8 +2,6 @@ package molecule.core.schema
 
 
 /** Schema transaction interface for auto-generated schema transaction data.
-  *
-  * @see [[http://www.scalamolecule.org/manual/schema/transaction/ Manual]]
   * */
 trait SchemaTransaction {
 

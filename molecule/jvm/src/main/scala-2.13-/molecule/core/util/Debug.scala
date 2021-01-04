@@ -4,7 +4,6 @@ import molecule.datomic.base.facade.TxReport
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import scala.collection.mutable.ArrayBuffer
-
 import scala.collection.JavaConverters._
 
 private[molecule] case class Debug(

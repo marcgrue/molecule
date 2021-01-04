@@ -14,8 +14,6 @@ import scala.language.implicitConversions
   * custom boilerplate DSL constructs to Datomic queries:
   * <br><br>
   * Custom DSL molecule --> Model --> Query --> Datomic query string
-  *
-  * @see [[http://www.scalamolecule.org/dev/transformation/]]
   * */
 case class Query2String(q: Query) extends Helpers {
 

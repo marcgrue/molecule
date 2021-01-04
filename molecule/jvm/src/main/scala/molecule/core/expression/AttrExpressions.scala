@@ -20,14 +20,6 @@ import molecule.core.boilerplate.attributes.Attr
   *   Person.name(unify)                       // Unify attributes in self-joins
   * }}}
   *
-  * @see Manual: [[http://www.scalamolecule.org/manual/attributes/expressions/ expressions]],
-  *      [[http://www.scalamolecule.org/manual/attributes/aggregates/ aggregates]],
-  *      [[http://www.scalamolecule.org/manual/attributes/parameterized/ input molecules]],
-  *      [[http://www.scalamolecule.org/manual/relationships/self-join/ self-join]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/expression expressions]],
-  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input1String.scala#L1 input1]],
-  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input2.scala#L1 input2]],
-  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input3.scala#L1 input3]]
   * @groupname attrMarker Attribute markers
   * @groupdesc attrMarker Markers applied to attributes that change the semantics of the attribute/molecule.
   * @groupprio attrMarker 20

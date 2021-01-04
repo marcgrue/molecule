@@ -2,11 +2,13 @@ package molecule.datomic.client.facade
 
 import java.util
 import java.util.{Date, stream, Collection => jCollection, List => jList}
+import datomic.Peer
 import datomic.Util._
 import datomic.db.DbId
-import datomic.Peer
-import datomicScala.client.api.{Datom, sync}
+import datomicClient.anomaly.CognitectAnomaly
+import datomicScala.client.api.async.{AsyncClient, AsyncConnection}
 import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
+import datomicScala.client.api.{Datom, sync}
 import molecule.core.ast.model._
 import molecule.core.ast.query.{Query, QueryExpr}
 import molecule.core.ast.tempDb._
@@ -21,17 +23,15 @@ import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 
-/** Facade to Datomic dev-local connection.
-  *
-  * @see [[http://www.scalamolecule.org/manual/time/testing/ Manual]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
+/** Facade to Datomic connection for client api (peer-server/cloud/dev-local).
   * */
-case class Conn_Client(client: Client, dbName: String)
+case class Conn_Client(client: Client, clientAsync: AsyncClient, dbName: String)
   extends Conn_Datomic with Helpers with BridgeDatomicFuture {
 
   val clientConn: sync.Connection = client.connect(dbName)
+
+  val clientConnAsync: Future[Either[CognitectAnomaly, AsyncConnection]] =
+    clientAsync.connect(dbName)
 
   // Temporary db for ad-hoc queries against time variation dbs
   // (takes precedence over test db)
@@ -213,47 +213,32 @@ case class Conn_Client(client: Client, dbName: String)
 
   def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-    //    val javaStmts: jList[jList[_]] = toJava(stmtss)
-    //
-    //    if (_adhocDb.isDefined) {
-    //      Future {
-    //        val adHocDb = getAdhocDb
-    //        TxReport_Client(adHocDb.`with`(adHocDb, javaStmts), stmtss)
-    //      }
-    //
-    //    } else if (_testDb.isDefined) {
-    //      Future {
-    //        // In-memory "transaction"
-    //        val txReport = TxReport_Client(_testDb.get.`with`(_testDb, javaStmts), stmtss)
-    //
-    //        // Continue with updated in-memory db
-    //        // todo: why can't we just say this? Or: why are there 2 db-after db objects?
-    //        //      val dbAfter = txReport.dbAfter
-    //        val dbAfter = txReport.dbAfter.asOf(txReport.t)
-    //        _testDb = Some(dbAfter)
-    //        txReport
-    //      }
-    //
-    //    } else {
-    //      // Live transaction
-    //      val moleculeInvocationFuture = try {
-    //        bridgeDatomicFuture(clientConn.transactAsync(javaStmts))
-    //      } catch {
-    //        case NonFatal(ex) => Future.failed(ex)
-    //      }
-    //      moleculeInvocationFuture map { moleculeInvocationResult: java.util.Map[_, _] =>
-    //        TxReport_Peer(moleculeInvocationResult, stmtss)
-    //      }
-    //    }
-
-    //    Future[TxReport]{}
-    //    Future(TxReport_Client(TxReport_Client()))
-    ???
+    transactAsync(toJava(scalaStmts), scalaStmts)
   }
 
   def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-    ???
+    if (_adhocDb.isDefined) {
+      Future {
+        TxReport_Client(getAdhocDb.`with`(clientConn.withDb, javaStmts), scalaStmts)
+      }
+
+    } else if (_testDb.isDefined) {
+      Future {
+        // In-memory "transaction"
+        val txReport = TxReport_Client(_testDb.get.`with`(clientConn.withDb, javaStmts), scalaStmts)
+
+        // Continue with updated in-memory db
+        // todo: why can't we just say this? Or: why are there 2 db-after db objects?
+        //      val dbAfter = txReport.dbAfter
+        val dbAfter = txReport.dbAfter.asOf(txReport.t)
+        _testDb = Some(dbAfter)
+        txReport
+      }
+    } else {
+      // Live transaction (simply wrapping in future instead using datomic async api)
+      Future(TxReport_Client(clientConn.transact(javaStmts)))
+    }
   }
 
 

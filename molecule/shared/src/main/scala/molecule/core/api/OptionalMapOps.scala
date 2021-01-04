@@ -2,7 +2,6 @@ package molecule.core.api
 
 /** Container of implicit for optional Map operations.
   *
-  * @see [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/attrMap/Optional.scala#L1 Tests]]
   * @groupname optMapOps Number aggregation keywords
   * @groupdesc optMapOps Keywords applied to number attributes that return aggregated value(s).
   * @groupprio optMapOps 45

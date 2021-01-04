@@ -2,7 +2,7 @@ package molecule.core
 
 /** Attribute expressions and operations.
   * <br><br>
-  * Refine attribute matches with various [[molecule.expression.AttrExpressions attribute expressions]]:
+  * Refine attribute matches with various [[molecule.core.expression.AttrExpressions attribute expressions]]:
   * {{{
   *   Person.age(42)                           // equality
   *   Person.name.contains("John")             // fulltext search
@@ -18,7 +18,7 @@ package molecule.core
   *   Person.name(?)                           // initiate input molecules awaiting input at runtime
   *   Person.name(unify)                       // Unify attributes in self-joins
   * }}}
-  * Apply [[molecule.expression.AggregateKeywords aggregate keywords]] to aggregate attribute value(s):
+  * Apply [[molecule.core.expression.AggregateKeywords aggregate keywords]] to aggregate attribute value(s):
   * {{{
   *   // Aggregates on any attribute type
   *   Person.age(count).get.head         === 3   // count of asserted `age` attribute values
@@ -42,9 +42,5 @@ package molecule.core
   *   Person.age(stddev).get.head   === 15.107025591499  // standard deviation of all `age` numbers
   *   Person.age(variance).get.head === 228.2222222222   // variance of all `age` numbers
   * }}}
-  * @see Manual: [[http://www.scalamolecule.org/manual/attributes/expressions/ expressions]] |
-  *      [[http://www.scalamolecule.org/manual/attributes/aggregates/ aggregates]] |
-  *      [[http://www.scalamolecule.org/manual/attributes/parameterized/ input molecules]]
-  * @see Tests: [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/expression expressions]]
   * */
 package object expression

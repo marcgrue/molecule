@@ -12,6 +12,12 @@ import molecule.datomic.base.api.DatomicEntity
 import scala.collection.JavaConverters._
 import scala.language.existentials
 
+/** Datomic Entity facade for client api (peer-server/cloud/dev-local).
+ *
+ * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
+ * @param eid    Entity id of type Object
+ * @param showKW
+ */
 case class DatomicEntity_Client(
   conn: Conn_Client,
   eid: Any,

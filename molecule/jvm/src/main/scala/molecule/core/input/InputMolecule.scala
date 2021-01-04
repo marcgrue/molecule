@@ -43,8 +43,6 @@ import molecule.core.util.fns
   *   // Or we can re-use the input molecule straight away
   *   ageOfPersons("Liz").get === List(34)
   * }}}
-  *
-  * @see [[http://www.scalamolecule.org/manual/attributes/parameterized/ Manual]]
   */
 trait InputMolecule extends MoleculeBase {
 

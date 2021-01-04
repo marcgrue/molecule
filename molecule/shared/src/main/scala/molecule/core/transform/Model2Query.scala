@@ -14,7 +14,6 @@ import molecule.core.util.Helpers
   * <br><br>
   * Custom DSL molecule --> Model --> Query --> Datomic query string
   *
-  * @see [[http://www.scalamolecule.org/dev/transformation/]]
   * */
 object Model2Query extends Helpers {
 

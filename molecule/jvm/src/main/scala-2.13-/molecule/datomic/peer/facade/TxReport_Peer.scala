@@ -10,6 +10,11 @@ import molecule.core.util.Debug
 import molecule.datomic.base.facade.TxReport
 import scala.collection.JavaConverters._
 
+/** Datomic TxReport facade for peer api.
+ *
+ * @param rawTxReport
+ * @param stmtss
+ */
 case class TxReport_Peer(
   rawTxReport: jMap[_, _],
   stmtss: Seq[Seq[Statement]] = Nil

@@ -31,8 +31,6 @@ import scala.language.{higherKinds, implicitConversions}
   * <br><br>
   * For brevity, only arity 1 and 2 method signatures are shown. Arity 3-22 follow the same pattern.
   *
-  * @see [[http://www.scalamolecule.org/manual/relationships/composites/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/Composite.scala#L1 Tests]]
   * @groupname composite3 Factory methods to create composite input molecule awaiting 3 inputs.
   * @groupprio composite3 63
   */

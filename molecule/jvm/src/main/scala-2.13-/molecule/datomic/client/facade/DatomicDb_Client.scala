@@ -10,6 +10,10 @@ import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 import scala.collection.JavaConverters._
 
+/** Datomic Db facade for client api (peer-server/cloud/dev-local).
+ *
+ * @param clientDb
+ */
 case class DatomicDb_Client(clientDb: Db) extends DatomicDb {
 
   def getDatomicDb: AnyRef = clientDb.datomicDb

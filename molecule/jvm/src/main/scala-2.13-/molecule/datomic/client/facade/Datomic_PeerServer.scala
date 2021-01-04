@@ -6,7 +6,7 @@ import datomicScala.client.api.sync.Datomic
 import scala.collection.JavaConverters._
 
 
-/**
+/** Datomic facade for peer-server.
  *
  * @param accessKey
  * @param secret

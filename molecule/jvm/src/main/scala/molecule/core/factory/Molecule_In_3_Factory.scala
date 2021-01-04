@@ -26,7 +26,6 @@ import scala.language.{higherKinds, implicitConversions}
   * <br><br>
   * For brevity, only arity 1 and 2 method signatures are shown. Arity 3-22 follow the same pattern.
   *
-  * @see [[http://www.scalamolecule.org/manual/attributes/parameterized/ Manual]]
   * @groupname input3 Factory methods to create input molecules awaiting 3 inputs.
   * @groupprio input3 53
   */

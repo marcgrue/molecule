@@ -18,32 +18,25 @@ class RecreateTestDbs extends MoleculeSpec {
 
 
   "Recreate test dbs" >> {
-//    List(
-//      "m_txCount" -> TxCountSchema,
-//      "m_coretests" -> CoreTestSchema,
-//      "m_bidirectional" -> BidirectionalSchema,
-//      "m_partitions" -> PartitionTestSchema,
-//      "m_nested" -> NestedSchema,
-//      "m_aggregates" -> AggregatesSchema,
-//      "m_socialNews" -> SocialNewsSchema,
-//      "m_graph" -> GraphSchema,
-//      "m_graph2" -> Graph2Schema,
-//      "m_modernGraph1" -> ModernGraph1Schema,
-//      "m_modernGraph2" -> ModernGraph2Schema,
-//      "m_productsOrder" -> ProductsOrderSchema,
-//      "m_seattle" -> SeattleSchema,
-//    ).foreach {
-//      case (db, schema) =>
-//        println("Recreating db " + db)
-//        Datomic_Peer.recreateDbFrom(schema, "localhost:4334/" + db, datomicProtocol)
-//    }
-
-
-//    Datomic.test === 8
-
-    val d = Datomic
-    val client = Datomic.clientPeerServer("k", "s", "localhost:8998")
-
+    List(
+      "m_txCount" -> TxCountSchema,
+      "m_coretests" -> CoreTestSchema,
+      "m_bidirectional" -> BidirectionalSchema,
+      "m_partitions" -> PartitionTestSchema,
+      "m_nested" -> NestedSchema,
+      "m_aggregates" -> AggregatesSchema,
+      "m_socialNews" -> SocialNewsSchema,
+      "m_graph" -> GraphSchema,
+      "m_graph2" -> Graph2Schema,
+      "m_modernGraph1" -> ModernGraph1Schema,
+      "m_modernGraph2" -> ModernGraph2Schema,
+      "m_productsOrder" -> ProductsOrderSchema,
+      "m_seattle" -> SeattleSchema,
+    ).foreach {
+      case (db, schema) =>
+        println("Recreating db " + db)
+        Datomic_Peer.recreateDbFrom(schema, "localhost:4334/" + db, datomicProtocol)
+    }
 
     ok
   }

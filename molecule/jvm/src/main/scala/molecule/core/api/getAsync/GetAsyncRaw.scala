@@ -82,7 +82,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(t: Long)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(t)(conn))
@@ -108,7 +107,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(t: Long, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(t, n)(conn))
@@ -131,7 +129,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(tx: TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(tx.t)(conn))
@@ -155,7 +152,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(tx: TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(tx.t, n)(conn))
@@ -174,7 +170,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(date: java.util.Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(date)(conn))
@@ -194,7 +189,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(date, n)(conn))
@@ -218,7 +212,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(t: Long)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(t)(conn))
@@ -241,7 +234,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(t: Long, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(t, n)(conn))
@@ -264,7 +256,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(tx: TxReport)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(tx.t)(conn))
@@ -288,7 +279,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(tx: TxReport, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(tx.t, n)(conn))
@@ -307,7 +297,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(date: java.util.Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(date)(conn))
@@ -327,7 +316,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncRawSince(date: java.util.Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(date, n)(conn))
@@ -348,7 +336,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncRawWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawWith(txMolecules: _*)(conn))
@@ -369,7 +356,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncRawWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawWith(n, txMolecules: _*)(conn))
@@ -386,7 +372,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncRawWith(txData: java.util.List[_])(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawWith(txData)(conn))
@@ -404,7 +389,6 @@ trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
     * @param n      Int Number of rows returned
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncRawWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawWith(txData, n)(conn))

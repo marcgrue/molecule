@@ -31,12 +31,7 @@ object Conn_Peer {
 }
 
 
-/** Facade to Datomic Connection.
-  *
-  * @see [[http://www.scalamolecule.org/manual/time/testing/ Manual]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
+/** Facade to Datomic connection for peer api.
   * */
 class Conn_Peer(val peerConn: datomic.Connection)
   extends Conn_Datomic with Helpers with BridgeDatomicFuture {

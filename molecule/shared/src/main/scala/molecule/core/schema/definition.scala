@@ -57,10 +57,6 @@ import scala.annotation.StaticAnnotation
   *   }
   * }}}
   *
-  * @see [[http://www.scalamolecule.org/manual/schema/ Manual]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Schema without partitions]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/schemaDef/schema/PartitionTestDefinition.scala Schema with partitions]],
-  *      [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/bidirectionals Bidirectionals]]
   * @groupname setup Setup
   * @groupprio setup 1
   * @groupname opt Options
@@ -534,8 +530,6 @@ object definition {
 
   /** Card-one reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/card-one/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
     * @group ref
     */
   trait one extends refOptionBuilder[one]
@@ -544,8 +538,6 @@ object definition {
 
   /** Card-many reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/card-many/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/util/schema/CoreTestDefinition.scala Example]]
     * @group ref
     */
   trait many extends refOptionBuilder[many]
@@ -556,8 +548,6 @@ object definition {
 
   /** Card-one bi-directional reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group bi
     */
   trait oneBi extends refOptionBuilder[oneBi]
@@ -566,8 +556,6 @@ object definition {
 
   /** Card-many bi-directional reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group bi
     */
   trait manyBi extends refOptionBuilder[manyBi]
@@ -578,8 +566,6 @@ object definition {
 
   /** Card-one bi-directional edge reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
   trait oneBiEdge extends refOptionBuilder[oneBiEdge]
@@ -588,8 +574,6 @@ object definition {
 
   /** Card-many bi-directional edge reference.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
   trait manyBiEdge extends refOptionBuilder[manyBiEdge]
@@ -598,8 +582,6 @@ object definition {
 
   /** Bi-directional edge target attribute.
     *
-    * @see [[http://www.scalamolecule.org/manual/relationships/bidirectional/ Manual]] |
-    *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/main/scala/molecule/coretests/bidirectionals/schema/BidirectionalDefinition.scala Example]]
     * @group edge
     */
   trait target extends refOptionBuilder[target]

@@ -6,7 +6,7 @@ lazy val molecule = crossProject(JSPlatform, JVMPlatform)
   .settings(
     Settings.base ++ Settings.shared ++
       Publish.withoutDocs // save time without doc creation for publishLocal
-    //      Publish.withDocs // make docs for publishSigned
+//          Publish.withDocs // make docs for publishSigned
   )
   .jsSettings(Settings.js)
   .jvmSettings(Settings.jvm)

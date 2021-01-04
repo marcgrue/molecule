@@ -28,8 +28,6 @@ import molecule.core.util.fns
   *   ageOfPersons(Seq("Joe", "Liz")).get === List(42, 34)
   * }}}
   *
-  * @see [[molecule.core.input.InputMolecule]]
-  *      | [[http://www.scalamolecule.org/manual/attributes/parameterized/ Manual]]
   * @tparam I1 Type of input matching attribute with `?` marker
   */
 trait InputMolecule_1[I1] extends InputMolecule {

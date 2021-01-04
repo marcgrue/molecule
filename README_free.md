@@ -1,8 +1,6 @@
 # Prepare running Molecule against Datomic Free
 
-Molecule transparently runs a unified Scala interface with only minor differences 
-against the full matrix of Datomic systems/apis/languages which from a Molecule 
-perspective boils down to 3 systems:
+Molecule transparently runs a unified Scala interface with only minor differences against the full matrix of Datomic systems/apis/languages which from a Molecule perspective boils down to 3 systems:
 
 | System            | API                | Protocol | Language     | Download                   | License              |   
 | :---:             | :---:              | :---:    | :---:        | :---:                      | :---:                |   
@@ -13,8 +11,7 @@ perspective boils down to 3 systems:
 
 Molecule is published with only a dependency on Datomic Free to be freely distributed. 
 
-To run tests against the two proprietary systems listed above
-too, please follow the instructions in `README_pro.md` 
+To run tests against the two proprietary systems listed above too, please follow the instructions in `README_pro.md` 
 
 Run test against only the free version by completing the following steps:
 
@@ -22,18 +19,16 @@ Run test against only the free version by completing the following steps:
 ## STEP 1 - Give Intellij enough memory (once)
 
 In order for Intellij to be happy, set VM option -Xmx2G in preferences:
+
 `Preferences > Build, Execution, Deployment > Compiler > Scala Compiler > Scala Compiler Server / VM options`
 
 Ensure that the java version (like 1.8) here is the same as in your terminal that you get from `java -version`
 
 ## STEP 2 - Set datomic directory path (once)
 
-Open `project.SettingsDatomic` and set `datomicDownloadsDir` to the path of the
-directory where you downloaded the Datomic distributions.
+Open `project.SettingsDatomic` and set `datomicDownloadsDir` to the path of the directory where you downloaded the Datomic distributions.
 
-Molecule will automatically detect and default to using the latest available 
-Datomic pro version if this is downloaded. To enforce using the free version, 
-you can compile molecule with this flag: `sbt compile -Dfree=true`
+Molecule will automatically detect and default to using the latest available Datomic pro version if this is downloaded. To enforce using the free version, you can compile molecule with this flag: `sbt compile -Dfree=true`
 
 
 ## STEP 3 - Start transactor
@@ -69,16 +64,19 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 // All tests (works only with peer, so set `tests` to 1 in TestSpec)
 sbt:molecule> test
 
-// Test against scala 2.12
-sbt:molecule> ++2.12.12; test
+// Test against scala 2.13
+sbt:molecule> ++2.13.4; testOnly molecule.tests.
+sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.*
+sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.TwoStepQueries
+
+// Test against scala 2.12 
+sbt:molecule> ++2.12.12; testOnly molecule.tests.*
 sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.*
 sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.TwoStepQueries
 ```
-Using sbt is about twice as fast and therefore preferable
-when running all tests (for peer system only though). 
+Using sbt is about twice as fast and therefore preferable when running all tests (for peer system only though). 
 
-Remember to ctrl-c the sbt process when switching back to 
-testing in IDE to avoid process locks.
+Remember to ctrl-c the sbt process when switching back to testing in IDE to avoid process locks.
 
 
 ## Further info

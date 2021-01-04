@@ -15,8 +15,6 @@ import scala.language.higherKinds
   *   // Query for data with transaction meta data - "which persons became members"
   *   Person.name.Tx(MyMetaData.action_("add member")).get === List("Ben")
   * }}}
-  * @see Manual: [[http://www.scalamolecule.org/manual/transactions/tx-meta-data/ Manual]]
-  *      | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/transaction/TransactionMetaData.scala#L1 Tests]]
   */
 trait Tx
 

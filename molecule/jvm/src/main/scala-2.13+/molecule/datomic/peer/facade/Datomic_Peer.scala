@@ -9,7 +9,6 @@ import scala.jdk.CollectionConverters._
 
 /** Facade to Datomic Peer with selected methods.
   *
-  * @see [[http://www.scalamolecule.org/manual/schema/transaction/ Manual]]
   * @groupname database  Database operations
   * @groupprio 10
   * */

@@ -11,8 +11,6 @@ import scala.language.higherKinds
   *       (23, 124, List(("Chocolate", 48.00, 1), ("Whisky", 38.00, 2)))
   *     )
   * }}}
-  * @see [[http://www.scalamolecule.org/manual/relationships/card-many/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/ref/NestedRef.scala#L1 Tests]]
   */
 trait Nested_In_2
 

@@ -6,7 +6,13 @@ import molecule.datomic.base.api.DatomicEntity
 import scala.collection.JavaConverters._
 import scala.language.existentials
 
-
+/** Datomic Entity facade for peer api.
+ *
+ * @param entity
+ * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
+ * @param eid    Entity id of type Object
+ * @param showKW
+ */
 case class DatomicEntity_Peer(
   entity: datomic.Entity,
   conn: Conn_Peer,

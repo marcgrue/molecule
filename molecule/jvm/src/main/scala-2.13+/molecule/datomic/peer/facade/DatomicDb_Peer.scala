@@ -6,6 +6,10 @@ import datomic.{Database, Peer, Util, Datom => PeerDatom}
 import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 
+/** Datomic Db facade for peer api.
+ *
+ * @param peerDb
+ */
 case class DatomicDb_Peer(peerDb: Database) extends DatomicDb {
 
   def getDatomicDb: AnyRef = peerDb

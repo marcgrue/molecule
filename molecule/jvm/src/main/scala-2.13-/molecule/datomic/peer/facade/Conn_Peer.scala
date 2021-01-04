@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-/** Factory methods to create facade to Datomic Connection. */
+/** Factory methods to create facade to Datomic Connection for peer api. */
 object Conn_Peer {
   def apply(uri: String): Conn_Peer = new Conn_Peer(datomic.Peer.connect(uri))
   def apply(datomicConn: datomic.Connection): Conn_Peer = new Conn_Peer(datomicConn)
@@ -31,12 +31,7 @@ object Conn_Peer {
 }
 
 
-/** Facade to Datomic Connection.
-  *
-  * @see [[http://www.scalamolecule.org/manual/time/testing/ Manual]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbAsOf.scala#L1 testDbAsOf]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbSince.scala#L1 testDbSince]],
-  *      [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/time/TestDbWith.scala#L1 testDbWith]],
+/** Facade to Datomic Connection for peer api.
   * */
 class Conn_Peer(val peerConn: datomic.Connection)
   extends Conn_Datomic with Helpers with BridgeDatomicFuture {
@@ -185,13 +180,11 @@ class Conn_Peer(val peerConn: datomic.Connection)
 
   def transactAsync(scalaStmts: Seq[Seq[Statement]])
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-    val javaStmts: jList[jList[_]] = toJava(scalaStmts)
-    transactAsync(javaStmts, scalaStmts)
+    transactAsync(toJava(scalaStmts), scalaStmts)
   }
 
   def transactAsync(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil)
                    (implicit ec: ExecutionContext): Future[TxReport] = {
-
     if (_adhocDb.isDefined) {
       Future {
         TxReport_Peer(getAdhocDb.`with`(javaStmts), scalaStmts)

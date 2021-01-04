@@ -62,7 +62,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableAsOf(t: Long)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableAsOf(t)(conn))
@@ -83,7 +82,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableAsOf(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableAsOf(tx.t)(conn))
@@ -100,7 +98,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableAsOf(date: java.util.Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableAsOf(date)(conn))
@@ -122,7 +119,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableSince(t: Long)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableSince(t)(conn))
@@ -144,7 +140,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param tx   [[TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableSince(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableSince(tx.t)(conn))
@@ -161,7 +156,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see [[http://www.scalamolecule.org/manual/time/asof-since/ Manual]] on `asof`/`since`
     */
   def getAsyncIterableSince(date: java.util.Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableSince(date)(conn))
@@ -182,7 +176,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableWith(txMolecules: _*)(conn))
@@ -199,7 +192,6 @@ trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see [[http://www.scalamolecule.org/manual/time/with/ Manual]] on `with`
     */
   def getAsyncIterableWith(txData: java.util.List[_])(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableWith(txData)(conn))

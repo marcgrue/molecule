@@ -17,8 +17,6 @@ import scala.language.existentials
 
 /** Entity wrapper with actions on entity.
   *
-  * @see [[http://www.scalamolecule.org/manual/entities/ Manual]]
-  *      | Tests: [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/runtime/EntityAPI.scala#L1 entity api]]
   * @groupname retract Entity retraction
   * @groupprio retract 1
   * @groupname tx Entity retraction with transaction meta data
@@ -27,12 +25,8 @@ import scala.language.existentials
   * @groupprio entityApi 3
   * @groupname touch Touch entity graph
   * @groupprio touch 3
-  * @param entity datomic.Entity
   * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
   * @param eid    Entity id of type Object
-  * @param showKW If a ref id points to an attribute definition, whether to show
-  *               the attribute keyword (like `:Ns.enum/enumValue`) or its
-  *               representation as a Long number
   */
 abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
 

@@ -1,8 +1,6 @@
 # Prepare running Molecule against all Datomic systems
 
-Molecule transparently runs a unified Scala interface with only minor differences 
-against the full matrix of Datomic systems/apis/languages which from a Molecule 
-perspective boils down to 3 systems:
+Molecule transparently runs a unified Scala interface with only minor differences against the full matrix of Datomic systems/apis/languages which from a Molecule perspective boils down to 3 systems:
 
 | System            | API                | Protocol | Language     | Download                   | License              |   
 | :---:             | :---:              | :---:    | :---:        | :---:                      | :---:                |   
@@ -11,17 +9,15 @@ perspective boils down to 3 systems:
 | dev-local (cloud) | datomic.client.api | dev      | Clojure      | [Dev-tools][dev]           | Email reg            |   
 
 
-Molecule is published with only a dependency on Datomic Free to be freely 
-distributed. To run tests only against the free version, please follow the
-instructions in `README_free.md`
+Molecule is published with only a dependency on Datomic Free to be freely distributed. To run tests only against the free version, please follow the instructions in `README_free.md`
 
-To run tests against the free and two proprietary systems too, please follow the 
-steps below (some steps are only required once during setup).
+To run tests against the free and two proprietary systems too, please follow the steps below (some steps are only required once during setup).
 
 
 ## STEP 1 - Give Intellij enough memory (once)
 
 In order for Intellij to be happy, set VM option -Xmx2G in preferences:
+
 `Preferences > Build, Execution, Deployment > Compiler > Scala Compiler > Scala Compiler Server / VM options` 
 
 Ensure that the java version (like 1.8) here is the same as in your terminal that you get from `java -version`
@@ -29,8 +25,7 @@ Ensure that the java version (like 1.8) here is the same as in your terminal tha
 
 ## STEP 2 - Download and install proprietary Datomic versions (once)
 
-Register and install the two last proprietary Datomic systems from the links 
-shown above into some folder locally.
+Register and install the two last proprietary Datomic systems from the links shown above into some folder locally.
 
 Install libraries to your local maven repository (.m2): 
 
@@ -40,22 +35,18 @@ Install libraries to your local maven repository (.m2):
 
 ## STEP 3 - Make proprietary-aware molecule available (once)
 
-Open `project.SettingsDatomic` and set `datomicDownloadsDir` to the path of the
-directory where you downloaded the Datomic distributions.
+Open `project.SettingsDatomic` and set `datomicDownloadsDir` to the path of the directory where you downloaded the Datomic distributions.
 
-In `project.Settings`, add "-SNAPSHOT" to the molecule version
-`version in ThisBuild := "<molecule-version>-SNAPSHOT"` and run 
-`sbt publishLocal` from the molecule project directory. Let your projects use 
-this proprietary-aware molecule version.
+In `project.Settings`, add "-SNAPSHOT" to the molecule version `version in ThisBuild := "<molecule-version>-SNAPSHOT"` and run `sbt publishLocal` from the molecule project directory. Let your projects use this proprietary-aware molecule version.
 
-Molecule will automatically detect and default to using the latest available
-Datomic pro version if this is downloaded.
+Molecule will automatically detect and default to using the latest available Datomic pro version if this is downloaded.
 
-To enforce using the free version, you can compile molecule with this flag:
+To enforce using the free version, you can compile molecule with this flag: 
+
 `sbt compile -Dfree=true`
 
-To enforce using a specific version, you can compile molecule with one or both
-of these flags:
+To enforce using a specific version, you can compile molecule with one or both of these flags:
+
 `sbt compile -Ddatomic.pro=1.0.6202 -Ddatomic.dev-local=0.9.225`
 
 
@@ -88,15 +79,12 @@ Run commands below to perform these 3 operations:
 
 ## STEP 6 - Create molecule samples (once)
 
-Run `molecule.setup.RecreateTestDbs` in moleculeTests to create sample databases. 
-This is necessary before starting the peer server so that it can "see" the 
-mbrainz-subset db.
+Run `molecule.setup.RecreateTestDbs` in molecule-tests to create sample databases. This is necessary before starting the peer server so that it can "see" the mbrainz-subset db.
 
 
 ## STEP 7 - Start peer server
                            
-Copy all lines below and paste into terminal to start Peer Server and having it
-serve all the sample databases used by the tests:
+Copy all lines below and paste into terminal to start the Peer Server and having it serve all the sample databases used by the tests:
 
     bin/run -m datomic.peer-server -h localhost -p 8998 -a k,s \
     -d m_txCount,datomic:mem://m_txCount \
@@ -115,11 +103,10 @@ serve all the sample databases used by the tests:
     -d mbrainz-1968-1973,datomic:dev://localhost:4334/mbrainz-1968-1973 \
     -d mbrainz-subset,datomic:dev://localhost:4334/mbrainz-subset
 
-Now you can run molecule tests or projects against peer, peer-server and 
-dev-local (cloud).
+Now you can run molecule tests or projects against peer, peer-server and dev-local (cloud).
 
 ## Test
-Test in IDE or with sbt:
+Test in IDE or with sbt. Observe that first time tests are run, all has to be compiled which can take a few minutes.
 ```
 sbt
 
@@ -132,14 +119,17 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 // All tests (works only with peer, so set `tests` to 1 in TestSpec)
 sbt:molecule> test 
 
-// Test against scala 2.12
-sbt:molecule> ++2.12.12; test
+// Test against scala 2.13
+sbt:molecule> ++2.13.4; testOnly molecule.tests.
+sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.*
+sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.TwoStepQueries
+
+// Test against scala 2.12 
+sbt:molecule> ++2.12.12; testOnly molecule.tests.*
 sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.*
 sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.TwoStepQueries
 ```
-Using sbt is about twice as fast and therefore preferable
-when running all tests. Remember to ctrl-c the sbt process when switching to
-test in IDE to avoid process locks.
+Using sbt is about twice as fast and therefore preferable when running all tests. Remember to ctrl-c the sbt process when switching to test in IDE to avoid process locks.
 
 ## Further info
 

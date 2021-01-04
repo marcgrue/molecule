@@ -25,8 +25,6 @@ package molecule.core.expression
   *   Person.age(variance).get.head === 228.2222222222   // variance of all `age` numbers
   * }}}
   *
-  * @see [[http://www.scalamolecule.org/manual/attributes/aggregates/ Manual]]
-  *     | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/expression/Aggregates.scala#L1 Tests]]
   * @groupname aggregates Aggregate keywords
   * @groupdesc aggregates Keywords applied to attributes that return aggregated value(s).
   * @groupprio aggregates 30

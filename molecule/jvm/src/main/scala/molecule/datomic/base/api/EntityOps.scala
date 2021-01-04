@@ -56,8 +56,6 @@ trait EntityOps {
     *   )
     * }}}
     *
-    * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *      | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
@@ -101,8 +99,6 @@ trait EntityOps {
     *   )
     * }}}
     *
-    * @see [[http://www.scalamolecule.org/manual/crud/retract/ Manual]]
-    *      | [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/crud/Retract.scala#L1 Test]]
     * @group entityOps
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules

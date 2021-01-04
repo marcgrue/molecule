@@ -9,7 +9,7 @@ import molecule.core.schema.SchemaTransaction
 import scala.jdk.CollectionConverters._
 
 
-/**
+/** Datomic facade for cloud/dev-local.
  *
  * @param system     folder where samples reside
  * @param storageDir absolute path to where "system" is

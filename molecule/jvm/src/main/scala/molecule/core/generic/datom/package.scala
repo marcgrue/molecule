@@ -31,7 +31,5 @@ package molecule.core.generic
   *  - '''`txInstant`''' - Transaction wall clock time (java.util.Date)
   *  - '''`op`''' - Operation status: assertion (true) / retraction (false)
   *
-  * @see [[https://github.com/scalamolecule/molecule/blob/master/coretests/src/test/scala/molecule/coretests/generic/Datom.scala#L1 Tests]]
-  *     for more generic attribute query examples.
   */
 package object datom

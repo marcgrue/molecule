@@ -11,6 +11,11 @@ import molecule.core.util.Debug
 import molecule.datomic.base.facade.TxReport
 import scala.collection.JavaConverters._
 
+/** Datomic TxReport facade for client api (peer-server/cloud/dev-local).
+ *
+ * @param clientTxReport
+ * @param stmtss
+ */
 case class TxReport_Client(
   clientTxReport: clientTxReport,
   stmtss: Seq[Seq[Statement]] = Nil

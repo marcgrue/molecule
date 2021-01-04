@@ -9,11 +9,6 @@ import molecule.core.ast.model._
   *   Person.name("John" or "Jonas")           // OR-logic
   * }}}
   *
-  * @see Manual: [[http://www.scalamolecule.org/manual/attributes/expressions/ expressions]],
-  *     | Tests: [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/expression expressions]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input1String.scala#L1 input1]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input2.scala#L1 input2]],
-  *     [[https://github.com/scalamolecule/molecule/tree/master/coretests/src/test/scala/molecule/coretests/input/Input3.scala#L1 input3]]
   * @groupname attrLogicImplicits Expression implicits
   * @groupdesc attrLogicImplicits Turns basic types into `TermValue`'s that can be used in [[molecule.core.ast.model.Expression Expression]]
   * @groupprio attrLogicImplicits 21
