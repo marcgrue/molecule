@@ -18,9 +18,9 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait EntityOps {
 
-  /** Long -> [[DatomicEntity Entity]] api implicit.
+  /** Long -> [[molecule.datomic.base.api.DatomicEntity Entity]] api implicit.
     * <br><br>
-    * Convenience implicit to allow calling [[DatomicEntity Entity]] methods directly on entity Long value.
+    * Convenience implicit to allow calling [[molecule.datomic.base.api.DatomicEntity Entity]] methods directly on entity Long value.
     * {{{
     *   // Get entity id of Ben
     *   val benId = Person.e.name_("Ben").get.head
@@ -60,7 +60,7 @@ trait EntityOps {
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[TxReport TxReport]] with result of retract
+    * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of retract
     */
   def retract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): TxReport = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
@@ -103,7 +103,7 @@ trait EntityOps {
     * @param eids                Iterable of entity ids of type Long
     * @param txMetaDataMolecules Zero or more transaction meta data molecules
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[TxReport TxReport]] with result of retract
+    * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of retract
     */
   def retractAsync(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
     val retractStmts = eids.toSeq.distinct map RetractEntity

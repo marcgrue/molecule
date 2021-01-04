@@ -25,7 +25,7 @@ trait TxBundles {
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return [[TxReport TxReport]] with result of transaction
+    * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of transaction
     */
   def transactBundle(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): TxReport =
     conn.transact(stmtss.flatten)
@@ -54,7 +54,7 @@ trait TxBundles {
     * @group bundled
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Future with [[TxReport TxReport]] with result of transaction
+    * @return Future with [[molecule.datomic.base.facade.TxReport TxReport]] with result of transaction
     */
   def transactBundleAsync(
     stmtss: Seq[Seq[Statement]]*

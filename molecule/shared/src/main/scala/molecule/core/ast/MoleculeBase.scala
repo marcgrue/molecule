@@ -2,7 +2,7 @@ package molecule.core.ast
 import molecule.core.ast.model.Model
 import molecule.core.ast.query.Query
 
-/** Base Molecule interface shared by [[molecule.core.api.Molecule Molecule]] and [[molecule.core.input.InputMolecule InputMolecule]]. */
+/** Base Molecule interface. */
 trait MoleculeBase {
 
   /** Internal [[molecule.core.ast.model.Model Model]] representation of molecule.

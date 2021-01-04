@@ -116,9 +116,9 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
     *   val tx1 = Person.name.age insert List(
@@ -159,10 +159,10 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getIterableAsOf
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(tx:molecule\.facade\.TxReport)* getAsyncIterableAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableAsOf]] method.
     */
   def getIterableAsOf(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
     getIterable(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -275,9 +275,9 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -298,10 +298,10 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     * }}}
     *
     * @group getIterableSince
-    * @param tx   [[TxReport TxReport]]
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableSince(tx:molecule\.facade\.TxReport)* getAsyncIterableSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncIterable.getAsyncIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableSince]] method.
     */
   def getIterableSince(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
     getIterable(conn.usingTempDb(Since(TxLong(tx.t))))

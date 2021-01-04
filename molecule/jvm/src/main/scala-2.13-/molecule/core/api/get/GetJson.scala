@@ -192,9 +192,9 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a
     * database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -232,10 +232,10 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * }}}
     *
     * @group getJsonAsOf
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonAsOf(tx:molecule\.facade\.TxReport)* getAsyncJsonAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncJsonAsOf]] method.
     */
   def getJsonAsOf(tx: TxReport)(implicit conn: Conn): String =
     getJsonFlat(conn.usingTempDb(AsOf(TxLong(tx.t))), -1)
@@ -246,9 +246,9 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a
     * database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -276,11 +276,11 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * }}}
     *
     * @group getJsonAsOf
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncJsonAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncJsonAsOf]] method.
     */
   def getJsonAsOf(tx: TxReport, n: Int)(implicit conn: Conn): String =
     getJsonFlat(conn.usingTempDb(AsOf(TxLong(tx.t))), n)
@@ -474,9 +474,9 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -504,10 +504,10 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * }}}
     *
     * @group getJsonSince
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonSince(tx:molecule\.facade\.TxReport)* getAsyncJsonSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncJsonSince]] method.
     */
   def getJsonSince(tx: TxReport)(implicit conn: Conn): String =
     getJsonFlat(conn.usingTempDb(Since(TxLong(tx.t))), -1)
@@ -518,9 +518,9 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -545,11 +545,11 @@ trait GetJson { self: MoleculeBase with JsonBuilder =>
     * }}}
     *
     * @group getJsonSince
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return String of json
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonSince(tx:molecule\.facade\.TxReport,n:Int)* getAsyncJsonSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncJson.getAsyncJsonSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncJsonSince]] method.
     */
   def getJsonSince(tx: TxReport, n: Int)(implicit conn: Conn): String =
     getJsonFlat(conn.usingTempDb(Since(TxLong(tx.t))), n)

@@ -62,7 +62,7 @@ trait TxFunctions {
     * @group txfn
     * @param txFnCall    Tx function invocation
     * @param txMolecules Optional tx meta data molecules
-    * @return [[TxReport TxReport]] with result of transaction
+    * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of transaction
     */
   def transactFn(
     txFnCall: Seq[Seq[Statement]],
@@ -105,7 +105,7 @@ trait TxFunctions {
     * @group txfn
     * @param txFnCall    Tx function invocation
     * @param txMolecules Optional tx meta data molecules
-    * @return Future with [[TxReport TxReport]] with result of transaction
+    * @return Future with [[molecule.datomic.base.facade.TxReport TxReport]] with result of transaction
     */
   def transactFnAsync(
     txFnCall: Seq[Seq[Statement]],

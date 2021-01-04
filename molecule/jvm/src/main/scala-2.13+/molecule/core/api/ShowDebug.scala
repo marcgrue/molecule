@@ -303,7 +303,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * 2. Data returned from get query (max 500 rows).
     *
     * @group debugGet
-    * @param tx   [[TxReport TxReport]]
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetAsOf(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -351,7 +351,7 @@ trait ShowDebug[Tpl] { self: Molecule[Tpl] =>
     * 2. Data returned from get query (max 500 rows).
     *
     * @group debugGet
-    * @param tx   [[TxReport TxReport]]
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def debugGetSince(tx: TxReport)(implicit conn: Conn): Unit = debugGet(conn.usingTempDb(Since(TxLong(tx.t))))

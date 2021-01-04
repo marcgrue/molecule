@@ -138,7 +138,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
 
   /** Retract single entity using entity id.
     * <br><br>
-    * Given the implicit conversion of Long's in [[EntityOps]] to an [[DatomicEntity Entity]] we can
+    * Given the implicit conversion of Long's in [[molecule.datomic.base.api.EntityOps]] to an [[molecule.datomic.base.api.DatomicEntity Entity]] we can
     * can call `retract` on an entity id directly:
     * {{{
     *   // Get entity id of Ben
@@ -152,16 +152,16 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * `eid.Tx(MyMetaData.action("my meta data")).retract`
     * <br><br>
     * To retract multiple entities (with or without tx meta data), use<br>
-    * `retract(eids, txMetaDataMolecules*)` in [[EntityOps]].
+    * `retract(eids, txMetaDataMolecules*)` in [[molecule.datomic.base.api.EntityOps]].
     *
     * @group retract
-    * @return [[TxReport]] with result of retraction
+    * @return [[molecule.datomic.base.facade.TxReport]] with result of retraction
     */
   def retract: TxReport = conn.transact(getRetractTx)
 
   /** Asynchronously retract single entity using entity id.
     * <br><br>
-    * Given the implicit conversion of Long's in [[EntityOps]] to an [[DatomicEntity Entity]] we can
+    * Given the implicit conversion of Long's in [[molecule.datomic.base.api.EntityOps]] to an [[molecule.datomic.base.api.DatomicEntity Entity]] we can
     * can call `retractAsync` on an entity id directly:
     * {{{
     *   // Get entity id of Ben
@@ -177,10 +177,10 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * `eid.Tx(MyMetaData.action("my meta data")).retract`
     * <br><br>
     * To retract multiple entities (with or without tx meta data), use<br>
-    * `retract(eids, txMetaDataMolecules*)` in [[EntityOps]].
+    * `retract(eids, txMetaDataMolecules*)` in [[molecule.datomic.base.api.EntityOps]].
     *
     * @group retract
-    * @return [[TxReport]] with result of retraction
+    * @return [[molecule.datomic.base.facade.TxReport]] with result of retraction
     */
   def retractAsync(implicit ec: ExecutionContext): Future[TxReport] =
     conn.transactAsync(getRetractTx)
@@ -273,7 +273,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
 
     /** Perform retraction of entity with added transaction meta data against database.
       *
-      * @return [[TxReport TxReport]] with result of transaction
+      * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of transaction
       */
     def retract: TxReport = conn.transact(stmtss)
 

@@ -110,16 +110,16 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a
     * database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetList.getAsOf(tx:molecule\.facade\.TxReport)* getAsOf]] method.
+    * [[molecule.core.api.get.GetList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
     *
     * @group getAsyncAsOf
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * */
@@ -132,16 +132,16 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetList.getAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.get.GetList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
-    * @param tx   [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
@@ -223,15 +223,15 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetList.getSince(tx:molecule\.facade\.TxReport)* getSince]] method.
+    * [[molecule.core.api.get.GetList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
     *
     * @group getAsyncSince
-    * @param tx   [[TxReport TxReport]]
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     */
@@ -244,15 +244,15 @@ trait GetAsyncList[Tpl] { self: Molecule[Tpl] with GetAsyncArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetList.getSince(tx:molecule\.facade\.TxReport,n:Int)* getSince]] method.
+    * [[molecule.core.api.get.GetList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
-    * @param tx   [[TxReport TxReport]]
+    * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule

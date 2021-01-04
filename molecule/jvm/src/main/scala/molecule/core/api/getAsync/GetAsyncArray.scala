@@ -123,20 +123,20 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve
     * a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetArray.getArrayAsOf(tx:molecule\.facade\.TxReport)* getArrayAsOf]] method.
+    * [[molecule.core.api.get.GetArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
     * also be the fastest way to traverse the data set.
     *
     * @group getAsyncArrayAsOf
-    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
@@ -150,13 +150,13 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetArray.getArrayAsOf(tx:molecule\.facade\.TxReport,n:Int)* getArrayAsOf]] method.
+    * [[molecule.core.api.get.GetArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -165,7 +165,7 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getAsyncArrayAsOf
-    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
@@ -278,19 +278,19 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.facade\.TxReport)* getArraySince]] method.
+    * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
     * also be the fastest way to traverse the data set.
     *
     * @group getAsyncArraySince
-    * @param tx      [[TxReport TxReport]]
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
@@ -304,12 +304,12 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * get a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.facade\.TxReport,n:Int)* getArraySince]] method.
+    * [[molecule.core.api.get.GetArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -318,7 +318,7 @@ trait GetAsyncArray[Tpl] { self: Molecule[Tpl] with GetArray[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getAsyncArraySince
-    * @param tx      [[TxReport TxReport]]
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array

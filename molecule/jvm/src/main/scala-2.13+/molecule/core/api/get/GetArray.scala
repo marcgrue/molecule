@@ -207,9 +207,9 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve
     * a database value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -247,11 +247,11 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * also be the fastest way to traverse the data set.
     *
     * @group getArrayAsOf
-    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.facade\.TxReport)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArrayAsOf]] method.
     **/
   def getArrayAsOf(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(AsOf(TxLong(tx.t))), tplType)
@@ -263,9 +263,9 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]]
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[TxReport TxReport]] from transaction
+    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
     * operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Insert (tx report 1)
@@ -296,12 +296,12 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getArrayAsOf
-    * @param tx      [[TxReport TxReport]] (returned from all molecule transaction operations)
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
     **/
   def getArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxLong(tx.t))), tplType)
@@ -495,9 +495,9 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -521,11 +521,11 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * also be the fastest way to traverse the data set.
     *
     * @group getArraySince
-    * @param tx      [[TxReport TxReport]]
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.facade\.TxReport)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArraySince]] method.
     */
   def getArraySince(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(Since(TxLong(tx.t))), tplType)
@@ -536,9 +536,9 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
     * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[TxReport TxReport]] that contains
+    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
     * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
+    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * {{{
     *   // Get tx reports for 3 transactions
     *   val tx1 = Person.name("Ann").save
@@ -561,12 +561,12 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * The Array is only populated with n rows of type-casted tuples.
     *
     * @group getArraySince
-    * @param tx      [[TxReport TxReport]]
+    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param n       Int Number of rows returned
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
     **/
   def getArraySince(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxLong(tx.t))), tplType)
