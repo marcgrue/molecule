@@ -120,7 +120,7 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 sbt:molecule> test 
 
 // Test against scala 2.13
-sbt:molecule> ++2.13.4; testOnly molecule.tests.
+sbt:molecule> ++2.13.4; testOnly molecule.tests.*
 sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.*
 sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.TwoStepQueries
 
