@@ -8,7 +8,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
 
   import c.universe._
 
-  val y = DebugMacro("Cast", 1)
+  val y = InspectMacro("Cast", 1)
 
 
   def castOneAttr(tpe: String): Int => Tree = tpe match {

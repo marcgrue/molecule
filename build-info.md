@@ -33,7 +33,7 @@ or
 > sbt +moleculeJVM/publishSigned +moleculeJS/publishSigned -Dfree=true
 
 // 2.13 only
-> sbt ++2.13.2 moleculeJVM/publishLocal moleculeJS/publishLocal
+> sbt ++2.13.4 moleculeJVM/publishLocal moleculeJS/publishLocal
 
 Delete previous ivy cached build files before publishing locally (if not using SNAPSHOT version)
 > del ~/.ivy2/local/org.scalamolecule/molecule*

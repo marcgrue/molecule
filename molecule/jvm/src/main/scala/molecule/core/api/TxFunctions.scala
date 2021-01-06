@@ -13,12 +13,10 @@ import molecule.core.macros.exception.TxFnException
 import molecule.core.transform.Model2Transaction
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
 import molecule.datomic.base.facade.{Conn, TxReport}
-import molecule.datomic.peer.facade.{Conn_Peer, TxReport_Peer}
-import scala.concurrent.{blocking, ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.language.experimental.macros
 import scala.language.implicitConversions
 import scala.util.control.NonFatal
-import molecule.datomic.api.out6._
 
 
 /** Transactional methods for bundled transactions and tx functions
@@ -113,13 +111,13 @@ trait TxFunctions {
   ): Future[TxReport] = macro TxFunctionCall.asyncTxFnCall
 
 
-  /** Debug tx function invocation
+  /** Inspect tx function invocation
     * <br><br>
     * Print transaction statements to output of a tx function invocation
     * without affecting the live database.
     * {{{
-    * // Print debug info for tx function invocation
-    * debugTransact(transfer(fromAccount, toAccount, 20))
+    * // Print inspect info for tx function invocation
+    * inspectTransact(transfer(fromAccount, toAccount, 20))
     *
     * // Prints produced tx statements to output:
     * /*
@@ -147,22 +145,21 @@ trait TxFunctions {
     * @param txFnCall    Tx function invocation
     * @param txMolecules Optional tx meta data molecules
     */
-  def debugTransactFn(
+  def inspectTransactFn(
     txFnCall: Seq[Seq[Statement]],
     txMolecules: MoleculeBase*
-  ): Unit = macro TxFunctionCall.debugTxFnCall
+  ): Unit = macro TxFunctionCall.inspectTxFnCall
 }
 
 
 object TxFunctions extends Helpers with BridgeDatomicFuture {
-
   def excMissingScalaJar(e: Throwable): String =
     s"""The Datomic transactor needs any dependencies in transactor
        |functions to be available on its classpath. Please copy the scala-library jar to the Datomic transactor lib.
        |Supposing $$DATOMIC_HOME points to your Datomic distribution folder you can likely run this command (on a mac):
-       |cp ~/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-${moleculeBuildInfo.BuildInfo.scalaVersion}.jar $$DATOMIC_HOME/lib/
+       |cp ~/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-<scala-version>.jar $$DATOMIC_HOME/lib/
        |You might also want to copy the molecule library:
-       |cp ~/.ivy2/cache/org.scalamolecule/molecule_2.13/${moleculeBuildInfo.BuildInfo.version}/jars/molecule_2.13.jar $$DATOMIC_HOME/lib/
+       |cp ~/.ivy2/cache/org.scalamolecule/molecule_2.13/<project-version>/jars/molecule_2.13.jar $$DATOMIC_HOME/lib/
        |You need to then restart the Datomic transactor.
        |${e.getMessage}""".stripMargin
 
@@ -170,7 +167,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
     s"""The Datomic transactor needs any dependencies in transactor
        |functions to be available on its classpath. Please copy the Molecule library jar to the Datomic transactor lib.
        |Supposing $$DATOMIC_HOME points to your Datomic distribution folder you can likely run this command (on a mac):
-       |cp ~/.ivy2/cache/org.scalamolecule/molecule_2.13/${moleculeBuildInfo.BuildInfo.version}/jars/molecule_2.13.jar $$DATOMIC_HOME/lib/
+       |cp ~/.ivy2/cache/org.scalamolecule/molecule_2.13/<project-version>/jars/molecule_2.13.jar $$DATOMIC_HOME/lib/
        |You need to then restart the Datomic transactor.
        |${e.getMessage}""".stripMargin
 
@@ -261,7 +258,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
   }
 
 
-  private[molecule] def debugTxFnCall(
+  private[molecule] def inspectTxFnCall(
     txFn: String,
     txMolecules: Seq[MoleculeBase],
     args: Any*
@@ -269,7 +266,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
     // Use temporary branch of db to not changing any live data
     conn.testDbWith()
     // Print tx report to console
-    txFnCall(txFn, txMolecules, args: _*)(conn).debug
+    txFnCall(txFn, txMolecules, args: _*)(conn).inspect
     conn.useLiveDb
   }
 

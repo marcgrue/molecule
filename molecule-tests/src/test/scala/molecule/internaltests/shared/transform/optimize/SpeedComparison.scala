@@ -43,7 +43,7 @@ class SpeedComparison extends TestSpec {
 
   "1" in new Setup {
 
-    //      Ns.int.>(middle).Ref1.int1.Ref2.int2.debugGet
+    //      Ns.int.>(middle).Ref1.int1.Ref2.int2.inspectGet
 
     QueryOptimizer(
       Query(
@@ -109,7 +109,7 @@ class SpeedComparison extends TestSpec {
 
   "2" in new Setup {
 
-    //      Ns.int.Ref1.int1.>(middle).Ref2.int2.debugGet
+    //      Ns.int.Ref1.int1.>(middle).Ref2.int2.inspectGet
 
     QueryOptimizer(
       Query(
@@ -179,7 +179,7 @@ class SpeedComparison extends TestSpec {
 
   "3" in new Setup {
 
-    //      Ns.int.Ref1.int1.Ref2.int2.>(middle).debugGet
+    //      Ns.int.Ref1.int1.Ref2.int2.>(middle).inspectGet
 
     QueryOptimizer(
       Query(

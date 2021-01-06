@@ -2,11 +2,12 @@ package molecule.setup.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out3._
 import molecule.datomic.base.facade.Conn
+import molecule.setup.SpecHelpers
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.socialNews._
 import scala.language.postfixOps
 
 
-case class SocialNewsData(conn0: Conn) {
+case class SocialNewsData(conn0: Conn) extends SpecHelpers {
   implicit val conn = conn0
 
   // Add Stories

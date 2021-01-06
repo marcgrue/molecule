@@ -48,7 +48,7 @@ case class VerifyModel(model: Model, op: String) {
 
   // todo - avoid
   //  living_Person.knows(Nil).update
-  //  living_Person.knows(count).debugUpdate
+  //  living_Person.knows(count).inspectUpdate
 
   private def err(method: String, msg: String): Nothing = {
     throw new VerifyModelException(s"[$method]  $msg")

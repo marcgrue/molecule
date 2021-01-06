@@ -21,12 +21,12 @@ private[molecule] trait MacroHelpers {
     def raw: String = showRaw(tree)
   }
 
-  def abortTree(tree: Tree, msg: String, debug: Boolean = true) = {
+  def abortTree(tree: Tree, msg: String, inspect: Boolean = true) = {
     val e: StackTraceElement = Thread.currentThread.getStackTrace.tail.find(mth => mth.getMethodName != "abortTree").getOrElse {
       throw new MoleculeCompileException("[MacroHelpers:abortTree] Couldn't find method where `abortTree` was called!")
     }
     val tr: String = s"${e.getClassName}   ${e.getMethodName}   line ${e.getLineNumber}"
-    val stack: String = if (debug) Seq("----------", tree.raw, "----------", tr, "----------") ++ Thread.currentThread.getStackTrace mkString "\n" else ""
+    val stack: String = if (inspect) Seq("----------", tree.raw, "----------", tr, "----------") ++ Thread.currentThread.getStackTrace mkString "\n" else ""
     throw new MoleculeCompileException(s"$msg:\n$tree \n$stack")
   }
 
@@ -34,7 +34,7 @@ private[molecule] trait MacroHelpers {
     def r: matching.Regex = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
   }
 
-  protected case class DebugMacro(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false) {
+  protected case class InspectMacro(clazz: String, threshold: Int, max: Int = 9999, showStackTrace: Boolean = false) {
 
     def apply(id: Int, params: Any*): Unit = {
       val stackTrace: String = if (showStackTrace) Thread.currentThread.getStackTrace mkString "\n" else ""

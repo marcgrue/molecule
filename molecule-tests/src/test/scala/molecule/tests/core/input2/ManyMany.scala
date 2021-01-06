@@ -68,7 +68,7 @@ class ManyMany extends TestSpec {
         } yield {
           try {
             i += 1
-            //          im((in1a, in2a), (in1b, in2b)).debugGet
+            //          im((in1a, in2a), (in1b, in2b)).inspectGet
             im((in1a, in2a), (in1b, in2b)).get.sorted === (out1a.intersect(out2a) ++ out1b.intersect(out2b)).distinct.sorted
           } catch {
             case e: Throwable =>
@@ -84,7 +84,7 @@ class ManyMany extends TestSpec {
               println(result)
               println("Result 1 : " + im1(in1a, in1b).get)
               println("Result 2 : " + im2(in2a, in2b).get)
-              im((in1a, in2a), (in1b, in2b)).debugGet
+              im((in1a, in2a), (in1b, in2b)).inspectGet
               throw new RuntimeException(expected + "\n" + result)
           }
         }
@@ -193,7 +193,7 @@ class ManyMany extends TestSpec {
                    |Expected: ${out1.intersect(out2)}""".stripMargin
               println(expected)
               val result = "Result  : " + im(in1, in2).get
-              im(in1, in2).debugGet
+              im(in1, in2).inspectGet
               println(result)
               println("Result 1: " + im1(in1).get)
               println("Result 2: " + im2(in2).get)
@@ -254,7 +254,7 @@ class ManyMany extends TestSpec {
                    |Expected: ${out1.intersect(out2)}""".stripMargin
               println(expected)
               val result = "Result  : " + im(in1, in2).get
-              im(in1, in2).debugGet
+              im(in1, in2).inspectGet
               println(result)
               println("Result 1: " + im1(in1).get)
               println("Result 2: " + im2(in2).get)
@@ -294,7 +294,7 @@ class ManyMany extends TestSpec {
                    |Expected: ${out1.intersect(out2)}""".stripMargin
               println(expected)
               val result = "Result  : " + im(in1, in2).get
-              im(in1, in2).debugGet
+              im(in1, in2).inspectGet
               println(result)
               println("Result 1: " + im1(in1).get)
               println("Result 2: " + im2(in2).get)

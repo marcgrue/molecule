@@ -1,6 +1,6 @@
 package molecule.tests.core.ref.nested
 
-import molecule.tests.core.nested.dsl.nested._
+import molecule.tests.core.ref.dsl.nested._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
 

@@ -92,6 +92,7 @@ Copy all lines below and paste into terminal to start the Peer Server and having
     -d m_bidirectional,datomic:mem://m_bidirectional \
     -d m_partitions,datomic:mem://m_partitions \
     -d m_nested,datomic:mem://m_nested \
+    -d m_selfjoin,datomic:mem://m_selfjoin \
     -d m_aggregates,datomic:mem://m_aggregates \
     -d m_socialNews,datomic:mem://m_socialNews \
     -d m_graph,datomic:mem://m_graph \

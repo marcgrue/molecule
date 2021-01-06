@@ -1,20 +1,19 @@
 package molecule.setup
 
-import molecule.core.util.testing.{MoleculeSpec, TxCountSchema}
+import molecule.core.util.testing.{MoleculeTestHelper, TxCountSchema}
 import molecule.datomic.peer.facade.Datomic_Peer
 import molecule.tests.core.base.schema.CoreTestSchema
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
-import molecule.tests.core.nested.schema.NestedSchema
+import molecule.tests.core.ref.schema.{NestedSchema, SelfJoinSchema}
 import molecule.tests.core.schemaDef.schema.PartitionTestSchema
 import molecule.tests.examples.datomic.dayOfDatomic.schema._
 import molecule.tests.examples.datomic.seattle.schema.SeattleSchema
 import molecule.tests.examples.gremlin.gettingStarted.schema._
 import moleculeBuildInfo.BuildInfo._
+import org.specs2.mutable.Specification
 
-import datomicScala.client.api.sync.{Client, Datomic}
 
-
-class RecreateTestDbs extends MoleculeSpec {
+class RecreateTestDbs extends Specification with MoleculeTestHelper {
 
 
   "Recreate test dbs" >> {
@@ -24,6 +23,7 @@ class RecreateTestDbs extends MoleculeSpec {
       "m_bidirectional" -> BidirectionalSchema,
       "m_partitions" -> PartitionTestSchema,
       "m_nested" -> NestedSchema,
+      "m_selfjoin" -> SelfJoinSchema,
       "m_aggregates" -> AggregatesSchema,
       "m_socialNews" -> SocialNewsSchema,
       "m_graph" -> GraphSchema,

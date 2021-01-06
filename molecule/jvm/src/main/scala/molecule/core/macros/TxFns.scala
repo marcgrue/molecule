@@ -17,7 +17,7 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
 
   import c.universe._
 
-  val x = DebugMacro("TxFns", 1)
+  val x = InspectMacro("TxFns", 1)
 
   def prepareForDatalog(annottees: Tree*): Tree = annottees match {
     case List(obj: ModuleDef) => obj match {

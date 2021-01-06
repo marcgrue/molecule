@@ -346,12 +346,12 @@ class TxFunction extends TestSpec {
     }
 
 
-    "Debugging tx fn call" in new CoreSetup {
+    "Inspecting tx fn call" in new CoreSetup {
 
       val e = Ns.int(100).save.eid
 
       // Print potential result of tx fn call to `with` branch of current db without affecting live db.
-      debugTransactFn(inc(e, 10))
+      inspectTransactFn(inc(e, 10))
       // 1st group: Empty list of additional statements since only the tx fn was called.
       //            If calling tx fn with molecule having attributes, the attribute statements will show here
       // 2nd group: tx timestamp
@@ -378,8 +378,8 @@ class TxFunction extends TestSpec {
       // Invoke tx function
       val txReport = transactFn(inc(e, 10))
 
-      // Print debug info from result of tx fn execution (will show the same as `debugTransact(...)`
-      txReport.debug
+      // Print inspect info from result of tx fn execution (will show the same as `inspectTransact(...)`
+      txReport.inspect
 
       // Live data has been changed
       Ns.int.get.head === 110

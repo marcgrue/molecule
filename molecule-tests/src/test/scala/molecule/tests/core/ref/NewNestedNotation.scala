@@ -13,13 +13,13 @@
 //
 //  "1 + 1$" in new CoreSetup {
 //
-//    Ns.long.int$ debugInsert Seq(
+//    Ns.long.int$ inspectInsert Seq(
 //      // Two rows of data
 //      (1, Some(11)),
 //      (2, None)
 //    )
 //
-//    Ref2.int2 + Ns.int$ debugInsert Seq(
+//    Ref2.int2 + Ns.int$ inspectInsert Seq(
 //      // Two rows of data
 //      (1, Some(11)),
 //      (2, None)

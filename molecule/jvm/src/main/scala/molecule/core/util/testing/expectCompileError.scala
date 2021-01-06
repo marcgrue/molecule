@@ -14,7 +14,7 @@ private[molecule] object expectCompileError {
 
   class CompileChecker(val c: blackbox.Context) extends MacroHelpers {
     import c.universe._
-    val x = DebugMacro("CompileChecker", 1)
+    val x = InspectMacro("CompileChecker", 1)
 
     def applyImplNoExp(code: c.Expr[String]) = applyImpl(code, null)
 

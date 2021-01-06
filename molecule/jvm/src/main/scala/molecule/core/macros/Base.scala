@@ -13,7 +13,7 @@ private[molecule] trait Base extends Dsl2Model {
 
   import c.universe._
 
-  val w = DebugMacro("Base", 1)
+  val w = InspectMacro("Base", 1)
 
   def mapIdents(idents: Seq[Any]): Seq[(String, Tree)] = idents.flatMap {
     case (key: String, v: String) if key.startsWith("__ident__") && v.startsWith("__ident__") => Seq(ArrowAssoc(key) -> q"convert(${TermName(key.substring(9))})", ArrowAssoc(v) -> q"convert(${TermName(v.substring(9))})")

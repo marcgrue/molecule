@@ -9,7 +9,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version in ThisBuild := "0.23.0",
+    version in ThisBuild := "0.23.1-SNAPSHOT",
     crossScalaVersions := Seq("2.12.12", "2.13.4"),
     scalaVersion in ThisBuild := "2.13.4",
 
@@ -41,19 +41,6 @@ object Settings extends SettingsDatomic with SettingsMolecule {
         }
       }
     }
-  )
-
-  val shared: Seq[Def.Setting[_]] = Seq(
-    buildInfoKeys := Seq[BuildInfoKey](
-      name, version, scalaVersion, sbtVersion,
-      "datomicProtocol" -> datomicProtocol,
-      "datomicHome" -> datomicHome,
-      "datomicProVersions" -> datomicProVersions,
-      "datomicProVersion" -> datomicProVersion,
-      "datomicDevLocalVersions" -> datomicDevLocalVersions,
-      "datomicDevLocalVersion" -> datomicDevLocalVersion
-    ),
-    buildInfoPackage := "moleculeBuildInfo"
   )
 
   val js: Seq[Def.Setting[_]] = Seq(
@@ -98,6 +85,17 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     exportJars := true,
 
     // Run sbt tests for all systems sequentially to avoid data locks with db
-    parallelExecution in Test := false
+    parallelExecution in Test := false,
+
+    buildInfoKeys := Seq[BuildInfoKey](
+      name, version, scalaVersion, sbtVersion,
+      "datomicProtocol" -> datomicProtocol,
+      "datomicHome" -> datomicHome,
+      "datomicProVersions" -> datomicProVersions,
+      "datomicProVersion" -> datomicProVersion,
+      "datomicDevLocalVersions" -> datomicDevLocalVersions,
+      "datomicDevLocalVersion" -> datomicDevLocalVersion
+    ),
+    buildInfoPackage := "moleculeBuildInfo"
   )
 }

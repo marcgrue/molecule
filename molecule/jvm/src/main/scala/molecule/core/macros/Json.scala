@@ -6,7 +6,7 @@ private[molecule] trait Json extends TreeOps {
   val c: blackbox.Context
   import c.universe._
 
-  val z = DebugMacro("Json", 1)
+  val z = InspectMacro("Json", 1)
 
 
   val jsonOneAttr: (String, String) => Int => Tree = (tpe: String, field: String) => tpe match {

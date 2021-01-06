@@ -169,8 +169,8 @@ trait Conn {
     *     ("Ben", 42),
     *   )
     *
-    *   // Start out easily with a Datomic query from debug output
-    *   Ns.str.int.debugGet // shows datomic query...
+    *   // Start out easily with a Datomic query from inspect output
+    *   Ns.str.int.inspectGet // shows datomic query...
     *
     *   // Paste Datomic query into `q` call
     *   conn.q("""[:find  ?b ?c
@@ -206,8 +206,8 @@ trait Conn {
     *     ("Ben", 42),
     *   )
     *
-    *   // Start out easily with a Datomic query from debug output
-    *   Ns.str.int.debugGet // shows datomic query...
+    *   // Start out easily with a Datomic query from inspect output
+    *   Ns.str.int.inspectGet // shows datomic query...
     *
     *   // Paste Datomic query into `q` call and use some db value
     *   conn.q(conn.db,
@@ -247,8 +247,8 @@ trait Conn {
     *     ("Ben", 42),
     *   )
     *
-    *   // Start out easily with a Datomic query from debug output
-    *   Ns.str.int.debugGet // shows datomic query...
+    *   // Start out easily with a Datomic query from inspect output
+    *   Ns.str.int.inspectGet // shows datomic query...
     *
     *   // Paste Datomic query into `q` call
     *   conn.q("""[:find  ?b ?c
@@ -280,8 +280,8 @@ trait Conn {
     *     ("Ben", 42),
     *   )
     *
-    *   // Get some Datomic query from debug output
-    *   Ns.str.int.debugGet // shows datomic query...
+    *   // Get some Datomic query from inspect output
+    *   Ns.str.int.inspectGet // shows datomic query...
     *
     *   // Paste Datomic query into `q` call and use some db value
     *   conn.q(conn.db,

@@ -7,7 +7,7 @@ import molecule.core.ast.query.Query
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.{CastHelpers, JsonBuilder, Model2Transaction}
-import molecule.core.util.Debug
+import molecule.core.util.Inspect
 import molecule.datomic.base.api.{DatomicEntity, EntityOps}
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.{ExecutionContext, Future}
@@ -65,14 +65,14 @@ import scala.language.implicitConversions
   * <td>Molecule transaction data (input to `getWith`).</td>
   * </tr>
   * <tr>
-  * <td><b>debug get</b><td>
+  * <td><b>inspect get</b><td>
   * <td><td>
-  * <td>Debug calling get method on molecule.</td>
+  * <td>Inspect calling get method on molecule.</td>
   * </tr>
   * <tr>
-  * <td><b>debug operation</b> &nbsp;&nbsp;&nbsp;<td>
+  * <td><b>inspect operation</b> &nbsp;&nbsp;&nbsp;<td>
   * <td><td>
-  * <td>Debug calling save/insert/update method on molecule.</td>
+  * <td>Inspect calling save/insert/update method on molecule.</td>
   * </tr>
   * </table>
   *
@@ -153,12 +153,12 @@ import scala.language.implicitConversions
   * @groupprio update 530
   * @groupname getTx Transaction data (input to getWith).
   * @groupprio getTx 610
-  * @groupname debugGet Debug get
-  * @groupdesc debugGet Molecule getter debugging methods.
-  * @groupprio debugGet 620
-  * @groupname debugOp Debug operation
-  * @groupdesc debugOp Molecule operation debugging methods (no effect on live db).
-  * @groupprio debugOp 630
+  * @groupname inspectGet Inspect get
+  * @groupdesc inspectGet Molecule getter inspecting methods.
+  * @groupprio inspectGet 620
+  * @groupname inspectOp Inspect operation
+  * @groupdesc inspectOp Molecule operation inspecting methods (no effect on live db).
+  * @groupprio inspectOp 630
   * @groupname internal Internal (but public) model/query representations
   * @groupprio internal 710
   **/
@@ -173,7 +173,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
   with GetAsyncList[Tpl]
   with GetAsyncRaw
   with GetAsyncJson
-  with ShowDebug[Tpl] {
+  with ShowInspect[Tpl] {
 
   // Save ============================================================================================================================
 
@@ -240,7 +240,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     } catch {
       case e: Throwable =>
         println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
-        Debug("output.Molecule.getSaveTx", 1)(1, _model, transformer.stmtsModel)
+        Inspect("output.Molecule.getSaveTx", 1)(1, _model, transformer.stmtsModel)
         throw e
     }
     Seq(stmts)
@@ -356,15 +356,15 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
   trait getInsertTx
 
 
-  /** Debug call to `insert` on a molecule (without affecting the db).
+  /** Inspect call to `insert` on a molecule (without affecting the db).
     * <br><br>
     * Prints internal molecule transformation representations to output:
     * <br><br>
     * Model --> Generic statements --> Datomic statements
     *
-    * @group debugOp
+    * @group inspectOp
     */
-  trait debugInsert
+  trait inspectInsert
 
 
   /** Insert data is verified on instantiation of `insert` object in each arity molecule */
@@ -394,7 +394,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     } catch {
       case e: Throwable =>
         println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
-        Debug("output.Molecule._debugInsert", 1)(1, _model, transformer.stmtsModel, dataRows, untupled(dataRows))
+        Inspect("output.Molecule._inspectInsert", 1)(1, _model, transformer.stmtsModel, dataRows, untupled(dataRows))
         throw e
     }
     stmtss
@@ -466,7 +466,7 @@ trait Molecule[Tpl] extends MoleculeBase with CastHelpers[Tpl] with JsonBuilder
     } catch {
       case e: Throwable =>
         println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
-        Debug("output.Molecule.debugUpdate", 1)(1, _model, transformer.stmtsModel)
+        Inspect("output.Molecule.inspectUpdate", 1)(1, _model, transformer.stmtsModel)
         throw e
     }
     Seq(stmts)
@@ -500,14 +500,14 @@ object Molecule {
       def apply(data: Iterable[A])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(Seq(_)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, ax: A*)(implicit conn: Conn): Unit = _debugInsert(conn, (a +: ax.toList).map(Seq(_)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, ax: A*)(implicit conn: Conn): Unit = _inspectInsert(conn, (a +: ax.toList).map(Seq(_)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[A])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(Seq(_)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[A])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(Seq(_)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -544,14 +544,14 @@ object Molecule {
       def apply(data: Iterable[(A, B)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -589,14 +589,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -634,14 +634,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -679,14 +679,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -724,14 +724,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -768,14 +768,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -813,14 +813,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -858,14 +858,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -903,14 +903,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -948,14 +948,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -993,14 +993,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1037,14 +1037,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1082,14 +1082,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1127,14 +1127,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1172,14 +1172,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1217,14 +1217,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1262,14 +1262,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1307,14 +1307,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1352,14 +1352,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1397,14 +1397,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T, u: U)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T, u: U)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */
@@ -1442,14 +1442,14 @@ object Molecule {
       def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)])(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = _insertAsync(conn, _model, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21, d._22)))
     }
 
-    /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-    object debugInsert extends debugInsert with checkInsertModel {
+    /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+    object inspectInsert extends inspectInsert with checkInsertModel {
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T, u: U, v: V)(implicit conn: Conn): Unit = _debugInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: K, l: L, m: M, n: N, o: O, p: P, q: Q, r: R, s: S, t: T, u: U, v: V)(implicit conn: Conn): Unit = _inspectInsert(conn, Seq(Seq(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)))
 
-      /** See [[molecule.core.api.Molecule.debugInsert debugInsert]] */
-      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)])(implicit conn: Conn): Unit = _debugInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21, d._22)))
+      /** See [[molecule.core.api.Molecule.inspectInsert inspectInsert]] */
+      def apply(data: Iterable[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)])(implicit conn: Conn): Unit = _inspectInsert(conn, data.map(d => Seq(d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8, d._9, d._10, d._11, d._12, d._13, d._14, d._15, d._16, d._17, d._18, d._19, d._20, d._21, d._22)))
     }
 
     /** See [[molecule.core.api.Molecule.getInsertTx getInsertTx]] */

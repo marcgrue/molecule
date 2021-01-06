@@ -7,7 +7,7 @@ import datomicScala.client.api.sync.{Db, TxReport => clientTxReport}
 import datomicScala.client.api.Datom
 import molecule.core.ast.transactionModel._
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.util.Debug
+import molecule.core.util.Inspect
 import molecule.datomic.base.facade.TxReport
 import scala.jdk.CollectionConverters._
 
@@ -67,7 +67,7 @@ case class TxReport_Client(
   private def datom2string(d: Datom) =
     s"[${d.e}   ${d.a}   ${d.v}       ${d.tx}  ${d.added}]"
 
-  def debug: Unit = Debug("TxReport", 1)(1, stmtss, this)
+  def inspect: Unit = Inspect("TxReport", 1)(1, stmtss, this)
 
   override def toString =
     s"""TxReport {

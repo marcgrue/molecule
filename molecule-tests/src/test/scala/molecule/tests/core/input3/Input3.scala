@@ -34,7 +34,7 @@ class Input3 extends TestSpec {
         } yield {
           try {
             i += 1
-            //          im.apply(in1, in2, in3).debugGet
+            //          im.apply(in1, in2, in3).inspectGet
             im.apply(in1, in2, in3).get === out1.intersect(out2).intersect(out3)
           } catch {
             case e: Throwable =>
@@ -50,7 +50,7 @@ class Input3 extends TestSpec {
               println("Result 1: " + im1(in1).get)
               println("Result 2: " + im2(in2).get)
               println("Result 2: " + im3(in3).get)
-              im(in1, in2, in3).debugGet
+              im(in1, in2, in3).inspectGet
               throw new RuntimeException(expected + "\n" + result)
           }
         }
@@ -93,7 +93,7 @@ class Input3 extends TestSpec {
                    |Expected: ${out1.intersect(out2).intersect(out3)}""".stripMargin
               println(expected)
               val result = "Result  : " + im(in1, in2, in3).get
-              im(in1, in2, in3).debugGet
+              im(in1, in2, in3).inspectGet
               println(result)
               println("Result 1: " + im1(in1).get)
               println("Result 2: " + im2(in2).get)

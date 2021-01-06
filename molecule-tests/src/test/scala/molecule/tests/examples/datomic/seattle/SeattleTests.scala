@@ -350,7 +350,7 @@ class SeattleTests extends TestSpec {
       28  ["MyBallard" #{"shopping" "news" "human interest" "events" "criminal activity"}]
       29  ["MyWallingford" #{"shopping" "news" "human interest" "events" "criminal activity"}]
 
-      Community.name.category("restaurants").debug
+      Community.name.category("restaurants").inspect
       OUTPUTS:
   --> 1  ["Ballard Gossip Girl" #{"nightlift" "shopping" "restaurants"}]
       2  ["Columbia Citizens" #{"restaurants" "neighborhood community site; buying/selling" "favorite places" "etc."}]

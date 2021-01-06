@@ -2,28 +2,30 @@ package molecule
 
 import _root_.datomic.Peer
 import molecule.core.schema.SchemaTransaction
-import molecule.core.util.testing.MoleculeSpec
+import molecule.core.util.testing.MoleculeTestHelper
 import molecule.core.util.{System, SystemDevLocal, SystemPeer, SystemPeerServer}
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.{Datomic_DevLocal, Datomic_PeerServer}
 import molecule.datomic.peer.facade.Datomic_Peer
-import molecule.setup.CleanPeerServer
+import molecule.setup.{CleanPeerServer, SpecHelpers}
 import molecule.setup.core.CoreData
 import molecule.setup.examples.datomic.dayOfDatomic.SocialNewsData
 import molecule.setup.examples.datomic.seattle.SeattleData
 import molecule.tests.core.base.schema.CoreTestSchema
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
-import molecule.tests.core.nested.schema.NestedSchema
+import molecule.tests.core.ref.schema.{NestedSchema, SelfJoinSchema}
 import molecule.tests.core.schemaDef.schema.PartitionTestSchema
 import molecule.tests.examples.datomic.dayOfDatomic.schema._
 import molecule.tests.examples.datomic.mbrainz.schema.{MBrainzSchema, MBrainzSchemaLowerToUpper}
 import molecule.tests.examples.datomic.seattle.schema.SeattleSchema
 import molecule.tests.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
 import moleculeBuildInfo.BuildInfo._
+import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import org.specs2.specification.core.{Fragments, Text}
 
-class TestSpec extends MoleculeSpec with CoreData {
+
+class TestSpec extends Specification with MoleculeTestHelper with CoreData {
   sequential
   var system    : System             = SystemPeer
   var peer      : Datomic_Peer       = null
@@ -36,7 +38,7 @@ class TestSpec extends MoleculeSpec with CoreData {
 
   // What systems to test (can be a single, two or three systems in any order)
   // 1: Peer   2: Peer-server   3: Dev-local
-  var tests = 123
+  var tests = 1
   def addSystem(fs: => Fragments, system: String) = fs.mapDescription {
     case Text(t)    => Text(s"$system        $t")
     case otherDescr => otherDescr
@@ -104,18 +106,21 @@ class TestSpec extends MoleculeSpec with CoreData {
     }
   }
 
-  // Entry points, coretests
+  // Entry points, core tests
   class CoreSetup extends Scope {
     implicit val conn: Conn = getConn(CoreTestSchema, "m_coretests")
   }
   class BidirectionalSetup extends Scope {
     implicit val conn = getConn(BidirectionalSchema, "m_bidirectional")
   }
-  class PartitionSetup extends Scope {
+  class PartitionSetup extends SpecHelpers with Scope {
     implicit val conn = getConn(PartitionTestSchema, "m_partitions")
   }
   class NestedSetup extends Scope {
     implicit val conn = getConn(NestedSchema, "m_nested")
+  }
+  class SelfJoinSetup extends Scope {
+    implicit val conn = getConn(SelfJoinSchema, "m_selfjoin")
   }
 
   // Entry points, examples

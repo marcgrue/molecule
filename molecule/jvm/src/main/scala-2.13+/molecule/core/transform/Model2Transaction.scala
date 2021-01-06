@@ -8,7 +8,7 @@ import datomic.db.DbId
 import molecule.core.ast.model._
 import molecule.core.ast.transactionModel._
 import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.{Debug, Helpers}
+import molecule.core.util.{Inspect, Helpers}
 import molecule.datomic.base.facade.Conn
 import scala.jdk.CollectionConverters._
 
@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
   *
   * */
 case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
-  val x = Debug("Model2Transaction", 1, 51, false, 6)
+  val x = Inspect("Model2Transaction", 1, 51, false, 6)
 
   private def err(method: String, msg: String) = {
     throw new Model2TransactionException(s"[$method]  $msg")

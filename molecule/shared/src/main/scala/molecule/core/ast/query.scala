@@ -32,7 +32,7 @@ object query extends Helpers {
     def datalog(maxLength: Int = 30): String = print.multiLine(maxLength)
     def datalog: String = datalog(30)
     def rules: String = if (i.rules.isEmpty) "none\n\n" else "[\n " + i.rules.map(Query2String(this).p(_)).mkString("\n ") + "\n]"
-    def debug: String =
+    def inspect: String =
       s"""$datalog
          |
          |RULES: $rules

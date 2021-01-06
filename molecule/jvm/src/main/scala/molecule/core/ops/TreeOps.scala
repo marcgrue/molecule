@@ -23,7 +23,7 @@ private[molecule] trait TreeOps extends Liftables {
   }
 
   implicit class richTree(val t: Tree) {
-    //    val zz = DebugMacro("TreeOps", 1)
+    //    val zz = InspectMacro("TreeOps", 1)
     lazy val tpe_         : Type           = if (t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
     lazy val at           : att            = att(t)
     lazy val nsFull       : String         = if (t.isFirstNS) t.symbol.name.toString else at.nsFull.toString

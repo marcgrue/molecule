@@ -9,12 +9,12 @@ trait SettingsMolecule {
   // molecule databases
 
   lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
-    moduleName := "moleculeTests",
+    moduleName := "molecule-tests",
     moleculeMakeJars := true,
     moleculeSchemas := Seq(
       "molecule/tests/core/base",
       "molecule/tests/core/bidirectionals",
-      "molecule/tests/core/nested",
+      "molecule/tests/core/ref",
       "molecule/tests/core/schemaDef",
 
       "molecule/tests/examples/datomic/dayOfDatomic",

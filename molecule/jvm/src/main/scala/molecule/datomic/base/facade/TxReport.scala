@@ -25,7 +25,7 @@ trait TxReport {
     */
   def eid: Long
 
-  def debug: Unit
+  def inspect: Unit
 
   /** Get transaction time t. */
   def t: Long

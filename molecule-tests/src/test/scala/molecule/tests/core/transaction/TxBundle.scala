@@ -73,13 +73,13 @@ class TxBundle extends TestSpec {
     }
 
 
-    "Debug" in new CoreSetup {
+    "Inspect" in new CoreSetup {
 
       // Initial data
       val List(e1, e2, e3) = Ns.int insert List(1, 2, 3) eids
 
-      // Print debug info for group transaction without affecting live db
-      debugTransactBundle(
+      // Print inspect info for group transaction without affecting live db
+      inspectTransactBundle(
         // retract
         e1.getRetractTx,
         // save
@@ -129,7 +129,7 @@ class TxBundle extends TestSpec {
       // Live data unchanged
       Ns.int.get === List(1, 2, 3)
 
-      // If a real group transaction is invoked, the resulting tx report can also be debugged
+      // If a real group transaction is invoked, the resulting tx report can also be inspected
       val tx = transactBundle(
         // retract
         e1.getRetractTx,
@@ -141,8 +141,8 @@ class TxBundle extends TestSpec {
         Ns(e2).int(20).getUpdateTx
       )
 
-      // Will print the same as calling `debugTransact(...)`
-      tx.debug
+      // Will print the same as calling `inspectTransact(...)`
+      tx.inspect
 
       // Live data has now changed
       Ns.int.get.sorted === List(

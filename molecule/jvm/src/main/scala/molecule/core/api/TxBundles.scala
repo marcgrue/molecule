@@ -62,12 +62,12 @@ trait TxBundles {
     conn.transactAsync(stmtss.flatten)
 
 
-  /** Debug transaction bundle statements
+  /** Inspect transaction bundle statements
     * <br><br>
-    * Add transaction statements from one or more molecule actions to `debugTransact`
+    * Add transaction statements from one or more molecule actions to `inspectTransact`
     * to see the bundled transaction statements.
     * {{{
-    * debugTransact(
+    * inspectTransact(
     *   // retract
     *   e1.getRetractTx,
     *   // save
@@ -115,11 +115,11 @@ trait TxBundles {
     * @param stmtss [[molecule.core.ast.transactionModel.Statement Statement]]'s from multiple molecule operations
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
-  def debugTransactBundle(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
+  def inspectTransactBundle(stmtss: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
     // Use temporary branch of db to not changing any live data
     conn.testDbWith()
     // Print tx report to console
-    conn.transact(stmtss.flatten).debug
+    conn.transact(stmtss.flatten).inspect
     conn.useLiveDb
   }
 }

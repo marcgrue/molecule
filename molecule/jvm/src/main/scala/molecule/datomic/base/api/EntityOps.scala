@@ -5,7 +5,7 @@ import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
-import molecule.core.util.Debug
+import molecule.core.util.Inspect
 import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.datomic.client.facade.{Conn_Client, DatomicEntity_Client}
 import molecule.datomic.peer.facade.{Conn_Peer, DatomicEntity_Peer}
@@ -127,17 +127,17 @@ trait EntityOps {
   }
 
 
-  /** Debug retracting multiple entities with optional transaction meta data.
+  /** Inspect retracting multiple entities with optional transaction meta data.
     * <br><br>
-    * Without affecting the database, a multiple entity retract action can be debugged by adding a 'D' (for 'Debug') to the retract method.
+    * Without affecting the database, a multiple entity retract action can be inspected by calling the `inspectRetract` method.
     * <br><br>
-    * Here we debug a possible retraction of two comment entities with transaction meta data asserting that the retraction was done by Ben Goodman:
+    * Here we inspect a possible retraction of two comment entities with transaction meta data asserting that the retraction was done by Ben Goodman:
     * {{{
-    *   debugRetract(Seq(commentEid1, commentEid2), MetaData.user("Ben Goodman"))
+    *   inspectRetract(Seq(commentEid1, commentEid2), MetaData.user("Ben Goodman"))
     * }}}
-    * This will print debugging info about the retraction to output (without affecting the database):
+    * This will print inspecting info about the retraction to output (without affecting the database):
     * {{{
-    *   ## 1 ## molecule.Datomic.debugRetract
+    *   ## 1 ## molecule.Datomic.inspectRetract
     *   ===================================================================================================================
     *   1      Model(
     *     1      TxMetaData(
@@ -160,7 +160,7 @@ trait EntityOps {
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Unit (prints to output)
     */
-  def debugRetract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): Unit = {
+  def inspectRetract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): Unit = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
 
     val txMetaDataModel = if (txMetaDataMolecules.isEmpty) {
@@ -184,9 +184,9 @@ trait EntityOps {
     } catch {
       case e: Throwable =>
         println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Error - data processed so far:  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
-        Debug("molecule.core.Datomic.debugRetract", 1)(1, txMetaDataModel, transformer.stmtsModel)
+        Inspect("molecule.core.Datomic.inspectRetract", 1)(1, txMetaDataModel, transformer.stmtsModel)
         throw e
     }
-    Debug("molecule.core.Datomic.debugRetract", 1)(1, txMetaDataModel, transformer.stmtsModel, stmts)
+    Inspect("molecule.core.Datomic.inspectRetract", 1)(1, txMetaDataModel, transformer.stmtsModel, stmts)
   }
 }

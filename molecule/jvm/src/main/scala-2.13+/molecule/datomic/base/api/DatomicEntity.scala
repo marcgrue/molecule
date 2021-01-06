@@ -8,7 +8,7 @@ import molecule.core.ast.model.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction
-import molecule.core.util.{Debug, Quoted}
+import molecule.core.util.{Inspect, Quoted}
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -201,14 +201,14 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * */
   def getRetractTx: List[List[RetractEntity]] = List(List(RetractEntity(eid)))
 
-  /** Debug entity transaction data of method `retract` without affecting the database.
+  /** Inspect entity transaction data of method `retract` without affecting the database.
     * {{{
-    *   // Debug retraction of an entity
-    *   eid.debugRetract
+    *   // Inspect retraction of an entity
+    *   eid.inspectRetract
     * }}}
     * This will print generated Datomic transaction statements in a readable format to output:
     * {{{
-    *   ## 1 ## Debug `retract` on entity
+    *   ## 1 ## Inspect `retract` on entity
     *   ========================================================================
     *   1          List(
     *     1          List(
@@ -218,7 +218,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     *
     * @group retract
     */
-  def debugRetract: Unit = Debug("Debug `retract` on entity", 1)(1, getRetractTx)
+  def inspectRetract: Unit = Inspect("Inspect `retract` on entity", 1)(1, getRetractTx)
 
   /** Entity retraction transaction meta data constructor.
     * <br><br>
@@ -284,13 +284,13 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     def retractAsync(implicit ec: ExecutionContext): Future[TxReport] =
       conn.transactAsync(stmtss)
 
-    /** Debug entity retraction with transaction meta data.
+    /** Inspect entity retraction with transaction meta data.
       * {{{
-      *   eid.Tx(MyMetaData.action("moved away")).debugRetract
+      *   eid.Tx(MyMetaData.action("moved away")).inspectRetract
       * }}}
       * This will print generated Datomic transaction statements in a readable format to output:
       * {{{
-      *   ## 1 ## Debug `retract` on entity with tx meta data
+      *   ## 1 ## Inspect `retract` on entity with tx meta data
       *   ========================================================================
       *   1          List(
       *     1          List(
@@ -299,8 +299,8 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
       *   ========================================================================
       * }}}
       */
-    def debugRetract: Unit =
-      Debug("Debug `retract` on entity with tx meta data", 1)(1, stmtss)
+    def inspectRetract: Unit =
+      Inspect("Inspect `retract` on entity with tx meta data", 1)(1, stmtss)
   }
 
   // Touch - traverse entity attributes ========================================
