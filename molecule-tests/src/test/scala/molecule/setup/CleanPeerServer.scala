@@ -1,7 +1,7 @@
 package molecule.setup
 
 import molecule.core.ast.transactionModel.{Retract, RetractEntity, Statement}
-import molecule.core.schema.SchemaTransaction
+import molecule.core.data.SchemaTransaction
 import molecule.core.util.testing.{TxCount, TxCountSchema}
 import molecule.datomic.api.out3._
 import molecule.datomic.client.facade.{Conn_Client, Datomic_PeerServer}

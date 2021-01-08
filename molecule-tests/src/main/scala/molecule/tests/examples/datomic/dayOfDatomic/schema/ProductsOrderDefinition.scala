@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 // See: http://blog.datomic.com/2013/06/component-entities.html
 

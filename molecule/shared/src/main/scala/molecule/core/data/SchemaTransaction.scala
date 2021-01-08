@@ -1,4 +1,4 @@
-package molecule.core.schema
+package molecule.core.data
 
 
 /** Schema transaction interface for auto-generated schema transaction data.

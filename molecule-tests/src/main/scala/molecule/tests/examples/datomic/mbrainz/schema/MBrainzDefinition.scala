@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.mbrainz.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(3, 8)
 object MBrainzDefinition {

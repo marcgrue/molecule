@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(2, 4)
 object Graph2Definition {

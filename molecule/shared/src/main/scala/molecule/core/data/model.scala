@@ -1,23 +1,23 @@
-package molecule.core.schema
+package molecule.core.data
 
 import scala.annotation.StaticAnnotation
 
-/** Schema definition DSL.
+/** Data Model DSL.
   * <br><br>
-  * Define Datomic database schema in a Schema Definition file.
+  * Define a Domain Data Model in a data model file.
   * <br><br>
   * For small projects, the schema can be defined without partition definitions where
   * all namespaces reside in a default tacit partition:
   * {{{
   *   package path.to.your.project
-  *   import molecule.schema.definition._       // import schema definition DSL
+  *   import molecule.data.model._       // import data model DSL
   *
-  *   @InOut(1, 8)                              // Set input/output arity
-  *   object SeattleDefinition {                // Schema definition object
+  *   @InOut(1, 8)                       // Set input/output arity
+  *   object SeattleDataModel {          // data model object
   *
-  *     trait Person {                          // Namespace
-  *       val name = oneString.fulltext   // String attribute definition with fulltext search
-  *       val age  = oneInt                     // Int attribute definition
+  *     trait Person {                   // Namespace
+  *       val name = oneString.fulltext  // String attribute definition with fulltext search
+  *       val age  = oneInt              // Int attribute definition
   *     }
   *
   *     // Additional namespaces...
@@ -26,10 +26,10 @@ import scala.annotation.StaticAnnotation
   * For larger projects, it is recommended to group namespaces in partitions:
   * {{{
   *   package path.to.your.project
-  *   import molecule.schema.definition._
+  *   import molecule.data.model._
   *
   *   @InOut(3, 15)
-  *   object SeattleDefinition {
+  *   object SeattleDataModel {
   *
   *     object customer {
   *       trait Person {
@@ -74,7 +74,7 @@ import scala.annotation.StaticAnnotation
   * @groupname edge Bidirectional edge references
   * @groupprio edge 8
   * */
-object definition {
+object model {
 
   /** Arity annotation for number of molecule input/output attributes.
     *
@@ -517,7 +517,7 @@ object definition {
 
   /** Internal card-one Any attribute for multi-typed values in log and indexes.
     *
-    * Do _not_ use in custom schema definitions.
+    * Do _not_ use in custom data models.
     *
     * It is only implemented internally for generic log and indexes.
     *

@@ -1,6 +1,6 @@
 package molecule.tests.core.base.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(3, 22)
 object CoreTestDefinition {

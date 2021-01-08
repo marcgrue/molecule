@@ -1,6 +1,6 @@
 package molecule.tests.core.ref.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(0, 3)
 object NestedDefinition {

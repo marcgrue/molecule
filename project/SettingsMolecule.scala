@@ -1,6 +1,6 @@
 import sbt._
 import sbt.Keys._
-import sbtmolecule.MoleculePlugin.autoImport.{moleculeMakeJars, moleculeSchemas}
+import sbtmolecule.MoleculePlugin.autoImport._
 
 trait SettingsMolecule {
 
@@ -11,7 +11,7 @@ trait SettingsMolecule {
   lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
     moduleName := "molecule-tests",
     moleculeMakeJars := true,
-    moleculeSchemas := Seq(
+    moleculeDataModelPaths := Seq(
       "molecule/tests/core/base",
       "molecule/tests/core/bidirectionals",
       "molecule/tests/core/ref",

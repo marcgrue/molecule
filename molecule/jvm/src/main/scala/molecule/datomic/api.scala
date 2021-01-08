@@ -12,7 +12,7 @@ import molecule.datomic.base.api.EntityOps
   * <br><br>
   * To start using Molecule involves 2 initial steps:
   *
-  *  - Define your schema: [[molecule.core.schema.definition Docs]]
+  *  - Define your schema: [[molecule.core.data.model Docs]]
   *  - `sbt compile` your project to let the sbt-molecule plugin generate your custom molecule DSL.
   *
   * Then you can start using your DSL and create molecules by importing the api, your DSL

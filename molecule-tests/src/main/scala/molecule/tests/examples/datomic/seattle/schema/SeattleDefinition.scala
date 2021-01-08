@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.seattle.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(2, 8)
 object SeattleDefinition {

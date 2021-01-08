@@ -1,6 +1,6 @@
 package molecule.tests.core.bidirectionals.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(1, 9)
 object BidirectionalDefinition {

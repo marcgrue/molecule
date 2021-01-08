@@ -7,7 +7,7 @@ import datomicClient.ClojureBridge
 import datomicScala.client.api.async.AsyncClient
 import datomicScala.client.api.sync.Client
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.schema.SchemaTransaction
+import molecule.core.data.SchemaTransaction
 import scala.jdk.CollectionConverters._
 
 /** Base Datomic facade for client api (peer-server/cloud/dev-local).

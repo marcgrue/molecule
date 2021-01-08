@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html
 

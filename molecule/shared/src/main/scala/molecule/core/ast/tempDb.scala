@@ -1,7 +1,5 @@
 package molecule.core.ast
 import java.util.{Date, List => jList}
-import datomic.Database
-import molecule.datomic.base.facade.DatomicDb
 
 private[molecule] object tempDb {
 

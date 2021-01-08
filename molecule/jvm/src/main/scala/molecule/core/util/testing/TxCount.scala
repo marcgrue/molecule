@@ -1,11 +1,8 @@
 package molecule.core.util.testing
-import txCount.TxCount_0
-import scala.language.higherKinds
 import molecule.core.boilerplate.attributes._
 import molecule.core.boilerplate.base._
-import molecule.core.boilerplate.dummyTypes._
-import molecule.core.boilerplate.out._
-import molecule.core.expression.AttrExpressions.?
+import molecule.core.util.testing.txCount.TxCount_0
+import scala.language.higherKinds
 
 
 

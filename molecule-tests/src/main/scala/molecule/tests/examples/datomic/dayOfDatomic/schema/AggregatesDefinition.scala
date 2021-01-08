@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic.schema
 
-import molecule.core.schema.definition._
+import molecule.core.data.model._
 
 @InOut(0, 5)
 object AggregatesDefinition {
