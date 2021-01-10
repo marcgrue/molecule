@@ -1,6 +1,6 @@
 package molecule.tests.core.schemaDef
 
-import molecule.core.ast.model.{Atom, Bond, Eq, Model}
+import molecule.core.ast.elements.{Atom, Bond, Eq, Model}
 import molecule.tests.core.schemaDef.dsl.partitionTest._
 import molecule.datomic.api.out4._
 import molecule.TestSpec

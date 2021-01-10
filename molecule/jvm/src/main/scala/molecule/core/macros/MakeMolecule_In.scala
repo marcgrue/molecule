@@ -96,7 +96,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
     if (flat) {
       if (hasVariables) {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.datomic.base.facade.Conn
           import molecule.core.ops.ModelOps._
           import molecule.core.transform.{Model2Query, QueryOptimizer}
@@ -124,7 +124,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.datomic.base.facade.Conn
           import molecule.core.transform.QueryOptimizer
 
@@ -152,7 +152,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
 
       if (hasVariables) {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.datomic.base.facade.Conn
           import molecule.core.ops.ModelOps._
           import molecule.core.transform.{Model2Query, QueryOptimizer}
@@ -180,7 +180,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.datomic.base.facade.Conn
           import molecule.core.transform.QueryOptimizer
 

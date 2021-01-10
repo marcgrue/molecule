@@ -1,4 +1,7 @@
+# Build cmds cheat sheet
 
+
+## Compile
 
 Compile to 2.13 only:
 
@@ -13,27 +16,28 @@ Compile to 2.12 and 2.13:
     sbt clean +compile
 
 
-
-
-
-
-
-
+## Compile JS
 
 > sbt
 > moleculeJS/fastOptJS
 
 
+## Publishing
 
-Publishing instructions:
-OBS: Check that changes applied in jvm module are applied to both 2.12 and 2.13!
-// 2.12 & 2.13:
-> sbt +moleculeJVM/publishLocal +moleculeJS/publishLocal -Dfree=true
+- Check that changes applied in jvm module are applied to both 2.12 and 2.13!
+- Un-comment `Publish.withDocs` in build.sbt
+
+2.12 & 2.13:
+> sbt +publishLocal -Dfree=true
+
 or
-> sbt +moleculeJVM/publishSigned +moleculeJS/publishSigned -Dfree=true
+ 
+> sbt +publishSigned -Dfree=true
+
 
 // 2.13 only
-> sbt ++2.13.4 moleculeJVM/publishLocal moleculeJS/publishLocal
+> sbt publishLocal
 
-Delete previous ivy cached build files before publishing locally (if not using SNAPSHOT version)
-> del ~/.ivy2/local/org.scalamolecule/molecule*
+// 2.12 only
+> sbt ++2.12.12 publishSigned
+

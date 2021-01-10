@@ -2,7 +2,7 @@ package molecule.core.api.get
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model.{Bond, Nested}
+import molecule.core.ast.elements.{Bond, Nested}
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}

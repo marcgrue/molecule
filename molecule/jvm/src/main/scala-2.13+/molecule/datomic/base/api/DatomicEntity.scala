@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import clojure.lang.{Keyword, PersistentArrayMap}
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model.{Model, TxMetaData}
+import molecule.core.ast.elements.{Model, TxMetaData}
 import molecule.core.ast.transactionModel.RetractEntity
 import molecule.core.ops.VerifyModel
 import molecule.core.transform.Model2Transaction

@@ -1,6 +1,6 @@
 package molecule.core.macros
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.exceptions.MoleculeException
 import molecule.core.transform.Dsl2Model
 import scala.collection.immutable

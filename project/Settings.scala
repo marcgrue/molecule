@@ -9,7 +9,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version in ThisBuild := "0.24.0-SNAPSHOT",
+    version in ThisBuild := "0.23.2",
     crossScalaVersions := Seq("2.12.12", "2.13.4"),
     scalaVersion in ThisBuild := "2.13.4",
 
@@ -22,13 +22,10 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Seq("-Ymacro-annotations")
       case _             => Nil
-    }) ++ (
-      // See https://github.com/suzaku-io/boopickle/commit/4d92604ee3e83c018e87a76a561468635634afac
-      if (scala.util.Properties.javaVersion.startsWith("1.8")) Nil else Seq("-release", "8")),
+    }),
 
     resolvers ++= Seq(
-      ("datomic" at "http://files.datomic.com/maven").withAllowInsecureProtocol(true),
-      ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true),
+      "clojars" at "https://clojars.org/repo",
       // If using datomic-pro/starter
       "my.datomic.com" at "https://my.datomic.com/repo",
       Resolver.mavenLocal
@@ -54,14 +51,16 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
         "org.specs2" %% "specs2-core" % "4.10.5",
-        "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.6.2"
+        "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.6.1"
       )
     ) ++ (if (datomicProtocol == "free") {
       Seq(libraryDependencies += "com.datomic" % "datomic-free" % "0.9.5697")
     } else {
       Seq(
+        // Please download from https://cognitect.com/dev-tools and install locally per included instructions
         libraryDependencies += "com.datomic" % "datomic-pro" % datomicProVersion,
-        excludeDependencies += ExclusionRule("com.datomic", "datomic-free")
+        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
+        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
       )
     })
   }

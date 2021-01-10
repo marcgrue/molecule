@@ -1,6 +1,6 @@
 package molecule.core.transform
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.boilerplate.attributes._
 import molecule.core.generic.index.{AEVT, AVET, EAVT, VAET}
 import molecule.core.generic.schema.Schema

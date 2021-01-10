@@ -2,7 +2,7 @@ package molecule.core.api
 import molecule.core.api.get._
 import molecule.core.api.getAsync._
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query.Query
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.ops.VerifyModel

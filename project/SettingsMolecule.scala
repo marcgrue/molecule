@@ -10,6 +10,9 @@ trait SettingsMolecule {
 
   lazy val moleculeTests: Seq[Def.Setting[_]] = Seq(
     moduleName := "molecule-tests",
+
+    // Generate Molecule boilerplate code with `sbt clean compile -Dmolecule=true`
+    moleculePluginActive := sys.props.get("molecule") == Some("true"),
     moleculeMakeJars := true,
     moleculeDataModelPaths := Seq(
       "molecule/tests/core/base",

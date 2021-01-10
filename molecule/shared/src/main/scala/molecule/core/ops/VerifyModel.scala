@@ -1,5 +1,5 @@
 package molecule.core.ops
-import molecule.core.ast.model.{VarValue, _}
+import molecule.core.ast.elements.{VarValue, _}
 import molecule.core.ops.exception.VerifyModelException
 
 

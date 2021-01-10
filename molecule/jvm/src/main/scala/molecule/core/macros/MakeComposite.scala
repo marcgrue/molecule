@@ -15,7 +15,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
     if (hasVariables) {
       q"""
-        import molecule.core.ast.model._
+        import molecule.core.ast.elements._
         import molecule.core.ops.ModelOps._
         import molecule.core.transform.Model2Query
 
@@ -32,7 +32,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       """
     } else {
       q"""
-        import molecule.core.ast.model._
+        import molecule.core.ast.elements._
         final class $outMolecule extends $MoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
 

@@ -1,6 +1,6 @@
 package molecule.core.transform
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query._
 import molecule.core.ops.QueryOps._
 import molecule.core.transform.exception.Model2QueryException
@@ -8,13 +8,13 @@ import molecule.core.util.Helpers
 
 
 /** Model to Query transformation.
-  * <br><br>
-  * Second transformation in Molecules series of transformations from
-  * custom boilerplate DSL constructs to Datomic queries:
-  * <br><br>
-  * Custom DSL molecule --> Model --> Query --> Datomic query string
-  *
-  * */
+ * <br><br>
+ * Second transformation in Molecules series of transformations from
+ * custom boilerplate DSL constructs to Datomic queries:
+ * <br><br>
+ * Custom DSL molecule --> Model --> Query --> Datomic query string
+ *
+ * */
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]

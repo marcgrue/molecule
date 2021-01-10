@@ -1,7 +1,7 @@
 package molecule.setup
 
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model.Model
+import molecule.core.ast.elements.Model
 import molecule.core.ast.query.Query
 import molecule.core.input.InputMolecule
 import molecule.core.transform.Model2Transaction

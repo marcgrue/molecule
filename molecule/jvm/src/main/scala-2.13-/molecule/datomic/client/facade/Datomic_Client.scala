@@ -61,7 +61,7 @@ abstract class Datomic_Client(val client: Client, val clientAsync: AsyncClient)
     conn.transact(allowedClientDefinitions(schema.namespaces))
     conn
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 }
 

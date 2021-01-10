@@ -6,7 +6,7 @@ import datomic.Connection.TEMPIDS
 import datomic.db.{Datum, DbId}
 import molecule.core.ast.transactionModel._
 import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.util.{Inspect, Inspect}
+import molecule.core.util.Inspect
 import molecule.datomic.base.facade.TxReport
 import scala.collection.JavaConverters._
 

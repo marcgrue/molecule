@@ -21,13 +21,13 @@ trait Datomic_Peer {
   def createDatabase(dbIdentifier: String, protocol: String = "mem"): Boolean = try {
     Peer.createDatabase(s"datomic:$protocol://$dbIdentifier")
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   def deleteDatabase(dbIdentifier: String, protocol: String = "mem"): Boolean = try {
     Peer.deleteDatabase(s"datomic:$protocol://$dbIdentifier")
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   def renameDatabase(
@@ -37,13 +37,13 @@ trait Datomic_Peer {
   ): Boolean = try {
     Peer.renameDatabase(s"datomic:$protocol://$dbIdentifier", newDbName)
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   def connect(dbIdentifier: String, protocol: String = "mem"): Conn_Peer = try {
     Conn_Peer(Peer.connect(s"datomic:$protocol://$dbIdentifier"))
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   /** Deletes existing database (!) and creates a new empty db with schema from Schema Transaction file.
@@ -77,7 +77,7 @@ trait Datomic_Peer {
       conn.transact(schema.namespaces)
       conn
     } catch {
-      case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+      case e: Throwable => throw new DatomicFacadeException(e.toString)
     }
   }
 
@@ -108,7 +108,7 @@ trait Datomic_Peer {
       conn.transact(schemaData)
       conn
     } catch {
-      case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+      case e: Throwable => throw new DatomicFacadeException(e.toString)
     }
   }
 
@@ -134,7 +134,7 @@ trait Datomic_Peer {
     conn.transact(schema.namespaces)
     conn
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 }
 

@@ -107,20 +107,16 @@ Copy all lines below and paste into terminal to start the Peer Server and having
 Now you can run molecule tests or projects against peer, peer-server and dev-local (cloud).
 
 ## Test
-Test in IDE or with sbt. Observe that first time tests are run, all has to be compiled which can take a few minutes.
+Test in IDE or with sbt. Observe that first time tests are run, all test files have to be compiled which can take a few minutes.
 ```
 sbt
 
-// Single test
+// Test (against scala 2.13 as default)
+sbt:molecule> testOnly molecule.tests.*
+sbt:molecule> testOnly molecule.tests.core.ref.*
 sbt:molecule> testOnly molecule.tests.core.ref.TwoStepQueries
 
-// Group of tests (works only with peer, so set `tests` to 1 in TestSpec)
-sbt:molecule> testOnly molecule.tests.core.ref.*
-
-// All tests (works only with peer, so set `tests` to 1 in TestSpec)
-sbt:molecule> test 
-
-// Test against scala 2.13
+// Test against scala 2.13 explicitly
 sbt:molecule> ++2.13.4; testOnly molecule.tests.*
 sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.*
 sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.TwoStepQueries

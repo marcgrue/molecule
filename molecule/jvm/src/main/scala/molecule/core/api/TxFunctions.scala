@@ -6,7 +6,7 @@ import datomic.Peer.function
 import datomic.Util
 import datomic.Util.{list, read}
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model.{Composite, Model, TxMetaData}
+import molecule.core.ast.elements.{Composite, Model, TxMetaData}
 import molecule.core.ast.transactionModel.Statement
 import molecule.core.macros.TxFunctionCall
 import molecule.core.macros.exception.TxFnException

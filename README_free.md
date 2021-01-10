@@ -55,13 +55,13 @@ Test in IDE or with sbt:
 ```
 sbt
 
-// Single test
+// Single test (2.13)
 sbt:molecule> testOnly molecule.tests.core.ref.TwoStepQueries
 
-// Group of tests (works only with peer, so set `tests` to 1 in TestSpec)
+// Group of tests (works only with peer, so set `tests` to 1 in TestSpec) (2.13)
 sbt:molecule> testOnly molecule.tests.core.ref.*
 
-// All tests (works only with peer, so set `tests` to 1 in TestSpec)
+// All tests (works only with peer, so set `tests` to 1 in TestSpec) (2.13)
 sbt:molecule> test
 
 // Test against scala 2.13

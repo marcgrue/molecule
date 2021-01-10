@@ -2,7 +2,7 @@ package molecule.core.input
 
 import molecule.core.api.Molecule._
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query._
 import molecule.datomic.base.facade.Conn
 import molecule.core.input.exception.InputMolecule_3_Exception

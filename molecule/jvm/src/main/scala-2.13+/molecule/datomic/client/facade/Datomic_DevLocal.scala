@@ -32,13 +32,13 @@ case class Datomic_DevLocal(system: String, storageDir: String = "")
   def createDatabase(dbName: String, timeout: Int = 0): Boolean = try {
     client.createDatabase(dbName, timeout)
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   def deleteDatabase(dbName: String, timeout: Int = 0): Boolean = try {
     client.deleteDatabase(dbName, timeout)
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
   def renameDatabase(
@@ -48,7 +48,7 @@ case class Datomic_DevLocal(system: String, storageDir: String = "")
   ): Boolean = try {
     Peer.renameDatabase(s"datomic:$protocol://$dbIdentifier", newDbName)
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
 
@@ -98,7 +98,7 @@ case class Datomic_DevLocal(system: String, storageDir: String = "")
     conn.transact(schemaData)
     conn
   } catch {
-    case e: Throwable => throw new DatomicFacadeException(e.getCause.toString)
+    case e: Throwable => throw new DatomicFacadeException(e.toString)
   }
 
 

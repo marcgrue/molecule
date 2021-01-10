@@ -157,7 +157,8 @@ class TestSpec extends Specification with MoleculeTestHelper with CoreData {
       dbName,
       false, // don't recreate db
       "localhost:4334/mbrainz-1968-1973", // peer uri to transactor
-      datomicProtocol
+      //      "free" // if running free transactor
+      "dev" // if running pro transactor
     )
 
     import molecule.datomic.api.out1._

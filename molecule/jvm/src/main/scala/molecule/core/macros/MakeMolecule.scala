@@ -18,7 +18,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     if (casts.size == 1) {
       if (hasVariables) {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.core.transform.Model2Query(_resolvedModel)) {
@@ -29,7 +29,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
             final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
             final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
@@ -41,7 +41,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     } else if(isOptNested) {
       if (hasVariables) {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.core.transform.Model2Query(_resolvedModel)) {
@@ -51,7 +51,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
             ..${castOptNestedRows(casts, OutTypes, optNestedRefIndexes, optNestedTacitIndexes)}
           }
@@ -64,7 +64,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
       if (hasVariables) {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.core.transform.Model2Query(_resolvedModel))
@@ -76,7 +76,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.model._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)})
             with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
             ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}

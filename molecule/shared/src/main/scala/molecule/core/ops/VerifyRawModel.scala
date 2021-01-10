@@ -1,5 +1,5 @@
 package molecule.core.ops
-import molecule.core.ast.model.{AssertMapPairs, Atom, Bond, Composite, Distinct, Element, EntValue, Fn, Generic, Nested, NoValue, ReBond, ReplaceMapPairs, ReplaceValue, TxMetaData}
+import molecule.core.ast.elements.{AssertMapPairs, Atom, Bond, Composite, Distinct, Element, EntValue, Fn, Generic, Nested, NoValue, ReBond, ReplaceMapPairs, ReplaceValue, TxMetaData}
 import molecule.core.ops.exception.VerifyRawModelException
 import molecule.core.util.Helpers
 

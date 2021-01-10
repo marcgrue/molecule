@@ -2,7 +2,7 @@ package molecule.core.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query.{NestedAttrs, _}
 import molecule.core.ops.exception.LiftablesException
 import molecule.core.util.MacroHelpers

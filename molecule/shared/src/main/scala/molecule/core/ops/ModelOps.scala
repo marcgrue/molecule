@@ -1,6 +1,6 @@
 package molecule.core.ops
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 
 
 /** Model operations */

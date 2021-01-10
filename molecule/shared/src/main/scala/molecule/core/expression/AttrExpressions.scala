@@ -1,6 +1,6 @@
 package molecule.core.expression
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.boilerplate.attributes.Attr
 
 
@@ -24,7 +24,7 @@ import molecule.core.boilerplate.attributes.Attr
   * @groupdesc attrMarker Markers applied to attributes that change the semantics of the attribute/molecule.
   * @groupprio attrMarker 20
   * @groupname attrExprImplicits Expression implicits
-  * @groupdesc attrExprImplicits Turns basic types into `TermValue`'s that can be used in [[molecule.core.ast.model.Expression Expression]]
+  * @groupdesc attrExprImplicits Turns basic types into `TermValue`'s that can be used in [[molecule.core.ast.elements.Expression Expression]]
   * @groupprio attrExprImplicits 21
   */
 trait AttrExpressions {
@@ -1194,6 +1194,12 @@ trait AttrExpressions {
       * @return Filtered molecule
       */
     def contains(word: String, moreWords: String*): Ns with Attr = ???
+
+    // todo: this set of String searchers instead - check Django ORM and other ORMs too
+    // def startsWith(str: String): Ns with Attr = ???
+    // def endsWith(str: String): Ns with Attr = ???
+    // def containsWord(str: String): Ns with Attr = ??? // current `contains`
+    // def contains(needle: String): Ns with Attr = ???     // *$needle*
 
 
     /** Mark as input molecule with String attribute word search.

@@ -2,7 +2,7 @@ package molecule.core.ast
 
 import java.util.{List => jList}
 import clojure.lang.Keyword
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.util.JavaUtil
 import scala.jdk.CollectionConverters._
 import datomic.Util.read

@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.seattle
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query._
 import molecule.datomic.api.in2_out8._
 import molecule.tests.examples.datomic.seattle.dsl.seattle._

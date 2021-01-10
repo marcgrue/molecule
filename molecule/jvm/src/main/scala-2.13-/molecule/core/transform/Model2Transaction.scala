@@ -5,7 +5,7 @@ import clojure.lang.{Keyword, PersistentArrayMap, PersistentVector}
 import datomic.Peer
 import datomic.Util.read
 import datomic.db.DbId
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.transactionModel._
 import molecule.core.transform.exception.Model2TransactionException
 import molecule.core.util.{Inspect, Helpers}

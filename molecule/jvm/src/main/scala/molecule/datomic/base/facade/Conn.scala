@@ -6,7 +6,7 @@ import java.util.{Date, Collection => jCollection, List => jList, Map => jMap}
 import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 import datomic.Peer
-import molecule.core.ast.model.Model
+import molecule.core.ast.elements.Model
 import molecule.core.ast.query.Query
 import molecule.core.ast.tempDb.TempDb
 import molecule.core.ast.transactionModel.Statement
@@ -320,7 +320,7 @@ trait Conn {
     * Return type (tuple matching the molecule) is the same for all 3 APIs so that
     * application code can query and access data of all molecules the same way.
     *
-    * @param model [[molecule.core.ast.model.Model Model]] instance
+    * @param model [[molecule.core.ast.elements.Model Model]] instance
     * @param query [[molecule.core.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */

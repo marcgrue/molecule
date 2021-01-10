@@ -1,6 +1,6 @@
 package molecule.core
 
-import molecule.core.ast.model.Model
+import molecule.core.ast.elements.Model
 import molecule.core.ast.query.{Query, QueryExpr}
 
 /** Exceptions thrown by Molecule. */

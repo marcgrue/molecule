@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.Date
 import datomic.Util
 import molecule.core.ast.MoleculeBase
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query.{DataClause, _}
 import molecule.core.input.exception.InputMoleculeException
 import molecule.core.util.fns

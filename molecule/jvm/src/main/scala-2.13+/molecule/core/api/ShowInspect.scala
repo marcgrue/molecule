@@ -2,7 +2,7 @@ package molecule.core.api
 
 import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{PersistentHashSet, PersistentVector}
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.ast.query.QueryExpr
 import molecule.core.ast.tempDb._
 import molecule.core.ast.transactionModel.Statement

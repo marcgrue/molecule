@@ -82,7 +82,7 @@ sbt.version=1.4.6
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.11.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.12.0")
 ```
 
 `build.sbt`:
@@ -97,7 +97,7 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.0",
+      "org.scalamolecule" %% "molecule" % "0.23.2",
       "com.datomic" % "datomic-free" % "0.9.5697" // or pro (see README_pro)
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -111,7 +111,7 @@ Molecule AST's and other generic interfaces have been ported to Scala.js so that
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.11.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.12.0")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.1")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 ```
@@ -133,7 +133,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.0",
+      "org.scalamolecule" %% "molecule" % "0.23.2",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -142,7 +142,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.23.0")
+      ("org.scalamolecule" %%% "molecule" % "0.23.2")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...

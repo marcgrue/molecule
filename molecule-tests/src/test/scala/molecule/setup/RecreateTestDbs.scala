@@ -35,7 +35,11 @@ class RecreateTestDbs extends Specification with MoleculeTestHelper {
     ).foreach {
       case (db, schema) =>
         println("Recreating db " + db)
-        Datomic_Peer.recreateDbFrom(schema, "localhost:4334/" + db, datomicProtocol)
+        Datomic_Peer.recreateDbFrom(
+          schema,
+          "localhost:4334/" + db,
+          datomicProtocol // has to match transactor: 'free' or 'dev' (pro)
+        )
     }
 
     ok

@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.core.ast.model._
+import molecule.core.ast.elements._
 import molecule.core.exceptions.MoleculeCompileException
 import scala.reflect.macros.blackbox
 import scala.util.matching
@@ -48,9 +48,9 @@ private[molecule] trait MacroHelpers {
             case l: Map[_, _]          => indent + "Map(\n" + l.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
             case Nested(bond, nested)  => indent + "Nested(\n" + (bond +: nested).zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
             case TxMetaData(elements)  => indent + "TxMetaData(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-            case Composite(elements)   => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-            case m: Model              => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
-            case (a, b)                => {
+            case Composite(elements) => indent + "Composite(\n" + elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case m: Model    => indent + "Model(\n" + m.elements.zipWithIndex.map { case (y, j) => traverse(y, level + 1, j + 1) }.mkString("\n") + ")"
+            case (a, b)              => {
               val bb = b match {
                 case it: Iterable[_] => traverse(it, level, 0)
                 case other           => other
