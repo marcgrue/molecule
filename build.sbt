@@ -1,11 +1,19 @@
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
+
+lazy val root = project.in(file(".")).
+  aggregate(molecule.js, molecule.jvm).
+  settings(
+    publish := {},
+    publishLocal := {},
+  )
+
 lazy val molecule = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(
     Settings.base ++
-      //      Publish.withoutDocs // save time without doc creation for publishLocal
-      Publish.withDocs // make docs for publishSigned
+      Publish.withoutDocs // save time without doc creation for publishLocal
+    //      Publish.withDocs // make docs for publishSigned
   )
   .jsSettings(Settings.js)
   .jsConfigure(_.enablePlugins(TzdbPlugin))

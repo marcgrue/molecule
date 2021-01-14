@@ -14,7 +14,7 @@ import org.specs2.mutable.Specification
 trait SpecHelpers extends Specification with MoleculeTestHelper {
 
 
-  implicit class dsl2model2query2string(molecule: MoleculeBase)(implicit conn: Conn) {
+  implicit class dsl2Model2query2string(molecule: MoleculeBase)(implicit conn: Conn) {
     def -->(model: Model) = new {
       molecule._model === model
 
@@ -55,7 +55,7 @@ trait SpecHelpers extends Specification with MoleculeTestHelper {
     }
   }
 
-  implicit class inputDsl2model2query2string(inputMolecule: InputMolecule) {
+  implicit class inputDsl2Model2query2string(inputMolecule: InputMolecule) {
     def -->(model: Model) = new {
       inputMolecule._model === model
       def -->(query: Query) = new {

@@ -9,7 +9,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version in ThisBuild := "0.23.2",
+    version in ThisBuild := "0.23.3-SNAPSHOT",
     crossScalaVersions := Seq("2.12.12", "2.13.4"),
     scalaVersion in ThisBuild := "2.13.4",
 

@@ -4,8 +4,8 @@ Molecule transparently runs a unified Scala interface with only minor difference
 
 | System            | API                | Protocol | Language     | Download                   | License              |   
 | :---:             | :---:              | :---:    | :---:        | :---:                      | :---:                |   
-| peer              | datomic.api        | free     | Clojure/Java | [On-Prem free][free]       | Datomic Free Edition | 
-| peer-server       | datomic.client.api | dev      | Clojure      | [On-Prem starter/pro][pro] | EULA                 |   
+| peer              | datomic.api        | free     | Clojure/Java | [On-Prem free][free]       | Free | 
+| peer-server       | datomic.client.api | dev      | Clojure      | [On-Prem starter/pro][pro] | Perpetual use, 1-year upgrades |   
 | dev-local (cloud) | datomic.client.api | dev      | Clojure      | [Dev-tools][dev]           | Email reg            |   
 
 
@@ -30,7 +30,7 @@ Register and install the two last proprietary Datomic systems from the links sho
 Install libraries to your local maven repository (.m2): 
 
 - Run `bin/maven-install` in datomic-pro-[version]
-- Run `./install` in coginect-dev-tools-[version]
+- Run `./install` in cognitect-dev-tools-[version]
 
 
 ## STEP 3 - Make proprietary-aware molecule available (once)

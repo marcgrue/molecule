@@ -5,8 +5,12 @@ import molecule.core.data.SchemaTransaction
 import molecule.core.util.testing.{TxCount, TxCountSchema}
 import molecule.datomic.api.out3._
 import molecule.datomic.client.facade.{Conn_Client, Datomic_PeerServer}
+import molecule.datomic.peer.facade.Datomic_Peer
+import moleculeBuildInfo.BuildInfo.datomicProtocol
 import scala.collection.mutable
 
+// Hack to empty a database on a Peer Server since we can't recreate it without
+// restarting the Peer Server which is not an option running big test suites.
 
 object CleanPeerServer {
 
@@ -16,8 +20,16 @@ object CleanPeerServer {
     schema: SchemaTransaction,
     basisT0: Long
   ): (Conn_Client, Long) = {
-    var basisT      = basisT0
-    val dataConn    = peerServer.connect(dbIdentifier)
+    var basisT   = basisT0
+    val dataConn = peerServer.connect(dbIdentifier)
+
+    // Uncomment and run, if m_txCount database hasn't been created yet
+    //    Datomic_Peer.recreateDbFrom(
+    //      TxCountSchema,
+    //      datomicProtocol, // has to match transactor: 'free' or 'dev' (pro)
+    //      "localhost:4334/m_txCount"
+    //    )
+
     val txCountConn = peerServer.connect("m_txCount")
     val log         = dataConn.clientConn.txRange(Some(1000), Some(1002))
 

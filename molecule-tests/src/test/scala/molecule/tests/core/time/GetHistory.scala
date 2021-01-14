@@ -9,7 +9,6 @@ class GetHistory extends TestSpec {
 
   // Since peer-server accumulates data across tests, we don't test history
   // here, although it works fine on a fresh/stable db
-  // respect base setting
   tests match {
     case 1 =>
     case 3 =>

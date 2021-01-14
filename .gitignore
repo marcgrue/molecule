@@ -27,6 +27,5 @@ project/plugins/project/
 # Mac
 *.DS_Store
 */.DS_Store
-coretests/lib/
-examples/lib/
+tests/lib/
 project/project/
