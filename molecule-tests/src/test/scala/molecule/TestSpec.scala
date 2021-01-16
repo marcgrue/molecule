@@ -37,7 +37,8 @@ class TestSpec extends Specification with MoleculeTestHelper with CoreData {
   def basisTx: Long = Peer.toTx(basisT).asInstanceOf[Long]
 
   // What systems to test (can be a single, two or three systems in any order)
-  // 1: Peer   2: Peer-server   3: Dev-local
+  // Set this variable in a test to specify which system should run it
+  // 0 1: Peer   2: Peer-server   3: Dev-local
   var tests = 1
   def addSystem(fs: => Fragments, system: String) = fs.mapDescription {
     case Text(t)    => Text(s"$system        $t")
@@ -45,9 +46,9 @@ class TestSpec extends Specification with MoleculeTestHelper with CoreData {
   }
   override def map(fs: => Fragments): Fragments = {
     tests.toString.getBytes.map {
-      case 49 => step(setupPeer()) ^ addSystem(fs, "peer       ")
-      case 50 => step(setupPeerServer()) ^ addSystem(fs, "peer-server")
-      case 51 => step(setupDevLocal()) ^ addSystem(fs, "dev-local  ")
+      case 49 /* 1 */ => step(setupPeer()) ^ addSystem(fs, "peer       ")
+      case 50 /* 2 */ => step(setupPeerServer()) ^ addSystem(fs, "peer-server")
+      case 51 /* 3 */ => step(setupDevLocal()) ^ addSystem(fs, "dev-local  ")
     }.reduce(_ ^ _)
   }
 

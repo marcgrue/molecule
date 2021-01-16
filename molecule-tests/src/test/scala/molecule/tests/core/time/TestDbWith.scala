@@ -19,7 +19,7 @@ class TestDbWith extends TestSpec {
 
     // Use current state with extra save tx as a test db "branch"
     conn.testDbWith(
-      Ns.int(4).getSaveTx
+      Ns.int(4).getSaveStmts
     )
 
     // Adjusted test state to work on
@@ -53,16 +53,16 @@ class TestDbWith extends TestSpec {
     // test db in a certain state
     conn.testDbWith(
       // --> List(1, 2, 3, 4)
-      Ns.int(4).getSaveTx,
+      Ns.int(4).getSaveStmts,
 
       // --> List(1, 2, 3, 4, 5, 6)
-      Ns.int getInsertTx List(5, 6),
+      Ns.int getInsertStmts List(5, 6),
 
       // --> List(0, 2, 3, 4, 5, 6)
-      Ns(e1).int(0).getUpdateTx,
+      Ns(e1).int(0).getUpdateStmts,
 
       // --> List(0, 3, 4, 5, 6)
-      e2.getRetractTx
+      e2.getRetractStmts
     )
 
     // Adjusted test state to work on
@@ -103,10 +103,10 @@ class TestDbWith extends TestSpec {
     Ns.int.get.sorted === List(1, 2, 3)
 
 
-    val save    = Ns.int(4).getSaveTx
-    val insert  = Ns.int getInsertTx List(5, 6)
-    val update  = Ns(e1).int(0).getUpdateTx
-    val retract = e2.getRetractTx
+    val save    = Ns.int(4).getSaveStmts
+    val insert  = Ns.int getInsertStmts List(5, 6)
+    val update  = Ns(e1).int(0).getUpdateStmts
+    val retract = e2.getRetractStmts
 
     // Apply a set of saved modularized transactions to get a
     // test db in a certain state.
@@ -159,7 +159,7 @@ class TestDbWith extends TestSpec {
 
       // Use state with extra save tx as a test db "branch"
       conn.testDbWith(
-        Ns.int(4).getSaveTx
+        Ns.int(4).getSaveStmts
       )
 
       // Adjusted test state to work on
@@ -191,16 +191,16 @@ class TestDbWith extends TestSpec {
       // test db in a certain state
       conn.testDbWith(
         // --> List(1, 2, 3, 4)
-        Ns.int(4).getSaveTx,
+        Ns.int(4).getSaveStmts,
 
         // --> List(1, 2, 3, 4, 5, 6)
-        Ns.int getInsertTx List(5, 6),
+        Ns.int getInsertStmts List(5, 6),
 
         // --> List(0, 2, 3, 4, 5, 6)
-        Ns(e1).int(0).getUpdateTx,
+        Ns(e1).int(0).getUpdateStmts,
 
         // --> List(0, 3, 4, 5, 6)
-        e2.getRetractTx
+        e2.getRetractStmts
       )
 
       // Adjusted test state to work on

@@ -57,6 +57,7 @@ class TestDbAsOf extends TestSpec {
   "as of: input types" in new Setup {
     Thread.sleep(10)
     val txR4 = Ns.int(4).save
+    Thread.sleep(10)
     val txR5 = Ns.int(5).save
 
     // Original state

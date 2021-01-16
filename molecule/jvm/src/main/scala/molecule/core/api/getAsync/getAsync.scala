@@ -19,7 +19,6 @@ import molecule.core.api.getAsync._
   *
   *  - [[GetAsyncArray]] - fastest retrieved typed data set. Can be traversed with a fast `while` loop
   *  - [[GetAsyncIterable]] - for lazily traversing row by row
-  *  - [[GetAsyncJson]] - data formatted as Json string
   *  - [[GetAsyncList]] - default getter returning Lists of tuples. Convenient typed data, suitable for smaller data sets
   *  - [[GetAsyncRaw]] - fastest retrieved raw un-typed data from Datomic
   *

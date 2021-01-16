@@ -115,7 +115,7 @@ trait Datomic_Peer {
 
   // Schema ............................................................................
 
-  /** Transact schema from auto-generated schema transaction data.
+  /** Transact schema from generated schema transaction data.
     *
     * @group database
     * @param schema sbt-plugin auto-generated Transaction file path.to.schema.YourDomainSchema

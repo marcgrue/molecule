@@ -157,7 +157,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * @group retract
     * @return [[molecule.datomic.base.facade.TxReport]] with result of retraction
     */
-  def retract: TxReport = conn.transact(getRetractTx)
+  def retract: TxReport = conn.transact(getRetractStmts)
 
   /** Asynchronously retract single entity using entity id.
     * <br><br>
@@ -183,7 +183,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * @return [[molecule.datomic.base.facade.TxReport]] with result of retraction
     */
   def retractAsync(implicit ec: ExecutionContext): Future[TxReport] =
-    conn.transactAsync(getRetractTx)
+    conn.transactAsync(getRetractStmts)
 
   /** Get entity retraction transaction data without affecting the database.
     * <br><br>
@@ -199,7 +199,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * @group retract
     * @return List[List[Retractentity[Long]]]
     * */
-  def getRetractTx: List[List[RetractEntity]] = List(List(RetractEntity(eid)))
+  def getRetractStmts: List[List[RetractEntity]] = List(List(RetractEntity(eid)))
 
   /** Inspect entity transaction data of method `retract` without affecting the database.
     * {{{
@@ -218,7 +218,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     *
     * @group retract
     */
-  def inspectRetract: Unit = Inspect("Inspect `retract` on entity", 1)(1, getRetractTx)
+  def inspectRetract: Unit = Inspect("Inspect `retract` on entity", 1)(1, getRetractStmts)
 
   /** Entity retraction transaction meta data constructor.
     * <br><br>

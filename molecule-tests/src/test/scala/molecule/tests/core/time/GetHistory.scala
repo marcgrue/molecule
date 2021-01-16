@@ -271,8 +271,11 @@ class GetHistory extends TestSpec {
   "Tacit generic attrs" in new Setup {
 
     // Transaction dates
+    Thread.sleep(10)
     val date2 = tx2.inst
+    Thread.sleep(10)
     val date3 = tx3.inst
+    Thread.sleep(10)
     val date5 = tx5.inst
 
     // Entities with retractions

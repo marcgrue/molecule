@@ -654,17 +654,5 @@ class ProductsAndOrders extends TestSpec {
         ("second", List("Don Juan")),
         ("chance", List("Marc"))))
     )
-
-    Order.orderid_(23).LineItems.text
-      .Comments.*(Comment.text
-      .Authors.*(Person.name
-    )).getJson ===
-      """[
-        |{"lineItems.LineItem.text": "in stock", "LineItem.comments": [
-        |   {"Comment.text": "second", "Comment.authors": [
-        |      {"Person.name": "Don Juan"}]},
-        |   {"Comment.text": "chance", "Comment.authors": [
-        |      {"Person.name": "Marc"}]}]}
-        |]""".stripMargin
   }
 }

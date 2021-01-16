@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
 abstract class Datomic_Client(val client: Client, val clientAsync: AsyncClient)
   extends ClojureBridge {
 
-  def connect(dbName: String): Conn_Client = Conn_Client(client, clientAsync, dbName)
+  def connect(dbName: String): Conn_Client
 
   protected def checkNotLambda: Any => Boolean
 

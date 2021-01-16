@@ -40,7 +40,7 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     override def iterator: Iterator[Tpl] = new Iterator[Tpl] {
       private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
       override def hasNext: Boolean = jIter.hasNext
-      override def next(): Tpl = castRow(jIter.next())
+      override def next(): Tpl = row2tuple(jIter.next())
     }
   }
 

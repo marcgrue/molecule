@@ -4,6 +4,7 @@ import datomic.Util.read
 import datomicScala.client.api.async.AsyncDatomic
 import datomicScala.client.api.sync.Datomic
 import scala.collection.JavaConverters._
+import scala.sys.process._
 
 
 /** Datomic facade for peer-server.
@@ -19,13 +20,45 @@ case class Datomic_PeerServer(
   endpoint: String,
   validateHostnames: Boolean = false
 ) extends Datomic_Client(
- Datomic.clientPeerServer(accessKey, secret, endpoint, validateHostnames),
- AsyncDatomic.clientPeerServer(accessKey, secret, endpoint, validateHostnames)
+  Datomic.clientPeerServer(accessKey, secret, endpoint, validateHostnames),
+  AsyncDatomic.clientPeerServer(accessKey, secret, endpoint, validateHostnames)
 ) {
 
-  // Peer server handles 1 database only
-  def getDatabaseName(timeout: Int = 0): Option[String] =
-    client.listDatabases(timeout).asScala.toList.headOption
+  def connectionError: Option[String] = try {
+    s"curl -k -S -s https://$endpoint/health".!!.trim match {
+      case "ok" => None
+      case err  => Some(err)
+    }
+  } catch {
+    case e: Throwable => Some(e.toString)
+  }
+
+  def connect(dbName: String): Conn_Client = {
+    connectionError.map(err =>
+      throw new RuntimeException(
+        "\nPeer Server not running. Please start it with something like" +
+          "\nbin/run -m datomic.peer-server -h localhost -p 8998 -a key,secret -d db-name,datomic:mem://db-name" +
+          "\nhttps://docs.datomic.com/on-prem/peer-server.html\n" + err
+      )
+    )
+
+    val servedDbs = getServedDatabases()
+
+    if (servedDbs.isEmpty)
+      throw new RuntimeException("Found no database served by the Peer Server")
+
+    if (!servedDbs.contains(dbName))
+      throw new RuntimeException(
+        s"Couldn't find db `$dbName` among databases currently served by the Peer Server:\n" +
+          servedDbs.mkString("\n")
+      )
+
+    Conn_Client(client, clientAsync, dbName)
+  }
+
+  def getServedDatabases(timeout: Int = 0): List[String] = {
+    client.listDatabases(timeout).asScala.toList.sorted
+  }
 
 
   def checkNotLambda: Any => Boolean = {

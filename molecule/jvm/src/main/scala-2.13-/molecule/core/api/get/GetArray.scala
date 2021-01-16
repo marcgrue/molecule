@@ -42,7 +42,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     val a = new Array[Tpl](jColl.size)
     var i = 0
     while (it.hasNext) {
-      a(i) = castRow(it.next)
+      a(i) = row2tuple(it.next)
       i += 1
     }
     a
@@ -81,7 +81,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
       val a = new Array[Tpl](max)
       var i = 0
       while (it.hasNext && i < max) {
-        a(i) = castRow(it.next)
+        a(i) = row2tuple(it.next)
         i += 1
       }
       a

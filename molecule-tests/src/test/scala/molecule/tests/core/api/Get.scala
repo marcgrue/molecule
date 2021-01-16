@@ -38,21 +38,9 @@ class Get extends TestSpec with JavaUtil {
     }
     Ns.int.getRaw.ints === List(1, 2, 3)
 
-    Ns.int.getJson ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2},
-        |{"Ns.int": 3}
-        |]""".stripMargin
-
     Ns.int.get(2) === List(1, 2)
     Ns.int.getArray(2) === Array(1, 2)
     Ns.int.getRaw(2).ints === List(1, 2)
-    Ns.int.getJson(2) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2}
-        |]""".stripMargin
   }
 
 
@@ -61,20 +49,9 @@ class Get extends TestSpec with JavaUtil {
     await(Ns.int.getAsyncArray) === Array(1, 2, 3)
     await(Ns.int.getAsyncIterable).iterator.toList === Iterator(1, 2, 3).toList
     await(Ns.int.getAsyncRaw).ints === List(1, 2, 3)
-    await(Ns.int.getAsyncJson) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2},
-        |{"Ns.int": 3}
-        |]""".stripMargin
 
     await(Ns.int.getAsync(2)) === List(1, 2)
     await(Ns.int.getAsyncArray(2)) === Array(1, 2)
     await(Ns.int.getAsyncRaw(2)).ints === List(1, 2)
-    await(Ns.int.getAsyncJson(2)) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2}
-        |]""".stripMargin
   }
 }

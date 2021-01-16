@@ -41,7 +41,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
     val it    = jColl.iterator
     val buf   = new ListBuffer[Tpl]
     while (it.hasNext) {
-      buf += castRow(it.next)
+      buf += row2tuple(it.next)
     }
     buf.toList
   }
@@ -84,7 +84,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
       val buf = new ListBuffer[Tpl]
       var i   = 0
       while (it.hasNext && i < max) {
-        buf += castRow(it.next)
+        buf += row2tuple(it.next)
         i += 1
       }
       buf.toList

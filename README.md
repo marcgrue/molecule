@@ -97,7 +97,7 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.2",
+      "org.scalamolecule" %% "molecule" % "0.24.0",
       "com.datomic" % "datomic-free" % "0.9.5697" // or pro (see README_pro)
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -133,7 +133,7 @@ lazy val yourProjectJVM = yourProject.jvm
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.23.2",
+      "org.scalamolecule" %% "molecule" % "0.24.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
@@ -142,7 +142,7 @@ lazy val yourProjectJVM = yourProject.jvm
 lazy val yourProjectJS = yourProject.js
   .settings(
     libraryDependencies ++= Seq(
-      ("org.scalamolecule" %%% "molecule" % "0.23.2")
+      ("org.scalamolecule" %%% "molecule" % "0.24.0")
         .exclude("com.datomic", "datomic-free")
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...

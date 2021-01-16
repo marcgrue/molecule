@@ -22,13 +22,13 @@ class TxBundle extends TestSpec {
     // Transact multiple molecule statements in one bundled transaction
     transactBundle(
       // retract
-      e1.getRetractTx,
+      e1.getRetractStmts,
       // save
-      Ns.int(4).getSaveTx,
+      Ns.int(4).getSaveStmts,
       // insert
-      Ns.int.getInsertTx(List(5, 6)),
+      Ns.int.getInsertStmts(List(5, 6)),
       // update
-      Ns(e2).int(20).getUpdateTx
+      Ns(e2).int(20).getUpdateStmts
     )
 
     // State after transaction bundle
@@ -44,8 +44,8 @@ class TxBundle extends TestSpec {
     // (different systems throws different exceptions)
     if (system == SystemPeer) {
       (transactBundle(
-        Ns(e3).int(31).getUpdateTx,
-        Ns(e3).int(32).getUpdateTx
+        Ns(e3).int(31).getUpdateStmts,
+        Ns(e3).int(32).getUpdateStmts
       ) must throwA[java.util.concurrent.ExecutionException]).message ===
         "Got the exception java.util.concurrent.ExecutionException: java.lang.IllegalArgumentException: " +
           ":db.error/datoms-conflict Two datoms in the same transaction conflict\n" +
@@ -61,8 +61,8 @@ class TxBundle extends TestSpec {
       if (system == SystemPeer) {
         Await.result(
           transactBundleAsync(
-            Ns.int(1).getSaveTx,
-            Ns.str("a").getSaveTx
+            Ns.int(1).getSaveStmts,
+            Ns.str("a").getSaveStmts
           ) map { txReport =>
             Ns.int.get === List(1)
             Ns.str.get === List("a")
@@ -81,13 +81,13 @@ class TxBundle extends TestSpec {
       // Print inspect info for group transaction without affecting live db
       inspectTransactBundle(
         // retract
-        e1.getRetractTx,
+        e1.getRetractStmts,
         // save
-        Ns.int(4).getSaveTx,
+        Ns.int(4).getSaveStmts,
         // insert
-        Ns.int.getInsertTx(List(5, 6)),
+        Ns.int.getInsertStmts(List(5, 6)),
         // update
-        Ns(e2).int(20).getUpdateTx
+        Ns(e2).int(20).getUpdateStmts
       )
 
       // Prints something like this:
@@ -132,13 +132,13 @@ class TxBundle extends TestSpec {
       // If a real group transaction is invoked, the resulting tx report can also be inspected
       val tx = transactBundle(
         // retract
-        e1.getRetractTx,
+        e1.getRetractStmts,
         // save
-        Ns.int(4).getSaveTx,
+        Ns.int(4).getSaveStmts,
         // insert
-        Ns.int.getInsertTx(List(5, 6)),
+        Ns.int.getInsertStmts(List(5, 6)),
         // update
-        Ns(e2).int(20).getUpdateTx
+        Ns(e2).int(20).getUpdateStmts
       )
 
       // Will print the same as calling `inspectTransact(...)`

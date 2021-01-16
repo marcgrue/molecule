@@ -11,7 +11,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
   private[this] final def generateCompositeMolecule(dsl: Tree, OutTypes: Type*): Tree = {
     val MoleculeTpe = molecule_o(OutTypes.size)
     val outMolecule = TypeName(c.freshName("compositOutMolecule$"))
-    val (model0, _, casts, jsons, _, hasVariables, _, _, _, _, _, _) = getModel(dsl)
+    val (model0, _, casts, hasVariables, _, _, _, _, _) = getModel(dsl)
 
     if (hasVariables) {
       q"""
@@ -21,12 +21,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
-          final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
-
-          final override def getJsonFlat(conn: _root_.molecule.datomic.base.facade.Conn, n: Int): String = getJsonComposite(conn, n)
-          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
-            ..${compositeJsons(jsons)}
-          }
+          final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
         }
         new $outMolecule
       """
@@ -34,12 +29,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       q"""
         import molecule.core.ast.elements._
         final class $outMolecule extends $MoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
-          final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
-
-          final override def getJsonFlat(conn: _root_.molecule.datomic.base.facade.Conn, n: Int): String = getJsonComposite(conn, n)
-          final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
-            ..${compositeJsons(jsons)}
-          }
+          final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
         }
         new $outMolecule
       """

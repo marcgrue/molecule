@@ -58,7 +58,7 @@ object TxFunctionExamples {
     val newBalance = curBalance + amount
     // Atomic update guaranteeing that the balance/pre-requisites haven't changed
     // between the curBalance check and saving the new value.
-    Ns(e).int(newBalance).getUpdateTx
+    Ns(e).int(newBalance).getUpdateStmts
   }
 
 
@@ -78,7 +78,7 @@ object TxFunctionExamples {
     val newToBalance   = Ns(to).int.get.headOption.getOrElse(0) + amount
 
     // Update accounts
-    Ns(from).int(newFromBalance).getUpdateTx ++ Ns(to).int(newToBalance).getUpdateTx
+    Ns(from).int(newFromBalance).getUpdateStmts ++ Ns(to).int(newToBalance).getUpdateStmts
   }
 
 
@@ -90,14 +90,14 @@ object TxFunctionExamples {
         s"Can't transfer $amount from account $from having a balance of only $curFromBalance.")
 
     val newFromBalance = curFromBalance - amount
-    Ns(from).int(newFromBalance).getUpdateTx
+    Ns(from).int(newFromBalance).getUpdateStmts
   }
 
 
   // "Sub" tx fn - can be used on its own or in other tx functions
   def deposit(to: Long, amount: Int)(implicit conn: Conn): Seq[Seq[Statement]] = {
     val newToBalance = Ns(to).int.get.headOption.getOrElse(0) + amount
-    Ns(to).int(newToBalance).getUpdateTx
+    Ns(to).int(newToBalance).getUpdateStmts
   }
 
 
@@ -125,7 +125,7 @@ object TxFunctionExamples {
       throw new TxFnException(s"Users have to be at least 18 years old to register.")
 
     // Save valid User
-    Ns.str(username).int(age).getSaveTx
+    Ns.str(username).int(age).getSaveStmts
   }
 
 
@@ -141,7 +141,7 @@ object TxFunctionExamples {
     // (Relying on age validation outside tx function)
 
     // Save valid User
-    Ns.str(username).int(age).getSaveTx
+    Ns.str(username).int(age).getSaveStmts
   }
 }
 

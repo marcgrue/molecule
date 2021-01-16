@@ -88,7 +88,7 @@ private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]
     acc6 = Nil
     acc7 = Nil
 
-    // Traverse backwards through rows (json require traversing forwards)
+    // Traverse backwards through rows
     descending = true
     subsequentRow = false
     i = 0

@@ -14,20 +14,20 @@ class GetWith extends TestSpec {
 
   "getSaveTx" in new Setup {
 
-    Ns.int.getWith(Ns.int(2).getSaveTx) === List(1, 2)
+    Ns.int.getWith(Ns.int(2).getSaveStmts) === List(1, 2)
 
-    Ns.int.getWith(Ns.str("b").getSaveTx) === List(1)
+    Ns.int.getWith(Ns.str("b").getSaveStmts) === List(1)
 
-    Ns.int.getWith(Ns.str("b").int(2).getSaveTx) === List(1, 2)
+    Ns.int.getWith(Ns.str("b").int(2).getSaveStmts) === List(1, 2)
 
-    Ns.str.getWith(Ns.str("b").int(2).getSaveTx) === List("a", "b")
+    Ns.str.getWith(Ns.str("b").int(2).getSaveStmts) === List("a", "b")
 
     Ns.str$.int.getWith(
-      Ns.int(2).getSaveTx
+      Ns.int(2).getSaveStmts
     ).sortBy(_._2) === List((Some("a"), 1), (None, 2))
 
     Ns.str.int.getWith(
-      Ns.str("b").int(2).getSaveTx
+      Ns.str("b").int(2).getSaveStmts
     ).sortBy(_._2) === List(("a", 1), ("b", 2))
 
     // Current state unchanged
@@ -38,7 +38,7 @@ class GetWith extends TestSpec {
   "getInsertTx" in new Setup {
 
     Ns.int.getWith(
-      Ns.int.getInsertTx(2, 3)
+      Ns.int.getInsertStmts(2, 3)
     ) === List(1, 2, 3)
 
     Ns.str.getWith(
@@ -49,7 +49,7 @@ class GetWith extends TestSpec {
     ) === List("a", "b")
 
     Ns.str$.int.getWith(
-      Ns.int.getInsertTx(2, 3)
+      Ns.int.getInsertStmts(2, 3)
     ).sortBy(_._2) === List(
       (Some("a"), 1),
       (None, 2),
@@ -74,15 +74,15 @@ class GetWith extends TestSpec {
 
   "getUpdateTx" in new Setup {
 
-    Ns.int.getWith(Ns(eid).int(2).getUpdateTx) === List(2)
+    Ns.int.getWith(Ns(eid).int(2).getUpdateStmts) === List(2)
 
-    Ns.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(2)
+    Ns.int.getWith(Ns(eid).str("b").int(2).getUpdateStmts) === List(2)
 
-    Ns.str.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List("b")
+    Ns.str.getWith(Ns(eid).str("b").int(2).getUpdateStmts) === List("b")
 
-    Ns.str.int.getWith(Ns(eid).int(2).getUpdateTx) === List(("a", 2))
+    Ns.str.int.getWith(Ns(eid).int(2).getUpdateStmts) === List(("a", 2))
 
-    Ns.str.int.getWith(Ns(eid).str("b").int(2).getUpdateTx) === List(("b", 2))
+    Ns.str.int.getWith(Ns(eid).str("b").int(2).getUpdateStmts) === List(("b", 2))
 
     // Current state unchanged
     Ns.str.int.get === List(("a", 1))
@@ -100,7 +100,7 @@ class GetWith extends TestSpec {
     )
 
     // Test retracting an entity id
-    Ns.str.int.getWith(eid2.getRetractTx) === List(
+    Ns.str.int.getWith(eid2.getRetractStmts) === List(
       ("a", 1)
     )
 
@@ -122,14 +122,14 @@ class GetWith extends TestSpec {
     Ns.str.int.get === List(("Fred", 42))
 
     Ns.str.int.getWith(
-      Ns(fred).int(43).getUpdateTx
+      Ns(fred).int(43).getUpdateStmts
     ) === List(("Fred", 43))
 
     // Production value intact
     Ns.str.int.get === List(("Fred", 42))
 
     Ns.str.int.getWith(
-      Ns.str("John").int(44).getSaveTx
+      Ns.str("John").int(44).getSaveStmts
     ).sorted === List(
       ("Fred", 42), // production value
       ("John", 44) // insertion worked
@@ -140,12 +140,12 @@ class GetWith extends TestSpec {
 
 
     Ns.str.int.getWith(
-      Ns.str("John").int(44).getSaveTx,
+      Ns.str("John").int(44).getSaveStmts,
       Ns.str.int getInsertTx List(
         ("Lisa", 23),
         ("Pete", 24)
       ),
-      Ns(fred).int(43).getUpdateTx
+      Ns(fred).int(43).getUpdateStmts
     ).sorted === List(
       ("Fred", 43), // Updated
       ("John", 44), // Saved
@@ -153,9 +153,9 @@ class GetWith extends TestSpec {
       ("Pete", 24) // Inserted
     )
 
-    val saveJohn      = Ns.str("John").int(44).getSaveTx
+    val saveJohn      = Ns.str("John").int(44).getSaveStmts
     val insertMembers = Ns.str.int getInsertTx List(("Lisa", 23), ("Pete", 24))
-    val updateFred    = Ns(fred).int(43).getUpdateTx
+    val updateFred    = Ns(fred).int(43).getUpdateStmts
 
     Ns.str.int.getWith(
       saveJohn,

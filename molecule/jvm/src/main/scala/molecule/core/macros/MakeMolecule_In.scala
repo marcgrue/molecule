@@ -14,8 +14,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
     val OutMoleculeTpe = molecule_o(OutTypes.size)
     val inputMolecule = TypeName(c.freshName("inputMolecule$"))
     val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables,
-    postTypes, postCasts, postJsons, _, _, _) = getModel(dsl)
+    val (model0, types, casts, hasVariables, postTypes, postCasts, _, _, _) = getModel(dsl)
     val flat = casts.size == 1
 
     // Methods for applying separate lists of input
@@ -34,7 +33,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
-                final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
             }
@@ -48,9 +47,8 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-                ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
               }
               new $outMolecule
             }
@@ -69,7 +67,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
-                final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
             }
@@ -83,9 +81,8 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-                ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
               }
               new $outMolecule
             }
@@ -111,10 +108,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
-                final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
-                  ..${topLevelJson(jsons)}
-                }
+                final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
             }
@@ -135,10 +129,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
-                final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {
-                  ..${topLevelJson(jsons)}
-                }
+                final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
               }
               new $outMolecule
             }
@@ -168,9 +159,8 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-                ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
               }
               new $outMolecule
             }
@@ -192,9 +182,8 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-                ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
               }
               new $outMolecule
             }

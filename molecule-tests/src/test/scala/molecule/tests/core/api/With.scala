@@ -13,8 +13,8 @@ class With extends TestSpec with JavaUtil {
   class Setup extends CoreSetup {
     Ns.int(1).save
 
-    val saveTx2 = Ns.int(2).getSaveTx
-    val saveTx3 = Ns.int(3).getSaveTx
+    val saveTx2 = Ns.int(2).getSaveStmts
+    val saveTx3 = Ns.int(3).getSaveStmts
 
     // Tx data from edn file
     // contains: "[{:Ns/int 2} {:Ns/int 3}]"
@@ -48,38 +48,5 @@ class With extends TestSpec with JavaUtil {
     Ns.int.getRawWith(2, saveTx2, saveTx3).ints === List(1, 2)
     Ns.int.getRawWith(txData2_3).ints === List(1, 2, 3)
     Ns.int.getRawWith(txData2_3, 2).ints === List(1, 2)
-
-    Ns.int.getJsonWith(saveTx2) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2}
-        |]""".stripMargin
-
-    Ns.int.getJsonWith(saveTx2, saveTx3) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2},
-        |{"Ns.int": 3}
-        |]""".stripMargin
-
-    Ns.int.getJsonWith(2, saveTx2, saveTx3) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2}
-        |]""".stripMargin
-
-
-    Ns.int.getJsonWith(txData2_3) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2},
-        |{"Ns.int": 3}
-        |]""".stripMargin
-
-    Ns.int.getJsonWith(txData2_3, 2) ===
-      """[
-        |{"Ns.int": 1},
-        |{"Ns.int": 2}
-        |]""".stripMargin
   }
 }

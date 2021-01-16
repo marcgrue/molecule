@@ -16,7 +16,6 @@ package molecule.core.api
   *
   *  - [[GetArray]] - fastest retrieved typed data set. Can be traversed with a fast `while` loop
   *  - [[GetIterable]] - for lazily traversing row by row
-  *  - [[GetJson]] - data formatted as Json string
   *  - [[GetList]] - default getter returning Lists of tuples. Convenient typed data, suitable for smaller data sets
   *  - [[GetRaw]] - fastest retrieved raw un-typed data from Datomic
   *

@@ -1,4 +1,5 @@
 package molecule.core.macros
+
 import molecule.core.transform.Model2Query
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
@@ -6,13 +7,14 @@ import scala.reflect.macros.blackbox
 
 /** Macro to make output molecules. */
 class MakeMolecule(val c: blackbox.Context) extends Base {
+
   import c.universe._
 
   private[this] final def generateMolecule(dsl: Tree, OutTypes: Type*): Tree = {
-    val OutMoleculeTpe: Tree = molecule_o(OutTypes.size)
-    val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, jsons, nestedRefAttrs, hasVariables,
-    postTypes, postCasts, postJsons, isOptNested,
+    val OutMoleculeTpe: Tree                    = molecule_o(OutTypes.size)
+    val outMolecule                             = TypeName(c.freshName("outMolecule$"))
+    val (model0, types, casts, hasVariables,
+    postTypes, postCasts, isOptNested,
     optNestedRefIndexes, optNestedTacitIndexes) = getModel(dsl)
 
     if (casts.size == 1) {
@@ -22,8 +24,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.core.transform.Model2Query(_resolvedModel)) {
-            final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-            final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+            final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
           }
           new $outMolecule
         """
@@ -31,14 +32,13 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
-            final override def castRow(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-            final override def row2json(sb: StringBuilder, row: java.util.List[AnyRef]): StringBuilder = {..${topLevelJson(jsons)}}
+            final override def row2tuple(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
           }
           new $outMolecule
         """
       }
 
-    } else if(isOptNested) {
+    } else if (isOptNested) {
       if (hasVariables) {
         q"""
           import molecule.core.ast.elements._
@@ -68,9 +68,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](_resolvedModel, _root_.molecule.core.transform.Model2Query(_resolvedModel))
-            with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+            with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
             ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-            ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
           }
           new $outMolecule
         """
@@ -78,9 +77,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)})
-            with ${nestedJsonClassX(casts.size)}[(..$OutTypes)] {
+            with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
             ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
-            ..${resolveNestedJsonMethods(jsons, nestedRefAttrs, postJsons).get}
           }
           new $outMolecule
         """

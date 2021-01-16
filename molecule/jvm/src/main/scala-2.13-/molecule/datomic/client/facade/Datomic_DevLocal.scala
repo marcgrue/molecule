@@ -21,6 +21,9 @@ case class Datomic_DevLocal(system: String, storageDir: String = "")
     AsyncDatomic.clientDevLocal(system, storageDir)
   ) {
 
+
+  def connect(dbName: String): Conn_Client = Conn_Client(client, clientAsync, dbName)
+
   def getDatabaseNames(
     timeout: Int = 0,
     offset: Int = 0,

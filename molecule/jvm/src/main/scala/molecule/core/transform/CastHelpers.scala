@@ -17,7 +17,7 @@ trait CastHelpers[Tpl] extends CastHelpersAggr {
 
 
   // Standard row cast interface to be materialized by macro
-  protected def castRow(row: jList[AnyRef]): Tpl = ???
+  protected def row2tuple(row: jList[AnyRef]): Tpl = ???
 
 
   // One ===========================================================================================

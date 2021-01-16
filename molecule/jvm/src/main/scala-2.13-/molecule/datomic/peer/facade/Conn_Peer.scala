@@ -31,7 +31,7 @@ object Conn_Peer {
 }
 
 
-/** Facade to Datomic Connection for peer api.
+/** Facade to Datomic connection for peer api.
   * */
 class Conn_Peer(val peerConn: datomic.Connection)
   extends Conn_Datomic with Helpers with BridgeDatomicFuture {

@@ -3,14 +3,15 @@ package molecule
 import datomicClient.ClojureBridge
 import molecule.core.util.Helpers
 import molecule.datomic.api.out3._
+import molecule.datomic.api.out5.m
 import molecule.tests.core.base.dsl.coreTest._
 
 
 class AdHocTest extends TestSpec with Helpers with ClojureBridge {
 
 
-  "adhoc" in new CoreSetup {
 
+  "adhoc" in new CoreSetup {
 
 
     ok
