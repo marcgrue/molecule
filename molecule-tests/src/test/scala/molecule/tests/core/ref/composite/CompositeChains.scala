@@ -42,36 +42,36 @@ class CompositeChains extends TestSpec {
 
   "Split into 3" in new CoreSetup {
 
-    // Insert composite data with 3 sub-molecules
+    // Insert composite data with 3 sub-molecules (23 attributes in total)
     Ns.bool.bools.date.dates.double.doubles.enum.enums +
       Ns.float.floats.int.ints.long.longs.ref1 +
-      Ns.refSub1.str.strs.uri.uris.uuid.uuids insert Seq(
+      Ns.refSub1.str.strs.uri.uris.uuid.uuids.refs1 insert Seq(
       // Two rows with tuples of 3 sub-tuples that type-safely match the 3 sub-molecules above
       (
-        (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+        (false, Set(false), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
         (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), r1),
-        (r2, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+        (r2, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2), Set(42L))
       ),
       (
-        (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
+        (true, Set(true), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
         (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), r3),
-        (r4, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+        (r4, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5), Set(43L))
       )
-    ) eids
+    )
 
     // Retrieve composite data with the same 3 sub-molecules
     m(Ns.bool.bools.date.dates.double.doubles.enum.enums +
       Ns.float.floats.int.ints.long.longs.ref1 +
-      Ns.refSub1.str.strs.uri.uris.uuid.uuids).get === Seq(
+      Ns.refSub1.str.strs.uri.uris.uuid.uuids.refs1).get === Seq(
       (
-        (false, Set(false), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
-        (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), r3),
-        (r4, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5))
+        (false, Set(false), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
+        (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), r1),
+        (r2, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2), Set(42L))
       ),
       (
-        (true, Set(true), date1, Set(date2, date3), 1.0, Set(2.0, 3.0), "enum1", Set("enum2", "enum3")),
-        (1f, Set(2f, 3f), 1, Set(2, 3), 1L, Set(2L, 3L), r1),
-        (r2, "a", Set("b", "c"), uri1, Set(uri2, uri3), uuid1, Set(uuid2))
+        (true, Set(true), date4, Set(date5, date6), 4.0, Set(5.0, 6.0), "enum4", Set("enum5", "enum6")),
+        (4f, Set(5f, 6f), 4, Set(5, 6), 4L, Set(5L, 6L), r3),
+        (r4, "d", Set("e", "f"), uri4, Set(uri5, uri6), uuid4, Set(uuid5), Set(43L))
       )
     )
 
@@ -80,14 +80,31 @@ class CompositeChains extends TestSpec {
       Ns.float.floats.int +
       Ns.refSub1.str.strs).get === Seq(
       (
-        (false, Set(false), date4, Set(date5, date6)),
-        (4f, Set(5f, 6f), 4),
-        (r4, "d", Set("e", "f"))
-      ),
-      (
-        (true, Set(true), date1, Set(date2, date3)),
+        (false, Set(false), date1, Set(date2, date3)),
         (1f, Set(2f, 3f), 1),
         (r2, "a", Set("b", "c"))
+      ),
+      (
+        (true, Set(true), date4, Set(date5, date6)),
+        (4f, Set(5f, 6f), 4),
+        (r4, "d", Set("e", "f"))
+      )
+    )
+
+    // Since the subset uses less than 22 attributes, we can return single tuples
+    // without the need for composite with sub-tuples:
+    m(Ns.bool.bools.date.dates
+      .float.floats.int
+      .refSub1.str.strs).get === Seq(
+      (
+        false, Set(false), date1, Set(date2, date3),
+        1f, Set(2f, 3f), 1,
+        r2, "a", Set("b", "c")
+      ),
+      (
+        true, Set(true), date4, Set(date5, date6),
+        4f, Set(5f, 6f), 4,
+        r4, "d", Set("e", "f")
       )
     )
   }

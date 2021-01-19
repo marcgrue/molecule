@@ -1,13 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 
-lazy val root = project.in(file(".")).
-  aggregate(molecule.js, molecule.jvm).
-  settings(
-    publish := {},
-    publishLocal := {},
-  )
-
 lazy val molecule = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(
