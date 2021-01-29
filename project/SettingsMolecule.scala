@@ -17,6 +17,7 @@ trait SettingsMolecule {
     moleculeDataModelPaths := Seq(
       "molecule/tests/core/base",
       "molecule/tests/core/bidirectionals",
+//      "molecule/tests/core/generic",
       "molecule/tests/core/ref",
       "molecule/tests/core/schemaDef",
 

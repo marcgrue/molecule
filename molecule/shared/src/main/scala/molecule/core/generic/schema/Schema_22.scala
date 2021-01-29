@@ -6,25 +6,25 @@ import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] extends Schema with OutSchema_22[Schema_22, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] {
-  type Stay[Attr[_, _], Type] = Attr[Schema_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V], P24[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]
+trait Schema_22[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] extends Schema with OutSchema_22[Obj, Schema_22, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] {
+  type Stay[Attr[_, _]           ] = Attr[Schema_22[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V], D24[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_22[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]
 
-  final lazy val id_          : Stay[id           , Long   ] = ???
-  final lazy val a_           : Stay[a            , String ] = ???
-  final lazy val part_        : Stay[part         , String ] = ???
-  final lazy val nsFull_      : Stay[nsFull       , String ] = ???
-  final lazy val ns_          : Stay[ns           , String ] = ???
-  final lazy val attr_        : Stay[attr         , String ] = ???
-  final lazy val tpe_         : Stay[tpe          , String ] = ???
-  final lazy val card_        : Stay[card         , String ] = ???
-  final lazy val doc_         : Stay[doc          , String ] = ???
-  final lazy val index_       : Stay[index        , Boolean] = ???
-  final lazy val unique_      : Stay[unique       , String ] = ???
-  final lazy val fulltext_    : Stay[fulltext     , Boolean] = ???
-  final lazy val isComponent_ : Stay[isComponent  , Boolean] = ???
-  final lazy val noHistory_   : Stay[noHistory    , Boolean] = ???
-  final lazy val enum_        : Stay[enum         , String ] = ???
-  final lazy val t_           : Stay[t            , Long   ] = ???
-  final lazy val tx_          : Stay[tx           , Long   ] = ???
-  final lazy val txInstant_   : Stay[txInstant    , Date   ] = ???
+  final lazy val id_          : Stay[id         ] = ???
+  final lazy val a_           : Stay[a          ] = ???
+  final lazy val part_        : Stay[part       ] = ???
+  final lazy val nsFull_      : Stay[nsFull     ] = ???
+  final lazy val ns_          : Stay[ns         ] = ???
+  final lazy val attr_        : Stay[attr       ] = ???
+  final lazy val tpe_         : Stay[tpe        ] = ???
+  final lazy val card_        : Stay[card       ] = ???
+  final lazy val doc_         : Stay[doc        ] = ???
+  final lazy val index_       : Stay[index      ] = ???
+  final lazy val unique_      : Stay[unique     ] = ???
+  final lazy val fulltext_    : Stay[fulltext   ] = ???
+  final lazy val isComponent_ : Stay[isComponent] = ???
+  final lazy val noHistory_   : Stay[noHistory  ] = ???
+  final lazy val enum_        : Stay[enum       ] = ???
+  final lazy val t_           : Stay[t          ] = ???
+  final lazy val tx_          : Stay[tx         ] = ???
+  final lazy val txInstant_   : Stay[txInstant  ] = ???
 }

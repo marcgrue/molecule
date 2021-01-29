@@ -5,7 +5,7 @@ import molecule.core.api.Molecule
 import molecule.datomic.base.facade.Conn
 
 /** Builder classes of various arity of nested tuples. */
-private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+trait NestedTuples[Obj, OuterTpl] extends jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
   // Lazily re-use nested list
   final override def getIterable(implicit conn: Conn): Iterable[OuterTpl] = get(conn)
@@ -114,9 +114,9 @@ private[molecule] trait NestedTuples[OuterTpl] extends jComparator[jList[AnyRef]
 }
 
 
-private[molecule] object NestedTuples {
+object NestedTuples {
 
-  trait NestedTuples1[OuterTpl] extends NestedTuples[OuterTpl] { self: Molecule[OuterTpl] =>
+  trait NestedTuples1[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -174,7 +174,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples2[OuterTpl] extends NestedTuples[OuterTpl] { self: Molecule[OuterTpl] =>
+  trait NestedTuples2[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -252,7 +252,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples3[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+  trait NestedTuples3[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -355,7 +355,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples4[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+  trait NestedTuples4[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -488,7 +488,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples5[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+  trait NestedTuples5[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -656,7 +656,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples6[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+  trait NestedTuples6[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
@@ -864,7 +864,7 @@ private[molecule] object NestedTuples {
   }
 
 
-  trait NestedTuples7[OuterTpl] extends NestedTuples[OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[OuterTpl] =>
+  trait NestedTuples7[Obj, OuterTpl] extends NestedTuples[Obj, OuterTpl] with jComparator[jList[AnyRef]] { self: Molecule[Obj, OuterTpl] =>
 
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars

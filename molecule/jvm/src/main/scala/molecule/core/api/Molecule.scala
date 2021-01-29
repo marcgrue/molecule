@@ -150,17 +150,17 @@ import scala.language.implicitConversions
  * @groupname internal Internal (but public) model/query representations
  * @groupprio internal 710
  * */
-trait Molecule[Tpl] extends MoleculeBase
-  with CastHelpers[Tpl]
-  with GetArray[Tpl]
-  with GetIterable[Tpl]
-  with GetList[Tpl]
+trait Molecule[Obj, Tpl] extends MoleculeBase
+  with CastHelpers[Obj, Tpl]
+  with GetArray[Obj, Tpl]
+  with GetIterable[Obj, Tpl]
+  with GetList[Obj, Tpl]
   with GetRaw
-  with GetAsyncArray[Tpl]
-  with GetAsyncIterable[Tpl]
-  with GetAsyncList[Tpl]
+  with GetAsyncArray[Obj, Tpl]
+  with GetAsyncIterable[Obj, Tpl]
+  with GetAsyncList[Obj, Tpl]
   with GetAsyncRaw
-  with ShowInspect[Tpl] {
+  with ShowInspect[Obj, Tpl] {
 
   // Save ============================================================================================================================
 
@@ -464,7 +464,7 @@ trait Molecule[Tpl] extends MoleculeBase
 /** Arity 1-22 molecule implementation interfaces. */
 object Molecule {
 
-  abstract class Molecule01[A](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[A] {
+  abstract class Molecule01[Obj, A](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, A] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -508,7 +508,7 @@ object Molecule {
     }
   }
 
-  abstract class Molecule02[A, B](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B)] {
+  abstract class Molecule02[Obj, A, B](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -553,7 +553,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule03[A, B, C](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C)] {
+  abstract class Molecule03[Obj, A, B, C](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -598,7 +598,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule04[A, B, C, D](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D)] {
+  abstract class Molecule04[Obj, A, B, C, D](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -643,7 +643,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule05[A, B, C, D, E](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E)] {
+  abstract class Molecule05[Obj, A, B, C, D, E](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -688,7 +688,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule06[A, B, C, D, E, F](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F)] {
+  abstract class Molecule06[Obj, A, B, C, D, E, F](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -732,7 +732,7 @@ object Molecule {
     }
   }
 
-  abstract class Molecule07[A, B, C, D, E, F, G](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G)] {
+  abstract class Molecule07[Obj, A, B, C, D, E, F, G](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -777,7 +777,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule08[A, B, C, D, E, F, G, H](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H)] {
+  abstract class Molecule08[Obj, A, B, C, D, E, F, G, H](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -822,7 +822,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule09[A, B, C, D, E, F, G, H, I](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I)] {
+  abstract class Molecule09[Obj, A, B, C, D, E, F, G, H, I](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -867,7 +867,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule10[A, B, C, D, E, F, G, H, I, J](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J)] {
+  abstract class Molecule10[Obj, A, B, C, D, E, F, G, H, I, J](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -912,7 +912,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule11[A, B, C, D, E, F, G, H, I, J, K](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K)] {
+  abstract class Molecule11[Obj, A, B, C, D, E, F, G, H, I, J, K](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -957,7 +957,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule12[A, B, C, D, E, F, G, H, I, J, K, L](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L)] {
+  abstract class Molecule12[Obj, A, B, C, D, E, F, G, H, I, J, K, L](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1001,7 +1001,7 @@ object Molecule {
     }
   }
 
-  abstract class Molecule13[A, B, C, D, E, F, G, H, I, J, K, L, M](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M)] {
+  abstract class Molecule13[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1046,7 +1046,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule14[A, B, C, D, E, F, G, H, I, J, K, L, M, N](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] {
+  abstract class Molecule14[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1091,7 +1091,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] {
+  abstract class Molecule15[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1136,7 +1136,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] {
+  abstract class Molecule16[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1181,7 +1181,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] {
+  abstract class Molecule17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1226,7 +1226,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] {
+  abstract class Molecule18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1271,7 +1271,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] {
+  abstract class Molecule19[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1316,7 +1316,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] {
+  abstract class Molecule20[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1361,7 +1361,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] {
+  abstract class Molecule21[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */
@@ -1406,7 +1406,7 @@ object Molecule {
   }
 
 
-  abstract class Molecule22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] {
+  abstract class Molecule22[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](val _model: Model, queryData: (Query, Option[Query], Query, Option[Query])) extends Molecule[Obj, (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] {
     val (_query, _nestedQuery, _rawQuery, _rawNestedQuery) = queryData
 
     /** See [[molecule.core.api.Molecule.insert insert]] */

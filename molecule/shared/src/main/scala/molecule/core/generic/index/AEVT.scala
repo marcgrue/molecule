@@ -92,93 +92,101 @@ trait AEVT extends GenericNs {
 
   /** Transaction operation: assertion (true) or retraction (false) */
   final class op       [Ns, In] extends OneBoolean[Ns, In] with Indexed
+
+  trait AEVT_e         { val e        : Long    }
+  trait AEVT_a         { val a        : String  }
+  trait AEVT_v         { val v        : Any     }
+  trait AEVT_t         { val t        : Long    }
+  trait AEVT_tx        { val tx       : Long    }
+  trait AEVT_txInstant { val txInstant: Date    }
+  trait AEVT_op        { val op       : Boolean }
 }
 
 /** AEVT interface to add a first generic attribute to molecule. */
 trait AEVT_0 extends AEVT with OutIndex_0 {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_1[Type], P2[_,_]] with AEVT_1[Type]
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_1[Prop, Tpe], D02[_,_,_]] with AEVT_1[Prop, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
 /** AEVT interface to add a second generic attribute to molecule. */
-trait AEVT_1[A] extends AEVT with OutIndex_1[A] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_2[A, Type], P3[_,_,_]] with AEVT_2[A, Type]
+trait AEVT_1[Obj, A] extends AEVT with OutIndex_1[Obj, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_2[Obj, A, Tpe], D03[_,_,_,_]] with AEVT_2[Obj with Prop, A, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_2[A, B] extends AEVT with OutIndex_2[A, B] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_3[A, B, Type], P4[_,_,_,_]] with AEVT_3[A, B, Type]
+trait AEVT_2[Obj, A, B] extends AEVT with OutIndex_2[Obj, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with AEVT_3[Obj with Prop, A, B, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_3[A, B, C] extends AEVT with OutIndex_3[A, B, C] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_4[A, B, C, Type], P5[_,_,_,_,_]] with AEVT_4[A, B, C, Type]
+trait AEVT_3[Obj, A, B, C] extends AEVT with OutIndex_3[Obj, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with AEVT_4[Obj with Prop, A, B, C, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_4[A, B, C, D] extends AEVT with OutIndex_4[A, B, C, D] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_5[A, B, C, D, Type], P6[_,_,_,_,_,_]] with AEVT_5[A, B, C, D, Type]
+trait AEVT_4[Obj, A, B, C, D] extends AEVT with OutIndex_4[Obj, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with AEVT_5[Obj with Prop, A, B, C, D, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_5[A, B, C, D, E] extends AEVT with OutIndex_5[A, B, C, D, E] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_6[A, B, C, D, E, Type], P7[_,_,_,_,_,_,_]] with AEVT_6[A, B, C, D, E, Type]
+trait AEVT_5[Obj, A, B, C, D, E] extends AEVT with OutIndex_5[Obj, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with AEVT_6[Obj with Prop, A, B, C, D, E, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_6[A, B, C, D, E, F] extends AEVT with OutIndex_6[A, B, C, D, E, F] {
-  type Next_[Attr[_, _], Type] = Attr[AEVT_7[A, B, C, D, E, F, Type], P8[_,_,_,_,_,_,_,_]] with AEVT_7[A, B, C, D, E, F, Type]
+trait AEVT_6[Obj, A, B, C, D, E, F] extends AEVT with OutIndex_6[Obj, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with AEVT_7[Obj with Prop, A, B, C, D, E, F, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
+  final lazy val a          : Next[a         , AEVT_a        , String ] = ???
+  final lazy val v          : Next[v         , AEVT_v        , Any    ] = ???
+  final lazy val t          : Next[t         , AEVT_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , AEVT_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , AEVT_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_7[A, B, C, D, E, F, G] extends AEVT with OutIndex_7[A, B, C, D, E, F, G]
+trait AEVT_7[Obj, A, B, C, D, E, F, G] extends AEVT with OutIndex_7[Obj, A, B, C, D, E, F, G]
 

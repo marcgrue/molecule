@@ -13,6 +13,8 @@ private[molecule] trait MacroHelpers {
   type W[T] = c.WeakTypeTag[T]
   type PF[A, B] = PartialFunction[A, B]
 
+  def w[T](implicit attag: WeakTypeTag[T]): Type = weakTypeOf[T]
+
   def expr(tree: Tree): c.Expr[Nothing] = {
     c.Expr(tree)(c.WeakTypeTag(tree.tpe))
   }

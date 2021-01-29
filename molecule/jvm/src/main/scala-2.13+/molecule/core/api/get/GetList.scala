@@ -17,7 +17,23 @@ import scala.language.implicitConversions
   * For expected smaller result sets it's convenient to return Lists of tuples of data.
   * Considered as the default getter, no postfix has been added (`get` instead of `getList`).
   * */
-trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
+trait GetList[Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule[Obj, Tpl] =>
+
+
+  def getObjList(implicit conn: Conn): List[Obj] = {
+    val jColl = conn.query(_model, _query)
+    val it    = jColl.iterator
+    val buf   = new ListBuffer[Obj]
+    while (it.hasNext) {
+      buf += row2obj(it.next)
+    }
+    buf.toList
+  }
+
+
+
+
+
 
 
   // get ================================================================================================
@@ -42,7 +58,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
     val it    = jColl.iterator
     val buf   = new ListBuffer[Tpl]
     while (it.hasNext) {
-      buf += row2tuple(it.next)
+      buf += row2tpl(it.next)
     }
     buf.toList
   }
@@ -85,7 +101,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule[Tpl] =>
       val buf = new ListBuffer[Tpl]
       var i   = 0
       while (it.hasNext && i < max) {
-        buf += row2tuple(it.next)
+        buf += row2tpl(it.next)
         i += 1
       }
       buf.toList

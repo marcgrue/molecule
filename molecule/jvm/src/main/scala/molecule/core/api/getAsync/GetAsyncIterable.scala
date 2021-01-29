@@ -23,7 +23,7 @@ import scala.language.implicitConversions
   * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter (in the
   * `get` package) in a Future. `getAsyncIterableAsOf` thus wraps the result of `getIterableAsOf` in a Future and so on.
   * */
-trait GetAsyncIterable[Tpl] { self: Molecule[Tpl] with GetIterable[Tpl] =>
+trait GetAsyncIterable[Obj, Tpl] { self: Molecule[Obj, Tpl] with GetIterable[Obj, Tpl] =>
 
 
   // get ================================================================================================

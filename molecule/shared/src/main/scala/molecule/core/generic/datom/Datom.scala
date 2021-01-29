@@ -8,6 +8,7 @@
 */
 package molecule.core.generic.datom
 
+import java.util.Date
 import molecule.core.boilerplate.attributes._
 import scala.language.higherKinds
 
@@ -34,4 +35,12 @@ trait Datom {
 
   /** Transaction operation: assertion (true) or retraction (false) */
   final class op       [Ns, In] extends OneBoolean[Ns, In] with Indexed
+
+  trait Datom_e         { val e        : Long    }
+  trait Datom_a         { val a        : String  }
+  trait Datom_v         { val v        : Any     }
+  trait Datom_t         { val t        : Long    }
+  trait Datom_tx        { val tx       : Long    }
+  trait Datom_txInstant { val txInstant: Date    }
+  trait Datom_op        { val op       : Boolean }
 }

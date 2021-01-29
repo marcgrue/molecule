@@ -1,5 +1,6 @@
 package molecule.core.generic.schema
 
+import java.util.Date
 import molecule.core.boilerplate.attributes._
 import molecule.core.boilerplate.base._
 import molecule.core.generic.GenericNs
@@ -107,4 +108,31 @@ trait Schema extends GenericNs {
 
   /** Optional attribute noHistory status (true/not set). */
   final class noHistory$   [Ns, In] extends OneBoolean$[Ns] with Indexed
+
+
+  trait Schema_id          { val id         : Long    }
+  trait Schema_a           { val a          : String  }
+  trait Schema_part        { val part       : String  }
+  trait Schema_nsFull      { val nsFull     : String  }
+  trait Schema_ns          { val ns         : String  }
+  trait Schema_attr        { val attr       : String  }
+  trait Schema_tpe         { val tpe        : String  }
+  trait Schema_card        { val card       : String  }
+  trait Schema_doc         { val doc        : String  }
+  trait Schema_index       { val index      : Boolean }
+  trait Schema_unique      { val unique     : String  }
+  trait Schema_fulltext    { val fulltext   : Boolean }
+  trait Schema_isComponent { val isComponent: Boolean }
+  trait Schema_noHistory   { val noHistory  : Boolean }
+  trait Schema_enum        { val enum       : String  }
+  trait Schema_t           { val t          : Long    }
+  trait Schema_tx          { val tx         : Long    }
+  trait Schema_txInstant   { val txInstant  : Date    }
+
+  trait Schema_doc$         { val doc$        : Option[String]  }
+  trait Schema_index$       { val index$      : Option[Boolean] }
+  trait Schema_unique$      { val unique$     : Option[String]  }
+  trait Schema_fulltext$    { val fulltext$   : Option[Boolean] }
+  trait Schema_isComponent$ { val isComponent$: Option[Boolean] }
+  trait Schema_noHistory$   { val noHistory$  : Option[Boolean] }
 }

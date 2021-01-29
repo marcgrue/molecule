@@ -123,94 +123,103 @@ trait Log extends GenericNs {
 
   /** Transaction operation: assertion (true) or retraction (false) */
   final class op       [Ns, In] extends OneBoolean[Ns, In] with Indexed
+
+  trait Log_e         { val e: Long         }
+  trait Log_a         { val a: String       }
+  trait Log_v         { val v: Any          }
+  trait Log_t         { val t: Long         }
+  trait Log_tx        { val tx: Long        }
+  trait Log_txInstant { val txInstant: Date }
+  trait Log_op        { val op: Boolean     }
 }
 
 
 /** Log interface to add a first generic attribute to molecule. */
 trait Log_0 extends Log with OutIndex_0 {
-  type Next_[Attr[_, _], Type] = Attr[Log_1[Type], P2[_,_]] with Log_1[Type]
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_1[Prop, Tpe], D02[_,_,_]] with Log_1[Prop, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
 /** Log interface to add a second generic attribute to molecule. */
-trait Log_1[A] extends Log with OutIndex_1[A] {
-  type Next_[Attr[_, _], Type] = Attr[Log_2[A, Type], P3[_,_,_]] with Log_2[A, Type]
+trait Log_1[Obj, A] extends Log with OutIndex_1[Obj, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_2[Obj, A, Tpe], D03[_,_,_,_]] with Log_2[Obj with Prop, A, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_2[A, B] extends Log with OutIndex_2[A, B] {
-  type Next_[Attr[_, _], Type] = Attr[Log_3[A, B, Type], P4[_,_,_,_]] with Log_3[A, B, Type]
+trait Log_2[Obj, A, B] extends Log with OutIndex_2[Obj, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with Log_3[Obj with Prop, A, B, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_3[A, B, C] extends Log with OutIndex_3[A, B, C] {
-  type Next_[Attr[_, _], Type] = Attr[Log_4[A, B, C, Type], P5[_,_,_,_,_]] with Log_4[A, B, C, Type]
+trait Log_3[Obj, A, B, C] extends Log with OutIndex_3[Obj, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with Log_4[Obj with Prop, A, B, C, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_4[A, B, C, D] extends Log with OutIndex_4[A, B, C, D] {
-  type Next_[Attr[_, _], Type] = Attr[Log_5[A, B, C, D, Type], P6[_,_,_,_,_,_]] with Log_5[A, B, C, D, Type]
+trait Log_4[Obj, A, B, C, D] extends Log with OutIndex_4[Obj, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with Log_5[Obj with Prop, A, B, C, D, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_5[A, B, C, D, E] extends Log with OutIndex_5[A, B, C, D, E] {
-  type Next_[Attr[_, _], Type] = Attr[Log_6[A, B, C, D, E, Type], P7[_,_,_,_,_,_,_]] with Log_6[A, B, C, D, E, Type]
+trait Log_5[Obj, A, B, C, D, E] extends Log with OutIndex_5[Obj, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with Log_6[Obj with Prop, A, B, C, D, E, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_6[A, B, C, D, E, F] extends Log with OutIndex_6[A, B, C, D, E, F] {
-  type Next_[Attr[_, _], Type] = Attr[Log_7[A, B, C, D, E, F, Type], P8[_,_,_,_,_,_,_,_]] with Log_7[A, B, C, D, E, F, Type]
+trait Log_6[Obj, A, B, C, D, E, F] extends Log with OutIndex_6[Obj, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Log_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with Log_7[Obj with Prop, A, B, C, D, E, F, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , Log_e        , Long   ] = ???
+  final lazy val a          : Next[a         , Log_a        , String ] = ???
+  final lazy val v          : Next[v         , Log_v        , Any    ] = ???
+  final lazy val t          : Next[t         , Log_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , Log_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , Log_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , Log_op       , Boolean] = ???
 }
 
-trait Log_7[A, B, C, D, E, F, G] extends Log with OutIndex_7[A, B, C, D, E, F, G]
+trait Log_7[Obj, A, B, C, D, E, F, G] extends Log with OutIndex_7[Obj, A, B, C, D, E, F, G]
+
 

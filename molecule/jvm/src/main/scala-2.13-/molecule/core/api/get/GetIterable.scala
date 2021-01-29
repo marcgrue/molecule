@@ -13,7 +13,7 @@ import scala.language.implicitConversions
   * <br><br>
   * Suitable for data sets that are lazily consumed.
   * */
-trait GetIterable[Tpl] { self: Molecule[Tpl] =>
+trait GetIterable[Obj, Tpl] { self: Molecule[Obj, Tpl] =>
 
 
   // get ================================================================================================
@@ -40,7 +40,7 @@ trait GetIterable[Tpl] { self: Molecule[Tpl] =>
     override def iterator: Iterator[Tpl] = new Iterator[Tpl] {
       private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
       override def hasNext: Boolean = jIter.hasNext
-      override def next(): Tpl = row2tuple(jIter.next())
+      override def next(): Tpl = row2tpl(jIter.next())
     }
   }
 

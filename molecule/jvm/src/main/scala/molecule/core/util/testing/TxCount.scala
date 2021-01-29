@@ -17,4 +17,9 @@ trait TxCount {
 
   final class db$    [Ns, In] extends OneString$[Ns] with Indexed
   final class basisT$[Ns, In] extends OneLong$  [Ns] with Indexed
+
+  trait TxCount_db      { val db     : String         }
+  trait TxCount_db$     { val db$    : Option[String] }
+  trait TxCount_basisT  { val basisT : Long           }
+  trait TxCount_basisT$ { val basisT$: Option[Long]   }
 }

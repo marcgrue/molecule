@@ -8,18 +8,18 @@ import molecule.core.boilerplate.out._
 import molecule.core.expression.AttrExpressions.?
 
 
-trait TxCount_1[A] extends TxCount with Out_1[TxCount_1, TxCount_2, P2, P3, A] {
-  type Next[Attr[_, _], Type] = Attr[TxCount_2[A, Type], P3[_,_,_]] with TxCount_2[A, Type]
-  type Stay[Attr[_, _], Type] = Attr[TxCount_1[A], P2[_,_]] with TxCount_1[A]
+trait TxCount_1[Obj, A] extends TxCount {
+  private type Next[Attr[_, _], Prop, Tpe] = Attr[TxCount_2[Obj, A, Tpe], D03[_,_,_,_]] with TxCount_2[Obj with Prop, A, Tpe]
+  private type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_1[Obj, A], D02[_,_,_]] with TxCount_1[Obj, A]
 
-  final lazy val db      : Next[db     , String] = ???
-  final lazy val basisT  : Next[basisT , Long  ] = ???
+  final lazy val db      : Next[db     , TxCount_db    , String] = ???
+  final lazy val basisT  : Next[basisT , TxCount_basisT, Long  ] = ???
 
-  final lazy val db$     : Next[db$    , Option[String]] = ???
-  final lazy val basisT$ : Next[basisT$, Option[Long]  ] = ???
+  final lazy val db$     : Next[db$    , TxCount_db$    , Option[String]] = ???
+  final lazy val basisT$ : Next[basisT$, TxCount_basisT$, Option[Long]  ] = ???
 
-  final lazy val db_     : Stay[db     , String] = ???
-  final lazy val basisT_ : Stay[basisT , Long  ] = ???
+  final lazy val db_     : Stay[db     , TxCount_db    , String] = ???
+  final lazy val basisT_ : Stay[basisT , TxCount_basisT, Long  ] = ???
 
-  final def Self : TxCount_1[A] with SelfJoin = ???
+  final def Self : TxCount_1[Obj, A] with SelfJoin = ???
 }

@@ -23,7 +23,7 @@ import scala.util.control.Breaks.break
   * Call a inspect method on a molecule to see the internal transformations and
   * produced transaction statements or sample data.
   * */
-trait ShowInspect[Tpl] { self: Molecule[Tpl] =>
+trait ShowInspect[Obj, Tpl] { self: Molecule[Obj, Tpl] =>
 
 
   /** Inspect call to `get` on a molecule (without affecting the db).

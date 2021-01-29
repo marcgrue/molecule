@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
   * <br><br>
   * The fastest way of getting a large typed data set. Can then be traversed with a fast `while` loop.
   * */
-trait GetArray[Tpl] { self: Molecule[Tpl] =>
+trait GetArray[Obj, Tpl] { self: Molecule[Obj, Tpl] =>
 
 
   // get ================================================================================================
@@ -36,13 +36,13 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArray(implicit* getAsyncArray]] method.
     */
-  def getArray(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] = {
+  def getArray(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] = {
     val jColl = conn.query(_model, _query)
     val it = jColl.iterator
     val a = new Array[Tpl](jColl.size)
     var i = 0
     while (it.hasNext) {
-      a(i) = row2tuple(it.next)
+      a(i) = row2tpl(it.next)
       i += 1
     }
     a
@@ -68,8 +68,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArray(n:Int)* getAsyncArray]] method.
     */
-  def getArray(n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] = if (n == -1) {
-    getArray(conn, tplType)
+  def getArray(n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] = if (n == -1) {
+    getArray(conn, objType, tplType)
   } else {
     val jColl = conn.query(_model, _query)
     val size = jColl.size
@@ -81,7 +81,7 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
       val a = new Array[Tpl](max)
       var i = 0
       while (it.hasNext && i < max) {
-        a(i) = row2tuple(it.next)
+        a(i) = row2tpl(it.next)
         i += 1
       }
       a
@@ -146,8 +146,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(t:Long)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxLong(t))), tplType)
+  def getArrayAsOf(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule as of transaction time `t`.
@@ -198,8 +198,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(t:Long,n:Int)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(AsOf(TxLong(t))), tplType)
+  def getArrayAsOf(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
 
 
   /** Get `Array` of all rows as tuples matching molecule as of tx.
@@ -253,8 +253,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArrayAsOf]] method.
     **/
-  def getArrayAsOf(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxLong(tx.t))), tplType)
+  def getArrayAsOf(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
   // Fully qualifying tx parameter (and other parameters below) for Scala Docs to be able to pick it up
   // when referencing the method from the asynchronous cousin methods.
 
@@ -303,8 +303,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
     **/
-  def getArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(AsOf(TxLong(tx.t))), tplType)
+  def getArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
 
 
   /** Get `Array` of all rows as tuples matching molecule as of date.
@@ -360,8 +360,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxDate(date))), tplType)
+  def getArrayAsOf(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule as of date.
@@ -407,8 +407,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date,n:Int)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(AsOf(TxDate(date))), tplType)
+  def getArrayAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
 
 
   // get since ================================================================================================
@@ -448,8 +448,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(t:Long)* getAsyncArraySince]] method.
     */
-  def getArraySince(t: Long)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxLong(t))), tplType)
+  def getArraySince(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
 
   /** Get `Array` of n rows as tuples matching molecule since transaction time `t`.
     * <br><br>
@@ -486,8 +486,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(t:Long,n:Int)* getAsyncArraySince]] method.
     */
-  def getArraySince(t: Long, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(Since(TxLong(t))), tplType)
+  def getArraySince(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
 
 
   /** Get `Array` of all rows as tuples matching molecule since tx.
@@ -527,8 +527,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArraySince]] method.
     */
-  def getArraySince(tx: TxReport)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxLong(tx.t))), tplType)
+  def getArraySince(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule since tx.
@@ -568,8 +568,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
     **/
-  def getArraySince(tx: TxReport, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(Since(TxLong(tx.t))), tplType)
+  def getArraySince(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
 
 
   /** Get `Array` of all rows as tuples matching molecule since date.
@@ -604,8 +604,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(date:java\.util\.Date)* getAsyncArraySince]] method.
     */
-  def getArraySince(date: java.util.Date)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxDate(date))), tplType)
+  def getArraySince(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule since date.
@@ -640,8 +640,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArraySince(date:java\.util\.Date,n:Int)* getAsyncArraySince]] method.
     */
-  def getArraySince(date: java.util.Date, n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(Since(TxDate(date))), tplType)
+  def getArraySince(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
 
 
   // get with ================================================================================================
@@ -680,8 +680,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayWith(txMolecules* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), tplType)
+  def getArrayWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule with applied molecule transaction data.
@@ -727,8 +727,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayWith(n:Int,txMolecules* getAsyncArrayWith]] method.
     */
-  def getArrayWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), tplType)
+  def getArrayWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), objType, tplType)
 
 
   /** Get `Array` of all rows as tuples matching molecule with applied raw transaction data.
@@ -756,8 +756,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_])* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txData: jList[_])(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), tplType)
+  def getArrayWith(txData: jList[_])(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), objType, tplType)
 
 
   /** Get `Array` of n rows as tuples matching molecule with applied raw transaction data.
@@ -791,8 +791,8 @@ trait GetArray[Tpl] { self: Molecule[Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[molecule.core.api.getAsync.GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_],n:Int)* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txData: jList[_], n: Int)(implicit conn: Conn, tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), tplType)
+  def getArrayWith(txData: jList[_], n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+    getArray(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), objType, tplType)
 
 
   // get history ================================================================================================

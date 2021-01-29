@@ -13,11 +13,14 @@ import com.cognitect.transit.impl.URIImpl
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpers[Tpl] extends CastHelpersAggr {
+trait CastHelpers[Obj, Tpl] extends CastHelpersAggr {
 
 
   // Standard row cast interface to be materialized by macro
-  protected def row2tuple(row: jList[AnyRef]): Tpl = ???
+  protected def row2obj(row: jList[AnyRef]): Obj = ???
+
+  // Standard row cast interface to be materialized by macro
+  protected def row2tpl(row: jList[AnyRef]): Tpl = ???
 
 
   // One ===========================================================================================

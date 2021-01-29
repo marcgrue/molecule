@@ -1,27 +1,26 @@
-package molecule.core.generic.datom
-
-import java.util.Date
-import scala.language.higherKinds
-
-
-/** Generic attribute interface to add second generic attribute */
-trait Datom_1[Ns1[_], Ns2[_,_], In1[_,_], In2[_,_,_], A] extends Datom {
-  type Next_[Attr[_, _], Type] = Attr[Ns2[A, Type], In2[_,_,_]] with Ns2[A, Type]
-  type Stay_[Attr[_, _], Type] = Attr[Ns1[A], In1[_,_]] with Ns1[A]
-
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Any    ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
-
-  final lazy val e_         : Stay_[e         , Long   ] = ???
-  final lazy val a_         : Stay_[a         , String ] = ???
-  final lazy val v_         : Stay_[v         , Any    ] = ???
-  final lazy val t_         : Stay_[t         , Long   ] = ???
-  final lazy val tx_        : Stay_[tx        , Long   ] = ???
-  final lazy val txInstant_ : Stay_[txInstant , Date   ] = ???
-  final lazy val op_        : Stay_[op        , Boolean] = ???
-}
+//package molecule.core.generic.datom
+//
+//import java.util.Date
+//import molecule.core.boilerplate.attributes._
+//import scala.language.higherKinds
+//
+//
+///** Generic attribute interface to add second generic attribute */
+//trait Datom_1[o0[_], p0, Ns1[_,_,_], Ns2[_,_,_,_], In1[_,_,_,_], In2[_,_,_,_,_], A] extends Datom {
+//
+//  final lazy val e          : OneLong   [Ns2[o0, p0 with Datom_e        , A, Long   ], In2] with Ns2[o0, p0 with Datom_e        , A, Long   ] with Indexed = ???
+//  final lazy val a          : OneString [Ns2[o0, p0 with Datom_a        , A, String ], In2] with Ns2[o0, p0 with Datom_a        , A, String ] with Indexed = ???
+//  final lazy val v          : OneAny    [Ns2[o0, p0 with Datom_v        , A, Any    ], In2] with Ns2[o0, p0 with Datom_v        , A, Any    ] with Indexed = ???
+//  final lazy val t          : OneLong   [Ns2[o0, p0 with Datom_t        , A, Long   ], In2] with Ns2[o0, p0 with Datom_t        , A, Long   ] with Indexed = ???
+//  final lazy val tx         : OneLong   [Ns2[o0, p0 with Datom_tx       , A, Long   ], In2] with Ns2[o0, p0 with Datom_tx       , A, Long   ] with Indexed = ???
+//  final lazy val txInstant  : OneDate   [Ns2[o0, p0 with Datom_txInstant, A, Date   ], In2] with Ns2[o0, p0 with Datom_txInstant, A, Date   ] with Indexed = ???
+//  final lazy val op         : OneBoolean[Ns2[o0, p0 with Datom_op       , A, Boolean], In2] with Ns2[o0, p0 with Datom_op       , A, Boolean] with Indexed = ???
+//
+//  final lazy val e_         : OneLong   [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val a_         : OneString [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val v_         : OneAny    [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val t_         : OneLong   [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val tx_        : OneLong   [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val txInstant_ : OneDate   [Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//  final lazy val op_        : OneBoolean[Ns1[o0, p0, A], In1] with Ns1[o0, p0, A] with Indexed = ???
+//}

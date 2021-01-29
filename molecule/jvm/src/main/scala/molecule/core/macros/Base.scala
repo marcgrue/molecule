@@ -208,7 +208,7 @@ private[molecule] trait Base extends Dsl2Model {
           nested_1(row.get(${levelCasts.head.length}))
         )
 
-        final override def row2tuple(row: jList[AnyRef]): (..$OutTypes) =
+        final override def row2tpl(row: jList[AnyRef]): (..$OutTypes) =
           nested_0(row).asInstanceOf[(..$OutTypes)]
        """
     //    println(tree)

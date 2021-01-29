@@ -100,93 +100,101 @@ trait VAET extends GenericNs {
 
   /** Transaction operation: assertion (true) or retraction (false) */
   final class op       [Ns, In] extends OneBoolean[Ns, In] with Indexed
+
+
+  trait VAET_e         { val e        : Long    }
+  trait VAET_a         { val a        : String  }
+  trait VAET_v         { val v        : Any     }
+  trait VAET_t         { val t        : Long    }
+  trait VAET_tx        { val tx       : Long    }
+  trait VAET_txInstant { val txInstant: Date    }
+  trait VAET_op        { val op       : Boolean }
 }
 
 /** VAET interface to add a first generic attribute to molecule. */
 trait VAET_0 extends VAET with OutIndex_0 {
-  type Next_[Attr[_, _], Type] = Attr[VAET_1[Type], P2[_,_]] with VAET_1[Type]
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_1[Prop, Tpe], D02[_,_,_]] with VAET_1[Prop, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
 /** VAET interface to add a second generic attribute to molecule. */
-trait VAET_1[A] extends VAET with OutIndex_1[A] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_2[A, Type], P3[_,_,_]] with VAET_2[A, Type]
+trait VAET_1[Obj, A] extends VAET with OutIndex_1[Obj, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_2[Obj, A, Tpe], D03[_,_,_,_]] with VAET_2[Obj with Prop, A, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_2[A, B] extends VAET with OutIndex_2[A, B] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_3[A, B, Type], P4[_,_,_,_]] with VAET_3[A, B, Type]
+trait VAET_2[Obj, A, B] extends VAET with OutIndex_2[Obj, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with VAET_3[Obj with Prop, A, B, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_3[A, B, C] extends VAET with OutIndex_3[A, B, C] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_4[A, B, C, Type], P5[_,_,_,_,_]] with VAET_4[A, B, C, Type]
+trait VAET_3[Obj, A, B, C] extends VAET with OutIndex_3[Obj, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with VAET_4[Obj with Prop, A, B, C, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_4[A, B, C, D] extends VAET with OutIndex_4[A, B, C, D] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_5[A, B, C, D, Type], P6[_,_,_,_,_,_]] with VAET_5[A, B, C, D, Type]
+trait VAET_4[Obj, A, B, C, D] extends VAET with OutIndex_4[Obj, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with VAET_5[Obj with Prop, A, B, C, D, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_5[A, B, C, D, E] extends VAET with OutIndex_5[A, B, C, D, E] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_6[A, B, C, D, E, Type], P7[_,_,_,_,_,_,_]] with VAET_6[A, B, C, D, E, Type]
+trait VAET_5[Obj, A, B, C, D, E] extends VAET with OutIndex_5[Obj, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with VAET_6[Obj with Prop, A, B, C, D, E, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_6[A, B, C, D, E, F] extends VAET with OutIndex_6[A, B, C, D, E, F] {
-  type Next_[Attr[_, _], Type] = Attr[VAET_7[A, B, C, D, E, F, Type], P8[_,_,_,_,_,_,_,_]] with VAET_7[A, B, C, D, E, F, Type]
+trait VAET_6[Obj, A, B, C, D, E, F] extends VAET with OutIndex_6[Obj, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with VAET_7[Obj with Prop, A, B, C, D, E, F, Tpe]
 
-  final lazy val e          : Next_[e         , Long   ] = ???
-  final lazy val a          : Next_[a         , String ] = ???
-  final lazy val v          : Next_[v         , Long   ] = ???
-  final lazy val t          : Next_[t         , Long   ] = ???
-  final lazy val tx         : Next_[tx        , Long   ] = ???
-  final lazy val txInstant  : Next_[txInstant , Date   ] = ???
-  final lazy val op         : Next_[op        , Boolean] = ???
+  final lazy val e          : Next[e         , VAET_e        , Long   ] = ???
+  final lazy val a          : Next[a         , VAET_a        , String ] = ???
+  final lazy val v          : Next[v         , VAET_v        , Any    ] = ???
+  final lazy val t          : Next[t         , VAET_t        , Long   ] = ???
+  final lazy val tx         : Next[tx        , VAET_tx       , Long   ] = ???
+  final lazy val txInstant  : Next[txInstant , VAET_txInstant, Date   ] = ???
+  final lazy val op         : Next[op        , VAET_op       , Boolean] = ???
 }
 
-trait VAET_7[A, B, C, D, E, F, G] extends VAET with OutIndex_7[A, B, C, D, E, F, G]
-
+trait VAET_7[Obj, A, B, C, D, E, F, G] extends VAET with OutIndex_7[Obj, A, B, C, D, E, F, G]
