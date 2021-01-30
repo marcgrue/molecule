@@ -1,14 +1,16 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS17
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends Schema with OutSchema_17[Obj, Schema_17, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Tpe], D19[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_18[Obj with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q], D18[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
+trait Schema_17[obj[_], props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends Schema with NS17[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_18[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Tpe], _] with Schema_18[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_17[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q     ], _] with Schema_17[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -54,5 +56,7 @@ trait Schema_17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends 
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_17[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Int] = ???
 }
          

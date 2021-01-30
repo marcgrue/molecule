@@ -1,14 +1,16 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS10
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_10[Obj, A, B, C, D, E, F, G, H, I, J] extends Schema with OutSchema_10[Obj, Schema_10, A, B, C, D, E, F, G, H, I, J] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_11[Obj, A, B, C, D, E, F, G, H, I, J, Tpe], D12[_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_11[Obj with Prop, A, B, C, D, E, F, G, H, I, J, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_10[Obj, A, B, C, D, E, F, G, H, I, J], D11[_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_10[Obj, A, B, C, D, E, F, G, H, I, J]
+trait Schema_10[obj[_], props, A, B, C, D, E, F, G, H, I, J] extends Schema with NS10[obj, props, A, B, C, D, E, F, G, H, I, J] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_11[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, Tpe], _] with Schema_11[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_10[obj, props          , A, B, C, D, E, F, G, H, I, J     ], _] with Schema_10[obj, props          , A, B, C, D, E, F, G, H, I, J]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -54,5 +56,7 @@ trait Schema_10[Obj, A, B, C, D, E, F, G, H, I, J] extends Schema with OutSchema
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_10[obj, props, A, B, C, D, E, F, G, H, I, Int] = ???
 }
          

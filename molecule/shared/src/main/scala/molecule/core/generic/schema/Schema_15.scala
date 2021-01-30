@@ -1,14 +1,16 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS15
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_15[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends Schema with OutSchema_15[Obj, Schema_15, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_16[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Tpe], D17[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_16[Obj with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_15[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O], D16[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_15[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O]
+trait Schema_15[obj[_], props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends Schema with NS15[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_16[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Tpe], _] with Schema_16[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_15[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O     ], _] with Schema_15[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -54,5 +56,7 @@ trait Schema_15[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends Schema
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_15[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, Int] = ???
 }
          

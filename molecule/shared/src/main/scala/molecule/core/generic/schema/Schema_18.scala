@@ -1,14 +1,16 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS18
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends Schema with OutSchema_18[Obj, Schema_18, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_19[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Tpe], D20[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_19[Obj with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R], D19[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Schema_18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
+trait Schema_18[obj[_], props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends Schema with NS18[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_19[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Tpe], _] with Schema_19[obj, props with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_18[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R     ], _] with Schema_18[obj, props          , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -54,5 +56,7 @@ trait Schema_18[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] exten
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_18[obj, props, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Int] = ???
 }
          

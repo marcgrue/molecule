@@ -13,24 +13,28 @@ import scala.language.higherKinds
 trait GenericAEVT {
 
   /** AEVT Index object to start AEVT Index molecule. */
-  object AEVT extends AEVT_0 with FirstNS {
+  object AEVT extends AEVT_0[AEVT_, Nothing] with FirstNS {
 
     /** Unfiltered AEVT Index fetching ALL datoms (!) */
-    final def apply                                     : AEVT_0 = ???
+    final def apply                                     : AEVT_0[AEVT_, Nothing] = ???
 
     /** Instantiate AEVT Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
-    final def apply(a: String)                          : AEVT_0 = ???
+    final def apply(a: String)                          : AEVT_0[AEVT_, Nothing] = ???
 
     /** Instantiate AEVT Index filtered by attribute name and entity id. */
-    final def apply(a: String, e: Long)                 : AEVT_0 = ???
+    final def apply(a: String, e: Long)                 : AEVT_0[AEVT_, Nothing] = ???
 
     /** Instantiate AEVT Index filtered by attribute name, entity id and value. */
-    final def apply(a: String, e: Long, v: Any)         : AEVT_0 = ???
+    final def apply(a: String, e: Long, v: Any)         : AEVT_0[AEVT_, Nothing] = ???
 
     /** Instantiate AEVT Index filtered by attribute name, entity id, value and
       * transaction entity id (`tx`) or point in time (`t`).*/
-    final def apply(a: String, e: Long, v: Any, t: Long): AEVT_0 = ???
+    final def apply(a: String, e: Long, v: Any, t: Long): AEVT_0[AEVT_, Nothing] = ???
   }
+}
+
+trait AEVT_[props] {
+  def AEVT: props = ???
 }
 
 /** AEVT Index.
@@ -103,8 +107,8 @@ trait AEVT extends GenericNs {
 }
 
 /** AEVT interface to add a first generic attribute to molecule. */
-trait AEVT_0 extends AEVT with OutIndex_0 {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_1[Prop, Tpe], D02[_,_,_]] with AEVT_1[Prop, Tpe]
+trait AEVT_0[obj[_], props] extends AEVT with OutIndex_0[obj, props] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_1[obj, Prop, Tpe], _] with AEVT_1[obj, Prop, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -116,8 +120,8 @@ trait AEVT_0 extends AEVT with OutIndex_0 {
 }
 
 /** AEVT interface to add a second generic attribute to molecule. */
-trait AEVT_1[Obj, A] extends AEVT with OutIndex_1[Obj, A] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_2[Obj, A, Tpe], D03[_,_,_,_]] with AEVT_2[Obj with Prop, A, Tpe]
+trait AEVT_1[obj[_], props, A] extends AEVT with OutIndex_1[obj, props, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_2[obj, props, A, Tpe], _] with AEVT_2[obj, props with Prop, A, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -128,8 +132,8 @@ trait AEVT_1[Obj, A] extends AEVT with OutIndex_1[Obj, A] {
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_2[Obj, A, B] extends AEVT with OutIndex_2[Obj, A, B] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with AEVT_3[Obj with Prop, A, B, Tpe]
+trait AEVT_2[obj[_], props, A, B] extends AEVT with OutIndex_2[obj, props, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_3[obj, props, A, B, Tpe], _] with AEVT_3[obj, props with Prop, A, B, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -140,8 +144,8 @@ trait AEVT_2[Obj, A, B] extends AEVT with OutIndex_2[Obj, A, B] {
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_3[Obj, A, B, C] extends AEVT with OutIndex_3[Obj, A, B, C] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with AEVT_4[Obj with Prop, A, B, C, Tpe]
+trait AEVT_3[obj[_], props, A, B, C] extends AEVT with OutIndex_3[obj, props, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_4[obj, props, A, B, C, Tpe], _] with AEVT_4[obj, props with Prop, A, B, C, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -152,8 +156,8 @@ trait AEVT_3[Obj, A, B, C] extends AEVT with OutIndex_3[Obj, A, B, C] {
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_4[Obj, A, B, C, D] extends AEVT with OutIndex_4[Obj, A, B, C, D] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with AEVT_5[Obj with Prop, A, B, C, D, Tpe]
+trait AEVT_4[obj[_], props, A, B, C, D] extends AEVT with OutIndex_4[obj, props, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_5[obj, props, A, B, C, D, Tpe], _] with AEVT_5[obj, props with Prop, A, B, C, D, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -164,8 +168,8 @@ trait AEVT_4[Obj, A, B, C, D] extends AEVT with OutIndex_4[Obj, A, B, C, D] {
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_5[Obj, A, B, C, D, E] extends AEVT with OutIndex_5[Obj, A, B, C, D, E] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with AEVT_6[Obj with Prop, A, B, C, D, E, Tpe]
+trait AEVT_5[obj[_], props, A, B, C, D, E] extends AEVT with OutIndex_5[obj, props, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_6[obj, props, A, B, C, D, E, Tpe], _] with AEVT_6[obj, props with Prop, A, B, C, D, E, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -176,8 +180,8 @@ trait AEVT_5[Obj, A, B, C, D, E] extends AEVT with OutIndex_5[Obj, A, B, C, D, E
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_6[Obj, A, B, C, D, E, F] extends AEVT with OutIndex_6[Obj, A, B, C, D, E, F] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with AEVT_7[Obj with Prop, A, B, C, D, E, F, Tpe]
+trait AEVT_6[obj[_], props, A, B, C, D, E, F] extends AEVT with OutIndex_6[obj, props, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_7[obj, props, A, B, C, D, E, F, Tpe], _] with AEVT_7[obj, props with Prop, A, B, C, D, E, F, Tpe]
 
   final lazy val e          : Next[e         , AEVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , AEVT_a        , String ] = ???
@@ -188,5 +192,5 @@ trait AEVT_6[Obj, A, B, C, D, E, F] extends AEVT with OutIndex_6[Obj, A, B, C, D
   final lazy val op         : Next[op        , AEVT_op       , Boolean] = ???
 }
 
-trait AEVT_7[Obj, A, B, C, D, E, F, G] extends AEVT with OutIndex_7[Obj, A, B, C, D, E, F, G]
+trait AEVT_7[obj[_], props, A, B, C, D, E, F, G] extends AEVT with OutIndex_7[obj, props, A, B, C, D, E, F, G]
 

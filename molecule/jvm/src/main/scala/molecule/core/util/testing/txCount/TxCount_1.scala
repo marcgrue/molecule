@@ -9,8 +9,8 @@ import molecule.core.expression.AttrExpressions.?
 
 
 trait TxCount_1[Obj, A] extends TxCount {
-  private type Next[Attr[_, _], Prop, Tpe] = Attr[TxCount_2[Obj, A, Tpe], D03[_,_,_,_]] with TxCount_2[Obj with Prop, A, Tpe]
-  private type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_1[Obj, A], D02[_,_,_]] with TxCount_1[Obj, A]
+  private type Next[Attr[_, _], Prop, Tpe] = Attr[TxCount_2[Obj, A, Tpe], _] with TxCount_2[Obj with Prop, A, Tpe]
+  private type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_1[Obj, A]     , _] with TxCount_1[Obj, A]
 
   final lazy val db      : Next[db     , TxCount_db    , String] = ???
   final lazy val basisT  : Next[basisT , TxCount_basisT, Long  ] = ???

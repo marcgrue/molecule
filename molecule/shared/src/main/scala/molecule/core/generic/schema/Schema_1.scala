@@ -1,15 +1,17 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS01
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
 /** Schema interface to add second Schema attribute */
-trait Schema_1[Obj, A] extends Schema with OutSchema_1[Obj, Schema_1, A] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_2[Obj, A, Tpe], D03[_,_,_,_]] with Schema_2[Obj with Prop, A, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_1[Obj, A], D02[_,_,_]] with Schema_1[Obj, A]
+trait Schema_1[obj[_], props, A] extends Schema with NS01[obj, props, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_2[obj, props with Prop, A, Tpe], _] with Schema_2[obj, props with Prop, A, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_1[obj, props          , A     ], _] with Schema_1[obj, props          , A]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -55,5 +57,7 @@ trait Schema_1[Obj, A] extends Schema with OutSchema_1[Obj, Schema_1, A] {
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_1[obj, props, Int] = ???
 }
          

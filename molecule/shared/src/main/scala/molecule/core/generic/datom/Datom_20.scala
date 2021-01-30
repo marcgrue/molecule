@@ -1,26 +1,24 @@
-//package molecule.core.generic.datom
-//
-//import java.util.Date
-//import scala.language.higherKinds
-//
-//
-//trait Datom_20[Obj, Ns20[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns21[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In20[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In21[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends Datom {
-//  type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns21[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Tpe], In21[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[Obj with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Tpe]
-//  type Stay_[Attr[_, _]           ] = Attr[Ns20[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
-//
-//  final lazy val e          : Next_[e        , Datom_e        , Long   ] = ???
-//  final lazy val a          : Next_[a        , Datom_a        , String ] = ???
-//  final lazy val v          : Next_[v        , Datom_v        , Any    ] = ???
-//  final lazy val t          : Next_[t        , Datom_t        , Long   ] = ???
-//  final lazy val tx         : Next_[tx       , Datom_tx       , Long   ] = ???
-//  final lazy val txInstant  : Next_[txInstant, Datom_txInstant, Date   ] = ???
-//  final lazy val op         : Next_[op       , Datom_op       , Boolean] = ???
-//
-//  final lazy val e_         : Stay_[e        ] = ???
-//  final lazy val a_         : Stay_[a        ] = ???
-//  final lazy val v_         : Stay_[v        ] = ???
-//  final lazy val t_         : Stay_[t        ] = ???
-//  final lazy val tx_        : Stay_[tx       ] = ???
-//  final lazy val txInstant_ : Stay_[txInstant] = ???
-//  final lazy val op_        : Stay_[op       ] = ???
-//}
+package molecule.core.generic.datom
+
+import java.util.Date
+import molecule.core.boilerplate.attributes.{Indexed, OneAny, OneBoolean, OneDate, OneLong, OneString}
+import scala.language.higherKinds
+
+trait Datom_20[o0[_], p0, Ns20[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns21[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In20[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In21[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends Datom {
+
+  final lazy val e          : OneLong   [Ns21[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ] with Indexed = ???
+  final lazy val a          : OneString [Ns21[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, String ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, String ] with Indexed = ???
+  final lazy val v          : OneAny    [Ns21[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Any    ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Any    ] with Indexed = ???
+  final lazy val t          : OneLong   [Ns21[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ] with Indexed = ???
+  final lazy val tx         : OneLong   [Ns21[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Long   ] with Indexed = ???
+  final lazy val txInstant  : OneDate   [Ns21[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Date   ], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Date   ] with Indexed = ???
+  final lazy val op         : OneBoolean[Ns21[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Boolean], In21[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns21[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Boolean] with Indexed = ???
+
+  final lazy val e_         : OneLong   [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val a_         : OneString [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val v_         : OneAny    [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val t_         : OneLong   [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val tx_        : OneLong   [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val txInstant_ : OneDate   [Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+  final lazy val op_        : OneBoolean[Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T], In20[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns20[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] with Indexed = ???
+}

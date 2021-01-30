@@ -1,26 +1,24 @@
-//package molecule.core.generic.datom
-//
-//import java.util.Date
-//import scala.language.higherKinds
-//
-//
-//trait Datom_16[Obj, Ns16[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns17[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In16[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In17[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends Datom {
-//  type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns17[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Tpe], In17[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[Obj with Prop, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Tpe]
-//  type Stay_[Attr[_, _]           ] = Attr[Ns16[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[Obj, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
-//
-//  final lazy val e          : Next_[e        , Datom_e        , Long   ] = ???
-//  final lazy val a          : Next_[a        , Datom_a        , String ] = ???
-//  final lazy val v          : Next_[v        , Datom_v        , Any    ] = ???
-//  final lazy val t          : Next_[t        , Datom_t        , Long   ] = ???
-//  final lazy val tx         : Next_[tx       , Datom_tx       , Long   ] = ???
-//  final lazy val txInstant  : Next_[txInstant, Datom_txInstant, Date   ] = ???
-//  final lazy val op         : Next_[op       , Datom_op       , Boolean] = ???
-//
-//  final lazy val e_         : Stay_[e        ] = ???
-//  final lazy val a_         : Stay_[a        ] = ???
-//  final lazy val v_         : Stay_[v        ] = ???
-//  final lazy val t_         : Stay_[t        ] = ???
-//  final lazy val tx_        : Stay_[tx       ] = ???
-//  final lazy val txInstant_ : Stay_[txInstant] = ???
-//  final lazy val op_        : Stay_[op       ] = ???
-//}
+package molecule.core.generic.datom
+
+import java.util.Date
+import molecule.core.boilerplate.attributes.{Indexed, OneAny, OneBoolean, OneDate, OneLong, OneString}
+import scala.language.higherKinds
+
+trait Datom_16[o0[_], p0, Ns16[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns17[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In16[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], In17[o[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends Datom {
+
+  final lazy val e          : OneLong   [Ns17[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ] with Indexed = ???
+  final lazy val a          : OneString [Ns17[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, String ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, String ] with Indexed = ???
+  final lazy val v          : OneAny    [Ns17[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Any    ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Any    ] with Indexed = ???
+  final lazy val t          : OneLong   [Ns17[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ] with Indexed = ???
+  final lazy val tx         : OneLong   [Ns17[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Long   ] with Indexed = ???
+  final lazy val txInstant  : OneDate   [Ns17[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Date   ], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Date   ] with Indexed = ???
+  final lazy val op         : OneBoolean[Ns17[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Boolean], In17[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns17[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Boolean] with Indexed = ???
+
+  final lazy val e_         : OneLong   [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val a_         : OneString [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val v_         : OneAny    [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val t_         : OneLong   [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val tx_        : OneLong   [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val txInstant_ : OneDate   [Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+  final lazy val op_        : OneBoolean[Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], In16[o0,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns16[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] with Indexed = ???
+}

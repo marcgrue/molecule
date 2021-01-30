@@ -11,8 +11,10 @@ import scala.language.higherKinds
 trait GenericSchema {
 
   /** Schema object to start Schema molecule. */
-  object Schema extends Schema_0 with FirstNS
+  object Schema extends Schema_0[Schema_, Nothing] with FirstNS
 }
+
+trait Schema_[props]     { def Schema     : props   }
 
 /** Base Schema trait with attribute types shared by all arity interfaces. */
 trait Schema extends GenericNs {
@@ -108,6 +110,7 @@ trait Schema extends GenericNs {
 
   /** Optional attribute noHistory status (true/not set). */
   final class noHistory$   [Ns, In] extends OneBoolean$[Ns] with Indexed
+
 
 
   trait Schema_id          { val id         : Long    }

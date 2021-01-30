@@ -1,26 +1,24 @@
-//package molecule.core.generic.datom
-//
-//import java.util.Date
-//import scala.language.higherKinds
-//
-//
-//trait Datom_9[Obj, Ns9[_,_,_,_,_,_,_,_,_,_,_], Ns10[_,_,_,_,_,_,_,_,_,_,_,_], In9[_,_,_,_,_,_,_,_,_,_,_,_], In10[_,_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I] extends Datom {
-//  type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns10[Obj, A, B, C, D, E, F, G, H, I, Tpe], In10[_,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[Obj with Prop, A, B, C, D, E, F, G, H, I, Tpe]
-//  type Stay_[Attr[_, _]           ] = Attr[Ns9[Obj, A, B, C, D, E, F, G, H, I], In9[_,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[Obj, A, B, C, D, E, F, G, H, I]
-//
-//  final lazy val e          : Next_[e        , Datom_e        , Long   ] = ???
-//  final lazy val a          : Next_[a        , Datom_a        , String ] = ???
-//  final lazy val v          : Next_[v        , Datom_v        , Any    ] = ???
-//  final lazy val t          : Next_[t        , Datom_t        , Long   ] = ???
-//  final lazy val tx         : Next_[tx       , Datom_tx       , Long   ] = ???
-//  final lazy val txInstant  : Next_[txInstant, Datom_txInstant, Date   ] = ???
-//  final lazy val op         : Next_[op       , Datom_op       , Boolean] = ???
-//
-//  final lazy val e_         : Stay_[e        ] = ???
-//  final lazy val a_         : Stay_[a        ] = ???
-//  final lazy val v_         : Stay_[v        ] = ???
-//  final lazy val t_         : Stay_[t        ] = ???
-//  final lazy val tx_        : Stay_[tx       ] = ???
-//  final lazy val txInstant_ : Stay_[txInstant] = ???
-//  final lazy val op_        : Stay_[op       ] = ???
-//}
+package molecule.core.generic.datom
+
+import java.util.Date
+import molecule.core.boilerplate.attributes.{Indexed, OneAny, OneBoolean, OneDate, OneLong, OneString}
+import scala.language.higherKinds
+
+trait Datom_9[o0[_], p0, Ns9[o[_],_,_,_,_,_,_,_,_,_,_], Ns10[o[_],_,_,_,_,_,_,_,_,_,_,_], In9[o[_],_,_,_,_,_,_,_,_,_,_,_], In10[o[_],_,_,_,_,_,_,_,_,_,_,_,_], A, B, C, D, E, F, G, H, I] extends Datom {
+
+  final lazy val e          : OneLong   [Ns10[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, Long   ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_e        , A, B, C, D, E, F, G, H, I, Long   ] with Indexed = ???
+  final lazy val a          : OneString [Ns10[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, String ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_a        , A, B, C, D, E, F, G, H, I, String ] with Indexed = ???
+  final lazy val v          : OneAny    [Ns10[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, Any    ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_v        , A, B, C, D, E, F, G, H, I, Any    ] with Indexed = ???
+  final lazy val t          : OneLong   [Ns10[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, Long   ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_t        , A, B, C, D, E, F, G, H, I, Long   ] with Indexed = ???
+  final lazy val tx         : OneLong   [Ns10[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, Long   ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_tx       , A, B, C, D, E, F, G, H, I, Long   ] with Indexed = ???
+  final lazy val txInstant  : OneDate   [Ns10[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, Date   ], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_txInstant, A, B, C, D, E, F, G, H, I, Date   ] with Indexed = ???
+  final lazy val op         : OneBoolean[Ns10[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, Boolean], In10[o0,_,_,_,_,_,_,_,_,_,_,_,_]] with Ns10[o0, p0 with Datom_op       , A, B, C, D, E, F, G, H, I, Boolean] with Indexed = ???
+
+  final lazy val e_         : OneLong   [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val a_         : OneString [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val v_         : OneAny    [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val t_         : OneLong   [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val tx_        : OneLong   [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val txInstant_ : OneDate   [Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+  final lazy val op_        : OneBoolean[Ns9[o0, p0, A, B, C, D, E, F, G, H, I], In9[o0,_,_,_,_,_,_,_,_,_,_,_]] with Ns9[o0, p0, A, B, C, D, E, F, G, H, I] with Indexed = ???
+}

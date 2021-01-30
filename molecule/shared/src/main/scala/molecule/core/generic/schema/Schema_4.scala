@@ -1,14 +1,16 @@
 package molecule.core.generic.schema
 
 import java.util.Date
+import molecule.core.api.Keywords
+import molecule.core.boilerplate.base.NS04
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.outSchema._
 import scala.language.higherKinds
 
 
-trait Schema_4[Obj, A, B, C, D] extends Schema with OutSchema_4[Obj, Schema_4, A, B, C, D] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with Schema_5[Obj with Prop, A, B, C, D, Tpe]
-  type Stay[Attr[_, _]           ] = Attr[Schema_4[Obj, A, B, C, D], D05[_,_,_,_,_,_]] with Schema_4[Obj, A, B, C, D]
+trait Schema_4[obj[_], props, A, B, C, D] extends Schema with NS04[obj, props, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_5[obj, props with Prop, A, B, C, D, Tpe], _] with Schema_5[obj, props with Prop, A, B, C, D, Tpe]
+  type Stay[Attr[_, _]           ] = Attr[Schema_4[obj, props          , A, B, C, D     ], _] with Schema_4[obj, props          , A, B, C, D]
   
   final lazy val id           : Next[id          , Schema_id          , Long   ] = ???
   final lazy val a            : Next[a           , Schema_a           , String ] = ???
@@ -54,5 +56,7 @@ trait Schema_4[Obj, A, B, C, D] extends Schema with OutSchema_4[Obj, Schema_4, A
   final lazy val t_           : Stay[t          ] = ???
   final lazy val tx_          : Stay[tx         ] = ???
   final lazy val txInstant_   : Stay[txInstant  ] = ???
+
+  def apply(v: Keywords.count): Schema_4[obj, props, A, B, C, Int] = ???
 }
          

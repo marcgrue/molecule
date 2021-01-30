@@ -7,30 +7,30 @@ import scala.language.higherKinds
 /** Type distribution to groups of functionality for 'output'/standard molecules. */
 object outIndex {
 
-  trait OutIndex_0
-    extends NS00[Nothing]
+  trait OutIndex_0[obj[_], props]
+    extends NS00[obj, props]
 
-  trait OutIndex_1[Obj, A]
-    extends NS01[Obj, A]
+  trait OutIndex_1[obj[_], props, A]
+    extends NS01[obj, props, A]
 
-  trait OutIndex_2[Obj, A, B]
-    extends NS02[Obj, A, B]
+  trait OutIndex_2[obj[_], props, A, B]
+    extends NS02[obj, props, A, B]
 
-  trait OutIndex_3[Obj, A, B, C]
-    extends NS03[Obj, A, B, C]
+  trait OutIndex_3[obj[_], props, A, B, C]
+    extends NS03[obj, props, A, B, C]
 
-  trait OutIndex_4[Obj, A, B, C, D]
-    extends NS04[Obj, A, B, C, D]
+  trait OutIndex_4[obj[_], props, A, B, C, D]
+    extends NS04[obj, props, A, B, C, D]
 
-  trait OutIndex_5[Obj, A, B, C, D, E]
-    extends NS05[Obj, A, B, C, D, E]
+  trait OutIndex_5[obj[_], props, A, B, C, D, E]
+    extends NS05[obj, props, A, B, C, D, E]
 
-  trait OutIndex_6[Obj, A, B, C, D, E, F]
-    extends NS06[Obj, A, B, C, D, E, F]
+  trait OutIndex_6[obj[_], props, A, B, C, D, E, F]
+    extends NS06[obj, props, A, B, C, D, E, F]
 
-  trait OutIndex_7[Obj, A, B, C, D, E, F, G]
-    extends NS07[Obj, A, B, C, D, E, F, G]
+  trait OutIndex_7[obj[_], props, A, B, C, D, E, F, G]
+    extends NS07[obj, props, A, B, C, D, E, F, G]
 
-  trait OutIndex_8[Obj, A, B, C, D, E, F, G, H]
-    extends NS08[Obj, A, B, C, D, E, F, G, H]
+  trait OutIndex_8[obj[_], props, A, B, C, D, E, F, G, H]
+    extends NS08[obj, props, A, B, C, D, E, F, G, H]
 }

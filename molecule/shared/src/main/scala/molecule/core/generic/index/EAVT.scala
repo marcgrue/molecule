@@ -13,25 +13,29 @@ import scala.language.higherKinds
 trait GenericEAVT {
 
   /** EAVT Index object to instantiate EAVT Index molecule. */
-  object EAVT extends EAVT_0 with FirstNS {
+  object EAVT extends EAVT_0[EAVT_, Nothing] with FirstNS {
 
     /** Unfiltered EAVT Index fetching ALL datoms (!) */
-    final def apply                                     : EAVT_0 = ???
+    final def apply                                     : EAVT_0[EAVT_, Nothing] = ???
 
     /** Instantiate EAVT Index filtered by entity id. */
-    final def apply(e: Long)                            : EAVT_0 = ???
+    final def apply(e: Long)                            : EAVT_0[EAVT_, Nothing] = ???
 
     /** Instantiate EAVT Index filtered by entity id and namespace-prefixed
       * attribute name (":part_Ns/attr"). */
-    final def apply(e: Long, a: String)                 : EAVT_0 = ???
+    final def apply(e: Long, a: String)                 : EAVT_0[EAVT_, Nothing] = ???
 
     /** Instantiate EAVT Index filtered by entity id, attribute name and value. */
-    final def apply(e: Long, a: String, v: Any)         : EAVT_0 = ???
+    final def apply(e: Long, a: String, v: Any)         : EAVT_0[EAVT_, Nothing] = ???
 
     /** Instantiate EAVT Index filtered by entity id, attribute name, value and
       * transaction entity id (`tx`) or point in time (`t`). */
-    final def apply(e: Long, a: String, v: Any, t: Long): EAVT_0 = ???
+    final def apply(e: Long, a: String, v: Any, t: Long): EAVT_0[EAVT_, Nothing] = ???
   }
+}
+
+trait EAVT_[props] {
+  def EAVT: props = ???
 }
 
 /** EAVT Index.
@@ -108,8 +112,8 @@ trait EAVT extends GenericNs {
 }
 
 /** EAVT interface to add a first generic attribute to molecule. */
-trait EAVT_0 extends EAVT with OutIndex_0 {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_1[Prop, Tpe], D02[_,_,_]] with EAVT_1[Prop, Tpe]
+trait EAVT_0[obj[_], props] extends EAVT with OutIndex_0[obj, props] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_1[obj, Prop, Tpe], _] with EAVT_1[obj, Prop, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -121,8 +125,8 @@ trait EAVT_0 extends EAVT with OutIndex_0 {
 }
 
 /** EAVT interface to add a second generic attribute to molecule. */
-trait EAVT_1[Obj, A] extends EAVT with OutIndex_1[Obj, A] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_2[Obj, A, Tpe], D03[_,_,_,_]] with EAVT_2[Obj with Prop, A, Tpe]
+trait EAVT_1[obj[_], props, A] extends EAVT with OutIndex_1[obj, props, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_2[obj, props, A, Tpe], _] with EAVT_2[obj, props with Prop, A, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -133,8 +137,8 @@ trait EAVT_1[Obj, A] extends EAVT with OutIndex_1[Obj, A] {
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_2[Obj, A, B] extends EAVT with OutIndex_2[Obj, A, B] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with EAVT_3[Obj with Prop, A, B, Tpe]
+trait EAVT_2[obj[_], props, A, B] extends EAVT with OutIndex_2[obj, props, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_3[obj, props, A, B, Tpe], _] with EAVT_3[obj, props with Prop, A, B, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -145,8 +149,8 @@ trait EAVT_2[Obj, A, B] extends EAVT with OutIndex_2[Obj, A, B] {
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_3[Obj, A, B, C] extends EAVT with OutIndex_3[Obj, A, B, C] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with EAVT_4[Obj with Prop, A, B, C, Tpe]
+trait EAVT_3[obj[_], props, A, B, C] extends EAVT with OutIndex_3[obj, props, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_4[obj, props, A, B, C, Tpe], _] with EAVT_4[obj, props with Prop, A, B, C, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -157,8 +161,8 @@ trait EAVT_3[Obj, A, B, C] extends EAVT with OutIndex_3[Obj, A, B, C] {
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_4[Obj, A, B, C, D] extends EAVT with OutIndex_4[Obj, A, B, C, D] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with EAVT_5[Obj with Prop, A, B, C, D, Tpe]
+trait EAVT_4[obj[_], props, A, B, C, D] extends EAVT with OutIndex_4[obj, props, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_5[obj, props, A, B, C, D, Tpe], _] with EAVT_5[obj, props with Prop, A, B, C, D, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -169,8 +173,8 @@ trait EAVT_4[Obj, A, B, C, D] extends EAVT with OutIndex_4[Obj, A, B, C, D] {
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_5[Obj, A, B, C, D, E] extends EAVT with OutIndex_5[Obj, A, B, C, D, E] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with EAVT_6[Obj with Prop, A, B, C, D, E, Tpe]
+trait EAVT_5[obj[_], props, A, B, C, D, E] extends EAVT with OutIndex_5[obj, props, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_6[obj, props, A, B, C, D, E, Tpe], _] with EAVT_6[obj, props with Prop, A, B, C, D, E, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -181,8 +185,8 @@ trait EAVT_5[Obj, A, B, C, D, E] extends EAVT with OutIndex_5[Obj, A, B, C, D, E
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_6[Obj, A, B, C, D, E, F] extends EAVT with OutIndex_6[Obj, A, B, C, D, E, F] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with EAVT_7[Obj with Prop, A, B, C, D, E, F, Tpe]
+trait EAVT_6[obj[_], props, A, B, C, D, E, F] extends EAVT with OutIndex_6[obj, props, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[EAVT_7[obj, props, A, B, C, D, E, F, Tpe], _] with EAVT_7[obj, props with Prop, A, B, C, D, E, F, Tpe]
 
   final lazy val e          : Next[e         , EAVT_e        , Long   ] = ???
   final lazy val a          : Next[a         , EAVT_a        , String ] = ???
@@ -193,4 +197,4 @@ trait EAVT_6[Obj, A, B, C, D, E, F] extends EAVT with OutIndex_6[Obj, A, B, C, D
   final lazy val op         : Next[op        , EAVT_op       , Boolean] = ???
 }
 
-trait EAVT_7[Obj, A, B, C, D, E, F, G] extends EAVT with OutIndex_7[Obj, A, B, C, D, E, F, G]
+trait EAVT_7[obj[_], props, A, B, C, D, E, F, G] extends EAVT with OutIndex_7[obj, props, A, B, C, D, E, F, G]

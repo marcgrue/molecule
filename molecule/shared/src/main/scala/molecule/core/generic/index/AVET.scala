@@ -13,23 +13,23 @@ import scala.language.higherKinds
 trait GenericAVET {
 
   /** AVET Index object to start AVET Index molecule. */
-  object AVET extends AVET_0 with FirstNS {
+  object AVET extends AVET_0[AVET_, Nothing] with FirstNS {
 
     /** Unfiltered AVET Index fetching ALL datoms (!) */
-    final def apply                                     : AVET_0 = ???
+    final def apply                                     : AVET_0[AVET_, Nothing] = ???
 
     /** Instantiate AVET Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
-    final def apply(a: String)                          : AVET_0 = ???
+    final def apply(a: String)                          : AVET_0[AVET_, Nothing] = ???
 
     /** Instantiate AVET Index filtered by attribute name and value. */
-    final def apply(a: String, v: Any)                  : AVET_0 = ???
+    final def apply(a: String, v: Any)                  : AVET_0[AVET_, Nothing] = ???
 
     /** Instantiate AVET Index filtered by attribute name, value and entity id. */
-    final def apply(a: String, v: Any, e: Long)         : AVET_0 = ???
+    final def apply(a: String, v: Any, e: Long)         : AVET_0[AVET_, Nothing] = ???
 
     /** Instantiate AVET Index filtered by attribute name, value, entity id and
       * transaction entity id (`tx`) or point in time (`t`).*/
-    final def apply(a: String, v: Any, e: Long, t: Long): AVET_0 = ???
+    final def apply(a: String, v: Any, e: Long, t: Long): AVET_0[AVET_, Nothing] = ???
 
 
     /** Range of values (using Datomic's Database.indexRange API)
@@ -40,8 +40,12 @@ trait GenericAVET {
       *  - To end if `until` is None
       *
       * */
-    final def range(a: String, from: Option[Any], until: Option[Any]): AVET_0 = ???
+    final def range(a: String, from: Option[Any], until: Option[Any]): AVET_0[AVET_, Nothing] = ???
   }
+}
+
+trait AVET_[props] {
+  def AVET: props = ???
 }
 
 /** AVET Index.
@@ -139,8 +143,8 @@ trait AVET extends GenericNs {
 }
 
 /** AVET interface to add a first generic attribute to molecule. */
-trait AVET_0 extends AVET with OutIndex_0 {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_1[Prop, Tpe], D02[_,_,_]] with AVET_1[Prop, Tpe]
+trait AVET_0[obj[_], props] extends AVET with OutIndex_0[obj, props] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_1[obj, Prop, Tpe], _] with AVET_1[obj, Prop, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -152,8 +156,8 @@ trait AVET_0 extends AVET with OutIndex_0 {
 }
 
 /** AVET interface to add a second generic attribute to molecule. */
-trait AVET_1[Obj, A] extends AVET with OutIndex_1[Obj, A] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_2[Obj, A, Tpe], D03[_,_,_,_]] with AVET_2[Obj with Prop, A, Tpe]
+trait AVET_1[obj[_], props, A] extends AVET with OutIndex_1[obj, props, A] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_2[obj, props, A, Tpe], _] with AVET_2[obj, props with Prop, A, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -164,8 +168,8 @@ trait AVET_1[Obj, A] extends AVET with OutIndex_1[Obj, A] {
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_2[Obj, A, B] extends AVET with OutIndex_2[Obj, A, B] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_3[Obj, A, B, Tpe], D04[_,_,_,_,_]] with AVET_3[Obj with Prop, A, B, Tpe]
+trait AVET_2[obj[_], props, A, B] extends AVET with OutIndex_2[obj, props, A, B] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_3[obj, props, A, B, Tpe], _] with AVET_3[obj, props with Prop, A, B, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -176,8 +180,8 @@ trait AVET_2[Obj, A, B] extends AVET with OutIndex_2[Obj, A, B] {
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_3[Obj, A, B, C] extends AVET with OutIndex_3[Obj, A, B, C] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_4[Obj, A, B, C, Tpe], D05[_,_,_,_,_,_]] with AVET_4[Obj with Prop, A, B, C, Tpe]
+trait AVET_3[obj[_], props, A, B, C] extends AVET with OutIndex_3[obj, props, A, B, C] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_4[obj, props, A, B, C, Tpe], _] with AVET_4[obj, props with Prop, A, B, C, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -188,8 +192,8 @@ trait AVET_3[Obj, A, B, C] extends AVET with OutIndex_3[Obj, A, B, C] {
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_4[Obj, A, B, C, D] extends AVET with OutIndex_4[Obj, A, B, C, D] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_5[Obj, A, B, C, D, Tpe], D06[_,_,_,_,_,_,_]] with AVET_5[Obj with Prop, A, B, C, D, Tpe]
+trait AVET_4[obj[_], props, A, B, C, D] extends AVET with OutIndex_4[obj, props, A, B, C, D] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_5[obj, props, A, B, C, D, Tpe], _] with AVET_5[obj, props with Prop, A, B, C, D, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -200,8 +204,8 @@ trait AVET_4[Obj, A, B, C, D] extends AVET with OutIndex_4[Obj, A, B, C, D] {
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_5[Obj, A, B, C, D, E] extends AVET with OutIndex_5[Obj, A, B, C, D, E] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_6[Obj, A, B, C, D, E, Tpe], D07[_,_,_,_,_,_,_,_]] with AVET_6[Obj with Prop, A, B, C, D, E, Tpe]
+trait AVET_5[obj[_], props, A, B, C, D, E] extends AVET with OutIndex_5[obj, props, A, B, C, D, E] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_6[obj, props, A, B, C, D, E, Tpe], _] with AVET_6[obj, props with Prop, A, B, C, D, E, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -212,8 +216,8 @@ trait AVET_5[Obj, A, B, C, D, E] extends AVET with OutIndex_5[Obj, A, B, C, D, E
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_6[Obj, A, B, C, D, E, F] extends AVET with OutIndex_6[Obj, A, B, C, D, E, F] {
-  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_7[Obj, A, B, C, D, E, F, Tpe], D08[_,_,_,_,_,_,_,_,_]] with AVET_7[Obj with Prop, A, B, C, D, E, F, Tpe]
+trait AVET_6[obj[_], props, A, B, C, D, E, F] extends AVET with OutIndex_6[obj, props, A, B, C, D, E, F] {
+  type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_7[obj, props, A, B, C, D, E, F, Tpe], _] with AVET_7[obj, props with Prop, A, B, C, D, E, F, Tpe]
 
   final lazy val e          : Next[e         , AVET_e        , Long   ] = ???
   final lazy val a          : Next[a         , AVET_a        , String ] = ???
@@ -224,4 +228,4 @@ trait AVET_6[Obj, A, B, C, D, E, F] extends AVET with OutIndex_6[Obj, A, B, C, D
   final lazy val op         : Next[op        , AVET_op       , Boolean] = ???
 }
 
-trait AVET_7[Obj, A, B, C, D, E, F, G] extends AVET with OutIndex_7[Obj, A, B, C, D, E, F, G]
+trait AVET_7[obj[_], props, A, B, C, D, E, F, G] extends AVET with OutIndex_7[obj, props, A, B, C, D, E, F, G]
