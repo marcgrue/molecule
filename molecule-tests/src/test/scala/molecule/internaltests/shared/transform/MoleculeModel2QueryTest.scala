@@ -1,8 +1,8 @@
 package molecule.internaltests.shared.transform
 
-import molecule.core.ast.elements._
-import molecule.core.ast.query._
-import molecule.core.transform.Model2Query
+import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.datomic.ast.query._
+import molecule.datomic.transform.Model2Query
 import molecule.TestSpec
 
 class Model2QueryTest extends TestSpec {

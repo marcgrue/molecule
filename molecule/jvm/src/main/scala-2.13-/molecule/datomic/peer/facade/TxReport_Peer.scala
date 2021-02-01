@@ -4,10 +4,10 @@ import java.util.{Date, List => jList, Map => jMap}
 import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
 import datomic.db.{Datum, DbId}
-import molecule.core.ast.transactionModel._
-import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.util.Inspect
+import molecule.datomic.base.ast.transactionModel._
 import molecule.datomic.base.facade.TxReport
+import molecule.datomic.base.facade.exception.DatomicFacadeException
+import molecule.datomic.base.util.Inspect
 import scala.collection.JavaConverters._
 
 /** Datomic TxReport facade for peer api.

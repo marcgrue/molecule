@@ -1,10 +1,10 @@
 package molecule.tests.core.bidirectionals.other
 
-import molecule.core.ops.exception.VerifyModelException
-import molecule.core.transform.exception.Model2TransactionException
 import molecule.tests.core.bidirectionals.dsl.bidirectional._
 import molecule.datomic.api.in1_out3._
 import molecule.TestSpec
+import molecule.datomic.base.transform.exception.Model2TransactionException
+import molecule.datomic.ops.exception.VerifyModelException
 
 
 class OneOther extends TestSpec {

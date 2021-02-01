@@ -1,11 +1,11 @@
 package molecule.tests.core.attr
 
-import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.SystemPeer
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out5._
 import molecule.TestSpec
+import molecule.datomic.ops.exception.VerifyModelException
+import molecule.datomic.util.SystemPeer
 
 class OptionalValues extends TestSpec {
 

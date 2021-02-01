@@ -1,9 +1,9 @@
 package molecule.tests.core.bidirectionals.self
 
-import molecule.core.ops.exception.VerifyModelException
 import molecule.tests.core.bidirectionals.dsl.bidirectional._
 import molecule.datomic.api.in1_out3._
 import molecule.TestSpec
+import molecule.datomic.ops.exception.VerifyModelException
 
 
 class ManySelf extends TestSpec {

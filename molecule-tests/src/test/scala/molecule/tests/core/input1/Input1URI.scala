@@ -1,8 +1,8 @@
 package molecule.tests.core.input1
 
 import java.net.URI
-import molecule.core.ast.query._
-import molecule.core.input.exception.InputMoleculeException
+import molecule.datomic.ast.query._
+import molecule.core._3_dsl2molecule.input.exception.InputMoleculeException
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.TestSpec

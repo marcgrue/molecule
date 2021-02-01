@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic.dataModel
 
-import molecule.core.data.model._
+import molecule.core._1_dataModel.data.model._
 
 @InOut(2, 4)
 object Graph2DataModel {

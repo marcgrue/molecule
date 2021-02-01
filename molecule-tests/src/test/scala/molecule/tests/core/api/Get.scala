@@ -4,7 +4,8 @@ import java.util.{Collection => jCollection, List => jList}
 import molecule.datomic.api.out1._
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.TestSpec
-import molecule.core.util.{SystemPeer, JavaUtil}
+import molecule.core.util.JavaUtil
+import molecule.datomic.util.SystemPeer
 
 
 class Get extends TestSpec with JavaUtil {

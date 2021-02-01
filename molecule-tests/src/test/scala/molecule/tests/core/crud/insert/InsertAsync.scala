@@ -1,10 +1,10 @@
 package molecule.tests.core.crud.insert
 
-import molecule.core.util.SystemPeer
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out2._
 import molecule.datomic.base.facade.TxReport
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

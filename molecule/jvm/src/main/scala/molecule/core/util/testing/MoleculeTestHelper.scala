@@ -1,9 +1,9 @@
 package molecule.core.util.testing
 
-import molecule.core.ast.query._
-import molecule.core.ast.transactionModel._
-import molecule.core.ops.QueryOps._
-import molecule.core.transform.Query2String
+import molecule.datomic.ast.query._
+import molecule.datomic.base.ast.transactionModel._
+import molecule.datomic.ops.QueryOps._
+import molecule.datomic.transform.Query2String
 import molecule.core.util.{MoleculeSpecException, RegexMatching}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}

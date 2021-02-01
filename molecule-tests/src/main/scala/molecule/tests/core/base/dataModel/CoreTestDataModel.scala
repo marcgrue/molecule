@@ -1,6 +1,6 @@
 package molecule.tests.core.base.dataModel
 
-import molecule.core.data.model._
+import molecule.core._1_dataModel.data.model._
 
 @InOut(3, 22)
 object CoreTestDataModel {

@@ -2,8 +2,8 @@ package molecule.datomic.peer.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
-import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.data.SchemaTransaction
+import molecule.core._1_dataModel.data.SchemaTransaction
+import molecule.datomic.base.facade.exception.DatomicFacadeException
 import scala.jdk.CollectionConverters._
 
 

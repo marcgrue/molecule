@@ -5,10 +5,10 @@ import datomic.db.DbId
 import datomic.Peer
 import datomicScala.client.api.sync.{Db, TxReport => clientTxReport}
 import datomicScala.client.api.Datom
-import molecule.core.ast.transactionModel._
-import molecule.core.facade.exception.DatomicFacadeException
-import molecule.core.util.Inspect
+import molecule.datomic.base.ast.transactionModel._
 import molecule.datomic.base.facade.TxReport
+import molecule.datomic.base.facade.exception.DatomicFacadeException
+import molecule.datomic.base.util.Inspect
 import scala.jdk.CollectionConverters._
 
 /** Datomic TxReport facade for client api (peer-server/cloud/dev-local).

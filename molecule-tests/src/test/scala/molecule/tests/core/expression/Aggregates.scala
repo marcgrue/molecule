@@ -1,10 +1,10 @@
 package molecule.tests.core.expression
 
-import molecule.core.util.SystemPeerServer
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeerServer
 
 class Aggregates extends TestSpec {
 

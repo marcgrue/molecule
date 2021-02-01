@@ -1,9 +1,10 @@
 package molecule.tests.core.generic
 
-import molecule.core.util.{SystemDevLocal, SystemPeer, SystemPeerServer}
+import molecule.core.util.SystemDevLocal
 import molecule.core.util.testing.expectCompileError
 import molecule.datomic.api.out3._
 import molecule.TestSpec
+import molecule.datomic.util.{SystemDevLocal, SystemPeer, SystemPeerServer}
 
 
 class SchemaTest extends TestSpec {

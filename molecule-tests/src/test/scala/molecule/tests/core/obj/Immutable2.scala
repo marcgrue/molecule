@@ -329,22 +329,22 @@
 ////    trait Obj2[T] extends Obj[T]
 ////    trait Pair[] =
 //
-////    trait NS02[A, B, a, b, c]
-////    trait NS02[A, B, a, b[_]]
-//    trait NS02[A, B, Pair, Pair]
+////    trait NS_0_02[A, B, a, b, c]
+////    trait NS_0_02[A, B, a, b[_]]
+//    trait NS_0_02[A, B, Pair, Pair]
 //
 //    trait Ref1_1[A, a, r1] {
-//      val str1: NS02[A, String, a, r1[B_str1]] = ???
+//      val str1: NS_0_02[A, String, a, r1[B_str1]] = ???
 //    }
 //
 ////    trait Ref1_2[A, B, a, r1[b], b] {
 ////
 ////    }
 //
-//    val m: NS02[Int, String, A_int, A_OneB_1[_][B_str1]] = Ns.int.Ref1.str1
+//    val m: NS_0_02[Int, String, A_int, A_OneB_1[_][B_str1]] = Ns.int.Ref1.str1
 //
 //
-//    def get[A, B, a, b[_], c](m: NS02[A, B, a, b, c]) = {
+//    def get[A, B, a, b[_], c](m: NS_0_02[A, B, a, b, c]) = {
 //      val tpl: (A, B) = ???
 //      val obj: a with b[c] = ???
 //      (tpl, obj)

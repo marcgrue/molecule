@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.core.ast.elements._
+import molecule.core._3_dsl2molecule.ast.elements._
 import molecule.core.exceptions.MoleculeCompileException
 import scala.reflect.macros.blackbox
 import scala.util.matching

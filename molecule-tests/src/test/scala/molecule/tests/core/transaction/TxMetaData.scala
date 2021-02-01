@@ -1,10 +1,11 @@
 package molecule.tests.core.transaction
 
-import molecule.core.ops.exception.VerifyModelException
-import molecule.core.util.{SystemPeer, SystemPeerServer}
+import molecule.core.util.SystemPeerServer
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out10._
 import molecule.TestSpec
+import molecule.datomic.ops.exception.VerifyModelException
+import molecule.datomic.util.{SystemPeer, SystemPeerServer}
 
 class TxMetaData extends TestSpec {
 

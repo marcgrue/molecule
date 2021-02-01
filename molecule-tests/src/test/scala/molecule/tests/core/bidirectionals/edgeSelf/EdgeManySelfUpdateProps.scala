@@ -1,9 +1,9 @@
 package molecule.tests.core.bidirectionals.edgeSelf
 
-import molecule.core.ops.exception.VerifyModelException
 import molecule.tests.core.bidirectionals.dsl.bidirectional._
 import molecule.datomic.api.in1_out9._
 import molecule.TestSpec
+import molecule.datomic.ops.exception.VerifyModelException
 
 class EdgeManySelfUpdateProps extends TestSpec {
 

@@ -1,8 +1,8 @@
 package molecule.tests.core.transaction
 
-import molecule.core.util.SystemPeer
 import molecule.datomic.api.out1._
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeer
 import molecule.tests.core.base.dsl.coreTest.Ns
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global

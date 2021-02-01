@@ -1,6 +1,6 @@
 package molecule.tests.examples.gremlin.gettingStarted.dataModel
 
-import molecule.core.data.model._
+import molecule.core._1_dataModel.data.model._
 
 @InOut(0, 5)
 object ModernGraph2DataModel {

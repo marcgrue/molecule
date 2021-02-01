@@ -1,7 +1,7 @@
 package molecule.core
 
-import molecule.core.ast.elements.Model
-import molecule.core.ast.query.{Query, QueryExpr}
+import molecule.core._3_dsl2molecule.ast.elements.Model
+import molecule.datomic.ast.query.{Query, QueryExpr}
 
 /** Exceptions thrown by Molecule. */
 package object exceptions {

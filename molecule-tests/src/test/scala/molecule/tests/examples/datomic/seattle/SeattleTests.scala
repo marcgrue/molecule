@@ -2,10 +2,10 @@ package molecule.tests.examples.datomic.seattle
 
 import java.io.FileReader
 import datomic.Util
-import molecule.core.util.SystemPeer
 import molecule.datomic.api.in2_out8._
 import molecule.tests.examples.datomic.seattle.dsl.seattle._
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeer
 
 
 class SeattleTests extends TestSpec {

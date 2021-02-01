@@ -1,9 +1,9 @@
 package molecule.tests.core.input1
 
-import molecule.core.util.SystemPeer
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeer
 
 
 class Input1StringIntro extends TestSpec {

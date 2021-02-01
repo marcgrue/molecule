@@ -1,11 +1,11 @@
 package molecule.core.util.testing
 package txCount
 import scala.language.higherKinds
-import molecule.core.boilerplate.attributes._
-import molecule.core.boilerplate.base._
-import molecule.core.boilerplate.dummyTypes._
-import molecule.core.boilerplate.out._
-import molecule.core.expression.AttrExpressions.?
+import molecule.core._2_dsl.boilerplate.attributes._
+import molecule.core._2_dsl.boilerplate.base._
+import molecule.core._2_dsl.boilerplate.dummyTypes._
+import molecule.core._2_dsl.boilerplate.api._
+import molecule.core._2_dsl.expression.AttrExpressions.?
 
 
 trait TxCount_2[Obj, A, B] extends TxCount {

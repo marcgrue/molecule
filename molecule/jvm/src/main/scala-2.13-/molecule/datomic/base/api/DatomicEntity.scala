@@ -3,13 +3,14 @@ package molecule.datomic.base.api
 import java.net.URI
 import java.util.{Date, UUID}
 import clojure.lang.{Keyword, PersistentArrayMap}
-import molecule.core.ast.MoleculeBase
-import molecule.core.ast.elements.{Model, TxMetaData}
-import molecule.core.ast.transactionModel.RetractEntity
-import molecule.core.ops.VerifyModel
-import molecule.core.transform.Model2Transaction
-import molecule.core.util.{Inspect, Quoted}
+import molecule.core._3_dsl2molecule.ast.MoleculeBase
+import molecule.core._3_dsl2molecule.ast.elements.{Model, TxMetaData}
+import molecule.core._3_dsl2molecule.ops.VerifyModel
+import molecule.datomic.base.ast.transactionModel.RetractEntity
+import molecule.core.util.Quoted
 import molecule.datomic.base.facade.{Conn, TxReport}
+import molecule.datomic.base.transform.Model2Transaction
+import molecule.datomic.base.util.Inspect
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.JavaConverters._
 import scala.language.existentials

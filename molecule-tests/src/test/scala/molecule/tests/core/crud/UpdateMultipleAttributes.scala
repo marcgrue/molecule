@@ -1,9 +1,9 @@
 package molecule.tests.core.crud
 
-import molecule.core.util.SystemPeer
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out4._
 import molecule.TestSpec
+import molecule.datomic.util.SystemPeer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

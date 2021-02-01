@@ -6,11 +6,13 @@ import java.util.{Date, Collection => jCollection, List => jList, Map => jMap}
 import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 import datomic.Peer
-import molecule.core.ast.elements.Model
-import molecule.core.ast.query.Query
-import molecule.core.ast.tempDb.TempDb
-import molecule.core.ast.transactionModel.Statement
+import molecule.core._3_dsl2molecule.ast.elements
+import molecule.core._3_dsl2molecule.ast.elements.Model
+import molecule.datomic.ast.query.Query
+import molecule.datomic.ast.tempDb.TempDb
+import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.api.DatomicEntity
+import molecule.datomic.base.ast.transactionModel
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -94,7 +96,7 @@ trait Conn {
     *   Person.name.get === List("Liz", "Joe")
     * }}}
     *
-    * @param txData List of List of transaction [[molecule.core.ast.transactionModel.Statement Statement]]'s
+    * @param txData List of List of transaction [[transactionModel.Statement Statement]]'s
     */
   def testDbWith(txData: Seq[Seq[Statement]]*): Unit
 
@@ -114,7 +116,7 @@ trait Conn {
   /** Convenience method to retrieve entity directly from connection. */
   def entity(id: Any): DatomicEntity
 
-  /** Transact Seq of Seqs of [[molecule.core.ast.transactionModel.Statement]]s
+  /** Transact Seq of Seqs of [[transactionModel.Statement]]s
     *
     * @param scalaStmts
     * @return [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -137,7 +139,7 @@ trait Conn {
   def transact(javaStmts: jList[_], scalaStmts: Seq[Seq[Statement]] = Nil): TxReport
 
 
-  /** Asynchronously transact Seq of Seqs of [[molecule.core.ast.transactionModel.Statement]]s
+  /** Asynchronously transact Seq of Seqs of [[transactionModel.Statement]]s
     *
     * @param scalaStmts
     * @return [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -320,8 +322,8 @@ trait Conn {
     * Return type (tuple matching the molecule) is the same for all 3 APIs so that
     * application code can query and access data of all molecules the same way.
     *
-    * @param model [[molecule.core.ast.elements.Model Model]] instance
-    * @param query [[molecule.core.ast.query.Query Query]] instance
+    * @param model [[elements.Model Model]] instance
+    * @param query [[molecule.datomic.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]]

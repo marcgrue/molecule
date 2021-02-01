@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.mbrainz.dataModel
 
-import molecule.core.data.model._
+import molecule.core._1_dataModel.data.model._
 
 @InOut(3, 8)
 object MBrainzDataModel {

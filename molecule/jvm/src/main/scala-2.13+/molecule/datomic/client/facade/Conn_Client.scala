@@ -9,12 +9,12 @@ import datomicClient.anomaly.CognitectAnomaly
 import datomicScala.client.api.async.{AsyncClient, AsyncConnection}
 import datomicScala.client.api.sync.{Client, Db, Datomic => clientDatomic}
 import datomicScala.client.api.{Datom, sync}
-import molecule.core.ast.elements._
-import molecule.core.ast.query.{Query, QueryExpr}
-import molecule.core.ast.tempDb._
-import molecule.core.ast.transactionModel._
+import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.datomic.ast.query.{Query, QueryExpr}
+import molecule.datomic.ast.tempDb._
+import molecule.datomic.base.ast.transactionModel._
 import molecule.core.exceptions._
-import molecule.core.transform.{Query2String, QueryOptimizer}
+import molecule.datomic.transform.{Query2String, QueryOptimizer}
 import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
 import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, Conn_Datomic, DatomicDb, TxReport}

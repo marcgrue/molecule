@@ -1,6 +1,6 @@
 package molecule.internaltests.shared.transform.optimize
 
-import molecule.core.ast.query.{Query, _}
+import molecule.datomic.ast.query.{Query, _}
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out2._
 import molecule.TestSpec

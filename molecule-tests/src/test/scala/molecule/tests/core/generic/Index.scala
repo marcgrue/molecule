@@ -1,11 +1,12 @@
 package molecule.tests.core.generic
 
 import molecule.core.exceptions.MoleculeException
-import molecule.core.util.{SystemDevLocal, SystemPeer, SystemPeerServer}
+import molecule.core.util.SystemDevLocal
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out5._
 import molecule.TestSpec
+import molecule.datomic.util.{SystemDevLocal, SystemPeer, SystemPeerServer}
 
 
 class Index extends TestSpec {

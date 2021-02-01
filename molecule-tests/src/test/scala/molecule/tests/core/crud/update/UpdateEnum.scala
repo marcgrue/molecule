@@ -3,13 +3,13 @@ package molecule.tests.core.crud.update
 import java.util.concurrent.ExecutionException
 import datomicClient.anomaly.Incorrect
 import datomicClient.anomaly.Incorrect
-import molecule.core.ops.exception.VerifyModelException
-import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.SystemPeer
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
+import molecule.datomic.base.transform.exception.Model2TransactionException
+import molecule.datomic.ops.exception.VerifyModelException
+import molecule.datomic.util.SystemPeer
 
 class UpdateEnum extends TestSpec {
 

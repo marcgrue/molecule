@@ -1,9 +1,9 @@
 package molecule.tests.core.bidirectionals.edgeSelf
 
-import molecule.core.transform.exception.Model2TransactionException
 import molecule.tests.core.bidirectionals.dsl.bidirectional._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
+import molecule.datomic.base.transform.exception.Model2TransactionException
 
 class EdgeOneSelfSave extends TestSpec {
 

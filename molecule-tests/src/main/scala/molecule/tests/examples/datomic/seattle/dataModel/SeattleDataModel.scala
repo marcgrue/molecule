@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.seattle.dataModel
 
-import molecule.core.data.model._
+import molecule.core._1_dataModel.data.model._
 
 @InOut(2, 8)
 object SeattleDataModel {

@@ -1,12 +1,12 @@
 package molecule.setup
 
-import molecule.core.ast.MoleculeBase
-import molecule.core.ast.elements.Model
-import molecule.core.ast.query.Query
-import molecule.core.input.InputMolecule
-import molecule.core.transform.Model2Transaction
+import molecule.core._3_dsl2molecule.ast.MoleculeBase
+import molecule.core._3_dsl2molecule.ast.elements.Model
+import molecule.datomic.ast.query.Query
+import molecule.core._3_dsl2molecule.input.InputMolecule
 import molecule.core.util.testing.MoleculeTestHelper
 import molecule.datomic.base.facade.Conn
+import molecule.datomic.base.transform.Model2Transaction
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 

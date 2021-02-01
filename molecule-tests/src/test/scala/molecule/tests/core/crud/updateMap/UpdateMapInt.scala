@@ -1,11 +1,11 @@
 package molecule.tests.core.crud.updateMap
 
-import molecule.core.transform.exception.Model2TransactionException
-import molecule.core.util.SystemPeer
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
+import molecule.datomic.base.transform.exception.Model2TransactionException
+import molecule.datomic.util.SystemPeer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

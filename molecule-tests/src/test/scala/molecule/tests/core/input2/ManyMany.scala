@@ -1,8 +1,8 @@
 package molecule.tests.core.input2
 
 import java.net.URI
-import molecule.core.input.{InputMolecule_1, InputMolecule_2}
-import molecule.core.input.exception.InputMolecule_2_Exception
+import molecule.core._3_dsl2molecule.input.{InputMolecule_1, InputMolecule_2}
+import molecule.core._3_dsl2molecule.input.exception.InputMolecule_2_Exception
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in2_out3._
 import molecule.TestSpec
