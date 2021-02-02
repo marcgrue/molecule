@@ -56,10 +56,10 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
 
     if (hasVariables) {
       q"""
-        import molecule.core.ast.elements._
+        import molecule.core._3_dsl2molecule.ast.elements._
+        import molecule.core._3_dsl2molecule.ops.ModelOps._
+        import molecule.core._3_dsl2molecule.transform.{Model2Query, QueryOptimizer}
         import molecule.datomic.base.facade.Conn
-        import molecule.core.ops.ModelOps._
-        import molecule.core.transform.{Model2Query, QueryOptimizer}
 
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
@@ -82,9 +82,9 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
       """
     } else {
       q"""
-        import molecule.core.ast.elements._
+        import molecule.core._3_dsl2molecule.ast.elements._
+        import molecule.core._3_dsl2molecule.transform.QueryOptimizer
         import molecule.datomic.base.facade.Conn
-        import molecule.core.transform.QueryOptimizer
 
         final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {

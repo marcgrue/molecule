@@ -2,7 +2,6 @@ package molecule.core._4_api.api
 
 import molecule.core._3_dsl2molecule.ast.MoleculeBase
 import molecule.core._3_dsl2molecule.transform.CastHelpers
-import molecule.core._4_api.api.get
 import molecule.core._4_api.api.get._
 import molecule.core._4_api.api.getAsync._
 import molecule.core._3_dsl2molecule.ast.elements._
@@ -155,10 +154,10 @@ import scala.language.implicitConversions
  * */
 trait Molecule[Obj, Tpl] extends MoleculeBase
   with CastHelpers[Obj, Tpl]
-  with get.GetArray[Obj, Tpl]
-  with get.GetIterable[Obj, Tpl]
-  with get.GetList[Obj, Tpl]
-  with get.GetRaw
+  with GetArray[Obj, Tpl]
+  with GetIterable[Obj, Tpl]
+  with GetList[Obj, Tpl]
+  with GetRaw
   with GetAsyncArray[Obj, Tpl]
   with GetAsyncIterable[Obj, Tpl]
   with GetAsyncList[Obj, Tpl]
