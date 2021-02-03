@@ -4,7 +4,7 @@ import molecule.core._2_dsl.composition.Nested_0
 import scala.language.higherKinds
 
 
-trait Nested05[obj[_], props, Ns6[o[_],_,_,_,_,_,_,_], In1_6[o[_],_,_,_,_,_,_,_,_], In2_6[o[_],_,_,_,_,_,_,_,_,_], In3_6[o[_],_,_,_,_,_,_,_,_,_,_], A, B, C, D, E] extends Nested_0 {
+trait Nested_0_05[obj[_], props, Ns6[o[_],_,_,_,_,_,_,_], In1_6[o[_],_,_,_,_,_,_,_,_], In2_6[o[_],_,_,_,_,_,_,_,_,_], In3_6[o[_],_,_,_,_,_,_,_,_,_,_], A, B, C, D, E] extends Nested_0 {
   final def *[nestedObj[_], nestedProps, a                                                               ] (nested: NS_0_01[nestedObj, nestedProps, a                                                               ]): Ns6[obj, props with obj[Seq[nestedProps]], A, B, C, D, E, Seq[a                                                                 ]] = ???
   final def *[nestedObj[_], nestedProps, a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps, a, b                                                            ]): Ns6[obj, props with obj[Seq[nestedProps]], A, B, C, D, E, Seq[(a, b                                                            )]] = ???
   final def *[nestedObj[_], nestedProps, a, b, c                                                         ] (nested: NS_0_03[nestedObj, nestedProps, a, b, c                                                         ]): Ns6[obj, props with obj[Seq[nestedProps]], A, B, C, D, E, Seq[(a, b, c                                                         )]] = ???
