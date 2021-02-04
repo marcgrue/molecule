@@ -1,6 +1,6 @@
 package molecule.tests.core.bidirectionals.dataModel
 
-import molecule.core._1_dataModel.data.model._
+import molecule.core.data.model._
 
 @InOut(1, 9)
 object BidirectionalDataModel {

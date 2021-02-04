@@ -1,7 +1,7 @@
 package molecule.datomic.base.util
 
 import java.util.{List => jList}
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.datomic.base.ast.transactionModel._
 import molecule.datomic.base.facade.TxReport
 import scala.collection.JavaConverters._

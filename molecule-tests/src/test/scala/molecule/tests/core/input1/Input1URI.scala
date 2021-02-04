@@ -2,7 +2,7 @@ package molecule.tests.core.input1
 
 import java.net.URI
 import molecule.datomic.ast.query._
-import molecule.core._3_dsl2molecule.input.exception.InputMoleculeException
+import molecule.core.input.exception.MoleculeException
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.TestSpec
@@ -70,8 +70,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uri1, uri2, uri3)
         inputMolecule(List(uri2)).get.sorted === List(uri3)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -81,8 +81,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uri1, uri2, uri3)
         inputMolecule(List(uri2)).get.sorted === List(uri2, uri3)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -92,8 +92,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uri1, uri2, uri3)
         inputMolecule(List(uri2)).get === List(uri1)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -103,8 +103,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uri1, uri2, uri3)
         inputMolecule(List(uri2)).get.sorted === List(uri1, uri2)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -137,8 +137,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uri2)).get.sorted === List(str3)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -148,8 +148,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uri2)).get.sorted === List(str2, str3)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -159,8 +159,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uri2)).get === List(str1)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -170,8 +170,8 @@ class Input1URI extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uri2)).get.sorted === List(str1, str2)
-        (inputMolecule(List(uri2, uri3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uri2, uri3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -411,12 +411,12 @@ class Input1URI extends TestSpec {
         // (uri3, uri4), (uri4, uri5), (uri4, uri5, uri6)
         inputMolecule(List(Set(uri2))).get === List((uri2, Set(uri3)), (uri3, Set(uri4, uri3)), (uri4, Set(uri4, uri5)), (uri5, Set(uri4, uri6, uri5)))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -430,12 +430,12 @@ class Input1URI extends TestSpec {
         // (uri2, uri4), (uri3, uri4), (uri4, uri5), (uri4, uri5, uri6)
         inputMolecule(List(Set(uri2))).get === List((uri1, Set(uri2)), (uri2, Set(uri3, uri2)), (uri3, Set(uri4, uri3)), (uri4, Set(uri4, uri5)), (uri5, Set(uri4, uri6, uri5)))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -448,12 +448,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List((uri1, Set(uri1)))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -466,12 +466,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List((uri1, Set(uri1, uri2)), (uri2, Set(uri2)))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -563,12 +563,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List(Set(uri3, uri4, uri5, uri6))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -581,12 +581,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List(Set(uri2, uri3, uri4, uri5, uri6))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -599,12 +599,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List(Set(uri1))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -617,12 +617,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List(Set(uri1, uri2))
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -722,12 +722,12 @@ class Input1URI extends TestSpec {
         // (uri3, uri4), (uri4, uri5), (uri4, uri5, uri6)
         inputMolecule(List(Set(uri2))).get.sorted === List(uri2, uri3, uri4, uri5)
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -741,12 +741,12 @@ class Input1URI extends TestSpec {
         // (uri2, uri4), (uri3, uri4), (uri4, uri5), (uri4, uri5, uri6)
         inputMolecule(List(Set(uri2))).get.sorted === List(uri1, uri2, uri3, uri4, uri5)
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -759,12 +759,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get === List(uri1)
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -777,12 +777,12 @@ class Input1URI extends TestSpec {
 
         inputMolecule(List(Set(uri2))).get.sorted === List(uri1, uri2)
 
-        (inputMolecule(List(Set(uri2, uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2, uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uri2), Set(uri3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }

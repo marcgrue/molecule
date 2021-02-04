@@ -1,7 +1,7 @@
 package molecule
 
 import datomicClient.ClojureBridge
-import molecule.core._4_api.api.Molecule
+import molecule.core.api.Molecule_0
 import molecule.core.util.Helpers
 import molecule.datomic.api.out3._
 import molecule.datomic.base.facade.Conn

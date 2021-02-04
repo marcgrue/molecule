@@ -1,11 +1,11 @@
 package molecule.tests.core.input3
 
 import java.net.URI
-import molecule.core._3_dsl2molecule.input.{InputMolecule_1, InputMolecule_3}
-import molecule.core._3_dsl2molecule.input.exception.InputMolecule_3_Exception
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in3_out4._
 import molecule.TestSpec
+import molecule.core.api.exception.Molecule_3_Exception
+import molecule.core.input.InputMolecule_1
 import scala.reflect.ClassTag
 
 
@@ -469,11 +469,11 @@ class Input3 extends TestSpec {
         ).get === List(3)
 
 
-        (m(Ns.int.ints(?).longs(?).strs(?)).apply(Nil, List(Set(1L)), List(Set("a"))).get must throwA[InputMolecule_3_Exception])
+        (m(Ns.int.ints(?).longs(?).strs(?)).apply(Nil, List(Set(1L)), List(Set("a"))).get must throwA[Molecule_3_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
           "Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `ints` --> `ints_`"
 
-        (m(Ns.int.ints_.<=(?).longs_(?).strs_(?)).apply(List(Set(1), Set(2)), List(Set(1L)), List(Set("a"))).get must throwA[InputMolecule_3_Exception])
+        (m(Ns.int.ints_.<=(?).longs_(?).strs_(?)).apply(List(Set(1), Set(2)), List(Set(1L)), List(Set("a"))).get must throwA[Molecule_3_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
           s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
       }

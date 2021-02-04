@@ -1,6 +1,6 @@
 package molecule.datomic.transform
 
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.datomic.ast.query._
 import molecule.datomic.ops.QueryOps._
 import molecule.datomic.transform.exception.Model2QueryException

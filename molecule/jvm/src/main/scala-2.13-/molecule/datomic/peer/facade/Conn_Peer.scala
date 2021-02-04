@@ -6,7 +6,7 @@ import datomic.{Database, Datom, ListenableFuture, Peer}
 import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.datomic.ast.query.{Query, QueryExpr}
 import molecule.datomic.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel._

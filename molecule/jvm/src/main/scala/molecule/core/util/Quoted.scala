@@ -1,7 +1,7 @@
 package molecule.core.util
 
 import java.util.{Date, UUID}
-import molecule.core._4_api.api.exception.EntityException
+import molecule.core.api.exception.EntityException
 import molecule.core.util.fns.date2str
 
 trait Quoted {

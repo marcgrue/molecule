@@ -6,8 +6,8 @@ import java.util.{Date, Collection => jCollection, List => jList, Map => jMap}
 import clojure.lang.{PersistentArrayMap, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 import datomic.Peer
-import molecule.core._3_dsl2molecule.ast.elements
-import molecule.core._3_dsl2molecule.ast.elements.Model
+import molecule.core.ast.elements
+import molecule.core.ast.elements.Model
 import molecule.datomic.ast.query.Query
 import molecule.datomic.ast.tempDb.TempDb
 import molecule.datomic.base.ast.transactionModel.Statement

@@ -1,7 +1,7 @@
 package molecule.tests.core.input1
 
 import java.util.UUID
-import molecule.core._3_dsl2molecule.input.exception.InputMoleculeException
+import molecule.core.input.exception.MoleculeException
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.TestSpec
@@ -56,8 +56,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uuid1, uuid2, uuid3)
         inputMolecule(List(uuid2)).get.sorted === List(uuid3)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -67,8 +67,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uuid1, uuid2, uuid3)
         inputMolecule(List(uuid2)).get.sorted === List(uuid2, uuid3)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -78,8 +78,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uuid1, uuid2, uuid3)
         inputMolecule(List(uuid2)).get === List(uuid1)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -89,8 +89,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(uuid1, uuid2, uuid3)
         inputMolecule(List(uuid2)).get.sorted === List(uuid1, uuid2)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -123,8 +123,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uuid2)).get.sorted === List(str3)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -134,8 +134,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uuid2)).get.sorted === List(str2, str3)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -145,8 +145,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uuid2)).get === List(str1)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -156,8 +156,8 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(uuid2)).get.sorted === List(str1, str2)
-        (inputMolecule(List(uuid2, uuid3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(uuid2, uuid3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -337,12 +337,12 @@ class Input1UUID extends TestSpec {
         // (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
         inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid2, Set(uuid3)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -356,12 +356,12 @@ class Input1UUID extends TestSpec {
         // (uuid2, uuid4), (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
         inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid1, Set(uuid2)), (uuid2, Set(uuid3, uuid2)), (uuid3, Set(uuid4, uuid3)), (uuid4, Set(uuid4, uuid5)), (uuid5, Set(uuid4, uuid6, uuid5)))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -374,12 +374,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List((uuid1, Set(uuid1)))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -392,12 +392,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get.sortBy(_._1.toString) === List((uuid1, Set(uuid1, uuid2)), (uuid2, Set(uuid2)))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -489,12 +489,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List(Set(uuid3, uuid4, uuid5, uuid6))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -507,12 +507,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List(Set(uuid2, uuid3, uuid4, uuid5, uuid6))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -525,12 +525,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List(Set(uuid1))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -543,12 +543,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List(Set(uuid1, uuid2))
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -648,12 +648,12 @@ class Input1UUID extends TestSpec {
         // (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
         inputMolecule(List(Set(uuid2))).get.sorted === List(uuid2, uuid3, uuid4, uuid5)
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -667,12 +667,12 @@ class Input1UUID extends TestSpec {
         // (uuid2, uuid4), (uuid3, uuid4), (uuid4, uuid5), (uuid4, uuid5, uuid6)
         inputMolecule(List(Set(uuid2))).get.sorted === List(uuid1, uuid2, uuid3, uuid4, uuid5)
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -685,12 +685,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get === List(uuid1)
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -703,12 +703,12 @@ class Input1UUID extends TestSpec {
 
         inputMolecule(List(Set(uuid2))).get.sorted === List(uuid1, uuid2)
 
-        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2, uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(uuid2), Set(uuid3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }

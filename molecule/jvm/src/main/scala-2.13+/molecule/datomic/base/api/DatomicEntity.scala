@@ -3,9 +3,9 @@ package molecule.datomic.base.api
 import java.net.URI
 import java.util.{Date, UUID}
 import clojure.lang.{Keyword, PersistentArrayMap}
-import molecule.core._3_dsl2molecule.ast.MoleculeBase
-import molecule.core._3_dsl2molecule.ast.elements.{Model, TxMetaData}
-import molecule.core._3_dsl2molecule.ops.VerifyModel
+import molecule.core.ast.MoleculeBase
+import molecule.core.ast.elements.{Model, TxMetaData}
+import molecule.core.ops.VerifyModel
 import molecule.datomic.base.ast.transactionModel.RetractEntity
 import molecule.core.util.Quoted
 import molecule.datomic.base.facade.{Conn, TxReport}

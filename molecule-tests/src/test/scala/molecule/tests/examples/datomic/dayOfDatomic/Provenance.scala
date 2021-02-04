@@ -1,6 +1,6 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.datomic.api.out7._
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.socialNews._
 import molecule.TestSpec

@@ -2,7 +2,7 @@ package molecule.datomic.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.datomic.ast.query.{Funct, _}
 import molecule.core.util.{Helpers, JavaUtil}
 import molecule.datomic.ops.exception.QueryOpsException

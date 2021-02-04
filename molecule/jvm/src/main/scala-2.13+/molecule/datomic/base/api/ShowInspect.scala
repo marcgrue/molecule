@@ -2,12 +2,12 @@ package molecule.datomic.base.api
 
 import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{PersistentHashSet, PersistentVector}
-import molecule.core._4_api.api.Molecule
-import molecule.core._3_dsl2molecule.ast.elements._
-import molecule.core._3_dsl2molecule.ops.VerifyModel
+import molecule.core.api.Molecule_0
+import molecule.core.ast.elements._
 import molecule.datomic.ast.query.QueryExpr
 import molecule.datomic.ast.tempDb._
 import molecule.core.exceptions.{MoleculeException, QueryException}
+import molecule.core.ops.VerifyModel
 import molecule.datomic.ops.QueryOps._
 import molecule.datomic.transform._
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -24,7 +24,7 @@ import scala.language.implicitConversions
   * Call a inspect method on a molecule to see the internal transformations and
   * produced transaction statements or sample data.
   * */
-trait ShowInspect[Obj, Tpl] { self: Molecule[Obj, Tpl] =>
+trait ShowInspect[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
   /** Inspect call to `get` on a molecule (without affecting the db).

@@ -1,6 +1,6 @@
 package molecule.tests.core.input1
 
-import molecule.core._3_dsl2molecule.input.exception.InputMoleculeException
+import molecule.core.input.exception.MoleculeException
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.TestSpec
@@ -55,8 +55,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(bigDec1, bigDec2, bigDec3)
         inputMolecule(List(bigDec2)).get.sorted === List(bigDec3)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -66,8 +66,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(bigDec1, bigDec2, bigDec3)
         inputMolecule(List(bigDec2)).get.sorted === List(bigDec2, bigDec3)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -77,8 +77,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(bigDec1, bigDec2, bigDec3)
         inputMolecule(List(bigDec2)).get === List(bigDec1)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -88,8 +88,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(bigDec1, bigDec2, bigDec3)
         inputMolecule(List(bigDec2)).get.sorted === List(bigDec1, bigDec2)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -122,8 +122,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(bigDec2)).get.sorted === List(str3)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -133,8 +133,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(bigDec2)).get.sorted === List(str2, str3)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -144,8 +144,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(bigDec2)).get === List(str1)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -155,8 +155,8 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(Nil).get.sorted === List(str1, str2, str3)
         inputMolecule(List(bigDec2)).get.sorted === List(str1, str2)
-        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(bigDec2, bigDec3)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -336,12 +336,12 @@ class Input1BigDecimal extends TestSpec {
         // (bigDec3, bigDec4), (bigDec4, bigDec5), (bigDec4, bigDec5, bigDec6)
         inputMolecule(List(Set(bigDec2))).get === List((bigDec2, Set(bigDec3)), (bigDec3, Set(bigDec4, bigDec3)), (bigDec4, Set(bigDec4, bigDec5)), (bigDec5, Set(bigDec4, bigDec6, bigDec5)))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -355,12 +355,12 @@ class Input1BigDecimal extends TestSpec {
         // (bigDec2, bigDec4), (bigDec3, bigDec4), (bigDec4, bigDec5), (bigDec4, bigDec5, bigDec6)
         inputMolecule(List(Set(bigDec2))).get === List((bigDec1, Set(bigDec2)), (bigDec2, Set(bigDec3, bigDec2)), (bigDec3, Set(bigDec4, bigDec3)), (bigDec4, Set(bigDec4, bigDec5)), (bigDec5, Set(bigDec4, bigDec6, bigDec5)))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -373,12 +373,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List((bigDec1, Set(bigDec1)))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -391,12 +391,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List((bigDec1, Set(bigDec1, bigDec2)), (bigDec2, Set(bigDec2)))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -488,12 +488,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List(Set(bigDec3, bigDec4, bigDec5, bigDec6))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -506,12 +506,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List(Set(bigDec2, bigDec3, bigDec4, bigDec5, bigDec6))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -524,12 +524,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List(Set(bigDec1))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -542,12 +542,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List(Set(bigDec1, bigDec2))
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }
@@ -647,12 +647,12 @@ class Input1BigDecimal extends TestSpec {
         // (bigDec3, bigDec4), (bigDec4, bigDec5), (bigDec4, bigDec5, bigDec6)
         inputMolecule(List(Set(bigDec2))).get.sorted === List(bigDec2, bigDec3, bigDec4, bigDec5)
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -666,12 +666,12 @@ class Input1BigDecimal extends TestSpec {
         // (bigDec2, bigDec4), (bigDec3, bigDec4), (bigDec4, bigDec5), (bigDec4, bigDec5, bigDec6)
         inputMolecule(List(Set(bigDec2))).get.sorted === List(bigDec1, bigDec2, bigDec3, bigDec4, bigDec5)
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -684,12 +684,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get === List(bigDec1)
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
@@ -702,12 +702,12 @@ class Input1BigDecimal extends TestSpec {
 
         inputMolecule(List(Set(bigDec2))).get.sorted === List(bigDec1, bigDec2)
 
-        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2, bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
 
-        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (inputMolecule(List(Set(bigDec2), Set(bigDec3))).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
     }

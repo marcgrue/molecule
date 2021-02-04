@@ -1,6 +1,6 @@
 package molecule.core.util.testing
-import molecule.core._2_dsl.boilerplate.attributes._
-import molecule.core._2_dsl.boilerplate.base._
+import molecule.core.boilerplate.attributes._
+import molecule.core.boilerplate.base._
 import molecule.core.util.testing.txCount.TxCount_0
 import scala.language.higherKinds
 

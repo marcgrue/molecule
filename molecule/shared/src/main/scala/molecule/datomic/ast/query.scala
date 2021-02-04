@@ -1,5 +1,5 @@
 package molecule.datomic.ast
-import molecule.core._3_dsl2molecule.ast.elements
+import molecule.core.ast.elements
 import molecule.datomic.transform.Query2String
 import molecule.core.util.Helpers
 

@@ -9,7 +9,7 @@
 package molecule.core.util.testing
 
 import datomic.Util._
-import molecule.core._1_dataModel.data.SchemaTransaction
+import molecule.core.data.SchemaTransaction
 
 object TxCountSchema extends SchemaTransaction {
 

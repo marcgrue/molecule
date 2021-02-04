@@ -2,7 +2,7 @@ package molecule.datomic.base.ast
 
 import java.util.{List => jList}
 import datomic.Util.read
-import molecule.core._3_dsl2molecule.ast.elements._
+import molecule.core.ast.elements._
 import molecule.core.util.JavaUtil
 import scala.jdk.CollectionConverters._
 

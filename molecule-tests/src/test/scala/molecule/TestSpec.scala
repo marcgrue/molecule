@@ -1,7 +1,7 @@
 package molecule
 
 import _root_.datomic.Peer
-import molecule.core._1_dataModel.data.SchemaTransaction
+import molecule.core.data.SchemaTransaction
 import molecule.core.util.testing.MoleculeTestHelper
 import molecule.core.util.SystemDevLocal
 import molecule.datomic.base.facade.Conn

@@ -1,9 +1,10 @@
 package molecule.tests.core.input2
 
-import molecule.core._3_dsl2molecule.input.exception.{InputMolecule_2_Exception, InputMoleculeException}
+import molecule.core.input.exception.MoleculeException
 import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in2_out3._
 import molecule.TestSpec
+import molecule.core.api.exception.Molecule_2_Exception
 
 
 class OneMany extends TestSpec {
@@ -63,7 +64,7 @@ class OneMany extends TestSpec {
         m(Ns.int.str_(?).longs_(?)).apply(Nil).get === List(8)
 
         // Mandatory attribute will not match Nil
-        (m(Ns.int.str_(?).longs(?)).apply(Nil).get must throwA[InputMolecule_2_Exception])
+        (m(Ns.int.str_(?).longs(?)).apply(Nil).get must throwA[Molecule_2_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
       }
@@ -257,17 +258,17 @@ class OneMany extends TestSpec {
         // Applying multiple pairs to input molecules with expression not allowed
 
         // Card one
-        (m(Ns.int.str_.not(?).longs(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
+        (m(Ns.int.str_.not(?).longs(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card many
-        (m(Ns.int.str_(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
+        (m(Ns.int.str_(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card one + many
-        (m(Ns.int.str_.not(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[InputMolecule_2_Exception])
+        (m(Ns.int.str_.not(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
           .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
       }
@@ -295,8 +296,8 @@ class OneMany extends TestSpec {
         m(Ns.int.str_(?).longs.<(?))("a", Set(3L)).get === List((1, Set(1L, 2L)), (2, Set(2L)))
 
         // Can't apply multiple values to comparison function
-        (m(Ns.int.str_(?).longs.<(?))("a", Set(2L, 3L)).get must throwA[InputMoleculeException])
-          .message === "Got the exception molecule.core.input.exception.InputMoleculeException: " +
+        (m(Ns.int.str_(?).longs.<(?))("a", Set(2L, 3L)).get must throwA[MoleculeException])
+          .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
           "Can't apply multiple values to comparison function."
       }
 
