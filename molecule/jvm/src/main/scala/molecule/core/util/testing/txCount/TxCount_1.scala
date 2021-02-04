@@ -5,7 +5,7 @@ import molecule.core.boilerplate.attributes._
 import molecule.core.boilerplate.base._
 import molecule.core.boilerplate.dummyTypes._
 import molecule.core.boilerplate.api._
-import molecule.core._2_dsl.expression.AttrExpressions.?
+import molecule.core.expression.AttrExpressions.?
 
 
 trait TxCount_1[Obj, A] extends TxCount {

@@ -5,7 +5,7 @@ import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in2_out3._
 import molecule.TestSpec
 import molecule.core.api.exception.Molecule_2_Exception
-import molecule.core.input.InputMolecule_1
+import molecule.core.input.Molecule_1
 import scala.reflect.ClassTag
 
 
@@ -16,9 +16,9 @@ class ManyMany extends TestSpec {
     class Setup extends CoreSetup {
 
       def pairsTacit[I1, I2, A](test: String,
-                                im: InputMolecule_2.InputMolecule_2_01[I1, I2, A],
-                                im1: InputMolecule_1.InputMolecule_1_01[I1, A],
-                                im2: InputMolecule_1.InputMolecule_1_01[I2, A],
+                                im: Molecule_2.Molecule_2_01[I1, I2, A],
+                                im1: Molecule_1.Molecule_1_01[I1, A],
+                                im2: Molecule_1.Molecule_1_01[I2, A],
                                 inOut1: Seq[(I1, List[A])],
                                 inOut2: Seq[(I2, List[A])]
                                )(implicit ev: ClassTag[A]) = {
@@ -51,9 +51,9 @@ class ManyMany extends TestSpec {
       }
 
       def pairsTacit22[I1, I2](test: String,
-                               im: InputMolecule_2.InputMolecule_2_01[I1, I2, Int],
-                               im1: InputMolecule_1.InputMolecule_1_01[I1, Int],
-                               im2: InputMolecule_1.InputMolecule_1_01[I2, Int],
+                               im: Molecule_2.Molecule_2_01[I1, I2, Int],
+                               im1: Molecule_1.Molecule_1_01[I1, Int],
+                               im2: Molecule_1.Molecule_1_01[I2, Int],
                                inOut1: Seq[(I1, List[Int])],
                                inOut2: Seq[(I2, List[Int])]
                               ) = {
@@ -92,9 +92,9 @@ class ManyMany extends TestSpec {
       }
 
       def pairsMandatory[I1, I2, A, B, C](test: String,
-                                          im: InputMolecule_2.InputMolecule_2_03[I1, I2, A, B, C],
-                                          im1: InputMolecule_1.InputMolecule_1_02[I1, A, B],
-                                          im2: InputMolecule_1.InputMolecule_1_02[I2, A, C],
+                                          im: Molecule_2.Molecule_2_03[I1, I2, A, B, C],
+                                          im1: Molecule_1.Molecule_1_02[I1, A, B],
+                                          im2: Molecule_1.Molecule_1_02[I2, A, C],
                                           inOut1: Seq[(I1, Seq[(A, B)])],
                                           inOut2: Seq[(I2, Seq[(A, C)])]
                                          )(implicit ev: ClassTag[(A, B, C)]) = {
@@ -136,9 +136,9 @@ class ManyMany extends TestSpec {
 
 
       def groupsTacit22[I1, I2](test: String,
-                                im: InputMolecule_2.InputMolecule_2_01[I1, I2, Int],
-                                im1: InputMolecule_1.InputMolecule_1_01[I1, Int],
-                                im2: InputMolecule_1.InputMolecule_1_01[I2, Int],
+                                im: Molecule_2.Molecule_2_01[I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[I1, Int],
+                                im2: Molecule_1.Molecule_1_01[I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
@@ -205,9 +205,9 @@ class ManyMany extends TestSpec {
 
 
       def groupsTacit21[I1, I2](test: String,
-                                im: InputMolecule_2.InputMolecule_2_01[I1, I2, Int],
-                                im1: InputMolecule_1.InputMolecule_1_01[I1, Int],
-                                im2: InputMolecule_1.InputMolecule_1_01[I2, Int],
+                                im: Molecule_2.Molecule_2_01[I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[I1, Int],
+                                im2: Molecule_1.Molecule_1_01[I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
@@ -264,9 +264,9 @@ class ManyMany extends TestSpec {
         println(s"$test   $i tests passed")
       }
 
-      def groupsTacit11[I1, I2](test: String, im: InputMolecule_2.InputMolecule_2_01[I1, I2, Int],
-                                im1: InputMolecule_1.InputMolecule_1_01[I1, Int],
-                                im2: InputMolecule_1.InputMolecule_1_01[I2, Int],
+      def groupsTacit11[I1, I2](test: String, im: Molecule_2.Molecule_2_01[I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[I1, Int],
+                                im2: Molecule_1.Molecule_1_01[I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
@@ -447,22 +447,22 @@ class ManyMany extends TestSpec {
           // Can't apply 0 pairs to molecule with tacit input attribute
 
           (m(Ns.int.ints(?).longs(?)).apply(Nil).get must throwA[Molecule_2_Exception])
-            .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+            .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
             "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
           (m(Ns.int.ints(?).longs_(?)).apply(Nil).get must throwA[Molecule_2_Exception])
-            .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+            .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
             "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
           (m(Ns.int.ints_(?).longs(?)).apply(Nil).get must throwA[Molecule_2_Exception])
-            .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+            .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
             "Can only apply empty list of pairs (Nil) to two tacit attributes"
 
 
           // Can't apply multiple pairs to input molecule with an expression input attribute
 
           (m(Ns.int.ints_(?).longs_.not(?)).apply(List((Set(1), Set(1L)), (Set(2), Set(2L)))).get must throwA[Molecule_2_Exception])
-            .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+            .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
             "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         }
@@ -908,12 +908,12 @@ class ManyMany extends TestSpec {
 
 
         (m(Ns.int.ints(?).longs(?)).apply(Nil, List(Set(1L))).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           "Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `ints` --> `ints_`"
 
 
         (m(Ns.int.ints_.<=(?).longs_(?)).apply(List(Set(1), Set(2)), List(Set(1L))).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
       }
 

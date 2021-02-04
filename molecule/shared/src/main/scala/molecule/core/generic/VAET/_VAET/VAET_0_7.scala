@@ -2,11 +2,12 @@
 * AUTO-GENERATED Molecule DSL for namespace `VAET`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/VAETDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/VAETDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
-package molecule.core.generic.VAET
+package molecule.core.generic.VAET._VAET
+import molecule.core.generic.VAET._
 
 import java.util.Date
 import molecule.core.boilerplate.api._

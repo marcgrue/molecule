@@ -6,7 +6,7 @@ import molecule.core.ast.MoleculeBase
 import molecule.core.ast.elements._
 import molecule.core.expression.AttrExpressions
 import molecule.core.input.exception.MoleculeException
-import molecule.core.input.{InputMolecule_1, InputMolecule_3}
+import molecule.core.input.{Molecule_1, Molecule_3}
 import molecule.core.util.fns
 import molecule.datomic.ast.query.{DataClause, _}
 
@@ -19,8 +19,8 @@ import molecule.datomic.ast.query.{DataClause, _}
   * input molecules are a good fit for re-use for queries where only a few parameters change.
   * <br><br>
   * Input molecules can await 1, 2 or 3 inputs and are constructed by applying the [[AttrExpressions.? ?]] marker
-  * to attributes. If one marker is applied, we get a [[InputMolecule_1 InputMolecule_1]], 2 inputs creates
-  * an [[InputMolecule_1 InputMolecule_3]] and 3 an [[InputMolecule_3 InputMolecule_3]].
+  * to attributes. If one marker is applied, we get a [[Molecule_1 Molecule_1]], 2 inputs creates
+  * an [[Molecule_1 Molecule_3]] and 3 an [[Molecule_3 Molecule_3]].
   * <br><br>
   * The three input molecule interfaces come in arity-versions corresponding to the number of non-?-marked attributes
   * in the input molecule. Let's see a simple example:
@@ -32,7 +32,7 @@ import molecule.datomic.ast.query.{DataClause, _}
   *   )
   *
   *   // Input molecule created at compile time. Awaits a name of type String
-  *   val ageOfPersons: InputMolecule_1.InputMolecule_1_01[String, Int] = m(Person.name_(?).age)
+  *   val ageOfPersons: Molecule_1.Molecule_1_01[String, Int] = m(Person.name_(?).age)
   *
   *   // Resolved molecule. "Joe" input is matched against name attribute
   *   val ageOfPersonsNamedJoe: Molecule.Molecule01[Int] = ageOfPersons.apply("Joe")

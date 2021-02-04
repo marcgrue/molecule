@@ -65,7 +65,7 @@ class OneMany extends TestSpec {
 
         // Mandatory attribute will not match Nil
         (m(Ns.int.str_(?).longs(?)).apply(Nil).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           "Can only apply empty list of pairs (Nil) to two tacit attributes"
       }
 
@@ -259,17 +259,17 @@ class OneMany extends TestSpec {
 
         // Card one
         (m(Ns.int.str_.not(?).longs(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card many
         (m(Ns.int.str_(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
         // Card one + many
         (m(Ns.int.str_.not(?).longs.not(?))(Seq(("a", Set(1L)), ("b", Set(2L)))).get must throwA[Molecule_2_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
           "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
       }
 

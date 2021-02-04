@@ -20,8 +20,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     val t = if (casts.size == 1) {
       if (hasVariables) {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
-          import molecule.core._3_dsl2molecule.ops.ModelOps._
+          import molecule.core.ast.elements._
+          import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel)) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(casts)})
@@ -36,7 +36,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(casts)})
             final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???
@@ -48,8 +48,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     } else if (isOptNested) {
       if (hasVariables) {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
-          import molecule.core._3_dsl2molecule.ops.ModelOps._
+          import molecule.core.ast.elements._
+          import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel)) {
             ..${castOptNestedRows(casts, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
@@ -58,7 +58,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             ..${castOptNestedRows(casts, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
           }
@@ -71,8 +71,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
       if (hasVariables) {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
-          import molecule.core._3_dsl2molecule.ops.ModelOps._
+          import molecule.core.ast.elements._
+          import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel))
             with ${nestedTupleClassX(casts.size)}[$ObjType, (..$TplTypes)] {
@@ -82,7 +82,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core._3_dsl2molecule.ast.elements._
+          import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)})
             with ${nestedTupleClassX(casts.size)}[$ObjType, (..$TplTypes)] {
             ..${resolveNestedTupleMethods(casts, types, TplTypes, postTypes, postCasts).get}

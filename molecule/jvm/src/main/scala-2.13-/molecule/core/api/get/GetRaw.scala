@@ -1,4 +1,4 @@
-package molecule.core._4_api.api.get
+package molecule.core.api.get
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.core.api.getAsync.GetAsyncRaw

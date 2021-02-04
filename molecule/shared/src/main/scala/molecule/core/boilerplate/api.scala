@@ -5,7 +5,7 @@ import molecule.core.composition.CompositeInit_1._
 import molecule.core.composition.CompositeInit_2._
 import molecule.core.composition.CompositeInit_3._
 import molecule.core.composition.Tx._
-import molecule.core._2_dsl.expression.AggregateKeywords._
+import molecule.core.expression.AggregateKeywords._
 import molecule.core.generic.Datom._
 import scala.language.higherKinds
 

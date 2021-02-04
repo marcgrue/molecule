@@ -50,7 +50,7 @@ trait AttrExpressions {
   trait ?
 
   // Avoiding overload via Keywords.? import
-  type ?? = molecule.core._2_dsl.expression.AttrExpressions.?
+  type ?? = molecule.core.expression.AttrExpressions.?
 
   /** Unify attribute value in self-join.
     * <br><br>
@@ -74,7 +74,7 @@ trait AttrExpressions {
     * @group attrMarker
     * */
   trait unify
-  type unify_stable = molecule.core._2_dsl.expression.AttrExpressions.unify
+  type unify_stable = molecule.core.expression.AttrExpressions.unify
 
 
   /** Expression methods common for all attributes. */

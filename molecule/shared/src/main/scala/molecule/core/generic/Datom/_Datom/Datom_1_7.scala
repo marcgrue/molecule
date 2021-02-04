@@ -2,11 +2,12 @@
 * AUTO-GENERATED Molecule DSL for namespace `Datom`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/DatomDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/DatomDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
-package molecule.core.generic.Datom
+package molecule.core.generic.Datom._Datom
+import molecule.core.generic.Datom._
 
 import java.util.Date
 import molecule.core.boilerplate.api._

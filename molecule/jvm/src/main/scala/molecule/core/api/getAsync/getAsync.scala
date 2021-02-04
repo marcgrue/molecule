@@ -1,6 +1,6 @@
 package molecule.core.api
 
-import molecule.core._4_api.api.getAsync._
+import molecule.core.api.getAsync._
 
 /** Asynchronous getter methods to retrieve data from Datomic.
   *

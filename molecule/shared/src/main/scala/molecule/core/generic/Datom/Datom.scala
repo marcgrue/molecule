@@ -2,7 +2,7 @@
 * AUTO-GENERATED Molecule DSL for namespace `Datom`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/DatomDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/DatomDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
@@ -13,13 +13,14 @@ import molecule.core.boilerplate.api._
 import molecule.core.boilerplate.attributes._
 import molecule.core.boilerplate.base._
 import molecule.core.boilerplate.dummyTypes._
-import molecule.core._2_dsl.expression.AttrExpressions.?
+import molecule.core.expression.AttrExpressions.?
+import molecule.core.generic.Datom._Datom._
 import scala.language.higherKinds
 
 object Datom extends Datom_0_0_L0[Datom_, Nothing] with FirstNS {
   final override def apply(eid: Long, eids: Long*): Datom_0_0_L0[Datom_, Nothing] = ???
   final override def apply(eids: Iterable[Long])  : Datom_0_0_L0[Datom_, Nothing] = ???
-  final override def apply(eids: ?)               : Datom_1_0_L0[Datom_, Nothing, Long] = ???
+  final          def apply(eids: ?)               : Datom_1_0_L0[Datom_, Nothing, Long] = ???
 }
 
 // Object interface

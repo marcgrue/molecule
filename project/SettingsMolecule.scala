@@ -14,7 +14,7 @@ trait SettingsMolecule {
     moleculePluginActive := sys.props.get("molecule") == Some("true"),
 //    moleculeMakeJars := true,
     moleculeMakeJars := false,
-    moleculeGenericPkg := "molecule.core._2_dsl.generic",
+    moleculeGenericPkg := "molecule.core.generic",
     moleculeDataModelPaths := Seq(
 //      "molecule/tests/core/base",
 //      "molecule/tests/core/bidirectionals",

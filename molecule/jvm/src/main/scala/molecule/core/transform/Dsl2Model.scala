@@ -1,8 +1,8 @@
 package molecule.core.transform
 
 import molecule.core.boilerplate.attributes._
-import molecule.core._2_dsl.generic.index.{AEVT, AVET, EAVT, VAET}
-import molecule.core._2_dsl.generic.{GenericNs, Log, Schema}
+import molecule.core.generic.index.{AEVT, AVET, EAVT, VAET}
+import molecule.core.generic.{GenericNs, Log, Schema}
 import molecule.core.transform.exception.Dsl2ModelException
 import molecule.core.ast.elements._
 import molecule.core.macros.Cast

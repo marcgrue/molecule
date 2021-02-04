@@ -1,3 +1,3 @@
-package molecule.core._2_dsl.composition
+package molecule.core.composition
 
 package object nested

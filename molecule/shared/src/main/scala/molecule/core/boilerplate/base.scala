@@ -29,7 +29,7 @@ object base {
       * @param eids Iterable of entity ids, typically List, Seq or Set of ids.
       * @return molecule to be further expanded with more attributes.
       */
-    def apply(eids: molecule.core._2_dsl.expression.AttrExpressions.?): AnyRef = ???
+    def apply(eids: molecule.core.expression.AttrExpressions.?): AnyRef = ???
   }
 
   // Using dummy type parameter to simplify parsing DSL

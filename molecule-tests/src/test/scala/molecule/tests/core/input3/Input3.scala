@@ -5,7 +5,7 @@ import molecule.tests.core.base.dsl.coreTest._
 import molecule.datomic.api.in3_out4._
 import molecule.TestSpec
 import molecule.core.api.exception.Molecule_3_Exception
-import molecule.core.input.InputMolecule_1
+import molecule.core.input.Molecule_1
 import scala.reflect.ClassTag
 
 
@@ -16,10 +16,10 @@ class Input3 extends TestSpec {
     class Setup extends CoreSetup {
 
       def triplesTacit[I1, I2, I3, A](test: String,
-                                      im: InputMolecule_3.InputMolecule_3_01[I1, I2, I3, A],
-                                      im1: InputMolecule_1.InputMolecule_1_01[I1, A],
-                                      im2: InputMolecule_1.InputMolecule_1_01[I2, A],
-                                      im3: InputMolecule_1.InputMolecule_1_01[I3, A],
+                                      im: Molecule_3.Molecule_3_01[I1, I2, I3, A],
+                                      im1: Molecule_1.Molecule_1_01[I1, A],
+                                      im2: Molecule_1.Molecule_1_01[I2, A],
+                                      im3: Molecule_1.Molecule_1_01[I3, A],
                                       inOut1: Seq[(I1, List[A])],
                                       inOut2: Seq[(I2, List[A])],
                                       inOut3: Seq[(I3, List[A])]
@@ -58,10 +58,10 @@ class Input3 extends TestSpec {
       }
 
 
-      def groupsTacit111[I1, I2, I3](test: String, im: InputMolecule_3.InputMolecule_3_01[I1, I2, I3, Int],
-                                     im1: InputMolecule_1.InputMolecule_1_01[I1, Int],
-                                     im2: InputMolecule_1.InputMolecule_1_01[I2, Int],
-                                     im3: InputMolecule_1.InputMolecule_1_01[I3, Int],
+      def groupsTacit111[I1, I2, I3](test: String, im: Molecule_3.Molecule_3_01[I1, I2, I3, Int],
+                                     im1: Molecule_1.Molecule_1_01[I1, Int],
+                                     im2: Molecule_1.Molecule_1_01[I2, Int],
+                                     im3: Molecule_1.Molecule_1_01[I3, Int],
                                      inOut1: Seq[(Seq[I1], List[Int])],
                                      inOut2: Seq[(Seq[I2], List[Int])],
                                      inOut3: Seq[(Seq[I3], List[Int])]
@@ -470,11 +470,11 @@ class Input3 extends TestSpec {
 
 
         (m(Ns.int.ints(?).longs(?).strs(?)).apply(Nil, List(Set(1L)), List(Set("a"))).get must throwA[Molecule_3_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_3_Exception: " +
           "Can only apply empty list (Nil) to a tacit input attribute. Please make input attr tacit: `ints` --> `ints_`"
 
         (m(Ns.int.ints_.<=(?).longs_(?).strs_(?)).apply(List(Set(1), Set(2)), List(Set(1L)), List(Set("a"))).get must throwA[Molecule_3_Exception])
-          .message === "Got the exception molecule.core.input.exception.InputMolecule_3_Exception: " +
+          .message === "Got the exception molecule.core.input.exception.Molecule_3_Exception: " +
           s"Can't apply multiple values to input attribute `:Ns/ints` having expression (<, >, <=, >=, !=)"
       }
     }

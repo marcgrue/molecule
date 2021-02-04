@@ -76,8 +76,8 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
       //          ..${args.map(typedParam(_))}
       //          ..${txFnBody.init}
       //          val _txFnStmts = ${txFnBody.last}
-      //          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core._3_dsl2molecule.ast.transactionModel.Statement]]
-      //          molecule.core._3_dsl2molecule.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
+      //          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core.ast.transactionModel.Statement]]
+      //          molecule.core.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
       //        }
       //      """
 
@@ -94,8 +94,8 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
           ..${args.map(typedParam(_))}
           ..${txFnBody.init}
           val _txFnStmts = ${txFnBody.last}
-          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core._3_dsl2molecule.ast.transactionModel.Statement]]
-          molecule.core._3_dsl2molecule.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
+          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core.ast.transactionModel.Statement]]
+          molecule.core.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
         }
       """
 

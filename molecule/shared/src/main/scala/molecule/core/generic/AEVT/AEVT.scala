@@ -2,7 +2,7 @@
 * AUTO-GENERATED Molecule DSL for namespace `AEVT`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/AEVTDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/AEVTDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
@@ -13,6 +13,7 @@ import molecule.core.boilerplate.api._
 import molecule.core.boilerplate.attributes._
 import molecule.core.boilerplate.base._
 import molecule.core.boilerplate.dummyTypes._
+import molecule.core.generic.AEVT._AEVT.AEVT_0_0_L0
 import scala.language.higherKinds
 
 object AEVT extends AEVT_0_0_L0[AEVT_, Nothing] with FirstNS {

@@ -1,4 +1,4 @@
-package molecule.core._4_api.api
+package molecule.core.api
 
 import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
 

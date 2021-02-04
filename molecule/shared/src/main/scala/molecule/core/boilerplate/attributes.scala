@@ -3,7 +3,7 @@ package molecule.core.boilerplate
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.core.boilerplate.base.NS
-import molecule.core._2_dsl.expression.AttrExpressions._
+import molecule.core.expression.AttrExpressions._
 
 /** Boilerplate interfaces for custom DSL generated from schema definition file.
   * <br><br>

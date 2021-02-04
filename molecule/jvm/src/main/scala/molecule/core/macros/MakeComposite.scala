@@ -16,9 +16,9 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
     if (hasVariables) {
       q"""
-        import molecule.core._3_dsl2molecule.ast.elements._
-        import molecule.core._3_dsl2molecule.ops.ModelOps._
-        import molecule.core._3_dsl2molecule.transform.Model2Query
+        import molecule.core.ast.elements._
+        import molecule.core.ops.ModelOps._
+        import molecule.core.transform.Model2Query
 
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
@@ -28,7 +28,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       """
     } else {
       q"""
-        import molecule.core._3_dsl2molecule.ast.elements._
+        import molecule.core.ast.elements._
         final class $outMolecule extends $MoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
         }

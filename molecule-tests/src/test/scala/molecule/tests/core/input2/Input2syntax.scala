@@ -176,7 +176,7 @@ class Input2syntax extends TestSpec {
       // Multiple pairs
       // Compare functions expects only one argument, so multiple input pairs are not allowed
       (inputExpression.apply((1, 2L), (1, 3L)).get must throwA[Molecule_2_Exception])
-        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
         "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
     }
   }
@@ -311,7 +311,7 @@ class Input2syntax extends TestSpec {
         "Can't apply multiple values to comparison function."
 
       (inputExpression.apply((1L, Set(1)), (2L, Set(2))).get must throwA[Molecule_2_Exception])
-        .message === "Got the exception molecule.core.input.exception.InputMolecule_2_Exception: " +
+        .message === "Got the exception molecule.core.input.exception.Molecule_2_Exception: " +
         "Can't apply multiple pairs to input attributes with one or more expressions (<, >, <=, >=, !=)"
 
 

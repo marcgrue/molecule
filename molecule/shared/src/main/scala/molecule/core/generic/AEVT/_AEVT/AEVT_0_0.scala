@@ -2,11 +2,12 @@
 * AUTO-GENERATED Molecule DSL for namespace `AEVT`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/AEVTDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/AEVTDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
-package molecule.core.generic.AEVT
+package molecule.core.generic.AEVT._AEVT
+import molecule.core.generic.AEVT._
 
 import java.util.Date
 import molecule.core.boilerplate.api._

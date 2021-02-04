@@ -2,11 +2,12 @@
 * AUTO-GENERATED Molecule DSL for namespace `Schema`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/SchemaDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/SchemaDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
 package molecule.core.generic.Schema
+import molecule.core.generic.Schema._Schema._
 
 import java.util.Date
 import molecule.core.boilerplate.api._

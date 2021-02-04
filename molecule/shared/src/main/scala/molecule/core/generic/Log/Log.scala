@@ -2,11 +2,12 @@
 * AUTO-GENERATED Molecule DSL for namespace `Log`
 *
 * To change:
-* 1. Edit data model in molecule.core._2_dsl.generic.dataModel/LogDataModel
+* 1. Edit data model in molecule.core.generic.dataModel/LogDataModel
 * 2. `sbt clean compile`
 * 3. Re-compile project in IDE
 */
 package molecule.core.generic.Log
+import molecule.core.generic.Log._Log._
 
 import java.util.Date
 import molecule.core.boilerplate.api._
