@@ -1,4 +1,4 @@
-package molecule.tests.core.generic.dataModel
+package molecule.tests.core.generic.standby
 
 import molecule.core.data.model._
 

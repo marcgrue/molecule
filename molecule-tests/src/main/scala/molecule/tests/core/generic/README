@@ -1,0 +1,13 @@
+To re-generate generic dsl code:
+
+1. In SettingsMolecule, set:
+
+    moleculeMakeJars := false,
+    moleculeGenericPkg := "molecule.core.generic",
+    moleculeDataModelPaths := Seq(
+      // ...uncomment others to save compile time
+      "molecule/tests/core/generic"
+    )
+
+2. `sbt clean compile -Dmolecule=true`
+3. Copy 7 folders in src_managed.main.molecule.tests.core.generic.dsl to shared.src.main.scala.molecule.core.generic

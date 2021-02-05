@@ -3,7 +3,7 @@ package molecule.core.composition
 import Composite_1._
 import Composite_2._
 import Composite_3._
-import molecule.core.boilerplate.base._
+import molecule.core.dsl.base._
 import scala.language.higherKinds
 
 /** Add sub-molecule to composite molecule.

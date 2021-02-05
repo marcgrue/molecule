@@ -2,11 +2,10 @@ package molecule.core.api
 
 import java.net.URI
 import java.util.Date
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
+import molecule.core.exceptions.MoleculeException
 import molecule.core.expression.AttrExpressions
-import molecule.core.input.exception.MoleculeException
-import molecule.core.input.{Molecule_1, Molecule_3}
 import molecule.core.util.fns
 import molecule.datomic.ast.query.{DataClause, _}
 
@@ -20,7 +19,7 @@ import molecule.datomic.ast.query.{DataClause, _}
   * <br><br>
   * Input molecules can await 1, 2 or 3 inputs and are constructed by applying the [[AttrExpressions.? ?]] marker
   * to attributes. If one marker is applied, we get a [[Molecule_1 Molecule_1]], 2 inputs creates
-  * an [[Molecule_1 Molecule_3]] and 3 an [[Molecule_3 Molecule_3]].
+  * an [[Molecule_2 Molecule_2]] and 3 an [[Molecule_3 Molecule_3]].
   * <br><br>
   * The three input molecule interfaces come in arity-versions corresponding to the number of non-?-marked attributes
   * in the input molecule. Let's see a simple example:
@@ -45,7 +44,7 @@ import molecule.datomic.ast.query.{DataClause, _}
   *   ageOfPersons("Liz").get === List(34)
   * }}}
   */
-trait InputMolecule extends MoleculeBase {
+trait InputMolecule extends Molecule {
 
   protected def resolveOr[I1](or: Or[I1]): Seq[I1] = {
     def traverse(or0: Or[I1]): Seq[I1] = or0 match {

@@ -9,7 +9,7 @@ lazy val molecule = crossProject(JSPlatform, JVMPlatform)
     //      Publish.withDocs // make docs for publishSigned
   )
   .jsSettings(Settings.js)
-  .jsConfigure(_.enablePlugins(TzdbPlugin))
+//  .jsConfigure(_.enablePlugins(TzdbPlugin))
   .jvmSettings(Settings.jvm)
 
 lazy val js  = molecule.js

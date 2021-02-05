@@ -2,7 +2,7 @@ package molecule.core.api.get
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.core.api.getAsync.GetAsyncRaw
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.datomic.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
@@ -16,7 +16,7 @@ import scala.language.implicitConversions
   * therefore the fastest (but untyped) way of retrieving data. Can be useful where typed data is
   * not needed.
   * */
-trait GetRaw { self: MoleculeBase =>
+trait GetRaw { self: Molecule =>
 
 
   // get ================================================================================================

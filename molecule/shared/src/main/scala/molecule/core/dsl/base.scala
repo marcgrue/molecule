@@ -1,4 +1,4 @@
-package molecule.core.boilerplate
+package molecule.core.dsl
 
 
 /** Base namespace markers to carry attribute types from one arity to the next. */

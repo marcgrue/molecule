@@ -2,7 +2,7 @@ package molecule.core.api.getAsync
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.core.api.get.GetRaw
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +26,7 @@ import scala.language.implicitConversions
   * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter (in the
   * `get` package) in a Future. `getAsyncRawAsOf` thus wraps the result of `getRawAsOf` in a Future and so on.
   * */
-trait GetAsyncRaw { self: MoleculeBase with GetRaw =>
+trait GetAsyncRaw { self: Molecule with GetRaw =>
 
 
   // get ================================================================================================

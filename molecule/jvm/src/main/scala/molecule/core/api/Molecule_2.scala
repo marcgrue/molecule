@@ -2,7 +2,7 @@ package molecule.core.api
 
 import molecule.core.api.Molecule_0._
 import molecule.core.api.exception.Molecule_2_Exception
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.datomic.ast.query._
 import molecule.datomic.base.facade.Conn
@@ -217,7 +217,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(i1: I1, i2: I2)(implicit conn: Conn): MoleculeBase
+  def apply(i1: I1, i2: I2)(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying one or more pairs of expressions, each matching both input attributes
@@ -244,7 +244,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(or: Or2[I1, I2])(implicit conn: Conn): MoleculeBase
+  def apply(or: Or2[I1, I2])(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying one or more value pairs
@@ -271,7 +271,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(tpl: (I1, I2), tpls: (I1, I2)*)(implicit conn: Conn): MoleculeBase
+  def apply(tpl: (I1, I2), tpls: (I1, I2)*)(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying Seq of value pairs
@@ -296,7 +296,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(ins: Seq[(I1, I2)])(implicit conn: Conn): MoleculeBase
+  def apply(ins: Seq[(I1, I2)])(implicit conn: Conn): Molecule
 
 
   // Separate inputs -----------------------------------------------------------------------------
@@ -326,7 +326,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(and: And2[I1, I2])(implicit conn: Conn): MoleculeBase
+  def apply(and: And2[I1, I2])(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying 2 Seq of values, one for each input attribute
@@ -357,7 +357,7 @@ trait Molecule_2[Obj, I1, I2] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(in1: Seq[I1], in2: Seq[I2])(implicit conn: Conn): MoleculeBase
+  def apply(in1: Seq[I1], in2: Seq[I2])(implicit conn: Conn): Molecule
 }
 
 

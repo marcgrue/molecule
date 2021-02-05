@@ -1,7 +1,7 @@
 package molecule.core.ops
 
-import molecule.core.boilerplate.attributes._
-import molecule.core.boilerplate.base.{FirstNS, NS}
+import molecule.core.dsl.attributes._
+import molecule.core.dsl.base.{FirstNS, NS}
 import molecule.core.ops.exception.TreeOpsException
 import molecule.datomic.ast.query._
 import scala.language.existentials

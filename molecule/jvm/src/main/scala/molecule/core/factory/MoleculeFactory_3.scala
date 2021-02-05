@@ -1,7 +1,7 @@
 package molecule.core.factory
 
 import molecule.core.api.Molecule_3._
-import molecule.core.boilerplate.base._
+import molecule.core.dsl.base._
 import molecule.core.macros.MakeMolecule_In
 import scala.language.experimental.macros
 import scala.language.{higherKinds, implicitConversions}

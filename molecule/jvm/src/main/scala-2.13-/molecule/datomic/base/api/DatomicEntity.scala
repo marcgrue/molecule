@@ -3,7 +3,7 @@ package molecule.datomic.base.api
 import java.net.URI
 import java.util.{Date, UUID}
 import clojure.lang.{Keyword, PersistentArrayMap}
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements.{Model, TxMetaData}
 import molecule.core.ops.VerifyModel
 import molecule.datomic.base.ast.transactionModel.RetractEntity
@@ -242,7 +242,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * @param metaMolecule Transaction meta data molecule
     * @return [[RetractMolecule RetractMolecule]] - a simple wrapper for adding retraction tx meta data
     */
-  def Tx(txMeta: MoleculeBase): RetractMolecule = RetractMolecule(txMeta)
+  def Tx(txMeta: Molecule): RetractMolecule = RetractMolecule(txMeta)
 
   /** Wrapper to add retract methods on entity with transaction meta data.
     * <br><br>
@@ -263,7 +263,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * @group tx
     * @param txMeta A molecule with transaction meta data to be saved with entity retraction
     */
-  case class RetractMolecule(txMeta: MoleculeBase) {
+  case class RetractMolecule(txMeta: Molecule) {
     private val retractStmts = Seq(RetractEntity(eid))
 
     private val _model = Model(Seq(TxMetaData(txMeta._model.elements)))

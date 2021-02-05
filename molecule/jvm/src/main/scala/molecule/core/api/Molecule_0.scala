@@ -4,7 +4,7 @@ import molecule.core.transform.CastHelpers
 import molecule.core.api
 import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
 import molecule.core.api.getAsync.{GetAsyncArray, GetAsyncIterable, GetAsyncList, GetAsyncRaw}
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.core.ops.VerifyModel
 import molecule.datomic.ast.query.Query
@@ -153,7 +153,7 @@ import scala.language.implicitConversions
  * @groupname internal Internal (but public) model/query representations
  * @groupprio internal 710
  * */
-trait Molecule_0[Obj, Tpl] extends MoleculeBase
+trait Molecule_0[Obj, Tpl] extends Molecule
   with CastHelpers[Obj, Tpl]
   with GetArray[Obj, Tpl]
   with GetIterable[Obj, Tpl]

@@ -2,7 +2,8 @@ package molecule.core.api
 
 import java.util.Date
 import molecule.core.api.Molecule_0._
-import molecule.core.ast.MoleculeBase
+import molecule.core.api.exception.Molecule_1_Exception
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.core.util.fns
 import molecule.datomic.ast.query._
@@ -86,7 +87,7 @@ trait Molecule_1[Obj, I1] extends InputMolecule {
     * @note Only distinct values are matched.
     * @return Resolved molecule that can be queried
     */
-  def apply(arg: I1)(implicit conn: Conn): MoleculeBase
+  def apply(arg: I1)(implicit conn: Conn): Molecule
 
 
   /** Apply one or more input values to resolve input molecule.
@@ -107,7 +108,7 @@ trait Molecule_1[Obj, I1] extends InputMolecule {
     * @note Only distinct values are matched.
     * @return Resolved molecule that can be queried
     */
-  def apply(arg: I1, arg2: I1, moreArgs: I1*)(implicit conn: Conn): MoleculeBase
+  def apply(arg: I1, arg2: I1, moreArgs: I1*)(implicit conn: Conn): Molecule
 
 
   /** Apply OR expression of input values to resolve input molecule.
@@ -130,7 +131,7 @@ trait Molecule_1[Obj, I1] extends InputMolecule {
     * @note Only distinct values are matched.
     * @return Resolved molecule that can be queried
     */
-  def apply(or: Or[I1])(implicit conn: Conn): MoleculeBase
+  def apply(or: Or[I1])(implicit conn: Conn): Molecule
 
 
   /** Apply Seq of input values with OR semantics to resolve input molecule.
@@ -153,7 +154,7 @@ trait Molecule_1[Obj, I1] extends InputMolecule {
     * @note Only distinct values are matched.
     * @return Resolved molecule that can be queried
     */
-  def apply(args: Seq[I1])(implicit conn: Conn): MoleculeBase
+  def apply(args: Seq[I1])(implicit conn: Conn): Molecule
 }
 
 

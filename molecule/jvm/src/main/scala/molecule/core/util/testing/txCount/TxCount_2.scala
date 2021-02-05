@@ -1,10 +1,10 @@
 package molecule.core.util.testing
 package txCount
 import scala.language.higherKinds
-import molecule.core.boilerplate.attributes._
-import molecule.core.boilerplate.base._
-import molecule.core.boilerplate.dummyTypes._
-import molecule.core.boilerplate.api._
+import molecule.core.dsl.attributes._
+import molecule.core.dsl.base._
+import molecule.core.dsl.dummyTypes._
+import molecule.core.dsl.api._
 import molecule.core.expression.AttrExpressions.?
 
 

@@ -7,21 +7,57 @@
 * 3. Re-compile project in IDE
 */
 package molecule.core.generic.Schema
-import molecule.core.generic.Schema._Schema._
 
 import java.util.Date
-import molecule.core.boilerplate.api._
-import molecule.core.boilerplate.attributes._
-import molecule.core.boilerplate.base._
-import molecule.core.boilerplate.dummyTypes._
+import molecule.core.dsl.api._
+import molecule.core.dsl.attributes._
+import molecule.core.dsl.base._
+import molecule.core.dsl.dummyTypes._
+import molecule.core.generic.GenericNs
 import scala.language.higherKinds
 
-object Schema extends Schema_0_0_L0[Schema_, Nothing] with FirstNS {
-  final override def apply(eid: Long, eids: Long*): Schema_0_0_L0[Schema_, Nothing] = ???
-  final override def apply(eids: Iterable[Long])  : Schema_0_0_L0[Schema_, Nothing] = ???
+
+trait Schema extends GenericNs {
+  final class id          [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class ident       [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class part        [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class nsFull      [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class ns          [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class a           [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class tpe         [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class card        [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class doc         [Stay, Next] extends OneString [Stay, Next] with Indexed with Fulltext[Stay, Next]
+  final class index       [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  final class unique      [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class fulltext    [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  final class isComponent [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  final class noHistory   [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  final class enum        [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class t           [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class tx          [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class txInstant   [Stay, Next] extends OneDate   [Stay, Next] with Indexed
+  
+  final class id$         [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class ident$      [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class part$       [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class nsFull$     [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class ns$         [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class a$          [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class tpe$        [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class card$       [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class doc$        [Stay, Next] extends OneString$ [Stay] with Indexed with Fulltext[Stay, Next]
+  final class index$      [Stay, Next] extends OneBoolean$[Stay] with Indexed
+  final class unique$     [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class fulltext$   [Stay, Next] extends OneBoolean$[Stay] with Indexed
+  final class isComponent$[Stay, Next] extends OneBoolean$[Stay] with Indexed
+  final class noHistory$  [Stay, Next] extends OneBoolean$[Stay] with Indexed
+  final class enum$       [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class t$          [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class tx$         [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class txInstant$  [Stay, Next] extends OneDate$   [Stay] with Indexed
 }
 
-// Object interface
+// Object properties
 
 trait Schema_[props] { def Schema: props = ??? }
 

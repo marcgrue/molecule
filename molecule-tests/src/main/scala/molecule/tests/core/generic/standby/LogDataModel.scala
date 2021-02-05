@@ -1,11 +1,11 @@
-package molecule.tests.core.generic.dataModel
+package molecule.tests.core.generic.standby
 
 import molecule.core.data.model._
 
 @InOut(0, 7)
-object VAETDataModel {
+object LogDataModel {
 
-  trait VAET {
+  trait Log {
     val e         = oneLong.doc("Entity id")
     val a         = oneString.doc("Attribute name")
     val v         = oneAny.doc("Value")

@@ -1,6 +1,6 @@
 package molecule.core.composition
 
-import molecule.core.boilerplate.base._
+import molecule.core.dsl.base._
 import scala.language.higherKinds
 
 

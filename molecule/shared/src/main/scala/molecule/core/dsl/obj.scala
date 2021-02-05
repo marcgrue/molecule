@@ -1,4 +1,4 @@
-package molecule.core.boilerplate
+package molecule.core.dsl
 
 object obj {
 

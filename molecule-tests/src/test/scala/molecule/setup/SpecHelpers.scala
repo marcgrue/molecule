@@ -1,7 +1,7 @@
 package molecule.setup
 
 import molecule.core.api.InputMolecule
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements.Model
 import molecule.datomic.ast.query.Query
 import molecule.core.util.testing.MoleculeTestHelper
@@ -14,7 +14,7 @@ import org.specs2.mutable.Specification
 trait SpecHelpers extends Specification with MoleculeTestHelper {
 
 
-  implicit class dsl2Model2query2string(molecule: MoleculeBase)(implicit conn: Conn) {
+  implicit class dsl2Model2query2string(molecule: Molecule)(implicit conn: Conn) {
     def -->(model: Model) = new {
       molecule._model === model
 
@@ -71,7 +71,7 @@ trait SpecHelpers extends Specification with MoleculeTestHelper {
     }
   }
 
-  def testUpdateMolecule(molecule: MoleculeBase)(implicit conn: Conn): Any {
+  def testUpdateMolecule(molecule: Molecule)(implicit conn: Conn): Any {
     def -->(txString: String): MatchResult[Any]
 
     def -->(model: Model): Any {
@@ -92,7 +92,7 @@ trait SpecHelpers extends Specification with MoleculeTestHelper {
     }
   }
 
-  def testInsertMolecule(molecule: MoleculeBase, ids: Seq[Long] = Seq())(implicit conn: Conn): Object {
+  def testInsertMolecule(molecule: Molecule, ids: Seq[Long] = Seq())(implicit conn: Conn): Object {
     def -->(txString: String): MatchResult[Any]
 
     def -->(model: Model): Object {

@@ -2,7 +2,7 @@ package molecule.core.expression
 
 import molecule.core.ast.elements
 import molecule.core.ast.elements._
-import molecule.core.boilerplate.attributes.Attr
+import molecule.core.dsl.attributes.Attr
 
 
 /** Attribute expression markers and methods.

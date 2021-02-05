@@ -7,21 +7,35 @@
 * 3. Re-compile project in IDE
 */
 package molecule.core.generic.VAET
-import molecule.core.generic.VAET._VAET._
 
 import java.util.Date
-import molecule.core.boilerplate.api._
-import molecule.core.boilerplate.attributes._
-import molecule.core.boilerplate.base._
-import molecule.core.boilerplate.dummyTypes._
+import molecule.core.dsl.api._
+import molecule.core.dsl.attributes._
+import molecule.core.dsl.base._
+import molecule.core.dsl.dummyTypes._
+import molecule.core.generic.GenericNs
 import scala.language.higherKinds
 
-object VAET extends VAET_0_0_L0[VAET_, Nothing] with FirstNS {
-  final override def apply(eid: Long, eids: Long*): VAET_0_0_L0[VAET_, Nothing] = ???
-  final override def apply(eids: Iterable[Long])  : VAET_0_0_L0[VAET_, Nothing] = ???
+
+trait VAET extends GenericNs {
+  final class e         [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class a         [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class v         [Stay, Next] extends OneAny    [Stay, Next] with Indexed
+  final class t         [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class tx        [Stay, Next] extends OneLong   [Stay, Next] with Indexed
+  final class txInstant [Stay, Next] extends OneDate   [Stay, Next] with Indexed
+  final class op        [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  
+  final class e$        [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class a$        [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class v$        [Stay, Next] extends OneAny$    [Stay] with Indexed
+  final class t$        [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class tx$       [Stay, Next] extends OneLong$   [Stay] with Indexed
+  final class txInstant$[Stay, Next] extends OneDate$   [Stay] with Indexed
+  final class op$       [Stay, Next] extends OneBoolean$[Stay] with Indexed
 }
 
-// Object interface
+// Object properties
 
 trait VAET_[props] { def VAET: props = ??? }
 

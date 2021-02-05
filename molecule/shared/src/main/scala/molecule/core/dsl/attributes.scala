@@ -1,8 +1,8 @@
-package molecule.core.boilerplate
+package molecule.core.dsl
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.core.boilerplate.base.NS
+import molecule.core.dsl.base.NS
 import molecule.core.expression.AttrExpressions._
 
 /** Boilerplate interfaces for custom DSL generated from schema definition file.

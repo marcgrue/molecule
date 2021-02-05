@@ -1,6 +1,6 @@
 package molecule.datomic.base.api
 
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements.{Model, TxMetaData}
 import molecule.core.ops.VerifyModel
 import molecule.datomic.base.ast.transactionModel.RetractEntity
@@ -62,7 +62,7 @@ trait EntityOps {
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of retract
     */
-  def retract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): TxReport = {
+  def retract(eids: Iterable[Long], txMetaDataMolecules: Molecule*)(implicit conn: Conn): TxReport = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
 
     val txMetaDataStmts = if (txMetaDataMolecules.isEmpty) {
@@ -105,7 +105,7 @@ trait EntityOps {
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return [[molecule.datomic.base.facade.TxReport TxReport]] with result of retract
     */
-  def retractAsync(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
+  def retractAsync(eids: Iterable[Long], txMetaDataMolecules: Molecule*)(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
 
     val txMetaDataStmts = if (txMetaDataMolecules.isEmpty) {
@@ -160,7 +160,7 @@ trait EntityOps {
     * @param conn                Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Unit (prints to output)
     */
-  def inspectRetract(eids: Iterable[Long], txMetaDataMolecules: MoleculeBase*)(implicit conn: Conn): Unit = {
+  def inspectRetract(eids: Iterable[Long], txMetaDataMolecules: Molecule*)(implicit conn: Conn): Unit = {
     val retractStmts = eids.toSeq.distinct map RetractEntity
 
     val txMetaDataModel = if (txMetaDataMolecules.isEmpty) {

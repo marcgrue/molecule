@@ -2,7 +2,7 @@ package molecule.core.api
 
 import molecule.core.api.Molecule_0._
 import molecule.core.api.exception.Molecule_3_Exception
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.datomic.ast.query._
 import molecule.datomic.base.facade.Conn
@@ -314,7 +314,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(i1: I1, i2: I2, i3: I3)(implicit conn: Conn): MoleculeBase
+  def apply(i1: I1, i2: I2, i3: I3)(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying one or more value triples
@@ -341,7 +341,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(tpl: (I1, I2, I3), tpls: (I1, I2, I3)*)(implicit conn: Conn): MoleculeBase
+  def apply(tpl: (I1, I2, I3), tpls: (I1, I2, I3)*)(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying one or more triples of expressions, each matching the 3 input attributes
@@ -367,7 +367,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(or: Or3[I1, I2, I3])(implicit conn: Conn): MoleculeBase
+  def apply(or: Or3[I1, I2, I3])(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying Seq of value triples
@@ -392,7 +392,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(ins: Seq[(I1, I2, I3)])(implicit conn: Conn): MoleculeBase
+  def apply(ins: Seq[(I1, I2, I3)])(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying 3 groups of expressions, one for each of the 3 input attributes
@@ -421,7 +421,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(and: And3[I1, I2, I3])(implicit conn: Conn): MoleculeBase
+  def apply(and: And3[I1, I2, I3])(implicit conn: Conn): Molecule
 
 
   /** Resolve input molecule by applying 3 groups of values, one for each of the 3 input attributes
@@ -453,7 +453,7 @@ trait Molecule_3[Obj, I1, I2, I3] extends InputMolecule {
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] in scope
     * @return Resolved molecule that can be queried
     */
-  def apply(in1: Seq[I1], in2: Seq[I2], in3: Seq[I3])(implicit conn: Conn): MoleculeBase
+  def apply(in1: Seq[I1], in2: Seq[I2], in3: Seq[I3])(implicit conn: Conn): Molecule
 }
 
 

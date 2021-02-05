@@ -6,7 +6,7 @@ import datomic.Peer.function
 import datomic.Util
 import datomic.Util.{list, read}
 import molecule.core.macros.exception.TxFnException
-import molecule.core.ast.MoleculeBase
+import molecule.core.ast.Molecule
 import molecule.core.ast.elements.{Composite, Model, TxMetaData}
 import molecule.core.macros.TxFunctionCall
 import molecule.core.util.{BridgeDatomicFuture, Helpers}
@@ -64,7 +64,7 @@ trait TxFunctions {
     */
   def transactFn(
     txFnCall: Seq[Seq[Statement]],
-    txMolecules: MoleculeBase*
+    txMolecules: Molecule*
   ): TxReport = macro TxFunctionCall.txFnCall
 
 
@@ -107,7 +107,7 @@ trait TxFunctions {
     */
   def transactFnAsync(
     txFnCall: Seq[Seq[Statement]],
-    txMolecules: MoleculeBase*
+    txMolecules: Molecule*
   ): Future[TxReport] = macro TxFunctionCall.asyncTxFnCall
 
 
@@ -147,7 +147,7 @@ trait TxFunctions {
     */
   def inspectTransactFn(
     txFnCall: Seq[Seq[Statement]],
-    txMolecules: MoleculeBase*
+    txMolecules: Molecule*
   ): Unit = macro TxFunctionCall.inspectTxFnCall
 }
 
@@ -219,7 +219,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
 
 
   private[this] def txStmts(
-    txMolecules: Seq[MoleculeBase],
+    txMolecules: Seq[Molecule],
     conn: Conn
   ): Seq[Statement] = if (txMolecules.nonEmpty) {
     val txElements    = txMolecules.flatMap { mol =>
@@ -240,7 +240,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
     * */
   private[molecule] def txFnCall(
     txFn: String,
-    txMolecules: Seq[MoleculeBase],
+    txMolecules: Seq[Molecule],
     args: Any*
   )(implicit conn: Conn): TxReport = tryTransactTxFn {
 
@@ -260,7 +260,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
 
   private[molecule] def inspectTxFnCall(
     txFn: String,
-    txMolecules: Seq[MoleculeBase],
+    txMolecules: Seq[Molecule],
     args: Any*
   )(implicit conn: Conn): Unit = {
     // Use temporary branch of db to not changing any live data
@@ -273,7 +273,7 @@ object TxFunctions extends Helpers with BridgeDatomicFuture {
 
   private[molecule] def asyncTxFnCall(
     txFn: String,
-    txMolecules: Seq[MoleculeBase],
+    txMolecules: Seq[Molecule],
     args: Any*
   )(implicit conn: Conn, ec: ExecutionContext): Future[TxReport] = try {
     val txFnInstallFuture: Future[Any] = {

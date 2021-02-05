@@ -4,7 +4,7 @@ import molecule.core.ast.elements.Model
 import molecule.datomic.ast.query.Query
 
 /** Base Molecule interface. */
-trait MoleculeBase {
+trait Molecule {
 
   /** Internal [[elements.Model Model]] representation of molecule.
     * <br><br>

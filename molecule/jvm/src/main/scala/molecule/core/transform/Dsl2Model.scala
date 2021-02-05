@@ -1,10 +1,15 @@
 package molecule.core.transform
 
-import molecule.core.boilerplate.attributes._
-import molecule.core.generic.index.{AEVT, AVET, EAVT, VAET}
-import molecule.core.generic.{GenericNs, Log, Schema}
+import molecule.core.dsl.attributes._
+import molecule.core.generic._
 import molecule.core.transform.exception.Dsl2ModelException
 import molecule.core.ast.elements._
+import molecule.core.generic.AEVT._
+import molecule.core.generic.AVET._
+import molecule.core.generic.EAVT._
+import molecule.core.generic.Log._
+import molecule.core.generic.Schema._
+import molecule.core.generic.VAET._
 import molecule.core.macros.Cast
 import molecule.core.ops.VerifyRawModel
 import scala.language.experimental.macros
