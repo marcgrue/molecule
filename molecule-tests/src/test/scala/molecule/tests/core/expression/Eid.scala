@@ -1,8 +1,8 @@
 package molecule.tests.core.expression
 
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in1_out2._
-import molecule.datomic.ops.exception.VerifyModelException
+import molecule.core.ops.exception.VerifyModelException
 
 class Eid extends Base {
 

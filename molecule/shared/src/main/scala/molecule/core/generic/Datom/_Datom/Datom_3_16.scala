@@ -8,15 +8,27 @@
 */
 package molecule.core.generic.Datom
 
+import java.net.URI
 import java.util.Date
-import molecule.core.dsl.api._
+import java.util.UUID
+import molecule.core.composition.CompositeInit_0._
+import molecule.core.composition.CompositeInit_1._
+import molecule.core.composition.CompositeInit_2._
+import molecule.core.composition.CompositeInit_3._
+import molecule.core.composition.nested._
+import molecule.core.composition.Nested_1._
+import molecule.core.composition.Nested_2._
+import molecule.core.composition.Nested_3._
+import molecule.core.composition.Tx._
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
-import molecule.core.dsl.dummyTypes._
+import molecule.core.expression._
+import molecule.core.expression.AttrExpressions.?
 import molecule.core.generic.Datom._
+import molecule.core.generic.GenericNs
 import scala.language.higherKinds
 
-trait Datom_3_16[o0[_], p0, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends Datom_[p0] with Datom
+trait Datom_3_16[o0[_], p0, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends Datom_[p0] with Datom with NS_3_16[o0, p0, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
 
 trait Datom_3_16_L0[o0[_], p0, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Ns_3_16[o0[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns_3_17[o0[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns_4_16[o0[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_], Ns_4_17[o0[_],_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]] extends Datom_3_16[o0, p0, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[Ns_3_17[o0, p0 with Prop, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Tpe], Nothing] with Ns_3_17[o0, p0 with Prop, I1, I2, I3, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Tpe]

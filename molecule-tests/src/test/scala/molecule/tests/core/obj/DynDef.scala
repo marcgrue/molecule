@@ -4,7 +4,7 @@
 //import molecule.TestSpec
 //import molecule.core.util.Helpers
 //import molecule.datomic.api.out3._
-//import molecule.tests.core.base.dsl.coreTest._
+//import molecule.tests.core.base.dsl.CoreTest._
 //import scala.language.dynamics
 //
 //
@@ -171,7 +171,7 @@
 //
 //
 //  //  "adhoc" in new BidirectionalSetup {
-//  //import molecule.tests.core.bidirectionals.dsl.bidirectional._
+//  //import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 //  //
 //  //  }
 //

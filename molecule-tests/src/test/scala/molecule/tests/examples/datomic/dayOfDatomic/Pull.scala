@@ -2,11 +2,11 @@ package molecule.tests.examples.datomic.dayOfDatomic
 
 import java.util.UUID
 import datomic.Util
-import molecule.core.util.SystemDevLocal
+import molecule.datomic.base.util.SystemDevLocal
 import molecule.datomic.api.out8._
-import molecule.tests.examples.datomic.mbrainz.dsl.mBrainz._
+import molecule.tests.examples.datomic.mbrainz.dsl.MBrainz._
 import molecule.TestSpec
-import molecule.datomic.util.{SystemDevLocal, SystemPeer}
+import molecule.datomic.base.util.{SystemDevLocal, SystemPeer}
 import scala.language.postfixOps
 
 /*

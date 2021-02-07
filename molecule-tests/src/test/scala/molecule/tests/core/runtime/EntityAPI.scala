@@ -1,6 +1,6 @@
 package molecule.tests.core.runtime
 
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
 

@@ -25,7 +25,7 @@ trait SettingsMolecule {
 
       //      "molecule/tests/core/generic"
     ),
-//        moleculeMakeJars := false,
+        moleculeMakeJars := false,
     //    moleculeGenericPkg := "molecule.core.generic",
 
     // Let IDE detect created jars in unmanaged lib directory

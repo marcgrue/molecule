@@ -2,11 +2,11 @@ package molecule.tests.core.crud.update
 
 import java.net.URI
 import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
 import molecule.datomic.base.transform.exception.Model2TransactionException
-import molecule.datomic.ops.exception.VerifyModelException
+import molecule.core.ops.exception.VerifyModelException
 
 class UpdateURI extends TestSpec {
 

@@ -1,7 +1,7 @@
 package molecule.tests.core.ref.composite
 
 import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out6._
 import molecule.TestSpec
 

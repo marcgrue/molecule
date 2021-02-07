@@ -3,7 +3,7 @@ package molecule.setup
 import molecule.core.api.InputMolecule
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements.Model
-import molecule.datomic.ast.query.Query
+import molecule.datomic.base.ast.query.Query
 import molecule.core.util.testing.MoleculeTestHelper
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.transform.Model2Transaction

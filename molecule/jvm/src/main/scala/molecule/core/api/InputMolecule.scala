@@ -7,7 +7,7 @@ import molecule.core.ast.elements._
 import molecule.core.exceptions.MoleculeException
 import molecule.core.expression.AttrExpressions
 import molecule.core.util.fns
-import molecule.datomic.ast.query.{DataClause, _}
+import molecule.datomic.base.ast.query.{DataClause, _}
 
 /** Shared interface of all input molecules.
   * <br><br>

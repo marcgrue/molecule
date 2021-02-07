@@ -1,6 +1,6 @@
 package molecule.tests.core.attrMap
 
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in1_out2._
 
 class Input extends Base {

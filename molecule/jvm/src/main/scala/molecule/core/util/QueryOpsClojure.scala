@@ -1,8 +1,8 @@
 package molecule.core.util
 
 import datomic.Util
-import molecule.datomic.ast.query.{CollectionBinding, InDataSource, InVar, Query, RelationBinding}
-import molecule.datomic.ops.exception.QueryOpsException
+import molecule.datomic.base.ast.query.{CollectionBinding, InDataSource, InVar, Query, RelationBinding}
+import molecule.datomic.base.ops.exception.QueryOpsException
 
 case class QueryOpsClojure(q: Query) {
 

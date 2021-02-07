@@ -3,7 +3,7 @@ package molecule.setup.examples.datomic.seattle
 import molecule.datomic.api.out8._
 import molecule.datomic.base.facade.Conn
 import molecule.setup.SpecHelpers
-import molecule.tests.examples.datomic.seattle.dsl.seattle._
+import molecule.tests.examples.datomic.seattle.dsl.Seattle._
 
 case class SeattleData(conn0: Conn) extends SpecHelpers {
 

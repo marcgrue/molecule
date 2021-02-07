@@ -1,7 +1,7 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out5._
-import molecule.tests.examples.datomic.dayOfDatomic.dsl.productsOrder._
+import molecule.tests.examples.datomic.dayOfDatomic.dsl.ProductsOrder._
 import molecule.TestSpec
 
 

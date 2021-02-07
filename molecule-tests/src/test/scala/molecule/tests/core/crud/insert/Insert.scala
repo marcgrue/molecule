@@ -1,6 +1,6 @@
 package molecule.tests.core.crud.insert
 
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out10._
 import molecule.TestSpec
 

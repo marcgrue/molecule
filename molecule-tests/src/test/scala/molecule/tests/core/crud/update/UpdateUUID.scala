@@ -2,11 +2,11 @@ package molecule.tests.core.crud.update
 
 import java.util.UUID
 import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
 import molecule.datomic.base.transform.exception.Model2TransactionException
-import molecule.datomic.ops.exception.VerifyModelException
+import molecule.core.ops.exception.VerifyModelException
 
 class UpdateUUID extends TestSpec {
 

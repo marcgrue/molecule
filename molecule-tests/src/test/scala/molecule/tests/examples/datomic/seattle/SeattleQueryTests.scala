@@ -1,7 +1,7 @@
 package molecule.tests.examples.datomic.seattle
 
 import molecule.datomic.api.in2_out8._
-import molecule.tests.examples.datomic.seattle.dsl.seattle._
+import molecule.tests.examples.datomic.seattle.dsl.Seattle._
 import molecule.TestSpec
 import scala.language.reflectiveCalls
 

@@ -1,7 +1,7 @@
 package molecule.tests.core.api
 
 import java.util.Date
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
 import molecule.TestSpec

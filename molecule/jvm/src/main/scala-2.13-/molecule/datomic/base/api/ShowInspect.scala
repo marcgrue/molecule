@@ -4,12 +4,12 @@ import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{PersistentHashSet, PersistentVector}
 import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
-import molecule.datomic.ast.query.QueryExpr
-import molecule.datomic.ast.tempDb._
+import molecule.datomic.base.ast.query.QueryExpr
+import molecule.datomic.base.ast.tempDb._
 import molecule.core.exceptions.{MoleculeException, QueryException}
 import molecule.core.ops.VerifyModel
-import molecule.datomic.ops.QueryOps._
-import molecule.datomic.transform._
+import molecule.datomic.base.ops.QueryOps._
+import molecule.datomic.base.transform._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.datomic.base.transform.Model2Transaction

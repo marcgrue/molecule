@@ -1,7 +1,7 @@
 package molecule.core.ast
 
 import molecule.core.ast.elements.Model
-import molecule.datomic.ast.query.Query
+import molecule.datomic.base.ast.query.Query
 
 /** Base Molecule interface. */
 trait Molecule {
@@ -16,7 +16,7 @@ trait Molecule {
     **/
   val _model: Model
 
-  /** Internal [[molecule.datomic.ast.query.Query Query]] representation of molecule.
+  /** Internal [[molecule.datomic.base.ast.query.Query Query]] representation of molecule.
     * <br><br>
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
@@ -26,7 +26,7 @@ trait Molecule {
     **/
   val _query: Query
 
-  /** Internal optional [[molecule.datomic.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
+  /** Internal optional [[molecule.datomic.base.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
     * <br><br>
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
@@ -36,7 +36,7 @@ trait Molecule {
     **/
   val _nestedQuery: Option[Query]
 
-  /** Internal un-optimized [[molecule.datomic.ast.query.Query Query]] representation molecule.
+  /** Internal un-optimized [[molecule.datomic.base.ast.query.Query Query]] representation molecule.
     * <br><br>
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>
@@ -46,7 +46,7 @@ trait Molecule {
     **/
   val _rawQuery: Query
 
-  /** Internal un-optimized optional [[molecule.datomic.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
+  /** Internal un-optimized optional [[molecule.datomic.base.ast.query.Query Query]] representation of nested molecule with added entity search for each level.
     * <br><br>
     * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
     * <br><br>

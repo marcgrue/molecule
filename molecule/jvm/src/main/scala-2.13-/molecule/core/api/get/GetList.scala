@@ -4,7 +4,7 @@ import java.util.{List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.get.GetArray
 import molecule.core.api.getAsync.GetAsyncList
-import molecule.datomic.ast.tempDb._
+import molecule.datomic.base.ast.tempDb._
 import molecule.core.util.Quoted
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}

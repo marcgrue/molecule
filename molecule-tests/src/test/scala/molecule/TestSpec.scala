@@ -3,11 +3,10 @@ package molecule
 import _root_.datomic.Peer
 import molecule.core.data.SchemaTransaction
 import molecule.core.util.testing.MoleculeTestHelper
-import molecule.core.util.SystemDevLocal
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.client.facade.{Datomic_DevLocal, Datomic_PeerServer}
 import molecule.datomic.peer.facade.Datomic_Peer
-import molecule.datomic.util.{System, SystemDevLocal, SystemPeer, SystemPeerServer}
+import molecule.datomic.base.util.{System, SystemDevLocal, SystemPeer, SystemPeerServer}
 import molecule.setup.{CleanPeerServer, SpecHelpers}
 import molecule.setup.core.CoreData
 import molecule.setup.examples.datomic.dayOfDatomic.SocialNewsData
@@ -39,7 +38,7 @@ class TestSpec extends Specification with MoleculeTestHelper with CoreData {
 
   // What systems to test (can be a single, two or three systems in any order)
   // Set this variable in a test to specify which system should run it
-  // 0 1: Peer   2: Peer-server   3: Dev-local
+  // 1: Peer   2: Peer-server   3: Dev-local
   var tests = 1
   def addSystem(fs: => Fragments, system: String) = fs.mapDescription {
     case Text(t)    => Text(s"$system        $t")

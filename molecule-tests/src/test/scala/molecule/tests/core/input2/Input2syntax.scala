@@ -1,7 +1,7 @@
 package molecule.tests.core.input2
 
 import molecule.core.input.exception.MoleculeException
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in2_out3._
 import molecule.TestSpec
 import molecule.core.api.exception.Molecule_2_Exception

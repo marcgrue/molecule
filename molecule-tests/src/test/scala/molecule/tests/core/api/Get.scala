@@ -2,10 +2,10 @@ package molecule.tests.core.api
 
 import java.util.{Collection => jCollection, List => jList}
 import molecule.datomic.api.out1._
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.TestSpec
 import molecule.core.util.JavaUtil
-import molecule.datomic.util.SystemPeer
+import molecule.datomic.base.util.SystemPeer
 
 
 class Get extends TestSpec with JavaUtil {

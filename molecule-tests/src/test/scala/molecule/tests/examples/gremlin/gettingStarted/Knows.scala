@@ -1,7 +1,7 @@
 package molecule.tests.examples.gremlin.gettingStarted
 
 import molecule.datomic.api.out4._
-import molecule.tests.examples.gremlin.gettingStarted.dsl.modernGraph2._
+import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2._
 import molecule.TestSpec
 
 /*

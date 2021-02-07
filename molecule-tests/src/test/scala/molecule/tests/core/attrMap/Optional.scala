@@ -1,7 +1,7 @@
 package molecule.tests.core.attrMap
 
 import molecule.core.api.OptionalMapOps._
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out2._
 
 class Optional extends Base {

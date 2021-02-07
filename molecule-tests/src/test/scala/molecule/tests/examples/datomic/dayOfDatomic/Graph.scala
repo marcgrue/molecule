@@ -12,7 +12,7 @@ class Graph extends TestSpec {
 
   "Simple hyperedge" in new GraphSetup {
 
-    import molecule.tests.examples.datomic.dayOfDatomic.dsl.graph._
+    import molecule.tests.examples.datomic.dayOfDatomic.dsl.Graph._
 
     val List(r1, r2) = Role.name insert List("Role1", "Role2") eids
 
@@ -114,7 +114,7 @@ class Graph extends TestSpec {
   // Load graph 2 where RoleInGroup references multiple Roles
   "Advanced hyperedge" in new Graph2Setup {
 
-    import molecule.tests.examples.datomic.dayOfDatomic.dsl.graph2._
+    import molecule.tests.examples.datomic.dayOfDatomic.dsl.Graph2._
 
     val List(r1, r2, r3, r4, r5, r6) = Role.name insert List("Role1", "Role2", "Role3", "Role4", "Role5", "Role6") eids
     val List(g1, g2, g3)             = Group.name.roles insert List(

@@ -7,7 +7,7 @@ import molecule.core.api.getAsync.{GetAsyncArray, GetAsyncIterable, GetAsyncList
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.core.ops.VerifyModel
-import molecule.datomic.ast.query.Query
+import molecule.datomic.base.ast.query.Query
 import molecule.datomic.base.api.ShowInspect
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}

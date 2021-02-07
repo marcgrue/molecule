@@ -8,14 +8,25 @@
 */
 package molecule.core.generic.VAET
 
+import java.net.URI
 import java.util.Date
-import molecule.core.dsl.api._
+import java.util.UUID
+import molecule.core.composition.CompositeInit_0._
+import molecule.core.composition.CompositeInit_1._
+import molecule.core.composition.CompositeInit_2._
+import molecule.core.composition.CompositeInit_3._
+import molecule.core.composition.nested._
+import molecule.core.composition.Nested_1._
+import molecule.core.composition.Nested_2._
+import molecule.core.composition.Nested_3._
+import molecule.core.composition.Tx._
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
-import molecule.core.dsl.dummyTypes._
+import molecule.core.expression._
+import molecule.core.expression.AttrExpressions.?
+import molecule.core.generic.Datom._
 import molecule.core.generic.GenericNs
 import scala.language.higherKinds
-
 
 trait VAET extends GenericNs {
   final class e         [Stay, Next] extends OneLong   [Stay, Next] with Indexed
@@ -34,8 +45,6 @@ trait VAET extends GenericNs {
   final class txInstant$[Stay, Next] extends OneDate$   [Stay] with Indexed
   final class op$       [Stay, Next] extends OneBoolean$[Stay] with Indexed
 }
-
-// Object properties
 
 trait VAET_[props] { def VAET: props = ??? }
 

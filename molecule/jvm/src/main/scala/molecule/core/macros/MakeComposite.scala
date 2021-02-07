@@ -1,6 +1,6 @@
 package molecule.core.macros
 
-import molecule.datomic.transform.Model2Query
+import molecule.datomic.base.transform.Model2Query
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
@@ -18,10 +18,10 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       q"""
         import molecule.core.ast.elements._
         import molecule.core.ops.ModelOps._
-        import molecule.core.transform.Model2Query
+        import molecule.datomic.base.transform.Model2Query
 
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-        final class $outMolecule extends $MoleculeTpe[..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
+        final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
         }
         new $outMolecule
@@ -29,7 +29,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
     } else {
       q"""
         import molecule.core.ast.elements._
-        final class $outMolecule extends $MoleculeTpe[..$OutTypes]($model0, ${Model2Query(model0)}) {
+        final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
         }
         new $outMolecule
@@ -39,15 +39,15 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
   // Composite molecules ....................................................
 
-  final def from1tuple[Obj: W, T1: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1])
-  final def from2tuples[Obj: W, T1: W, T2: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2])
-  final def from3tuples[Obj: W, T1: W, T2: W, T3: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3])
-  final def from4tuples[Obj: W, T1: W, T2: W, T3: W, T4: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4])
-  final def from5tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5])
-  final def from6tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6])
-  final def from7tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7])
-  final def from8tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8])
-  final def from9tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W, T9: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8], weakTypeOf[T9])
+  final def from01tuples[Obj: W, T1: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1])
+  final def from02tuples[Obj: W, T1: W, T2: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2])
+  final def from03tuples[Obj: W, T1: W, T2: W, T3: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3])
+  final def from04tuples[Obj: W, T1: W, T2: W, T3: W, T4: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4])
+  final def from05tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5])
+  final def from06tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6])
+  final def from07tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7])
+  final def from08tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8])
+  final def from09tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W, T9: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8], weakTypeOf[T9])
   final def from10tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W, T9: W, T10: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8], weakTypeOf[T9], weakTypeOf[T10])
   final def from11tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W, T9: W, T10: W, T11: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8], weakTypeOf[T9], weakTypeOf[T10], weakTypeOf[T11])
   final def from12tuples[Obj: W, T1: W, T2: W, T3: W, T4: W, T5: W, T6: W, T7: W, T8: W, T9: W, T10: W, T11: W, T12: W](dsl: Tree): Tree = generateCompositeMolecule(dsl, weakTypeOf[Obj], weakTypeOf[T1], weakTypeOf[T2], weakTypeOf[T3], weakTypeOf[T4], weakTypeOf[T5], weakTypeOf[T6], weakTypeOf[T7], weakTypeOf[T8], weakTypeOf[T9], weakTypeOf[T10], weakTypeOf[T11], weakTypeOf[T12])

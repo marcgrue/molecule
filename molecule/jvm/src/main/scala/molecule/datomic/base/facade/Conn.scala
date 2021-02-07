@@ -8,8 +8,8 @@ import com.cognitect.transit.impl.URIImpl
 import datomic.Peer
 import molecule.core.ast.elements
 import molecule.core.ast.elements.Model
-import molecule.datomic.ast.query.Query
-import molecule.datomic.ast.tempDb.TempDb
+import molecule.datomic.base.ast.query.Query
+import molecule.datomic.base.ast.tempDb.TempDb
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.ast.transactionModel
@@ -323,7 +323,7 @@ trait Conn {
     * application code can query and access data of all molecules the same way.
     *
     * @param model [[elements.Model Model]] instance
-    * @param query [[molecule.datomic.ast.query.Query Query]] instance
+    * @param query [[molecule.datomic.base.ast.query.Query Query]] instance
     * @return java.util.Collection[java.util.List[AnyRef]]
     * */
   def query(model: Model, query: Query): jCollection[jList[AnyRef]]

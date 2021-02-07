@@ -1,10 +1,10 @@
 package molecule.tests.core.ref
 
 import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out4._
 import molecule.TestSpec
-import molecule.datomic.ops.exception.VerifyModelException
+import molecule.core.ops.exception.VerifyModelException
 
 class Relations extends TestSpec {
 

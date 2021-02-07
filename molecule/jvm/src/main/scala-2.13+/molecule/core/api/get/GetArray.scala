@@ -3,7 +3,7 @@ package molecule.core.api.get
 import java.util.{List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncArray
-import molecule.datomic.ast.tempDb._
+import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.jdk.CollectionConverters._

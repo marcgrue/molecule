@@ -1,7 +1,7 @@
 package molecule.tests.core.input3
 
 import java.net.URI
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in3_out4._
 import molecule.TestSpec
 import molecule.core.api.exception.Molecule_3_Exception

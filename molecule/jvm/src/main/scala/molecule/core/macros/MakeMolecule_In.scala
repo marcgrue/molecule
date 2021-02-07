@@ -1,6 +1,6 @@
 package molecule.core.macros
 
-import molecule.datomic.transform.Model2Query
+import molecule.datomic.base.transform.Model2Query
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
@@ -28,9 +28,9 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         val (inParams, inTerm1, inTerm2) = (Seq(q"$i1: $t1", q"$i2: $t2"), i1, i2)
         if (flat) {
           q"""
-            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
@@ -41,10 +41,10 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
           """
         } else {
           q"""
-            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2)
               val boundRawNestedQuery = bindSeqs(_rawNestedQuery.get, $inTerm1, $inTerm2)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
@@ -62,9 +62,9 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         val (inParams, inTerm1, inTerm2, inTerm3) = (Seq(q"$i1: $t1", q"$i2: $t2", q"$i3: $t3"), i1, i2, i3)
         if (flat) {
           q"""
-            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2, $inTerm3)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
@@ -75,10 +75,10 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
           """
         } else {
           q"""
-            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindSeqs(_rawQuery, $inTerm1, $inTerm2, $inTerm3)
               val boundRawNestedQuery = bindSeqs(_rawNestedQuery.get, $inTerm1, $inTerm2, $inTerm3)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
@@ -96,16 +96,16 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
-          import molecule.core.transform.{Model2Query, QueryOptimizer}
+          import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
           import molecule.datomic.base.facade.Conn
 
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
+          final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes](
             _resolvedModel, Model2Query(_resolvedModel)
           ) {
-            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
@@ -120,13 +120,13 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
       } else {
         q"""
           import molecule.core.ast.elements._
-          import molecule.core.transform.QueryOptimizer
+          import molecule.datomic.base.transform.QueryOptimizer
           import molecule.datomic.base.facade.Conn
 
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
-            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+          final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
+            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
@@ -146,17 +146,17 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
-          import molecule.core.transform.{Model2Query, QueryOptimizer}
+          import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
           import molecule.datomic.base.facade.Conn
 
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes](
+          final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes](
             _resolvedModel, Model2Query(_resolvedModel)
           ) {
-            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)
               val boundRawNestedQuery = bindValues(_rawNestedQuery.get, args)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
@@ -172,14 +172,14 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
       } else {
         q"""
           import molecule.core.ast.elements._
-          import molecule.core.transform.QueryOptimizer
+          import molecule.datomic.base.transform.QueryOptimizer
           import molecule.datomic.base.facade.Conn
 
-          final class $inputMolecule extends $InputMoleculeTpe[..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
-            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[..$OutTypes] = {
+          final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
+            def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)
               val boundRawNestedQuery = bindValues(_rawNestedQuery.get, args)
-              final class $outMolecule extends $OutMoleculeTpe[..$OutTypes](
+              final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$OutTypes](
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
@@ -199,15 +199,15 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
 
   // Input molecules with 1 input and 1-22 outputs
 
-  final def await_1_1[Obj: W, I1: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A])
-  final def await_1_2[Obj: W, I1: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B])
-  final def await_1_3[Obj: W, I1: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
-  final def await_1_4[Obj: W, I1: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
-  final def await_1_5[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
-  final def await_1_6[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
-  final def await_1_7[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
-  final def await_1_8[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
-  final def await_1_9[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
+  final def await_1_01[Obj: W, I1: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A])
+  final def await_1_02[Obj: W, I1: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B])
+  final def await_1_03[Obj: W, I1: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
+  final def await_1_04[Obj: W, I1: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
+  final def await_1_05[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
+  final def await_1_06[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
+  final def await_1_07[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
+  final def await_1_08[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
+  final def await_1_09[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
   final def await_1_10[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J])
   final def await_1_11[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K])
   final def await_1_12[Obj: W, I1: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W, L: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K], weakTypeOf[L])
@@ -225,15 +225,15 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
 
   // Input molecules with 2 inputs and 1-22 outputs
 
-  final def await_2_1[Obj: W, I1: W, I2: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A])
-  final def await_2_2[Obj: W, I1: W, I2: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B])
-  final def await_2_3[Obj: W, I1: W, I2: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
-  final def await_2_4[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
-  final def await_2_5[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
-  final def await_2_6[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
-  final def await_2_7[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
-  final def await_2_8[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
-  final def await_2_9[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
+  final def await_2_01[Obj: W, I1: W, I2: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A])
+  final def await_2_02[Obj: W, I1: W, I2: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B])
+  final def await_2_03[Obj: W, I1: W, I2: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
+  final def await_2_04[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
+  final def await_2_05[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
+  final def await_2_06[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
+  final def await_2_07[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
+  final def await_2_08[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
+  final def await_2_09[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
   final def await_2_10[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J])
   final def await_2_11[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K])
   final def await_2_12[Obj: W, I1: W, I2: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W, L: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K], weakTypeOf[L])
@@ -251,15 +251,15 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
 
   // Input molecules with 3 inputs and 1-22 outputs
 
-  final def await_3_1[Obj: W, I1: W, I2: W, I3: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A])
-  final def await_3_2[Obj: W, I1: W, I2: W, I3: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B])
-  final def await_3_3[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
-  final def await_3_4[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
-  final def await_3_5[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
-  final def await_3_6[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
-  final def await_3_7[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
-  final def await_3_8[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
-  final def await_3_9[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
+  final def await_3_01[Obj: W, I1: W, I2: W, I3: W, A: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A])
+  final def await_3_02[Obj: W, I1: W, I2: W, I3: W, A: W, B: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B])
+  final def await_3_03[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C])
+  final def await_3_04[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D])
+  final def await_3_05[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E])
+  final def await_3_06[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F])
+  final def await_3_07[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G])
+  final def await_3_08[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H])
+  final def await_3_09[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I])
   final def await_3_10[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J])
   final def await_3_11[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K])
   final def await_3_12[Obj: W, I1: W, I2: W, I3: W, A: W, B: W, C: W, D: W, E: W, F: W, G: W, H: W, I: W, J: W, K: W, L: W](dsl: Tree): Tree = generateInputMolecule(dsl, weakTypeOf[Obj], weakTypeOf[I1], weakTypeOf[I2], weakTypeOf[I3])(weakTypeOf[A], weakTypeOf[B], weakTypeOf[C], weakTypeOf[D], weakTypeOf[E], weakTypeOf[F], weakTypeOf[G], weakTypeOf[H], weakTypeOf[I], weakTypeOf[J], weakTypeOf[K], weakTypeOf[L])

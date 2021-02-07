@@ -4,7 +4,7 @@ import molecule.core.api.Molecule_0._
 import molecule.core.api.exception.Molecule_3_Exception
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
-import molecule.datomic.ast.query._
+import molecule.datomic.base.ast.query._
 import molecule.datomic.base.facade.Conn
 
 

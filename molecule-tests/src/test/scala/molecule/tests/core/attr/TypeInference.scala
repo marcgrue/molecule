@@ -2,7 +2,7 @@ package molecule.tests.core.attr
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out22._
 import molecule.TestSpec
 

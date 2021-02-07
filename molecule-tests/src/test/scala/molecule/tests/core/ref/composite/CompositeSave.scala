@@ -1,6 +1,6 @@
 package molecule.tests.core.ref.composite
 
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out4._
 import molecule.TestSpec
 

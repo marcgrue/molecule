@@ -1,7 +1,7 @@
 package molecule.tests.core.time
 
 import molecule.datomic.api.out1._
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.TestSpec
 import molecule.tests.core.time.domain.Crud
 

@@ -1,9 +1,9 @@
 package molecule.tests.core.bidirectionals.edgeOther
 
-import molecule.tests.core.bidirectionals.dsl.bidirectional._
+import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out4._
 import molecule.TestSpec
-import molecule.datomic.ops.exception.VerifyModelException
+import molecule.core.ops.exception.VerifyModelException
 
 class EdgeManyOtherSave extends TestSpec {
 

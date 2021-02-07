@@ -2,7 +2,7 @@ package molecule.tests.core.api
 
 import java.io.FileReader
 import datomic.Util
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
 import molecule.TestSpec
 import molecule.core.util.JavaUtil

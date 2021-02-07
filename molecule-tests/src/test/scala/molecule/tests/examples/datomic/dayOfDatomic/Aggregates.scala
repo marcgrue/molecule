@@ -1,8 +1,7 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
-import molecule.datomic.api.out3._
-//import molecule.tests.examples.datomic.dayOfDatomic.dsl.aggregates._
-import molecule.tests.examples.datomic.dayOfDatomic.dsl.aggregates._
+import molecule.datomic.api.out5._
+import molecule.tests.examples.datomic.dayOfDatomic.dsl.Aggregates._
 import molecule.TestSpec
 import scala.language.postfixOps
 
@@ -80,7 +79,10 @@ class Aggregates extends TestSpec {
     Obj.meanRadius(stddev).get.head === 161902.52780945456
 
     // We can even fetch multiple aggregates in one query:
-    Obj.meanRadius(sum).meanRadius(avg).meanRadius(median).get.head ===
+    val x: Obj_0_1[Obj_, Nothing with Obj_meanRadius, Double] = Obj.meanRadius.apply(sum)
+
+
+    Obj.meanRadius.apply(sum). meanRadius(avg).meanRadius(median).get.head ===
       (907633.0, 53390.17647058824, 2631.2)
   }
 

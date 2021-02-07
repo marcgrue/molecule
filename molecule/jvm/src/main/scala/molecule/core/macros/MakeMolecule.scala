@@ -1,6 +1,6 @@
 package molecule.core.macros
 
-import molecule.datomic.transform.Model2Query
+import molecule.datomic.base.transform.Model2Query
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 
@@ -23,7 +23,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel)) {
+          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel)) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(casts)})
             final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???
 //              new Ns_str
@@ -51,7 +51,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel)) {
+          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel)) {
             ..${castOptNestedRows(casts, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
           }
           new $outMolecule
@@ -74,7 +74,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
-          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.transform.Model2Query(_resolvedModel))
+          final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel))
             with ${nestedTupleClassX(casts.size)}[$ObjType, (..$TplTypes)] {
             ..${resolveNestedTupleMethods(casts, types, TplTypes, postTypes, postCasts).get}
           }

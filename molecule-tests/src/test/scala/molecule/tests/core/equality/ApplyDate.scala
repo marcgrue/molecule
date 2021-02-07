@@ -1,7 +1,7 @@
 package molecule.tests.core.equality
 
 import java.util.Date
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out4._
 import molecule.TestSpec
 

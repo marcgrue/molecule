@@ -6,7 +6,7 @@ import molecule.core.api.exception.Molecule_1_Exception
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.core.util.fns
-import molecule.datomic.ast.query._
+import molecule.datomic.base.ast.query._
 import molecule.datomic.base.facade.Conn
 
 

@@ -2,9 +2,9 @@ package molecule.internaltests.shared.transform.optimize
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
-import molecule.datomic.ast.query.{Query, _}
-import molecule.datomic.transform.QueryOptimizer
-import molecule.tests.core.base.dsl.coreTest._
+import molecule.datomic.base.ast.query.{Query, _}
+import molecule.datomic.base.transform.QueryOptimizer
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
 import molecule.TestSpec
 
