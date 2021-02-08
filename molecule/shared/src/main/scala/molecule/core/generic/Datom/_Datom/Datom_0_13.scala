@@ -8,25 +8,8 @@
 */
 package molecule.core.generic.Datom
 
-import java.net.URI
 import java.util.Date
-import java.util.UUID
-import molecule.core.composition.CompositeInit_0._
-import molecule.core.composition.CompositeInit_1._
-import molecule.core.composition.CompositeInit_2._
-import molecule.core.composition.CompositeInit_3._
-import molecule.core.composition.nested._
-import molecule.core.composition.Nested_1._
-import molecule.core.composition.Nested_2._
-import molecule.core.composition.Nested_3._
-import molecule.core.composition.Tx._
-import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
-import molecule.core.expression._
-import molecule.core.expression.AttrExpressions.?
-import molecule.core.generic.Datom._
-import molecule.core.generic.GenericNs
-import scala.language.higherKinds
 
 trait Datom_0_13[o0[_], p0, A, B, C, D, E, F, G, H, I, J, K, L, M] extends Datom_[p0] with Datom with NS_0_13[o0, p0, A, B, C, D, E, F, G, H, I, J, K, L, M]
 

@@ -1,4 +1,5 @@
 package molecule.core.composition.nested_2
+package nested_2_01
 import molecule.core.dsl.base._
 import scala.language.higherKinds
 
@@ -6,8 +7,8 @@ import scala.language.higherKinds
 trait Nested_2_01_L1[
   o0[_], p0, o1[_],
   I1, I2, A,
-  Ns_2_2_L0[_[_],_,_,_,_,_],
-  Ns_3_2_L0[_[_],_,_,_,_,_,_]
+  Ns_2_2_L0[n0[_],_,_,_,_,_],
+  Ns_3_2_L0[n0[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L0[o0, p0 with o1[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L0[o0, p0 with o1[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -102,8 +103,8 @@ trait Nested_2_01_L1[
 trait Nested_2_01_L2[
   o0[_], p0, o1[_], p1, o2[_],
   I1, I2, A,
-  Ns_2_2_L1[_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L1[_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L1[n0[_],_,n1[_],_,_,_,_,_],
+  Ns_3_2_L1[n0[_],_,n1[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L1[o0, p0, o1, p1 with o2[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L1[o0, p0, o1, p1 with o2[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -198,8 +199,8 @@ trait Nested_2_01_L2[
 trait Nested_2_01_L3[
   o0[_], p0, o1[_], p1, o2[_], p2, o3[_],
   I1, I2, A,
-  Ns_2_2_L2[_[_],_,_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L2[_[_],_,_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L2[n0[_],_,n1[_],_,n2[_],_,_,_,_,_],
+  Ns_3_2_L2[n0[_],_,n1[_],_,n2[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L2[o0, p0, o1, p1, o2, p2 with o3[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L2[o0, p0, o1, p1, o2, p2 with o3[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -294,8 +295,8 @@ trait Nested_2_01_L3[
 trait Nested_2_01_L4[
   o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_],
   I1, I2, A,
-  Ns_2_2_L3[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L3[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L3[n0[_],_,n1[_],_,n2[_],_,n3[_],_,_,_,_,_],
+  Ns_3_2_L3[n0[_],_,n1[_],_,n2[_],_,n3[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L3[o0, p0, o1, p1, o2, p2, o3, p3 with o4[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L3[o0, p0, o1, p1, o2, p2, o3, p3 with o4[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -390,8 +391,8 @@ trait Nested_2_01_L4[
 trait Nested_2_01_L5[
   o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_],
   I1, I2, A,
-  Ns_2_2_L4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L4[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,_,_,_,_],
+  Ns_3_2_L4[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4 with o5[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4 with o5[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -486,8 +487,8 @@ trait Nested_2_01_L5[
 trait Nested_2_01_L6[
   o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_],
   I1, I2, A,
-  Ns_2_2_L5[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L5[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L5[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,n5[_],_,_,_,_,_],
+  Ns_3_2_L5[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,n5[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L5[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5 with o6[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L5[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5 with o6[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???
@@ -582,8 +583,8 @@ trait Nested_2_01_L6[
 trait Nested_2_01_L7[
   o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_], p6, o7[_],
   I1, I2, A,
-  Ns_2_2_L6[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_],
-  Ns_3_2_L6[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_]
+  Ns_2_2_L6[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,n5[_],_,n6[_],_,_,_,_,_],
+  Ns_3_2_L6[n0[_],_,n1[_],_,n2[_],_,n3[_],_,n4[_],_,n5[_],_,n6[_],_,_,_,_,_,_]
 ] extends Nested_2 {
   final def * [nestedObj[_], nestedProps            , a                                                               ] (nested: NS_0_01[nestedObj, nestedProps            , a                                                               ]): Ns_2_2_L6[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6 with o7[Seq[nestedProps]], I1, I2             , A, Seq[a                                                                 ]] = ???
   final def * [nestedObj[_], nestedProps            , a, b                                                            ] (nested: NS_0_02[nestedObj, nestedProps            , a, b                                                            ]): Ns_2_2_L6[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6 with o7[Seq[nestedProps]], I1, I2             , A, Seq[(a, b                                                            )]] = ???

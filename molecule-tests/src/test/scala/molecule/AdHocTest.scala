@@ -1,7 +1,5 @@
 package molecule
 
-import molecule.core.api.Molecule_0
-import molecule.core.composition.nested.Nested_0_02
 import molecule.core.dsl.attributes
 import molecule.datomic.api.out3._
 import molecule.datomic.base.facade.Conn
@@ -58,7 +56,7 @@ class AdHocTest extends Specification {
 //    val a: Nothing with Ns_float with Ns_Ref1_[Nothing with Ref1_int1 with Ref1_Refs2_[Nothing with Ref2_str2]]                      = m(Ns.float.Ref1.int1.Refs2.str2).getObjList.head
 //    val c: Ref2_0_3_L1[Ns_, Nothing with Ns_float, Ref1_Refs2_, Nothing with Ref1_Refs2_[Seq[Nothing with Ref2_str2]], Float, Int, Seq[String]] = Ns.float.Ref1.int1.Refs2.*(Ref2.str2)
 //    val b: Nothing with Ns_float with Ref1_Refs2_[Nothing with Ref1_Refs2_[Seq[Nothing with Ref2_str2]]]                                        = m(Ns.float.Ref1.int1.Refs2.*(Ref2.str2)).getObjList.head
-    val b: Nothing with Ns_float with Ns_Ref1_[Nothing with Ref1_int1 with Ref1_Refs2_[Seq[Nothing with Ref2_str2]]]                            = m(Ns.float.Ref1.int1.Refs2.*(Ref2.str2)).getObjList.head
+//    val b: Nothing with Ns_float with Ns_Ref1_[Nothing with Ref1_int1 with Ref1_Refs2_[Seq[Nothing with Ref2_str2]]]                            = m(Ns.float.Ref1.int1.Refs2.*(Ref2.str2)).getObjList.head
 
 //      val o = m(Ns.float.Ref1.int1).getObjList.head
 //      o.float

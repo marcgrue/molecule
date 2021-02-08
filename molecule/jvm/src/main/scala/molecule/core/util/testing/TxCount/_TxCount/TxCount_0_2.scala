@@ -8,25 +8,12 @@
 */
 package molecule.core.util.testing.TxCount
 
-import java.net.URI
-import java.util.Date
-import java.util.UUID
 import molecule.core.composition.CompositeInit_0._
-import molecule.core.composition.CompositeInit_1._
-import molecule.core.composition.CompositeInit_2._
-import molecule.core.composition.CompositeInit_3._
-import molecule.core.composition.nested._
-import molecule.core.composition.Nested_1._
-import molecule.core.composition.Nested_2._
-import molecule.core.composition.Nested_3._
 import molecule.core.composition.Tx._
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
 import molecule.core.expression._
-import molecule.core.expression.AttrExpressions.?
 import molecule.core.generic.Datom._
-import molecule.core.generic.GenericNs
-import scala.language.higherKinds
 
 trait TxCount_0_2[o0[_], p0, A, B] extends TxCount_[p0] with _TxCount_
   with NS_0_02           [o0, p0, A, B]
@@ -38,7 +25,7 @@ trait TxCount_0_2_L0[o0[_], p0, A, B] extends TxCount_0_2[o0, p0, A, B]
   with Aggr_02_L0  [o0, p0, A, B, TxCount_0_2_L0]
 {
   
-   override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L0[o0, p0          , A, B     ], Nothing] with TxCount_0_2_L0[o0, p0          , A, B     ]
+  override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L0[o0, p0          , A, B     ], Nothing] with TxCount_0_2_L0[o0, p0          , A, B     ]
 
   final lazy val db_     : Stay[db     , TxCount_db    , String] = ???
   final lazy val basisT_ : Stay[basisT , TxCount_basisT, Long  ] = ???
@@ -52,7 +39,7 @@ trait TxCount_0_2_L1[o0[_], p0, o1[_], p1, A, B] extends TxCount_0_2[o0, p0 with
   with Aggr_02_L1  [o0, p0, o1, p1, A, B, TxCount_0_2_L1]
 {
   
-   override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L1[o0, p0, o1, p1          , A, B     ], Nothing] with TxCount_0_2_L1[o0, p0, o1, p1          , A, B     ]
+  override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L1[o0, p0, o1, p1          , A, B     ], Nothing] with TxCount_0_2_L1[o0, p0, o1, p1          , A, B     ]
 
   final lazy val db_     : Stay[db     , TxCount_db    , String] = ???
   final lazy val basisT_ : Stay[basisT , TxCount_basisT, Long  ] = ???
@@ -66,7 +53,7 @@ trait TxCount_0_2_L2[o0[_], p0, o1[_], p1, o2[_], p2, A, B] extends TxCount_0_2[
   with Aggr_02_L2  [o0, p0, o1, p1, o2, p2, A, B, TxCount_0_2_L2]
 {
   
-   override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L2[o0, p0, o1, p1, o2, p2          , A, B     ], Nothing] with TxCount_0_2_L2[o0, p0, o1, p1, o2, p2          , A, B     ]
+  override type Stay[Attr[_, _], Prop, Tpe] = Attr[TxCount_0_2_L2[o0, p0, o1, p1, o2, p2          , A, B     ], Nothing] with TxCount_0_2_L2[o0, p0, o1, p1, o2, p2          , A, B     ]
 
   final lazy val db_     : Stay[db     , TxCount_db    , String] = ???
   final lazy val basisT_ : Stay[basisT , TxCount_basisT, Long  ] = ???

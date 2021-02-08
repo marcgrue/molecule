@@ -1,4 +1,4 @@
-package molecule.core._3_dsl2molecule
+package molecule.core
 
 /** Internal Molecule ASTs. */
 package object ast
