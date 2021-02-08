@@ -1,6 +1,5 @@
-package molecule.core.composition.nested
+package molecule.core.composition.nested_0
 import molecule.core.dsl.base._
-import molecule.core.composition.Nested_0
 import scala.language.higherKinds
 
 
