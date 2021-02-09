@@ -4,8 +4,8 @@ import java.util.Date
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
 import molecule.datomic.base.facade.TxReport
-import molecule.TestSpec
 import molecule.core.util.JavaUtil
+import molecule.setup.TestSpec
 
 
 class AsOf extends TestSpec with JavaUtil {

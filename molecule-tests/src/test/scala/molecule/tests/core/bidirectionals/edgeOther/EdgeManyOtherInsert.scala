@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeOther
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out4._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class EdgeManyOtherInsert extends TestSpec {
 
@@ -38,15 +38,15 @@ class EdgeManyOtherInsert extends TestSpec {
       personsCloseTo("Leo").get === List(List((6, "Ann")))
     }
 
-    "nested edge only not allowed" in new Setup {
-
-      // Can't save nested edges without including target entity
-      (Person.name.CloseTo.*(CloseTo.weight).Animal.name insert List(
-        ("Ann", List(7, 8), "Gus")
-      ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
-        s"[noNestedEdgesWithoutTarget]  Nested edge ns `CloseTo` should link to " +
-        s"target ns within the nested group of attributes."
-    }
+//    "nested edge only not allowed" in new Setup {
+//
+//      // Can't save nested edges without including target entity
+//      (Person.name.CloseTo.*(CloseTo.weight).Animal.name insert List(
+//        ("Ann", List(7, 8), "Gus")
+//      ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//        s"[noNestedEdgesWithoutTarget]  Nested edge ns `CloseTo` should link to " +
+//        s"target ns within the nested group of attributes."
+//    }
   }
 
 

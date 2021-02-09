@@ -1,8 +1,8 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out3._
+import molecule.setup.TestSpec
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.SocialNews._
-import molecule.TestSpec
 import scala.language.postfixOps
 
 // http://blog.datomic.com/2013/05/a-whirlwind-tour-of-datomic-query_16.html

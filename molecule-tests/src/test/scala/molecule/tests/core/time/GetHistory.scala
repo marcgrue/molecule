@@ -2,7 +2,7 @@ package molecule.tests.core.time
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in1_out6._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class GetHistory extends TestSpec {

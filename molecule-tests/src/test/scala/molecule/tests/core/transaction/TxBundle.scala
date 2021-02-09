@@ -1,9 +1,9 @@
 package molecule.tests.core.transaction
 
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeer
-import molecule.tests.core.base.dsl.coreTest.Ns
+import molecule.setup.TestSpec
+import molecule.tests.core.base.dsl.CoreTest.Ns
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

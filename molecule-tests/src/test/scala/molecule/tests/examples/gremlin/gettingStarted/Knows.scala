@@ -1,8 +1,8 @@
 package molecule.tests.examples.gremlin.gettingStarted
 
-import molecule.datomic.api.out4._
+import molecule.datomic.api.out10._
+import molecule.setup.TestSpec
 import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2._
-import molecule.TestSpec
 
 /*
   Bidirectional property edge - expanding on the Gremlin tutorial at:
@@ -66,7 +66,7 @@ class Knows extends TestSpec {
     // Weighed friendships (property edges)
 
     // Creating multiple edges
-    val markoKnows = Knows.person.weight.insert(List((vadas, 0.5), (josh, 1.0))).eids
+    val markoKnows = Knows. person.weight.insert(List((vadas, 0.5), (josh, 1.0))).eids
     Person(marko).knows(markoKnows).update
 
     // Extra friendship not in the tutorial so that we can make fof queries

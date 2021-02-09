@@ -2,7 +2,7 @@ package molecule.tests.core.attr
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out11._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

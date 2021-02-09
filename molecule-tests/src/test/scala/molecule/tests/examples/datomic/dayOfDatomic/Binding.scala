@@ -3,7 +3,7 @@ package molecule.tests.examples.datomic.dayOfDatomic
 import molecule.datomic.api.in2_out3._
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.SocialNews._
 import molecule.datomic.peer.facade.Datomic_Peer._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class Binding extends TestSpec {

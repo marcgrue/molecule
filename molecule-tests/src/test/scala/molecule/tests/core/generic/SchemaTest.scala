@@ -1,10 +1,9 @@
 package molecule.tests.core.generic
 
-import molecule.core.util.SystemDevLocal
 import molecule.core.util.testing.expectCompileError
 import molecule.datomic.api.out3._
-import molecule.TestSpec
 import molecule.datomic.base.util.{SystemDevLocal, SystemPeer, SystemPeerServer}
+import molecule.setup.TestSpec
 
 
 class SchemaTest extends TestSpec {
@@ -29,7 +28,7 @@ class SchemaTest extends TestSpec {
       Schema.part.<=("gen").get === List("gen")
       Schema.part.<("gen").get === Nil
 
-      Schema.part(count).get === List(2)
+      Schema.part.get.length === 2
 
 
       // Since all attributes have an attribute name, a tacit `part_` makes no difference
@@ -67,7 +66,7 @@ class SchemaTest extends TestSpec {
       Schema.nsFull.not("gen_Profession").get.sorted === List("gen_Person", "lit_Book")
       Schema.nsFull.not("gen_Profession", "lit_Book").get === List("gen_Person")
 
-      Schema.nsFull(count).get === List(3)
+      Schema.nsFull.get.head === 3
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
@@ -127,7 +126,7 @@ class SchemaTest extends TestSpec {
       Schema.id.not(97).get.size === attrCount - 1
       Schema.id.not(97, 98).get.size === attrCount - 2
 
-      Schema.id(count).get === List(attrCount)
+      Schema.id.get.length === attrCount
 
 
       // Since all attributes have an id, a tacit `id_` makes no difference
@@ -154,7 +153,7 @@ class SchemaTest extends TestSpec {
       Schema.a.not(":Ns/str").get.size === attrCount - 1
       Schema.a.not(":Ns/str", ":Ns/int").get.size === attrCount - 2
 
-      Schema.a(count).get === List(attrCount)
+      Schema.a.get.head.length === List(attrCount)
 
 
       // Since all attributes have an `ident`, a tacit `ident_` makes no difference
@@ -206,7 +205,7 @@ class SchemaTest extends TestSpec {
       Schema.nsFull.not("Ref1").get.sorted === List("Ns", "Ref2", "Ref3", "Ref4")
       Schema.nsFull.not("Ref1", "Ref2").get.sorted === List("Ns", "Ref3", "Ref4")
 
-      Schema.nsFull(count).get === List(5)
+      Schema.nsFull.get.length === 5
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
@@ -259,7 +258,7 @@ class SchemaTest extends TestSpec {
       Schema.ns.not("Ref1").get.sorted === List("Ns", "Ref2", "Ref3", "Ref4")
       Schema.ns.not("Ref1", "Ref2").get.sorted === List("Ns", "Ref3", "Ref4")
 
-      Schema.ns(count).get === List(5)
+      Schema.ns.get.head.length === List(5)
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
@@ -318,7 +317,7 @@ class SchemaTest extends TestSpec {
       Schema.attr.not("str").get.size === attrCount - 1
       Schema.attr.not("str", "int").get.size === attrCount - 2
 
-      Schema.attr(count).get === List(attrCount)
+      Schema.attr.get.length === attrCount
 
 
       // Since all attributes have an attribute name, a tacit `a_` makes no difference
@@ -410,7 +409,7 @@ class SchemaTest extends TestSpec {
           "uri",
           "uuid",
         )
-        Schema.tpe(count).get === List(11)
+        Schema.tpe.get.head.length === List(11)
 
       } else {
 
@@ -436,7 +435,7 @@ class SchemaTest extends TestSpec {
           "uri",
           "uuid",
         )
-        Schema.tpe(count).get === List(10)
+        Schema.tpe.get.head.length === List(10)
       }
 
 
@@ -474,7 +473,7 @@ class SchemaTest extends TestSpec {
       Schema.card.not("one").get === List("many")
       Schema.card.not("one", "many").get === Nil
 
-      Schema.card(count).get === List(2)
+      Schema.card.get.head.length === List(2)
 
 
       // Since all attributes have a cardinality, a tacit `card_` makes no difference
@@ -536,7 +535,7 @@ class SchemaTest extends TestSpec {
       }
 
       // Count documented attributes
-      Schema.doc(count).get === List(2)
+      Schema.doc.get.head.length === List(2)
 
 
       // Use tacit `doc_` to filter documented attributes
@@ -592,7 +591,7 @@ class SchemaTest extends TestSpec {
         Schema.a.index.not(false).get.size === attrCount
 
         // Count attribute indexing statuses (only true)
-        Schema.index(count).get === List(1)
+        Schema.index.get.length === 1
 
 
         // Using tacit `index_` is not that useful since all attributes are indexed by default
@@ -638,7 +637,7 @@ class SchemaTest extends TestSpec {
       )
 
       // Count attribute indexing statuses
-      Schema.unique(count).get === List(2)
+      Schema.unique.get.head.length === List(2)
 
       Schema.a.unique("identity").get === List((":Ref2/str2", "identity"))
       Schema.a.unique("value").get === List((":Ref2/int2", "value"))
@@ -692,7 +691,7 @@ class SchemaTest extends TestSpec {
         Schema.fulltext.get === List(true) // no false
 
         // Count attribute fulltext statuses (only true)
-        Schema.fulltext(count).get === List(1)
+        Schema.fulltext.get.length === 1
 
         // Attributes with fulltext search
         Schema.a.fulltext.get.sortBy(_._1) === List(
@@ -764,7 +763,7 @@ class SchemaTest extends TestSpec {
 
       // Component status options - either true or non-asserted
       Schema.isComponent.get === List(true) // no false
-      Schema.isComponent(count).get === List(1)
+      Schema.isComponent.get.length === 1
 
       // Component attributes
       Schema.a.isComponent.get === List(
@@ -833,7 +832,7 @@ class SchemaTest extends TestSpec {
 
       // No-history status options - either true or non-asserted
       Schema.noHistory.get === List(true) // no false
-      Schema.noHistory(count).get === List(1)
+      Schema.noHistory.get.length === 1
 
       // No-history attributes
       Schema.a.noHistory.get === List(
@@ -924,10 +923,11 @@ class SchemaTest extends TestSpec {
     )
 
     // How many enums in total (duplicate enum values coalesce)
-    Schema.enum(count).get === List(22)
+    Schema.enum.get.head.length === List(22)
 
     // Enums per namespace
-    Schema.ns.enum(count).get === List(
+    val x: Map[String, List[(String, String)]] = Schema.ns.enum.get.groupBy(_._1)
+    Schema.ns.enum.get.groupBy(_._1).map{case (k, v) => k -> v.length} === List(
       ("Ns", 10),
       ("Ref1", 3),
       ("Ref2", 3),
@@ -936,7 +936,9 @@ class SchemaTest extends TestSpec {
     )
 
     // Enums per namespace per attribute
-    Schema.ns.attr.enum(count).get === List(
+    Schema.ns.attr.enum.get
+      .groupBy{case (n, a, _) => (n, a)}
+      .map{case (pair, vs) => (pair._1, pair._2, vs.length) } === List(
       ("Ns", "enum", 10),
       ("Ns", "enums", 10),
       ("Ref1", "enum1", 3),

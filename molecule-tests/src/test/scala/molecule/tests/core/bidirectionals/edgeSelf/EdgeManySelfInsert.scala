@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeSelf
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out3._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class EdgeManySelfInsert extends TestSpec {
 
@@ -40,7 +40,8 @@ class EdgeManySelfInsert extends TestSpec {
     "nested edge only not allowed" in new Setup {
 
       // Can't save nested edges without including target entity
-      (Person.name.Knows.*(Knows.weight).Person.name insert List(
+//      (Person.name.Knows.*(Knows.weight).Person.name insert List(
+      (Person.name.Knows.*(Knows.weight) insert List(
         ("Ben", List(7, 8), "Joe")
       ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +

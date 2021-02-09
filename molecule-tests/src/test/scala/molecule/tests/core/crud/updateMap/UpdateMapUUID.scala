@@ -4,8 +4,8 @@ import java.util.UUID
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.datomic.base.transform.exception.Model2TransactionException
+import molecule.setup.TestSpec
 
 class UpdateMapUUID extends TestSpec {
 

@@ -2,7 +2,7 @@ package molecule.tests.core.time
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out2._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 import molecule.tests.core.time.domain.Counter
 
 

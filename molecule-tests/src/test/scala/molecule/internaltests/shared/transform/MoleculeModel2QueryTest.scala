@@ -3,7 +3,7 @@ package molecule.internaltests.shared.transform
 import molecule.core.ast.elements._
 import molecule.datomic.base.ast.query._
 import molecule.datomic.base.transform.Model2Query
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class Model2QueryTest extends TestSpec {
 

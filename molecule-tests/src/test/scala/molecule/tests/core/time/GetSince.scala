@@ -2,8 +2,8 @@ package molecule.tests.core.time
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.core.util.JavaUtil
+import molecule.setup.TestSpec
 
 class GetSince extends TestSpec with JavaUtil {
 

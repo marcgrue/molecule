@@ -2,8 +2,8 @@ package molecule.tests.core.crud.update
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class UpdateBoolean extends TestSpec {
 

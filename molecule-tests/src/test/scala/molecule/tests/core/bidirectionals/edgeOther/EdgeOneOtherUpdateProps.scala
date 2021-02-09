@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeOther
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.out9._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class EdgeOneOtherUpdateProps extends TestSpec {
 
@@ -38,7 +38,7 @@ class EdgeOneOtherUpdateProps extends TestSpec {
       .commonLicences
       .commonScores
       .CoreQuality.name._Favorite
-      .InCommon.*(Quality.name)._Favorite
+      .InCommon.*(Quality.name)
       .Animal.name
       .get === List(
       ("Ann"
@@ -61,7 +61,7 @@ class EdgeOneOtherUpdateProps extends TestSpec {
       .commonLicences
       .commonScores
       .CoreQuality.name._Favorite
-      .InCommon.*(Quality.name)._Favorite
+      .InCommon.*(Quality.name)
       .Person.name
       .get === List(
       ("Rex"
@@ -235,8 +235,8 @@ class EdgeOneOtherUpdateProps extends TestSpec {
     "refs" in new Setup {
 
       // Current value
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Patience", "Humor"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Patience", "Humor"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get === List((Seq("Patience", "Humor"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get === List((Seq("Patience", "Humor"), "Ann"))
 
       // As with card-one references we have two choices to change referenced value(s)
 
@@ -246,8 +246,8 @@ class EdgeOneOtherUpdateProps extends TestSpec {
       Quality(humor).name("Funny").update
 
       // Same references, new value(s)
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Waiting ability", "Funny"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Waiting ability", "Funny"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get === List((Seq("Waiting ability", "Funny"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get === List((Seq("Waiting ability", "Funny"), "Ann"))
 
 
       // 2. Update reference(s)
@@ -256,37 +256,37 @@ class EdgeOneOtherUpdateProps extends TestSpec {
 
       // replace
       Favorite(annRex).inCommon.replace(humor -> sporty).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
 
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // remove
       Favorite(annRex).inCommon.retract(patience).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List((Seq("Sporty"), "Rex"))
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List((Seq("Sporty"), "Ann"))
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get === List((Seq("Sporty"), "Rex"))
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get === List((Seq("Sporty"), "Ann"))
 
       // add
       Favorite(annRex).inCommon.assert(patience).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Rex"))
 
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Sporty", "Waiting ability"), "Ann"))
 
       // Apply new values
       Favorite(annRex).inCommon(sporty, humor).update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Rex"))
 
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get
         .map(p => (p._1.sorted, p._2)) === List((Seq("Funny", "Sporty"), "Ann"))
 
       // Retract all references
       Favorite(annRex).inCommon().update
-      Person.name_("Ann").Favorite.InCommon.*(Quality.name)._Favorite.Animal.name.get === List()
-      Animal.name_("Rex").Favorite.InCommon.*(Quality.name)._Favorite.Person.name.get === List()
+      Person.name_("Ann").Favorite.InCommon.*(Quality.name).Animal.name.get === List()
+      Animal.name_("Rex").Favorite.InCommon.*(Quality.name).Person.name.get === List()
     }
   }
 

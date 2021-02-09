@@ -3,7 +3,7 @@ package molecule.tests.examples.datomic.dayOfDatomic
 import molecule.datomic.api.out4._
 import org.specs2.mutable.Specification
 import molecule.datomic.peer.facade.Datomic_Peer._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class Graph extends TestSpec {

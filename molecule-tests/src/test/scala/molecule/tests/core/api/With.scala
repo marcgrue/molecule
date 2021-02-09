@@ -4,8 +4,8 @@ import java.io.FileReader
 import datomic.Util
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.core.util.JavaUtil
+import molecule.setup.TestSpec
 
 
 class With extends TestSpec with JavaUtil {

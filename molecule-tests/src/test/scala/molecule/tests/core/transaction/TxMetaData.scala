@@ -3,9 +3,9 @@ package molecule.tests.core.transaction
 import molecule.core.util.SystemPeerServer
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out10._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
 import molecule.datomic.base.util.{SystemPeer, SystemPeerServer}
+import molecule.setup.TestSpec
 
 class TxMetaData extends TestSpec {
 
@@ -136,6 +136,7 @@ class TxMetaData extends TestSpec {
 
       // Tx meta data that is not connected by references can be saved by applying
       // individual tx molecules to separate tx's
+      Ns.int(1).Tx(Ns.str("a") + Ref1.int1(10)).save
       Ns.int(1).Tx(Ns.str("a")).Tx(Ref1.int1(10)).save
 
       // This is not the same as a composite since the composite would be its own entity

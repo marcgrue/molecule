@@ -10,23 +10,24 @@ package molecule.core.generic.Datom
 
 import java.util.Date
 import molecule.core.dsl.attributes._
+import scala.language.higherKinds
 
 trait Datom {
-  final class e         [Stay, Next] extends OneLong   [Stay, Next] with Indexed
-  final class a         [Stay, Next] extends OneString [Stay, Next] with Indexed
-  final class v         [Stay, Next] extends OneAny    [Stay, Next] with Indexed
-  final class t         [Stay, Next] extends OneLong   [Stay, Next] with Indexed
-  final class tx        [Stay, Next] extends OneLong   [Stay, Next] with Indexed
-  final class txInstant [Stay, Next] extends OneDate   [Stay, Next] with Indexed
-  final class op        [Stay, Next] extends OneBoolean[Stay, Next] with Indexed
+  final class e         [Stay_, Next_] extends OneLong   [Stay_, Next_] with Indexed
+  final class a         [Stay_, Next_] extends OneString [Stay_, Next_] with Indexed
+  final class v         [Stay_, Next_] extends OneAny    [Stay_, Next_] with Indexed
+  final class t         [Stay_, Next_] extends OneLong   [Stay_, Next_] with Indexed
+  final class tx        [Stay_, Next_] extends OneLong   [Stay_, Next_] with Indexed
+  final class txInstant [Stay_, Next_] extends OneDate   [Stay_, Next_] with Indexed
+  final class op        [Stay_, Next_] extends OneBoolean[Stay_, Next_] with Indexed
   
-  final class e$        [Stay, Next] extends OneLong$   [Stay] with Indexed
-  final class a$        [Stay, Next] extends OneString$ [Stay] with Indexed
-  final class v$        [Stay, Next] extends OneAny$    [Stay] with Indexed
-  final class t$        [Stay, Next] extends OneLong$   [Stay] with Indexed
-  final class tx$       [Stay, Next] extends OneLong$   [Stay] with Indexed
-  final class txInstant$[Stay, Next] extends OneDate$   [Stay] with Indexed
-  final class op$       [Stay, Next] extends OneBoolean$[Stay] with Indexed
+  final class e$        [Stay_, Next_] extends OneLong$   [Stay_] with Indexed
+  final class a$        [Stay_, Next_] extends OneString$ [Stay_] with Indexed
+  final class v$        [Stay_, Next_] extends OneAny$    [Stay_] with Indexed
+  final class t$        [Stay_, Next_] extends OneLong$   [Stay_] with Indexed
+  final class tx$       [Stay_, Next_] extends OneLong$   [Stay_] with Indexed
+  final class txInstant$[Stay_, Next_] extends OneDate$   [Stay_] with Indexed
+  final class op$       [Stay_, Next_] extends OneBoolean$[Stay_] with Indexed
 }
 
 trait Datom_[props] { def Datom: props = ??? }

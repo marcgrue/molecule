@@ -1,11 +1,10 @@
 package molecule.tests.core.generic
 
-import molecule.core.util.SystemDevLocal
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out6._
-import molecule.TestSpec
 import molecule.datomic.base.util.{SystemDevLocal, SystemPeerServer}
+import molecule.setup.TestSpec
 
 /** Generic Datom attribute interface
   *

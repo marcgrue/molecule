@@ -22,7 +22,7 @@ private[molecule] trait Dsl2Model extends Cast {
   import c.universe._
 
   val x = InspectMacro("Dsl2Model", 901, 900)
-//      val x = InspectMacro("Dsl2Model", 200, 900)
+  //      val x = InspectMacro("Dsl2Model", 200, 900)
 
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -31,12 +31,12 @@ private[molecule] trait Dsl2Model extends Cast {
     Model,
       List[List[Tree]],
       List[List[Int => Tree]],
-//      List[List[Int => Tree]],
-//      List[String],
+      //      List[List[Int => Tree]],
+      //      List[String],
       Boolean,
       List[Tree],
       List[Int => Tree],
-//      List[Int => Tree],
+      //      List[Int => Tree],
       Boolean,
       Map[Int, List[Int]],
       Map[Int, List[Int]],
@@ -60,9 +60,9 @@ private[molecule] trait Dsl2Model extends Cast {
     var optNestedRefIndexes  : Map[Int, List[Int]] = Map.empty[Int, List[Int]]
     var optNestedTacitIndexes: Map[Int, List[Int]] = Map.empty[Int, List[Int]]
 
-    var types         : List[List[Tree]]                                        = List(List.empty[Tree])
-    var casts         : List[List[Int => Tree]]                                 = List(List.empty[Int => Tree])
-    var nestedRefAttrs: List[String]                                            = List.empty[String]
+    var types         : List[List[Tree]]        = List(List.empty[Tree])
+    var casts         : List[List[Int => Tree]] = List(List.empty[Int => Tree])
+    var nestedRefAttrs: List[String]            = List.empty[String]
 
     var tx          : String  = ""
     var hasVariables: Boolean = false
@@ -117,7 +117,11 @@ private[molecule] trait Dsl2Model extends Cast {
 
     def traverseElement(prev: Tree, p: richTree, element: Element): Seq[Element] = {
       if (p.isNS && !p.isFirstNS) {
-        x(711, prev, element)
+        x(711
+          , prev
+          , p
+          , element
+        )
         resolve(prev) :+ element
       } else {
         x(710, element)
@@ -265,8 +269,8 @@ private[molecule] trait Dsl2Model extends Cast {
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (attrStr.head == '_') {
-        x(134, t.tpeS)
-        traverseElement(prev, p, ReBond(c.typecheck(tree).tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")))
+        x(134, attrStr.tail)
+        traverseElement(prev, p, ReBond(attrStr.tail))
 
       } else if (t.isRef) {
         x(135, t.tpeS, t.card, t.refCard)
@@ -844,19 +848,8 @@ private[molecule] trait Dsl2Model extends Cast {
 
 
 
-//      nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
+      //      nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
       nestedRefAttrs = nestedRefAttrs :+ refAttr.capitalize
-
-
-
-
-
-
-
-
-
-
-
 
 
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)

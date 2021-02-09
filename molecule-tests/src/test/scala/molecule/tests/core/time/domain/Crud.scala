@@ -1,6 +1,6 @@
 package molecule.tests.core.time.domain
 
-import molecule.tests.core.base.dsl.coreTest.Ns
+import molecule.tests.core.base.dsl.CoreTest.Ns
 import molecule.datomic.api.out2._
 import molecule.datomic.base.facade.Conn
 

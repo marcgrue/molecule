@@ -1,9 +1,9 @@
 package molecule.tests.core.ref
 
-import molecule.TestSpec
 import molecule.core.util.testing.expectCompileError
 import molecule.datomic.api.out8._
-import molecule.tests.core.ref.dsl.selfJoin._
+import molecule.setup.TestSpec
+import molecule.tests.core.ref.dsl.SelfJoin._
 
 class SelfJoin extends TestSpec {
 

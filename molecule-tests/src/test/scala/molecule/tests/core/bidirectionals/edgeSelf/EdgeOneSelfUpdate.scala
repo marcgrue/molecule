@@ -2,7 +2,7 @@ package molecule.tests.core.bidirectionals.edgeSelf
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class EdgeOneSelfUpdate extends TestSpec {
 

@@ -6,7 +6,7 @@ import molecule.datomic.base.ast.query.{Query, _}
 import molecule.datomic.base.transform.QueryOptimizer
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class SpeedComparison extends TestSpec {

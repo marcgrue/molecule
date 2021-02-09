@@ -70,46 +70,4 @@ trait SpecHelpers extends Specification with MoleculeTestHelper {
       inputMolecule._query.datalog(30) === queryString
     }
   }
-
-  def testUpdateMolecule(molecule: Molecule)(implicit conn: Conn): Any {
-    def -->(txString: String): MatchResult[Any]
-
-    def -->(model: Model): Any {
-      def -->(txString: String): MatchResult[Any]
-    }
-  } = new {
-    def -->(model: Model) = new {
-      molecule._model === model
-      def -->(txString: String) = {
-        val tx = Model2Transaction(conn, molecule._model).updateStmts()
-        formatTx(tx) === txString
-      }
-    }
-
-    def -->(txString: String) = {
-      val tx = Model2Transaction(conn, molecule._model).updateStmts()
-      formatTx(tx) === txString
-    }
-  }
-
-  def testInsertMolecule(molecule: Molecule, ids: Seq[Long] = Seq())(implicit conn: Conn): Object {
-    def -->(txString: String): MatchResult[Any]
-
-    def -->(model: Model): Object {
-      def -->(txString: String): MatchResult[Any]
-    }
-  } = new {
-    def -->(model: Model) = new {
-      molecule._model === model
-      def -->(txString: String) = {
-        val tx = Model2Transaction(conn, model).saveStmts()
-        formatTx(tx) === txString
-      }
-    }
-
-    def -->(txString: String) = {
-      val tx = Model2Transaction(conn, molecule._model).saveStmts()
-      formatTx(tx) === txString
-    }
-  }
 }

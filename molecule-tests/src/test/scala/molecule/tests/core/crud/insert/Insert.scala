@@ -2,7 +2,7 @@ package molecule.tests.core.crud.insert
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out10._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class Insert extends TestSpec {

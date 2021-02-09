@@ -1,8 +1,8 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out4._
+import molecule.setup.TestSpec
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.SocialNews._
-import molecule.TestSpec
 
 
 class SocialNews extends TestSpec {

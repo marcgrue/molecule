@@ -2,8 +2,8 @@ package molecule.tests.examples.datomic.mbrainz
 
 import molecule.datomic.api.in1_out4._
 import molecule.tests.examples.datomic.mbrainz.dsl.MBrainz._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeer
+import molecule.setup.TestSpec
 import scala.language.postfixOps
 
 

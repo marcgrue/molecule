@@ -3,8 +3,8 @@ package molecule.tests.core.crud.insert
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out2._
 import molecule.datomic.base.facade.TxReport
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeer
+import molecule.setup.TestSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

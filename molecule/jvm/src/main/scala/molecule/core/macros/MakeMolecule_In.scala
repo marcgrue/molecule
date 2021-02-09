@@ -48,7 +48,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[$ObjType, (..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
               }
               new $outMolecule
@@ -82,7 +82,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[$ObjType, (..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
               }
               new $outMolecule
@@ -160,7 +160,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[$ObjType, (..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
               }
               new $outMolecule
@@ -183,7 +183,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 _model,
                 (QueryOptimizer(boundRawQuery), Some(QueryOptimizer(boundRawNestedQuery)),
                   boundRawQuery, Some(boundRawNestedQuery))
-              ) with ${nestedTupleClassX(casts.size)}[(..$OutTypes)] {
+              ) with ${nestedTupleClassX(casts.size)}[$ObjType, (..$OutTypes)] {
                 ..${resolveNestedTupleMethods(casts, types, OutTypes, postTypes, postCasts).get}
               }
               new $outMolecule

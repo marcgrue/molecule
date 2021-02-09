@@ -5,8 +5,8 @@ import datomic.Util
 import molecule.datomic.base.util.SystemDevLocal
 import molecule.datomic.api.out8._
 import molecule.tests.examples.datomic.mbrainz.dsl.MBrainz._
-import molecule.TestSpec
 import molecule.datomic.base.util.{SystemDevLocal, SystemPeer}
+import molecule.setup.TestSpec
 import scala.language.postfixOps
 
 /*

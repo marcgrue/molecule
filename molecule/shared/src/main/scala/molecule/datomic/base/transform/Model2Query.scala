@@ -145,6 +145,7 @@ object Model2Query extends Helpers {
       case DataClause(_, Var(backE), a, Var(_), _, _) if a.nsFull == backRef => backE
     } getOrElse {
       abort(s"Can't find back reference namespace `$backRef` in query so far:\n$model\n---------\n$query\n---------\n$rb")
+//      "XXX"
     }
     (query, backRefE, v, backRef, "", "")
   }

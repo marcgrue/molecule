@@ -11,14 +11,16 @@ package molecule.core.generic.Schema
 import java.util.Date
 import molecule.core.dsl.attributes._
 import molecule.core.generic.GenericNs
+import scala.language.higherKinds
 
 trait Schema extends GenericNs {
   final class id          [Stay, Next] extends OneLong   [Stay, Next] with Indexed
-  final class ident       [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class a           [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class part        [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class nsFull      [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class ns          [Stay, Next] extends OneString [Stay, Next] with Indexed
-  final class a           [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class ident       [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class attr        [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class tpe         [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class card        [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class doc         [Stay, Next] extends OneString [Stay, Next] with Indexed with Fulltext[Stay, Next]
@@ -33,11 +35,12 @@ trait Schema extends GenericNs {
   final class txInstant   [Stay, Next] extends OneDate   [Stay, Next] with Indexed
   
   final class id$         [Stay, Next] extends OneLong$   [Stay] with Indexed
-  final class ident$      [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class a$          [Stay, Next] extends OneString$ [Stay] with Indexed
   final class part$       [Stay, Next] extends OneString$ [Stay] with Indexed
   final class nsFull$     [Stay, Next] extends OneString$ [Stay] with Indexed
   final class ns$         [Stay, Next] extends OneString$ [Stay] with Indexed
-  final class a$          [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class ident$      [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class attr$       [Stay, Next] extends OneString$ [Stay] with Indexed
   final class tpe$        [Stay, Next] extends OneString$ [Stay] with Indexed
   final class card$       [Stay, Next] extends OneString$ [Stay] with Indexed
   final class doc$        [Stay, Next] extends OneString$ [Stay] with Indexed with Fulltext[Stay, Next]
@@ -55,11 +58,12 @@ trait Schema extends GenericNs {
 trait Schema_[props] { def Schema: props = ??? }
 
 trait Schema_id           { lazy val id          : Long    = ??? }
-trait Schema_ident        { lazy val ident       : String  = ??? }
+trait Schema_a            { lazy val a           : String  = ??? }
 trait Schema_part         { lazy val part        : String  = ??? }
 trait Schema_nsFull       { lazy val nsFull      : String  = ??? }
 trait Schema_ns           { lazy val ns          : String  = ??? }
-trait Schema_a            { lazy val a           : String  = ??? }
+trait Schema_ident        { lazy val ident       : String  = ??? }
+trait Schema_attr         { lazy val attr        : String  = ??? }
 trait Schema_tpe          { lazy val tpe         : String  = ??? }
 trait Schema_card         { lazy val card        : String  = ??? }
 trait Schema_doc          { lazy val doc         : String  = ??? }
@@ -74,11 +78,12 @@ trait Schema_tx           { lazy val tx          : Long    = ??? }
 trait Schema_txInstant    { lazy val txInstant   : Date    = ??? }
 
 trait Schema_id$          { lazy val id$         : Option[Long   ] = ??? }
-trait Schema_ident$       { lazy val ident$      : Option[String ] = ??? }
+trait Schema_a$           { lazy val a$          : Option[String ] = ??? }
 trait Schema_part$        { lazy val part$       : Option[String ] = ??? }
 trait Schema_nsFull$      { lazy val nsFull$     : Option[String ] = ??? }
 trait Schema_ns$          { lazy val ns$         : Option[String ] = ??? }
-trait Schema_a$           { lazy val a$          : Option[String ] = ??? }
+trait Schema_ident$       { lazy val ident$      : Option[String ] = ??? }
+trait Schema_attr$        { lazy val attr$       : Option[String ] = ??? }
 trait Schema_tpe$         { lazy val tpe$        : Option[String ] = ??? }
 trait Schema_card$        { lazy val card$       : Option[String ] = ??? }
 trait Schema_doc$         { lazy val doc$        : Option[String ] = ??? }

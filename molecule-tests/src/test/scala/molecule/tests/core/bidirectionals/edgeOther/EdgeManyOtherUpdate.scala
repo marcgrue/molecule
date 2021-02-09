@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeOther
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out4._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class EdgeManyOtherUpdate extends TestSpec {
 
@@ -215,17 +215,17 @@ class EdgeManyOtherUpdate extends TestSpec {
       "\n  Animal ... name(Max, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
-    (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[VerifyModelException])
-      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
-      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
-
-    (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[VerifyModelException])
-      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
-      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
-
-    (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[VerifyModelException])
-      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
-      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+//    (Person(ann).CloseTo.*(CloseTo.weight(4)).Animal.name("Max").update must throwA[VerifyModelException])
+//      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+//
+//    (Person(ann).CloseTo.*(CloseTo.weight(4)).animal(42L).update must throwA[VerifyModelException])
+//      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
+//
+//    (Person(ann).CloseTo.*(CloseTo.weight(4).Animal.name("Max")).update must throwA[VerifyModelException])
+//      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//      s"[update_onlyOneNs]  Update molecules can't have nested data structures like `CloseTo`."
 
     (Person(ann).CloseTo.*(CloseTo.weight(4).animal(42L)).update must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +

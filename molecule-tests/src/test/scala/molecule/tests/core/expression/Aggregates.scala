@@ -3,8 +3,8 @@ package molecule.tests.core.expression
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeerServer
+import molecule.setup.TestSpec
 
 class Aggregates extends TestSpec {
 

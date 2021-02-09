@@ -2,7 +2,7 @@ package molecule.tests.core.input1
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in1_out2._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class Input1Boolean extends TestSpec {

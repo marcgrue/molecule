@@ -2,9 +2,9 @@ package molecule.tests.core.bidirectionals.self
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out3._
-import molecule.TestSpec
 import molecule.datomic.base.transform.exception.Model2TransactionException
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 
 class OneSelf extends TestSpec {

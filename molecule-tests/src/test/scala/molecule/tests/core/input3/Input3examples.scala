@@ -2,7 +2,7 @@ package molecule.tests.core.input3
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in3_out4._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class Input3examples extends TestSpec {

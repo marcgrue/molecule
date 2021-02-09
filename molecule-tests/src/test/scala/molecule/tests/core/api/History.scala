@@ -2,7 +2,7 @@ package molecule.tests.core.api
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class History extends TestSpec {

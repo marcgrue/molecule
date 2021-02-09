@@ -10,6 +10,7 @@ package molecule.core.util.testing.TxCount
 
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
 object TxCount extends TxCount_0_0_L0[TxCount_, Nothing] with FirstNS {
   final override def apply(eid: Long, eids: Long*): TxCount_0_0_L0[TxCount_, Nothing] = ???

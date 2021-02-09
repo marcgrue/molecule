@@ -1,8 +1,8 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out5._
+import molecule.setup.TestSpec
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.Aggregates._
-import molecule.TestSpec
 import scala.language.postfixOps
 
 class Aggregates extends TestSpec {
@@ -101,7 +101,7 @@ class Aggregates extends TestSpec {
       ":Obj/meanRadius",
       ":Obj/name",
     )
-    Schema.a(count).get.head === 5
+    Schema.a.get.head.length === 5
 
     // How many (Datomic) types does this schema use?
     Schema.tpe.get === List(
@@ -109,7 +109,7 @@ class Aggregates extends TestSpec {
       "double", // Double
       "long", // Int
     )
-    Schema.tpe(count).get.head === 3
+    Schema.tpe.get.head.length === 3
   }
 
 

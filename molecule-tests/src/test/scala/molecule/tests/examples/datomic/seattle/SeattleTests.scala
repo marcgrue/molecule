@@ -4,12 +4,11 @@ import java.io.FileReader
 import datomic.Util
 import molecule.datomic.api.in2_out8._
 import molecule.tests.examples.datomic.seattle.dsl.Seattle._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeer
+import molecule.setup.TestSpec
 
 
 class SeattleTests extends TestSpec {
-
 
   "A first query" in new SeattleSetup {
     // A Community-name molecule

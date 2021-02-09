@@ -2,7 +2,7 @@ package molecule.tests.core.time
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out2._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class GetWith extends TestSpec {
 
@@ -42,7 +42,7 @@ class GetWith extends TestSpec {
     ) === List(1, 2, 3)
 
     Ns.str.getWith(
-      Ns.str$.int.getInsertTx(Seq(
+      Ns.str$.int.getInsertStmts(Seq(
         (Some("b"), 2),
         (None, 3)
       ))
@@ -57,7 +57,7 @@ class GetWith extends TestSpec {
     )
 
     Ns.str$.int.getWith(
-      Ns.str$.int.getInsertTx(Seq(
+      Ns.str$.int.getInsertStmts(Seq(
         (Some("b"), 2),
         (None, 3)
       ))

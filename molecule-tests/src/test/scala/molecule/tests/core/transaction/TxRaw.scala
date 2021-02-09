@@ -3,8 +3,8 @@ package molecule.tests.core.transaction
 import java.io.FileReader
 import datomic.Util
 import molecule.datomic.api.out1._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeer
+import molecule.setup.TestSpec
 import molecule.tests.core.base.dsl.coreTest.Ns
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global

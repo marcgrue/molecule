@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeSelf
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out9._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 
 class EdgeOneSelfUpdateProps extends TestSpec {
@@ -34,7 +34,7 @@ class EdgeOneSelfUpdateProps extends TestSpec {
       .commonLicences
       .commonScores
       .CoreQuality.name._Loves
-      .InCommon.*(Quality.name)._Loves
+      .InCommon.*(Quality.name)
       .Person.name
       .get === List(
       ("Ann"

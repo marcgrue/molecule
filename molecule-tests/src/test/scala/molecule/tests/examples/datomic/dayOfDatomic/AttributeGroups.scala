@@ -2,7 +2,7 @@ package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out2._
 import molecule.datomic.peer.facade.Datomic_Peer._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class AttributeGroups extends TestSpec {
 

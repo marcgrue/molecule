@@ -1,13 +1,12 @@
 package molecule.tests.core.generic
 
 import molecule.core.exceptions.MoleculeException
-import molecule.core.util.SystemDevLocal
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out5._
 import molecule.datomic.base.facade.TxReport
-import molecule.TestSpec
 import molecule.datomic.base.util.{SystemDevLocal, SystemPeer}
+import molecule.setup.TestSpec
 
 
 class LogTest extends TestSpec {

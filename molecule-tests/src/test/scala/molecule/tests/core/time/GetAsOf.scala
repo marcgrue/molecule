@@ -5,7 +5,7 @@ import datomic.Util.list
 import molecule.core.util.JavaUtil
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class GetAsOf extends TestSpec with JavaUtil {

@@ -3,9 +3,9 @@ package molecule.tests.core.input2
 import java.net.URI
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in2_out3._
-import molecule.TestSpec
 import molecule.core.api.exception.Molecule_2_Exception
-import molecule.core.input.Molecule_1
+import molecule.core.api._
+import molecule.setup.TestSpec
 import scala.reflect.ClassTag
 
 

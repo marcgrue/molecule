@@ -1,8 +1,8 @@
 package molecule.tests.examples.datomic.dayOfDatomic
 
 import molecule.datomic.api.out5._
+import molecule.setup.TestSpec
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.ProductsOrder._
-import molecule.TestSpec
 
 
 class ProductsAndOrders extends TestSpec {

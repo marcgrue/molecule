@@ -2,8 +2,8 @@ package molecule.tests.core.bidirectionals.edgeOther
 
 import molecule.tests.core.bidirectionals.dsl.Bidirectional._
 import molecule.datomic.api.in1_out4._
-import molecule.TestSpec
 import molecule.core.ops.exception.VerifyModelException
+import molecule.setup.TestSpec
 
 class EdgeManyOtherSave extends TestSpec {
 
@@ -17,9 +17,13 @@ class EdgeManyOtherSave extends TestSpec {
 
     "no nesting in save molecules" in new Setup {
 
-      (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).Animal.name("Rex").save must throwA[VerifyModelException])
+      (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).save must throwA[VerifyModelException])
         .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNested]  Nested data structures not allowed in save molecules"
+
+//      (Person.name("Ann").CloseTo.*(CloseTo.weight(7)).Animal.name("Rex").save must throwA[VerifyModelException])
+//        .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//        s"[noNested]  Nested data structures not allowed in save molecules"
 
       // Insert entities, each having one or more connected entities with relationship properties
       val rex = Animal.name.insert("Rex").eid

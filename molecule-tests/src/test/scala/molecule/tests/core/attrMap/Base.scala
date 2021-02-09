@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out2._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class Base extends TestSpec {
 

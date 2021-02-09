@@ -3,8 +3,8 @@ package molecule.tests.examples.datomic.dayOfDatomic
 import molecule.core.ast.elements._
 import molecule.datomic.api.out7._
 import molecule.tests.examples.datomic.dayOfDatomic.dsl.SocialNews._
-import molecule.TestSpec
 import molecule.datomic.base.util.SystemPeerServer
+import molecule.setup.TestSpec
 import scala.language.reflectiveCalls
 
 

@@ -1,9 +1,9 @@
 package molecule.tests.core.expression
 
 import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.coreTest.Ns
+import molecule.tests.core.base.dsl.CoreTest.Ns
 import molecule.datomic.api.in1_out2._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class Null extends TestSpec {
 
