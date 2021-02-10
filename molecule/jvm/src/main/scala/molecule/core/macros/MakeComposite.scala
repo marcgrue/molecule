@@ -14,7 +14,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
     val outMolecule = TypeName(c.freshName("compositOutMolecule$"))
     val (model0, _, casts, hasVariables, _, _, _, _, _) = getModel(dsl)
 
-    if (hasVariables) {
+    val t = if (hasVariables) {
       q"""
         import molecule.core.ast.elements._
         import molecule.core.ops.ModelOps._
@@ -35,6 +35,8 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         new $outMolecule
       """
     }
+//    abort(t.toString())
+    t
   }
 
   // Composite molecules ....................................................

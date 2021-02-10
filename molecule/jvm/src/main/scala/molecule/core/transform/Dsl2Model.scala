@@ -21,7 +21,8 @@ private[molecule] trait Dsl2Model extends Cast {
 
   import c.universe._
 
-  val x = InspectMacro("Dsl2Model", 901, 900)
+  val x = InspectMacro("Dsl2Model", 604, 603, mkError = true)
+  //  val x = InspectMacro("Dsl2Model", 603, 900)
   //      val x = InspectMacro("Dsl2Model", 200, 900)
 
 
@@ -48,6 +49,7 @@ private[molecule] trait Dsl2Model extends Cast {
     val keywords         = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample")
     def badFn(fn: TermName) = List("countDistinct", "distinct", "max", "min", "rand", "sample", "avg", "median", "stddev", "sum", "variance").contains(fn.toString())
 
+    var isTxMeta                : Boolean = false
     var isComposite             : Boolean = false
     var collectCompositeElements: Boolean = false
 
@@ -64,7 +66,6 @@ private[molecule] trait Dsl2Model extends Cast {
     var casts         : List[List[Int => Tree]] = List(List.empty[Int => Tree])
     var nestedRefAttrs: List[String]            = List.empty[String]
 
-    var tx          : String  = ""
     var hasVariables: Boolean = false
     var standard    : Boolean = true
     var aggrType    : String  = ""
@@ -131,7 +132,7 @@ private[molecule] trait Dsl2Model extends Cast {
     }
 
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
-      if (isComposite) {
+      if (isComposite && !isTxMeta) {
         x(741, prev, elements)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
@@ -213,12 +214,14 @@ private[molecule] trait Dsl2Model extends Cast {
       val subCompositeElements = resolve(subCompositeTree)
       x(602, prev, subCompositeElements)
 
-      // Start new level
-      types = List.empty[Tree] :: types
-      casts = List.empty[Int => Tree] :: casts
+      if (!isTxMeta) {
+        // Start new level
+        types = List.empty[Tree] :: types
+        casts = List.empty[Int => Tree] :: casts
+      }
 
       val elements = traverseElements(prev, p, subCompositeElements)
-      x(603, elements)
+      x(603, prev, subCompositeElements, types, casts, elements)
       collectCompositeElements = true
       elements
     }
@@ -643,8 +646,10 @@ private[molecule] trait Dsl2Model extends Cast {
 
     def resolveTypedApply(tree: Tree, p: richTree): Seq[Element] = tree match {
       case q"$prev.Tx.apply[..$t]($txMolecule)" =>
-        x(310, "Tx", txMolecule)
+        isTxMeta = true
         val txMetaData = TxMetaData(resolve(q"$txMolecule"))
+        isTxMeta = false
+        x(310, "Tx", prev, txMolecule, txMetaData, casts)
         traverseElement(prev, p, txMetaData)
 
       case q"$prev.e.apply[..$types]($nested)" if !p.isRef =>

@@ -1,7 +1,7 @@
 package molecule.tests.core.ref.nested
 
 import molecule.tests.core.base.dsl.CoreTest._
-import molecule.datomic.api.out3._
+import molecule.datomic.api.out6._
 import molecule.setup.TestSpec
 
 
@@ -244,12 +244,17 @@ class NestedAttrs extends TestSpec {
 
     Ns.float.str.Refs1.*(Ref1.int1).get.head === (1f, "a", Seq(11, 12))
 
+    // Note how we jump back to the namespace (`Ns`) _before_ the nested ns (`Ref1`)
     Ns.float.Refs1.*(Ref1.int1).str.get.head === (1f, Seq(11, 12), "a")
-
-    // Multiple nested
-    // todo
-//    Ns.float.Refs1.*(Ref1.int1).Parents.*(Ref1.int1).get.head === (1f, Seq(11, 12), "a")
   }
+
+  // todo?
+  //  "Multiple nested?" in new CoreSetup {
+  //
+  //    Ns.str.Refs1.*(Ref1.int1).Parents.*(Ref1.int1).insert("a", Seq(11, 12), Seq(21, 22))
+  //
+  //    Ns.str.Refs1.*(Ref1.int1).Parents.*(Ref1.int1).get.head === ("a", Seq(11, 12), Seq(21, 22))
+  //  }
 
 
   "Applied eid" in new CoreSetup {

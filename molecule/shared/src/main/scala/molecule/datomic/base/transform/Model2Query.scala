@@ -8,21 +8,20 @@ import molecule.core.util.Helpers
 
 
 /** Model to Query transformation.
- * <br><br>
- * Second transformation in Molecules series of transformations from
- * custom boilerplate DSL constructs to Datomic queries:
- * <br><br>
- * Custom DSL molecule --> Model --> Query --> Datomic query string
- *
- * */
+  * <br><br>
+  * Second transformation in Molecules series of transformations from
+  * custom boilerplate DSL constructs to Datomic queries:
+  * <br><br>
+  * Custom DSL molecule --> Model --> Query --> Datomic query string
+  *
+  * */
 object Model2Query extends Helpers {
 
   var nestedEntityClauses: List[Funct] = List.empty[Funct]
   var nestedEntityVars   : List[Var]   = List.empty[Var]
   var nestedLevel        : Int         = 1
   var _model             : Model       = null
-  val datomGeneric                     =
-    Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
+  val datomGeneric                     = Seq("e", "e_", "tx", "t", "txInstant", "op", "tx_", "t_", "txInstant_", "op_", "a", "a_", "v", "v_")
 
   def abort(msg: String): Nothing = throw new Model2QueryException(msg)
 
@@ -145,7 +144,6 @@ object Model2Query extends Helpers {
       case DataClause(_, Var(backE), a, Var(_), _, _) if a.nsFull == backRef => backE
     } getOrElse {
       abort(s"Can't find back reference namespace `$backRef` in query so far:\n$model\n---------\n$query\n---------\n$rb")
-//      "XXX"
     }
     (query, backRefE, v, backRef, "", "")
   }
@@ -173,9 +171,18 @@ object Model2Query extends Helpers {
         abort("Couldn't attach tx to any DataClause in query:\n" + query0)
       (query0.copy(wh = Where(cls1)), txV)
     }
-
+    var first = true
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, txV, w, prevNs, prevAttr, prevRefNs)) {
-      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+//      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
+        val nextV = if(first) {
+          first = false
+          v1
+        } else {
+          // All tx meta data attributes have new `v`
+          nextChar(v1, 1)
+        }
+        make(model, q1, element, e1, nextV, "","","")
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }

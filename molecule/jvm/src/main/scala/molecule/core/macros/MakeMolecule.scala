@@ -10,12 +10,19 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
+  val z = InspectMacro("MakeMolecule", 1, 900, mkError = true)
+
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
+
     val OutMoleculeTpe: Tree                    = molecule_o(TplTypes.size)
     val outMolecule                             = TypeName(c.freshName("outMolecule$"))
     val (model0, types, casts, hasVariables,
     postTypes, postCasts, isOptNested,
     optNestedRefIndexes, optNestedTacitIndexes) = getModel(dsl)
+
+    println(model0)
+//    abort(model0.toString)
+//    val q0 = Model2Query(model0)
 
     val t = if (casts.size == 1) {
       if (hasVariables) {
@@ -91,7 +98,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         """
       }
     }
-//    println(t)
+//    z(1, t, model0, q0._1, q0._1.datalog)
     t
   }
 

@@ -284,9 +284,8 @@ class TxFunction extends TestSpec {
       Ns(toAccount).int.get.head === 720
 
       // Both account entities share the same transaction meta data
-      // todo
-//      Ns(fromAccount).int.Tx(Ref2.str2 + Ref1.int1).get.head === (80, "Tx meta data...", 12345)
-//      Ns(toAccount).int.Tx(Ref2.str2 + Ref1.int1).get.head === (720, "Tx meta data...", 12345)
+      Ns(fromAccount).int.Tx(Ref2.str2 + Ref1.int1).get.head === (80, "Tx meta data...", 12345)
+      Ns(toAccount).int.Tx(Ref2.str2 + Ref1.int1).get.head === (720, "Tx meta data...", 12345)
 
       // Partial tx meta data queries
       Ns(fromAccount).int.Tx(Ref2.str2).get.head === (80, "Tx meta data...")

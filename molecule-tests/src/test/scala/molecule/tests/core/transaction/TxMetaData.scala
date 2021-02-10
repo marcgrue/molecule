@@ -131,16 +131,11 @@ class TxMetaData extends TestSpec {
     }
 
 
-    "Multiple tx groups" in new CoreSetup {
+    "Composite tx meta data" in new CoreSetup {
 
-      // Tx meta data that is not connected by references can be saved by applying
-      // individual tx molecules to separate tx's
-      // todo
-//      Ns.int(1).Tx(Ns.str("a") + Ref1.int1(10)).save
+      Ns.int(1).Tx(Ns.str("a") + Ref1.int1(10)).save
 
-      // This is not the same as a composite since the composite would be its own entity
-      // and not the tx entity. (won't compile either)
-      // Ns.int.Tx(Ns.str + Ref1.int1).get
+       Ns.int.Tx(Ns.str + Ref1.int1).get
 
       // Ns.str has no own reference to Ref1.int1
       Ns.int.Tx(Ns.str.Ref1.int1).get === Nil
@@ -156,8 +151,7 @@ class TxMetaData extends TestSpec {
       )
 
       // Tx entity has both Ns.str and Ref1.int1 asserted
-      // todo
-//      Ns.int.Tx(Ns.str + Ref1.int1).get === List((1, "a", 10))
+      Ns.int.Tx(Ns.str + Ref1.int1).get === List((1, "a", 10))
     }
   }
 
@@ -251,32 +245,31 @@ class TxMetaData extends TestSpec {
 
   "Composite with multiple tx meta data molecules" in new CoreSetup {
 
-    //todo
-//    m(Ns.str + Ns.int
-//      .Tx(
-//        Ns
-//          .bool_(true)
-//          .bools_(Set(false))
-//          .date_(date7)
-//          .dates_(Set(date8, date9))
-//          .double_(7.0)
-//          .doubles_(Set(8.0, 9.0))
-//          .enum_(enum7)
-//          .enums_(Set(enum8, enum9))
-//          .float_(7f)
-//          .floats_(Set(8f, 9f))
-//      +
-//        Ns
-//          .long_(7L)
-//          .longs_(Set(8L, 9L))
-//          .ref1_(701L)
-//          .refSub1_(702L)
-//          .uuid_(uuid7)
-//          .uuids_(Set(uuid8))
-//      )
-//    ) insert Seq(
-//      ("with tx meta data", 1)
-//    )
+    m(Ns.str + Ns.int
+      .Tx(
+        Ns
+          .bool_(true)
+          .bools_(Set(false))
+          .date_(date7)
+          .dates_(Set(date8, date9))
+          .double_(7.0)
+          .doubles_(Set(8.0, 9.0))
+          .enum_(enum7)
+          .enums_(Set(enum8, enum9))
+          .float_(7f)
+          .floats_(Set(8f, 9f))
+      +
+        Ns
+          .long_(7L)
+          .longs_(Set(8L, 9L))
+          .ref1_(701L)
+          .refSub1_(702L)
+          .uuid_(uuid7)
+          .uuids_(Set(uuid8))
+      )
+    ) insert Seq(
+      ("with tx meta data", 1)
+    )
 
     Ns.str.int.insert("without tx meta data", 2)
 

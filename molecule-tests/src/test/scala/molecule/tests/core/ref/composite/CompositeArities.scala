@@ -168,8 +168,7 @@ class CompositeArities extends TestSpec {
 
     // Composite of Molecule2 + Molecule1 + Tx meta data
     // Note that tx meta attributes have underscore/are tacit in order not to affect the type of input
-    val List(e1, e2, txId) = Ref2.int2.str2 +
-      Ref1.str1.int1.Tx(Ns.str_("Tx meta data")) insert Seq(
+    val List(e1, e2, txId) = Ref2.int2.str2 + Ref1.str1.int1.Tx(Ns.str_("Tx meta data")) insert Seq(
       ((1, "a"), ("aa", 11)),
       ((2, "b"), ("bb", 22))
     ) eids
