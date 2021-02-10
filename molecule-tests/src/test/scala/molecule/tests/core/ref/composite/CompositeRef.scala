@@ -2,7 +2,7 @@ package molecule.tests.core.ref.composite
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out4._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class CompositeRef extends TestSpec {
 

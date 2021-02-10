@@ -10,8 +10,9 @@ package molecule.core.generic.AEVT
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait AEVT_0_4[o0[_], p0, A, B, C, D] extends AEVT_[p0] with AEVT with NS_0_04[o0, p0, A, B, C, D]
+trait AEVT_0_4[o0[_], p0, A, B, C, D] extends AEVT with NS_0_04[o0, p0, A, B, C, D]
 
 trait AEVT_0_4_L0[o0[_], p0, A, B, C, D] extends AEVT_0_4[o0, p0, A, B, C, D] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[AEVT_0_5_L0[o0, p0 with Prop, A, B, C, D, Tpe], Nothing] with AEVT_0_5_L0[o0, p0 with Prop, A, B, C, D, Tpe]

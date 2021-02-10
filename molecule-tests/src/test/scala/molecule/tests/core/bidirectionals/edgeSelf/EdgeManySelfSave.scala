@@ -16,7 +16,7 @@ class EdgeManySelfSave extends TestSpec {
 
     "no nesting in save molecules" in new Setup {
 
-      (Person.name("Ann").Knows.*(Knows.weight(7)).Person.name("Ben").save must throwA[VerifyModelException])
+      (Person.name("Ann").Knows.*(Knows.weight(7)).name("Ben").save must throwA[VerifyModelException])
         .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNested]  Nested data structures not allowed in save molecules"
 

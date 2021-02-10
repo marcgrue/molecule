@@ -11,6 +11,7 @@ package molecule.core.generic.Log
 import java.util.Date
 import molecule.core.dsl.attributes._
 import molecule.core.generic.GenericNs
+import scala.language.higherKinds
 
 trait Log extends GenericNs {
   final class e         [Stay, Next] extends OneLong   [Stay, Next] with Indexed

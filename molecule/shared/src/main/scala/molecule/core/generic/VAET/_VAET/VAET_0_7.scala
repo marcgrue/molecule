@@ -10,8 +10,9 @@ package molecule.core.generic.VAET
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait VAET_0_7[o0[_], p0, A, B, C, D, E, F, G] extends VAET_[p0] with VAET with NS_0_07[o0, p0, A, B, C, D, E, F, G]
+trait VAET_0_7[o0[_], p0, A, B, C, D, E, F, G] extends VAET with NS_0_07[o0, p0, A, B, C, D, E, F, G]
 
 trait VAET_0_7_L0[o0[_], p0, A, B, C, D, E, F, G] extends VAET_0_7[o0, p0, A, B, C, D, E, F, G] {
   

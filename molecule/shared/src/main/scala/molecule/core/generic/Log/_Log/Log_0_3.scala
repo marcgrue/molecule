@@ -10,8 +10,9 @@ package molecule.core.generic.Log
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait Log_0_3[o0[_], p0, A, B, C] extends Log_[p0] with Log with NS_0_03[o0, p0, A, B, C]
+trait Log_0_3[o0[_], p0, A, B, C] extends Log with NS_0_03[o0, p0, A, B, C]
 
 trait Log_0_3_L0[o0[_], p0, A, B, C] extends Log_0_3[o0, p0, A, B, C] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[Log_0_4_L0[o0, p0 with Prop, A, B, C, Tpe], Nothing] with Log_0_4_L0[o0, p0 with Prop, A, B, C, Tpe]

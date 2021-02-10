@@ -12,7 +12,7 @@ import java.util.Date
 import molecule.core.dsl.base._
 import scala.language.higherKinds
 
-trait Schema_0_7[o0[_], p0, A, B, C, D, E, F, G] extends Schema_[p0] with Schema with NS_0_07[o0, p0, A, B, C, D, E, F, G]
+trait Schema_0_7[o0[_], p0, A, B, C, D, E, F, G] extends Schema with NS_0_07[o0, p0, A, B, C, D, E, F, G]
 
 trait Schema_0_7_L0[o0[_], p0, A, B, C, D, E, F, G] extends Schema_0_7[o0, p0, A, B, C, D, E, F, G] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[Schema_0_8_L0[o0, p0 with Prop, A, B, C, D, E, F, G, Tpe], Nothing] with Schema_0_8_L0[o0, p0 with Prop, A, B, C, D, E, F, G, Tpe]

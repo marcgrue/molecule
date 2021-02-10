@@ -15,10 +15,10 @@ class ManyMany extends TestSpec {
 
     class Setup extends CoreSetup {
 
-      def pairsTacit[I1, I2, A](test: String,
-                                im: Molecule_2.Molecule_2_01[I1, I2, A],
-                                im1: Molecule_1.Molecule_1_01[I1, A],
-                                im2: Molecule_1.Molecule_1_01[I2, A],
+      def pairsTacit[Obj, I1, I2, A](test: String,
+                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, A],
+                                im1: Molecule_1.Molecule_1_01[Obj, I1, A],
+                                im2: Molecule_1.Molecule_1_01[Obj, I2, A],
                                 inOut1: Seq[(I1, List[A])],
                                 inOut2: Seq[(I2, List[A])]
                                )(implicit ev: ClassTag[A]) = {
@@ -50,10 +50,10 @@ class ManyMany extends TestSpec {
         println(s"$test   $i tests passed")
       }
 
-      def pairsTacit22[I1, I2](test: String,
-                               im: Molecule_2.Molecule_2_01[I1, I2, Int],
-                               im1: Molecule_1.Molecule_1_01[I1, Int],
-                               im2: Molecule_1.Molecule_1_01[I2, Int],
+      def pairsTacit22[Obj, I1, I2](test: String,
+                               im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
+                               im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
+                               im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
                                inOut1: Seq[(I1, List[Int])],
                                inOut2: Seq[(I2, List[Int])]
                               ) = {
@@ -91,10 +91,10 @@ class ManyMany extends TestSpec {
         println(s"Eq Eq   $i tests passed")
       }
 
-      def pairsMandatory[I1, I2, A, B, C](test: String,
-                                          im: Molecule_2.Molecule_2_03[I1, I2, A, B, C],
-                                          im1: Molecule_1.Molecule_1_02[I1, A, B],
-                                          im2: Molecule_1.Molecule_1_02[I2, A, C],
+      def pairsMandatory[Obj, I1, I2, A, B, C](test: String,
+                                          im: Molecule_2.Molecule_2_03[Obj, I1, I2, A, B, C],
+                                          im1: Molecule_1.Molecule_1_02[Obj, I1, A, B],
+                                          im2: Molecule_1.Molecule_1_02[Obj, I2, A, C],
                                           inOut1: Seq[(I1, Seq[(A, B)])],
                                           inOut2: Seq[(I2, Seq[(A, C)])]
                                          )(implicit ev: ClassTag[(A, B, C)]) = {
@@ -135,10 +135,10 @@ class ManyMany extends TestSpec {
       }
 
 
-      def groupsTacit22[I1, I2](test: String,
-                                im: Molecule_2.Molecule_2_01[I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[I1, Int],
-                                im2: Molecule_1.Molecule_1_01[I2, Int],
+      def groupsTacit22[Obj, I1, I2](test: String,
+                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
+                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
@@ -204,10 +204,10 @@ class ManyMany extends TestSpec {
       }
 
 
-      def groupsTacit21[I1, I2](test: String,
-                                im: Molecule_2.Molecule_2_01[I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[I1, Int],
-                                im2: Molecule_1.Molecule_1_01[I2, Int],
+      def groupsTacit21[Obj, I1, I2](test: String,
+                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
+                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
@@ -264,9 +264,9 @@ class ManyMany extends TestSpec {
         println(s"$test   $i tests passed")
       }
 
-      def groupsTacit11[I1, I2](test: String, im: Molecule_2.Molecule_2_01[I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[I1, Int],
-                                im2: Molecule_1.Molecule_1_01[I2, Int],
+      def groupsTacit11[Obj, I1, I2](test: String, im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
+                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
+                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
                                 inOut1: Seq[(Seq[I1], List[Int])],
                                 inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")

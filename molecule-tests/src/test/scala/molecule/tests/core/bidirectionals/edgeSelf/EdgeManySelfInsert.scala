@@ -40,12 +40,16 @@ class EdgeManySelfInsert extends TestSpec {
     "nested edge only not allowed" in new Setup {
 
       // Can't save nested edges without including target entity
-//      (Person.name.Knows.*(Knows.weight).Person.name insert List(
-      (Person.name.Knows.*(Knows.weight) insert List(
+      (Person.name.Knows.*(Knows.weight).name insert List(
         ("Ben", List(7, 8), "Joe")
       ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
         s"[noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
         s"target ns within the nested group of attributes."
+//      (Person.name.Knows.*(Knows.weight).Person.name insert List(
+//        ("Ben", List(7, 8), "Joe")
+//      ) must throwA[VerifyModelException]).message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+//        s"[noNestedEdgesWithoutTarget]  Nested edge ns `Knows` should link to " +
+//        s"target ns within the nested group of attributes."
     }
   }
 

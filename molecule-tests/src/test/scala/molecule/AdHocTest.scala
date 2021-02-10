@@ -54,10 +54,10 @@ import org.specs2.mutable.Specification
     //      o.RefsSub1.str1
     //    }
     //
-    //    val o = m(Ns.float.Ref1.int1.Refs2.*(Ref2.int2)).getObjList.head
-    //    o.float
-    //    o.Ref1.int1
-    //    o.Ref1.Refs2.head.int2
+        val o = m(Ns.float.Ref1.int1.Refs2.*(Ref2.int2)).getObjList.head
+        o.float
+        o.Ref1.int1
+        o.Ref1.Refs2.head.int2
 
     Ns.str.Ref1.str1._Ns.Refs1.int1.inspectInsert(
       List(

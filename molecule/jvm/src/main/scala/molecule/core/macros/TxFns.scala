@@ -26,11 +26,6 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
         // Add untyped tx functions with extra initial db arg
         q"""
          object $txFnContainer {
-           // import molecule.datomic.peer.facade.Database_Peer
-           // import molecule.datomic.peer.facade.Conn_Peer
-           // import molecule.datomic.client.facade.Database_DevLocal
-           // import molecule.datomic.client.facade.Conn_Client
-           // import datomicScala.client.api.sync.Db
            ..$typedTxFns
            ..${typedTxFns.map(untypedTxFn(_))}
          }
@@ -76,8 +71,8 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
       //          ..${args.map(typedParam(_))}
       //          ..${txFnBody.init}
       //          val _txFnStmts = ${txFnBody.last}
-      //          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core.ast.transactionModel.Statement]]
-      //          molecule.core.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
+      //          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.datomic.base.ast.transactionModel.Statement]]
+      //          molecule.datomic.base.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
       //        }
       //      """
 
@@ -94,8 +89,8 @@ private[molecule] final class TxFnMacro(val c: blackbox.Context) extends MacroHe
           ..${args.map(typedParam(_))}
           ..${txFnBody.init}
           val _txFnStmts = ${txFnBody.last}
-          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.core.ast.transactionModel.Statement]]
-          molecule.core.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
+          val _txMetaDataStmts = txMetaData.asInstanceOf[Seq[molecule.datomic.base.ast.transactionModel.Statement]]
+          molecule.datomic.base.ast.transactionModel.toJava(_txFnStmts :+ _txMetaDataStmts)
         }
       """
 

@@ -12,9 +12,9 @@ import java.util.Date
 import molecule.core.dsl.base._
 import scala.language.higherKinds
 
-trait Datom_2_3[o0[_], p0, I1, I2, A, B, C] extends Datom_[p0] with Datom with NS_2_03[o0, p0, I1, I2, A, B, C]
+trait Datom_2_3[o0[_], p0, I1, I2, A, B, C] extends Datom with NS_2_03[o0, p0, I1, I2, A, B, C]
 
-trait Datom_2_3_L0[o0[_], p0, I1, I2, A, B, C, Ns_2_3[o0[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0, I1, I2, A, B, C] {
+trait Datom_2_3_L0[o0[_], p0, I1, I2, A, B, C, Ns_2_3[_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0, I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0          , I1, I2, A, B, C     ], Ns_3_3[o0, p0          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0          , I1, I2, A, B, C     ]
 
@@ -37,7 +37,7 @@ trait Datom_2_3_L0[o0[_], p0, I1, I2, A, B, C, Ns_2_3[o0[_],_,_,_,_,_,_], Ns_2_4
 }
 
 
-trait Datom_2_3_L1[o0[_], p0, o1[_], p1, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1], I1, I2, A, B, C] {
+trait Datom_2_3_L1[o0[_], p0, o1[_], p1, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1          , I1, I2, A, B, C     ]
 
@@ -60,7 +60,7 @@ trait Datom_2_3_L1[o0[_], p0, o1[_], p1, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_
 }
 
 
-trait Datom_2_3_L2[o0[_], p0, o1[_], p1, o2[_], p2, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2]], I1, I2, A, B, C] {
+trait Datom_2_3_L2[o0[_], p0, o1[_], p1, o2[_], p2, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2          , I1, I2, A, B, C     ]
 
@@ -83,7 +83,7 @@ trait Datom_2_3_L2[o0[_], p0, o1[_], p1, o2[_], p2, I1, I2, A, B, C, Ns_2_3[o0[_
 }
 
 
-trait Datom_2_3_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3]]], I1, I2, A, B, C] {
+trait Datom_2_3_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3]]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2, o3, p3 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2, o3, p3          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3          , I1, I2, A, B, C     ]
 
@@ -106,7 +106,7 @@ trait Datom_2_3_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, I1, I2, A, B, C, 
 }
 
 
-trait Datom_2_3_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4]]]], I1, I2, A, B, C] {
+trait Datom_2_3_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4]]]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4          , I1, I2, A, B, C     ]
 
@@ -129,7 +129,7 @@ trait Datom_2_3_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, I1, I2
 }
 
 
-trait Datom_2_3_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5]]]]], I1, I2, A, B, C] {
+trait Datom_2_3_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5]]]]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5          , I1, I2, A, B, C     ]
 
@@ -152,7 +152,7 @@ trait Datom_2_3_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_],
 }
 
 
-trait Datom_2_3_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_], p6, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5 with o6[p6]]]]]], I1, I2, A, B, C] {
+trait Datom_2_3_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_], p6, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5 with o6[p6]]]]]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6          , I1, I2, A, B, C     ]
 
@@ -175,7 +175,7 @@ trait Datom_2_3_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_],
 }
 
 
-trait Datom_2_3_L7[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_], p6, o7[_], p7, I1, I2, A, B, C, Ns_2_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,o7[_],_,_,_,_,_,_], Ns_2_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,o7[_],_,_,_,_,_,_,_], Ns_3_3[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,o7[_],_,_,_,_,_,_,_], Ns_3_4[o0[_],_,o1[_],_,o2[_],_,o3[_],_,o4[_],_,o5[_],_,o6[_],_,o7[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5 with o6[p6 with o7[p7]]]]]]], I1, I2, A, B, C] {
+trait Datom_2_3_L7[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_], p5, o6[_], p6, o7[_], p7, I1, I2, A, B, C, Ns_2_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_], Ns_2_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_3[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_], Ns_3_4[_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_[_],_,_,_,_,_,_,_,_]] extends Datom_2_3[o0, p0 with o1[p1 with o2[p2 with o3[p3 with o4[p4 with o5[p5 with o6[p6 with o7[p7]]]]]]], I1, I2, A, B, C] {
   type Next_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7 with Prop, I1, I2, A, B, C, Tpe], Ns_3_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7 with Prop, I1, I2, Tpe, A, B, C, Tpe]] with Ns_2_4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7 with Prop, I1, I2, A, B, C, Tpe]
   type Stay_[Attr[_, _], Prop, Tpe] = Attr[Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7          , I1, I2, A, B, C     ], Ns_3_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7          , I1, I2, Tpe, A, B, C     ]] with Ns_2_3[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7          , I1, I2, A, B, C     ]
 

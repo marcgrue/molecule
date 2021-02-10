@@ -8,6 +8,9 @@
 */
 package molecule.core.util.testing.TxCount
 
+import java.net.URI
+import java.util.Date
+import java.util.UUID
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
 import scala.language.higherKinds

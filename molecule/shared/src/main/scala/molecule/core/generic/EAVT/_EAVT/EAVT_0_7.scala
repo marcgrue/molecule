@@ -10,8 +10,9 @@ package molecule.core.generic.EAVT
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait EAVT_0_7[o0[_], p0, A, B, C, D, E, F, G] extends EAVT_[p0] with EAVT with NS_0_07[o0, p0, A, B, C, D, E, F, G]
+trait EAVT_0_7[o0[_], p0, A, B, C, D, E, F, G] extends EAVT with NS_0_07[o0, p0, A, B, C, D, E, F, G]
 
 trait EAVT_0_7_L0[o0[_], p0, A, B, C, D, E, F, G] extends EAVT_0_7[o0, p0, A, B, C, D, E, F, G] {
   

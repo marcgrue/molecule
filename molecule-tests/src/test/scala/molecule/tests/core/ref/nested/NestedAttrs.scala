@@ -2,7 +2,7 @@ package molecule.tests.core.ref.nested
 
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class NestedAttrs extends TestSpec {
@@ -244,11 +244,11 @@ class NestedAttrs extends TestSpec {
 
     Ns.float.str.Refs1.*(Ref1.int1).get.head === (1f, "a", Seq(11, 12))
 
-    Ns.float.Refs1.*(Ref1.int1)._Ns.str.get.head === (1f, Seq(11, 12), "a")
-    Ns.float.Refs1.*(Ref1.int1).int1.get.head === (1f, Seq(11, 12), "a")
+    Ns.float.Refs1.*(Ref1.int1).str.get.head === (1f, Seq(11, 12), "a")
 
     // Multiple nested
-//    Ns.float.Refs1.*(Ref1.int1)._Ns.Parents.*(Ref1.int1).get.head === (1f, Seq(11, 12), "a")
+    // todo
+//    Ns.float.Refs1.*(Ref1.int1).Parents.*(Ref1.int1).get.head === (1f, Seq(11, 12), "a")
   }
 
 

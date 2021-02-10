@@ -213,11 +213,13 @@ class EdgeManySelfUpdate extends TestSpec {
       "\n  Person ... name(Joe, Liz)"
 
     // As with save molecules nesting is not allowed in update molecules
-    (Person(ann).Knows.*(Knows.weight(4)).Person.name("Joe").update must throwA[VerifyModelException])
+//    (Person(ann).Knows.*(Knows.weight(4)).Person.name("Joe").update must throwA[VerifyModelException])
+    (Person(ann).Knows.*(Knows.weight(4)).name("Joe").update must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 
-    (Person(ann).Knows.*(Knows.weight(4)).person(42L).update must throwA[VerifyModelException])
+//    (Person(ann).Knows.*(Knows.weight(4)).person(42L).update must throwA[VerifyModelException])
+    (Person(ann).Knows.*(Knows.weight(4)).e(42L).update must throwA[VerifyModelException])
       .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
       s"[update_onlyOneNs]  Update molecules can't have nested data structures like `Knows`."
 

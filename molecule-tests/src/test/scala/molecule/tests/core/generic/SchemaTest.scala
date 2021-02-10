@@ -530,7 +530,7 @@ class SchemaTest extends TestSpec {
         // Fulltext search for multiple words not allowed
         expectCompileError(
           """m(Schema.doc.contains("Int", "String"))""",
-          "molecule.core.transform.exception.Model2QueryException: " +
+          "molecule.datomic.base.transform.exception.Model2QueryException: " +
             "Fulltext search can only be performed with 1 search phrase.")
       }
 

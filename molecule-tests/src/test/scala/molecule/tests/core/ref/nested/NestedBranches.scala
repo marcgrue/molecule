@@ -1,8 +1,8 @@
 package molecule.tests.core.ref.nested
 
-import molecule.tests.core.ref.dsl.nested._
+import molecule.tests.core.ref.dsl.Nested._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 class NestedBranches extends TestSpec {
 
@@ -26,7 +26,7 @@ class NestedBranches extends TestSpec {
       List(branchA(leafs), branchB(leaf)),
     )
     data.foreach { d =>
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -63,7 +63,7 @@ class NestedBranches extends TestSpec {
     )
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -184,7 +184,7 @@ class NestedBranches extends TestSpec {
     )
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -396,7 +396,7 @@ class NestedBranches extends TestSpec {
     )
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -732,7 +732,7 @@ class NestedBranches extends TestSpec {
 
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -1231,7 +1231,7 @@ class NestedBranches extends TestSpec {
 
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok
@@ -1814,7 +1814,7 @@ class NestedBranches extends TestSpec {
 
     data.foreach { d =>
       println(d)
-      conn.testDbWith(nested.getInsertTx(d))
+      conn.testDbWith(nested.getInsertStmts(d))
       nested.get === d
     }
     ok

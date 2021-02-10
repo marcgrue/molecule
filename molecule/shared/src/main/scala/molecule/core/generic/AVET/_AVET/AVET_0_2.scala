@@ -10,8 +10,9 @@ package molecule.core.generic.AVET
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait AVET_0_2[o0[_], p0, A, B] extends AVET_[p0] with AVET with NS_0_02[o0, p0, A, B]
+trait AVET_0_2[o0[_], p0, A, B] extends AVET with NS_0_02[o0, p0, A, B]
 
 trait AVET_0_2_L0[o0[_], p0, A, B] extends AVET_0_2[o0, p0, A, B] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[AVET_0_3_L0[o0, p0 with Prop, A, B, Tpe], Nothing] with AVET_0_3_L0[o0, p0 with Prop, A, B, Tpe]

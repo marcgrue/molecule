@@ -10,8 +10,9 @@ package molecule.core.generic.VAET
 
 import java.util.Date
 import molecule.core.dsl.base._
+import scala.language.higherKinds
 
-trait VAET_0_4[o0[_], p0, A, B, C, D] extends VAET_[p0] with VAET with NS_0_04[o0, p0, A, B, C, D]
+trait VAET_0_4[o0[_], p0, A, B, C, D] extends VAET with NS_0_04[o0, p0, A, B, C, D]
 
 trait VAET_0_4_L0[o0[_], p0, A, B, C, D] extends VAET_0_4[o0, p0, A, B, C, D] {
   type Next[Attr[_, _], Prop, Tpe] = Attr[VAET_0_5_L0[o0, p0 with Prop, A, B, C, D, Tpe], Nothing] with VAET_0_5_L0[o0, p0 with Prop, A, B, C, D, Tpe]

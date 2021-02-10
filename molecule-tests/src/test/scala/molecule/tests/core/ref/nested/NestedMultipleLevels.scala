@@ -3,7 +3,7 @@ package molecule.tests.core.ref.nested
 import molecule.core.util.testing.expectCompileError
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.out3._
-import molecule.TestSpec
+import molecule.setup.TestSpec
 
 
 class NestedMultipleLevels extends TestSpec {

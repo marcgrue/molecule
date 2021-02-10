@@ -141,7 +141,7 @@ class GetWith extends TestSpec {
 
     Ns.str.int.getWith(
       Ns.str("John").int(44).getSaveStmts,
-      Ns.str.int getInsertTx List(
+      Ns.str.int getInsertStmts List(
         ("Lisa", 23),
         ("Pete", 24)
       ),
@@ -154,7 +154,7 @@ class GetWith extends TestSpec {
     )
 
     val saveJohn      = Ns.str("John").int(44).getSaveStmts
-    val insertMembers = Ns.str.int getInsertTx List(("Lisa", 23), ("Pete", 24))
+    val insertMembers = Ns.str.int getInsertStmts List(("Lisa", 23), ("Pete", 24))
     val updateFred    = Ns(fred).int(43).getUpdateStmts
 
     Ns.str.int.getWith(
