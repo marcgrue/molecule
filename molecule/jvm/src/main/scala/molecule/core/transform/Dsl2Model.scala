@@ -25,6 +25,7 @@ private[molecule] trait Dsl2Model extends Cast {
   //      val x = InspectMacro("Dsl2Model", 600, 600, mkError = true)
   //      val x = InspectMacro("Dsl2Model", 602, 602, mkError = true)
   //      val x = InspectMacro("Dsl2Model", 711, 711, mkError = true)
+  //  val x = InspectMacro("Dsl2Model", 550, 560, mkError = true)
   val x = InspectMacro("Dsl2Model", 901, 900)
   //      val x = InspectMacro("Dsl2Model", 200, 900)
 
@@ -850,29 +851,21 @@ private[molecule] trait Dsl2Model extends Cast {
     def nested1(prev: Tree, p: richTree, manyRef: TermName, nestedTree: Tree) = {
       val refNext           = q"$prev.$manyRef".refNext
       val parentNs          = prev match {
-        case q"$pre.apply($value)" if p.isMapAttrK      => x(551, 1); new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
-        case q"$pre.apply($value)" if p.isAttr          => x(552, 1); richTree(pre).nsFull
-        case q"$pre.apply($value)"                      => x(553, 1); richTree(pre).name.capitalize
-        case _ if prev.symbol.name.toString.head == '_' => x(554, 1); prev.tpe.typeSymbol.name.toString.replaceFirst("_[0-9]+$", "")
-        case q"$pre.e" if p.isAttr                      => x(555, 1); q"$pre".symbol.name
-        case _ if p.isAttr                              => x(556, 1); p.nsFull
-        case _ if p.isRef                               => x(557, 1); p.refNext
-        case _                                          => x(558, 1); p.name.capitalize
+        case q"$pre.apply($value)" if p.isMapAttrK      => new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
+        case q"$pre.apply($value)" if p.isAttr          => richTree(pre).nsFull
+        case q"$pre.apply($value)"                      => richTree(pre).name.capitalize
+        case _ if prev.symbol.name.toString.head == '_' => prev.tpe.typeSymbol.name.toString.split("_\\d", 2).head
+        case q"$pre.e" if p.isAttr                      => q"$pre".symbol.name
+        case _ if p.isAttr                              => p.nsFull
+        case _ if p.isRef                               => p.refNext
+        case _                                          => p.name.capitalize
       }
       val opt               = if (isOptNested) "$" else ""
-      //      val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
-      val (nsFull, refAttr) = (parentNs.toString.split('_').head, firstLow(manyRef))
-
-
-      x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr)
-
-
+      val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
+      x(550, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr)
       nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
-      //      nestedRefAttrs = nestedRefAttrs :+ refAttr.capitalize
-
-
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-      x(511, nsFull, nestedRefAttrs, nestedElems, post)
+      x(560, nsFull, nestedRefAttrs, nestedElems, post)
       Nested(Bond(nsFull, refAttr + opt, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
     }
 

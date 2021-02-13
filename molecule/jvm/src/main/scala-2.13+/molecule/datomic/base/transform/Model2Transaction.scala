@@ -56,7 +56,10 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         val nested   = elements.foldLeft("v": Any, Seq[Statement]()) {
           case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
         }._2
-        ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
+        val add = Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c))
+
+//        ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
+        ("e", stmts :+ add)
 
       case ("tx", Composite(elements)) =>
         val associated = elements.foldLeft("tx": Any, Seq[Statement]()) {

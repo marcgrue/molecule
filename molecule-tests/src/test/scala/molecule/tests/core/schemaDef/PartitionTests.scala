@@ -9,27 +9,35 @@ import scala.language.reflectiveCalls
 
 class PartitionTests extends TestSpec {
 
-  "Insert resolves to correct partitions" in new PartitionSetup {
+  "Save resolves to correct partitions" in new PartitionSetup {
 
-    lit_Book.title("A good book").cat("good").Author.name("Marc").gender("male").inspectSave === 7
+    lit_Book.title("A good book").cat("good").Author.name("Marc").gender("male").inspectSave
 
-//    testInsertMolecule(
-//      lit_Book.title("A good book").cat("good").Author.name("Marc").gender("male")
-//    ) -->
-//      Model(List(
-//        Atom("lit_Book", "title", "String", 1, Eq(List("A good book")), None, List()),
-//        Atom("lit_Book", "cat", "String", 1, Eq(List("good")), Some(":lit_Book.cat/"), List()),
-//        Bond("lit_Book", "author", "gen_Person", 1),
-//        Atom("gen_Person", "name", "String", 1, Eq(List("Marc")), None, List()),
-//        Atom("gen_Person", "gender", "String", 1, Eq(List("male")), Some(":gen_Person.gender/"), List()))) -->
-//      //           action          temp id             attribute            value
-//      """List(
-//        |  List(:db/add,  #db/id[:lit -1000001],  :lit_Book/title   ,  A good book            ),
-//        |  List(:db/add,  #db/id[:lit -1000001],  :lit_Book/cat     ,  :lit_Book.cat/good     ),
-//        |  List(:db/add,  #db/id[:lit -1000001],  :lit_Book/author  ,  #db/id[:gen -1000002]  ),
-//        |  List(:db/add,  #db/id[:gen -1000002],  :gen_Person/name  ,  Marc                   ),
-//        |  List(:db/add,  #db/id[:gen -1000002],  :gen_Person/gender,  :gen_Person.gender/male)
-//        |)""".stripMargin
+    /*
+## 1 ## output.Molecule.inspectSave
+================================================================================================================
+Model(
+  Atom("lit_Book", "title", "String", 1, Eq(Seq("A good book")), None, Seq(), Seq())
+  Atom("lit_Book", "cat", "String", 1, Eq(Seq("good")), Some(":lit_Book.cat/"), Seq(), Seq())
+  Bond("lit_Book", "author", "gen_Person", 1, Seq())
+  Atom("gen_Person", "name", "String", 1, Eq(Seq("Marc")), None, Seq(), Seq())
+  Atom("gen_Person", "gender", "String", 1, Eq(Seq("male")), Some(":gen_Person.gender/"), Seq(), Seq()))
+----------------------------------------------------------------------------------------------------------------
+List(
+  List(":db/add",     __tempId, ":lit_Book/title",            Values(Eq(Seq("A good book")),None), Card(1)),
+  List(":db/add",     e       , ":lit_Book/cat",              Values(Eq(Seq("good")),Some(:lit_Book.cat/)), Card(1)),
+  list(":db/add",     e       , ":lit_Book/author",           :gen_Person),
+  List(":db/add",     v       , ":gen_Person/name",           Values(Eq(Seq("Marc")),None), Card(1)),
+  List(":db/add",     e       , ":gen_Person/gender",         Values(Eq(Seq("male")),Some(:gen_Person.gender/)), Card(1)))
+----------------------------------------------------------------------------------------------------------------
+list(
+  list(":db/add",     #db/id[:lit -1000025], ":lit_Book/title",            A good book),
+  list(":db/add",     #db/id[:lit -1000025], ":lit_Book/cat",              :lit_Book.cat/good),
+  list(":db/add",     #db/id[:lit -1000025], ":lit_Book/author",           #db/id[:gen -1000026]),
+  list(":db/add",     #db/id[:gen -1000026], ":gen_Person/name",           Marc),
+  list(":db/add",     #db/id[:gen -1000026], ":gen_Person/gender",         :gen_Person.gender/male))
+================================================================================================================
+     */
   }
 
 
