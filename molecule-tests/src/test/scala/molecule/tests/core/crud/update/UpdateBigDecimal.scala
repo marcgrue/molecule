@@ -138,13 +138,13 @@ class UpdateBigDecimal extends TestSpec {
       val other8 = bigDec8
 
       (Ns(eid).bigDecs.replace(bigDec7 -> bigDec8, bigDec8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigDecs`:" +
         "\n8.0"
 
       // Conflicting new values
       (Ns(eid).bigDecs.replace(Seq(bigDec7 -> bigDec8, bigDec8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigDecs`:" +
         "\n8.0"
     }

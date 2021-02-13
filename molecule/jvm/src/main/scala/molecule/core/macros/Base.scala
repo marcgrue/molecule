@@ -56,8 +56,8 @@ private[molecule] trait Base extends Dsl2Model {
     (identifiers0 ++ newIdentifiers).distinct
   }
 
-  def compositeCasts(castss: List[List[Int => Tree]]): Seq[Tree] = {
-    var i              = -1
+  def compositeCasts(castss: List[List[Int => Tree]], offset: Int = 0): Seq[Tree] = {
+    var i              = -1 + offset
     var subTupleFields = Seq.empty[Tree]
     val subTuples      = castss.flatMap {
       case Nil   => None
@@ -71,10 +71,13 @@ private[molecule] trait Base extends Dsl2Model {
     subTuples
   }
 
-  def topLevel(casts: List[List[Int => Tree]]): List[Tree] =
-    casts.head.zipWithIndex.map {
-      case (cast, i) => cast(i)
+  def topLevel(castss: List[List[Int => Tree]], offset: Int = 0): List[Tree] = {
+    var i = -1 + offset
+    castss.head.map { cast =>
+      i += 1
+      cast(i)
     }
+  }
 
 
   // Optional nested -----------------------------------------------------------

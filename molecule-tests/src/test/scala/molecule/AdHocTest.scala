@@ -3,7 +3,7 @@ package molecule
 import java.util.Date
 import molecule.core.ast.elements._
 import molecule.core.util.Helpers
-import molecule.datomic.api.in1_out5._
+import molecule.datomic.api.in1_out10._
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.transform.Model2Query
 import molecule.datomic.peer.facade.Datomic_Peer
@@ -30,69 +30,35 @@ class AdHocTest extends Specification {
   //  }
 
   //  "adhoc" in new BidirectionalSetup {
+  //
   //    import molecule.tests.core.bidirectionals.dsl.Bidirectional._
   //
-  //        val animalsCloseTo = m(Person.name_(?).CloseTo.*(CloseTo.weight.Animal.name))
+  //
+  //
   //  }
   //
   //
   //
   //
-  //    "adhoc" in new CoreSetup {
+  //  "adhoc" in new CoreSetup {
+  //    import molecule.tests.core.base.dsl.CoreTest._
   //
-  //      //    val a: Molecule_0.Molecule_0_02[Ns_[Nothing with Ns_str] with Ref1_[Nothing with Ref1_int1], String, Int] = m(Ns.str("a") + Ref1.int1(10))
-  //      //
-  //      //    val b: Ns_[Nothing with Ns_str] with Ref1_[Nothing with Ref1_int1] = a.getObjList.head
-  //      //
-  //      //    b.Ns.str
-  //      //    b.Ref1.int1
-  //      //
-  //      //
-  //      //    val c: Molecule_0.Molecule_0_03[Nothing with Ns_int with Tx_[Ns_[Nothing with Ns_str] with Ref1_[Nothing with Ref1_int1]], Int, String, Int] = m(Ns.int(1).Tx.apply(Ns.str("a") + Ref1.int1(10)))
-  //
-  //      //      m(Ns.int.str)
-  //
-  //
-  //
-  //    }
 
+  //  }
 
 
   "adhoc" >> {
 
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-    //    m(Ns.str.Ref1.str1._Ns.Refs1.int1)
-
-    //      m(Ns.int.str)
-
-    //      m(Ns.str("a") + Ref1.int1(10)).inspectGet
-
-    //    m(Ns.int(1).Tx.apply(Ref2.str2("a") + Ref1.int1(10))) //.inspectSave
-
-    /*
-    1          List(
-      1          Atom("Ns", "int", "Int", 1, Eq(Seq(1)), None, Seq(), Seq())
-      2          TxMetaData(
-        1          Composite(
-          1          Atom("Ref2", "str2", "String", 1, Eq(Seq("a")), None, Seq(), Seq()))
-        2          Composite(
-          1          Atom("Ref1", "int1", "Int", 1, Eq(Seq(10)), None, Seq(), Seq()))))
-     */
 
 
-    //    m(Ns.int(1).Tx(Ref2.str2("a"))).inspectSave
-    //    m(Ns.int(1).Tx(Ref2.str2("a"))).save
 
-    val date1 = new Date()
 
-//    Model2Query(
-//      Model(List(
-//        Atom("Ns", "date", "java.util.Date", 1, Eq(Seq("__ident__date1")), None, Seq(), Seq())))
-//    )
-
-    m(Ns.date(date1)).inspectGet
-
+    //    Model2Query(
+    //      Model(List(
+    //        Atom("Ns", "date", "java.util.Date", 1, Eq(Seq("__ident__date1")), None, Seq(), Seq())))
+    //    )
 
 
     //    {

@@ -310,13 +310,13 @@ class UpdateDouble extends TestSpec {
       val other8 = 8.0
 
       (Ns(eid).doubles.replace(double7 -> double8, double8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/doubles`:" +
         "\n8.0"
 
       // Conflicting new values
       (Ns(eid).doubles.replace(Seq(double7 -> double8, double8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/doubles`:" +
         "\n8.0"
     }

@@ -7,22 +7,23 @@ import scala.reflect.macros.blackbox
 
 /** Macro to make composite input molecules. */
 class MakeComposite_In(val c: blackbox.Context) extends Base {
+
   import c.universe._
 
   private[this] final def generateComposite_In_Molecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
-    val OutMoleculeTpe = molecule_o(OutTypes.size)
-    val inputMolecule = TypeName(c.freshName("compositeInputMolecule$"))
-    val outMolecule = TypeName(c.freshName("compositeOutMolecule$"))
-    val (model0, _, casts, hasVariables, _, _, _, _, _) = getModel(dsl)
+    val InputMoleculeTpe                                   = inputMolecule_i_o(InTypes.size, OutTypes.size)
+    val OutMoleculeTpe                                     = molecule_o(OutTypes.size)
+    val inputMolecule                                      = TypeName(c.freshName("compositeInputMolecule$"))
+    val outMolecule                                        = TypeName(c.freshName("compositeOutMolecule$"))
+    val (model0, _, casts, hasVariables, _, _, _, _, _, _) = getModel(dsl)
 
     // Methods for applying separate lists of input
     val applySeqs = InTypes match {
       case Seq(it1) => q"" // no extra
 
       case Seq(it1, it2) =>
-        val (i1, i2) = (TermName(s"in1"), TermName(s"in2"))
-        val (t1, t2) = (tq"Seq[$it1]", tq"Seq[$it2]")
+        val (i1, i2)                     = (TermName(s"in1"), TermName(s"in2"))
+        val (t1, t2)                     = (tq"Seq[$it1]", tq"Seq[$it2]")
         val (inParams, inTerm1, inTerm2) = (Seq(q"$i1: $t1", q"$i2: $t2"), i1, i2)
         q"""
           def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
@@ -38,8 +39,8 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
         """
 
       case Seq(it1, it2, it3) =>
-        val (i1, i2, i3) = (TermName(s"in1"), TermName(s"in2"), TermName(s"in3"))
-        val (t1, t2, t3) = (tq"Seq[$it1]", tq"Seq[$it2]", tq"Seq[$it3]")
+        val (i1, i2, i3)                          = (TermName(s"in1"), TermName(s"in2"), TermName(s"in3"))
+        val (t1, t2, t3)                          = (tq"Seq[$it1]", tq"Seq[$it2]", tq"Seq[$it3]")
         val (inParams, inTerm1, inTerm2, inTerm3) = (Seq(q"$i1: $t1", q"$i2: $t2", q"$i3: $t3"), i1, i2, i3)
         q"""
           def apply(..$inParams)(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {

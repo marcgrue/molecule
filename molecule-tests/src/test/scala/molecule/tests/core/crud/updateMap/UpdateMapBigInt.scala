@@ -56,7 +56,7 @@ class UpdateMapBigInt extends TestSpec {
 
       // vararg
       (Ns(eid).bigIntMap.assert(str1 -> bigInt1, str1x -> bigInt2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
@@ -64,7 +64,7 @@ class UpdateMapBigInt extends TestSpec {
 
       // Seq
       (Ns(eid).bigIntMap.assert(Seq(str1 -> bigInt1, str1x -> bigInt2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
@@ -177,13 +177,13 @@ class UpdateMapBigInt extends TestSpec {
       // Can't apply pairs with duplicate keys
 
       (Ns(eid).bigIntMap(str1 -> bigInt1, str1 -> bigInt2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2
 
       (Ns(eid).bigIntMap(Seq(str1 -> bigInt1, str1 -> bigInt2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/bigIntMap`:" +
         "\na -> " + bigInt1 +
         "\na -> " + bigInt2

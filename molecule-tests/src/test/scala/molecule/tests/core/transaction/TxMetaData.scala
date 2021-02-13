@@ -131,27 +131,375 @@ class TxMetaData extends TestSpec {
     }
 
 
-    "Composite tx meta data" in new CoreSetup {
+    "Composite + tx meta data" in new CoreSetup {
 
-      Ns.int(1).Tx(Ns.str("a") + Ref1.int1(10)).save
+      (Ref1.int1(1).str1("a") + Ref2.int2(2).str2("b").Tx(Ref3.int3(3).str3("c"))).save
 
-       Ns.int.Tx(Ns.str + Ref1.int1).get
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3)).get.head === ((1, "a"), (2, "b", 3, "c"))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3_)).get.head === ((1, "a"), (2, "b", 3))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3)).get.head === ((1, "a"), (2, "b", 3))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3_)).get.head === ((1, "a"), (2, "b"))
 
-      // Ns.str has no own reference to Ref1.int1
-      Ns.int.Tx(Ns.str.Ref1.int1).get === Nil
+      (Ref1.int1.str1 + Ref2.int2.str2_.Tx(Ref3.int3.str3)).get.head === ((1, "a"), (2, 3, "c"))
+      (Ref1.int1.str1 + Ref2.int2.str2_.Tx(Ref3.int3.str3_)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.str2_.Tx(Ref3.int3)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.str2_.Tx(Ref3.int3_)).get.head === ((1, "a"), 2)
 
-      // Tx entity has Ns.str asserted
-      Ns.int.Tx(Ns.str).get === List(
-        (1, "a")
-      )
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3)).get.head === ((1, "a"), (2, 3, "c"))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3_)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3_)).get.head === ((1, "a"), 2)
 
-      // Tx entity also has Ref1.int1 asserted
-      Ns.int.Tx(Ref1.int1).get === List(
-        (1, 10)
-      )
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3)).get.head === ((1, "a"), (3, "c"))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3_)).get.head === ((1, "a"), 3)
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3)).get.head === ((1, "a"), 3)
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3_)).get.head === (1, "a")
 
-      // Tx entity has both Ns.str and Ref1.int1 asserted
-      Ns.int.Tx(Ns.str + Ref1.int1).get === List((1, "a", 10))
+      Ref1.int1.str1.Tx(Ref3.int3.str3).get.head === (1, "a", 3, "c")
+      Ref1.int1.str1.Tx(Ref3.int3.str3_).get.head === (1, "a", 3)
+      Ref1.int1.str1.Tx(Ref3.int3).get.head === (1, "a", 3)
+      Ref1.int1.str1.Tx(Ref3.int3_).get.head === (1, "a")
+
+
+      (Ref1.int1.str1_ + Ref2.int2.str2.Tx(Ref3.int3.str3)).get.head === (1, (2, "b", 3, "c"))
+      (Ref1.int1.str1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_)).get.head === (1, (2, "b", 3))
+      (Ref1.int1.str1_ + Ref2.int2.str2.Tx(Ref3.int3)).get.head === (1, (2, "b", 3))
+      (Ref1.int1.str1_ + Ref2.int2.str2.Tx(Ref3.int3_)).get.head === (1, (2, "b"))
+
+      (Ref1.int1.str1_ + Ref2.int2.str2_.Tx(Ref3.int3.str3)).get.head === (1, (2, 3, "c"))
+      (Ref1.int1.str1_ + Ref2.int2.str2_.Tx(Ref3.int3.str3_)).get.head === (1, (2, 3))
+      (Ref1.int1.str1_ + Ref2.int2.str2_.Tx(Ref3.int3)).get.head === (1, (2, 3))
+      (Ref1.int1.str1_ + Ref2.int2.str2_.Tx(Ref3.int3_)).get.head === (1, 2)
+
+      (Ref1.int1.str1_ + Ref2.int2.Tx(Ref3.int3.str3)).get.head === (1, (2, 3, "c"))
+      (Ref1.int1.str1_ + Ref2.int2.Tx(Ref3.int3.str3_)).get.head === (1, (2, 3))
+      (Ref1.int1.str1_ + Ref2.int2.Tx(Ref3.int3)).get.head === (1, (2, 3))
+      (Ref1.int1.str1_ + Ref2.int2.Tx(Ref3.int3_)).get.head === (1, 2)
+
+      (Ref1.int1.str1_ + Ref2.int2_.Tx(Ref3.int3.str3)).get.head === (1, (3, "c"))
+      (Ref1.int1.str1_ + Ref2.int2_.Tx(Ref3.int3.str3_)).get.head === (1, 3)
+      (Ref1.int1.str1_ + Ref2.int2_.Tx(Ref3.int3)).get.head === (1, 3)
+      (Ref1.int1.str1_ + Ref2.int2_.Tx(Ref3.int3_)).get.head === 1
+
+      Ref1.int1.str1_.Tx(Ref3.int3.str3).get.head === (1, 3, "c")
+      Ref1.int1.str1_.Tx(Ref3.int3.str3_).get.head === (1, 3)
+      Ref1.int1.str1_.Tx(Ref3.int3).get.head === (1, 3)
+      Ref1.int1.str1_.Tx(Ref3.int3_).get.head === 1
+
+
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3)).get.head === (1, (2, "b", 3, "c"))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3_)).get.head === (1, (2, "b", 3))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3)).get.head === (1, (2, "b", 3))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3_)).get.head === (1, (2, "b"))
+
+      (Ref1.int1 + Ref2.int2.str2_.Tx(Ref3.int3.str3)).get.head === (1, (2, 3, "c"))
+      (Ref1.int1 + Ref2.int2.str2_.Tx(Ref3.int3.str3_)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.str2_.Tx(Ref3.int3)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.str2_.Tx(Ref3.int3_)).get.head === (1, 2)
+
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3)).get.head === (1, (2, 3, "c"))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3_)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3_)).get.head === (1, 2)
+
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3)).get.head === (1, (3, "c"))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3_)).get.head === (1, 3)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3)).get.head === (1, 3)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3_)).get.head === 1
+
+      Ref1.int1.Tx(Ref3.int3.str3).get.head === (1, 3, "c")
+      Ref1.int1.Tx(Ref3.int3.str3_).get.head === (1, 3)
+      Ref1.int1.Tx(Ref3.int3).get.head === (1, 3)
+      Ref1.int1.Tx(Ref3.int3_).get.head === 1
+
+
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3)).get.head === (2, "b", 3, "c")
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_)).get.head === (2, "b", 3)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3)).get.head === (2, "b", 3)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3_)).get.head === (2, "b")
+
+      (Ref1.int1_ + Ref2.int2.str2_.Tx(Ref3.int3.str3)).get.head === (2, 3, "c")
+      (Ref1.int1_ + Ref2.int2.str2_.Tx(Ref3.int3.str3_)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.str2_.Tx(Ref3.int3)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.str2_.Tx(Ref3.int3_)).get.head === 2
+
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3)).get.head === (2, 3, "c")
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3_)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3_)).get.head === 2
+
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3)).get.head === (3, "c")
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3_)).get.head === 3
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3)).get.head === 3
+
+      Ref1.int1_.Tx(Ref3.int3.str3).get.head === (3, "c")
+      Ref1.int1_.Tx(Ref3.int3.str3_).get.head === 3
+      Ref1.int1_.Tx(Ref3.int3).get.head === 3
+    }
+
+
+    "Tx composite meta data" in new CoreSetup {
+
+      Ref1.int1(1).str1("a").Tx(Ref2.int2(2).str2("b") + Ref3.int3(3).str3("c")).save
+
+      Ref1.int1.str1.Tx(Ref2.int2.str2 + Ref3.int3.str3).get.head === (1, "a", (2, "b"), (3, "c"))
+      Ref1.int1.str1.Tx(Ref2.int2.str2 + Ref3.int3.str3_).get.head === (1, "a", (2, "b"), 3)
+      Ref1.int1.str1.Tx(Ref2.int2.str2 + Ref3.int3).get.head === (1, "a", (2, "b"), 3)
+      // Note how composite enforces (2, b) tuple
+      Ref1.int1.str1.Tx(Ref2.int2.str2 + Ref3.int3_).get.head === (1, "a", (2, "b"))
+      // Without composite, 2 and b are treated on same level as preceding attributes
+      Ref1.int1.str1.Tx(Ref2.int2.str2).get.head === (1, "a", 2, "b")
+
+      Ref1.int1.str1.Tx(Ref2.int2.str2_ + Ref3.int3.str3).get.head === (1, "a", 2, (3, "c"))
+      Ref1.int1.str1.Tx(Ref2.int2.str2_ + Ref3.int3.str3_).get.head === (1, "a", 2, 3)
+      Ref1.int1.str1.Tx(Ref2.int2.str2_ + Ref3.int3).get.head === (1, "a", 2, 3)
+      Ref1.int1.str1.Tx(Ref2.int2.str2_ + Ref3.int3_).get.head === (1, "a", 2)
+      Ref1.int1.str1.Tx(Ref2.int2.str2_).get.head === (1, "a", 2)
+
+      Ref1.int1.str1.Tx(Ref2.int2 + Ref3.int3.str3).get.head === (1, "a", 2, (3, "c"))
+      Ref1.int1.str1.Tx(Ref2.int2 + Ref3.int3.str3_).get.head === (1, "a", 2, 3)
+      Ref1.int1.str1.Tx(Ref2.int2 + Ref3.int3).get.head === (1, "a", 2, 3)
+      Ref1.int1.str1.Tx(Ref2.int2 + Ref3.int3_).get.head === (1, "a", 2)
+      Ref1.int1.str1.Tx(Ref2.int2).get.head === (1, "a", 2)
+
+      Ref1.int1.str1.Tx(Ref2.int2_ + Ref3.int3.str3).get.head === (1, "a", (3, "c"))
+      Ref1.int1.str1.Tx(Ref2.int2_ + Ref3.int3.str3_).get.head === (1, "a", 3)
+      Ref1.int1.str1.Tx(Ref2.int2_ + Ref3.int3).get.head === (1, "a", 3)
+      Ref1.int1.str1.Tx(Ref2.int2_ + Ref3.int3_).get.head === (1, "a")
+      Ref1.int1.str1.Tx(Ref2.int2_).get.head === (1, "a")
+      Ref1.int1.str1.get.head === (1, "a")
+
+
+      Ref1.int1.str1_.Tx(Ref2.int2.str2 + Ref3.int3.str3).get.head === (1, (2, "b"), (3, "c"))
+      Ref1.int1.str1_.Tx(Ref2.int2.str2 + Ref3.int3.str3_).get.head === (1, (2, "b"), 3)
+      Ref1.int1.str1_.Tx(Ref2.int2.str2 + Ref3.int3).get.head === (1, (2, "b"), 3)
+      Ref1.int1.str1_.Tx(Ref2.int2.str2 + Ref3.int3_).get.head === (1, (2, "b"))
+      Ref1.int1.str1_.Tx(Ref2.int2.str2).get.head === (1, 2, "b")
+
+      Ref1.int1.str1_.Tx(Ref2.int2.str2_ + Ref3.int3.str3).get.head === (1, 2, (3, "c"))
+      Ref1.int1.str1_.Tx(Ref2.int2.str2_ + Ref3.int3.str3_).get.head === (1, 2, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2.str2_ + Ref3.int3).get.head === (1, 2, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2.str2_ + Ref3.int3_).get.head === (1, 2)
+      Ref1.int1.str1_.Tx(Ref2.int2.str2_).get.head === (1, 2)
+
+      Ref1.int1.str1_.Tx(Ref2.int2 + Ref3.int3.str3).get.head === (1, 2, (3, "c"))
+      Ref1.int1.str1_.Tx(Ref2.int2 + Ref3.int3.str3_).get.head === (1, 2, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2 + Ref3.int3).get.head === (1, 2, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2 + Ref3.int3_).get.head === (1, 2)
+      Ref1.int1.str1_.Tx(Ref2.int2).get.head === (1, 2)
+
+      Ref1.int1.str1_.Tx(Ref2.int2_ + Ref3.int3.str3).get.head === (1, (3, "c"))
+      Ref1.int1.str1_.Tx(Ref2.int2_ + Ref3.int3.str3_).get.head === (1, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2_ + Ref3.int3).get.head === (1, 3)
+      Ref1.int1.str1_.Tx(Ref2.int2_ + Ref3.int3_).get.head === 1
+      Ref1.int1.str1_.Tx(Ref2.int2_).get.head === 1
+      Ref1.int1.str1_.get.head === 1
+
+
+      Ref1.int1.Tx(Ref2.int2.str2 + Ref3.int3.str3).get.head === (1, (2, "b"), (3, "c"))
+      Ref1.int1.Tx(Ref2.int2.str2 + Ref3.int3.str3_).get.head === (1, (2, "b"), 3)
+      Ref1.int1.Tx(Ref2.int2.str2 + Ref3.int3).get.head === (1, (2, "b"), 3)
+      Ref1.int1.Tx(Ref2.int2.str2 + Ref3.int3_).get.head === (1, (2, "b"))
+      Ref1.int1.Tx(Ref2.int2.str2).get.head === (1, 2, "b")
+
+      Ref1.int1.Tx(Ref2.int2.str2_ + Ref3.int3.str3).get.head === (1, 2, (3, "c"))
+      Ref1.int1.Tx(Ref2.int2.str2_ + Ref3.int3.str3_).get.head === (1, 2, 3)
+      Ref1.int1.Tx(Ref2.int2.str2_ + Ref3.int3).get.head === (1, 2, 3)
+      Ref1.int1.Tx(Ref2.int2.str2_ + Ref3.int3_).get.head === (1, 2)
+      Ref1.int1.Tx(Ref2.int2.str2_).get.head === (1, 2)
+
+      Ref1.int1.Tx(Ref2.int2 + Ref3.int3.str3).get.head === (1, 2, (3, "c"))
+      Ref1.int1.Tx(Ref2.int2 + Ref3.int3.str3_).get.head === (1, 2, 3)
+      Ref1.int1.Tx(Ref2.int2 + Ref3.int3).get.head === (1, 2, 3)
+      Ref1.int1.Tx(Ref2.int2 + Ref3.int3_).get.head === (1, 2)
+      Ref1.int1.Tx(Ref2.int2).get.head === (1, 2)
+
+      Ref1.int1.Tx(Ref2.int2_ + Ref3.int3.str3).get.head === (1, (3, "c"))
+      Ref1.int1.Tx(Ref2.int2_ + Ref3.int3.str3_).get.head === (1, 3)
+      Ref1.int1.Tx(Ref2.int2_ + Ref3.int3).get.head === (1, 3)
+      Ref1.int1.Tx(Ref2.int2_ + Ref3.int3_).get.head === 1
+      Ref1.int1.Tx(Ref2.int2_).get.head === 1
+      Ref1.int1.get.head === 1
+
+
+      Ref1.int1_.Tx(Ref2.int2.str2 + Ref3.int3.str3).get.head === ((2, "b"), (3, "c"))
+      Ref1.int1_.Tx(Ref2.int2.str2 + Ref3.int3.str3_).get.head === ((2, "b"), 3)
+      Ref1.int1_.Tx(Ref2.int2.str2 + Ref3.int3).get.head === ((2, "b"), 3)
+      Ref1.int1_.Tx(Ref2.int2.str2 + Ref3.int3_).get.head === ((2, "b"))
+      Ref1.int1_.Tx(Ref2.int2.str2).get.head === (2, "b")
+
+      Ref1.int1_.Tx(Ref2.int2.str2_ + Ref3.int3.str3).get.head === (2, (3, "c"))
+      Ref1.int1_.Tx(Ref2.int2.str2_ + Ref3.int3.str3_).get.head === (2, 3)
+      Ref1.int1_.Tx(Ref2.int2.str2_ + Ref3.int3).get.head === (2, 3)
+      Ref1.int1_.Tx(Ref2.int2.str2_ + Ref3.int3_).get.head === 2
+      Ref1.int1_.Tx(Ref2.int2.str2_).get.head === 2
+
+      Ref1.int1_.Tx(Ref2.int2 + Ref3.int3.str3).get.head === (2, (3, "c"))
+      Ref1.int1_.Tx(Ref2.int2 + Ref3.int3.str3_).get.head === (2, 3)
+      Ref1.int1_.Tx(Ref2.int2 + Ref3.int3).get.head === (2, 3)
+      Ref1.int1_.Tx(Ref2.int2 + Ref3.int3_).get.head === 2
+      Ref1.int1_.Tx(Ref2.int2).get.head === 2
+
+      Ref1.int1_.Tx(Ref2.int2_ + Ref3.int3.str3).get.head === (3, "c")
+      Ref1.int1_.Tx(Ref2.int2_ + Ref3.int3.str3_).get.head === 3
+      Ref1.int1_.Tx(Ref2.int2_ + Ref3.int3).get.head === 3
+    }
+
+
+    "Composite + tx composite meta data" in new CoreSetup {
+      (Ref1.int1(1).str1("a") + Ref2.int2(2).str2("b").Tx(Ref3.int3(3).str3("c") + Ref4.int4(4).str4("d"))).save
+
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === ((1, "a"), (2, "b", (3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === ((1, "a"), (2, "b", (3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === ((1, "a"), (2, "b", (3, "c")))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === ((1, "a"), (2, "b", 3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (2, "b", 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === ((1, "a"), (2, "b", 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === ((1, "a"), (2, "b", 3))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === ((1, "a"), (2, "b", 3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === ((1, "a"), (2, "b", 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4)).get.head === ((1, "a"), (2, "b", 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4_)).get.head === ((1, "a"), (2, "b", 3))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === ((1, "a"), (2, "b", (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (2, "b", 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4)).get.head === ((1, "a"), (2, "b", 4))
+      (Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === ((1, "a"), (2, "b"))
+
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === ((1, "a"), (2, (3, "c"), (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === ((1, "a"), (2, (3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === ((1, "a"), (2, (3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === ((1, "a"), (2, (3, "c")))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === ((1, "a"), (2, 3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (2, 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === ((1, "a"), (2, 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === ((1, "a"), (2, 3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === ((1, "a"), (2, 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4)).get.head === ((1, "a"), (2, 3, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4_)).get.head === ((1, "a"), (2, 3))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === ((1, "a"), (2, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (2, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4)).get.head === ((1, "a"), (2, 4))
+      (Ref1.int1.str1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === ((1, "a"), 2)
+
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === ((1, "a"), ((3, "c"), (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === ((1, "a"), ((3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === ((1, "a"), ((3, "c"), 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === ((1, "a"), ((3, "c")))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === ((1, "a"), (3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (3, 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === ((1, "a"), (3, 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === ((1, "a"), (3))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === ((1, "a"), (3, (4, "d")))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === ((1, "a"), (3, 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4)).get.head === ((1, "a"), (3, 4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4_)).get.head === ((1, "a"), (3))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === ((1, "a"), ((4, "d")))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === ((1, "a"), (4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4)).get.head === ((1, "a"), (4))
+      (Ref1.int1.str1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4_)).get.head === ((1, "a"))
+
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === (1, (2, "b", (3, "c"), (4, "d")))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === (1, (2, "b", (3, "c"), 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === (1, (2, "b", (3, "c"), 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (1, (2, "b", (3, "c")))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (1, (2, "b", 3, (4, "d")))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (1, (2, "b", 3, 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (1, (2, "b", 3, 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === (1, (2, "b", 3))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (1, (2, "b", 3, (4, "d")))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (1, (2, "b", 3, 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4)).get.head === (1, (2, "b", 3, 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4_)).get.head === (1, (2, "b", 3))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (1, (2, "b", (4, "d")))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === (1, (2, "b", 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4)).get.head === (1, (2, "b", 4))
+      (Ref1.int1 + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === (1, (2, "b"))
+
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === (1, (2, (3, "c"), (4, "d")))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === (1, (2, (3, "c"), 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === (1, (2, (3, "c"), 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (1, (2, (3, "c")))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (1, (2, 3, (4, "d")))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (1, (2, 3, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (1, (2, 3, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (1, (2, 3, (4, "d")))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (1, (2, 3, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4)).get.head === (1, (2, 3, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3 + Ref4.int4_)).get.head === (1, (2, 3))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (1, (2, (4, "d")))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === (1, (2, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4)).get.head === (1, (2, 4))
+      (Ref1.int1 + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === (1, 2)
+
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === (1, ((3, "c"), (4, "d")))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === (1, ((3, "c"), 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === (1, ((3, "c"), 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (1, (3, "c"))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (1, (3, (4, "d")))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (1, (3, 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (1, (3, 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === (1, 3)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (1, (3, (4, "d")))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (1, (3, 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4)).get.head === (1, (3, 4))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4_)).get.head === (1, 3)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (1, (4, "d"))
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === (1, 4)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4)).get.head === (1, 4)
+      (Ref1.int1 + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4_)).get.head === 1
+
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === (2, "b", (3, "c"), (4, "d"))
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === (2, "b", (3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === (2, "b", (3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (2, "b", (3, "c"))
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (2, "b", 3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (2, "b", 3, 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (2, "b", 3, 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === (2, "b", 3)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (2, "b", 3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (2, "b", 3, 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4)).get.head === (2, "b", 3, 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3 + Ref4.int4_)).get.head === (2, "b", 3)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (2, "b", (4, "d"))
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === (2, "b", 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4)).get.head === (2, "b", 4)
+      (Ref1.int1_ + Ref2.int2.str2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === (2, "b")
+
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === (2, (3, "c"), (4, "d"))
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === (2, (3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === (2, (3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (2, (3, "c"))
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (2, 3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (2, 3, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (2, 3, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (2, 3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (2, 3, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3 + Ref4.int4)).get.head === (2, 3, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3 + Ref4.int4_)).get.head === (2, 3)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (2, (4, "d"))
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === (2, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4)).get.head === (2, 4)
+      (Ref1.int1_ + Ref2.int2.Tx(Ref3.int3_ + Ref4.int4_)).get.head === 2
+
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4)).get.head === ((3, "c"), (4, "d"))
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4.str4_)).get.head === ((3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4)).get.head === ((3, "c"), 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3 + Ref4.int4_)).get.head === (3, "c")
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4)).get.head === (3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4.str4_)).get.head === (3, 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4)).get.head === (3, 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3.str3_ + Ref4.int4_)).get.head === 3
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4)).get.head === (3, (4, "d"))
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4.str4_)).get.head === (3, 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4)).get.head === (3, 4)
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3 + Ref4.int4_)).get.head === 3
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (4, "d")
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === 4
+      (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4)).get.head === 4
     }
   }
 
@@ -199,7 +547,6 @@ class TxMetaData extends TestSpec {
 
 
     "Large tx meta data" in new CoreSetup {
-
       Ns.str.Tx(Ns
         .int_(int1)
         .long_(long1)
@@ -243,8 +590,8 @@ class TxMetaData extends TestSpec {
     }
   }
 
-  "Composite with multiple tx meta data molecules" in new CoreSetup {
 
+  "Composite with multiple tx meta data molecules" in new CoreSetup {
     m(Ns.str + Ns.int
       .Tx(
         Ns
@@ -258,14 +605,14 @@ class TxMetaData extends TestSpec {
           .enums_(Set(enum8, enum9))
           .float_(7f)
           .floats_(Set(8f, 9f))
-      +
-        Ns
-          .long_(7L)
-          .longs_(Set(8L, 9L))
-          .ref1_(701L)
-          .refSub1_(702L)
-          .uuid_(uuid7)
-          .uuids_(Set(uuid8))
+          +
+          Ns
+            .long_(7L)
+            .longs_(Set(8L, 9L))
+            .ref1_(701L)
+            .refSub1_(702L)
+            .uuid_(uuid7)
+            .uuids_(Set(uuid8))
       )
     ) insert Seq(
       ("with tx meta data", 1)

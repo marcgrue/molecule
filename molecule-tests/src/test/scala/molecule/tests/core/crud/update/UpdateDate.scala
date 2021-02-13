@@ -134,13 +134,13 @@ class UpdateDate extends TestSpec {
       val other8 = date8
 
       (Ns(eid).dates.replace(date7 -> date8, date8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\n" + date8
 
       // Conflicting new values
       (Ns(eid).dates.replace(Seq(date7 -> date8, date8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/dates`:" +
         "\n" + date8
     }

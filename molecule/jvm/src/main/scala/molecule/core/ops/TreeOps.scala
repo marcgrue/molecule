@@ -90,6 +90,11 @@ private[molecule] trait TreeOps extends Liftables {
   def nsString(nsTree: Tree): String = nsString(nsTree.symbol.name.toString)
   def nsString(nsName: Name): String = nsString(nsName.decodedName.toString)
 
+  def extractNsAttr(tpe: Type, tree: Tree) = {
+    val ss = c.typecheck(tree).tpe.baseType(tpe.typeSymbol).typeArgs.head.typeSymbol.name.toString.split('_')
+    // part_Ns or Ns
+    ":" + ss.init.mkString("_") + "/" + ss.last
+  }
 
   // Todo more types...
   def tpe(s: String): Tree = s match {

@@ -58,6 +58,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         }._2
         ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
 
+      case ("tx", Composite(elements)) =>
+        val associated = elements.foldLeft("tx": Any, Seq[Statement]()) {
+          case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
+        }._2
+        ("tx", stmts ++ associated)
+
       case (_, Composite(elements)) =>
         // Mark the first stmt as having the shared entity for all composite sub molecules
         // Then we can go back and pick up that entity as base for the newt sub-molecule

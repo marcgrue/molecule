@@ -515,12 +515,12 @@ class IntCard2 extends TestSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -583,12 +583,12 @@ class IntCard2 extends TestSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -650,12 +650,12 @@ class IntCard2 extends TestSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -717,12 +717,12 @@ class IntCard2 extends TestSpec {
 
 
     (inputMolecule(List(Set(int2, int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
 
     (inputMolecule(List(Set(int2), Set(int3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 }

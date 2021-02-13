@@ -160,14 +160,14 @@ class UpdateMapDouble extends TestSpec {
 
       // vararg
       (Ns(eid).doubleMap("str1" -> 1.0, "str1" -> 2.0).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\nstr1 -> 1.0" +
         "\nstr1 -> 2.0"
 
       // Seq
       (Ns(eid).doubleMap(Seq("str1" -> 1.0, "str1" -> 2.0)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\nstr1 -> 1.0" +
         "\nstr1 -> 2.0"
@@ -223,14 +223,14 @@ class UpdateMapDouble extends TestSpec {
 
       // vararg
       (Ns(eid).doubleMap.assert(str1 -> double1, str1x -> double2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"
 
       // Seq
       (Ns(eid).doubleMap.assert(Seq(str1 -> double1, str1x -> double2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"
@@ -344,14 +344,14 @@ class UpdateMapDouble extends TestSpec {
 
       // vararg
       (Ns(eid).doubleMap(str1 -> double1, str1 -> double2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"
 
       // Seq
       (Ns(eid).doubleMap(Seq(str1 -> double1, str1 -> double2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/doubleMap`:" +
         "\na -> 1.0" +
         "\na -> 2.0"

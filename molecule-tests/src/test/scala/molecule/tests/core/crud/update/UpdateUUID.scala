@@ -134,13 +134,13 @@ class UpdateUUID extends TestSpec {
       val other8 = uuid8
 
       (Ns(eid).uuids.replace(uuid7 -> uuid8, uuid8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uuids`:" +
         "\n" + uuid8
 
       // Conflicting new values
       (Ns(eid).uuids.replace(Seq(uuid7 -> uuid8, uuid8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uuids`:" +
         "\n" + uuid8
     }

@@ -148,7 +148,7 @@ class OneSelf extends TestSpec {
 
       // Referencing the same id is not allowed
       (Person(adam).spouse(adam).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:biSelfRef]  Current entity and referenced entity ids can't be the same."
     }
 

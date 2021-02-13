@@ -8,23 +8,24 @@ import scala.reflect.macros.blackbox
 
 /** Macro to make input molecules. */
 class MakeMolecule_In(val c: blackbox.Context) extends Base {
+
   import c.universe._
 
   private[this] final def generateInputMolecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
-    val OutMoleculeTpe = molecule_o(OutTypes.size)
-    val inputMolecule = TypeName(c.freshName("inputMolecule$"))
-    val outMolecule = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, hasVariables, postTypes, postCasts, _, _, _) = getModel(dsl)
-    val flat = casts.size == 1
+    val InputMoleculeTpe                                                       = inputMolecule_i_o(InTypes.size, OutTypes.size)
+    val OutMoleculeTpe                                                         = molecule_o(OutTypes.size)
+    val inputMolecule                                                          = TypeName(c.freshName("inputMolecule$"))
+    val outMolecule                                                            = TypeName(c.freshName("outMolecule$"))
+    val (model0, types, casts, hasVariables, _, postTypes, postCasts, _, _, _) = getModel(dsl)
+    val flat                                                                   = casts.size == 1
 
     // Methods for applying separate lists of input
     val applySeqs = InTypes match {
       case Seq(it1) => q"" // no extra
 
       case Seq(it1, it2) =>
-        val (i1, i2) = (TermName(s"in1"), TermName(s"in2"))
-        val (t1, t2) = (tq"Seq[$it1]", tq"Seq[$it2]")
+        val (i1, i2)                     = (TermName(s"in1"), TermName(s"in2"))
+        val (t1, t2)                     = (tq"Seq[$it1]", tq"Seq[$it2]")
         val (inParams, inTerm1, inTerm2) = (Seq(q"$i1: $t1", q"$i2: $t2"), i1, i2)
         if (flat) {
           q"""
@@ -57,8 +58,8 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         }
 
       case Seq(it1, it2, it3) =>
-        val (i1, i2, i3) = (TermName(s"in1"), TermName(s"in2"), TermName(s"in3"))
-        val (t1, t2, t3) = (tq"Seq[$it1]", tq"Seq[$it2]", tq"Seq[$it3]")
+        val (i1, i2, i3)                          = (TermName(s"in1"), TermName(s"in2"), TermName(s"in3"))
+        val (t1, t2, t3)                          = (tq"Seq[$it1]", tq"Seq[$it2]", tq"Seq[$it3]")
         val (inParams, inTerm1, inTerm2, inTerm3) = (Seq(q"$i1: $t1", q"$i2: $t2", q"$i3: $t3"), i1, i2, i3)
         if (flat) {
           q"""

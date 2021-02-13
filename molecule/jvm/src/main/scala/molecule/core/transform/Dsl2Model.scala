@@ -21,8 +21,11 @@ private[molecule] trait Dsl2Model extends Cast {
 
   import c.universe._
 
-  val x = InspectMacro("Dsl2Model", 604, 603, mkError = true)
-  //  val x = InspectMacro("Dsl2Model", 603, 900)
+  //      val x = InspectMacro("Dsl2Model", 310, 310, mkError = true)
+  //      val x = InspectMacro("Dsl2Model", 600, 600, mkError = true)
+  //      val x = InspectMacro("Dsl2Model", 602, 602, mkError = true)
+  //      val x = InspectMacro("Dsl2Model", 711, 711, mkError = true)
+  val x = InspectMacro("Dsl2Model", 901, 900)
   //      val x = InspectMacro("Dsl2Model", 200, 900)
 
 
@@ -35,6 +38,7 @@ private[molecule] trait Dsl2Model extends Cast {
       //      List[List[Int => Tree]],
       //      List[String],
       Boolean,
+      Int,
       List[Tree],
       List[Int => Tree],
       //      List[Int => Tree],
@@ -49,7 +53,9 @@ private[molecule] trait Dsl2Model extends Cast {
     val keywords         = Seq("$qmark", "Nil", "None", "count", "countDistinct", "min", "max", "sum", "avg", "unify", "distinct", "median", "variance", "stddev", "rand", "sample")
     def badFn(fn: TermName) = List("countDistinct", "distinct", "max", "min", "rand", "sample", "avg", "median", "stddev", "sum", "variance").contains(fn.toString())
 
-    var isTxMeta                : Boolean = false
+    var txMetaDataStarted       : Boolean = false
+    var txMetaDataDone          : Boolean = false
+    var txMetaCompositesCount   : Int     = 0
     var isComposite             : Boolean = false
     var collectCompositeElements: Boolean = false
 
@@ -118,11 +124,22 @@ private[molecule] trait Dsl2Model extends Cast {
 
     def traverseElement(prev: Tree, p: richTree, element: Element): Seq[Element] = {
       if (p.isNS && !p.isFirstNS) {
-        x(711
+        if (txMetaDataDone && txMetaCompositesCount > 0) {
+          // Start new level
+          types = List.empty[Tree] :: types
+          casts = List.empty[Int => Tree] :: casts
+        }
+        txMetaDataDone = false
+
+        val id = if (element.isInstanceOf[TxMetaData]) 711 else 0
+        x(id
           , prev
           , p
           , element
+          , types
+          , casts
         )
+
         resolve(prev) :+ element
       } else {
         x(710, element)
@@ -132,7 +149,8 @@ private[molecule] trait Dsl2Model extends Cast {
     }
 
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
-      if (isComposite && !isTxMeta) {
+      //      if (isComposite && !isTxMeta) {
+      if (isComposite) {
         x(741, prev, elements)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
@@ -198,7 +216,7 @@ private[molecule] trait Dsl2Model extends Cast {
           resolveOptNested(prev, richTree(prev), manyRef, nested)
 
         case q"$prev.+[..$types]($subComposite)" =>
-          x(600, prev)
+          x(600, prev, subComposite)
           resolveComposite(prev, richTree(prev), q"$subComposite")
 
         case other => abort(s"Unexpected DSL structure: $other\n${showRaw(other)}")
@@ -212,16 +230,18 @@ private[molecule] trait Dsl2Model extends Cast {
       isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
-      x(602, prev, subCompositeElements)
+      x(602, prev, subCompositeElements, types, casts)
 
-      if (!isTxMeta) {
-        // Start new level
-        types = List.empty[Tree] :: types
-        casts = List.empty[Int => Tree] :: casts
+      if (txMetaDataStarted) {
+        txMetaCompositesCount = if (txMetaCompositesCount == 0) 2 else txMetaCompositesCount + 1
       }
 
+      // Start new level
+      types = List.empty[Tree] :: types
+      casts = List.empty[Int => Tree] :: casts
+
       val elements = traverseElements(prev, p, subCompositeElements)
-      x(603, prev, subCompositeElements, types, casts, elements)
+      x(603, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount)
       collectCompositeElements = true
       elements
     }
@@ -646,10 +666,11 @@ private[molecule] trait Dsl2Model extends Cast {
 
     def resolveTypedApply(tree: Tree, p: richTree): Seq[Element] = tree match {
       case q"$prev.Tx.apply[..$t]($txMolecule)" =>
-        isTxMeta = true
+        txMetaDataStarted = true
         val txMetaData = TxMetaData(resolve(q"$txMolecule"))
-        isTxMeta = false
-        x(310, "Tx", prev, txMolecule, txMetaData, casts)
+        txMetaDataStarted = false
+        txMetaDataDone = true
+        x(310, "Tx", prev, txMolecule, txMetaData, types, casts, txMetaCompositesCount)
         traverseElement(prev, p, txMetaData)
 
       case q"$prev.e.apply[..$types]($nested)" if !p.isRef =>
@@ -827,8 +848,8 @@ private[molecule] trait Dsl2Model extends Cast {
     }
 
     def nested1(prev: Tree, p: richTree, manyRef: TermName, nestedTree: Tree) = {
-      val refNext  = q"$prev.$manyRef".refNext
-      val parentNs = prev match {
+      val refNext           = q"$prev.$manyRef".refNext
+      val parentNs          = prev match {
         case q"$pre.apply($value)" if p.isMapAttrK      => x(551, 1); new nsp(c.typecheck(prev).tpe.typeSymbol.owner)
         case q"$pre.apply($value)" if p.isAttr          => x(552, 1); richTree(pre).nsFull
         case q"$pre.apply($value)"                      => x(553, 1); richTree(pre).name.capitalize
@@ -838,23 +859,16 @@ private[molecule] trait Dsl2Model extends Cast {
         case _ if p.isRef                               => x(557, 1); p.refNext
         case _                                          => x(558, 1); p.name.capitalize
       }
-      val opt      = if (isOptNested) "$" else ""
-      x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post)
-      val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
+      val opt               = if (isOptNested) "$" else ""
+      //      val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
+      val (nsFull, refAttr) = (parentNs.toString.split('_').head, firstLow(manyRef))
 
 
+      x(510, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr)
 
 
-
-
-
-
-
-
-
-
-      //      nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
-      nestedRefAttrs = nestedRefAttrs :+ refAttr.capitalize
+      nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
+      //      nestedRefAttrs = nestedRefAttrs :+ refAttr.capitalize
 
 
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
@@ -891,20 +905,16 @@ private[molecule] trait Dsl2Model extends Cast {
         Seq(BiSelfRefAttr(t.card))
 
       } else if (t.isBiOtherRef) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiOtherRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiOtherRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiOtherRef(t.refCard, extractNsAttr(weakTypeOf[BiOtherRef_[_]], tree)))
 
       } else if (t.isBiOtherRefAttr) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiOtherRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiOtherRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiOtherRefAttr(t.card, extractNsAttr(weakTypeOf[BiOtherRefAttr_[_]], tree)))
 
       } else if (t.isBiEdgeRef) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiEdgeRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiEdgeRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiEdgeRef(t.refCard, extractNsAttr(weakTypeOf[BiEdgeRef_[_]], tree)))
 
       } else if (t.isBiEdgeRefAttr) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiEdgeRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiEdgeRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiEdgeRefAttr(t.card, extractNsAttr(weakTypeOf[BiEdgeRefAttr_[_]], tree)))
 
       } else if (t.isBiEdgePropRef) {
         Seq(BiEdgePropRef(t.refCard))
@@ -916,12 +926,10 @@ private[molecule] trait Dsl2Model extends Cast {
         Seq(BiEdgePropRefAttr(t.card))
 
       } else if (t.isBiTargetRef) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiTargetRef_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiTargetRef(t.refCard, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiTargetRef(t.refCard, extractNsAttr(weakTypeOf[BiTargetRef_[_]], tree)))
 
       } else if (t.isBiTargetRefAttr) {
-        val baseType = c.typecheck(tree).tpe.baseType(weakTypeOf[BiTargetRefAttr_[_]].typeSymbol).typeArgs.head.typeSymbol
-        Seq(BiTargetRefAttr(t.card, ":" + baseType.owner.name + "/" + baseType.name))
+        Seq(BiTargetRefAttr(t.card, extractNsAttr(weakTypeOf[BiTargetRefAttr_[_]], tree)))
 
       } else {
         throw new Dsl2ModelException("Unexpected Bidirectional: " + t)
@@ -1347,14 +1355,15 @@ private[molecule] trait Dsl2Model extends Cast {
     }
     //    x(801, elements)
     //    x(801, elements, types, casts)
-    x(801, elements, types, casts, nestedRefAttrs, hasVariables,
+    x(801, elements, types, casts, nestedRefAttrs,
+      hasVariables, txMetaCompositesCount,
       postTypes, postCasts, post)
 
     // Return checked model
     (
       Model(VerifyRawModel(elements, false)),
       types, casts,
-      hasVariables,
+      hasVariables, txMetaCompositesCount,
       postTypes, postCasts,
       isOptNested,
       optNestedRefIndexes, optNestedTacitIndexes

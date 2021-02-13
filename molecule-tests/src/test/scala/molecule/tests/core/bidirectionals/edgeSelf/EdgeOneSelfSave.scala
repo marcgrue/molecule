@@ -129,7 +129,7 @@ class EdgeOneSelfSave extends TestSpec {
 
       // Narcissistic tendencies not allowed
       (Person(ann).loves(ann).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         s"[valueStmts:biEdgeRefAttr]  Current entity and referenced entity ids can't be the same."
 
       // Ann and Ben know each other with a weight of 7

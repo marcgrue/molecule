@@ -135,13 +135,13 @@ class UpdateURI extends TestSpec {
       val other8 = uri8
 
       (Ns(eid).uris.replace(uri7 -> uri8, uri8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uris`:" +
         "\nuri8"
 
       // Conflicting new values
       (Ns(eid).uris.replace(Seq(uri7 -> uri8, uri8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/uris`:" +
         "\nuri8"
     }

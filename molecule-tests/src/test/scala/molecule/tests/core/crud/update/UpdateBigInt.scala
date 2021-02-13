@@ -138,13 +138,13 @@ class UpdateBigInt extends TestSpec {
       val other8 = bigInt8
 
       (Ns(eid).bigInts.replace(bigInt7 -> bigInt8, bigInt8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigInts`:" +
         "\n8"
 
       // Conflicting new values
       (Ns(eid).bigInts.replace(Seq(bigInt7 -> bigInt8, bigInt8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/bigInts`:" +
         "\n8"
     }

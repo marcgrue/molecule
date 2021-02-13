@@ -12,6 +12,7 @@ import scala.reflect.macros.blackbox
 
 private[molecule] trait Liftables extends MacroHelpers {
   val c: blackbox.Context
+
   import c.universe._
 
   def abort(msg: String) = throw new LiftablesException(msg)
@@ -377,12 +378,13 @@ private[molecule] trait Liftables extends MacroHelpers {
 
   implicit val liftTxMetaData: c.universe.Liftable[TxMetaData] = Liftable[TxMetaData] { tm =>
     val es = tm.elements map {
-      case a: Atom    => q"$a"
-      case b: Bond    => q"$b"
-      case r: ReBond  => q"$r"
-      case Self       => q"Self"
-      case g: Generic => q"$g"
-      case q"$e "     => e
+      case a: Atom      => q"$a"
+      case b: Bond      => q"$b"
+      case r: ReBond    => q"$r"
+      case Self         => q"Self"
+      case g: Generic   => q"$g"
+      case c: Composite => q"$c"
+      case q"$e "       => e
     }
     q"TxMetaData(Seq(..$es))"
   }

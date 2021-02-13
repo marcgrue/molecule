@@ -469,11 +469,11 @@ class EnumCard2 extends TestSpec {
         Funct(">", Seq(Var("c2_1"), Val(0)), NoBinding))))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -488,11 +488,11 @@ class EnumCard2 extends TestSpec {
     inputMolecule(List(Set(enum2))).get === List((enum1, Set(enum2)), (enum2, Set(enum3, enum2)), (enum3, Set(enum4, enum3)), (enum4, Set(enum4, enum5)), (enum5, Set(enum4, enum6, enum5)))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -506,11 +506,11 @@ class EnumCard2 extends TestSpec {
     inputMolecule(List(Set(enum2))).get === List((enum1, Set(enum1)))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 
@@ -524,11 +524,11 @@ class EnumCard2 extends TestSpec {
     inputMolecule(List(Set(enum2))).get === List((enum1, Set(enum1, enum2)), (enum2, Set(enum2)))
 
     (inputMolecule(List(Set(enum2, enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
 
     (inputMolecule(List(Set(enum2), Set(enum3))).get must throwA[MoleculeException])
-      .message === "Got the exception molecule.core.input.exception.MoleculeException: " +
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
       "Can't apply multiple values to comparison function."
   }
 }

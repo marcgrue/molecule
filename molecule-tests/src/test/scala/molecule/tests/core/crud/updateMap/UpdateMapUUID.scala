@@ -57,7 +57,7 @@ class UpdateMapUUID extends TestSpec {
 
       // vararg
       (Ns(eid).uuidMap.assert(str1 -> uuid1, str1x -> uuid2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -65,7 +65,7 @@ class UpdateMapUUID extends TestSpec {
 
       // Seq
       (Ns(eid).uuidMap.assert(Seq(str1 -> uuid1, str1x -> uuid2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -179,7 +179,7 @@ class UpdateMapUUID extends TestSpec {
 
       // vararg
       (Ns(eid).uuidMap(str1 -> uuid1, str1 -> uuid2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2
@@ -187,7 +187,7 @@ class UpdateMapUUID extends TestSpec {
 
       // Seq
       (Ns(eid).uuidMap(Seq(str1 -> uuid1, str1 -> uuid2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uuidMap`:" +
         "\na -> " + uuid1 +
         "\na -> " + uuid2

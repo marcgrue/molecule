@@ -159,13 +159,13 @@ class UpdateMapLong extends TestSpec {
       // Can't apply pairs with duplicate keys
 
       (Ns(eid).longMap("str1" -> 1L, "str1" -> 2L).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\nstr1 -> 1" +
         "\nstr1 -> 2"
 
       (Ns(eid).longMap(Seq("str1" -> 1L, "str1" -> 2L)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\nstr1 -> 1" +
         "\nstr1 -> 2"
@@ -221,14 +221,14 @@ class UpdateMapLong extends TestSpec {
 
       // vararg
       (Ns(eid).longMap.assert(str1 -> long1, str1x -> long2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
 
       // Seq
       (Ns(eid).longMap.assert(Seq(str1 -> long1, str1x -> long2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
@@ -341,13 +341,13 @@ class UpdateMapLong extends TestSpec {
       // Can't apply pairs with duplicate keys
 
       (Ns(eid).longMap(str1 -> long1, str1 -> long2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"
 
       (Ns(eid).longMap(Seq(str1 -> long1, str1 -> long2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/longMap`:" +
         "\na -> 1" +
         "\na -> 2"

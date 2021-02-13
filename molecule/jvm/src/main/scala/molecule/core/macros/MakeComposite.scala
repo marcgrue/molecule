@@ -7,12 +7,46 @@ import scala.reflect.macros.blackbox
 
 /** Macro to make composite molecules. */
 class MakeComposite(val c: blackbox.Context) extends Base {
+
   import c.universe._
 
+  val z = InspectMacro("MakeMolecule", 1, 900, mkError = true)
+
+
   private[this] final def generateCompositeMolecule(dsl: Tree, ObjType: Type, OutTypes: Type*): Tree = {
-    val MoleculeTpe = molecule_o(OutTypes.size)
-    val outMolecule = TypeName(c.freshName("compositOutMolecule$"))
-    val (model0, _, casts, hasVariables, _, _, _, _, _) = getModel(dsl)
+    val MoleculeTpe                                                                 = molecule_o(OutTypes.size)
+    val outMolecule                                                                 = TypeName(c.freshName("compositOutMolecule$"))
+    val (model0, types, castss, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
+
+    val casts = if (txMetaCompositesCount > 0) {
+      val ordinaryComposites = castss.take(castss.length - txMetaCompositesCount)
+      val txMetaComposites   = castss.takeRight(txMetaCompositesCount)
+      val firstComposites    = ordinaryComposites.init
+      val lastComposite      = ordinaryComposites.last
+      val lastOffset         = firstComposites.flatten.length
+      val metaOffset         = ordinaryComposites.flatten.length
+
+      val first = compositeCasts(firstComposites)
+      val last  = topLevel(List(lastComposite), lastOffset) ++ compositeCasts(txMetaComposites, metaOffset)
+
+//      z(1, model0, types, castss, first, last)
+      (first, last) match {
+        case (Nil, last) => q"(..$last)"
+        case (first, Nil) => q"(..$first)"
+        case (first, last) => q"(..$first, (..$last))"
+      }
+    } else {
+      q"(..${compositeCasts(castss)})"
+    }
+    //    val casts = if (txMetaCompositesCount > 0) {
+    //      val ordinaryCastss = castss.take(castss.length - txMetaCompositesCount)
+    //      val txMetaCastss   = castss.takeRight(txMetaCompositesCount)
+    //      val rowOffset      = ordinaryCastss.flatten.length
+    //      z(1, model0, types, ordinaryCastss, txMetaCastss)
+    //      q"(..${compositeCasts(ordinaryCastss)}, ..${compositeCasts(txMetaCastss, rowOffset)})"
+    //    } else {
+    //      q"(..${compositeCasts(castss)})"
+    //    }
 
     val t = if (hasVariables) {
       q"""
@@ -22,7 +56,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
-          final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+          final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
         }
         new $outMolecule
       """
@@ -30,12 +64,16 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       q"""
         import molecule.core.ast.elements._
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes]($model0, ${Model2Query(model0)}) {
-          final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+          final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
         }
         new $outMolecule
       """
     }
-//    abort(t.toString())
+    //    abort(t.toString())
+
+    //    val q0 = Model2Query(model0)
+    //    z(1, t, model0, q0._1, q0._1.datalog)
+    //    z(1, t, model0, casts)
     t
   }
 

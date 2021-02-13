@@ -14,24 +14,32 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
 
-    val OutMoleculeTpe: Tree                    = molecule_o(TplTypes.size)
-    val outMolecule                             = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, hasVariables,
-    postTypes, postCasts, isOptNested,
-    optNestedRefIndexes, optNestedTacitIndexes) = getModel(dsl)
+    val OutMoleculeTpe: Tree = molecule_o(TplTypes.size)
+    val outMolecule          = TypeName(c.freshName("outMolecule$"))
+    val (
+      model0, typess, castss,
+      hasVariables, txMetaCompositesCount,
+      postTypes, postCasts, isOptNested,
+      optNestedRefIndexes, optNestedTacitIndexes
+      )                      = getModel(dsl)
 
-    println(model0)
-//    abort(model0.toString)
-//    val q0 = Model2Query(model0)
+    //    val q0 = Model2Query(model0)
+    //    z(1, model0, q0._1, q0._1.datalog, casts)
+//        z(1, model0, typess, castss, hasTxMetaComposites)
 
-    val t = if (casts.size == 1) {
+    val t = if (castss.size == 1 || txMetaCompositesCount > 0) {
+      val casts = if (txMetaCompositesCount > 0)
+        q"(..${topLevel(List(castss.head))}, ..${compositeCasts(castss.tail, castss.head.length)})"
+      else
+        q"(..${topLevel(castss)})"
+
       if (hasVariables) {
         q"""
           import molecule.core.ast.elements._
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel)) {
-            final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(casts)})
+            final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
             final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???
 //              new Ns_str
 //                with Ns_int {
@@ -42,10 +50,11 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           new $outMolecule
         """
       } else {
+        //            final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(castss)})
         q"""
           import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
-            final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = (..${topLevel(casts)})
+            final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
             final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???
           }
           new $outMolecule
@@ -59,7 +68,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel)) {
-            ..${castOptNestedRows(casts, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
+            ..${castOptNestedRows(castss, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
           }
           new $outMolecule
         """
@@ -67,7 +76,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
-            ..${castOptNestedRows(casts, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
+            ..${castOptNestedRows(castss, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
           }
           new $outMolecule
         """
@@ -82,8 +91,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           import molecule.core.ops.ModelOps._
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel))
-            with ${nestedTupleClassX(casts.size)}[$ObjType, (..$TplTypes)] {
-            ..${resolveNestedTupleMethods(casts, types, TplTypes, postTypes, postCasts).get}
+            with ${nestedTupleClassX(castss.size)}[$ObjType, (..$TplTypes)] {
+            ..${resolveNestedTupleMethods(castss, typess, TplTypes, postTypes, postCasts).get}
           }
           new $outMolecule
         """
@@ -91,14 +100,14 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
         q"""
           import molecule.core.ast.elements._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)})
-            with ${nestedTupleClassX(casts.size)}[$ObjType, (..$TplTypes)] {
-            ..${resolveNestedTupleMethods(casts, types, TplTypes, postTypes, postCasts).get}
+            with ${nestedTupleClassX(castss.size)}[$ObjType, (..$TplTypes)] {
+            ..${resolveNestedTupleMethods(castss, typess, TplTypes, postTypes, postCasts).get}
           }
           new $outMolecule
         """
       }
     }
-//    z(1, t, model0, q0._1, q0._1.datalog)
+    //        z(2, t, model0, typess, castss)
     t
   }
 

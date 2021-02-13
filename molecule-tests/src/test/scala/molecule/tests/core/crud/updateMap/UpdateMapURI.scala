@@ -57,7 +57,7 @@ class UpdateMapURI extends TestSpec {
 
       // vararg
       (Ns(eid).uriMap.assert(str1 -> uri1, str1x -> uri2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
@@ -65,7 +65,7 @@ class UpdateMapURI extends TestSpec {
 
       // Seq
       (Ns(eid).uriMap.assert(Seq(str1 -> uri1, str1x -> uri2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
@@ -178,13 +178,13 @@ class UpdateMapURI extends TestSpec {
       // Can't apply pairs with duplicate keys
 
       (Ns(eid).uriMap(str1 -> uri1, str1 -> uri2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2
 
       (Ns(eid).uriMap(Seq(str1 -> uri1, str1 -> uri2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/uriMap`:" +
         "\na -> " + uri1 +
         "\na -> " + uri2

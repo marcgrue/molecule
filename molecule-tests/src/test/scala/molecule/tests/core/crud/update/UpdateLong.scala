@@ -309,13 +309,13 @@ class UpdateLong extends TestSpec {
       val other8 = 8L
 
       (Ns(eid).longs.replace(long7 -> long8, long8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/longs`:" +
         "\n8"
 
       // Conflicting new values
       (Ns(eid).longs.replace(Seq(long7 -> long8, long8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/longs`:" +
         "\n8"
     }

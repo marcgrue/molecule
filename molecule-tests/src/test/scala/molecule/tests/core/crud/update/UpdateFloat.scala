@@ -317,13 +317,13 @@ class UpdateFloat extends TestSpec {
       val other8 = 8f
 
       (Ns(eid).floats.replace(float7 -> float8, float8 -> other8).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/floats`:" +
         "\n8.0"
 
       // Conflicting new values
       (Ns(eid).floats.replace(Seq(float7 -> float8, float8 -> other8)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't replace with duplicate new values of attribute `:Ns/floats`:" +
         "\n8.0"
     }

@@ -66,7 +66,7 @@ class SchemaTest extends TestSpec {
       Schema.nsFull.not("gen_Profession").get.sorted === List("gen_Person", "lit_Book")
       Schema.nsFull.not("gen_Profession", "lit_Book").get === List("gen_Person")
 
-      Schema.nsFull.get.head === 3
+      Schema.nsFull.get.length === 3
 
 
       // Since all attributes have a namespace, a tacit `nsFull_` makes no difference
@@ -106,7 +106,7 @@ class SchemaTest extends TestSpec {
     // Differing counts and ids for different systems
     val List(attrCount, a1, a2, a3, card1count, card2count) = system match {
       case SystemPeer => List(74, 106, 108, 109, 32, 42)
-//      case DatomicPeer       => List(74, 97, 99, 100, 32, 42)
+      //      case DatomicPeer       => List(74, 97, 99, 100, 32, 42)
       case SystemDevLocal   => List(71, 105, 107, 108, 31, 40)
       case SystemPeerServer => List(71, 104, 106, 107, 31, 40)
     }
@@ -152,9 +152,6 @@ class SchemaTest extends TestSpec {
 
       Schema.a.not(":Ns/str").get.size === attrCount - 1
       Schema.a.not(":Ns/str", ":Ns/int").get.size === attrCount - 2
-
-      Schema.a.get.head.length === List(attrCount)
-
 
       // Since all attributes have an `ident`, a tacit `ident_` makes no difference
       Schema.a_.ns.get.size === 5
@@ -257,8 +254,6 @@ class SchemaTest extends TestSpec {
 
       Schema.ns.not("Ref1").get.sorted === List("Ns", "Ref2", "Ref3", "Ref4")
       Schema.ns.not("Ref1", "Ref2").get.sorted === List("Ns", "Ref3", "Ref4")
-
-      Schema.ns.get.head.length === List(5)
 
 
       // Since all attributes have a namespace, a tacit `ns_` makes no difference
@@ -409,7 +404,6 @@ class SchemaTest extends TestSpec {
           "uri",
           "uuid",
         )
-        Schema.tpe.get.head.length === List(11)
 
       } else {
 
@@ -435,7 +429,6 @@ class SchemaTest extends TestSpec {
           "uri",
           "uuid",
         )
-        Schema.tpe.get.head.length === List(10)
       }
 
 
@@ -472,8 +465,6 @@ class SchemaTest extends TestSpec {
 
       Schema.card.not("one").get === List("many")
       Schema.card.not("one", "many").get === Nil
-
-      Schema.card.get.head.length === List(2)
 
 
       // Since all attributes have a cardinality, a tacit `card_` makes no difference
@@ -533,10 +524,6 @@ class SchemaTest extends TestSpec {
           "molecule.datomic.base.transform.exception.Model2QueryException: " +
             "Fulltext search can only be performed with 1 search phrase.")
       }
-
-      // Count documented attributes
-      Schema.doc.get.head.length === List(2)
-
 
       // Use tacit `doc_` to filter documented attributes
       // All attributes
@@ -635,9 +622,6 @@ class SchemaTest extends TestSpec {
         (":Ref2/str2", "identity"),
         (":Ref2/int2", "value"),
       )
-
-      // Count attribute indexing statuses
-      Schema.unique.get.head.length === List(2)
 
       Schema.a.unique("identity").get === List((":Ref2/str2", "identity"))
       Schema.a.unique("value").get === List((":Ref2/int2", "value"))
@@ -922,12 +906,12 @@ class SchemaTest extends TestSpec {
       (":Ns/enums", "enum1")
     )
 
-    // How many enums in total (duplicate enum values coalesce)
-    Schema.enum.get.head.length === List(22)
-
     // Enums per namespace
     val x: Map[String, List[(String, String)]] = Schema.ns.enum.get.groupBy(_._1)
-    Schema.ns.enum.get.groupBy(_._1).map{case (k, v) => k -> v.length} === List(
+    Schema.ns.enum.get
+      .groupBy(_._1)
+      .map { case (k, v) => k -> v.length }.toList
+      .sortBy(_._1) === List(
       ("Ns", 10),
       ("Ref1", 3),
       ("Ref2", 3),
@@ -937,8 +921,9 @@ class SchemaTest extends TestSpec {
 
     // Enums per namespace per attribute
     Schema.ns.attr.enum.get
-      .groupBy{case (n, a, _) => (n, a)}
-      .map{case (pair, vs) => (pair._1, pair._2, vs.length) } === List(
+      .groupBy { case (n, a, _) => (n, a) }
+      .map { case (pair, vs) => (pair._1, pair._2, vs.length) }.toList
+      .sortBy(t => (t._1, t._2)) === List(
       ("Ns", "enum", 10),
       ("Ns", "enums", 10),
       ("Ref1", "enum1", 3),

@@ -57,7 +57,7 @@ class UpdateMapDate extends TestSpec {
 
       // vararg
       (Ns(eid).dateMap.assert(str1 -> date1, str1x -> date2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
         "\na -> " + date1 +
         "\na -> " + date2
@@ -65,7 +65,7 @@ class UpdateMapDate extends TestSpec {
 
       // Seq
       (Ns(eid).dateMap.assert(Seq(str1 -> date1, str1x -> date2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't assert multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
         "\na -> " + date1 +
         "\na -> " + date2
@@ -179,7 +179,7 @@ class UpdateMapDate extends TestSpec {
 
       // vararg
       (Ns(eid).dateMap(str1 -> date1, str1 -> date2).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
         "\na -> " + date1 +
         "\na -> " + date2
@@ -187,7 +187,7 @@ class UpdateMapDate extends TestSpec {
 
       // Seq
       (Ns(eid).dateMap(Seq(str1 -> date1, str1 -> date2)).update must throwA[Model2TransactionException])
-        .message === "Got the exception molecule.core.transform.exception.Model2TransactionException: " +
+        .message === "Got the exception molecule.datomic.base.transform.exception.Model2TransactionException: " +
         "[valueStmts:default]  Can't apply multiple key/value pairs with the same key for attribute `:Ns/dateMap`:" +
         "\na -> " + date1 +
         "\na -> " + date2

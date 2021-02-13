@@ -106,13 +106,20 @@ object Model2Query extends Helpers {
 
   def makeBond(query: Query, bond: Bond, e: String, v: String, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = bond match {
-    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional)               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                               => (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
-    case Bond(`prevNs`, refAttr, refNs, _, _)                                  => (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
-    case Bond(`prevAttr`, refAttr, refNs, _, _)                                => (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
-    case Bond(`prevRefNs`, refAttr, refNs, _, _)                               => (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
-    case Bond(nsFull, refAttr, refNs, _, _) if datomGeneric.contains(prevAttr) => (resolve(query, e, w, bond), e, w, nsFull, refAttr, refNs)
-    case Bond(nsFull, refAttr, refNs, _, _)                                    => (resolve(query, e, v, bond), e, v, nsFull, refAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, bi: Bidirectional)               =>
+      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, `prevAttr`, refNs, _, _)                               =>
+      (resolve(query, v, w, bond), v, w, prevNs, prevAttr, refNs)
+    case Bond(`prevNs`, refAttr, refNs, _, _)                                  =>
+      (resolve(query, e, w, bond), e, w, prevNs, refAttr, refNs)
+    case Bond(`prevAttr`, refAttr, refNs, _, _)                                =>
+      (resolve(query, v, w, bond), v, w, prevAttr, refAttr, refNs)
+    case Bond(`prevRefNs`, refAttr, refNs, _, _)                               =>
+      (resolve(query, v, w, bond), v, w, prevRefNs, refAttr, refNs)
+    case Bond(nsFull, refAttr, refNs, _, _) if datomGeneric.contains(prevAttr) =>
+      (resolve(query, e, w, bond), e, w, nsFull, refAttr, refNs)
+    case Bond(nsFull, refAttr, refNs, _, _)                                    =>
+      (resolve(query, e, v, bond), e, v, nsFull, refAttr, refNs)
   }
 
   def makeAtomUnify(query: Query, a: Atom, nsFull: String, attr: String, e: String, v: String, w: String, prevNs: String)
@@ -159,7 +166,7 @@ object Model2Query extends Helpers {
   def makeTxMetaData(model: Model, query0: Query, txMetaData: TxMetaData, w: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
     // Ensure tx variable is present in previous DataClause
-    val (query, txV) = {
+    val (query, txV)                                 = {
       val (cls1, txV) = query0.wh.clauses.foldRight(Seq.empty[Clause], "") {
         case (dcl@DataClause(_, _, KW("db", "ident", _), _, _, _), (cls, "")) => (dcl +: cls, "")
         case (dcl@DataClause(_, _, _, Var(v), Var("_"), _), (cls, ""))        => (dcl.copy(tx = Var(v + "_tx")) +: cls, v + "_tx")
@@ -171,18 +178,23 @@ object Model2Query extends Helpers {
         abort("Couldn't attach tx to any DataClause in query:\n" + query0)
       (query0.copy(wh = Where(cls1)), txV)
     }
-    var first = true
+    //    var first = true
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, txV, w, prevNs, prevAttr, prevRefNs)) {
-//      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
       case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
-        val nextV = if(first) {
-          first = false
-          v1
-        } else {
-          // All tx meta data attributes have new `v`
-          nextChar(v1, 1)
-        }
-        make(model, q1, element, e1, nextV, "","","")
+        make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+
+      //      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
+      //        val nextV = if(first) {
+      //          first = false
+      //          v1
+      //        } else if(prevRefNs == prevRefNs1) {
+      //          v1
+      //        } else {
+      //          // All tx meta data attributes have new `v`
+      //          nextChar(v1, 1)
+      //        }
+      ////        make(model, q1, element, e1, nextV, "","","")
+      //        make(model, q1, element, e1, nextV, prevNs1, prevAttr1, prevRefNs1)
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }
@@ -229,7 +241,13 @@ object Model2Query extends Helpers {
       (q2, "", "", "", "", "")
     } else {
       // Mandatory nested values - where clauses
-      val (e2, elements2)                 = if (nsFull == "") (e, elements) else (w, b +: elements)
+      val (e2, elements2)                 = if (nsFull == "")
+        (e, elements)
+      else if (nsFull == prevRefNs)
+        (v, b +: elements)
+      else
+        (e, b +: elements)
+      //        (w, b +: elements)
       val (q2, _, v2, ns2, attr2, refNs2) = elements2.foldLeft((query, e, v, prevNs, prevAttr, prevRefNs)) {
         case ((query1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element1) =>
           make(model, query1, element1, e1, v1, prevNs1, prevAttr1, prevRefNs1)
@@ -238,7 +256,7 @@ object Model2Query extends Helpers {
     }
   }
 
-  def makeComposite(model: Model, query: Query, composite: Composite, e: String, v: String, prevNs: String, prevAttr: String, prevRefNs: String)
+  def makeComposite(model: Model, query: Query, composite: Composite, e: String, v0: String, prevNs: String, prevAttr: String, prevRefNs: String)
   : (Query, String, String, String, String, String) = {
     def getFirstEid(clauses: Seq[Clause]): String = clauses.head match {
       case DataClause(_, Var(compositeEid), KW(nsFull, _, _), _, _, _) if nsFull != "db" => compositeEid
@@ -246,10 +264,17 @@ object Model2Query extends Helpers {
       case other                                                                         =>
         abort(s"Unexpected first clause of composite query: " + other + "\n" + query.wh.clauses.mkString("\n"))
     }
-    val eid: String = if (query.wh.clauses.isEmpty) e else getFirstEid(query.wh.clauses)
+    val eid: String = if (e == "tx") "tx" else if (query.wh.clauses.isEmpty) e else getFirstEid(query.wh.clauses)
+    val v           = if (query.wh.clauses.nonEmpty) {
+      query.wh.clauses.last match {
+        case DataClause(_, _, _, Var(`v0`), _, _) => nextChar(v0, 1)
+        case _                                    => v0
+      }
+    } else v0
 
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = composite.elements.foldLeft((query, eid, v, prevNs, prevAttr, prevRefNs)) {
-      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) => make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
+      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
+        make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }
