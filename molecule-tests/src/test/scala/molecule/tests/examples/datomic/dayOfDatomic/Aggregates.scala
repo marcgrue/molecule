@@ -79,10 +79,7 @@ class Aggregates extends TestSpec {
     Obj.meanRadius(stddev).get.head === 161902.52780945456
 
     // We can even fetch multiple aggregates in one query:
-    val x: Obj_0_1[Obj_, Nothing with Obj_meanRadius, Double] = Obj.meanRadius.apply(sum)
-
-
-    Obj.meanRadius.apply(sum). meanRadius(avg).meanRadius(median).get.head ===
+    Obj.meanRadius(sum).meanRadius(avg).meanRadius(median).get.head ===
       (907633.0, 53390.17647058824, 2631.2)
   }
 
@@ -101,7 +98,6 @@ class Aggregates extends TestSpec {
       ":Obj/meanRadius",
       ":Obj/name",
     )
-    Schema.a.get.head.length === 5
 
     // How many (Datomic) types does this schema use?
     Schema.tpe.get === List(
@@ -109,7 +105,6 @@ class Aggregates extends TestSpec {
       "double", // Double
       "long", // Int
     )
-    Schema.tpe.get.head.length === 3
   }
 
 

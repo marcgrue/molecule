@@ -38,15 +38,6 @@ class MakeComposite(val c: blackbox.Context) extends Base {
     } else {
       q"(..${compositeCasts(castss)})"
     }
-    //    val casts = if (txMetaCompositesCount > 0) {
-    //      val ordinaryCastss = castss.take(castss.length - txMetaCompositesCount)
-    //      val txMetaCastss   = castss.takeRight(txMetaCompositesCount)
-    //      val rowOffset      = ordinaryCastss.flatten.length
-    //      z(1, model0, types, ordinaryCastss, txMetaCastss)
-    //      q"(..${compositeCasts(ordinaryCastss)}, ..${compositeCasts(txMetaCastss, rowOffset)})"
-    //    } else {
-    //      q"(..${compositeCasts(castss)})"
-    //    }
 
     val t = if (hasVariables) {
       q"""
@@ -69,11 +60,8 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         new $outMolecule
       """
     }
-    //    abort(t.toString())
-
     //    val q0 = Model2Query(model0)
     //    z(1, t, model0, q0._1, q0._1.datalog)
-    //    z(1, t, model0, casts)
     t
   }
 

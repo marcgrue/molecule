@@ -4,13 +4,13 @@ import java.util.Date
 import molecule.core.ast.elements._
 import molecule.core.util.Helpers
 import molecule.datomic.api.in1_out10._
-import molecule.datomic.api.out4.m
+import molecule.datomic.api.out10.m
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.transform.Model2Query
 import molecule.datomic.peer.facade.Datomic_Peer
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.tests.core.base.schema.CoreTestSchema
-
+import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2.Person
 import org.specs2.mutable.Specification
 
 
@@ -47,18 +47,17 @@ class AdHocTest extends molecule.setup.TestSpec with Helpers {
   //
 
   //  }
+//
+//  "Insert resolves to correct partitions" in new PartitionSetup {
+//    import molecule.tests.core.schemaDef.dsl.PartitionTest._
+//    m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name).inspectGet
+//  }
 
-  "Insert resolves to correct partitions" in new PartitionSetup {
-    import molecule.tests.core.schemaDef.dsl.PartitionTest._
 
+  "Insert resolves to correct partitions" in new ModernGraph2Setup {
+    import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2._
 
-    m(lit_Book.title.Author.name._lit_Book.Reviewers * gen_Person.name).get
-
-
-//    m(lit_Book.title.Reviewers.name.Professions * gen_Profession.name).get === List(("book", "Jan", List("Musician")))
-//    // Same as
-//    m(lit_Book.title.Reviewers.Professions * gen_Profession.name).get === List(("book", List("Musician")))
-
+    m(Person.name.Knows * Person.name).inspectGet
   }
 
 

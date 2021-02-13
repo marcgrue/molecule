@@ -21,14 +21,8 @@ private[molecule] trait Dsl2Model extends Cast {
 
   import c.universe._
 
-  //      val x = InspectMacro("Dsl2Model", 310, 310, mkError = true)
-  //      val x = InspectMacro("Dsl2Model", 600, 600, mkError = true)
-  //      val x = InspectMacro("Dsl2Model", 602, 602, mkError = true)
-  //      val x = InspectMacro("Dsl2Model", 711, 711, mkError = true)
-  //  val x = InspectMacro("Dsl2Model", 550, 560, mkError = true)
+  //  val x = InspectMacro("Dsl2Model", 570, 570, mkError = true)
   val x = InspectMacro("Dsl2Model", 901, 900)
-  //      val x = InspectMacro("Dsl2Model", 200, 900)
-
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -131,16 +125,7 @@ private[molecule] trait Dsl2Model extends Cast {
           casts = List.empty[Int => Tree] :: casts
         }
         txMetaDataDone = false
-
-        val id = if (element.isInstanceOf[TxMetaData]) 711 else 0
-        x(id
-          , prev
-          , p
-          , element
-          , types
-          , casts
-        )
-
+        x(711, prev, p, element, types, casts)
         resolve(prev) :+ element
       } else {
         x(710, element)
@@ -150,7 +135,6 @@ private[molecule] trait Dsl2Model extends Cast {
     }
 
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
-      //      if (isComposite && !isTxMeta) {
       if (isComposite) {
         x(741, prev, elements)
         val prevElements = resolve(prev)
@@ -865,7 +849,7 @@ private[molecule] trait Dsl2Model extends Cast {
       x(550, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr)
       nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-      x(560, nsFull, nestedRefAttrs, nestedElems, post)
+      x(560, prev, manyRef, nestedTree, nsFull, parentNs, nestedRefAttrs, nestedElems)
       Nested(Bond(nsFull, refAttr + opt, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
     }
 
@@ -875,16 +859,19 @@ private[molecule] trait Dsl2Model extends Cast {
       if (refNext != nestedNs) {
         // Find refs in `manyRef` namespace and match the target type with the first namespace of the first nested element
         val refs             = c.typecheck(manyRef).tpe.members.filter(e => e.isMethod && e.asMethod.returnType <:< weakTypeOf[Ref[_, _]])
-        val refPairs         = refs.map(r => r.name -> r.typeSignature.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name)
-        val refPairsFiltered = refPairs.filter(_._2.toString == nestedNs.capitalize)
-        if (refPairsFiltered.isEmpty) {
+        val refPairs         = refs.map(r => r.name -> r.typeSignature.baseType(weakTypeOf[Ref[_, _]].typeSymbol).typeArgs.last.typeSymbol.name.toString.init)
+        val refPairsFiltered = refPairs.filter(_._2 == nestedNs.capitalize)
+        val nestedElements2  = if (refPairsFiltered.isEmpty) {
           nestedElements
         } else if (refPairsFiltered.size == 1) {
           val (refAttr, refNs) = refPairsFiltered.head
           val opt              = if (isOptNested) "$" else ""
-          Bond(refNext, firstLow(refAttr) + opt, refNs.toString, 2, bi(manyRef, richTree(manyRef))) +: nestedElements
-        } else
+          Bond(refNext, firstLow(refAttr) + opt, refNs, 2, bi(manyRef, richTree(manyRef))) +: nestedElements
+        } else {
           abort(s"`$manyRef` has more than one ref pointing to `$nestedNs`:\n${refPairs.mkString("\n")}")
+        }
+        x(570, manyRef, refNext, nested, refs, refPairs, refPairsFiltered, nestedElements, nestedElements2)
+        nestedElements2
       } else {
         nestedElements
       }
