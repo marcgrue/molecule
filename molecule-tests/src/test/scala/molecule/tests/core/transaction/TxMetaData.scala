@@ -1,7 +1,7 @@
 package molecule.tests.core.transaction
 
 import molecule.tests.core.base.dsl.CoreTest._
-import molecule.datomic.api.out10._
+import molecule.datomic.api.in3_out10._
 import molecule.core.ops.exception.VerifyModelException
 import molecule.datomic.base.util.{SystemPeer, SystemPeerServer}
 import molecule.setup.TestSpec
@@ -500,6 +500,51 @@ class TxMetaData extends TestSpec {
       (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4)).get.head === (4, "d")
       (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4.str4_)).get.head === 4
       (Ref1.int1_ + Ref2.int2_.Tx(Ref3.int3_ + Ref4.int4)).get.head === 4
+    }
+
+
+    "Composite + tx composite meta data + input" in new CoreSetup {
+      (Ref1.int1(1).str1("a") + Ref2.int2(2).str2("b").Tx(Ref3.int3(3).str3("c") + Ref4.int4(4).str4("d"))).save
+
+      val a1 = Ref2.int2
+      val a2 = Ref2.int2.apply(?)
+
+      val a = m(Ref2.int2.apply(?).Tx(Ref3.int3))
+
+
+      val m1 = m(Ref1.int1(?).str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4.str4))
+      val m2 = m(Ref1.int1.str1 + Ref2.int2(?).str2.Tx(Ref3.int3.str3 + Ref4.int4.str4))
+      val m3 = m(Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3(?).str3 + Ref4.int4.str4))
+      val m4 = m(Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4(?).str4))
+
+      m1(1).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m2(2).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m3(3).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m4(4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+
+      val m12 = m(Ref1.int1(?).str1 + Ref2.int2(?).str2.Tx(Ref3.int3.str3 + Ref4.int4.str4))
+      val m13 = m(Ref1.int1(?).str1 + Ref2.int2.str2.Tx(Ref3.int3(?).str3 + Ref4.int4.str4))
+      val m14 = m(Ref1.int1(?).str1 + Ref2.int2.str2.Tx(Ref3.int3.str3 + Ref4.int4(?).str4))
+      val m23 = m(Ref1.int1.str1 + Ref2.int2(?).str2.Tx(Ref3.int3(?).str3 + Ref4.int4.str4))
+      val m24 = m(Ref1.int1.str1 + Ref2.int2(?).str2.Tx(Ref3.int3.str3 + Ref4.int4(?).str4))
+      val m34 = m(Ref1.int1.str1 + Ref2.int2.str2.Tx(Ref3.int3(?).str3 + Ref4.int4(?).str4))
+
+      m12(1, 2).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m13(1, 3).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m14(1, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m23(2, 3).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m24(2, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m34(3, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+
+      val m123 = m(Ref1.int1(?).str1 + Ref2.int2(?).str2.Tx(Ref3.int3(?).str3 + Ref4.int4.str4))
+      val m124 = m(Ref1.int1(?).str1 + Ref2.int2(?).str2.Tx(Ref3.int3.str3 + Ref4.int4(?).str4))
+      val m134 = m(Ref1.int1(?).str1 + Ref2.int2.str2.Tx(Ref3.int3(?).str3 + Ref4.int4(?).str4))
+      val m234 = m(Ref1.int1.str1 + Ref2.int2(?).str2.Tx(Ref3.int3(?).str3 + Ref4.int4(?).str4))
+
+      m123(1, 2, 3).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m124(1, 2, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m134(1, 3, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
+      m234(2, 3, 4).get.head === ((1, "a"), (2, "b", (3, "c"), (4, "d")))
     }
   }
 

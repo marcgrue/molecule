@@ -12,7 +12,7 @@ import java.net.URI
 import java.util.Date
 import java.util.UUID
 import molecule.core.composition.CompositeInit_0.CompositeInit_0_00
-import molecule.core.composition.Tx.Tx00
+import molecule.core.composition.Tx_0_00
 import molecule.core.composition.nested_0.nested_0_00._
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
@@ -23,7 +23,7 @@ import scala.language.higherKinds
 trait TxCount_0_0[o0[_], p0] extends _TxCount_
   with NS_0_00           [o0, p0]
   with CompositeInit_0_00[o0, p0]
-  with Tx00              [o0, p0]
+  with Tx_0_00           [o0, p0]
 
 trait TxCount_0_0_L0[o0[_], p0] extends TxCount_0_0[o0, p0]
   with Datom_0_0_L0[o0, p0, TxCount_0_0_L0, TxCount_0_1_L0, Nothing, Nothing]
