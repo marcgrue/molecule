@@ -14,9 +14,10 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
 
   private[this] final def generateCompositeMolecule(dsl: Tree, ObjType: Type, OutTypes: Type*): Tree = {
-    val MoleculeTpe                                                                 = molecule_o(OutTypes.size)
-    val outMolecule                                                                 = TypeName(c.freshName("compositOutMolecule$"))
-    val (model0, types, castss, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
+    val MoleculeTpe = molecule_o(OutTypes.size)
+    val outMolecule = TypeName(c.freshName("compositOutMolecule$"))
+
+    val (model0, _, castss, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
 
     val casts = if (txMetaCompositesCount > 0) {
       val ordinaryComposites = castss.take(castss.length - txMetaCompositesCount)
@@ -29,10 +30,10 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       val first = compositeCasts(firstComposites)
       val last  = topLevel(List(lastComposite), lastOffset) ++ compositeCasts(txMetaComposites, metaOffset)
 
-//      z(1, model0, types, castss, first, last)
+      //      z(1, model0, types, castss, first, last)
       (first, last) match {
-        case (Nil, last) => q"(..$last)"
-        case (first, Nil) => q"(..$first)"
+        case (Nil, last)   => q"(..$last)"
+        case (first, Nil)  => q"(..$first)"
         case (first, last) => q"(..$first, (..$last))"
       }
     } else {

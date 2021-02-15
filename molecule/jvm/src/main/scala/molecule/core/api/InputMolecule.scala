@@ -71,6 +71,7 @@ trait InputMolecule extends Molecule {
       case (tacit, Atom(`nsFull`, `attr` | `attrK`, _, _, _, _, _, _))               => Some(false)
       case (tacit, Nested(_, elements2))                                             => isTacit_(elements2, tacit)
       case (tacit, Composite(elements2))                                             => isTacit_(elements2, tacit)
+      case (tacit, TxMetaData(elements2))                                            => isTacit_(elements2, tacit)
       case (tacit, _)                                                                => tacit
     }
     isTacit_(_model.elements, None) match {
@@ -87,6 +88,7 @@ trait InputMolecule extends Molecule {
       case (cardOpt, Atom(`nsFull` | `nsFull_`, `attr` | `attr_` | `attrK` | `attrK_`, _, card, _, _, _, _)) => Some(card)
       case (cardOpt, Nested(_, elements2))                                                                   => isTacit_(elements2, cardOpt)
       case (cardOpt, Composite(elements2))                                                                   => isTacit_(elements2, cardOpt)
+      case (cardOpt, TxMetaData(elements2))                                                                  => isTacit_(elements2, cardOpt)
       case (cardOpt, e)                                                                                      => cardOpt
     }
     isTacit_(_model.elements, None) match {
@@ -101,6 +103,7 @@ trait InputMolecule extends Molecule {
       case (expr, Atom(`nsFull`, `attr` | `attr_`, _, _, Neq(_) | Lt(_) | Gt(_) | Le(_) | Ge(_) | Fulltext(_), _, _, _)) => true
       case (expr, Nested(_, elements2))                                                                                  => isExpression_(elements2, expr)
       case (expr, Composite(elements2))                                                                                  => isExpression_(elements2, expr)
+      case (expr, TxMetaData(elements2))                                                                                 => isExpression_(elements2, expr)
       case (expr, _)                                                                                                     => expr
     }
     isExpression_(_model.elements, false)

@@ -12,7 +12,7 @@ import java.net.URI
 import java.util.Date
 import java.util.UUID
 import molecule.core.composition.CompositeInit_0.CompositeInit_0_00
-import molecule.core.composition.Tx_0_00
+import molecule.core.composition.Tx_0.Tx_0_00
 import molecule.core.composition.nested_0.nested_0_00._
 import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._

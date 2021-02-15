@@ -11,11 +11,33 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
   import c.universe._
 
   private[this] final def generateComposite_In_Molecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val InputMoleculeTpe                                   = inputMolecule_i_o(InTypes.size, OutTypes.size)
-    val OutMoleculeTpe                                     = molecule_o(OutTypes.size)
-    val inputMolecule                                      = TypeName(c.freshName("compositeInputMolecule$"))
-    val outMolecule                                        = TypeName(c.freshName("compositeOutMolecule$"))
-    val (model0, _, casts, hasVariables, _, _, _, _, _, _) = getModel(dsl)
+    val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
+    val OutMoleculeTpe   = molecule_o(OutTypes.size)
+    val inputMolecule    = TypeName(c.freshName("compositeInputMolecule$"))
+    val outMolecule      = TypeName(c.freshName("compositeOutMolecule$"))
+
+    val (model0, _, castss, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
+
+    val casts = if (txMetaCompositesCount > 0) {
+      val ordinaryComposites = castss.take(castss.length - txMetaCompositesCount)
+      val txMetaComposites   = castss.takeRight(txMetaCompositesCount)
+      val firstComposites    = ordinaryComposites.init
+      val lastComposite      = ordinaryComposites.last
+      val lastOffset         = firstComposites.flatten.length
+      val metaOffset         = ordinaryComposites.flatten.length
+
+      val first = compositeCasts(firstComposites)
+      val last  = topLevel(List(lastComposite), lastOffset) ++ compositeCasts(txMetaComposites, metaOffset)
+
+      //      z(1, model0, types, castss, first, last)
+      (first, last) match {
+        case (Nil, last)   => q"(..$last)"
+        case (first, Nil)  => q"(..$first)"
+        case (first, last) => q"(..$first, (..$last))"
+      }
+    } else {
+      q"(..${compositeCasts(castss)})"
+    }
 
     // Methods for applying separate lists of input
     val applySeqs = InTypes match {
@@ -32,7 +54,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               _model,
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
-              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
             }
             new $outMolecule
           }
@@ -49,7 +71,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               _model,
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
-              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
             }
             new $outMolecule
           }
@@ -74,7 +96,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               _model,
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
-              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
             }
             new $outMolecule
           }
@@ -95,7 +117,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               _model,
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
-              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${compositeCasts(casts)})
+              final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
             }
             new $outMolecule
           }
