@@ -12,12 +12,13 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
   import c.universe._
 
   private[this] final def generateInputMolecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val InputMoleculeTpe                                                       = inputMolecule_i_o(InTypes.size, OutTypes.size)
-    val OutMoleculeTpe                                                         = molecule_o(OutTypes.size)
-    val inputMolecule                                                          = TypeName(c.freshName("inputMolecule$"))
-    val outMolecule                                                            = TypeName(c.freshName("outMolecule$"))
-    val (model0, types, casts, hasVariables, _, postTypes, postCasts, _, _, _) = getModel(dsl)
-    val flat                                                                   = casts.size == 1
+    val (model0, types, casts, obj, hasVariables, _, postTypes, postCasts, _, _, _) = getModel(dsl)
+
+    val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
+    val OutMoleculeTpe   = molecule_o(OutTypes.size)
+    val inputMolecule    = TypeName(c.freshName("inputMolecule$"))
+    val outMolecule      = TypeName(c.freshName("outMolecule$"))
+    val flat             = casts.size == 1
 
     // Methods for applying separate lists of input
     val applySeqs = InTypes match {

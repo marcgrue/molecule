@@ -11,12 +11,12 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
   import c.universe._
 
   private[this] final def generateComposite_In_Molecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
+    val (model0, _, castss, obj, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
+
     val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
     val OutMoleculeTpe   = molecule_o(OutTypes.size)
     val inputMolecule    = TypeName(c.freshName("compositeInputMolecule$"))
     val outMolecule      = TypeName(c.freshName("compositeOutMolecule$"))
-
-    val (model0, _, castss, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
 
     val casts = if (txMetaCompositesCount > 0) {
       val ordinaryComposites = castss.take(castss.length - txMetaCompositesCount)

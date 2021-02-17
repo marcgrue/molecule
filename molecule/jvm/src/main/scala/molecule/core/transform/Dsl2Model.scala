@@ -30,6 +30,7 @@ private[molecule] trait Dsl2Model extends Cast {
     Model,
       List[List[Tree]],
       List[List[Int => Tree]],
+      Obj,
       //      List[List[Int => Tree]],
       //      List[String],
       Boolean,
@@ -65,6 +66,7 @@ private[molecule] trait Dsl2Model extends Cast {
 
     var types         : List[List[Tree]]        = List(List.empty[Tree])
     var casts         : List[List[Int => Tree]] = List(List.empty[Int => Tree])
+    var obj           : Obj                     = Obj("", "", 0, Nil)
     var nestedRefAttrs: List[String]            = List.empty[String]
 
     var hasVariables: Boolean = false
@@ -110,6 +112,9 @@ private[molecule] trait Dsl2Model extends Cast {
         if (post) {
           postTypes = getType(t) +: postTypes
           postCasts = castLambda(t) +: postCasts
+
+          obj = obj.copy(props = Prop(t.nsFull + "_" + t.name, t.name, t.tpeS, castOneAttr(t.tpeS)) :: obj.props)
+
         } else {
           types = (getType(t) :: types.head) +: types.tail
           casts = (castLambda(t) :: casts.head) +: casts.tail
@@ -282,6 +287,10 @@ private[molecule] trait Dsl2Model extends Cast {
 
       } else if (t.isRef) {
         x(135, t.tpeS, t.card, t.refCard)
+
+
+        val refName = t.name.capitalize
+        obj = Obj("", "", 0, List(Obj(t.nsFull + "_" + refName + "_", refName, t.card, obj.props)))
         traverseElement(prev, p, Bond(t.refThis, firstLow(attrStr), t.refNext, t.refCard, bi(tree, t)))
 
       } else if (t.isRefAttr) {
@@ -1342,7 +1351,7 @@ private[molecule] trait Dsl2Model extends Cast {
     // Return checked model
     (
       Model(VerifyRawModel(elements, false)),
-      types, casts,
+      types, casts, obj,
       hasVariables, txMetaCompositesCount,
       postTypes, postCasts,
       isOptNested,

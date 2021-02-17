@@ -15,9 +15,9 @@ import molecule.core.dsl.attributes._
 import molecule.core.dsl.base._
 import scala.language.higherKinds
 
-object TxCount extends TxCount_0_0_L0[TxCount_, Nothing] with FirstNS {
-  final override def apply(eid: Long, eids: Long*): TxCount_0_0_L0[TxCount_, Nothing] = ???
-  final override def apply(eids: Iterable[Long])  : TxCount_0_0_L0[TxCount_, Nothing] = ???
+object TxCount extends TxCount_0_0_L0[TxCount_, DummyProp] with FirstNS {
+  final override def apply(eid: Long, eids: Long*): TxCount_0_0_L0[TxCount_, DummyProp] = ???
+  final override def apply(eids: Iterable[Long])  : TxCount_0_0_L0[TxCount_, DummyProp] = ???
 }
 
 trait _TxCount_ {

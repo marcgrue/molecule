@@ -4,6 +4,9 @@ package molecule.core.dsl
 /** Base namespace markers to carry attribute types from one arity to the next. */
 object base {
 
+  /** Initial empty property trait for object type buildup */
+  trait DummyProp
+
   trait NS
 
   trait FirstNS extends NS {

@@ -30,7 +30,7 @@ trait GetList[Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule_
     buf.toList
   }
 
-
+  def getObj(implicit conn: Conn): Obj = getObjList(conn).head
 
 
 

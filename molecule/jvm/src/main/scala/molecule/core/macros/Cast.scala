@@ -1,5 +1,6 @@
 package molecule.core.macros
 
+import molecule.core.ast.elements.{Composite, Element, Nested, TxMetaData}
 import molecule.core.ops.TreeOps
 import scala.reflect.macros.blackbox
 
@@ -9,6 +10,27 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
   import c.universe._
 
   val y = InspectMacro("Cast", 1)
+
+  sealed trait Node
+  case class Prop(cls: String, prop: String, tpe: String, cast: Int => Tree) extends Node {
+    override def toString: String = {
+      s"""Prop("$cls", "$prop", "$tpe", $cast)"""
+    }
+  }
+  case class Obj(cls: String, ref: String, card: Int, props: List[Node]) extends Node {
+    override def toString: String = {
+      def draw(nodes: Seq[Node], indent: Int): Seq[String] = {
+        val s = "  " * indent
+        nodes map {
+          case Obj(cls, ref, card, props) =>
+            s"""|${s}Obj("$cls", "$ref", $card, List(
+                |${draw(props, indent + 1).mkString(s",\n")}))""".stripMargin
+          case prop                  => s"$s$prop"
+        }
+      }
+      draw(Seq(this), 0).head
+    }
+  }
 
 
   def castOneAttr(tpe: String): Int => Tree = tpe match {
