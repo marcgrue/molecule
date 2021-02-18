@@ -335,13 +335,22 @@ class Save extends TestSpec with ClojureBridge {
       Ns.ints(13).ref1$(Some(1L)).get.head === (Set(13), Some(1L))
     }
 
-    "ref" in new CoreSetup {
 
+    "ref" in new CoreSetup {
       Ns.int(1).Ref1.str1("a").int1$.apply(Some(10)).save
       Ns.int(1).Ref1.str1.int1.get.head === (1, "a", 10)
 
       Ns.int(2).Ref1.str1("b").int1$.apply(None).save
       Ns.int(2).Ref1.str1.int1$.get.head === (2, "b", None)
+    }
+
+
+    "backref" in new CoreSetup {
+      Ns.int(0).Ref1.int1(1).Ref2.str2("b")._Ref1.Refs2.int2(2).save
+
+      Ns.int.Ref1.int1.Ref2.str2._Ref1.Refs2.int2.get === List(
+        (0, 1, "b", 2)
+      )
     }
   }
 

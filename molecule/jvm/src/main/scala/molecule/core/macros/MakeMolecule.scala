@@ -10,8 +10,9 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-  //  val z = InspectMacro("MakeMolecule", 1, 900, mkError = true)
-  val z = InspectMacro("MakeMolecule", 1, 900)
+  //  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
+//  val z = InspectMacro("MakeMolecule", 1, 8)
+  val z = InspectMacro("MakeMolecule", 9, 8)
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
     val (
@@ -40,79 +41,29 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, _root_.molecule.datomic.base.transform.Model2Query(_resolvedModel)) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
           }
           new $outMolecule
         """
       } else {
 
-
-        //        val t1 = "molecule.tests.core.base.dsl.CoreTest.Ns_int"
-        //        val t2 = tq"molecule.tests.core.base.dsl.CoreTest.Ns_str"
-
-        //        val t4 = TypeName("DummyProp with molecule.tests.core.base.dsl.CoreTest.Ref1_int1 with molecule.tests.core.base.dsl.CoreTest.Ref1_str1")
-        //        val t3 = tq"molecule.tests.core.base.dsl.CoreTest.Ns_Ref1_[$t4]"
-        lazy val t1 = tq"Ns_int"
-        lazy val t2 = tq"Ns_str"
-        lazy val t4 = TypeName("DummyProp with Ref1_int1")
-        lazy val t3 = tq"Ns_Ref1_[DummyProp with Ref1_int1]"
-
-        val ts = Seq(
-          tq"molecule.tests.core.base.dsl.CoreTest.Ns_int",
-          tq"molecule.tests.core.base.dsl.CoreTest.Ns_str"
-        )
-
-        val body0 =
-          q"""{
-              new DummyProp with $t1 with $t2 with $t3 {
-                final override lazy val int: Int = castOneInt(row, 0)
-                final override lazy val str: String = castOne[String](row, 1)
-                final override def Ref1: DummyProp with Ref1_int1 = new DummyProp with Ref1_int1 {
-                  final override lazy val int1: Int = 1
-                }
-              }
-            }
-             """
-        val body1 = objCode(obj, -1)._1
-
         val tt =
           q"""
           import molecule.core.ast.elements._
-          import molecule.core.dsl.base.DummyProp
-              import molecule.tests.core.base.dsl.CoreTest._
+          import molecule.core.dsl.base.Init
+          import molecule.tests.core.base.dsl.CoreTest._
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = //{objCode(obj, -1)} //???
-              $body1
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
           }
           new $outMolecule
         """
-        //              new molecule.tests.core.base.dsl.CoreTest.Ns_int with molecule.tests.core.base.dsl.CoreTest.Ns_str {
-        //              new A with $ot4 {
-        //              new A with $d1 with $d2 {
-        //              new molecule.tests.core.base.dsl.CoreTest.Ns_int with molecule.tests.core.base.dsl.CoreTest.Ns_str {
-        //              class obj() extends $ObjType {
-        //              (new molecule.tests.core.base.dsl.CoreTest.Ns_int {
-        //              (new molecule.tests.core.base.dsl.CoreTest.Ns_int {
 
-        //        val obj = Obj("", 0, Seq(
-        //          Prop(tq"molecule.tests.core.base.dsl.CoreTest.Ns_int", "int", tq"Int", castOneAttr("Int")),
-        //          Prop(tq"molecule.tests.core.base.dsl.CoreTest.Ns_str", "str", tq"String", castOneAttr("String"))
-        //        ))
-        //
-        //        val t0 = tq""
-
-        z(1
+        z(2
           , obj
-          , body0
-          , body1
-//          , ObjType
-//          , showRaw(ObjType)
-          //          , q"new $t1 with $t2 with $t3 {}"
-          //          , getObj(obj, 0)
+          //          , objCode(obj)._1
           , tt
         )
-
         tt
       }
 

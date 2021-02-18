@@ -4,7 +4,7 @@ import java.util.Date
 import molecule.core.api.Molecule_1
 import molecule.core.ast.elements._
 import molecule.core.composition.Tx
-import molecule.core.dsl.base.NS_0_01
+import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
 import molecule.core.macros.ObjBuilder
 import molecule.core.util.Helpers
@@ -82,115 +82,155 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-    Ns.int(0).str("x").Ref1.int1(1).save
-
-    val o = m(Ns.int.str.Ref1.int1).getObj
-
-    o.int === 0
-    o.str === "x"
-    o.Ref1.int1 === 1
+    //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
 
 
-////    val o1 = m(Ns.int.str).getObj
-////    val o1 = m(Ns.int).getObj
-//
-//    val o2 = new Ns_int with Ns_str with Ns_Ref1_[Ref1_int1] {
-//      final override lazy val int = 0
-//      final override lazy val str = "x"
-//      final override def Ref1: Ref1_int1 = new Ref1_int1 {
-//        final override lazy val int1: Int = 1
-//      }
-//    }
-//
-//    val o3 = new Ns_int with Ns_str {
-//      final override lazy val int = 0
-//      final override lazy val str = "x"
-//    }
-//
-//    trait Ns_str        { lazy val str       : String                  = ??? }
-//    trait Ns_int        { lazy val int       : Int                     = ??? }
-//
-//
-//    showRaw(reify(new Ns_int with Ns_str {
-//      final override lazy val int = 0
-//      final override lazy val str = "x"
-//    }))
+    Ns.int.Ref1.int1.getObj
 
-//    import scala.reflect.runtime.universe._
-//    trait A { val a = 7 }
-//    trait B
-//    val AB = tq"A with B"
-//    val ab = q"new $AB"
-//
-//
-//    def build[T]: T = macro ObjBuilder.obj[T]
-//
-////    type tt = A with B
-////    trait X extends A with B
-//
-////    build[A with B]
-//    val o  = build[A with B]
+    Ns.int.Ref1.int1._Ns.str.getObj
+
+    Ns.int.Ref1.int1._Ns.Refs1.str1.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1.str1.getObj
+
+    Ns.int.Ref1.Ref2.str2._Ref1.str1.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1.Refs2.int2.getObj
+
+    Ns.int.Ref1.Ref2.str2._Ref1.Refs2.int2.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.str.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.str.getObj
+
+    Ns.int.Ref1.Ref2.str2._Ref1._Ns.str.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.Refs1.str1.getObj
+
+    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
+
+    Ns.int.Ref1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
 
 
+    /*
+     */
+
+    //    {
+    //      val o = Ns.int(0).str("a")
+    //    }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //    val o = m(Ns.int.str.Ref1.int1).getObj
+    //
+    //    o.int === 0
+    //    o.str === "x"
+    //    o.Ref1.int1 === 1
+    //
+    //    val o1 = m(Ns.int).getObj
+    //    o1.int === 0
+    //    o1.str === "x"
 
 
-//    build[A]
+    ////    val o1 = m(Ns.int.str).getObj
+    ////    val o1 = m(Ns.int).getObj
+    //
+    //    val o2 = new Ns_int with Ns_str with Ns_Ref1_[Ref1_int1] {
+    //      final override lazy val int = 0
+    //      final override lazy val str = "x"
+    //      final override def Ref1: Ref1_int1 = new Ref1_int1 {
+    //        final override lazy val int1: Int = 1
+    //      }
+    //    }
+    //
+    //    val o3 = new Ns_int with Ns_str {
+    //      final override lazy val int = 0
+    //      final override lazy val str = "x"
+    //    }
+    //
+    //    trait Ns_str        { lazy val str       : String                  = ??? }
+    //    trait Ns_int        { lazy val int       : Int                     = ??? }
+    //
+    //
+    //    showRaw(reify(new Ns_int with Ns_str {
+    //      final override lazy val int = 0
+    //      final override lazy val str = "x"
+    //    }))
+
+    //    import scala.reflect.runtime.universe._
+    //    trait A { val a = 7 }
+    //    trait B
+    //    val AB = tq"A with B"
+    //    val ab = q"new $AB"
+    //
+    //
+    //    def build[T]: T = macro ObjBuilder.obj[T]
+    //
+    ////    type tt = A with B
+    ////    trait X extends A with B
+    //
+    ////    build[A with B]
+    //    val o  = build[A with B]
 
 
+    //    build[A]
 
 
-//    RefinedType(
-//      List(
-//        RefinedType(
-//          List(
-//            RefinedType(
-//              List(
-//                TypeRef(SingleType(SingleType(SingleType(SingleType(ThisType("<root>"), molecule), molecule.core), molecule.core.dsl), molecule.core.dsl.base), molecule.core.dsl.base.DummyProp, List()),
-//                TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_int, List())
-//              ),
-//              Scope()
-//            ),
-//            TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_str, List())),
-//          Scope()
-//        ),
-//        TypeRef(
-//          ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_Ref1_,
-//          List(
-//            RefinedType(
-//              List(
-//                TypeRef(
-//                  SingleType(SingleType(SingleType(SingleType(ThisType("<root>"), molecule), molecule.core), molecule.core.dsl), molecule.core.dsl.base), molecule.core.dsl.base.DummyProp, List()),
-//                TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ref1_int1, List())),
-//              Scope()
-//            )
-//          )
-//        )
-//      ),
-//      Scope()
-//    )
+    //    RefinedType(
+    //      List(
+    //        RefinedType(
+    //          List(
+    //            RefinedType(
+    //              List(
+    //                TypeRef(SingleType(SingleType(SingleType(SingleType(ThisType("<root>"), molecule), molecule.core), molecule.core.dsl), molecule.core.dsl.base), molecule.core.dsl.base.Init, List()),
+    //                TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_int, List())
+    //              ),
+    //              Scope()
+    //            ),
+    //            TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_str, List())),
+    //          Scope()
+    //        ),
+    //        TypeRef(
+    //          ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ns_Ref1_,
+    //          List(
+    //            RefinedType(
+    //              List(
+    //                TypeRef(
+    //                  SingleType(SingleType(SingleType(SingleType(ThisType("<root>"), molecule), molecule.core), molecule.core.dsl), molecule.core.dsl.base), molecule.core.dsl.base.Init, List()),
+    //                TypeRef(ThisType(molecule.tests.core.base.dsl.CoreTest), molecule.tests.core.base.dsl.CoreTest.Ref1_int1, List())),
+    //              Scope()
+    //            )
+    //          )
+    //        )
+    //      ),
+    //      Scope()
+    //    )
 
-//    class obj() extends Nothing with molecule.tests.core.base.dsl.CoreTest.Ns_int with molecule.tests.core.base.dsl.CoreTest.Ns_str with molecule.tests.core.base.dsl.CoreTest.Ns_Ref1_[Nothing with molecule.tests.core.base.dsl.CoreTest.Ref1_int1] {
-//      override val int: Int = castOneInt(row, 0)
-//      override val str: String = castOne[String](row, 1)
-//    }
-//
-//    class obj()
-//
-//    val x = new obj()
+    //    class obj() extends Nothing with molecule.tests.core.base.dsl.CoreTest.Ns_int with molecule.tests.core.base.dsl.CoreTest.Ns_str with molecule.tests.core.base.dsl.CoreTest.Ns_Ref1_[Nothing with molecule.tests.core.base.dsl.CoreTest.Ref1_int1] {
+    //      override val int: Int = castOneInt(row, 0)
+    //      override val str: String = castOne[String](row, 1)
+    //    }
+    //
+    //    class obj()
+    //
+    //    val x = new obj()
 
-//    class obj extends Nothing with molecule.tests.core.base.dsl.CoreTest.Ns_int {
-//      final override lazy val int: Int = 0
-//    }
-//    val x = new obj()
-//
-//    x.int === 0
-
-
+    //    class obj extends Nothing with molecule.tests.core.base.dsl.CoreTest.Ns_int {
+    //      final override lazy val int: Int = 0
+    //    }
+    //    val x = new obj()
+    //
+    //    x.int === 0
 
 
-//    o2.int === 0
-//    o2.str === "x"
-//    o2.Ref1.int1 === 1
+    //    o2.int === 0
+    //    o2.str === "x"
+    //    o2.Ref1.int1 === 1
 
 
     //    {

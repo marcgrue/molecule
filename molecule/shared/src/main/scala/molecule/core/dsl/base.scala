@@ -5,7 +5,7 @@ package molecule.core.dsl
 object base {
 
   /** Initial empty property trait for object type buildup */
-  trait DummyProp
+  trait Init
 
   trait NS
 

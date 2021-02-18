@@ -8,7 +8,7 @@ private[molecule] trait CastOptNested extends TreeOps {
   import c.universe._
 
 
-  def castOptNestedOneAttr(tpe: String): Int => Tree = tpe match {
+  val castOptNestedOneAttr: String => Int => Tree = {
     case "String"         => (i: Int) => q"castOptNestedOne[String](${TermName("it" + i)})"
     case "Int"            => (i: Int) => q"castOptNestedOneInt(${TermName("it" + i)})"
     case "Int2"           => (i: Int) => q"castOptNestedOneInt2(${TermName("it" + i)})"
@@ -24,7 +24,7 @@ private[molecule] trait CastOptNested extends TreeOps {
     case "Any"            => (i: Int) => q"row.get($i)"
   }
 
-  def castOptNestedManyAttr(tpe: String): Int => Tree = tpe match {
+  val castOptNestedManyAttr: String => Int => Tree = {
     case "String"         => (i: Int) => q"castOptNestedMany[String](${TermName("it" + i)})"
     case "Int"            => (i: Int) => q"castOptNestedManyInt(${TermName("it" + i)})"
     case "Float"          => (i: Int) => q"castOptNestedManyFloat(${TermName("it" + i)})"

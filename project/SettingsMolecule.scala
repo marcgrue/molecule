@@ -14,18 +14,18 @@ trait SettingsMolecule {
     moleculePluginActive := sys.props.get("molecule") == Some("true"),
     moleculeDataModelPaths := Seq(
       "molecule/tests/core/base",
-//      "molecule/tests/core/bidirectionals",
-//      "molecule/tests/core/ref",
-//      "molecule/tests/core/schemaDef",
-//
-//      "molecule/tests/examples/datomic/dayOfDatomic",
-//      "molecule/tests/examples/datomic/mbrainz",
-//      "molecule/tests/examples/datomic/seattle",
-//      "molecule/tests/examples/gremlin/gettingStarted",
+      "molecule/tests/core/bidirectionals",
+      "molecule/tests/core/ref",
+      "molecule/tests/core/schemaDef",
+
+      "molecule/tests/examples/datomic/dayOfDatomic",
+      "molecule/tests/examples/datomic/mbrainz",
+      "molecule/tests/examples/datomic/seattle",
+      "molecule/tests/examples/gremlin/gettingStarted",
 
       //      "molecule/tests/core/generic"
     ),
-        moleculeMakeJars := false,
+//        moleculeMakeJars := false,
     //    moleculeGenericPkg := "molecule.core.generic",
 
     // Let IDE detect created jars in unmanaged lib directory

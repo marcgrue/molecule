@@ -4,36 +4,14 @@ import molecule.core.ast.elements.{Composite, Element, Nested, TxMetaData}
 import molecule.core.ops.TreeOps
 import scala.reflect.macros.blackbox
 
-private[molecule] trait Cast extends CastAggr with TreeOps {
+private[molecule] trait Cast extends CastAggr {
   val c: blackbox.Context
 
   import c.universe._
 
-  val y = InspectMacro("Cast", 1)
+  lazy val y = InspectMacro("Cast", 1)
 
-  sealed trait Node
-  case class Prop(cls: String, prop: String, tpe: String, cast: Int => Tree) extends Node {
-    override def toString: String = {
-      s"""Prop("$cls", "$prop", "$tpe", $cast)"""
-    }
-  }
-  case class Obj(cls: String, ref: String, card: Int, props: List[Node]) extends Node {
-    override def toString: String = {
-      def draw(nodes: Seq[Node], indent: Int): Seq[String] = {
-        val s = "  " * indent
-        nodes map {
-          case Obj(cls, ref, card, props) =>
-            s"""|${s}Obj("$cls", "$ref", $card, List(
-                |${draw(props, indent + 1).mkString(s",\n")}))""".stripMargin
-          case prop                  => s"$s$prop"
-        }
-      }
-      draw(Seq(this), 0).head
-    }
-  }
-
-
-  def castOneAttr(tpe: String): Int => Tree = tpe match {
+  val castOneAttr: String => Int => Tree = {
     case "String"         => (i: Int) => q"castOne[String](row, $i)"
     case "Int"            => (i: Int) => q"castOneInt(row, $i)"
     case "Int2"           => (i: Int) => q"castOneInt2(row, $i)"
@@ -49,7 +27,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
     case "Any"            => (i: Int) => q"row.get($i)"
   }
 
-  def castManyAttr(tpe: String): Int => Tree = tpe match {
+  val castManyAttr: String => Int => Tree = {
     case "String"         => (i: Int) => q"castMany[String](row, $i)"
     case "Int"            => (i: Int) => q"castManyInt(row, $i)"
     case "Float"          => (i: Int) => q"castManyFloat(row, $i)"
@@ -65,7 +43,6 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
 
   val castMandatoryAttr: richTree => Int => Tree = (t: richTree) =>
     if (t.card == 1) castOneAttr(t.tpeS) else castManyAttr(t.tpeS)
-
 
   val castOptionalAttr: richTree => Int => Tree = (t: richTree) =>
     if (t.card == 1) {
@@ -189,7 +166,7 @@ private[molecule] trait Cast extends CastAggr with TreeOps {
     case "BigDecimal"     => (i: Int) => q"castOptMapApplyBigDecimal(row, $i)"
   }
 
-  def castKeyedMapAttr(tpe: String): Int => Tree = tpe match {
+  val castKeyedMapAttr: String =>  Int => Tree = {
     case "String"         => (i: Int) => q"row.get($i).toString"
     case "Int"            => (i: Int) => q"row.get($i).toString.toInt"
     case "Long"           => (i: Int) => q"row.get($i).toString.toLong"

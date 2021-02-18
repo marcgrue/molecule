@@ -3,15 +3,15 @@ package molecule.core.macros
 import molecule.core.ops.TreeOps
 import scala.reflect.macros.blackbox
 
-private[molecule] trait CastAggr extends CastOptNested with TreeOps {
+private[molecule] trait CastAggr extends CastOptNested {
   val c: blackbox.Context
   import c.universe._
 
 
-  def castAggrInt: Int => Tree = (i: Int) => q"row.get($i).toString.toInt"
-  def castAggrDouble: Int => Tree = (i: Int) => q"row.get($i).asInstanceOf[Double]"
+  val castAggrInt: Int => Tree = (i: Int) => q"row.get($i).toString.toInt"
+  val castAggrDouble: Int => Tree = (i: Int) => q"row.get($i).asInstanceOf[Double]"
 
-  def castAggrOneList(tpe: String): Int => Tree = tpe match {
+  val castAggrOneList: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrOneListInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrOneList[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrOneListFloat(row, $i)"
@@ -24,7 +24,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrOneListURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneList[java.util.UUID](row, $i)"
   }
-  def castAggrManyList(tpe: String): Int => Tree = tpe match {
+  val castAggrManyList: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrManyListInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrManyList[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrManyListFloat(row, $i)"
@@ -38,7 +38,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.util.UUID" => (i: Int) => q"castAggrManyList[java.util.UUID](row, $i)"
   }
 
-  def castAggrOneListDistinct(tpe: String): Int => Tree = tpe match {
+  val castAggrOneListDistinct: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrOneListDistinctInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrOneListDistinct[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrOneListDistinctFloat(row, $i)"
@@ -51,7 +51,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrOneListDistinctURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneListDistinct[java.util.UUID](row, $i)"
   }
-  def castAggrManyListDistinct(tpe: String): Int => Tree = tpe match {
+  val castAggrManyListDistinct: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrManyListDistinctInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrManyListDistinct[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrManyListDistinctFloat(row, $i)"
@@ -65,7 +65,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.util.UUID" => (i: Int) => q"castAggrManyListDistinct[java.util.UUID](row, $i)"
   }
 
-  def castAggrOneListRand(tpe: String): Int => Tree = tpe match {
+  val castAggrOneListRand: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrOneListRandInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrOneListRand[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrOneListRandFloat(row, $i)"
@@ -78,7 +78,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.net.URI"   => (i: Int) => q"castAggrOneListRandURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castAggrOneListRand[java.util.UUID](row, $i)"
   }
-  def castAggrManyListRand(tpe: String): Int => Tree = tpe match {
+  val castAggrManyListRand: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrManyListRandInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrManyListRand[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrManyListRandFloat(row, $i)"
@@ -93,7 +93,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
   }
 
 
-  def castAggrSingleSample(tpe: String): Int => Tree = tpe match {
+  val castAggrSingleSample: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrSingleSampleInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrSingleSample[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrSingleSampleFloat(row, $i)"
@@ -107,7 +107,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.util.UUID" => (i: Int) => q"castAggrSingleSample[java.util.UUID](row, $i)"
   }
 
-  def castAggrOneSingle(tpe: String): Int => Tree = tpe match {
+  val castAggrOneSingle: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castOneInt(row, $i)"
     case "Long"           => (i: Int) => q"castOne[Long](row, $i)"
     case "Float"          => (i: Int) => q"castOneFloat(row, $i)"
@@ -120,7 +120,7 @@ private[molecule] trait CastAggr extends CastOptNested with TreeOps {
     case "java.net.URI"   => (i: Int) => q"castOneURI(row, $i)"
     case "java.util.UUID" => (i: Int) => q"castOne[java.util.UUID](row, $i)"
   }
-  def castAggrManySingle(tpe: String): Int => Tree = tpe match {
+  val castAggrManySingle: String => Int => Tree = {
     case "Int"            => (i: Int) => q"castAggrManySingleInt(row, $i)"
     case "Long"           => (i: Int) => q"castAggrManySingle[Long](row, $i)"
     case "Float"          => (i: Int) => q"castAggrManySingleFloat(row, $i)"
