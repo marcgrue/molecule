@@ -1,6 +1,6 @@
 package molecule.core.generic
 
-import molecule.core.dsl.base.FirstNS
+import molecule.core.dsl.base.{FirstNS, Init}
 import molecule.core.generic.VAET._
 
 /** VAET reverse Index.
@@ -51,22 +51,22 @@ import molecule.core.generic.VAET._
 trait GenericVAET {
 
   /** VAET Index object to start VAET reverse Index molecule. */
-  object VAET extends VAET_0_0_L0[VAET_, Nothing] with FirstNS {
+  object VAET extends VAET_0_0_L0[VAET_, Init] with FirstNS {
 
     /** Unfiltered VAET Index fetching ALL datoms (!) */
-    final def apply                                          : VAET_0_0_L0[VAET_, Nothing] = ???
+    final def apply                                          : VAET_0_0_L0[VAET_, Init] = ???
 
     /** Instantiate VAET reverse Index filtered by ref entity id value. */
-    final def apply(refId: Long)                             : VAET_0_0_L0[VAET_, Nothing] = ???
+    final def apply(refId: Long)                             : VAET_0_0_L0[VAET_, Init] = ???
 
     /** Instantiate VAET reverse Index filtered by ref entity id value and attribute name. */
-    final def apply(refId: Long, a: String)                  : VAET_0_0_L0[VAET_, Nothing] = ???
+    final def apply(refId: Long, a: String)                  : VAET_0_0_L0[VAET_, Init] = ???
 
     /** Instantiate VAET reverse Index filtered by ref entity id value, attribute name and entity id. */
-    final def apply(refId: Long, a: String, e: Long)         : VAET_0_0_L0[VAET_, Nothing] = ???
+    final def apply(refId: Long, a: String, e: Long)         : VAET_0_0_L0[VAET_, Init] = ???
 
     /** Instantiate VAET reverse Index filtered by ref entity id value, attribute name, entity id and
       * transaction entity id (`tx`) or point in time (`t`). */
-    final def apply(refId: Long, a: String, e: Long, t: Long): VAET_0_0_L0[VAET_, Nothing] = ???
+    final def apply(refId: Long, a: String, e: Long, t: Long): VAET_0_0_L0[VAET_, Init] = ???
   }
 }

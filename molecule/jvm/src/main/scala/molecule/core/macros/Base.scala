@@ -12,6 +12,18 @@ private[molecule] trait Base extends Dsl2Model {
 
   val w = InspectMacro("Base", 1)
 
+  def getImports(genericImports: List[Tree]) =
+    q"""
+        import java.net.URI
+        import java.util.{Date, UUID}
+        import molecule.core.ast.elements._
+        import molecule.core.dsl.base.Init
+        ..$genericImports
+        import molecule.core.ops.ModelOps._
+        import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
+        import molecule.datomic.base.facade.Conn
+     """
+
   def mapIdents(idents: Seq[Any]): Seq[(String, Tree)] = idents.flatMap {
     case (key: String, v: String) if key.startsWith("__ident__") && v.startsWith("__ident__") => Seq(ArrowAssoc(key) -> q"convert(${TermName(key.substring(9))})", ArrowAssoc(v) -> q"convert(${TermName(v.substring(9))})")
     case (key: String, v: Any) if key.startsWith("__ident__")                                 => Seq(ArrowAssoc(key) -> q"convert(${TermName(key.substring(9))})")

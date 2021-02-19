@@ -23,13 +23,14 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   //    val x = InspectMacro("Dsl2Model", 151, 152, mkError = true)
   //  val x = InspectMacro("Dsl2Model", 150, 152)
-//    val x = InspectMacro("Dsl2Model", 151, 154, mkError = true)
-  val x = InspectMacro("Dsl2Model", 901, 900)
+//  val x = InspectMacro("Dsl2Model", 243, 245, mkError = true)
+      val x = InspectMacro("Dsl2Model", 901, 900)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
   private[molecule] final def getModel(dsl: Tree): (
-    Model,
+    List[Tree],
+      Model,
       List[List[Tree]],
       List[List[Int => Tree]],
       Obj,
@@ -66,6 +67,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     var optNestedRefIndexes  : Map[Int, List[Int]] = Map.empty[Int, List[Int]]
     var optNestedTacitIndexes: Map[Int, List[Int]] = Map.empty[Int, List[Int]]
 
+    var genericImports: List[Tree]              = List(q"import molecule.core.generic.Datom._")
     var types         : List[List[Tree]]        = List(List.empty[Tree])
     var casts         : List[List[Int => Tree]] = List(List.empty[Int => Tree])
     var obj           : Obj                     = Obj("", "", 0, Nil)
@@ -79,39 +81,44 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     var first      : Boolean = true
     var genericType: String  = "datom"
 
-    def getType(t: richTree): Tree =
+    def getType(t: richTree): Tree = {
+      val tpe = isolateType(t.tpeS)
       if (t.name.last == '$')
         t.card match {
-          case 1 => tq"Option[${TypeName(t.tpeS)}]"
-          case 2 => tq"Option[Set[${TypeName(t.tpeS)}]]"
-          case 3 => tq"Option[Map[String, ${TypeName(t.tpeS)}]]"
-          case 4 => tq"Option[${TypeName(t.tpeS)}]"
+          case 1 => tq"Option[${TypeName(tpe)}]"
+          case 2 => tq"Option[Set[${TypeName(tpe)}]]"
+          case 3 => tq"Option[Map[String, ${TypeName(tpe)}]]"
+          case 4 => tq"Option[${TypeName(tpe)}]"
         }
       else
         t.card match {
-          case 1 => tq"${TypeName(t.tpeS)}"
-          case 2 => tq"Set[${TypeName(t.tpeS)}]"
-          case 3 => tq"Map[String, ${TypeName(t.tpeS)}]"
-          case 4 => tq"${TypeName(t.tpeS)}"
+          case 1 => tq"${TypeName(tpe)}"
+          case 2 => tq"Set[${TypeName(tpe)}]"
+          case 3 => tq"Map[String, ${TypeName(tpe)}]"
+          case 4 => tq"${TypeName(tpe)}"
         }
-
-    def addSpecific(
-      castLambda: Int => Tree,
-      tpeStr: String,
-      optT: Option[richTree] = None
-    ): Unit = {
-      val tpe = optT.fold[Tree](tq"${TypeName(tpeStr)}")(getType)
-      if (post) {
-        postTypes = tpe +: postTypes
-        postCasts = castLambda +: postCasts
-      } else {
-        types = (tpe :: types.head) +: types.tail
-        casts = (castLambda :: casts.head) +: casts.tail
-      }
     }
 
-    def addProp(t: richTree, tpeStr: String, cast: Int => Tree): Unit = {
-      obj = addNode(obj, Prop(t.nsFull + "_" + t.name, t.name, tpeStr, cast), objLevel)
+    def addProp(t: richTree, tpe: Tree, cast: Int => Tree): Unit = {
+      obj = addNode(obj, Prop(t.nsFull + "_" + t.name, t.name, tpe, cast), objLevel)
+    }
+
+    def addSpecific(
+      t: richTree,
+      cast: Int => Tree,
+      tpeStr: String = "",
+      doAddProp: Boolean = true
+    ): Unit = {
+      val tpe = if (tpeStr.nonEmpty) tq"${TypeName(tpeStr)}" else getType(t)
+      if (post) {
+        postTypes = tpe +: postTypes
+        postCasts = cast +: postCasts
+        if (doAddProp)
+          addProp(t, tpe, cast)
+      } else {
+        types = (tpe :: types.head) +: types.tail
+        casts = (cast :: casts.head) +: casts.tail
+      }
     }
 
     def addCast(castLambda: richTree => Int => Tree, t: richTree): Unit = {
@@ -119,7 +126,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         if (post) {
           postTypes = getType(t) +: postTypes
           postCasts = castLambda(t) +: postCasts
-          addProp(t, t.tpeS, castLambda(t))
+          addProp(t, getType(t), castLambda(t))
         } else {
           types = (getType(t) :: types.head) +: types.tail
           casts = (castLambda(t) :: casts.head) +: casts.tail
@@ -173,12 +180,29 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       if (first) {
         val p = richTree(tree)
         if (p.tpe_ <:< typeOf[GenericNs]) p.tpe_ match {
-          case t if t <:< typeOf[Schema] => genericType = "schema"
-          case t if t <:< typeOf[EAVT]   => genericType = "eavt"
-          case t if t <:< typeOf[AEVT]   => genericType = "aevt"
-          case t if t <:< typeOf[AVET]   => genericType = "avet"
-          case t if t <:< typeOf[VAET]   => genericType = "vaet"
-          case t if t <:< typeOf[Log]    => genericType = "log"
+          case t if t <:< typeOf[Schema] =>
+            genericType = "schema"
+            genericImports = genericImports :+ q"import molecule.core.generic.Schema._"
+
+          case t if t <:< typeOf[EAVT] =>
+            genericType = "eavt"
+            genericImports = genericImports :+ q"import molecule.core.generic.EAVT._"
+
+          case t if t <:< typeOf[AEVT] =>
+            genericType = "aevt"
+            genericImports = genericImports :+ q"import molecule.core.generic.AEVT._"
+
+          case t if t <:< typeOf[AVET] =>
+            genericType = "avet"
+            genericImports = genericImports :+ q"import molecule.core.generic.AVET._"
+
+          case t if t <:< typeOf[VAET] =>
+            genericType = "vaet"
+            genericImports = genericImports :+ q"import molecule.core.generic.VAET._"
+
+          case t if t <:< typeOf[Log] =>
+            genericType = "log"
+            genericImports = genericImports :+ q"import molecule.core.generic.Log._"
         }
         first = false
         x(99, p.tpe_, genericType)
@@ -269,11 +293,9 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       } else if (t.isEnum) {
         x(131, t.tpeS)
         if (optNestedLevel > 0) {
-          addSpecific(castOptNestedEnum(t), "", Some(t))
-          addProp(t, t.tpeS, castOptNestedEnum(t))
+          addSpecific(t, castOptNestedEnum(t))
         } else {
-          addSpecific(castEnum(t), "", Some(t))
-          addProp(t, t.tpeS, castEnum(t))
+          addSpecific(t, castEnum(t))
         }
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, EnumVal, Some(t.enumPrefix), bi(tree, t)))
 
@@ -296,11 +318,14 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
       } else if (t.isRef) {
         x(135, t.tpeS, t.card, t.refCard, t.refThis, t.refNext)
+        //        if (obj.props.nonEmpty) {
+        // Only add ref if there are any props to ref
         val refName = t.name.capitalize
         val refCls  = t.nsFull + "_" + refName + "_"
         obj = addRef(obj, refCls, refName, t.card, objLevel)
         objLevel = (objLevel - 1).max(0)
         x(152, obj)
+        //        }
         traverseElement(prev, p, Bond(t.refThis, firstLow(attrStr), t.refNext, t.refCard, bi(tree, t)))
 
       } else if (t.isRefAttr) {
@@ -389,13 +414,10 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
       def castGeneric(tpe: String, value: Value): Seq[Element] = {
         val tpeOrAggrTpe = if (aggrType.nonEmpty) aggrType else tpe
-        addSpecific(castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
-        addProp(t, tpeOrAggrTpe, castOneAttr(tpeOrAggrTpe))
-
+        addSpecific(t, castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
         traverseElement(prev, p, Generic(genericNs, attrStr, genericType, value))
       }
-      x(113, attrStr, genericType, p.nsFull, p.nsFull2)
-      attrStr match {
+      val elements = attrStr match {
         case "e"    => castGeneric("Long", EntValue)
         case "v"    => castGeneric("Any", NoValue)
         case "a"    => castGeneric("String", NoValue)
@@ -410,15 +432,15 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
             case "op"        => castGeneric("Boolean", NoValue)
           }
       }
+      x(113, attrStr, genericType, p.nsFull, p.nsFull2, obj)
+      elements
     }
 
 
     def resolveMandatorySchemaAttr(t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = {
       def castGeneric(tpe: String): Seq[Element] = {
         val tpeOrAggrTpe = if (aggrType.nonEmpty) aggrType else tpe
-        addSpecific(castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
-        addProp(t, tpeOrAggrTpe, castOneAttr(tpeOrAggrTpe))
-
+        addSpecific(t, castOneAttr(tpeOrAggrTpe), tpeOrAggrTpe)
         traverseElement(prev, p, Generic("Schema", attrStr, "schema", NoValue))
       }
       x(122, attrStr, p.nsFull, p.nsFull2)
@@ -496,15 +518,18 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
       } else if (tree.isMapAttrK) {
         tree match {
-          case t@q"$prev.$mapAttr.apply($key)" =>
-            val tpeStr = t.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
-            val nsFull = new nsp(t.tpe.typeSymbol.owner).toString
+          case t1@q"$prev1.$mapAttr.apply($key)" =>
+            val tpeStr = t1.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
+            val nsFull = new nsp(t1.tpe.typeSymbol.owner).toString
             x(260, attrStr, tpeStr)
             if (attrStr.last != '_') {
-              addSpecific(castKeyedMapAttr(tpeStr), tpeStr)
-              addProp(t, tpeStr, castKeyedMapAttr(tpeStr))
+              addSpecific(p, castKeyedMapAttr(tpeStr), tpeStr, false)
+              // Have to add node manually since nsFull is resolved in a special way
+              val propType = isolateType(tpeStr)
+              val newProp  = Prop(nsFull + "_" + attrStr, attrStr, tq"${TypeName(propType)}", castKeyedMapAttr(tpeStr))
+              obj = addNode(obj, newProp, objLevel)
             }
-            traverseElement(prev, p, Atom(nsFull, mapAttr.toString, tpeStr, 4, VarValue, None, Nil, Seq(extract(q"$key").toString)))
+            traverseElement(prev1, p, Atom(nsFull, mapAttr.toString, tpeStr, 4, VarValue, None, Nil, Seq(extract(q"$key").toString)))
         }
 
       } else {
@@ -537,13 +562,11 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
               x(251, "aggrType: " + aggrType)
               if (aggrType.nonEmpty) {
                 // Aggregate
-                addSpecific(castOneAttr(aggrType), aggrType)
-                addProp(t, aggrType, castOneAttr(aggrType))
+                addSpecific(t, castOneAttr(aggrType), aggrType)
                 traverseElement(prev, p, Generic("Schema", attrStr, "schema", value))
               } else {
                 // Clean/comparison
-                addSpecific(castOneAttr(tpe), tpe)
-                addProp(t, tpe, castOneAttr(tpe))
+                addSpecific(t, castOneAttr(tpe), tpe)
                 traverseElement(prev, p, Generic("Schema", attrStr, "schema", value))
               }
             case "tacit"     =>
@@ -623,18 +646,26 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
     def resolveApplyGeneric(prev: Tree, t: richTree, attrStr: String, args: Tree) = {
       def resolve(value: Value, aggrType: String = ""): Seq[Element] = {
-        def casts(mandatory: Boolean, tpe: String): Seq[Element] = {
+        def casts(mandatory: Boolean, tpe: String, genericAttr: String = ""): Seq[Element] = {
           if (mandatory) {
-            x(241, "aggrType: " + aggrType)
+            x(241, "aggrType: " + aggrType, obj)
             if (aggrType.nonEmpty) {
               // Aggregate
-              addSpecific(castOneAttr(aggrType), aggrType)
-              addProp(t, aggrType, castOneAttr(aggrType))
+              addSpecific(t, castOneAttr(aggrType), aggrType)
               traverseElement(prev, t, Generic(t.nsFull, attrStr, genericType, value))
             } else {
               // Clean/comparison
-              addSpecific(castOneAttr(tpe), tpe)
-              addProp(t, tpe, castOneAttr(tpe))
+              addSpecific(t, castOneAttr(tpe), tpe, false)
+              if (genericAttr.nonEmpty) {
+                val newProp = Prop("Datom_" + genericAttr, genericAttr, tq"${TypeName(tpe)}", castOneAttr(tpe))
+                obj = addNode(obj, newProp, objLevel)
+              }
+              x(242
+                , t
+                , t.nsFull
+                , t.name
+                , obj
+              )
               traverseElement(prev, t, Generic(t.nsFull, attrStr, genericType, value))
             }
           } else {
@@ -647,13 +678,13 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
           }
         }
         attrStr match {
-          case "e"         => casts(true, "Long")
-          case "a"         => casts(true, "String")
-          case "v"         => casts(true, "Any")
-          case "t"         => casts(true, "Long")
-          case "tx"        => casts(true, "Long")
-          case "txInstant" => casts(true, "java.util.Date")
-          case "op"        => casts(true, "Boolean")
+          case "e"         => casts(true, "Long", "e")
+          case "a"         => casts(true, "String", "a")
+          case "v"         => casts(true, "Any", "v")
+          case "t"         => casts(true, "Long", "t")
+          case "tx"        => casts(true, "Long", "tx")
+          case "txInstant" => casts(true, "java.util.Date", "txInstant")
+          case "op"        => casts(true, "Boolean", "op")
 
           case "e_"         => casts(false, "Long")
           case "a_"         => casts(false, "String")
@@ -672,7 +703,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         case q"scala.collection.immutable.List(..$vs)"                 => resolve(modelValue("apply", null, q"Seq(..$vs)"))
         case _                                                         => abort("Unexpected value applied to generic attribute: " + args)
       }
-      x(245, t.nsFull, attrStr, args, element)
+      x(245, t.nsFull, attrStr, args, element, obj)
       element
     }
 
@@ -718,14 +749,19 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       case t@q"$prev.$keyedAttr.apply($key).$op(..$values)" if q"$prev.$keyedAttr($key)".isMapAttrK =>
         val tpe    = c.typecheck(q"$prev.$keyedAttr($key)").tpe
         val tpeStr = tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
-        x(420, keyedAttr, tpeStr)
+        val nsFull = new nsp(tpe.typeSymbol.owner).toString
+        x(420, nsFull, keyedAttr, tpeStr, obj)
         if (keyedAttr.toString().last != '_') {
-          addSpecific(castKeyedMapAttr(tpeStr), tpeStr)
-          addProp(t, tpeStr, castKeyedMapAttr(tpeStr))
-
+          addSpecific(richTree(q"$prev.$keyedAttr"), castKeyedMapAttr(tpeStr), tpeStr, false)
+          // Have to add node manually since nsFull is resolved in a special way
+          //          val newProp = Prop(nsFull + "_" + keyedAttr, keyedAttr.toString(), tq"${TypeName(tpeStr)}", castKeyedMapAttr(tpeStr))
+          val propType = isolateType(tpeStr)
+          val newProp  = Prop(nsFull + "_" + keyedAttr, keyedAttr.toString(), tq"${TypeName(propType)}", castKeyedMapAttr(tpeStr))
+          obj = addNode(obj, newProp, objLevel)
+          x(421, obj)
         }
         traverseElement(prev, richTree(prev),
-          Atom(new nsp(tpe.typeSymbol.owner).toString, keyedAttr.toString, tpeStr, 4, modelValue(op.toString(), t, q"Seq(..$values)"), None, Nil, Seq(extract(q"$key").toString))
+          Atom(nsFull, keyedAttr.toString, tpeStr, 4, modelValue(op.toString(), t, q"Seq(..$values)"), None, Nil, Seq(extract(q"$key").toString))
         )
 
       // Attribute operations -----------------------------
@@ -962,48 +998,37 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
           case '_' | '$' => abort("Only mandatory attributes are allowed to aggregate")
           case _         => aggrType match {
             case "int" =>
-              addSpecific(castAggrInt, "Int")
-              addProp(t, "Int", castAggrInt)
+              addSpecific(t, castAggrInt, "Int")
 
             case "double" =>
-              addSpecific(castAggrDouble, s"Double")
-              addProp(t, "Double", castAggrDouble)
+              addSpecific(t, castAggrDouble, s"Double")
 
             case "list" if t.card == 2 =>
-              addSpecific(castAggrManyList(tpeStr), s"List[$tpeStr]")
-              addProp(t, s"List[$tpeStr]", castAggrManyList(tpeStr))
+              addSpecific(t, castAggrManyList(tpeStr), s"List[$tpeStr]")
 
             case "list" =>
-              addSpecific(castAggrOneList(tpeStr), s"List[$tpeStr]")
-              addProp(t, s"List[$tpeStr]", castAggrOneList(tpeStr))
+              addSpecific(t, castAggrOneList(tpeStr), s"List[$tpeStr]")
 
             case "listDistinct" if t.card == 2 =>
-              addSpecific(castAggrManyListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
-              addProp(t, s"List[$tpeStr]", castAggrManyListDistinct(tpeStr))
+              addSpecific(t, castAggrManyListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
 
             case "listDistinct" =>
-              addSpecific(castAggrOneListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
-              addProp(t, s"List[$tpeStr]", castAggrOneListDistinct(tpeStr))
+              addSpecific(t, castAggrOneListDistinct(tpeStr), s"List[$tpeStr]") // Ns.str.int(distinct).get
 
             case "listRand" if t.card == 2 =>
-              addSpecific(castAggrManyListRand(tpeStr), s"List[$tpeStr]")
-              addProp(t, s"List[$tpeStr]", castAggrManyListRand(tpeStr))
+              addSpecific(t, castAggrManyListRand(tpeStr), s"List[$tpeStr]")
 
             case "listRand" =>
-              addSpecific(castAggrOneListRand(tpeStr), s"List[$tpeStr]")
-              addProp(t, s"List[$tpeStr]", castAggrOneListRand(tpeStr))
+              addSpecific(t, castAggrOneListRand(tpeStr), s"List[$tpeStr]")
 
             case "singleSample" =>
-              addSpecific(castAggrSingleSample(tpeStr), tpeStr)
-              addProp(t, tpeStr, castAggrSingleSample(tpeStr))
+              addSpecific(t, castAggrSingleSample(tpeStr), tpeStr)
 
             case "single" if t.card == 2 =>
-              addSpecific(castAggrManySingle(tpeStr), tpeStr)
-              addProp(t, tpeStr, castAggrManySingle(tpeStr))
+              addSpecific(t, castAggrManySingle(tpeStr), tpeStr)
 
             case "single" =>
-              addSpecific(castAggrOneSingle(tpeStr), tpeStr)
-              addProp(t, tpeStr, castAggrOneSingle(tpeStr))
+              addSpecific(t, castAggrOneSingle(tpeStr), tpeStr)
           }
         }
         standard = true
@@ -1382,6 +1407,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
     // Return checked model
     (
+      genericImports,
       Model(VerifyRawModel(elements, false)),
       types, casts, obj,
       hasVariables, txMetaCompositesCount,

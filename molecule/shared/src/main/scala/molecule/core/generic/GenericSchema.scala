@@ -1,6 +1,6 @@
 package molecule.core.generic
 
-import molecule.core.dsl.base.FirstNS
+import molecule.core.dsl.base.{FirstNS, Init}
 import molecule.core.generic.Schema._
 
 
@@ -25,5 +25,5 @@ import molecule.core.generic.Schema._
 trait GenericSchema {
 
   /** Schema object to start Schema molecule. */
-  object Schema extends Schema_0_0_L0[Schema_, Nothing] with FirstNS
+  object Schema extends Schema_0_0_L0[Schema_, Init] with FirstNS
 }

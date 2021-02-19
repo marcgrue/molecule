@@ -1,6 +1,6 @@
 package molecule.core.generic
 
-import molecule.core.dsl.base.FirstNS
+import molecule.core.dsl.base.{FirstNS, Init}
 import molecule.core.generic.AEVT
 import molecule.core.generic.AEVT._
 
@@ -44,22 +44,22 @@ import molecule.core.generic.AEVT._
 trait GenericAEVT {
 
   /** AEVT Index object to start AEVT Index molecule. */
-  object AEVT extends AEVT_0_0_L0[AEVT_, Nothing] with FirstNS {
+  object AEVT extends AEVT_0_0_L0[AEVT_, Init] with FirstNS {
 
     /** Unfiltered AEVT Index fetching ALL datoms (!) */
-    final def apply                                     : AEVT_0_0_L0[AEVT_, Nothing] = ???
+    final def apply                                     : AEVT_0_0_L0[AEVT_, Init] = ???
 
     /** Instantiate AEVT Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
-    final def apply(a: String)                          : AEVT_0_0_L0[AEVT_, Nothing] = ???
+    final def apply(a: String)                          : AEVT_0_0_L0[AEVT_, Init] = ???
 
     /** Instantiate AEVT Index filtered by attribute name and entity id. */
-    final def apply(a: String, e: Long)                 : AEVT_0_0_L0[AEVT_, Nothing] = ???
+    final def apply(a: String, e: Long)                 : AEVT_0_0_L0[AEVT_, Init] = ???
 
     /** Instantiate AEVT Index filtered by attribute name, entity id and value. */
-    final def apply(a: String, e: Long, v: Any)         : AEVT_0_0_L0[AEVT_, Nothing] = ???
+    final def apply(a: String, e: Long, v: Any)         : AEVT_0_0_L0[AEVT_, Init] = ???
 
     /** Instantiate AEVT Index filtered by attribute name, entity id, value and
       * transaction entity id (`tx`) or point in time (`t`).*/
-    final def apply(a: String, e: Long, v: Any, t: Long): AEVT_0_0_L0[AEVT_, Nothing] = ???
+    final def apply(a: String, e: Long, v: Any, t: Long): AEVT_0_0_L0[AEVT_, Init] = ???
   }
 }

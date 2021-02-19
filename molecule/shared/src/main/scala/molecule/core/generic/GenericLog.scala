@@ -1,6 +1,6 @@
 package molecule.core.generic
 
-import molecule.core.dsl.base.FirstNS
+import molecule.core.dsl.base.{FirstNS, Init}
 import molecule.core.generic.Log._
 
 /** Log interface.
@@ -64,7 +64,7 @@ import molecule.core.generic.Log._
 trait GenericLog {
 
   /** Log object to start Log molecule. */
-  object Log extends Log_0_0_L0[Log_, Nothing] with FirstNS {
+  object Log extends Log_0_0_L0[Log_, Init] with FirstNS {
 
     /** Range of transactions (using Datomic's Log.txRange API)
       *
@@ -87,10 +87,10 @@ trait GenericLog {
       * @param until Last tx (exclusive). End if None
       * @return Log builder object to add generic datom attributes
       */
-    final def apply(from: Option[Any], until: Option[Any]): Log_0_0_L0[Log_, Nothing] = ???
+    final def apply(from: Option[Any], until: Option[Any]): Log_0_0_L0[Log_, Init] = ???
 
-    final def apply(from: Option[Any]): Log_0_0_L0[Log_, Nothing] = ???
+    final def apply(from: Option[Any]): Log_0_0_L0[Log_, Init] = ???
 
-    final def apply(): Log_0_0_L0[Log_, Nothing] = ???
+    final def apply(): Log_0_0_L0[Log_, Init] = ???
   }
 }

@@ -1,5 +1,6 @@
 package molecule.core.macros
 
+import molecule.datomic.api.in1_out2.m
 import molecule.datomic.base.transform.Model2Query
 import scala.language.experimental.macros
 import scala.language.higherKinds
@@ -11,9 +12,16 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-  private[this] final def generateInputMolecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val (model0, types, casts, obj, hasVariables, _, postTypes, postCasts, _, _, _) = getModel(dsl)
+//  val z = InspectMacro("MakeMolecule_In", 1, 8, mkError = true)
+    val z = InspectMacro("MakeMolecule", 9, 8)
+  //    val z = InspectMacro("MakeMolecule", 1, 8)
 
+  private[this] final def generateInputMolecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
+    val (
+      genericImports, model0, types, casts, obj,
+      hasVariables, _, postTypes, postCasts, _, _, _
+      )                  = getModel(dsl)
+    val imports          = getImports(genericImports)
     val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
     val OutMoleculeTpe   = molecule_o(OutTypes.size)
     val inputMolecule    = TypeName(c.freshName("inputMolecule$"))
@@ -37,6 +45,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -71,6 +80,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -96,11 +106,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
     if (flat) {
       if (hasVariables) {
         q"""
-          import molecule.core.ast.elements._
-          import molecule.core.ops.ModelOps._
-          import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
-          import molecule.datomic.base.facade.Conn
-
+          ..$imports
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes](
             _resolvedModel, Model2Query(_resolvedModel)
@@ -112,6 +118,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -120,11 +127,9 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
           new $inputMolecule
         """
       } else {
-        q"""
-          import molecule.core.ast.elements._
-          import molecule.datomic.base.transform.QueryOptimizer
-          import molecule.datomic.base.facade.Conn
-
+        val t =
+          q"""
+          ..$imports
           final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)
@@ -133,6 +138,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -140,17 +146,22 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
           }
           new $inputMolecule
         """
+
+        z(1
+          , model0
+          , obj
+          , t
+        )
+
+
+        t
       }
 
     } else {
 
       if (hasVariables) {
         q"""
-          import molecule.core.ast.elements._
-          import molecule.core.ops.ModelOps._
-          import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
-          import molecule.datomic.base.facade.Conn
-
+          ..$imports
           private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes](
             _resolvedModel, Model2Query(_resolvedModel)
@@ -173,10 +184,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
         """
       } else {
         q"""
-          import molecule.core.ast.elements._
-          import molecule.datomic.base.transform.QueryOptimizer
-          import molecule.datomic.base.facade.Conn
-
+          ..$imports
           final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
             def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
               val boundRawQuery = bindValues(_rawQuery, args)

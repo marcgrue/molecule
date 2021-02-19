@@ -1,6 +1,6 @@
 package molecule.core.generic
 
-import molecule.core.dsl.base.FirstNS
+import molecule.core.dsl.base.{FirstNS, Init}
 import molecule.core.generic.AVET._
 
 /** AVET Index.
@@ -67,23 +67,23 @@ import molecule.core.generic.AVET._
 trait GenericAVET {
 
   /** AVET Index object to start AVET Index molecule. */
-  object AVET extends AVET_0_0_L0[AVET_, Nothing] with FirstNS {
+  object AVET extends AVET_0_0_L0[AVET_, Init] with FirstNS {
 
     /** Unfiltered AVET Index fetching ALL datoms (!) */
-    final def apply                                     : AVET_0_0_L0[AVET_, Nothing] = ???
+    final def apply                                     : AVET_0_0_L0[AVET_, Init] = ???
 
     /** Instantiate AVET Index filtered by namespace-prefixed attribute name (":part_Ns/attr"). */
-    final def apply(a: String)                          : AVET_0_0_L0[AVET_, Nothing] = ???
+    final def apply(a: String)                          : AVET_0_0_L0[AVET_, Init] = ???
 
     /** Instantiate AVET Index filtered by attribute name and value. */
-    final def apply(a: String, v: Any)                  : AVET_0_0_L0[AVET_, Nothing] = ???
+    final def apply(a: String, v: Any)                  : AVET_0_0_L0[AVET_, Init] = ???
 
     /** Instantiate AVET Index filtered by attribute name, value and entity id. */
-    final def apply(a: String, v: Any, e: Long)         : AVET_0_0_L0[AVET_, Nothing] = ???
+    final def apply(a: String, v: Any, e: Long)         : AVET_0_0_L0[AVET_, Init] = ???
 
     /** Instantiate AVET Index filtered by attribute name, value, entity id and
       * transaction entity id (`tx`) or point in time (`t`).*/
-    final def apply(a: String, v: Any, e: Long, t: Long): AVET_0_0_L0[AVET_, Nothing] = ???
+    final def apply(a: String, v: Any, e: Long, t: Long): AVET_0_0_L0[AVET_, Init] = ???
 
 
     /** Range of values (using Datomic's Database.indexRange API)
@@ -94,6 +94,6 @@ trait GenericAVET {
       *  - To end if `until` is None
       *
       * */
-    final def range(a: String, from: Option[Any], until: Option[Any]): AVET_0_0_L0[AVET_, Nothing] = ???
+    final def range(a: String, from: Option[Any], until: Option[Any]): AVET_0_0_L0[AVET_, Init] = ???
   }
 }

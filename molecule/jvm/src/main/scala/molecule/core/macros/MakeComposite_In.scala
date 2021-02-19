@@ -11,8 +11,11 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
   import c.universe._
 
   private[this] final def generateComposite_In_Molecule(dsl: Tree, ObjType: Type, InTypes: Type*)(OutTypes: Type*): Tree = {
-    val (model0, _, castss, obj, hasVariables, txMetaCompositesCount, _, _, _, _, _) = getModel(dsl)
-
+    val (
+      genericImports, model0, _, castss, obj,
+      hasVariables, txMetaCompositesCount, _, _, _, _, _
+      )                  = getModel(dsl)
+    val imports          = getImports(genericImports)
     val InputMoleculeTpe = inputMolecule_i_o(InTypes.size, OutTypes.size)
     val OutMoleculeTpe   = molecule_o(OutTypes.size)
     val inputMolecule    = TypeName(c.freshName("compositeInputMolecule$"))
@@ -55,6 +58,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
               final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
+              final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
             }
             new $outMolecule
           }
@@ -72,6 +76,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
               final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
+              final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
             }
             new $outMolecule
           }
@@ -80,11 +85,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
 
     if (hasVariables) {
       q"""
-        import molecule.core.ast.elements._
-        import molecule.core.ops.ModelOps._
-        import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
-        import molecule.datomic.base.facade.Conn
-
+        ..$imports
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes](
           _resolvedModel,
@@ -97,6 +98,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
               final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
+              final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
             }
             new $outMolecule
           }
@@ -106,10 +108,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
       """
     } else {
       q"""
-        import molecule.core.ast.elements._
-        import molecule.datomic.base.transform.QueryOptimizer
-        import molecule.datomic.base.facade.Conn
-
+        ..$imports
         final class $inputMolecule extends $InputMoleculeTpe[$ObjType, ..$InTypes, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           def apply(args: Seq[(..$InTypes)])(implicit conn: Conn): $OutMoleculeTpe[$ObjType, ..$OutTypes] = {
             val boundRawQuery = bindValues(_rawQuery, args)
@@ -118,6 +117,7 @@ class MakeComposite_In(val c: blackbox.Context) extends Base {
               (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
             ) {
               final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
+              final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
             }
             new $outMolecule
           }
