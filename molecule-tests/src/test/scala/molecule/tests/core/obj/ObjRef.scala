@@ -65,8 +65,37 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
         o.int
         o.Ref1 // (no ref attributes though)
 
-    /*
-     */
+        ////    Ns.int.strMapK("en").getObj
+        //
+        //    m(Ns.int.strMapK("en").apply(?))
+        //
+        //    //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
+
+
+//        val o = Person.name("Ann").Buddies.e(42L).getObj
+
+
+//        Ns.int.strMapK("en").getObj
+//
+//        m(Ns.int.strMapK("en").apply(?))
+
+//        Ns.int.int.get.head === (1, 1)
+
+
+
+//        Ns.date.getObj
+//        Ns.uuid.getObj
+//        Ns.uri.getObj
+
+        // Only add ref if there are any props to ref
+//        Ns.int.Ref1.int1_.getObj
+
+
+//        val o = m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2.Ref3.int3).getObj
+//        m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2).getObj
+//        m(Ns.int.str + Ref1.int1.str1).getObj
+//        m(Ns.int.str + Ref1.int1).getObj
+//        m(Ns.int.str + Ref1.int1_).getObj
 
     //    {
     //      val o = Ns.int(0).str("a")

@@ -4,7 +4,6 @@ import java.util.Date
 import molecule.core.api.Molecule_1
 import molecule.core.ast.elements._
 import molecule.core.composition.Tx
-import molecule.datomic.api.out2.m
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 //import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
@@ -90,19 +89,34 @@ class AdHocTest extends Specification {
   //    }
 
   "adhoc" >> {
-
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
 
-    val o = m(Ns.int.str + Ref2.int2.str2).getObj
 
-    o.Ns.int
-    o.Ns.str
-    o.Ref2.int2
-    o.Ref2.str2
 
-    m(Ns(42L).str("b") + Ref2.int2(2)).getObj
+//    molecule.core.dsl.base.Init
+//      with molecule.tests.core.base.dsl.CoreTest.Ns_[
+//        molecule.core.dsl.base.Init
+//          with molecule.tests.core.base.dsl.CoreTest.Ns_int
+//          with molecule.tests.core.base.dsl.CoreTest.Ns_str
+//          with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init]]
+//
+//
+//    molecule.tests.core.base.dsl.CoreTest.Ns_[
+//      molecule.core.dsl.base.Init
+//        with molecule.tests.core.base.dsl.CoreTest.Ns_int
+//        with molecule.tests.core.base.dsl.CoreTest.Ns_str]
+//    with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init]
+
+//    o.Ns.int
+//    o.Ns.str
+//    o.Ref1.int1
+//    o.Ref1.str1
+//    o.Ref2.int2
+//    o.Ref2.str2
+//
+//    m(Ns(42L).str("b") + Ref2.int2(2)).getObj
 
     ok
   }

@@ -23,8 +23,11 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   //    val x = InspectMacro("Dsl2Model", 151, 152, mkError = true)
   //  val x = InspectMacro("Dsl2Model", 150, 152)
-//  val x = InspectMacro("Dsl2Model", 243, 245, mkError = true)
-      val x = InspectMacro("Dsl2Model", 901, 900)
+  //  val x = InspectMacro("Dsl2Model", 604, 604, mkError = true)
+  //  val x = InspectMacro("Dsl2Model", 745, 745, mkError = true)
+  //    val x = InspectMacro("Dsl2Model", 746, 746, mkError = true)
+  //  val x = InspectMacro("Dsl2Model", 744, 747)
+  val x = InspectMacro("Dsl2Model", 901, 900)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -55,6 +58,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     var txMetaDataStarted       : Boolean = false
     var txMetaDataDone          : Boolean = false
     var txMetaCompositesCount   : Int     = 0
+    var objCompositesCount      : Int     = 0
     var isComposite             : Boolean = false
     var collectCompositeElements: Boolean = false
 
@@ -103,6 +107,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       obj = addNode(obj, Prop(t.nsFull + "_" + t.name, t.name, tpe, cast), objLevel)
     }
 
+
     def addSpecific(
       t: richTree,
       cast: Int => Tree,
@@ -118,6 +123,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       } else {
         types = (tpe :: types.head) +: types.tail
         casts = (cast :: casts.head) +: casts.tail
+        if (doAddProp)
+          addProp(t, tpe, cast)
       }
     }
 
@@ -130,6 +137,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         } else {
           types = (getType(t) :: types.head) +: types.tail
           casts = (castLambda(t) :: casts.head) +: casts.tail
+          addProp(t, getType(t), castLambda(t))
         }
       }
     }
@@ -151,17 +159,47 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
     }
 
+    def levelComposite(subCompositeElements: Seq[Element]): Unit = {
+      val err = "Unexpectedly couldn't find ns in sub composite:\n  " + subCompositeElements.mkString("\n  ")
+      val ns  = subCompositeElements.collectFirst {
+        case Atom(ns, _, _, _, _, _, _, _) => ns
+        case Bond(nsFull, _, _, _, _)      => nsFull
+        case Composite(elements)           => elements.collectFirst {
+          case Atom(ns, _, _, _, _, _, _, _) => ns
+          case Bond(nsFull, _, _, _, _)      => nsFull
+        } getOrElse abort(err)
+      } getOrElse abort(err)
+
+      val nsCls    = ns + "_"
+      // Prepend namespace in obj
+      val newProps = if (objCompositesCount > 0) {
+        val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
+        val newP                = Obj(nsCls, ns, 1, props) +: composites
+        //        if (compositeCount == 4)
+        x(746, types, objCompositesCount, obj, props, composites, obj.copy(props = newP))
+        newP
+      } else {
+        x(747, types, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))))
+        List(Obj(nsCls, ns, 1, obj.props))
+      }
+      obj = obj.copy(props = newProps)
+    }
+
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
       if (isComposite) {
         x(741, prev, elements)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
           val result = prevElements :+ Composite(elements)
-          x(745, prevElements, elements, result, collectCompositeElements, casts, types)
+          val obj0   = obj
+          //          levelComposite(result)
+          x(745, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj)
           result
         } else {
           val result = Seq(Composite(prevElements), Composite(elements))
-          x(744, prevElements, elements, result, collectCompositeElements, casts, types)
+          val obj0   = obj
+          levelComposite(result)
+          x(744, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj)
           result
         }
       } else {
@@ -242,13 +280,14 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
     }
 
+
     def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree): Seq[Element] = {
       x(601, prev, subCompositeTree)
       post = false
       isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
-      x(602, prev, subCompositeElements, types, casts)
+      x(602, prev, subCompositeElements, types, casts, obj)
 
       if (txMetaDataStarted) {
         txMetaCompositesCount = if (txMetaCompositesCount == 0) 2 else txMetaCompositesCount + 1
@@ -258,8 +297,13 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       types = List.empty[Tree] :: types
       casts = List.empty[Int => Tree] :: casts
 
+      // Make composite in obj
+      levelComposite(subCompositeElements)
+      objCompositesCount += 1
+
+      x(603, prev, subCompositeElements, types, casts, txMetaCompositesCount, obj)
       val elements = traverseElements(prev, p, subCompositeElements)
-      x(603, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount)
+      x(604, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount, obj)
       collectCompositeElements = true
       elements
     }
@@ -318,14 +362,12 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
       } else if (t.isRef) {
         x(135, t.tpeS, t.card, t.refCard, t.refThis, t.refNext)
-        //        if (obj.props.nonEmpty) {
-        // Only add ref if there are any props to ref
+        // Prepend ref in obj
         val refName = t.name.capitalize
         val refCls  = t.nsFull + "_" + refName + "_"
         obj = addRef(obj, refCls, refName, t.card, objLevel)
         objLevel = (objLevel - 1).max(0)
         x(152, obj)
-        //        }
         traverseElement(prev, p, Bond(t.refThis, firstLow(attrStr), t.refNext, t.refCard, bi(tree, t)))
 
       } else if (t.isRefAttr) {

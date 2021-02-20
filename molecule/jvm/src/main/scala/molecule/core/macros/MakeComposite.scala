@@ -10,12 +10,14 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-  val z = InspectMacro("MakeMolecule", 1, 900, mkError = true)
+//  val z = InspectMacro("MakeMolecule", 1, 9, mkError = true)
+//  val z = InspectMacro("MakeMolecule", 1, 9)
+  val z = InspectMacro("MakeMolecule", 9, 8, mkError = true)
 
 
   private[this] final def generateCompositeMolecule(dsl: Tree, ObjType: Type, OutTypes: Type*): Tree = {
     val (
-      genericImports, model0, _, castss, obj,
+      genericImports, model0, typess, castss, obj,
       hasVariables, txMetaCompositesCount, _, _, _, _, _
       )             = getModel(dsl)
     val imports     = getImports(genericImports)
@@ -65,6 +67,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
     }
     //    val q0 = Model2Query(model0)
     z(1
+      , typess
       , obj
       , objCode(obj)._1
     )
