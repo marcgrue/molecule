@@ -3,8 +3,8 @@ package molecule.core.ops
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.core.ast.elements._
+import molecule.core.macros.MacroHelpers
 import molecule.core.ops.exception.LiftablesException
-import molecule.core.util.MacroHelpers
 import molecule.datomic.base.ast.query.{NestedAttrs, _}
 import scala.collection.immutable.HashSet
 import scala.collection.immutable.Set.{Set1, Set2, Set3, Set4}

@@ -1,7 +1,6 @@
 package molecule.core.macros
 
 import molecule.core.api.TxFunctions
-import molecule.core.util.MacroHelpers
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 

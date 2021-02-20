@@ -27,7 +27,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
   //  val x = InspectMacro("Dsl2Model", 745, 745, mkError = true)
   //    val x = InspectMacro("Dsl2Model", 746, 746, mkError = true)
   //  val x = InspectMacro("Dsl2Model", 744, 747)
-  val x = InspectMacro("Dsl2Model", 901, 900)
+  val x = InspectMacro("Dsl2Model", 1, 900)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 

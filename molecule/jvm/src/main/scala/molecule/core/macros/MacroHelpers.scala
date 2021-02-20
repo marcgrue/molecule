@@ -1,4 +1,4 @@
-package molecule.core.util
+package molecule.core.macros
 
 import molecule.core.ast.elements._
 import molecule.core.exceptions.MoleculeCompileException

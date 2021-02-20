@@ -92,31 +92,8 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-
-
-
-//    molecule.core.dsl.base.Init
-//      with molecule.tests.core.base.dsl.CoreTest.Ns_[
-//        molecule.core.dsl.base.Init
-//          with molecule.tests.core.base.dsl.CoreTest.Ns_int
-//          with molecule.tests.core.base.dsl.CoreTest.Ns_str
-//          with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init]]
-//
-//
-//    molecule.tests.core.base.dsl.CoreTest.Ns_[
-//      molecule.core.dsl.base.Init
-//        with molecule.tests.core.base.dsl.CoreTest.Ns_int
-//        with molecule.tests.core.base.dsl.CoreTest.Ns_str]
-//    with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init]
-
-//    o.Ns.int
-//    o.Ns.str
-//    o.Ref1.int1
-//    o.Ref1.str1
-//    o.Ref2.int2
-//    o.Ref2.str2
-//
-//    m(Ns(42L).str("b") + Ref2.int2(2)).getObj
+    Ns.date(min).get
+//    Ns.date(min(2)).get
 
     ok
   }
