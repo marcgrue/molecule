@@ -6,6 +6,8 @@ import java.util.{Date, UUID, List => jList, Map => jMap}
 import clojure.lang.{Keyword, PersistentHashSet, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 
+
+
 /** Core molecule interface defining actions that can be called on molecules.
   *
   * Generally we could often have made higher-order methods taking a casting function for
@@ -14,9 +16,8 @@ import com.cognitect.transit.impl.URIImpl
   */
 trait CastHelpers[Obj, Tpl] extends CastHelpersAggr {
 
-
   // Row to object cast interface to be materialized by macro
-  protected def row2obj(row: jList[AnyRef]): Obj = ???
+  protected def row2obj(row: jList[AnyRef]): DynamicProp with Obj = ???
 
   // Row to tuple cast interface to be materialized by macro
   protected def row2tpl(row: jList[AnyRef]): Tpl = ???

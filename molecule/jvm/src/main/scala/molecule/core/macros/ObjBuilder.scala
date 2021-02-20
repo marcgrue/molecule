@@ -10,19 +10,11 @@ trait ObjBuilder extends Cast {
 
   lazy val p = InspectMacro("ObjBuilder", 1, 900)
 
-  def isolateType(tpeStr: String): String = tpeStr match {
-    case "java.util.Date" => "Date"
-    case "java.util.UUID" => "UUID"
-    case "java.net.URI"   => "URI"
-    case other            => other
-  }
-
   sealed trait Node
-  case class Prop(cls: String, prop: String, tpe: Tree, cast: Int => Tree) extends Node {
+  case class Prop(cls: String, prop: String, tpe: Tree, cast: Int => Tree, optAggr: Option[(String, Tree)] = None) extends Node {
     override def toString: String = {
       // Since we can't use the lambda object reference, we simply add null so that we can copy/paste
-      s"""Prop("$cls", "$prop", "$tpe", null)"""
-      //      s"""Prop("$cls", "$prop", "$tpe", $cast)"""
+      s"""Prop("$cls", "$prop", "$tpe", null, $optAggr)"""
     }
   }
   case class Obj(cls: String, ref: String, card: Int, props: List[Node]) extends Node {
@@ -47,7 +39,7 @@ trait ObjBuilder extends Cast {
     def classes(nodes: List[Node]): List[Tree] = {
       var prevClasses = List.empty[String]
       nodes.flatMap {
-        case Prop(cls, _, _, _) =>
+        case Prop(cls, _, _, _, _) =>
           if (!prevClasses.contains(cls)) {
             prevClasses = prevClasses :+ cls
             Some(tq"${TypeName(cls)}")
@@ -83,13 +75,21 @@ trait ObjBuilder extends Cast {
     }
 
     def properties(nodes: List[Node]): List[Tree] = {
-      var propNames = List.empty[String]
-      nodes.flatMap {
-        case Prop(_, prop, tpe, cast) =>
+      var propNames    = List.empty[String]
+      var dynamicProps = List.empty[(String, Tree)]
+      val propDefs     = nodes.flatMap {
+        case Prop(_, prop, tpe, cast, optAggr) =>
           i += 1
           if (!propNames.contains(prop)) {
             propNames = propNames :+ prop
-            Some(q"final override lazy val ${TermName(prop)}: $tpe = ${cast(i)}")
+            optAggr.fold(
+              Some(q"final override lazy val ${TermName(prop)}: $tpe = ${cast(i)}")
+            ) {
+              case (aggrProp, aggrTpe) =>
+                dynamicProps = dynamicProps :+ (aggrProp, cast(i))
+                val err = s"Please access `$aggrProp` property to get aggregate value of type `$aggrTpe` (dynamic type is `Any`)."
+                Some(q"""final override lazy val ${TermName(prop)}: $tpe = throw new RuntimeException($err)""")
+            }
           } else None
 
         case o@Obj(_, ref, _, props) =>
@@ -122,32 +122,43 @@ trait ObjBuilder extends Cast {
             case _                                                                      => None
           }
       }
+      if (dynamicProps.isEmpty) propDefs else {
+        val caseClauses   = dynamicProps.map {
+          case (aggrProp, aggrCast) => cq"""$aggrProp => $aggrCast"""
+        }
+        val selectDynamic =
+          q"""override def selectDynamic(name: String): Any = name match {
+              case ..$caseClauses
+              case other => throw new RuntimeException("")
+            }"""
+        propDefs :+ selectDynamic
+      }
     }
 
     val tree = classes(obj.props) match {
-      case Nil                                                                    => q"new Init {}"
-      case List(a)                                                                => q"new Init with $a { ..${properties(obj.props)} }"
-      case List(a, b)                                                             => q"new Init with $a with $b { ..${properties(obj.props)} }"
-      case List(a, b, c)                                                          => q"new Init with $a with $b with $c { ..${properties(obj.props)} }"
-      case List(a, b, c, d)                                                       => q"new Init with $a with $b with $c with $d { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e)                                                    => q"new Init with $a with $b with $c with $d with $e { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f)                                                 => q"new Init with $a with $b with $c with $d with $e with $f { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g)                                              => q"new Init with $a with $b with $c with $d with $e with $f with $g { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h)                                           => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i)                                        => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j)                                     => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k)                                  => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l)                               => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m)                            => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n)                         => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)                      => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)                   => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)                => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)             => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)          => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)       => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)    => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t with $u { ..${properties(obj.props)} }"
-      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) => q"new Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t with $u with $v { ..${properties(obj.props)} }"
+      case Nil                                                                    => q"new DynamicProp with Init {}"
+      case List(a)                                                                => q"new DynamicProp with Init with $a { ..${properties(obj.props)} }"
+      case List(a, b)                                                             => q"new DynamicProp with Init with $a with $b { ..${properties(obj.props)} }"
+      case List(a, b, c)                                                          => q"new DynamicProp with Init with $a with $b with $c { ..${properties(obj.props)} }"
+      case List(a, b, c, d)                                                       => q"new DynamicProp with Init with $a with $b with $c with $d { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e)                                                    => q"new DynamicProp with Init with $a with $b with $c with $d with $e { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f)                                                 => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g)                                              => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h)                                           => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i)                                        => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j)                                     => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k)                                  => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l)                               => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m)                            => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n)                         => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)                      => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)                   => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)                => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)             => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)          => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)       => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)    => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t with $u { ..${properties(obj.props)} }"
+      case List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) => q"new DynamicProp with Init with $a with $b with $c with $d with $e with $f with $g with $h with $i with $j with $k with $l with $m with $n with $o with $p with $q with $r with $s with $t with $u with $v { ..${properties(obj.props)} }"
       case list                                                                   => abort("Unexpected list of types:\n  " + list.mkString("\n  "))
     }
     (tree, i)
@@ -327,12 +338,12 @@ trait ObjBuilder extends Cast {
 
   def addComposite(obj: Obj, nsCls: String, ns: String, hasSubComposite: Boolean): Obj = {
     val newProps = if (hasSubComposite) {
-        List(
-          Obj(nsCls, ns, 1, obj.props.init),
-          obj.props.last
-        )
+      List(
+        Obj(nsCls, ns, 1, obj.props.init),
+        obj.props.last
+      )
     } else {
-        List(Obj(nsCls, ns, 1, obj.props))
+      List(Obj(nsCls, ns, 1, obj.props))
     }
     obj.copy(props = newProps)
   }

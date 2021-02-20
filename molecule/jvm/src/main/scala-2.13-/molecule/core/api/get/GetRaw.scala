@@ -1,6 +1,6 @@
 package molecule.core.api.get
 
-import java.util.{Collection => jCollection, List => jList}
+import java.util.{Date, Collection => jCollection, List => jList}
 import molecule.core.api.getAsync.GetAsyncRaw
 import molecule.core.ast.Molecule
 import molecule.datomic.base.ast.tempDb._
@@ -289,7 +289,7 @@ trait GetRaw { self: Molecule =>
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date)* getAsyncRawAsOf]] method.
     */
-  def getRawAsOf(date: java.util.Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
+  def getRawAsOf(date: Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(AsOf(TxDate(date))))
 
 
@@ -334,7 +334,7 @@ trait GetRaw { self: Molecule =>
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date,n:Int)* getAsyncRawAsOf]] method.
     */
-  def getRawAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
+  def getRawAsOf(date: Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(AsOf(TxDate(date))))
 
 
@@ -516,7 +516,7 @@ trait GetRaw { self: Molecule =>
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date)* getAsyncRawSince]] method.
     */
-  def getRawSince(date: java.util.Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
+  def getRawSince(date: Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(Since(TxDate(date))))
 
 
@@ -548,7 +548,7 @@ trait GetRaw { self: Molecule =>
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date,n:Int)* getAsyncRawSince]] method.
     */
-  def getRawSince(date: java.util.Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
+  def getRawSince(date: Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(Since(TxDate(date))))
 
 

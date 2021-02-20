@@ -1,5 +1,6 @@
 package molecule.core.api.getAsync
 
+import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.api.get.GetIterable
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -99,7 +100,7 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     */
-  def getAsyncIterableAsOf(date: java.util.Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
+  def getAsyncIterableAsOf(date: Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableAsOf(date)(conn))
 
 
@@ -157,7 +158,7 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     */
-  def getAsyncIterableSince(date: java.util.Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
+  def getAsyncIterableSince(date: Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
     Future(getIterableSince(date)(conn))
 
 

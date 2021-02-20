@@ -1,5 +1,6 @@
 package molecule.core.api.getAsync
 
+import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.api.get.GetList
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -163,7 +164,7 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncAsOf(date: java.util.Date)(implicit conn: Conn): Future[List[Tpl]] =
+  def getAsyncAsOf(date: Date)(implicit conn: Conn): Future[List[Tpl]] =
     Future(getAsOf(date)(conn))
 
 
@@ -180,7 +181,7 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+  def getAsyncAsOf(date: Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
     Future(getAsOf(date, n)(conn))
 
 
@@ -274,7 +275,7 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncSince(date: java.util.Date)(implicit conn: Conn): Future[List[Tpl]] =
+  def getAsyncSince(date: Date)(implicit conn: Conn): Future[List[Tpl]] =
     Future(getSince(date)(conn))
 
 
@@ -291,7 +292,7 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncSince(date: java.util.Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
+  def getAsyncSince(date: Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
     Future(getSince(date, n)(conn))
 
 

@@ -109,7 +109,7 @@ trait ShowInspect[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
         case ((i, acc), Generic(_, _, "datom" | "schema", _))               => (i + 1, acc :+ (1, false, false, false))
         case ((i, acc), ga: GenericAtom) if ga.attr.last == '_'             => (i, acc)
         case ((i, acc), Atom(_, _, _, _, Fn(fn, _), _, _, _)) if isAggr(fn) => (i + 1, acc :+ (1, false, false, true))
-        case ((i, acc), Atom(_, attr, "java.util.Date", card, _, _, _, _))  => (i + 1, acc :+ (card, attr.last == '$', true, false))
+        case ((i, acc), Atom(_, attr, "Date", card, _, _, _, _))  => (i + 1, acc :+ (card, attr.last == '$', true, false))
         case ((i, acc), Atom(_, attr, _, card, _, _, _, _))                 => (i + 1, acc :+ (card, attr.last == '$', false, false))
         case ((i, acc), Nested(_, nestedElements))                          => recurse(i, acc, nestedElements)
         case ((i, acc), Composite(compositeElements))                       => recurse(i, acc, compositeElements)

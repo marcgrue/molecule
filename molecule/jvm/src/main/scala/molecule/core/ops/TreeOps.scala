@@ -10,6 +10,7 @@ import scala.reflect.macros.blackbox
 
 private[molecule] trait TreeOps extends Liftables {
   val c: blackbox.Context
+
   import c.universe._
 
 
@@ -302,7 +303,12 @@ private[molecule] trait TreeOps extends Liftables {
     def name: TermName = TermName(toString)
     def fullName: String = attrType.typeSymbol.fullName
 
-    def tpeS: String = if (tpe =:= NoType) "" else tpe.toString
+    def tpeS: String = if (tpe =:= NoType) "" else tpe.toString match {
+      case "java.util.Date" => "Date"
+      case "java.util.UUID" => "UUID"
+      case "java.net.URI"   => "URI"
+      case other            => other
+    }
 
     def contentType: Type = tpe
 

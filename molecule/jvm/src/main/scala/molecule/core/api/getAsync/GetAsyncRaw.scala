@@ -1,6 +1,6 @@
 package molecule.core.api.getAsync
 
-import java.util.{Collection => jCollection, List => jList}
+import java.util.{Date, Collection => jCollection, List => jList}
 import molecule.core.api.get.GetRaw
 import molecule.core.ast.Molecule
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -171,7 +171,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     */
-  def getAsyncRawAsOf(date: java.util.Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawAsOf(date: Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(date)(conn))
 
 
@@ -190,7 +190,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     */
-  def getAsyncRawAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawAsOf(date: Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawAsOf(date, n)(conn))
 
 
@@ -298,7 +298,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     */
-  def getAsyncRawSince(date: java.util.Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawSince(date: Date)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(date)(conn))
 
 
@@ -317,7 +317,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     */
-  def getAsyncRawSince(date: java.util.Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
+  def getAsyncRawSince(date: Date, n: Int)(implicit conn: Conn): Future[jCollection[jList[AnyRef]]] =
     Future(getRawSince(date, n)(conn))
 
 

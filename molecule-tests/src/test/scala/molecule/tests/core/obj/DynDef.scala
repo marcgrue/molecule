@@ -118,56 +118,56 @@
 //  }
 //
 //
-//  //    object rp {
-//  //      val p = obj1("a", 2, List(obj2("a1", 11), obj2("a2", 12)))
-//  //      p.int = 3
-//  //      def roleMethod: Int = p.int * 7
-//  //      val xx = 5
-//  //    }
-//  //
-//  //    rp.roleMethod
-//  //    rp.xx
+//      object rp {
+//        val p = obj1("a", 2, List(obj2("a1", 11), obj2("a2", 12)))
+//        p.int = 3
+//        def roleMethod: Int = p.int * 7
+//        val xx = 5
+//      }
 //
-//  //  trait tpe1 extends Ns_strm with Ns_intm with Ns_Refs[tpe2] with saver with dyn
-//  //  trait tpe1 extends Ns_strm with Ns_intm with saver with dyn
-//  //
-//  //  case class Account(
-//  //    private val name0: String,
-//  //    private val amount0: Int,
-//  //    //    private val Refs0: List[tpe2]
-//  //  ) extends tpe1 {
-//  //    var name    = name0
-//  //    var balance = amount0
-//  //    //    var Refs    = Refs0
-//  //
-//  //    // todo: macro
-//  //
-//  //    def apply(body: tpe1 => Unit): tpe1 = {
-//  //      //      new Account(this.str, this.balance, this.Refs) {
-//  //      new Account(this.name, this.balance) {
-//  //        val self: Account = this
-//  //
-//  //        self.balance = 3
-//  //        val xx = 5
-//  //        def roleMethod: Int = self.balance * 7 + xx
-//  //
-//  //        override def selectDynamic(name: String): Any = name match {
-//  //          case "roleMethod" => roleMethod
-//  //          case other        => throw new IllegalArgumentException(s"Please implement role method `$other`.")
-//  //        }
-//  //      }
-//  //    }
-//  //  }
+//      rp.roleMethod
+//      rp.xx
 //
-//  //    object role1 {
-//  //      val o = new obj1("a", 2, List(obj2("a1", 11), obj2("a2", 12)))
-//  //      o.int = 3
-//  //      val xx = 5
-//  //      def roleMethod: Int = o.balance * 7 + xx
-//  //    }
-//  //
-//  //    role1.o.balance
-//  //    role1.roleMethod
+//    trait tpe1 extends Ns_strm with Ns_intm with Ns_Refs[tpe2] with saver with dyn
+//    trait tpe1 extends Ns_strm with Ns_intm with saver with dyn
+//
+//    case class Account(
+//      private val name0: String,
+//      private val amount0: Int,
+//      //    private val Refs0: List[tpe2]
+//    ) extends tpe1 {
+//      var name    = name0
+//      var balance = amount0
+//      //    var Refs    = Refs0
+//
+//      // todo: macro
+//
+//      def apply(body: tpe1 => Unit): tpe1 = {
+//        //      new Account(this.str, this.balance, this.Refs) {
+//        new Account(this.name, this.balance) {
+//          val self: Account = this
+//
+//          self.balance = 3
+//          val xx = 5
+//          def roleMethod: Int = self.balance * 7 + xx
+//
+//          override def selectDynamic(name: String): Any = name match {
+//            case "roleMethod" => roleMethod
+//            case other        => throw new IllegalArgumentException(s"Please implement role method `$other`.")
+//          }
+//        }
+//      }
+//    }
+//
+//      object role1 {
+//        val o = new obj1("a", 2, List(obj2("a1", 11), obj2("a2", 12)))
+//        o.int = 3
+//        val xx = 5
+//        def roleMethod: Int = o.balance * 7 + xx
+//      }
+//
+//      role1.o.balance
+//      role1.roleMethod
 //
 //
 //  //  "adhoc" in new BidirectionalSetup {

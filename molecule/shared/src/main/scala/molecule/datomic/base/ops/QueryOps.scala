@@ -133,7 +133,7 @@ object QueryOps extends Helpers with JavaUtil {
 
     def nots(e: String, a: Atom, v: String, argss: Seq[Any]): Query = {
       argss.zipWithIndex.foldLeft(q) {
-        case (q1, (set: Set[_], i)) if a.tpe == "java.net.URI" =>
+        case (q1, (set: Set[_], i)) if a.tpe == "URI" =>
           val notClauses = set.toSeq.zipWithIndex.flatMap { case (uri, j) =>
             val x = Var(v + "_" + (j + 1))
             Seq(
@@ -142,12 +142,12 @@ object QueryOps extends Helpers with JavaUtil {
             )
           }
           q1.copy(wh = Where(q1.wh.clauses :+ NotJoinClauses(Seq(Var(e)), notClauses)))
-        case (q1, (set: Set[_], _))                            =>
+        case (q1, (set: Set[_], _))                   =>
           val notClauses = set.toSeq.map(arg =>
             DataClause(ImplDS, Var(e), KW(a.nsFull, a.attr), Val(pre(a, arg)), Empty)
           )
           q1.copy(wh = Where(q1.wh.clauses :+ NotClauses(notClauses)))
-        case _                                                 =>
+        case _                                        =>
           throw new QueryOpsException(s"Expected Seq[Set[T]], got: " + argss)
       }
     }
@@ -447,7 +447,7 @@ object QueryOps extends Helpers with JavaUtil {
     def compareTo2(op: String, tpeS: String, v: String, qv: QueryValue, i: Int = 0): Query = {
       val w  = Var(if (i > 0) v + "_" + i else v + 2)
       val q1 = tpeS match {
-        case "BigInt" =>
+        case "BigInt"     =>
           qv match {
             case Var(v1) => q
               .func("biginteger", Seq(Var(v)), ScalarBinding(Var(v + "_casted")))
@@ -460,15 +460,15 @@ object QueryOps extends Helpers with JavaUtil {
 
             case other => throw new IllegalArgumentException("Unexpected QueryValue for BigInt resolution: " + other)
           }
-        case "BigDecimal"   => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(w))
-        case "java.net.URI" => qv match {
+        case "BigDecimal" => q.func(".compareTo ^java.math.BigDecimal", Seq(Var(v), qv), ScalarBinding(w))
+        case "URI"        => qv match {
           case Val(arg) =>
             q.func(s"""ground (java.net.URI. "$arg")""", Empty, v + "_" + (i + 1) + "a")
               .func(".compareTo ^java.net.URI", Seq(Var(v), Var(v + "_" + (i + 1) + "a")), ScalarBinding(w))
           case other    =>
             q.func(".compareTo ^" + castStr(tpeS), Seq(Var(v), qv), ScalarBinding(w))
         }
-        case _              => q.func(".compareTo ^" + castStr(tpeS), Seq(Var(v), qv), ScalarBinding(w))
+        case _            => q.func(".compareTo ^" + castStr(tpeS), Seq(Var(v), qv), ScalarBinding(w))
       }
       q1.func(op, Seq(w, Val(0)))
     }
@@ -488,13 +488,13 @@ object QueryOps extends Helpers with JavaUtil {
       case "Float" | "Double" =>
         q.func(s"""ground ${withDecimal(arg)}""", Empty, v)
 
-      case "java.util.Date" =>
+      case "Date" =>
         q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)
 
-      case "java.util.UUID" =>
+      case "UUID" =>
         q.func(s"""ground #uuid "$arg"""", Empty, v)
 
-      case "java.net.URI" =>
+      case "URI" =>
         q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
 
       case "BigInt" =>
@@ -569,14 +569,14 @@ object QueryOps extends Helpers with JavaUtil {
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 2)))
         .func("second", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
       a.tpe match {
-        case "String"         => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case "Boolean"        => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case "java.util.Date" => q1
+        case "String"  => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case "Boolean" => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case "Date"    => q1
           .func(".compareTo ^String", Seq(Var(v + 3), Var(v + "Value")), ScalarBinding(Var(v + 5)))
           .func(op, Seq(Var(v + 5), Val(0)))
-        case "java.util.UUID" => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case "java.net.URI"   => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
-        case number           => q1
+        case "UUID"    => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case "URI"     => q1.compareTo(op, a, v + 3, Var(v + "Value"), 1)
+        case number    => q1
           .func("read-string", Seq(Var(v + 3)), ScalarBinding(Var(v + 4)))
           .func(op, Seq(Var(v + 4), Var(v + "Value")))
       }
@@ -590,14 +590,14 @@ object QueryOps extends Helpers with JavaUtil {
         .func(".split ^String", Seq(Var(v), Val("@"), Val(2)), ScalarBinding(Var(v + 1)))
         .func("second", Seq(Var(v + 1)), ScalarBinding(Var(v + 2)))
       a.tpe match {
-        case "String"         => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case "Boolean"        => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case "java.util.Date" => q1
+        case "String"  => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
+        case "Boolean" => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
+        case "Date"    => q1
           .func(".compareTo ^String", Seq(Var(v + 2), Var(v + "Value")), ScalarBinding(Var(v + 4)))
           .func(op, Seq(Var(v + 4), Val(0)))
-        case "UUID"           => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case "URI"            => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
-        case number           => q1
+        case "UUID"    => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
+        case "URI"     => q1.compareTo(op, a, v + 2, Var(v + "Value"), 1)
+        case number    => q1
           .func("read-string", Seq(Var(v + 2)), ScalarBinding(Var(v + 3)))
           .func(op, Seq(Var(v + 3), Var(v + "Value")))
       }

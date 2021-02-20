@@ -1,6 +1,6 @@
 package molecule.core.api.get
 
-import java.util.{Collection => jCollection, Iterator => jIterator, List => jList}
+import java.util.{Date, Collection => jCollection, Iterator => jIterator, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncIterable
 import molecule.datomic.base.ast.tempDb._
@@ -227,7 +227,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
+  def getIterableAsOf(date: Date)(implicit conn: Conn): Iterable[Tpl] =
     getIterable(conn.usingTempDb(AsOf(TxDate(date))))
 
 
@@ -336,7 +336,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(date: java.util.Date)(implicit conn: Conn): Iterable[Tpl] =
+  def getIterableSince(date: Date)(implicit conn: Conn): Iterable[Tpl] =
     getIterable(conn.usingTempDb(Since(TxDate(date))))
 
 

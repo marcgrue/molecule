@@ -38,23 +38,23 @@ class AdHocTest extends Specification {
   //
   //    ok
   //  }
-//
-//    "adhoc" in new BidirectionalSetup {
-//      import molecule.tests.core.bidirectionals.dsl.Bidirectional._
-//      Person.name("Ann").Buddies.e(gus)
-//    }
+  //
+  //    "adhoc" in new BidirectionalSetup {
+  //      import molecule.tests.core.bidirectionals.dsl.Bidirectional._
+  //      Person.name("Ann").Buddies.e(gus)
+  //    }
 
-//    "adhoc" >> {
-//      import molecule.tests.core.bidirectionals.dsl.Bidirectional._
-//      implicit val conn: Conn = Datomic_Peer.recreateDbFrom(BidirectionalSchema)
-//
-//      val o = Person.name("Ann").Buddies.e(42L).getObj
-//
-//      o.name
-//      o.Buddies.e
-//
-//      ok
-//    }
+  //    "adhoc" >> {
+  //      import molecule.tests.core.bidirectionals.dsl.Bidirectional._
+  //      implicit val conn: Conn = Datomic_Peer.recreateDbFrom(BidirectionalSchema)
+  //
+  //      val o = Person.name("Ann").Buddies.e(42L).getObj
+  //
+  //      o.name
+  //      o.Buddies.e
+  //
+  //      ok
+  //    }
   //
   //
   //
@@ -92,8 +92,16 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-    Ns.date(min).get
-//    Ns.date(min(2)).get
+    Ns.str.insert("a", "b", "c")
+
+    val o = Ns.str.apply(min(2)).getObj
+    o.str_mins === List("a", "b")
+    o.str === 6
+//    o.xx === 7
+//    o.
+
+
+
 
     ok
   }

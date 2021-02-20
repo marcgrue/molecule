@@ -11,8 +11,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
   import c.universe._
 
 //    val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
-  val z = InspectMacro("MakeMolecule", 9, 8)
-//    val z = InspectMacro("MakeMolecule", 1, 8)
+//  val z = InspectMacro("MakeMolecule", 9, 8)
+    val z = InspectMacro("MakeMolecule", 1, 8)
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
     val (
@@ -24,12 +24,6 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     val imports              = getImports(genericImports)
     val OutMoleculeTpe: Tree = molecule_o(TplTypes.size)
     val outMolecule          = TypeName(c.freshName("outMolecule$"))
-
-    z(1
-      , model0
-      , obj
-      , objCode(obj)._1
-    )
 
 
     val t = if (castss.size == 1 || txMetaCompositesCount > 0) {
@@ -47,7 +41,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, Model2Query(_resolvedModel)) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ???//{objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
           }
           new $outMolecule
         """
@@ -58,7 +52,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): $ObjType      = ${objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
 
 //            final def row2obj2(row: java.util.List[AnyRef]): ObjType      = { //{objCode(obj)._1}
 //              new Init with Ns_int {
@@ -69,7 +63,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           new $outMolecule
         """
 
-        z(2
+        z(1
           , model0
           , obj
           , objCode(obj)._1

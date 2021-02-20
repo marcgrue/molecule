@@ -354,7 +354,7 @@ object Model2Query extends Helpers {
     case "enum"        => resolveSchemaMandatory(g, q.schemaEnum, "String")
     case "t"           => resolveSchemaMandatory(g, q.schemaT, "Long")
     case "tx"          => resolveSchemaMandatory(g, q.schema, "Long")
-    case "txInstant"   => resolveSchemaMandatory(g, q.schemaTxInstant, "java.util.Date")
+    case "txInstant"   => resolveSchemaMandatory(g, q.schemaTxInstant, "Date")
 
     case "id_"          => resolveSchemaTacit(g, q.schema, "Long")
     case "a_"           => resolveSchemaTacit(g, q.schemaA, "String")
@@ -373,7 +373,7 @@ object Model2Query extends Helpers {
     case "enum_"        => resolveSchemaTacit(g, q.schemaEnum, "String")
     case "t_"           => resolveSchemaTacit(g, q.schemaT, "Long")
     case "tx_"          => resolveSchemaTacit(g, q.schema, "Long")
-    case "txInstant_"   => resolveSchemaTacit(g, q.schemaTxInstant, "java.util.Date")
+    case "txInstant_"   => resolveSchemaTacit(g, q.schemaTxInstant, "Date")
 
     case "unique$" => resolveSchemaOptionalUnique(g, q)
     case optional  => resolveSchemaOptional(g, q)
@@ -450,7 +450,7 @@ object Model2Query extends Helpers {
       resolveDatomMandatory(q1, g, "Long", "", w)
     case "tx"        => resolveDatomMandatory(q.datomTx(e, v, v1), g, "Long", v)
     case "t"         => resolveDatomMandatory(q.datomT(e, v, v1), g, "Long", v)
-    case "txInstant" => resolveDatomMandatory(q.datomTxInstant(e, v, v1), g, "java.util.Date", v)
+    case "txInstant" => resolveDatomMandatory(q.datomTxInstant(e, v, v1), g, "Date", v)
     case "op"        => resolveDatomMandatory(q.datomOp(e, v, v1), g, "Boolean", v)
     case "a"         => resolveDatomMandatory(q.datomA(e, v, v1), g, "String", v)
     case "v"         =>
@@ -470,7 +470,7 @@ object Model2Query extends Helpers {
       resolveDatomTacit(q1, e, g, "Long", "", w)
     case "tx_"        => resolveDatomTacit(q.datomTx(e, v, v1), e, g, "Long", v)
     case "t_"         => resolveDatomTacit(q.datomT(e, v, v1), e, g, "Long", v)
-    case "txInstant_" => resolveDatomTacit(q.datomTxInstant(e, v, v1), e, g, "java.util.Date", v)
+    case "txInstant_" => resolveDatomTacit(q.datomTxInstant(e, v, v1), e, g, "Date", v)
     case "op_"        => resolveDatomTacit(q.datomOp(e, v, v1), e, g, "Boolean", v)
     case "a_"         => resolveDatomTacit(q.datomA(e, v, v1), e, g, "String", v)
     case "v_"         =>
@@ -977,9 +977,9 @@ object Model2Query extends Helpers {
 
   def coalesce(fn: String): Boolean = Seq("sum", "count", "count-distinct", "median", "avg", "variance", "stddev").contains(fn)
 
-  def uri(t: String): Boolean = t.contains("java.net.URI")
+  def uri(t: String): Boolean = t.contains("URI")
 
-  def u(t: String, v: String): String = if (t.contains("java.net.URI")) v else ""
+  def u(t: String, v: String): String = if (t.contains("URI")) v else ""
 
   def nextChar(str: String, inc: Int): String = {
     val chars      = str.toCharArray

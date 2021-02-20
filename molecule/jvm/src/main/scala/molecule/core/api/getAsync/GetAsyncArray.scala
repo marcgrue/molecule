@@ -1,5 +1,6 @@
 package molecule.core.api.getAsync
 
+import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.api.get.GetArray
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -192,7 +193,7 @@ trait GetAsyncArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tp
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncArrayAsOf(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArrayAsOf(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(date)(conn, objType, tplType))
 
 
@@ -216,7 +217,7 @@ trait GetAsyncArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tp
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncArrayAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArrayAsOf(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArrayAsOf(date, n)(conn, objType, tplType))
 
 
@@ -345,7 +346,7 @@ trait GetAsyncArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tp
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncArraySince(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArraySince(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(date)(conn, objType, tplType))
 
 
@@ -369,7 +370,7 @@ trait GetAsyncArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tp
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     */
-  def getAsyncArraySince(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
+  def getAsyncArraySince(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Future[Array[Tpl]] =
     Future(getArraySince(date, n)(conn, objType, tplType))
 
 

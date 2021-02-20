@@ -1,6 +1,6 @@
 package molecule.core.api.get
 
-import java.util.{List => jList}
+import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncArray
 import molecule.datomic.base.ast.tempDb._
@@ -361,7 +361,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayAsOf(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
 
 
@@ -408,7 +408,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date,n:Int)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayAsOf(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
 
 
@@ -605,7 +605,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date)* getAsyncArraySince]] method.
     */
-  def getArraySince(date: java.util.Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArraySince(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
 
 
@@ -641,7 +641,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date,n:Int)* getAsyncArraySince]] method.
     */
-  def getArraySince(date: java.util.Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArraySince(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
 
 

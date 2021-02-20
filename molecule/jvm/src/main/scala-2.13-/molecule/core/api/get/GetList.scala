@@ -1,6 +1,6 @@
 package molecule.core.api.get
 
-import java.util.{List => jList}
+import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.get.GetArray
 import molecule.core.api.getAsync.GetAsyncList
@@ -346,7 +346,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule_0[Obj, Tpl
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncList.getAsyncAsOf(date:java\.util\.Date)* getAsyncAsOf]] method.
     */
-  def getAsOf(date: java.util.Date)(implicit conn: Conn): List[Tpl] =
+  def getAsOf(date: Date)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxDate(date))))
 
 
@@ -387,7 +387,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule_0[Obj, Tpl
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncList.getAsyncAsOf(date:java\.util\.Date,n:Int)* getAsyncAsOf]] method.
     */
-  def getAsOf(date: java.util.Date, n: Int)(implicit conn: Conn): List[Tpl] =
+  def getAsOf(date: Date, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxDate(date))))
 
 
@@ -561,7 +561,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule_0[Obj, Tpl
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncList.getAsyncSince(date:java\.util\.Date)* getAsyncSince]] method.
     */
-  def getSince(date: java.util.Date)(implicit conn: Conn): List[Tpl] =
+  def getSince(date: Date)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(Since(TxDate(date))))
 
 
@@ -591,7 +591,7 @@ trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule_0[Obj, Tpl
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncList.getAsyncSince(date:java\.util\.Date,n:Int)* getAsyncSince]] method.
     */
-  def getSince(date: java.util.Date, n: Int)(implicit conn: Conn): List[Tpl] =
+  def getSince(date: Date, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(Since(TxDate(date))))
 
 
