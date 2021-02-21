@@ -17,6 +17,7 @@ private[molecule] trait Base extends Dsl2Model {
         import java.net.URI
         import java.util.{Date, UUID}
         import molecule.core.ast.elements._
+        import molecule.core.composition._
         import molecule.core.dsl.base.Init
         ..$genericImports
         import molecule.core.ops.ModelOps._

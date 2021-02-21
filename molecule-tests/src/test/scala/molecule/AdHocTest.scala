@@ -3,6 +3,7 @@ package molecule
 import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
+import molecule.core.composition.Tx_
 //import molecule.core.composition.Tx
 import molecule.core.transform.DynamicProp
 import molecule.tests.core.base.dsl.CoreTest.{Ns, Ref1}
@@ -126,24 +127,44 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-    val o = Ns.int.Tx(Ref1.int1).getObj
 
-    o.int
-    o.Tx.Ref1.int1
 
-//    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx2_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx2.apply(Ref1.int1))
-//    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx.apply(Ref1.int1))
+    val o = m(Ref2.int2 + Ns.int.str).getObj
+
+
+
+//    val List(e1, e2) = Ref2.int2 + Ns.int.str insert Seq(
+//      // Two rows of data
+//      (1, (11, "aa")),
+//      (2, (22, "bb"))
+//    ) eids
+
+//      molecule.core.transform.DynamicProp with molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref1_str1 with molecule.tests.core.base.dsl.CoreTest.Ref1_int1
+//    with molecule.core.composition.Tx_[
+//      molecule.core.dsl.base.Init with
+//        molecule.tests.core.base.dsl.CoreTest.Ns_[
+//          molecule.core.dsl.base.Init
+//          with molecule.tests.core.base.dsl.CoreTest.Ns_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ns_str]
+//          with molecule.tests.core.base.dsl.CoreTest.Ref2_[molecule.core.dsl.base.Init
+//          with molecule.tests.core.base.dsl.CoreTest.Ref2_int2
+//          with molecule.tests.core.base.dsl.CoreTest.Ref2_str2]]
+//    ]
 //
-//    val b: DynamicProp with base.Init with Ns_int with Ns_Ref1_[base.Init with Ref1_str1] = Ns.int.Ref1.str1.getObj
-//
-//    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with (
-//      (
-//        Ref1.str1[Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String], Ref1_1_1_L0[Ref1_, base.Init with Ref1_str1, String, String]] with Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String]
-//        )#int1[Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int], Ref1_1_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, Int, String, Int]]
-//        with Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int]
-//      )#Tx_[Ns_[base.Init]] = m(Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
+//      molecule.core.transform.DynamicProp with molecule.core.dsl.base.Init
+//    with molecule.tests.core.base.dsl.CoreTest.Ref1_str1
+//    with molecule.tests.core.base.dsl.CoreTest.Ref1_int1
+//    with molecule.core.composition.Tx_[
+//      molecule.tests.core.base.dsl.CoreTest.Ns_[
+//        molecule.core.dsl.base.Init
+//          with molecule.tests.core.base.dsl.CoreTest.Ns_str
+//      ]
+//        with molecule.tests.core.base.dsl.CoreTest.Ref2_[
+//        molecule.core.dsl.base.Init
+//          with molecule.tests.core.base.dsl.CoreTest.Ref2_int2
+//          with molecule.tests.core.base.dsl.CoreTest.Ref2_str2]
+//    ]
 
-//    val o: DynamicProp with Ref2_[base.Init with Ref2_int2 with Ref2_str2] with Ref1_[base.Init with Ref1_str1 with Ref1_int1 with Tx_[Ns_[base.Init]]] = m(Ref2.int2.str2 + Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
+//    val o = m(Ref2.int2.str2 + Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data"))).getObj
 
     ok
   }

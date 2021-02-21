@@ -21,8 +21,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   import c.universe._
 
-//  val x = InspectMacro("Dsl2Model", 901, 900)
-      val x = InspectMacro("Dsl2Model", 1, 900)
+    val x = InspectMacro("Dsl2Model", 901, 900)
+//  val x = InspectMacro("Dsl2Model", 1, 900)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -281,7 +281,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
 
     def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree): Seq[Element] = {
-      x(601, prev, subCompositeTree)
+      x(601, prev, subCompositeTree, obj)
       post = false
       isComposite = true
       collectCompositeElements = false
@@ -748,10 +748,53 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     def resolveTypedApply(tree: Tree, p: richTree): Seq[Element] = tree match {
       case q"$prev.Tx.apply[..$t]($txMolecule)" =>
         txMetaDataStarted = true
-        val txMetaData = TxMetaData(resolve(q"$txMolecule"))
+
+        val txMetaProps = resolve(q"$txMolecule")
+        val txMetaData  = TxMetaData(txMetaProps)
+
+        val err = "Unexpectedly couldn't find ns in sub composite:\n  " + txMetaProps.mkString("\n  ")
+        val ns  = txMetaProps.collectFirst {
+          case Atom(ns, _, _, _, _, _, _, _) => ns
+          case Bond(nsFull, _, _, _, _)      => nsFull
+          case Composite(elements)           => elements.collectFirst {
+            case Atom(ns, _, _, _, _, _, _, _) => ns
+            case Bond(nsFull, _, _, _, _)      => nsFull
+          } getOrElse abort(err)
+        } getOrElse abort(err)
+        //
+        //        val nsCls    = ns + "_"
+        //        // Prepend namespace in obj
+        //        val newProps = if (objCompositesCount > 0) {
+        //          val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
+        //          val newP                = Obj(nsCls, ns, 1, props) +: composites
+        //          //        if (compositeCount == 4)
+        //          x(746, types, objCompositesCount, obj, props, composites, obj.copy(props = newP))
+        //          newP
+        //        } else {
+        //          x(747, types, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))))
+        //          List(Obj(nsCls, ns, 1, obj.props))
+        //        }
+        //        obj = obj.copy(props = newProps)
+
+
+        val obj0 = obj
+        if (txMetaCompositesCount == 0) {
+          // Start non-composite tx meta data with namespace
+          // (composite data is already namespaced)
+          obj = addRef(obj, ns + "_", ns, 1, objLevel)
+          objLevel = (objLevel - 1).max(0)
+        }
+
+        val obj1 = obj
+
+        // Treat tx meta data as referenced data
+        obj = addRef(obj, "Tx_", "Tx", 1, objLevel)
+        objLevel = (objLevel - 1).max(0)
+
         txMetaDataStarted = false
         txMetaDataDone = true
-        x(310, "Tx", prev, txMolecule, txMetaData, types, casts, txMetaCompositesCount)
+
+        x(310, "Tx", prev, txMolecule, txMetaData, types, casts, txMetaCompositesCount, objCompositesCount, ns, obj0, obj1, obj)
         traverseElement(prev, p, txMetaData)
 
       case q"$prev.e.apply[..$types]($nested)" if !p.isRef =>
@@ -1032,7 +1075,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         attr.last match {
           case '_' | '$' => abort("Only mandatory attributes are allowed to aggregate")
           case _         =>
-            val tpe = TypeName(tpeStr)
+            val tpe    = TypeName(tpeStr)
             val propFn = attr + "_" + aggrFn
             t.card match {
               case 2 => aggrType match {

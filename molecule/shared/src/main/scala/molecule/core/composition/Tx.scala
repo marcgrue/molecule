@@ -1,5 +1,6 @@
 package molecule.core.composition
 
+import molecule.core.dsl.base.Init
 import scala.language.higherKinds
 
 /** Transaction meta data on molecule.

@@ -12,7 +12,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
 
 //  val z = InspectMacro("MakeMolecule", 1, 9, mkError = true)
 //  val z = InspectMacro("MakeMolecule", 1, 9)
-  val z = InspectMacro("MakeMolecule", 9, 8, mkError = true)
+  val z = InspectMacro("MakeMolecule", 9, 8)
 
 
   private[this] final def generateCompositeMolecule(dsl: Tree, ObjType: Type, OutTypes: Type*): Tree = {
@@ -66,7 +66,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       """
     }
     //    val q0 = Model2Query(model0)
-    z(1
+    z(3
       , typess
       , obj
       , objCode(obj)._1

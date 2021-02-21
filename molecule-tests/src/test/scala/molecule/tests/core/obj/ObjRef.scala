@@ -34,38 +34,38 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
     //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
 
 
-    Ns.int.Ref1.int1.getObj
-
-    Ns.int.Ref1.int1._Ns.str.getObj
-
-    Ns.int.Ref1.int1._Ns.Refs1.str1.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1.str1.getObj
-
-    Ns.int.Ref1.Ref2.str2._Ref1.str1.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1.Refs2.int2.getObj
-
-    Ns.int.Ref1.Ref2.str2._Ref1.Refs2.int2.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.str.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.str.getObj
-
-    Ns.int.Ref1.Ref2.str2._Ref1._Ns.str.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.Refs1.str1.getObj
-
-    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
-
-    Ns.int.Ref1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
-
-
-    // Only add ref if there are any props to ref
-    // (we can't be selective in the molecule type buildup, so the "empty refs" have to remain)
-    val o = Ns.int.Ref1.int1_.getObj
-    o.int
-    o.Ref1 // (no ref attributes though)
+//    Ns.int.Ref1.int1.getObj
+//
+//    Ns.int.Ref1.int1._Ns.str.getObj
+//
+//    Ns.int.Ref1.int1._Ns.Refs1.str1.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1.str1.getObj
+//
+//    Ns.int.Ref1.Ref2.str2._Ref1.str1.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1.Refs2.int2.getObj
+//
+//    Ns.int.Ref1.Ref2.str2._Ref1.Refs2.int2.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.str.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.str.getObj
+//
+//    Ns.int.Ref1.Ref2.str2._Ref1._Ns.str.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1.enum1._Ns.Refs1.str1.getObj
+//
+//    Ns.int.Ref1.int1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
+//
+//    Ns.int.Ref1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
+//
+//
+//    // Only add ref if there are any props to ref
+//    // (we can't be selective in the molecule type buildup, so the "empty refs" have to remain)
+//    val o = Ns.int.Ref1.int1_.getObj
+//    o.int
+//    o.Ref1 // (no ref attributes though)
 
     ////    Ns.int.strMapK("en").getObj
     //
@@ -130,7 +130,66 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 //    o.Person.name
 //    o.Person.Person.name
 
+    //    val o = Ns.int.Tx.apply(Ref1.int1).getObj
+    //
+    //    o.int
+    //    o.Tx.Ref1.int1
 
+    //    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx2_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx2.apply(Ref1.int1))
+    //    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx.apply(Ref1.int1))
+    //
+    //    val b: DynamicProp with base.Init with Ns_int with Ns_Ref1_[base.Init with Ref1_str1] = Ns.int.Ref1.str1.getObj
+    //
+    //    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with (
+    //      (
+    //        Ref1.str1[Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String], Ref1_1_1_L0[Ref1_, base.Init with Ref1_str1, String, String]] with Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String]
+    //        )#int1[Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int], Ref1_1_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, Int, String, Int]]
+    //        with Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int]
+    //      )#Tx_[Ns_[base.Init]] = m(Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
+
+    //    val o = m(Ns.str_("Tx meta data") + Ref2.int2.str2).getObj
+    //    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with Tx_[Ns_[base.Init] with Ref2_[base.Init with Ref2_int2 with Ref2_str2]] = m(Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data") + Ref2.int2.str2)).getObj
+//    val o = m(Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data") + Ref2.int2.str2)).getObj
+//
+//    o.int1
+//    o.str1
+//    o.Tx.Ns
+//    o.Tx.Ref2.int2
+//    o.Tx.Ref2.str2
+
+
+
+
+
+
+
+
+    //    val o = Ns.int.Tx.apply(Ref1.int1).getObj
+    //
+    //    o.int
+    //    o.Tx.Ref1.int1
+
+    //    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx2_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx2.apply(Ref1.int1))
+    //    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx.apply(Ref1.int1))
+    //
+    //    val b: DynamicProp with base.Init with Ns_int with Ns_Ref1_[base.Init with Ref1_str1] = Ns.int.Ref1.str1.getObj
+    //
+    //    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with (
+    //      (
+    //        Ref1.str1[Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String], Ref1_1_1_L0[Ref1_, base.Init with Ref1_str1, String, String]] with Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String]
+    //        )#int1[Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int], Ref1_1_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, Int, String, Int]]
+    //        with Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int]
+    //      )#Tx_[Ns_[base.Init]] = m(Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
+
+    //    val o = m(Ns.str_("Tx meta data") + Ref2.int2.str2).getObj
+    //    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with Tx_[Ns_[base.Init] with Ref2_[base.Init with Ref2_int2 with Ref2_str2]] = m(Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data") + Ref2.int2.str2)).getObj
+//    val o = m(Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data") + Ref2.int2.str2)).getObj
+//
+//    o.int1
+//    o.str1
+//    o.Tx.Ns
+//    o.Tx.Ref2.int2
+//    o.Tx.Ref2.str2
     //
     //
     //
