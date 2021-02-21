@@ -1,10 +1,13 @@
 package molecule
 
 import java.util.Date
+import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
-import molecule.core.composition.Tx
-//import molecule.datomic.api.in1_out2.m
+//import molecule.core.composition.Tx
+import molecule.core.transform.DynamicProp
+import molecule.tests.core.base.dsl.CoreTest.{Ns, Ref1}
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
+import molecule.tests.core.ref.schema.SelfJoinSchema
 //import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
 import molecule.core.macros.ObjBuilder
@@ -43,17 +46,49 @@ class AdHocTest extends Specification {
   //      Person.name("Ann").Buddies.e(gus)
   //    }
 
-  //    "adhoc" >> {
-  //      import molecule.tests.core.bidirectionals.dsl.Bidirectional._
-  //      implicit val conn: Conn = Datomic_Peer.recreateDbFrom(BidirectionalSchema)
+//  "self-join" >> {
+//    import molecule.tests.core.ref.dsl.SelfJoin._
+//    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(SelfJoinSchema)
+//
+//    //    val o = Person.age_(23).Likes.beverage._Person.Self
+//    //      .age_(25).Likes.beverage_(unify).getObj
+//    //
+//    //    o.Likes.beverage
+//    //    o.Person.beverage
+//
+//
+//    // Beverages liked by all 3 different people
+//    val o: DynamicProp with base.Init
+//      with Person_name
+//      with Person_Likes_[base.Init with Score_beverage]
+//      with Person_age
+//      with Person_[
+//      base.Init
+//        with Person_name
+//        with Person_Likes_[base.Init]
+//        with Person_[
+//        base.Init
+//          with Person_name
+//          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
+//      .name("Ben").Likes.beverage_(unify)._Person.Self
+//      .name("Liz").Likes.beverage_(unify).getObj
+//
+//    o.name
+//    o.age
+//    o.Likes.beverage
+//    o.Person.name
+//    o.Person.Person.name
+//
+//    ok
+//  }
+
+  //      "bidirectional" >> {
+  //        import molecule.tests.core.bidirectionals.dsl.Bidirectional._
+  //        implicit val conn: Conn = Datomic_Peer.recreateDbFrom(BidirectionalSchema)
   //
-  //      val o = Person.name("Ann").Buddies.e(42L).getObj
   //
-  //      o.name
-  //      o.Buddies.e
-  //
-  //      ok
-  //    }
+  //        ok
+  //      }
   //
   //
   //
@@ -87,40 +122,28 @@ class AdHocTest extends Specification {
   //      ok
   //    }
 
-  "adhoc" >> {
+  "core" >> {
     import molecule.tests.core.base.dsl.CoreTest._
-//    import molecule.tests.core.base.dsl.CoreTest.Ns
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-//    Schema.part.get
-//    Ns.str.getObj
+    val o = Ns.int.Tx(Ref1.int1).getObj
 
-//    Ns.int.ints$ insert List(
-//      (10, Some(Set(1, 2))),
-//      (20, Some(Set(2, 3))),
-//      (30, Some(Set(3, 4))),
-//      (40, None)
-//    )
+    o.int
+    o.Tx.Ref1.int1
+
+//    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx2_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx2.apply(Ref1.int1))
+//    val a: Molecule_0.Molecule_0_02[base.Init with Ns_int with Tx_[Ref1_[base.Init with Ref1_int1]], Int, Int] = m(Ns.int.Tx.apply(Ref1.int1))
 //
-//    // Apply empty value to match entities with non-asserted attributes (null)
-//    Ns.int.ints_().get === List(40)
+//    val b: DynamicProp with base.Init with Ns_int with Ns_Ref1_[base.Init with Ref1_str1] = Ns.int.Ref1.str1.getObj
 //
-//    // Same as applying empty Iterables
-//    Ns.int.ints_(Nil).get === List(40)
-//    Ns.int.ints_(List()).get === List(40)
-//
-//    // Applying empty value to mandatory attribute is contradictive and never matches entities.
-//    Ns.int.ints().get === Nil
-//
-//    // Applying possibly empty list as variable simply yields empty result set
-//    val emptyList = Nil
-//    Ns.ints(emptyList).get === Nil
-//
-//    // Apply Nil to tacit attribute of input molecule
-//    m(Ns.int.ints_(?)).apply(Nil).get === List(40)
-//
-//    // Apply Nil to mandatory attribute of input molecule never matches any entities
-//    m(Ns.int.ints(?)).apply(Nil).get === Nil
+//    val o: DynamicProp with base.Init with Ref1_str1 with Ref1_int1 with (
+//      (
+//        Ref1.str1[Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String], Ref1_1_1_L0[Ref1_, base.Init with Ref1_str1, String, String]] with Ref1_0_1_L0[Ref1_, base.Init with Ref1_str1, String]
+//        )#int1[Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int], Ref1_1_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, Int, String, Int]]
+//        with Ref1_0_2_L0[Ref1_, base.Init with Ref1_str1 with Ref1_int1, String, Int]
+//      )#Tx_[Ns_[base.Init]] = m(Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
+
+//    val o: DynamicProp with Ref2_[base.Init with Ref2_int2 with Ref2_str2] with Ref1_[base.Init with Ref1_str1 with Ref1_int1 with Tx_[Ns_[base.Init]]] = m(Ref2.int2.str2 + Ref1.str1.int1.Tx(Ns.str_("Tx meta data"))).getObj
 
     ok
   }

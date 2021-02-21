@@ -7,6 +7,7 @@ import molecule.core.composition.Tx
 import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
 import molecule.core.macros.ObjBuilder
+import molecule.core.transform.DynamicProp
 import molecule.core.util.Helpers
 import molecule.core.util.testing.TxCount.schema.TxCountSchema
 import molecule.datomic.api.in3_out10._
@@ -97,13 +98,39 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
     //        m(Ns.int.str + Ref1.int1).getObj
     //        m(Ns.int.str + Ref1.int1_).getObj
     //
-    //
-    //        Ns.str.insert("a", "b", "c")
-    //        val o = Ns.str.apply(min(2)).getObj
-    //        o.str_mins === List("a", "b")
-    //        //o.str === 6 // throws exception
-    //        o.xx === 7 // throws exception - only prop_aggrFn allowed
-    //
+//
+//    // Aggregate changes type - using dynamic prop name
+//    Ns.str.insert("a", "b", "c")
+//    val o = Ns.str.apply(min(2)).getObj
+//    o.str_mins === List("a", "b")
+//    //o.str === 6 // throws exception
+//    //    o.xx === 7 // throws exception - only str_mins allowed in this case
+//
+//    // Successive self-join refs
+//
+//    // Beverages liked by all 3 different people
+//    val o: DynamicProp with base.Init
+//      with Person_name
+//      with Person_Likes_[base.Init with Score_beverage]
+//      with Person_age
+//      with Person_[
+//      base.Init
+//        with Person_name
+//        with Person_Likes_[base.Init]
+//        with Person_[
+//        base.Init
+//          with Person_name
+//          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
+//      .name("Ben").Likes.beverage_(unify)._Person.Self
+//      .name("Liz").Likes.beverage_(unify).getObj
+//
+//    o.name
+//    o.age
+//    o.Likes.beverage
+//    o.Person.name
+//    o.Person.Person.name
+
+
     //
     //
     //

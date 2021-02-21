@@ -1,5 +1,5 @@
 package molecule.core.transform
-
+import scala.language.dynamics
 
 trait DynamicProp extends Dynamic {
   def selectDynamic(name: String): Any = throw new RuntimeException(

@@ -21,8 +21,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   import c.universe._
 
-  val x = InspectMacro("Dsl2Model", 901, 900)
-  //    val x = InspectMacro("Dsl2Model", 1, 900)
+//  val x = InspectMacro("Dsl2Model", 901, 900)
+      val x = InspectMacro("Dsl2Model", 1, 900)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -462,7 +462,10 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         case "e"    => castGeneric("Long", EntValue)
         case "v"    => castGeneric("Any", NoValue)
         case "a"    => castGeneric("String", NoValue)
-        case "Self" => traverseElement(prev, p, Self)
+        case "Self" =>
+          obj = addRef(obj, t.nsFull + "_", t.nsFull, 1, objLevel)
+          objLevel = (objLevel - 1).max(0)
+          traverseElement(prev, p, Self)
         case tx     =>
           if (prev.toString.endsWith("$"))
             abort(s"Optional attributes (`${p.name}`) can't be followed by generic transaction attributes (`$attrStr`).")

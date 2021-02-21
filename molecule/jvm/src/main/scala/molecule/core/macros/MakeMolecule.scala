@@ -10,8 +10,8 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-    val z = InspectMacro("MakeMolecule", 9, 8)
-//        val z = InspectMacro("MakeMolecule", 1, 8)
+//    val z = InspectMacro("MakeMolecule", 9, 8)
+        val z = InspectMacro("MakeMolecule", 1, 8)
 //  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
@@ -50,7 +50,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ???//{objCode(obj)._1}
           }
           new $outMolecule
         """

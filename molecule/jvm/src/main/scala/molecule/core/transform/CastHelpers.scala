@@ -14,7 +14,7 @@ import com.cognitect.transit.impl.URIImpl
   * variating cases. But we prioritize minimizing the macro-generated code as much as possible
   * to lower compile time overhead.
   */
-trait CastHelpers[+Obj, Tpl] extends CastHelpersAggr {
+trait CastHelpers[Obj, Tpl] extends CastHelpersAggr {
 
   // Row to object cast interface to be materialized by macro
   protected def row2obj(row: jList[AnyRef]): DynamicProp with Obj = ???

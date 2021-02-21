@@ -7,7 +7,7 @@ import molecule.core.api.exception.Molecule_2_Exception
 import molecule.core.api._
 import molecule.setup.TestSpec
 import scala.reflect.ClassTag
-
+import scala.annotation.unchecked.uncheckedVariance
 
 class ManyMany extends TestSpec {
 
@@ -15,13 +15,14 @@ class ManyMany extends TestSpec {
 
     class Setup extends CoreSetup {
 
-      def pairsTacit[Obj, I1, I2, A](test: String,
-                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, A],
-                                im1: Molecule_1.Molecule_1_01[Obj, I1, A],
-                                im2: Molecule_1.Molecule_1_01[Obj, I2, A],
-                                inOut1: Seq[(I1, List[A])],
-                                inOut2: Seq[(I2, List[A])]
-                               )(implicit ev: ClassTag[A]) = {
+      def pairsTacit[I1, I2, A](
+        test: String,
+        im: Molecule_2.Molecule_2_01[_, I1, I2, A],
+        im1: Molecule_1.Molecule_1_01[_, I1, A],
+        im2: Molecule_1.Molecule_1_01[_, I2, A],
+        inOut1: Seq[(I1, List[A])],
+        inOut2: Seq[(I2, List[A])]
+      )(implicit ev: ClassTag[A]) = {
         println("------------------------")
         println(s"""$test   pairs tacit""")
         var i = 0
@@ -50,13 +51,14 @@ class ManyMany extends TestSpec {
         println(s"$test   $i tests passed")
       }
 
-      def pairsTacit22[Obj, I1, I2](test: String,
-                               im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
-                               im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
-                               im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
-                               inOut1: Seq[(I1, List[Int])],
-                               inOut2: Seq[(I2, List[Int])]
-                              ) = {
+      def pairsTacit22[I1, I2](
+        test: String,
+        im: Molecule_2.Molecule_2_01[_, I1, I2, Int],
+        im1: Molecule_1.Molecule_1_01[_, I1, Int],
+        im2: Molecule_1.Molecule_1_01[_, I2, Int],
+        inOut1: Seq[(I1, List[Int])],
+        inOut2: Seq[(I2, List[Int])]
+      ) = {
         println("------------------------")
         println(s"""$test   pairs tacit 2+2""")
         var i = 0
@@ -91,13 +93,14 @@ class ManyMany extends TestSpec {
         println(s"Eq Eq   $i tests passed")
       }
 
-      def pairsMandatory[Obj, I1, I2, A, B, C](test: String,
-                                          im: Molecule_2.Molecule_2_03[Obj, I1, I2, A, B, C],
-                                          im1: Molecule_1.Molecule_1_02[Obj, I1, A, B],
-                                          im2: Molecule_1.Molecule_1_02[Obj, I2, A, C],
-                                          inOut1: Seq[(I1, Seq[(A, B)])],
-                                          inOut2: Seq[(I2, Seq[(A, C)])]
-                                         )(implicit ev: ClassTag[(A, B, C)]) = {
+      def pairsMandatory[I1, I2, A, B, C](
+        test: String,
+        im: Molecule_2.Molecule_2_03[_, I1, I2, A, B, C],
+        im1: Molecule_1.Molecule_1_02[_, I1, A, B],
+        im2: Molecule_1.Molecule_1_02[_, I2, A, C],
+        inOut1: Seq[(I1, Seq[(A, B)])],
+        inOut2: Seq[(I2, Seq[(A, C)])]
+      )(implicit ev: ClassTag[(A, B, C)]) = {
         println("------------------------")
         println(s"""$test   pairs mandatory""")
         var i = 0
@@ -135,12 +138,13 @@ class ManyMany extends TestSpec {
       }
 
 
-      def groupsTacit22[Obj, I1, I2](test: String,
-                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
-                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
-                                inOut1: Seq[(Seq[I1], List[Int])],
-                                inOut2: Seq[(Seq[I2], List[Int])]) = {
+      def groupsTacit22[I1, I2](
+        test: String,
+        im: Molecule_2.Molecule_2_01[_, I1, I2, Int],
+        im1: Molecule_1.Molecule_1_01[_, I1, Int],
+        im2: Molecule_1.Molecule_1_01[_, I2, Int],
+        inOut1: Seq[(Seq[I1], List[Int])],
+        inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
         println(s"""$test   groups tacit 2+2""")
         val combos = (for {
@@ -204,12 +208,13 @@ class ManyMany extends TestSpec {
       }
 
 
-      def groupsTacit21[Obj, I1, I2](test: String,
-                                im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
-                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
-                                inOut1: Seq[(Seq[I1], List[Int])],
-                                inOut2: Seq[(Seq[I2], List[Int])]) = {
+      def groupsTacit21[I1, I2](
+        test: String,
+        im: Molecule_2.Molecule_2_01[_, I1, I2, Int],
+        im1: Molecule_1.Molecule_1_01[_, I1, Int],
+        im2: Molecule_1.Molecule_1_01[_, I2, Int],
+        inOut1: Seq[(Seq[I1], List[Int])],
+        inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
         println(s"""$test   groups tacit 2+1""")
         val combos = (for {
@@ -264,11 +269,13 @@ class ManyMany extends TestSpec {
         println(s"$test   $i tests passed")
       }
 
-      def groupsTacit11[Obj, I1, I2](test: String, im: Molecule_2.Molecule_2_01[Obj, I1, I2, Int],
-                                im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
-                                im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
-                                inOut1: Seq[(Seq[I1], List[Int])],
-                                inOut2: Seq[(Seq[I2], List[Int])]) = {
+      def groupsTacit11[I1, I2](
+        test: String,
+        im: Molecule_2.Molecule_2_01[_, I1, I2, Int],
+        im1: Molecule_1.Molecule_1_01[_, I1, Int],
+        im2: Molecule_1.Molecule_1_01[_, I2, Int],
+        inOut1: Seq[(Seq[I1], List[Int])],
+        inOut2: Seq[(Seq[I2], List[Int])]) = {
         println("------------------------")
         println(s"""$test   tacit 1 + 1""")
         val combos = (for {

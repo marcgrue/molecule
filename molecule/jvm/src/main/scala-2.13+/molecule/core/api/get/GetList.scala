@@ -18,7 +18,7 @@ import scala.language.implicitConversions
   * For expected smaller result sets it's convenient to return Lists of tuples of data.
   * Considered as the default getter, no postfix has been added (`get` instead of `getList`).
   * */
-trait GetList[+Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
+trait GetList[Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
 
 
   def getObjList(implicit conn: Conn): List[DynamicProp with Obj] = {

@@ -14,7 +14,7 @@ import scala.language.implicitConversions
   * <br><br>
   * Suitable for data sets that are lazily consumed.
   * */
-trait GetIterable[+Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
+trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
   // get ================================================================================================

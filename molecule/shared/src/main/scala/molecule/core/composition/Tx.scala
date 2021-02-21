@@ -13,9 +13,8 @@ import scala.language.higherKinds
   *   Person.name.Tx(MyMetaData.action_("add member")).get === List("Ben")
   * }}}
   */
-trait Tx {
+trait Tx
 
-  trait Tx_[props] {
-    def Tx: props = ???
-  }
+trait Tx_[props] {
+  def Tx: props = ???
 }

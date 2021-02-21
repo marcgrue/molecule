@@ -24,8 +24,7 @@ import scala.language.implicitConversions
   * Call a inspect method on a molecule to see the internal transformations and
   * produced transaction statements or sample data.
   * */
-trait ShowInspect[+Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
-
+trait ShowInspect[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
   /** Inspect call to `get` on a molecule (without affecting the db).
     * <br><br>

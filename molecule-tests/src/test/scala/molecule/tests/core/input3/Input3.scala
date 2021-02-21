@@ -15,15 +15,16 @@ class Input3 extends TestSpec {
 
     class Setup extends CoreSetup {
 
-      def triplesTacit[Obj, I1, I2, I3, A](test: String,
-                                      im: Molecule_3.Molecule_3_01[Obj, I1, I2, I3, A],
-                                      im1: Molecule_1.Molecule_1_01[Obj, I1, A],
-                                      im2: Molecule_1.Molecule_1_01[Obj, I2, A],
-                                      im3: Molecule_1.Molecule_1_01[Obj, I3, A],
-                                      inOut1: Seq[(I1, List[A])],
-                                      inOut2: Seq[(I2, List[A])],
-                                      inOut3: Seq[(I3, List[A])]
-                                     )(implicit ev: ClassTag[A]) = {
+      def triplesTacit[I1, I2, I3, A](
+        test: String,
+        im: Molecule_3.Molecule_3_01[_, I1, I2, I3, A],
+        im1: Molecule_1.Molecule_1_01[_, I1, A],
+        im2: Molecule_1.Molecule_1_01[_, I2, A],
+        im3: Molecule_1.Molecule_1_01[_, I3, A],
+        inOut1: Seq[(I1, List[A])],
+        inOut2: Seq[(I2, List[A])],
+        inOut3: Seq[(I3, List[A])]
+      )(implicit ev: ClassTag[A]) = {
         println("------------------------")
         println(s"""$test   pairs tacit""")
         var i = 0
@@ -58,14 +59,16 @@ class Input3 extends TestSpec {
       }
 
 
-      def groupsTacit111[Obj, I1, I2, I3](test: String, im: Molecule_3.Molecule_3_01[Obj, I1, I2, I3, Int],
-                                     im1: Molecule_1.Molecule_1_01[Obj, I1, Int],
-                                     im2: Molecule_1.Molecule_1_01[Obj, I2, Int],
-                                     im3: Molecule_1.Molecule_1_01[Obj, I3, Int],
-                                     inOut1: Seq[(Seq[I1], List[Int])],
-                                     inOut2: Seq[(Seq[I2], List[Int])],
-                                     inOut3: Seq[(Seq[I3], List[Int])]
-                                    ) = {
+      def groupsTacit111[I1, I2, I3](
+        test: String,
+        im: Molecule_3.Molecule_3_01[_, I1, I2, I3, Int],
+        im1: Molecule_1.Molecule_1_01[_, I1, Int],
+        im2: Molecule_1.Molecule_1_01[_, I2, Int],
+        im3: Molecule_1.Molecule_1_01[_, I3, Int],
+        inOut1: Seq[(Seq[I1], List[Int])],
+        inOut2: Seq[(Seq[I2], List[Int])],
+        inOut3: Seq[(Seq[I3], List[Int])]
+      ) = {
         println("------------------------")
         println(s"""$test   tacit 1+1+1""")
         val combos = (for {
