@@ -9,13 +9,13 @@ import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
-
+import scala.annotation.unchecked.uncheckedVariance
 
 /** Data getter methods on molecules returning `Array[Tpl]`.
   * <br><br>
   * The fastest way of getting a large typed data set. Can then be traversed with a fast `while` loop.
   * */
-trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
+trait GetArray[+Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
   // get ================================================================================================
@@ -37,7 +37,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArray(implicit* getAsyncArray]] method.
     */
-  def getArray(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] = {
+  def getArray(implicit conn: Conn, objType: ClassTag[Obj @uncheckedVariance], tplType: ClassTag[Tpl]): Array[Tpl] = {
     val jColl = conn.query(_model, _query)
     val it = jColl.iterator
     val a = new Array[Tpl](jColl.size)

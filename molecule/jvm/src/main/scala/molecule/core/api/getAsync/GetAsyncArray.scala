@@ -32,7 +32,7 @@ import scala.reflect.ClassTag
   * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter (in the
   * `get` package) in a Future. `getAsyncArrayAsOf` thus wraps the result of `getArrayAsOf` in a Future and so on.
   * */
-trait GetAsyncArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tpl] =>
+trait GetAsyncArray[+Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetArray[Obj, Tpl] =>
 
 
   // get ================================================================================================
