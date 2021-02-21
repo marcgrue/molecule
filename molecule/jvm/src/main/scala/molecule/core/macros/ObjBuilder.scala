@@ -138,18 +138,7 @@ trait ObjBuilder extends Cast {
 
     val tree = classes(obj.props) match {
       case Nil                                                                    => q"new DynamicProp with Init {}"
-//      case List(a)                                                                => q"new DynamicProp with Init with $a { ..${properties(obj.props)} }"
-      case List(a)                                                                =>
-        q"""
-
-
-            new DynamicProp with Init with $a {
-
-
-           ..${properties(obj.props)}
-
-           }"""
-
+      case List(a)                                                                => q"new DynamicProp with Init with $a { ..${properties(obj.props)} }"
       case List(a, b)                                                             => q"new DynamicProp with Init with $a with $b { ..${properties(obj.props)} }"
       case List(a, b, c)                                                          => q"new DynamicProp with Init with $a with $b with $c { ..${properties(obj.props)} }"
       case List(a, b, c, d)                                                       => q"new DynamicProp with Init with $a with $b with $c with $d { ..${properties(obj.props)} }"

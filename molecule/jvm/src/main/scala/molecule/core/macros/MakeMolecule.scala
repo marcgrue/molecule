@@ -10,49 +10,11 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-//    val z = InspectMacro("MakeMolecule", 9, 8)
-        val z = InspectMacro("MakeMolecule", 1, 8)
+    val z = InspectMacro("MakeMolecule", 9, 8)
+//        val z = InspectMacro("MakeMolecule", 1, 8)
 //  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
-//    val propCls = ObjType.toString.split('.').last
-//    try {
-//      c.typecheck(q"(??? : ${TypeName(propCls)})")
-//    } catch {
-//      // Check that all dsl is imported
-//      case e: TypecheckException =>
-//        abort(s"Couldn't find property dsl class `$propCls`. Please import all Molecule dsl code with `import <path>.dsl.YourDomain._`. " + e)
-//    }
-
-//    val apiImports = c.enclosingPackage.children.collect{
-//      case im: Import if im.toString.startsWith("import molecule.datomic.api.") => im.toString
-//    }
-//    if(apiImports.length > 1) {
-//      abort("Found multiple Molecule api imports:\n  "
-//        + apiImports.mkString("\n  ")
-//        + "\nThis can sometimes happen if you paste molecules into your code and your IDE adds redundant imports."
-//      )
-//    }
-//
-//    try {
-//      c.typecheck(c.parse("Ns.strx.get"))
-//    } catch {
-//      // Check that all dsl is imported
-//      case e: TypecheckException =>
-//        abort(s"xx " + e)
-//      case e =>
-//        abort(s"zz " + e)
-//    }
-
-//    z(1
-////      ,apiImports
-//      //      , c.enclosingPackage
-//      //      , c.enclosingPackage.children
-//      , c.enclosingPackage.children.collect{ case im: Import => im }
-//      , c.enclosingPackage.children.collect{ case im: Import if im.toString().startsWith("import molecule.datomic.api.") => im }
-//      //      , c.enclosingPackage.children.collect{ case im: Import => im.children }
-//    )
-
     val (
       genericImports, model0, typess, castss, obj,
       hasVariables, txMetaCompositesCount,
@@ -88,7 +50,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = {objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
           }
           new $outMolecule
         """
