@@ -1,7 +1,6 @@
 package molecule.tests.core.expression
 
-import molecule.core.util.testing.expectCompileError
-import molecule.tests.core.base.dsl.CoreTest.Ns
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.datomic.api.in1_out2._
 import molecule.setup.TestSpec
 
@@ -29,29 +28,6 @@ class Null extends TestSpec {
     // Applying possibly empty list as variable simply yields empty result set
     val emptyList = Nil
     Ns.int(emptyList).get === Nil
-
-
-    // Can't apply empty Iterable constructor or other expressions (won't compile)
-    // Ns.str.int_(Seq.empty[Int])
-
-    //    // 2.13 compile error
-    //    expectCompileError(
-    //      "m(Ns.str.int_(Seq.empty[Int]))",
-    //      "molecule.datomic.base.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-    //        "\ncode : scala.`package`.Seq.empty[Int]" +
-    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-    //        "\nTry to assign the expression to a variable and apply the variable instead."
-    //    )
-    //    // 2.12 compile error
-    //    expectCompileError(
-    //      "m(Ns.str.int_(Seq.empty[Int]))",
-    //      "molecule.datomic.base.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-    //        "\ncode : scala.collection.Seq.empty[Int]" +
-    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-    //        "\nTry to assign the expression to a variable and apply the variable instead."
-    //    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.str.int_(?)).apply(Nil).get === List("d")
@@ -83,29 +59,6 @@ class Null extends TestSpec {
     // Applying possibly empty list as variable simply yields empty result set
     val emptyList = Nil
     Ns.ints(emptyList).get === Nil
-
-
-    // Can't apply empty Iterable constructor or any Scala expression
-    // Ns.int.ints_(Seq.empty[Int])
-
-    //    // 2.13 compile error
-    //    expectCompileError(
-    //      "m(Ns.int.ints_(Seq.empty[Int]))",
-    //      "molecule.datomic.base.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-    //        "\ncode : scala.`package`.Seq.empty[Int]" +
-    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-    //        "\nTry to assign the expression to a variable and apply the variable instead."
-    //    )
-    //    // 2.12 compile error
-    //    expectCompileError(
-    //      "m(Ns.int.ints_(Seq.empty[Int]))",
-    //      "molecule.datomic.base.transform.exception.Dsl2ModelException: Can't lift unexpected code:" +
-    //        "\ncode : scala.collection.Seq.empty[Int]" +
-    //        "\nclass: class scala.reflect.internal.Trees$TypeApply" +
-    //        "\nMaybe you are applying some Scala expression to a molecule attribute?" +
-    //        "\nTry to assign the expression to a variable and apply the variable instead."
-    //    )
 
     // Apply Nil to tacit attribute of input molecule
     m(Ns.int.ints_(?)).apply(Nil).get === List(40)

@@ -1,9 +1,9 @@
 package molecule
 
 import java.util.Date
-import molecule.core.api.Molecule_1
 import molecule.core.ast.elements._
 import molecule.core.composition.Tx
+//import molecule.datomic.api.in1_out2.m
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 //import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
@@ -19,7 +19,6 @@ import scala.reflect.runtime.universe._
 import molecule.tests.core.base.schema.CoreTestSchema
 //import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2.Person
 import org.specs2.mutable.Specification
-import scala.language.experimental.macros
 
 
 //class AdHocTest extends molecule.setup.TestSpec with Helpers {
@@ -90,18 +89,38 @@ class AdHocTest extends Specification {
 
   "adhoc" >> {
     import molecule.tests.core.base.dsl.CoreTest._
+//    import molecule.tests.core.base.dsl.CoreTest.Ns
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-    Ns.str.insert("a", "b", "c")
+//    Schema.part.get
+//    Ns.str.getObj
 
-    val o = Ns.str.apply(min(2)).getObj
-    o.str_mins === List("a", "b")
-    o.str === 6
-//    o.xx === 7
-//    o.
-
-
-
+//    Ns.int.ints$ insert List(
+//      (10, Some(Set(1, 2))),
+//      (20, Some(Set(2, 3))),
+//      (30, Some(Set(3, 4))),
+//      (40, None)
+//    )
+//
+//    // Apply empty value to match entities with non-asserted attributes (null)
+//    Ns.int.ints_().get === List(40)
+//
+//    // Same as applying empty Iterables
+//    Ns.int.ints_(Nil).get === List(40)
+//    Ns.int.ints_(List()).get === List(40)
+//
+//    // Applying empty value to mandatory attribute is contradictive and never matches entities.
+//    Ns.int.ints().get === Nil
+//
+//    // Applying possibly empty list as variable simply yields empty result set
+//    val emptyList = Nil
+//    Ns.ints(emptyList).get === Nil
+//
+//    // Apply Nil to tacit attribute of input molecule
+//    m(Ns.int.ints_(?)).apply(Nil).get === List(40)
+//
+//    // Apply Nil to mandatory attribute of input molecule never matches any entities
+//    m(Ns.int.ints(?)).apply(Nil).get === Nil
 
     ok
   }

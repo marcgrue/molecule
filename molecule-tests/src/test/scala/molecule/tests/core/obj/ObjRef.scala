@@ -22,11 +22,12 @@ import scala.language.experimental.macros
 
 
 class ObjRef extends molecule.setup.TestSpec with Helpers {
-//class AdHocTest extends Specification {
+  //class AdHocTest extends Specification {
 
-    "ref/backref" in new CoreSetup {
+  "ref/backref" in new CoreSetup {
 
     import molecule.tests.core.base.dsl.CoreTest._
+
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
     //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
@@ -59,49 +60,49 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
     Ns.int.Ref1.Ref2.str2._Ref1._Ns.Refs1.str1.getObj
 
 
-        // Only add ref if there are any props to ref
-        // (we can't be selective in the molecule type buildup, so the "empty refs" have to remain)
-        val o = Ns.int.Ref1.int1_.getObj
-        o.int
-        o.Ref1 // (no ref attributes though)
+    // Only add ref if there are any props to ref
+    // (we can't be selective in the molecule type buildup, so the "empty refs" have to remain)
+    val o = Ns.int.Ref1.int1_.getObj
+    o.int
+    o.Ref1 // (no ref attributes though)
 
-        ////    Ns.int.strMapK("en").getObj
-        //
-        //    m(Ns.int.strMapK("en").apply(?))
-        //
-        //    //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
-
-
-//        val o = Person.name("Ann").Buddies.e(42L).getObj
+    ////    Ns.int.strMapK("en").getObj
+    //
+    //    m(Ns.int.strMapK("en").apply(?))
+    //
+    //    //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
 
 
-//        Ns.int.strMapK("en").getObj
-//
-//        m(Ns.int.strMapK("en").apply(?))
-
-//        Ns.int.int.get.head === (1, 1)
+    //        val o = Person.name("Ann").Buddies.e(42L).getObj
 
 
+    //        Ns.int.strMapK("en").getObj
+    //
+    //        m(Ns.int.strMapK("en").apply(?))
 
-//        Ns.date.getObj
-//        Ns.uuid.getObj
-//        Ns.uri.getObj
-
-        // Only add ref if there are any props to ref
-//        Ns.int.Ref1.int1_.getObj
+    //        Ns.int.int.get.head === (1, 1)
 
 
-//        val o = m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2.Ref3.int3).getObj
-//        m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2).getObj
-//        m(Ns.int.str + Ref1.int1.str1).getObj
-//        m(Ns.int.str + Ref1.int1).getObj
-//        m(Ns.int.str + Ref1.int1_).getObj
+    //        Ns.date.getObj
+    //        Ns.uuid.getObj
+    //        Ns.uri.getObj
 
-    //    {
-    //      val o = Ns.int(0).str("a")
-    //    }
+    // Only add ref if there are any props to ref
+    //        Ns.int.Ref1.int1_.getObj
+
+
+    //        val o = m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2.Ref3.int3).getObj
+    //        m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2).getObj
+    //        m(Ns.int.str + Ref1.int1.str1).getObj
+    //        m(Ns.int.str + Ref1.int1).getObj
+    //        m(Ns.int.str + Ref1.int1_).getObj
     //
     //
+    //        Ns.str.insert("a", "b", "c")
+    //        val o = Ns.str.apply(min(2)).getObj
+    //        o.str_mins === List("a", "b")
+    //        //o.str === 6 // throws exception
+    //        o.xx === 7 // throws exception - only prop_aggrFn allowed
     //
     //
     //

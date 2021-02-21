@@ -2,7 +2,7 @@ package molecule.core.macros
 
 import molecule.datomic.base.transform.Model2Query
 import scala.language.higherKinds
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.{TypecheckException, blackbox}
 
 
 /** Macro to make output molecules. */
@@ -10,11 +10,49 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-//    val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
-//  val z = InspectMacro("MakeMolecule", 9, 8)
-    val z = InspectMacro("MakeMolecule", 1, 8)
+//    val z = InspectMacro("MakeMolecule", 9, 8)
+        val z = InspectMacro("MakeMolecule", 1, 8)
+//  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
+//    val propCls = ObjType.toString.split('.').last
+//    try {
+//      c.typecheck(q"(??? : ${TypeName(propCls)})")
+//    } catch {
+//      // Check that all dsl is imported
+//      case e: TypecheckException =>
+//        abort(s"Couldn't find property dsl class `$propCls`. Please import all Molecule dsl code with `import <path>.dsl.YourDomain._`. " + e)
+//    }
+
+//    val apiImports = c.enclosingPackage.children.collect{
+//      case im: Import if im.toString.startsWith("import molecule.datomic.api.") => im.toString
+//    }
+//    if(apiImports.length > 1) {
+//      abort("Found multiple Molecule api imports:\n  "
+//        + apiImports.mkString("\n  ")
+//        + "\nThis can sometimes happen if you paste molecules into your code and your IDE adds redundant imports."
+//      )
+//    }
+//
+//    try {
+//      c.typecheck(c.parse("Ns.strx.get"))
+//    } catch {
+//      // Check that all dsl is imported
+//      case e: TypecheckException =>
+//        abort(s"xx " + e)
+//      case e =>
+//        abort(s"zz " + e)
+//    }
+
+//    z(1
+////      ,apiImports
+//      //      , c.enclosingPackage
+//      //      , c.enclosingPackage.children
+//      , c.enclosingPackage.children.collect{ case im: Import => im }
+//      , c.enclosingPackage.children.collect{ case im: Import if im.toString().startsWith("import molecule.datomic.api.") => im }
+//      //      , c.enclosingPackage.children.collect{ case im: Import => im.children }
+//    )
+
     val (
       genericImports, model0, typess, castss, obj,
       hasVariables, txMetaCompositesCount,
@@ -25,7 +63,6 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
     val OutMoleculeTpe: Tree = molecule_o(TplTypes.size)
     val outMolecule          = TypeName(c.freshName("outMolecule$"))
 
-
     val t = if (castss.size == 1 || txMetaCompositesCount > 0) {
       val casts = if (txMetaCompositesCount > 0) {
         // Treat tx meta data as associated data (composite)
@@ -33,7 +70,6 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
       } else {
         q"(..${topLevel(castss)})"
       }
-
 
       if (hasVariables) {
         q"""
@@ -52,18 +88,12 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
-
-//            final def row2obj2(row: java.util.List[AnyRef]): ObjType      = { //{objCode(obj)._1}
-//              new Init with Ns_int {
-//                final override lazy val int: Int = castOneInt(row, 0)
-//              }
-//            }
+            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = {objCode(obj)._1}
           }
           new $outMolecule
         """
 
-        z(1
+        z(2
           , model0
           , obj
           , objCode(obj)._1

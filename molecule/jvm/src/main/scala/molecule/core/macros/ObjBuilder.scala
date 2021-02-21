@@ -87,7 +87,7 @@ trait ObjBuilder extends Cast {
             ) {
               case (aggrProp, aggrTpe) =>
                 dynamicProps = dynamicProps :+ (aggrProp, cast(i))
-                val err = s"Please access `$aggrProp` property to get aggregate value of type `$aggrTpe` (dynamic type is `Any`)."
+                val err = s"""Please access `$aggrProp` property to get aggregate value of type `$aggrTpe` (dynamic type is `Any`)."""
                 Some(q"""final override lazy val ${TermName(prop)}: $tpe = throw new RuntimeException($err)""")
             }
           } else None
@@ -126,10 +126,11 @@ trait ObjBuilder extends Cast {
         val caseClauses   = dynamicProps.map {
           case (aggrProp, aggrCast) => cq"""$aggrProp => $aggrCast"""
         }
+        val err = s"Can only access dynamic properties with refined aggregate types: " + dynamicProps.map(_._1).mkString(", ")
         val selectDynamic =
           q"""override def selectDynamic(name: String): Any = name match {
               case ..$caseClauses
-              case other => throw new RuntimeException("")
+              case other => throw new RuntimeException($err)
             }"""
         propDefs :+ selectDynamic
       }
@@ -137,7 +138,18 @@ trait ObjBuilder extends Cast {
 
     val tree = classes(obj.props) match {
       case Nil                                                                    => q"new DynamicProp with Init {}"
-      case List(a)                                                                => q"new DynamicProp with Init with $a { ..${properties(obj.props)} }"
+//      case List(a)                                                                => q"new DynamicProp with Init with $a { ..${properties(obj.props)} }"
+      case List(a)                                                                =>
+        q"""
+
+
+            new DynamicProp with Init with $a {
+
+
+           ..${properties(obj.props)}
+
+           }"""
+
       case List(a, b)                                                             => q"new DynamicProp with Init with $a with $b { ..${properties(obj.props)} }"
       case List(a, b, c)                                                          => q"new DynamicProp with Init with $a with $b with $c { ..${properties(obj.props)} }"
       case List(a, b, c, d)                                                       => q"new DynamicProp with Init with $a with $b with $c with $d { ..${properties(obj.props)} }"
