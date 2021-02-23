@@ -2,7 +2,7 @@ package molecule.core.macros
 
 import molecule.datomic.base.transform.Model2Query
 import scala.language.higherKinds
-import scala.reflect.macros.{TypecheckException, blackbox}
+import scala.reflect.macros.blackbox
 
 
 /** Macro to make output molecules. */

@@ -4,6 +4,9 @@ import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
 import molecule.core.composition.Tx_
+import molecule.core.exceptions.MoleculeException
+import molecule.core.ops.exception.VerifyModelException
+import molecule.datomic.api.out4.m
 //import molecule.core.composition.Tx
 import molecule.core.transform.DynamicProp
 import molecule.tests.core.base.dsl.CoreTest.{Ns, Ref1}
@@ -47,41 +50,41 @@ class AdHocTest extends Specification {
   //      Person.name("Ann").Buddies.e(gus)
   //    }
 
-//  "self-join" >> {
-//    import molecule.tests.core.ref.dsl.SelfJoin._
-//    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(SelfJoinSchema)
-//
-//    //    val o = Person.age_(23).Likes.beverage._Person.Self
-//    //      .age_(25).Likes.beverage_(unify).getObj
-//    //
-//    //    o.Likes.beverage
-//    //    o.Person.beverage
-//
-//
-//    // Beverages liked by all 3 different people
-//    val o: DynamicProp with base.Init
-//      with Person_name
-//      with Person_Likes_[base.Init with Score_beverage]
-//      with Person_age
-//      with Person_[
-//      base.Init
-//        with Person_name
-//        with Person_Likes_[base.Init]
-//        with Person_[
-//        base.Init
-//          with Person_name
-//          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
-//      .name("Ben").Likes.beverage_(unify)._Person.Self
-//      .name("Liz").Likes.beverage_(unify).getObj
-//
-//    o.name
-//    o.age
-//    o.Likes.beverage
-//    o.Person.name
-//    o.Person.Person.name
-//
-//    ok
-//  }
+  //  "self-join" >> {
+  //    import molecule.tests.core.ref.dsl.SelfJoin._
+  //    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(SelfJoinSchema)
+  //
+  //    //    val o = Person.age_(23).Likes.beverage._Person.Self
+  //    //      .age_(25).Likes.beverage_(unify).getObj
+  //    //
+  //    //    o.Likes.beverage
+  //    //    o.Person.beverage
+  //
+  //
+  //    // Beverages liked by all 3 different people
+  //    val o: DynamicProp with base.Init
+  //      with Person_name
+  //      with Person_Likes_[base.Init with Score_beverage]
+  //      with Person_age
+  //      with Person_[
+  //      base.Init
+  //        with Person_name
+  //        with Person_Likes_[base.Init]
+  //        with Person_[
+  //        base.Init
+  //          with Person_name
+  //          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
+  //      .name("Ben").Likes.beverage_(unify)._Person.Self
+  //      .name("Liz").Likes.beverage_(unify).getObj
+  //
+  //    o.name
+  //    o.age
+  //    o.Likes.beverage
+  //    o.Person.name
+  //    o.Person.Person.name
+  //
+  //    ok
+  //  }
 
   //      "bidirectional" >> {
   //        import molecule.tests.core.bidirectionals.dsl.Bidirectional._
@@ -129,42 +132,6 @@ class AdHocTest extends Specification {
 
 
 
-    val o = m(Ref2.int2 + Ns.int.str).getObj
-
-
-
-//    val List(e1, e2) = Ref2.int2 + Ns.int.str insert Seq(
-//      // Two rows of data
-//      (1, (11, "aa")),
-//      (2, (22, "bb"))
-//    ) eids
-
-//      molecule.core.transform.DynamicProp with molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref1_str1 with molecule.tests.core.base.dsl.CoreTest.Ref1_int1
-//    with molecule.core.composition.Tx_[
-//      molecule.core.dsl.base.Init with
-//        molecule.tests.core.base.dsl.CoreTest.Ns_[
-//          molecule.core.dsl.base.Init
-//          with molecule.tests.core.base.dsl.CoreTest.Ns_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ns_str]
-//          with molecule.tests.core.base.dsl.CoreTest.Ref2_[molecule.core.dsl.base.Init
-//          with molecule.tests.core.base.dsl.CoreTest.Ref2_int2
-//          with molecule.tests.core.base.dsl.CoreTest.Ref2_str2]]
-//    ]
-//
-//      molecule.core.transform.DynamicProp with molecule.core.dsl.base.Init
-//    with molecule.tests.core.base.dsl.CoreTest.Ref1_str1
-//    with molecule.tests.core.base.dsl.CoreTest.Ref1_int1
-//    with molecule.core.composition.Tx_[
-//      molecule.tests.core.base.dsl.CoreTest.Ns_[
-//        molecule.core.dsl.base.Init
-//          with molecule.tests.core.base.dsl.CoreTest.Ns_str
-//      ]
-//        with molecule.tests.core.base.dsl.CoreTest.Ref2_[
-//        molecule.core.dsl.base.Init
-//          with molecule.tests.core.base.dsl.CoreTest.Ref2_int2
-//          with molecule.tests.core.base.dsl.CoreTest.Ref2_str2]
-//    ]
-
-//    val o = m(Ref2.int2.str2 + Ref1.str1.int1.Tx.apply(Ns.str_("Tx meta data"))).getObj
 
     ok
   }

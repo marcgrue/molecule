@@ -21,8 +21,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   import c.universe._
 
-    val x = InspectMacro("Dsl2Model", 901, 900)
-//  val x = InspectMacro("Dsl2Model", 1, 900)
+      val x = InspectMacro("Dsl2Model", 901, 900)
+//  val x = InspectMacro("Dsl2Model", 101, 800)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -158,47 +158,20 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
     }
 
-    def levelComposite(subCompositeElements: Seq[Element]): Unit = {
-      val err = "Unexpectedly couldn't find ns in sub composite:\n  " + subCompositeElements.mkString("\n  ")
-      val ns  = subCompositeElements.collectFirst {
-        case Atom(ns, _, _, _, _, _, _, _) => ns
-        case Bond(nsFull, _, _, _, _)      => nsFull
-        case Composite(elements)           => elements.collectFirst {
-          case Atom(ns, _, _, _, _, _, _, _) => ns
-          case Bond(nsFull, _, _, _, _)      => nsFull
-        } getOrElse abort(err)
-      } getOrElse abort(err)
-
-      val nsCls    = ns + "_"
-      // Prepend namespace in obj
-      val newProps = if (objCompositesCount > 0) {
-        val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
-        val newP                = Obj(nsCls, ns, 1, props) +: composites
-        //        if (compositeCount == 4)
-        x(746, types, objCompositesCount, obj, props, composites, obj.copy(props = newP))
-        newP
-      } else {
-        x(747, types, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))))
-        List(Obj(nsCls, ns, 1, obj.props))
-      }
-      obj = obj.copy(props = newProps)
-    }
-
-    def traverseElements(prev: Tree, p: richTree, elements: Seq[Element]): Seq[Element] = {
+    def traverseElements(prev: Tree, p: richTree, elements: Seq[Element], sameNs: Boolean = false): Seq[Element] = {
       if (isComposite) {
-        x(741, prev, elements)
+        x(640, prev, elements, sameNs)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
           val result = prevElements :+ Composite(elements)
           val obj0   = obj
-          //          levelComposite(result)
-          x(745, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj)
+          x(641, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj, sameNs)
           result
         } else {
           val result = Seq(Composite(prevElements), Composite(elements))
           val obj0   = obj
-          levelComposite(result)
-          x(744, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj)
+          levelComposite(result, sameNs)
+          x(642, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj, sameNs)
           result
         }
       } else {
@@ -272,21 +245,56 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
           resolveOptNested(prev, richTree(prev), manyRef, nested)
 
         case q"$prev.+[..$types]($subComposite)" =>
-          x(600, prev, subComposite)
+          x(600, prev, subComposite, obj)
           resolveComposite(prev, richTree(prev), q"$subComposite")
+
+        case q"$prev.++[..$types]($subComposite)" =>
+          x(610, prev, subComposite, obj)
+          val res = resolveComposite(prev, richTree(prev), q"$subComposite", true)
+          res
 
         case other => abort(s"Unexpected DSL structure: $other\n${showRaw(other)}")
       }
     }
 
+    def levelComposite(subCompositeElements: Seq[Element], sameNs: Boolean = false): Unit = {
+      val err = "Unexpectedly couldn't find ns in sub composite:\n  " + subCompositeElements.mkString("\n  ")
+      val ns  = subCompositeElements.collectFirst {
+        case Atom(ns, _, _, _, _, _, _, _) => ns
+        case Bond(nsFull, _, _, _, _)      => nsFull
+        case Composite(elements)           => elements.collectFirst {
+          case Atom(ns, _, _, _, _, _, _, _) => ns
+          case Bond(nsFull, _, _, _, _)      => nsFull
+        } getOrElse abort(err)
+      } getOrElse abort(err)
 
-    def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree): Seq[Element] = {
-      x(601, prev, subCompositeTree, obj)
+      val nsCls    = ns + "_"
+      // Prepend namespace in obj
+      val newProps = if (objCompositesCount > 0) {
+        val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
+        val compNs              = composites.head.asInstanceOf[Obj].cls
+        val newP                = if (sameNs && nsCls == composites.head.asInstanceOf[Obj].cls) {
+          val o = composites.head.asInstanceOf[Obj]
+          o.copy(props = props ++ o.props) +: composites.tail
+        } else {
+          Obj(nsCls, ns, 1, props) +: composites
+        }
+        x(630, types, objCompositesCount, obj, props, composites, obj.copy(props = newP), nsCls, compNs, sameNs)
+        newP
+      } else {
+        x(631, types, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))), sameNs)
+        List(Obj(nsCls, ns, 1, obj.props))
+      }
+      obj = obj.copy(props = newProps)
+    }
+
+    def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree, sameNs: Boolean = false): Seq[Element] = {
+      x(620, prev, subCompositeTree, obj, sameNs)
       post = false
       isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
-      x(602, prev, subCompositeElements, types, casts, obj)
+      x(621, prev, subCompositeElements, types, casts, obj, sameNs)
 
       if (txMetaDataStarted) {
         txMetaCompositesCount = if (txMetaCompositesCount == 0) 2 else txMetaCompositesCount + 1
@@ -297,12 +305,12 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       casts = List.empty[Int => Tree] :: casts
 
       // Make composite in obj
-      levelComposite(subCompositeElements)
+      levelComposite(subCompositeElements, sameNs)
       objCompositesCount += 1
 
-      x(603, prev, subCompositeElements, types, casts, txMetaCompositesCount, obj)
-      val elements = traverseElements(prev, p, subCompositeElements)
-      x(604, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount, obj)
+      x(622, prev, subCompositeElements, types, casts, txMetaCompositesCount, obj, sameNs)
+      val elements = traverseElements(prev, p, subCompositeElements, sameNs)
+      x(623, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount, obj, sameNs)
       collectCompositeElements = true
       elements
     }
@@ -360,13 +368,19 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         traverseElement(prev, p, ReBond(attrStr.tail))
 
       } else if (t.isRef) {
-        x(135, t.tpeS, t.card, t.refCard, t.refThis, t.refNext)
+        x(135, t.tpeS, t.card, t.refCard, t.refThis, t.refNext, obj)
         // Prepend ref in obj
         val refName = t.name.capitalize
         val refCls  = t.nsFull + "_" + refName + "_"
-        obj = addRef(obj, refCls, refName, t.card, objLevel)
-        objLevel = (objLevel - 1).max(0)
-        x(152, obj)
+        if (objCompositesCount > 0) {
+          val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
+          val newProps            = Obj(refCls, refName, 1, props) +: composites
+          obj = obj.copy(props = newProps)
+        } else {
+          obj = addRef(obj, refCls, refName, t.card, objLevel)
+          objLevel = (objLevel - 1).max(0)
+        }
+        x(152, obj, objLevel, isComposite, objCompositesCount, refCls)
         traverseElement(prev, p, Bond(t.refThis, firstLow(attrStr), t.refNext, t.refCard, bi(tree, t)))
 
       } else if (t.isRefAttr) {

@@ -160,6 +160,59 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 
 
 
+//    m(Ns.int ++ Ns.float.str).insert(1, (2, "a"))
+//    val o = m(Ns.int ++ Ns.float.str).getObj
+//
+//    o.Ns.int === 1
+//    o.Ns.float === 2
+//    o.Ns.str === "a"
+//
+
+
+//    m(Ns.int + Ns.float.str + Ref1.int1.str1).insert.apply(1, (2f, "a"), (3, "b"))
+//
+//    val o = m(Ns.int ++ Ns.float.str + Ref1.int1.str1).getObj
+//    o.Ns.int === 1
+//    o.Ns.float === 2f
+//    o.Ns.str === "a"
+//    o.Ref1.int1 === 3
+//    o.Ref1.str1 === "b"
+//
+//    // Multiple same-name namespace composites need ++ to allow access to object interface
+//    // Can't access object properties from same-name namespace composites
+//    (m(Ns.int + Ns.float.str + Ref1.int1.str1).getObj must throwA[molecule.core.exceptions.MoleculeException])
+//      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
+//      s"Please compose multiple same-name namespaces with `++` instead of `+` to access object properties."
+//
+//    // Multiple same-name namespace composites behaves equally for tuple output
+//    m(Ns.int + Ns.float.str + Ref1.int1.str1).get.head === (1, (2f, "a"), (3, "b"))
+//    m(Ns.int ++ Ns.float.str + Ref1.int1.str1).get.head === (1, (2f, "a"), (3, "b"))
+
+
+    //    m(Ns.int.Ref1.int1)
+    //    m(Ns.int.Ref1.int1.str1 + Ref2.int2)
+    //    m(Ns.int.Ref1.int1.str1 + Ref1.int1)
+    //    m(Ns.int.Ref1.int1.str1 + Ns.str)
+    //    m(Ns.int.Ref1.int1.str1 ++ Ns.str)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
