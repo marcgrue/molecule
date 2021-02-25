@@ -11,6 +11,7 @@ import molecule.core.transform.DynamicProp
 import molecule.core.util.Helpers
 import molecule.core.util.testing.TxCount.schema.TxCountSchema
 import molecule.datomic.api.in3_out10._
+import molecule.datomic.api.out4.m
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.transform.Model2Query
 import molecule.datomic.peer.facade.Datomic_Peer
@@ -197,10 +198,55 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 
 
 
+//    m(Ns.int.Refs1 * Ref1.int1.str1) insert List(
+//      (1, List((1, "a"), (2, "b")))
+//    )
+//
+//    m(Ns.int.Refs1 * Ref1.int1.str1).get === List(
+//      (1, List((1, "a"), (2, "b")))
+//    )
+//
+//    val o = m(Ns.int.Refs1 * Ref1.int1.str1).getObj
+//    o.int === 1
+//    o.Refs1.head.int1 === 1
+//    o.Refs1.head.str1 === "a"
+//    o.Refs1.last.int1 === 2
+//    o.Refs1.last.str1 === "b"
 
 
 
 
+//    m(Ns.str.Refs1 * Ref1.int1$.Ref2.int2$.str2) insert List(
+//      ("a", List((Some(11), Some(12), "aa"))),
+//      ("b", List((Some(13), None, "bb"))),
+//      ("c", List((None, Some(14), "cc"))),
+//      ("d", List())
+//    )
+//
+//    m(Ns.str.Refs1 *? Ref1.int1$.Ref2.int2$.str2).get
+//      .sortBy(_._1) === List(
+//      ("a", List((Some(11), Some(12), "aa"))),
+//      ("b", List((Some(13), None, "bb"))),
+//      ("c", List((None, Some(14), "cc"))),
+//      ("d", List())
+//    )
+//
+//    {
+//      val oo = m(Ns.str.Refs1 *? Ref1.int1$.Ref2.int2$.str2).getObjList.sortBy(_.str)
+//      oo.head.str === "a"
+//      oo.head.Refs1.head.int1$ === Some(11)
+//      oo.head.Refs1.head.Ref2.int2$ === Some(12)
+//      oo.head.Refs1.head.Ref2.str2 === "aa"
+//    }
+
+
+
+//    m(Ns.apply(42L).str.Refs1.*(Ref1.int1))
+//    m(Ns.apply(42L).Refs1.*(Ref1.int1))
+//    m(Ns.str.Refs1.*(Ref1.Refs2.*(Ref2.int2)))
+
+    // Successive nested not allowed (won't compile)
+    //        m(Ns.float.Refs1.*(Ref1.int1.str1).str.RefsSub1.*(Ref1.ref2))
 
 
 

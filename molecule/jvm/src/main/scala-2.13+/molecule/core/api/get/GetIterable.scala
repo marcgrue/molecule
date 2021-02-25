@@ -3,6 +3,7 @@ package molecule.core.api.get
 import java.util.{Date, Collection => jCollection, Iterator => jIterator, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncIterable
+import molecule.core.transform.DynamicProp
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
@@ -17,16 +18,42 @@ import scala.language.implicitConversions
 trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
-  // get ================================================================================================
+  // get obj data ==============================================================
+
+  /** Get `Iterable` of all objects matching the molecule.
+    * <br><br>
+    * Objects are lazily type-casted on each call to iterator.next().
+    * {{{
+    *   val person = Person.name.age.getObjIterable.next
+    *   person.name === "Ben"
+    *   person.age === 42
+    * }}}
+    *
+    * @group get
+    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
+    * @return Iterable[DynamicProp with Obj] where Obj is composed of trait types
+    *         matching the attributes of the molecule.
+    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
+    */
+  def getObjIterable(implicit conn: Conn): Iterable[DynamicProp with Obj] = new Iterable[DynamicProp with Obj] {
+    private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
+    override def isEmpty: Boolean = jColl.isEmpty
+    override def size: Int = jColl.size
+    override def iterator: Iterator[DynamicProp with Obj] = new Iterator[DynamicProp with Obj] {
+      private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
+      override def hasNext: Boolean = jIter.hasNext
+      override def next(): DynamicProp with Obj = row2obj(jIter.next())
+    }
+  }
+
+
+  // get tuple data ============================================================
 
   /** Get `Iterable` of all rows as tuples matching the molecule.
     * <br><br>
     * Rows are lazily type-casted on each call to iterator.next().
     * {{{
-    *   Person.name.age.getIterable.toList === List(
-    *     ("Ben", 42),
-    *     ("Liz", 37),
-    *   )
+    *   Person.name.age.getIterable.next === ("Ben", 42)
     * }}}
     *
     * @group get
@@ -46,7 +73,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
   }
 
 
-  // get as of ================================================================================================
+  // get as of =================================================================
 
   /** Get `Iterable` of all rows as tuples matching molecule as of transaction time `t`.
     * <br><br>

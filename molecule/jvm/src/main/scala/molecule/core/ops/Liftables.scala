@@ -229,7 +229,7 @@ private[molecule] trait Liftables extends MacroHelpers {
   implicit val liftRule : c.universe.Liftable[Rule]  = Liftable[Rule] { rd => q"Rule(${rd.name}, Seq(..${rd.args}), Seq(..${rd.clauses}))" }
   implicit val liftIn   : c.universe.Liftable[In]    = Liftable[In] { in => q"In(Seq(..${in.inputs}), Seq(..${in.rules}), Seq(..${in.ds}))" }
   implicit val liftWhere: c.universe.Liftable[Where] = Liftable[Where] { where => q"Where(Seq(..${where.clauses}))" }
-  implicit val liftQuery: c.universe.Liftable[Query] = Liftable[Query] { q => q"import molecule.datomic.base.ast.query._; Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
+  implicit val liftQuery: c.universe.Liftable[Query] = Liftable[Query] { q => q"Query(${q.f}, ${q.wi}, ${q.i}, ${q.wh})" }
 
 
   // Liftables for Model --------------------------------------------------------------

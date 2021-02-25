@@ -22,6 +22,7 @@ private[molecule] trait Base extends Dsl2Model {
         ..$genericImports
         import molecule.core.ops.ModelOps._
         import molecule.core.transform.DynamicProp
+        import molecule.datomic.base.ast.query._
         import molecule.datomic.base.transform.{Model2Query, QueryOptimizer}
         import molecule.datomic.base.facade.Conn
      """
@@ -231,23 +232,23 @@ private[molecule] trait Base extends Dsl2Model {
 
 
   case class resolveNestedTupleMethods(
-    casts: List[List[Int => Tree]],
-    types: List[List[Tree]],
+    castss: List[List[Int => Tree]],
+    typess: List[List[Tree]],
     OutTypes: Seq[Type],
     postTypes: List[Tree],
     postCasts: List[Int => Tree]
   ) {
-    val levels = casts.size
-    lazy val t1: Tree = tq"List[(..${if (levels == 2) types(1) else types(1) :+ t2})]"
-    lazy val t2: Tree = tq"List[(..${if (levels == 3) types(2) else types(2) :+ t3})]"
-    lazy val t3: Tree = tq"List[(..${if (levels == 4) types(3) else types(3) :+ t4})]"
-    lazy val t4: Tree = tq"List[(..${if (levels == 5) types(4) else types(4) :+ t5})]"
-    lazy val t5: Tree = tq"List[(..${if (levels == 6) types(5) else types(5) :+ t6})]"
-    lazy val t6: Tree = tq"List[(..${if (levels == 7) types(6) else types(6) :+ t7})]"
-    lazy val t7: Tree = tq"List[(..${types(7)})]"
+    val levels = castss.size
+    lazy val t1: Tree = tq"List[(..${if (levels == 2) typess(1) else typess(1) :+ t2})]"
+    lazy val t2: Tree = tq"List[(..${if (levels == 3) typess(2) else typess(2) :+ t3})]"
+    lazy val t3: Tree = tq"List[(..${if (levels == 4) typess(3) else typess(3) :+ t4})]"
+    lazy val t4: Tree = tq"List[(..${if (levels == 5) typess(4) else typess(4) :+ t5})]"
+    lazy val t5: Tree = tq"List[(..${if (levels == 6) typess(5) else typess(5) :+ t6})]"
+    lazy val t6: Tree = tq"List[(..${if (levels == 7) typess(6) else typess(6) :+ t7})]"
+    lazy val t7: Tree = tq"List[(..${typess(7)})]"
 
     var fieldIndex = levels - 1
-    def castLevel(level: Int): List[Tree] = casts(level).map { castLambda =>
+    def castLevel(level: Int): List[Tree] = castss(level).map { castLambda =>
       fieldIndex += 1
       castLambda(fieldIndex)
     }

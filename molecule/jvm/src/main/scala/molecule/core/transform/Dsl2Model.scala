@@ -21,7 +21,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   import c.universe._
 
-      val x = InspectMacro("Dsl2Model", 901, 900)
+    val x = InspectMacro("Dsl2Model", 901, 900)
 //  val x = InspectMacro("Dsl2Model", 101, 800)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
@@ -67,8 +67,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     var optNestedTacitIndexes: Map[Int, List[Int]] = Map.empty[Int, List[Int]]
 
     var genericImports: List[Tree]              = List(q"import molecule.core.generic.Datom._")
-    var types         : List[List[Tree]]        = List(List.empty[Tree])
-    var casts         : List[List[Int => Tree]] = List(List.empty[Int => Tree])
+    var typess        : List[List[Tree]]        = List(List.empty[Tree])
+    var castss        : List[List[Int => Tree]] = List(List.empty[Int => Tree])
     var obj           : Obj                     = Obj("", "", 0, Nil)
     var objLevel      : Int                     = 0
     var nestedRefAttrs: List[String]            = List.empty[String]
@@ -99,7 +99,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     }
 
     def addProp(t: richTree, tpe: Tree, cast: Int => Tree, aggr: Option[(String, Tree)] = None): Unit = {
-      obj = addNode(obj, Prop(t.nsFull + "_" + t.name, t.name, tpe, cast, aggr), objLevel)
+      obj = addNode(obj, Prop(t.nsFull + "_" + t.name.replace('$', '_'), t.name, tpe, cast, aggr), objLevel)
     }
 
 
@@ -120,8 +120,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         if (doAddProp)
           addProp(t, tpe, cast, optAggr)
       } else {
-        types = (tpe :: types.head) +: types.tail
-        casts = (cast :: casts.head) +: casts.tail
+        typess = (tpe :: typess.head) +: typess.tail
+        castss = (cast :: castss.head) +: castss.tail
         if (doAddProp)
           addProp(t, tpe, cast, optAggr)
       }
@@ -134,8 +134,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
           postCasts = castLambda(t) +: postCasts
           addProp(t, getType(t), castLambda(t))
         } else {
-          types = (getType(t) :: types.head) +: types.tail
-          casts = (castLambda(t) :: casts.head) +: casts.tail
+          typess = (getType(t) :: typess.head) +: typess.tail
+          castss = (castLambda(t) :: castss.head) +: castss.tail
           addProp(t, getType(t), castLambda(t))
         }
       }
@@ -145,11 +145,11 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       if (p.isNS && !p.isFirstNS) {
         if (txMetaDataDone && txMetaCompositesCount > 0) {
           // Start new level
-          types = List.empty[Tree] :: types
-          casts = List.empty[Int => Tree] :: casts
+          typess = List.empty[Tree] :: typess
+          castss = List.empty[Int => Tree] :: castss
         }
         txMetaDataDone = false
-        x(711, prev, p, element, types, casts)
+        x(711, prev, p, element, typess, castss)
         resolve(prev) :+ element
       } else {
         x(710, element)
@@ -165,13 +165,13 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         if (collectCompositeElements) {
           val result = prevElements :+ Composite(elements)
           val obj0   = obj
-          x(641, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj, sameNs)
+          x(641, prevElements, elements, result, collectCompositeElements, castss, typess, obj0, obj, sameNs)
           result
         } else {
           val result = Seq(Composite(prevElements), Composite(elements))
           val obj0   = obj
           levelComposite(result, sameNs)
-          x(642, prevElements, elements, result, collectCompositeElements, casts, types, obj0, obj, sameNs)
+          x(642, prevElements, elements, result, collectCompositeElements, castss, typess, obj0, obj, sameNs)
           result
         }
       } else {
@@ -279,10 +279,10 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         } else {
           Obj(nsCls, ns, 1, props) +: composites
         }
-        x(630, types, objCompositesCount, obj, props, composites, obj.copy(props = newP), nsCls, compNs, sameNs)
+        x(630, typess, objCompositesCount, obj, props, composites, obj.copy(props = newP), nsCls, compNs, sameNs)
         newP
       } else {
-        x(631, types, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))), sameNs)
+        x(631, typess, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))), sameNs)
         List(Obj(nsCls, ns, 1, obj.props))
       }
       obj = obj.copy(props = newProps)
@@ -294,23 +294,23 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
-      x(621, prev, subCompositeElements, types, casts, obj, sameNs)
+      x(621, prev, subCompositeElements, typess, castss, obj, sameNs)
 
       if (txMetaDataStarted) {
         txMetaCompositesCount = if (txMetaCompositesCount == 0) 2 else txMetaCompositesCount + 1
       }
 
       // Start new level
-      types = List.empty[Tree] :: types
-      casts = List.empty[Int => Tree] :: casts
+      typess = List.empty[Tree] :: typess
+      castss = List.empty[Int => Tree] :: castss
 
       // Make composite in obj
       levelComposite(subCompositeElements, sameNs)
       objCompositesCount += 1
 
-      x(622, prev, subCompositeElements, types, casts, txMetaCompositesCount, obj, sameNs)
+      x(622, prev, subCompositeElements, typess, castss, txMetaCompositesCount, obj, sameNs)
       val elements = traverseElements(prev, p, subCompositeElements, sameNs)
-      x(623, prev, subCompositeElements, types, casts, elements, txMetaCompositesCount, obj, sameNs)
+      x(623, prev, subCompositeElements, typess, castss, elements, txMetaCompositesCount, obj, sameNs)
       collectCompositeElements = true
       elements
     }
@@ -371,7 +371,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         x(135, t.tpeS, t.card, t.refCard, t.refThis, t.refNext, obj)
         // Prepend ref in obj
         val refName = t.name.capitalize
-        val refCls  = t.nsFull + "_" + refName + "_"
+        val refCls  = t.nsFull + "__" + refName
         if (objCompositesCount > 0) {
           val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
           val newProps            = Obj(refCls, refName, 1, props) +: composites
@@ -411,7 +411,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
       } else if (t.isValueAttr$) {
         addCast(if (optNestedLevel > 0) castOptNestedOptionalAttr else castOptionalAttr, t)
-        x(143, t.tpeS, types, postTypes)
+        x(143, t.tpeS, typess, postTypes)
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (t.isRefAttr$) {
@@ -434,22 +434,22 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
       } else if (t.isEnum) {
         if (optNestedLevel > 0)
-          casts = (castOptNestedEnumOpt(t) :: casts.head) +: casts.tail
+          castss = (castOptNestedEnumOpt(t) :: castss.head) +: castss.tail
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, EnumVal, Some(t.enumPrefix), bi(tree, t)))
 
       } else if (t.isMapAttr) {
         if (optNestedLevel > 0)
-          casts = (castOptNestedOptionalMapAttr(t) :: casts.head) +: casts.tail
+          castss = (castOptNestedOptionalMapAttr(t) :: castss.head) +: castss.tail
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, 3, VarValue, None, bi(tree, t)))
 
       } else if (t.isValueAttr) {
         if (optNestedLevel > 0)
-          casts = (castOptNestedOptionalAttr(t) :: casts.head) +: casts.tail
+          castss = (castOptNestedOptionalAttr(t) :: castss.head) +: castss.tail
         traverseElement(prev, p, Atom(t.nsFull, t.name, t.tpeS, t.card, VarValue, gvs = bi(tree, t)))
 
       } else if (t.isRefAttr) {
         if (optNestedLevel > 0)
-          casts = (castOptNestedOptionalRefAttr(t) :: casts.head) +: casts.tail
+          castss = (castOptNestedOptionalRefAttr(t) :: castss.head) +: castss.tail
         traverseElement(prev, p, Atom(t.nsFull, t.name, "ref", t.card, VarValue, gvs = bi(tree, t)))
 
       } else {
@@ -808,7 +808,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         txMetaDataStarted = false
         txMetaDataDone = true
 
-        x(310, "Tx", prev, txMolecule, txMetaData, types, casts, txMetaCompositesCount, objCompositesCount, ns, obj0, obj1, obj)
+        x(310, "Tx", prev, txMolecule, txMetaData, typess, castss, txMetaCompositesCount, objCompositesCount, ns, obj0, obj1, obj)
         traverseElement(prev, p, txMetaData)
 
       case q"$prev.e.apply[..$types]($nested)" if !p.isRef =>
@@ -960,7 +960,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
 
     def resolveNested(prev: Tree, p: richTree, manyRef: TermName, nested: Tree): Seq[Element] = {
-      x(521, post)
+      x(521, post, prev, manyRef, nested, obj)
       if (isOptNested)
         abort("Optional nested structure can't be mixed with mandatory nested structure.")
       // From now on, elements are part of nested structure
@@ -968,9 +968,9 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       // Add nested elements on current level
       val nestedElement = nested1(prev, p, manyRef, q"$nested")
       // Start new level
-      types = List.empty[Tree] :: types
-      casts = List.empty[Int => Tree] :: casts
-      x(523, nestedElement, post)
+      typess = List.empty[Tree] :: typess
+      castss = List.empty[Int => Tree] :: castss
+      x(523, nestedElement, post, prev, manyRef, nested, obj)
       traverseElement(prev, p, nestedElement)
     }
 
@@ -984,8 +984,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       val nestedElement = nested1(prev, p, manyRef, q"$nested")
       optNestedLevel -= 1
       // Start new level
-      types = List.empty[Tree] :: types
-      casts = List.empty[Int => Tree] :: casts
+      typess = List.empty[Tree] :: typess
+      castss = List.empty[Int => Tree] :: castss
       x(526, nestedElement, post)
       traverseElement(prev, p, nestedElement)
     }
@@ -1004,10 +1004,15 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
       val opt               = if (isOptNested) "$" else ""
       val (nsFull, refAttr) = (parentNs.toString, firstLow(manyRef))
-      x(550, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr)
+      x(550, q"$prev.$manyRef", prev, manyRef, refNext, parentNs, post, nsFull, refAttr, obj)
       nestedRefAttrs = nestedRefAttrs :+ s"$nsFull.$refAttr"
+      // park post props
+      val postProps = obj.props
+      obj = Obj("", "", 0, Nil)
       val nestedElems = nestedElements(q"$prev.$manyRef", refNext, nestedTree)
-      x(560, prev, manyRef, nestedTree, nsFull, parentNs, nestedRefAttrs, nestedElems)
+      val nestedObj   = Obj(nsFull + "__" + manyRef, manyRef.toString, 2, obj.props)
+      obj = obj.copy(props = nestedObj +: postProps)
+      x(560, prev, manyRef, nestedTree, nsFull, parentNs, nestedRefAttrs, nestedElems, postProps, obj)
       Nested(Bond(nsFull, refAttr + opt, refNext, 2, bi(q"$prev.$manyRef", richTree(q"$prev.$manyRef"))), nestedElems)
     }
 
@@ -1028,9 +1033,10 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         } else {
           abort(s"`$manyRef` has more than one ref pointing to `$nestedNs`:\n${refPairs.mkString("\n")}")
         }
-        x(570, manyRef, refNext, nested, refs, refPairs, refPairsFiltered, nestedElements, nestedElements2)
+        x(571, manyRef, refNext, nested, nestedNs, nestedElements, refs, refPairs, refPairsFiltered, nestedElements2, obj)
         nestedElements2
       } else {
+        x(572, manyRef, refNext, nested, nestedNs, nestedElements, obj)
         nestedElements
       }
     }
@@ -1476,14 +1482,14 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
     if (post) {
       // no nested, so transfer
-      types = List(postTypes)
-      casts = List(postCasts)
+      typess = List(postTypes)
+      castss = List(postCasts)
       postTypes = Nil
       postCasts = Nil
     }
     //    x(801, elements)
     //    x(801, elements, types, casts)
-    x(801, elements, types, casts, nestedRefAttrs,
+    x(801, elements, typess, castss, nestedRefAttrs,
       hasVariables, txMetaCompositesCount,
       postTypes, postCasts, post)
 
@@ -1491,7 +1497,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
     (
       genericImports,
       Model(VerifyRawModel(elements, false)),
-      types, casts, obj,
+      typess, castss, obj,
       hasVariables, txMetaCompositesCount,
       postTypes, postCasts,
       isOptNested,

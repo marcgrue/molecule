@@ -4,12 +4,13 @@ import java.util.Date
 import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
 import molecule.core.composition.Tx_
+import molecule.core.dsl.base.Init
 import molecule.core.exceptions.MoleculeException
 import molecule.core.ops.exception.VerifyModelException
 import molecule.datomic.api.out4.m
 //import molecule.core.composition.Tx
 import molecule.core.transform.DynamicProp
-import molecule.tests.core.base.dsl.CoreTest.{Ns, Ref1}
+import molecule.tests.core.base.dsl.CoreTest._
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 import molecule.tests.core.ref.schema.SelfJoinSchema
 //import molecule.core.dsl.base.{Init, NS_0_01}
@@ -129,6 +130,16 @@ class AdHocTest extends Specification {
   "core" >> {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
+
+
+
+
+
+
+
+
+
+
 
 
 

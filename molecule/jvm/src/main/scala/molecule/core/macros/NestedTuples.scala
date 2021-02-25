@@ -3,12 +3,15 @@ package molecule.core.macros
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList, Comparator => jComparator, List => jList}
 import molecule.core.api.Molecule_0
+import molecule.core.transform.DynamicProp
 import molecule.datomic.base.facade.Conn
 
 /** Builder classes of various arity of nested tuples. */
 trait NestedTuples[Obj, OuterTpl] extends jComparator[jList[AnyRef]] { self: Molecule_0[Obj, OuterTpl] =>
 
-  // Lazily re-use nested list
+  def outerTpl2obj(outerTpl: OuterTpl): DynamicProp with Obj = ???
+
+  // Re-use nested list implementation
   final override def getIterable(implicit conn: Conn): Iterable[OuterTpl] = get(conn)
 
   val levels = _nestedQuery.fold(0)(_.f.outputs.size - _query.f.outputs.size)
@@ -95,7 +98,7 @@ trait NestedTuples[Obj, OuterTpl] extends jComparator[jList[AnyRef]] { self: Mol
     i = 0
   }
 
-  // java.util.Comparator sorting interface implemented by NestedTuples subclasses
+  // java.util.Comparator sorting interface implemented by NestedTuples subclasses (`rows.sort(this)`)
   protected def compare(a: jList[AnyRef], b: jList[AnyRef]): Int = {
     sortIndex = 0
     result = 0
@@ -122,7 +125,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -172,6 +175,30 @@ object NestedTuples {
         acc0
       }
     }
+
+    /**
+      * Lazily populate objects
+      *
+      * @param conn
+      * @return
+      */
+    final override def getObjIterable(implicit conn: Conn): Iterable[DynamicProp with Obj] = {
+      new Iterable[DynamicProp with Obj] {
+        val tplIterable: Iterable[OuterTpl] = getIterable
+        override def isEmpty: Boolean = tplIterable.isEmpty
+        override def size: Int = tplIterable.size
+        override def iterator: Iterator[DynamicProp with Obj] = new Iterator[DynamicProp with Obj] {
+          private val tplIterator: Iterator[OuterTpl] = tplIterable.iterator
+          override def hasNext: Boolean = tplIterator.hasNext
+          override def next(): DynamicProp with Obj = outerTpl2obj(tplIterator.next())
+        }
+      }
+    }
+
+    final override def getObjList(implicit conn: Conn): List[DynamicProp with Obj] = {
+      // Let tuples `get` do the heavy lifting of sorting and casting
+      get.map(outerTpl2obj)
+    }
   }
 
 
@@ -180,7 +207,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -258,7 +285,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -361,7 +388,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -494,7 +521,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -662,7 +689,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]
@@ -870,7 +897,7 @@ object NestedTuples {
     final override def get(implicit conn: Conn): List[OuterTpl] = {
       resetCastVars
       val rows: java.util.ArrayList[jList[AnyRef]] = new java.util.ArrayList(conn.query(_model, _nestedQuery.get))
-      val last = rows.size
+      val last                                     = rows.size
 
       if (last == 0) {
         List.empty[OuterTpl]

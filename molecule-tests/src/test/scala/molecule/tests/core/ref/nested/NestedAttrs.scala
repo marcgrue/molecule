@@ -17,13 +17,13 @@ class NestedAttrs extends TestSpec {
       )
 
       m(Ns.int.Refs1 * Ref1.int1.str1$).get === List(
-        (1, List((1, Some("a")), (2, None))),
+        (1, List((1, Some("a")), (2, None)))
       )
       m(Ns.int.Refs1 * Ref1.int1.str1).get === List(
-        (1, List((1, "a"))),
+        (1, List((1, "a")))
       )
       m(Ns.int.Refs1 * Ref1.int1.str1_).get === List(
-        (1, List(1)),
+        (1, List(1))
       )
 
       // Optional nested
