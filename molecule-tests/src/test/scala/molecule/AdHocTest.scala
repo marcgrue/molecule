@@ -7,7 +7,6 @@ import molecule.core.composition.Tx_
 import molecule.core.dsl.base.Init
 import molecule.core.exceptions.MoleculeException
 import molecule.core.ops.exception.VerifyModelException
-import molecule.datomic.api.out4.m
 //import molecule.core.composition.Tx
 import molecule.core.transform.DynamicProp
 import molecule.tests.core.base.dsl.CoreTest._
@@ -136,9 +135,32 @@ class AdHocTest extends Specification {
 
 
 
+//    (Ref1.int1(1).str1("a") +
+//      Ref2.int2(2).str2("b")
+//        .Tx(Ref3.int3(3).str3("c") + Ref4.int4(4).str4("d"))).save
+//
+//    m(Ref1.int1.str1.+(Ref2.int2.str2.Tx(Ref3.int3.str3))).save
+//    m(Ref1.int1.str1.+(Ref2.int2.str2.Tx(Ref3.int3.str3.+(Ref4.int4.str4)))).save
 
 
+//    m(Ref1.int1.+(Ref2.int2.Tx(Ref3.int3))).save
+//    m(Ref1.int1.+(Ref2.int2.Tx(Ref3.int3.+(Ref4.int4)))).save
 
+
+//    molecule.core.transform.DynamicProp with molecule.core.dsl.base.Init
+//    with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref1_int1]
+//    with molecule.tests.core.base.dsl.CoreTest.Ref2_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref2_int2]
+//    with molecule.core.composition.Tx_[molecule.core.dsl.base.Init
+//      with molecule.tests.core.base.dsl.CoreTest.Ref3_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref3_int3]
+//      with molecule.tests.core.base.dsl.CoreTest.Ref4_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref4_int4]]
+//
+//    molecule.core.transform.DynamicProp
+//    with molecule.tests.core.base.dsl.CoreTest.Ref1_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref1_int1]
+//    with molecule.tests.core.base.dsl.CoreTest.Ref2_[molecule.core.dsl.base.Init
+//      with molecule.tests.core.base.dsl.CoreTest.Ref2_int2
+//      with molecule.core.composition.Tx_[molecule.core.dsl.base.Init
+//      with molecule.tests.core.base.dsl.CoreTest.Ref3_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref3_int3]
+//      with molecule.tests.core.base.dsl.CoreTest.Ref4_[molecule.core.dsl.base.Init with molecule.tests.core.base.dsl.CoreTest.Ref4_int4]]]
 
 
 

@@ -250,6 +250,17 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 
 
 
+    // Composites + composite tx meta data
+    //    m(Ref1.int1.+(Ref2.int2.Tx(Ref3.int3.+(Ref4.int4)))).save
+
+
+
+
+
+
+
+
+
 
 
 

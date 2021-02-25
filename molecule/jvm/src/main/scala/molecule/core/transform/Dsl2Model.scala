@@ -21,8 +21,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
   import c.universe._
 
-    val x = InspectMacro("Dsl2Model", 901, 900)
-//  val x = InspectMacro("Dsl2Model", 101, 800)
+      val x = InspectMacro("Dsl2Model", 901, 900)
+//  val x = InspectMacro("Dsl2Model", 201, 700)
 
   override def abort(msg: String): Nothing = throw new Dsl2ModelException(msg)
 
@@ -160,7 +160,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
     def traverseElements(prev: Tree, p: richTree, elements: Seq[Element], sameNs: Boolean = false): Seq[Element] = {
       if (isComposite) {
-        x(640, prev, elements, sameNs)
+        x(640, prev, elements, sameNs, obj)
         val prevElements = resolve(prev)
         if (collectCompositeElements) {
           val result = prevElements :+ Composite(elements)
@@ -170,7 +170,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
         } else {
           val result = Seq(Composite(prevElements), Composite(elements))
           val obj0   = obj
-          levelComposite(result, sameNs)
+          levelCompositeObj(result, sameNs)
           x(642, prevElements, elements, result, collectCompositeElements, castss, typess, obj0, obj, sameNs)
           result
         }
@@ -257,9 +257,10 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       }
     }
 
-    def levelComposite(subCompositeElements: Seq[Element], sameNs: Boolean = false): Unit = {
-      val err = "Unexpectedly couldn't find ns in sub composite:\n  " + subCompositeElements.mkString("\n  ")
-      val ns  = subCompositeElements.collectFirst {
+    def levelCompositeObj(subCompositeElements: Seq[Element], sameNs: Boolean = false): Unit = {
+      x(630, subCompositeElements, sameNs, objCompositesCount)
+      val err   = "Unexpectedly couldn't find ns in sub composite:\n  " + subCompositeElements.mkString("\n  ")
+      val ns    = subCompositeElements.collectFirst {
         case Atom(ns, _, _, _, _, _, _, _) => ns
         case Bond(nsFull, _, _, _, _)      => nsFull
         case Composite(elements)           => elements.collectFirst {
@@ -267,25 +268,31 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
           case Bond(nsFull, _, _, _, _)      => nsFull
         } getOrElse abort(err)
       } getOrElse abort(err)
+      val nsCls = ns + "_"
 
-      val nsCls    = ns + "_"
       // Prepend namespace in obj
-      val newProps = if (objCompositesCount > 0) {
+      val newProps: List[Node] = if (objCompositesCount > 0) {
         val (props, composites) = obj.props.splitAt(obj.props.length - objCompositesCount)
-        val compNs              = composites.head.asInstanceOf[Obj].cls
-        val newP                = if (sameNs && nsCls == composites.head.asInstanceOf[Obj].cls) {
-          val o = composites.head.asInstanceOf[Obj]
-          o.copy(props = props ++ o.props) +: composites.tail
-        } else {
-          Obj(nsCls, ns, 1, props) +: composites
+        val newP: List[Node]    = composites.head match {
+          case Obj("Tx_", _, _, _) =>
+            // Reset obj composites count
+            objCompositesCount = 0
+            List(Obj(nsCls, ns, 1, props ++ composites))
+
+          case compositeObj@Obj(compositeCls, _, _, _) if sameNs && nsCls == compositeCls =>
+            compositeObj.copy(props = props ++ compositeObj.props) +: composites.tail
+
+          case _ => Obj(nsCls, ns, 1, props) +: composites
         }
-        x(630, typess, objCompositesCount, obj, props, composites, obj.copy(props = newP), nsCls, compNs, sameNs)
+        x(631, props, composites, newP)
         newP
       } else {
-        x(631, typess, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))), sameNs)
+        x(632, typess, objCompositesCount, obj, obj.copy(props = List(Obj(nsCls, ns, 1, obj.props))), sameNs)
         List(Obj(nsCls, ns, 1, obj.props))
       }
+      val obj0                 = obj
       obj = obj.copy(props = newProps)
+      x(633, obj0, obj, ns)
     }
 
     def resolveComposite(prev: Tree, p: richTree, subCompositeTree: Tree, sameNs: Boolean = false): Seq[Element] = {
@@ -294,6 +301,8 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       isComposite = true
       collectCompositeElements = false
       val subCompositeElements = resolve(subCompositeTree)
+      // Make sure we continue to collect composite elements
+      collectCompositeElements = false
       x(621, prev, subCompositeElements, typess, castss, obj, sameNs)
 
       if (txMetaDataStarted) {
@@ -305,13 +314,13 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       castss = List.empty[Int => Tree] :: castss
 
       // Make composite in obj
-      levelComposite(subCompositeElements, sameNs)
+      levelCompositeObj(subCompositeElements, sameNs)
       objCompositesCount += 1
 
-      x(622, prev, subCompositeElements, typess, castss, txMetaCompositesCount, obj, sameNs)
+      x(622, prev, subCompositeElements, typess, castss, txMetaCompositesCount, obj, sameNs, objCompositesCount)
       val elements = traverseElements(prev, p, subCompositeElements, sameNs)
-      x(623, prev, subCompositeElements, typess, castss, elements, txMetaCompositesCount, obj, sameNs)
       collectCompositeElements = true
+      x(623, prev, subCompositeElements, typess, castss, elements, txMetaCompositesCount, obj, sameNs)
       elements
     }
 
@@ -577,7 +586,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       } else if (tree.isMapAttrK) {
         tree match {
           case t1@q"$prev1.$mapAttr.apply($key)" =>
-            val tpeStr = t1.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
+            val tpeStr = truncTpe(t1.tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString)
             val nsFull = new nsp(t1.tpe.typeSymbol.owner).toString
             x(260, attrStr, tpeStr)
             if (attrStr.last != '_') {
@@ -842,7 +851,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
       // Keyed attribute map operation
       case t@q"$prev.$keyedAttr.apply($key).$op(..$values)" if q"$prev.$keyedAttr($key)".isMapAttrK =>
         val tpe    = c.typecheck(q"$prev.$keyedAttr($key)").tpe
-        val tpeStr = tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString
+        val tpeStr = truncTpe(tpe.baseType(weakTypeOf[One[_, _, _]].typeSymbol).typeArgs.last.toString)
         val nsFull = new nsp(tpe.typeSymbol.owner).toString
         x(420, nsFull, keyedAttr, tpeStr, obj)
         if (keyedAttr.toString().last != '_') {

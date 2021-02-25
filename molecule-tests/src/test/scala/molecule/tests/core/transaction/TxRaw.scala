@@ -5,7 +5,7 @@ import datomic.Util
 import molecule.datomic.api.out1._
 import molecule.datomic.base.util.SystemPeer
 import molecule.setup.TestSpec
-import molecule.tests.core.base.dsl.CoreTest.Ns
+import molecule.tests.core.base.dsl.CoreTest._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

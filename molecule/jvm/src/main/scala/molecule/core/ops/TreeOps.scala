@@ -24,6 +24,13 @@ private[molecule] trait TreeOps extends Liftables {
     case _   => attr
   }
 
+  def truncTpe(tpe: String): String = tpe match {
+    case "java.util.Date" => "Date"
+    case "java.util.UUID" => "UUID"
+    case "java.net.URI"   => "URI"
+    case other            => other
+  }
+
   implicit class richTree(val t: Tree) {
     //    val zz = InspectMacro("TreeOps", 1)
     lazy val tpe_         : Type           = if (t == null) abort("[molecule.ops.TreeOps.richTree] Can't handle null.") else c.typecheck(t).tpe
@@ -91,7 +98,7 @@ private[molecule] trait TreeOps extends Liftables {
   def nsString(nsTree: Tree): String = nsString(nsTree.symbol.name.toString)
   def nsString(nsName: Name): String = nsString(nsName.decodedName.toString)
 
-  def extractNsAttr(tpe: Type, tree: Tree) = {
+  def extractNsAttr(tpe: Type, tree: Tree): String = {
     val ss = c.typecheck(tree).tpe.baseType(tpe.typeSymbol).typeArgs.head.typeSymbol.name.toString.split('_')
     // part_Ns or Ns
     ":" + ss.init.mkString("_") + "/" + ss.last
@@ -303,12 +310,8 @@ private[molecule] trait TreeOps extends Liftables {
     def name: TermName = TermName(toString)
     def fullName: String = attrType.typeSymbol.fullName
 
-    def tpeS: String = if (tpe =:= NoType) "" else tpe.toString match {
-      case "java.util.Date" => "Date"
-      case "java.util.UUID" => "UUID"
-      case "java.net.URI"   => "URI"
-      case other            => other
-    }
+    def tpeS: String = if (tpe =:= NoType) "" else truncTpe(tpe.toString)
+
 
     def contentType: Type = tpe
 

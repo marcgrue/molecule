@@ -45,19 +45,13 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       q"(..${compositeCasts(castss)})"
     }
 
-    val objTree = objCode(obj)._1
-    val objTree2 = objCode(obj)._1
-//    val objTree2 = q"???"
-//    val objTree2 = q"throw new RuntimeException($xx)"
-//    val objTree2 = q"""throw new RuntimeException("Please compose multiple same-name namespaces with `++` (instead of `+`) to get object accessibility.")"""
-
     val t = if (hasVariables) {
       q"""
         ..$imports
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
-          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = $objTree
+          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
         }
         new $outMolecule
       """
@@ -66,7 +60,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         ..$imports
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
-          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = $objTree2
+          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
 //          {throw new RuntimeException(xx)}
 //          {throw new RuntimeException("Please compose multiple same-name namespaces with `++` (instead of `+`) to get object accessibility.")}
 //            new DynamicProp with Init with Ns_[Init with Ns_int] with Ns_[Init with Ns_float with Ns_str] {
@@ -84,7 +78,8 @@ class MakeComposite(val c: blackbox.Context) extends Base {
       """
     }
     //    val q0 = Model2Query(model0)
-    z(3
+    z(2
+      , model0
       , typess
       , obj
       , objCode(obj)._1
