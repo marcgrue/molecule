@@ -40,11 +40,13 @@ trait Datom_tx         { lazy val tx        : Long    = ??? }
 trait Datom_txInstant  { lazy val txInstant : Date    = ??? }
 trait Datom_op         { lazy val op        : Boolean = ??? }
 
-trait Datom_e$         { lazy val e$        : Option[Long   ] = ??? }
-trait Datom_a$         { lazy val a$        : Option[String ] = ??? }
-trait Datom_v$         { lazy val v$        : Option[Any    ] = ??? }
-trait Datom_t$         { lazy val t$        : Option[Long   ] = ??? }
-trait Datom_tx$        { lazy val tx$       : Option[Long   ] = ??? }
-trait Datom_txInstant$ { lazy val txInstant$: Option[Date   ] = ??? }
-trait Datom_op$        { lazy val op$       : Option[Boolean] = ??? }
+// Please note that `$` has been subsituted with `_` to allow packaging to jars.
+// To be interpreted as optional and not tacit
+trait Datom_e_         { lazy val e$        : Option[Long   ] = ??? }
+trait Datom_a_         { lazy val a$        : Option[String ] = ??? }
+trait Datom_v_         { lazy val v$        : Option[Any    ] = ??? }
+trait Datom_t_         { lazy val t$        : Option[Long   ] = ??? }
+trait Datom_tx_        { lazy val tx$       : Option[Long   ] = ??? }
+trait Datom_txInstant_ { lazy val txInstant$: Option[Date   ] = ??? }
+trait Datom_op_        { lazy val op$       : Option[Boolean] = ??? }
 

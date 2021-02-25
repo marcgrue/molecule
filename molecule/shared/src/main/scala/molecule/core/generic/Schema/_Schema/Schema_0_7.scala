@@ -38,12 +38,12 @@ trait Schema_0_7_L0[o0[_], p0, A, B, C, D, E, F, G] extends Schema_0_7[o0, p0, A
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -91,12 +91,12 @@ trait Schema_0_7_L1[o0[_], p0, o1[_], p1, A, B, C, D, E, F, G] extends Schema_0_
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -144,12 +144,12 @@ trait Schema_0_7_L2[o0[_], p0, o1[_], p1, o2[_], p2, A, B, C, D, E, F, G] extend
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -197,12 +197,12 @@ trait Schema_0_7_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, A, B, C, D, E, F
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -250,12 +250,12 @@ trait Schema_0_7_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, A, B,
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -303,12 +303,12 @@ trait Schema_0_7_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -356,12 +356,12 @@ trait Schema_0_7_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
@@ -409,12 +409,12 @@ trait Schema_0_7_L7[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val tx           : Next[tx          , Schema_tx         , Long   ] = ???
   final lazy val txInstant    : Next[txInstant   , Schema_txInstant  , Date   ] = ???
   
-  final lazy val doc$         : Next[doc$        , Schema_doc$        , Option[String ]] = ???
-  final lazy val index$       : Next[index$      , Schema_index$      , Option[Boolean]] = ???
-  final lazy val unique$      : Next[unique$     , Schema_unique$     , Option[String ]] = ???
-  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext$   , Option[Boolean]] = ???
-  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent$, Option[Boolean]] = ???
-  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory$  , Option[Boolean]] = ???
+  final lazy val doc$         : Next[doc$        , Schema_doc_        , Option[String ]] = ???
+  final lazy val index$       : Next[index$      , Schema_index_      , Option[Boolean]] = ???
+  final lazy val unique$      : Next[unique$     , Schema_unique_     , Option[String ]] = ???
+  final lazy val fulltext$    : Next[fulltext$   , Schema_fulltext_   , Option[Boolean]] = ???
+  final lazy val isComponent$ : Next[isComponent$, Schema_isComponent_, Option[Boolean]] = ???
+  final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
   final lazy val a_           : Stay[a           , Schema_a          , String ] = ???

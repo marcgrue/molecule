@@ -431,17 +431,4 @@ trait ObjBuilder extends Cast {
     }
     obj.copy(props = newProps)
   }
-
-
-  def addComposite(obj: Obj, nsCls: String, ns: String, hasSubComposite: Boolean): Obj = {
-    val newProps = if (hasSubComposite) {
-      List(
-        Obj(nsCls, ns, 1, obj.props.init),
-        obj.props.last
-      )
-    } else {
-      List(Obj(nsCls, ns, 1, obj.props))
-    }
-    obj.copy(props = newProps)
-  }
 }

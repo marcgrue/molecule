@@ -41,11 +41,13 @@ trait VAET_tx         { lazy val tx        : Long    = ??? }
 trait VAET_txInstant  { lazy val txInstant : Date    = ??? }
 trait VAET_op         { lazy val op        : Boolean = ??? }
 
-trait VAET_e$         { lazy val e$        : Option[Long   ] = ??? }
-trait VAET_a$         { lazy val a$        : Option[String ] = ??? }
-trait VAET_v$         { lazy val v$        : Option[Any    ] = ??? }
-trait VAET_t$         { lazy val t$        : Option[Long   ] = ??? }
-trait VAET_tx$        { lazy val tx$       : Option[Long   ] = ??? }
-trait VAET_txInstant$ { lazy val txInstant$: Option[Date   ] = ??? }
-trait VAET_op$        { lazy val op$       : Option[Boolean] = ??? }
+// Please note that `$` has been subsituted with `_` to allow packaging to jars.
+// To be interpreted as optional and not tacit
+trait VAET_e_         { lazy val e$        : Option[Long   ] = ??? }
+trait VAET_a_         { lazy val a$        : Option[String ] = ??? }
+trait VAET_v_         { lazy val v$        : Option[Any    ] = ??? }
+trait VAET_t_         { lazy val t$        : Option[Long   ] = ??? }
+trait VAET_tx_        { lazy val tx$       : Option[Long   ] = ??? }
+trait VAET_txInstant_ { lazy val txInstant$: Option[Date   ] = ??? }
+trait VAET_op_        { lazy val op$       : Option[Boolean] = ??? }
 
