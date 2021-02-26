@@ -17,7 +17,7 @@ import com.cognitect.transit.impl.URIImpl
 trait CastHelpers[Obj, Tpl] extends CastHelpersAggr {
 
   // Row to object cast interface to be materialized by macro
-  protected def row2obj(row: jList[AnyRef]): DynamicProp with Obj = ???
+  protected def row2obj(row: jList[AnyRef]): Obj = ???
 
   // Row to tuple cast interface to be materialized by macro
   protected def row2tpl(row: jList[AnyRef]): Tpl = ???

@@ -3,7 +3,6 @@ package molecule.core.api.get
 import java.util.{Date, Collection => jCollection, Iterator => jIterator, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncIterable
-import molecule.core.transform.DynamicProp
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
@@ -31,18 +30,18 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *
     * @group get
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[DynamicProp with Obj] where Obj is composed of trait types
+    * @return Iterable[Obj] where Obj is composed of trait types
     *         matching the attributes of the molecule.
     * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
     */
-  def getObjIterable(implicit conn: Conn): Iterable[DynamicProp with Obj] = new Iterable[DynamicProp with Obj] {
+  def getObjIterable(implicit conn: Conn): Iterable[Obj] = new Iterable[Obj] {
     private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
     override def isEmpty: Boolean = jColl.isEmpty
     override def size: Int = jColl.size
-    override def iterator: Iterator[DynamicProp with Obj] = new Iterator[DynamicProp with Obj] {
+    override def iterator: Iterator[Obj] = new Iterator[Obj] {
       private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
       override def hasNext: Boolean = jIter.hasNext
-      override def next(): DynamicProp with Obj = row2obj(jIter.next())
+      override def next(): Obj = row2obj(jIter.next())
     }
   }
 

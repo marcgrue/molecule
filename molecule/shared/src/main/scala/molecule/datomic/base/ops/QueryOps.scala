@@ -21,6 +21,9 @@ object QueryOps extends Helpers with JavaUtil {
   def castStr(tpe: String): String = tpe match {
     case "Int" | "ref" => "Long"
     case "Float"       => "Double"
+    case "Date"        => "java.util.Date"
+    case "UUID"        => "java.util.UUID"
+    case "URI"         => "java.net.URI"
     case other         => other
   }
 
@@ -230,7 +233,6 @@ object QueryOps extends Helpers with JavaUtil {
 
     def schemaT: Query = q.schema
       .func("-", Seq(Var("tx"), Val(txBase)), ScalarBinding(Var("t")))
-    //      .func("datomic.Peer/toT ^Long", Seq(Var("tx")), ScalarBinding(Var("t")))
 
     def schemaTxInstant: Query = q.schema
       .where("tx", "db", "txInstant", Var("txInstant"), "")
@@ -371,11 +373,9 @@ object QueryOps extends Helpers with JavaUtil {
       q.wh.clauses.reverse.collectFirst {
         case DataClause(_, _, _, _, Var(tx), _) if tx == v + "_tx" =>
           q.func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
-        //          q.func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
       } getOrElse
         q.datomTx(e, v, v1)
           .func("-", Seq(Var(v + "_tx"), Val(txBase)), ScalarBinding(Var(v + "_t")))
-      //          .func("datomic.Peer/toT ^Long", Seq(Var(v + "_tx")), ScalarBinding(Var(v + "_t")))
     }
 
     def datomTxInstant(e: String, v: String, v1: String): Query = {

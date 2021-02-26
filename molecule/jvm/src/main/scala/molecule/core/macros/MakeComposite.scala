@@ -51,7 +51,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes](_resolvedModel, Model2Query(_resolvedModel)) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
-          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+          final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
         }
         new $outMolecule
       """
@@ -60,19 +60,7 @@ class MakeComposite(val c: blackbox.Context) extends Base {
         ..$imports
         final class $outMolecule extends $MoleculeTpe[$ObjType, ..$OutTypes]($model0, ${Model2Query(model0)}) {
           final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = $casts
-          final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
-//          {throw new RuntimeException(xx)}
-//          {throw new RuntimeException("Please compose multiple same-name namespaces with `++` (instead of `+`) to get object accessibility.")}
-//            new DynamicProp with Init with Ns_[Init with Ns_int] with Ns_[Init with Ns_float with Ns_str] {
-//              final override def Ns: Init with Ns_int with Ns_float with Ns_str = {
-//                new DynamicProp with Init with Ns_int with Ns_float with Ns_str {
-//                  final override lazy val int: Int = 1
-//                  final override lazy val float: Float = 2f
-//                  final override lazy val str: String = "a"
-//                }
-//              }
-//            }
-//          }
+          final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
         }
         new $outMolecule
       """

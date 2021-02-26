@@ -45,7 +45,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -80,7 +80,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -118,7 +118,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
               }
               new $outMolecule
             }
@@ -138,7 +138,7 @@ class MakeMolecule_In(val c: blackbox.Context) extends Base {
                 (QueryOptimizer(boundRawQuery), None, boundRawQuery, None)
               ) {
                 final override def row2tpl(row: java.util.List[AnyRef]): (..$OutTypes) = (..${topLevel(casts)})
-                final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+                final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
               }
               new $outMolecule
             }

@@ -8,7 +8,6 @@ import molecule.core.dsl.base.Init
 import molecule.core.exceptions.MoleculeException
 import molecule.core.ops.exception.VerifyModelException
 //import molecule.core.composition.Tx
-import molecule.core.transform.DynamicProp
 import molecule.tests.core.base.dsl.CoreTest._
 import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
 import molecule.tests.core.ref.schema.SelfJoinSchema

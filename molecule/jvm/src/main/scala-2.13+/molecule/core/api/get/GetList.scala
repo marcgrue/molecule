@@ -3,7 +3,6 @@ package molecule.core.api.get
 import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
 import molecule.core.api.getAsync.GetAsyncList
-import molecule.core.transform.DynamicProp
 import molecule.core.util.Quoted
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -21,17 +20,17 @@ import scala.language.implicitConversions
 trait GetList[Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
 
 
-  def getObjList(implicit conn: Conn): List[DynamicProp with Obj] = {
+  def getObjList(implicit conn: Conn): List[Obj] = {
     val jColl = conn.query(_model, _query)
     val it    = jColl.iterator
-    val buf   = new ListBuffer[DynamicProp with Obj]
+    val buf   = new ListBuffer[Obj]
     while (it.hasNext) {
       buf += row2obj(it.next)
     }
     buf.toList
   }
 
-  def getObj(implicit conn: Conn): DynamicProp with Obj = getObjList(conn).head
+  def getObj(implicit conn: Conn): Obj = getObjList(conn).head
 
 
 

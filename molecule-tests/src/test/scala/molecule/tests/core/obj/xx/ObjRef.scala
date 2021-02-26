@@ -7,7 +7,6 @@ import molecule.core.composition.Tx
 import molecule.core.dsl.base.{Init, NS_0_01}
 import molecule.core.dsl.{attributes, base}
 import molecule.core.macros.ObjBuilder
-import molecule.core.transform.DynamicProp
 import molecule.core.util.Helpers
 import molecule.core.util.testing.TxCount.schema.TxCountSchema
 import molecule.datomic.api.in3_out10._
@@ -30,7 +29,7 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 
     import molecule.tests.core.base.dsl.CoreTest._
 
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
+//    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
     //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
 

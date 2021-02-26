@@ -43,7 +43,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, Model2Query(_resolvedModel)) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
           }
           new $outMolecule
         """
@@ -52,7 +52,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = ${objCode(obj)._1}
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
           }
           new $outMolecule
         """
@@ -65,7 +65,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final private val _resolvedModel: Model = resolveIdentifiers($model0, ${mapIdentifiers(model0.elements).toMap})
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, Model2Query(_resolvedModel)) {
             ..${castOptNestedRows(castss, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = {
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType = {
               $tpl
               ${objCode(obj, isNested = true)._1}
             }
@@ -77,7 +77,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           ..$imports
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             ..${castOptNestedRows(castss, TplTypes, optNestedRefIndexes, optNestedTacitIndexes)}
-            final override def row2obj(row: java.util.List[AnyRef]): DynamicProp with $ObjType = {
+            final override def row2obj(row: java.util.List[AnyRef]): $ObjType = {
               $tpl
               ${objCode(obj, isNested = true)._1}
             }
@@ -96,7 +96,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes](_resolvedModel, Model2Query(_resolvedModel))
             with ${nestedTupleClassX(castss.size)}[$ObjType, (..$TplTypes)] {
             ..${resolveNestedTupleMethods(castss, typess, TplTypes, postTypes, postCasts).get}
-            final override def outerTpl2obj(tpl: (..$TplTypes)): DynamicProp with $ObjType = {
+            final override def outerTpl2obj(tpl: (..$TplTypes)): $ObjType = {
               $tpl
               ${objCode(obj, isNested = true)._1}
             }
@@ -109,7 +109,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)})
             with ${nestedTupleClassX(castss.size)}[$ObjType, (..$TplTypes)] {
             ..${resolveNestedTupleMethods(castss, typess, TplTypes, postTypes, postCasts).get}
-            final override def outerTpl2obj(tpl: (..$TplTypes)): DynamicProp with $ObjType = {
+            final override def outerTpl2obj(tpl: (..$TplTypes)): $ObjType = {
               $tpl
               ${objCode(obj, isNested = true)._1}
             }
