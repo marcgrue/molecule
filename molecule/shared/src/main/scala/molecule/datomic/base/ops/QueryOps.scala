@@ -164,7 +164,6 @@ object QueryOps extends Helpers with JavaUtil {
       q.where(Var("_"), KW("db.install", "attribute"), "id", "tx")
         .where(Var("id"), KW("db", "ident"), "idIdent")
         .func("namespace", Seq(Var("idIdent")), ScalarBinding(Var("nsFull")))
-        //        .func("java.util.regex.Pattern/matches ^String",
         .func(".matches ^String",
           Seq(Var("nsFull"), Val(
             "^(db|db.alter|db.excise|db.install|db.part|db.sys|fressian" + // peer/client

@@ -8,16 +8,15 @@ object SchemaDataModel {
   trait Schema {
 
     val id     = oneLong.doc("Attribute entity id")
-    val ident  = oneString.doc("Attribute ident ':part_Ns/attr' or :Ns/attr (clojure KeyWord as String)")
     val part   = oneString.doc("Partition name 'part'")
-    val nsFull = oneString.doc("Namespace name with partition prefix 'part_ns' or 'ns' if no partitions defined")
-    val ns     = oneString.doc("Namespace name 'ns'")
-    val a      = oneString.doc("Attribute name 'attr'")
+    val nsFull = oneString.doc("Namespace name with partition prefix 'part_Ns' or 'Ns' if no partitions defined")
+    val ns     = oneString.doc("Namespace name 'Ns'")
+    val a      = oneString.doc("Full attribute name ':Ns/attr' or ':part_Ns/attr'")
+    val attr   = oneString.doc("Attribute name 'attr' without namespace")
 
     // Required
     val tpe  = oneString.doc("Datomic value type: string, long, double, boolean, bigint, bigdec, instant, uuid, uri, bytes, ref")
     val card = oneString.doc("Cardinality: one, many")
-
 
     // Optional
     val doc         = oneString.fulltext.doc("Attribute description")

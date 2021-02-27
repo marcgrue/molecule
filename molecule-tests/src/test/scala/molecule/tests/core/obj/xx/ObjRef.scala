@@ -10,10 +10,11 @@ import molecule.core.macros.ObjBuilder
 import molecule.core.util.Helpers
 import molecule.core.util.testing.TxCount.schema.TxCountSchema
 import molecule.datomic.api.in3_out10._
-import molecule.datomic.api.out4.m
 import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.transform.Model2Query
 import molecule.datomic.peer.facade.Datomic_Peer
+//import molecule.tests.core.bidirectionals.dsl.Bidirectional._
+import molecule.tests.core.ref.dsl.SelfJoin._
 import scala.reflect.runtime.universe._
 //import molecule.tests.core.base.dsl.CoreTest._
 import molecule.tests.core.base.schema.CoreTestSchema
@@ -67,29 +68,27 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 //    o.int
 //    o.Ref1 // (no ref attributes though)
 
-    ////    Ns.int.strMapK("en").getObj
-    //
-    //    m(Ns.int.strMapK("en").apply(?))
-    //
-    //    //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
+    //    Ns.int.strMapK("en").getObj
+//
+//        m(Ns.int.strMapK("en").apply(?))
+//
+//        //        Ns.int(0).str("a").Ref1.int1(1).str1("b").Ref2.int2(2).str2("c").save
+//
+//
+//            val o = Person.name("Ann").Buddies.e(42L).getObj
+//
+//
+//            Ns.int.strMapK("en").getObj
+//
+//            m(Ns.int.strMapK("en").apply(?))
+//
+//            Ns.int.int.get.head === (1, 1)
+//
+//
+//            Ns.date.getObj
+//            Ns.uuid.getObj
+//            Ns.uri.getObj
 
-
-    //        val o = Person.name("Ann").Buddies.e(42L).getObj
-
-
-    //        Ns.int.strMapK("en").getObj
-    //
-    //        m(Ns.int.strMapK("en").apply(?))
-
-    //        Ns.int.int.get.head === (1, 1)
-
-
-    //        Ns.date.getObj
-    //        Ns.uuid.getObj
-    //        Ns.uri.getObj
-
-    // Only add ref if there are any props to ref
-    //        Ns.int.Ref1.int1_.getObj
 
 
     //        val o = m(Ns.int.str + Ref1.int1.str1 + Ref2.int2.str2.Ref3.int3).getObj
@@ -109,18 +108,18 @@ class ObjRef extends molecule.setup.TestSpec with Helpers {
 //    // Successive self-join refs
 //
 //    // Beverages liked by all 3 different people
-//    val o: DynamicProp with base.Init
+//    val o: base.Init
 //      with Person_name
-//      with Person_Likes_[base.Init with Score_beverage]
+//      with Person__Likes[base.Init with Score_beverage]
 //      with Person_age
 //      with Person_[
 //      base.Init
 //        with Person_name
-//        with Person_Likes_[base.Init]
+//        with Person__Likes[base.Init]
 //        with Person_[
 //        base.Init
 //          with Person_name
-//          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
+//          with Person__Likes[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
 //      .name("Ben").Likes.beverage_(unify)._Person.Self
 //      .name("Liz").Likes.beverage_(unify).getObj
 //

@@ -965,6 +965,7 @@ object Model2Query extends Helpers {
       case Ge(arg)                                 => q.find(v).where(e, a, v).compareTo(">=", a, v, Val(arg))
       case Lt(arg)                                 => q.find(v).where(e, a, v).compareTo("<", a, v, Val(arg))
       case Le(arg)                                 => q.find(v).where(e, a, v).compareTo("<=", a, v, Val(arg))
+      case And(args)                               => q.find(v).whereAnd(e, a, v, args, u(t, v))
       case Fn(fn, Some(i))                         => q.find(fn, Seq(i), v).where(e, a, v)
       case Fn(fn, _) if coalesce(fn)               => q.aggrV(a).fold(q.find(fn, Nil, v).where(e, a, v).widh(e))(q.find(fn, Nil, _).widh(e))
       case Fn(fn, _)                               => q.find(fn, Nil, v).where(e, a, v)

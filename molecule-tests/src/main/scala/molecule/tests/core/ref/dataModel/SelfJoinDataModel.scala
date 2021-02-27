@@ -2,7 +2,7 @@ package molecule.tests.core.ref.dataModel
 
 import molecule.core.data.model._
 
-@InOut(0, 5)
+@InOut(0, 7)
 object SelfJoinDataModel {
 
   trait Person {

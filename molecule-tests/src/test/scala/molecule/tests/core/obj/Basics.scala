@@ -70,4 +70,30 @@ class Basics extends TestSpec with Helpers {
     o.int === 1
     o.str === "a"
   }
+
+
+  "Mapped/Keyed" in new CoreSetup {
+    Ns.int.strMap insert List(
+      (1, Map("en" -> "Hi there", "da" -> "Hejsa")),
+      (2, Map("en" -> "Hello", "da" -> "Hej")),
+    )
+
+    Ns.int_(1).strMap.getObj.strMap === Map("en" -> "Hi there", "da" -> "Hejsa")
+    Ns.int_(1).strMap.getObj.strMap("en") === "Hi there"
+    Ns.int_(1).strMapK("en").getObj.strMapK === "Hi there"
+  }
+
+
+  "Repeated attributes" in new CoreSetup {
+    Ns.int.insert(1, 2, 3)
+
+    // Object will only have 1 property given repeated attributes
+    Ns.int.>(1).int.<(3).getObj.int === 2
+
+    // While tuple outputs the value twice
+    Ns.int.>(1).int.<(3).get.head === (2, 2)
+
+    // Or you can make one of the attributes tacit
+    Ns.int.>(1).int_.<(3).get.head === 2
+  }
 }

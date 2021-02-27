@@ -34,6 +34,7 @@ object VerifyRawModel extends Helpers {
     var after          : Boolean             = false
     var hasMandatory   : Boolean             = false
     var generics       : Seq[String]         = Nil
+    var allGenerics    : Seq[String]         = Nil
     var beforeFirstAttr: Boolean             = true
     var isFiltered     : Boolean             = false
     var nsAttrs        : Map[String, String] = Map.empty[String, String]
@@ -100,6 +101,7 @@ object VerifyRawModel extends Helpers {
           beforeFirstAttr = false
 
         case g: Generic => {
+          allGenerics = allGenerics :+ g.attr
           if (g.attr.last != '_')
             hasMandatory = true
           g.tpe match {
@@ -161,6 +163,12 @@ object VerifyRawModel extends Helpers {
           }
         case _            =>
       }
+    }
+
+    if (allGenerics.nonEmpty) {
+      val duplicates = allGenerics.groupBy(identity).collect { case (v, vs) if vs.size > 1 => v }.toSeq
+      if (duplicates.nonEmpty)
+        abort(s"Generic attributes only allowed once in a molecule. Found multiple occurences of `${duplicates.head}`.")
     }
 
     if (!hasMandatory)

@@ -534,7 +534,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
 
 
     def resolveOptionalSchemaAttr(t: richTree, prev: Tree, p: richTree, attrStr: String): Seq[Element] = attrStr match {
-      case "id$" | "ident$" | "part$" | "nsFull$" | "ns$" | "attr$" | "tpe$" | "card$" =>
+      case "id$" | "part$" | "nsFull$" | "ns$" | "attr$" | "tpe$" | "card$" =>
         abort("Schema attributes that are present with all attribute definitions are not allowed to be optional.")
 
       case "unique$" =>
@@ -714,7 +714,7 @@ private[molecule] trait Dsl2Model extends ObjBuilder {
                   tq"${TypeName(tpe)}",
                   castOneAttr(aggrType),
                   optAggrTpe = Some("Int"))
-//                  optAggrTpe = Some((genericAttr + "_count", tq"Int")))
+                //                  optAggrTpe = Some((genericAttr + "_count", tq"Int")))
                 obj = addNode(obj, newProp, objLevel)
               }
               traverseElement(prev, t, Generic(t.nsFull2, attrStr, genericType, value))

@@ -141,7 +141,6 @@ class SchemaTest extends TestSpec {
       Schema.id_.not(a2, a3).attr.get.size === attrCount - 2
     }
 
-
     "a" in new SchemaSetup {
 
       Schema.a.get.size === attrCount

@@ -15,11 +15,10 @@ import scala.language.higherKinds
 
 trait Schema extends GenericNs {
   final class id          [Stay, Next] extends OneLong   [Stay, Next] with Indexed
-  final class a           [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class part        [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class nsFull      [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class ns          [Stay, Next] extends OneString [Stay, Next] with Indexed
-  final class ident       [Stay, Next] extends OneString [Stay, Next] with Indexed
+  final class a           [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class attr        [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class tpe         [Stay, Next] extends OneString [Stay, Next] with Indexed
   final class card        [Stay, Next] extends OneString [Stay, Next] with Indexed
@@ -35,11 +34,10 @@ trait Schema extends GenericNs {
   final class txInstant   [Stay, Next] extends OneDate   [Stay, Next] with Indexed
   
   final class id$         [Stay, Next] extends OneLong$   [Stay] with Indexed
-  final class a$          [Stay, Next] extends OneString$ [Stay] with Indexed
   final class part$       [Stay, Next] extends OneString$ [Stay] with Indexed
   final class nsFull$     [Stay, Next] extends OneString$ [Stay] with Indexed
   final class ns$         [Stay, Next] extends OneString$ [Stay] with Indexed
-  final class ident$      [Stay, Next] extends OneString$ [Stay] with Indexed
+  final class a$          [Stay, Next] extends OneString$ [Stay] with Indexed
   final class attr$       [Stay, Next] extends OneString$ [Stay] with Indexed
   final class tpe$        [Stay, Next] extends OneString$ [Stay] with Indexed
   final class card$       [Stay, Next] extends OneString$ [Stay] with Indexed
@@ -58,11 +56,10 @@ trait Schema extends GenericNs {
 trait Schema_[props] { def Schema: props = ??? }
 
 trait Schema_id           { lazy val id          : Long    = ??? }
-trait Schema_a            { lazy val a           : String  = ??? }
 trait Schema_part         { lazy val part        : String  = ??? }
 trait Schema_nsFull       { lazy val nsFull      : String  = ??? }
 trait Schema_ns           { lazy val ns          : String  = ??? }
-trait Schema_ident        { lazy val ident       : String  = ??? }
+trait Schema_a            { lazy val a           : String  = ??? }
 trait Schema_attr         { lazy val attr        : String  = ??? }
 trait Schema_tpe          { lazy val tpe         : String  = ??? }
 trait Schema_card         { lazy val card        : String  = ??? }
@@ -80,11 +77,10 @@ trait Schema_txInstant    { lazy val txInstant   : Date    = ??? }
 // Please note that `$` has been subsituted with `_` to allow packaging to jars.
 // To be interpreted as optional and not tacit
 trait Schema_id_          { lazy val id$         : Option[Long   ] = ??? }
-trait Schema_a_           { lazy val a$          : Option[String ] = ??? }
 trait Schema_part_        { lazy val part$       : Option[String ] = ??? }
 trait Schema_nsFull_      { lazy val nsFull$     : Option[String ] = ??? }
 trait Schema_ns_          { lazy val ns$         : Option[String ] = ??? }
-trait Schema_ident_       { lazy val ident$      : Option[String ] = ??? }
+trait Schema_a_           { lazy val a$          : Option[String ] = ??? }
 trait Schema_attr_        { lazy val attr$       : Option[String ] = ??? }
 trait Schema_tpe_         { lazy val tpe$        : Option[String ] = ??? }
 trait Schema_card_        { lazy val card$       : Option[String ] = ??? }

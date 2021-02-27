@@ -223,7 +223,7 @@ class SelfJoin extends TestSpec {
   "Explicit self-join" in new Setup {
 
     // All the examples above use the AND notation to construct
-    // simple self-joiPerson. Any of them could be re-written to use
+    // simple self-joins to Person. Any of them could be re-written to use
     // a more powerful and expressive Self-notation:
 
     Person.age_(23 and 25).Likes.beverage.get === List("Coffee", "Tea")
@@ -341,7 +341,8 @@ class SelfJoin extends TestSpec {
     Person.name_("Joe" and "Ben" and "Liz").Likes.beverage.get === List("Coffee")
 
     // Beverages liked by all 3 different people
-    Person.name_("Joe").Likes.beverage._Person.Self
+    Person
+      .name_("Joe").Likes.beverage._Person.Self
       .name_("Ben").Likes.beverage_(unify)._Person.Self
       .name_("Liz").Likes.beverage_(unify).get === List("Coffee")
   }

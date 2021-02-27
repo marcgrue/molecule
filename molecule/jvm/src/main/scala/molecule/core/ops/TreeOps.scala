@@ -13,7 +13,6 @@ private[molecule] trait TreeOps extends Liftables {
 
   import c.universe._
 
-
   override def abort(msg: String) = throw new TreeOpsException(msg)
 
   def firstLow(str: Any): String = str.toString.head.toLower.toString + str.toString.tail

@@ -19,11 +19,10 @@ trait Schema_0_1_L0[o0[_], p0, A] extends Schema_0_1[o0, p0, A] {
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L0[o0, p0          , A     ], Nothing] with Schema_0_1_L0[o0, p0          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -46,11 +45,10 @@ trait Schema_0_1_L0[o0[_], p0, A] extends Schema_0_1[o0, p0, A] {
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -72,11 +70,10 @@ trait Schema_0_1_L1[o0[_], p0, o1[_], p1, A] extends Schema_0_1[o0, p0 with o1[p
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L1[o0, p0, o1, p1          , A     ], Nothing] with Schema_0_1_L1[o0, p0, o1, p1          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -99,11 +96,10 @@ trait Schema_0_1_L1[o0[_], p0, o1[_], p1, A] extends Schema_0_1[o0, p0 with o1[p
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -125,11 +121,10 @@ trait Schema_0_1_L2[o0[_], p0, o1[_], p1, o2[_], p2, A] extends Schema_0_1[o0, p
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L2[o0, p0, o1, p1, o2, p2          , A     ], Nothing] with Schema_0_1_L2[o0, p0, o1, p1, o2, p2          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -152,11 +147,10 @@ trait Schema_0_1_L2[o0[_], p0, o1[_], p1, o2[_], p2, A] extends Schema_0_1[o0, p
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -178,11 +172,10 @@ trait Schema_0_1_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, A] extends Schem
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L3[o0, p0, o1, p1, o2, p2, o3, p3          , A     ], Nothing] with Schema_0_1_L3[o0, p0, o1, p1, o2, p2, o3, p3          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -205,11 +198,10 @@ trait Schema_0_1_L3[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, A] extends Schem
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -231,11 +223,10 @@ trait Schema_0_1_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, A] ex
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4          , A     ], Nothing] with Schema_0_1_L4[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -258,11 +249,10 @@ trait Schema_0_1_L4[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, A] ex
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -284,11 +274,10 @@ trait Schema_0_1_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L5[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5          , A     ], Nothing] with Schema_0_1_L5[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -311,11 +300,10 @@ trait Schema_0_1_L5[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -337,11 +325,10 @@ trait Schema_0_1_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L6[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6          , A     ], Nothing] with Schema_0_1_L6[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -364,11 +351,10 @@ trait Schema_0_1_L6[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
@@ -390,11 +376,10 @@ trait Schema_0_1_L7[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   type Stay[Attr[_, _], Prop, Tpe] = Attr[Schema_0_1_L7[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7          , A     ], Nothing] with Schema_0_1_L7[o0, p0, o1, p1, o2, p2, o3, p3, o4, p4, o5, p5, o6, p6, o7, p7          , A     ]
 
   final lazy val id           : Next[id          , Schema_id         , Long   ] = ???
-  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val part         : Next[part        , Schema_part       , String ] = ???
   final lazy val nsFull       : Next[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns           : Next[ns          , Schema_ns         , String ] = ???
-  final lazy val ident        : Next[ident       , Schema_ident      , String ] = ???
+  final lazy val a            : Next[a           , Schema_a          , String ] = ???
   final lazy val attr         : Next[attr        , Schema_attr       , String ] = ???
   final lazy val tpe          : Next[tpe         , Schema_tpe        , String ] = ???
   final lazy val card         : Next[card        , Schema_card       , String ] = ???
@@ -417,11 +402,10 @@ trait Schema_0_1_L7[o0[_], p0, o1[_], p1, o2[_], p2, o3[_], p3, o4[_], p4, o5[_]
   final lazy val noHistory$   : Next[noHistory$  , Schema_noHistory_  , Option[Boolean]] = ???
   
   final lazy val id_          : Stay[id          , Schema_id         , Long   ] = ???
-  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val part_        : Stay[part        , Schema_part       , String ] = ???
   final lazy val nsFull_      : Stay[nsFull      , Schema_nsFull     , String ] = ???
   final lazy val ns_          : Stay[ns          , Schema_ns         , String ] = ???
-  final lazy val ident_       : Stay[ident       , Schema_ident      , String ] = ???
+  final lazy val a_           : Stay[a           , Schema_a          , String ] = ???
   final lazy val attr_        : Stay[attr        , Schema_attr       , String ] = ???
   final lazy val tpe_         : Stay[tpe         , Schema_tpe        , String ] = ???
   final lazy val card_        : Stay[card        , Schema_card       , String ] = ???
