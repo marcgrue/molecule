@@ -116,7 +116,7 @@ class Index extends TestSpec {
     // The EAVT index provides efficient access to everything about a given entity.
     // Conceptually this is very similar to row access style in a SQL database, except
     // that entities can possess arbitrary attributes rather then being limited to
-    // a predefined set of columns.
+    // a predefined set of columns in a table.
 
     // Note that Datomic sorts the attribute id, not the name/ident,
     // so we don't get alphabetic order by attribute name. Attributes are though

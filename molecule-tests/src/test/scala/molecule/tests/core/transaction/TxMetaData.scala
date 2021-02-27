@@ -94,7 +94,6 @@ class TxMetaData extends TestSpec {
       )
     }
 
-
     "Tx refs" in new CoreSetup {
 
       // Saving tx meta data (Ns.str) that references another namespace attribute (Ref1.int1)
@@ -128,6 +127,26 @@ class TxMetaData extends TestSpec {
         (1, "a"),
         (2, "b")
       )
+    }
+
+    "Ref + tx meta data" in new CoreSetup {
+      Ns.int(0).Ref1.int1(1).Tx(Ref2.int2(2)).save
+      Ns.int.Ref1.int1.Tx.apply(Ref2.int2).get.head === (0, 1, 2)
+    }
+
+    "Refs + tx meta data" in new CoreSetup {
+      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3)).save
+      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3)).get.head === (0, 1, 2, 3)
+    }
+
+    "Ref + tx meta data composites" in new CoreSetup {
+      Ns.int(0).Ref1.int1(1).Tx(Ref2.int2(2) + Ref3.int3(3)).save
+      Ns.int(0).Ref1.int1(1).Tx(Ref2.int2(2) + Ref3.int3(3)).get.head === (0, 1, 2, 3)
+    }
+
+    "Refs + tx meta data composites" in new CoreSetup {
+      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3) + Ref4.int4(4)).save
+      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3) + Ref4.int4(4)).get.head === (0, 1, 2, 3, 4)
     }
   }
 

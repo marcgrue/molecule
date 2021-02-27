@@ -480,4 +480,11 @@ class Save extends TestSpec with ClojureBridge {
       Ns.int.intMap$(none).get.sortBy(_._1) === List((6, None), (7, None))
     }
   }
+
+
+  "Nested data not allowed in save" in new CoreSetup {
+    (Ns.int(0).Refs1.*(Ref1.int1(1)).save must throwA[VerifyModelException])
+      .message === "Got the exception molecule.core.ops.exception.VerifyModelException: " +
+      "[noNested]  Nested data structures not allowed in save molecules"
+  }
 }
