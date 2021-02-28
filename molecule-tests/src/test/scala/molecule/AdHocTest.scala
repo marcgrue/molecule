@@ -50,41 +50,15 @@ class AdHocTest extends Specification {
   //      Person.name("Ann").Buddies.e(gus)
   //    }
 
-  //  "self-join" >> {
-  //    import molecule.tests.core.ref.dsl.SelfJoin._
-  //    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(SelfJoinSchema)
-  //
-  //    //    val o = Person.age_(23).Likes.beverage._Person.Self
-  //    //      .age_(25).Likes.beverage_(unify).getObj
-  //    //
-  //    //    o.Likes.beverage
-  //    //    o.Person.beverage
+  //    "self-join" >> {
+  //      import molecule.tests.core.ref.dsl.SelfJoin._
+  //      implicit val conn: Conn = Datomic_Peer.recreateDbFrom(SelfJoinSchema)
   //
   //
-  //    // Beverages liked by all 3 different people
-  //    val o: DynamicProp with base.Init
-  //      with Person_name
-  //      with Person_Likes_[base.Init with Score_beverage]
-  //      with Person_age
-  //      with Person_[
-  //      base.Init
-  //        with Person_name
-  //        with Person_Likes_[base.Init]
-  //        with Person_[
-  //        base.Init
-  //          with Person_name
-  //          with Person_Likes_[base.Init]]] = Person.name("Joe").Likes.beverage._Person.age.Self
-  //      .name("Ben").Likes.beverage_(unify)._Person.Self
-  //      .name("Liz").Likes.beverage_(unify).getObj
   //
-  //    o.name
-  //    o.age
-  //    o.Likes.beverage
-  //    o.Person.name
-  //    o.Person.Person.name
   //
-  //    ok
-  //  }
+  //      ok
+  //    }
 
   //      "bidirectional" >> {
   //        import molecule.tests.core.bidirectionals.dsl.Bidirectional._
@@ -109,12 +83,12 @@ class AdHocTest extends Specification {
   //  }
   //
   //
-  //  "Insert resolves to correct partitions" in new ModernGraph2Setup {
+  //    "Insert resolves to correct partitions" in new ModernGraph2Setup {
   //
-  //    import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2._
+  //      import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2._
   //
-  //    m(Person.name.Knows * Person.name).inspectGet
-  //  }
+  //      m(Person.name.Knows * Person.name).inspectGet
+  //    }
   //
   //
   //    "txCount" >> {
@@ -130,111 +104,33 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-    {
-      Ns.int(0).Ref1.int1(1).Tx(Ref2.int2(2)).save
-      val o = Ns.int.Ref1.int1.Tx(Ref2.int2).getObj
-      o.int === 0
-      o.Ref1.int1 === 1
-      // Note how Tx relates to base object and not Ref2
-      o.Tx.Ref2.int2 === 2
+
+    //    Ns.int(1).save
+    val x = m(Ns.int).apply { self =>
+            def a1 = 1
+      //      def a2() = 2
+      //      def a3(i: Int) = 3
+//            def a4[A]() = 4
+      //      def a5[A](i: Int) = 5
+      def a6(i: Int): Int = a1
+
+      //      def a7(i: Int, s: String) = 7
+
+      //      val hej = 5
     }
+
+    x.int === 7
+    //    x.hejsa === 3
+    //    x.hej === 5
+    x.a1 === 1
+    x.a6(6) === 1
+//    x.a6(7) === 13
+
+    //    x.a7(42, "hej")
+
 
     ok
   }
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3)).save
-      val o = Ns.int.Ref1.int1.Ref2.int2.Tx(Ref3.int3).getObj
-      o.int === 0
-      o.Ref1.int1 === 1
-      o.Ref1.Ref2.int2 === 2
-      o.Tx.Ref3.int3 === 3
-    }
-  }
-
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      Ns.int(0).Ref1.int1(1).Tx(Ref2.int2(2) + Ref3.int3(3)).save
-      val o = Ns.int.Ref1.int1.Tx(Ref2.int2 + Ref3.int3).getObj
-      o.int === 0
-      o.Ref1.int1 === 1
-      o.Tx.Ref2.int2 === 2
-      o.Tx.Ref3.int3 === 3
-    }
-  }
-
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      Ns.int(0).Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3) + Ref4.int4(4)).save
-      val o = Ns.int.Ref1.int1.Ref2.int2.Tx(Ref3.int3 + Ref4.int4).getObj
-      o.int === 0
-      o.Ref1.int1 === 1
-      o.Ref1.Ref2.int2 === 2
-      o.Tx.Ref3.int3 === 3
-      o.Tx.Ref4.int4 === 4
-    }
-  }
-
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      (Ns.int(0) + Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3))).save
-      val o = (Ns.int + Ref1.int1.Ref2.int2.Tx(Ref3.int3)).getObj
-      // All properties are namespaced
-      o.Ns.int === 0
-      o.Ref1.int1 === 1
-      o.Ref1.Ref2.int2 === 2
-      o.Ref1.Tx.Ref3.int3 === 3
-    }
-  }
-
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      (Ns.int(0) + Ref1.int1(1).Ref2.int2(2).Ref3.int3(3).Tx(Ref4.int4(4))).save
-      val o = (Ns.int + Ref1.int1.Ref2.int2.Ref3.int3.Tx(Ref4.int4)).getObj
-      // All properties are namespaced
-      o.Ns.int === 0
-      o.Ref1.int1 === 1
-      o.Ref1.Ref2.int2 === 2
-      o.Ref1.Ref2.Ref3.int3 === 3
-      o.Ref1.Tx.Ref4.int4 === 4
-    }
-  }
-
-  "core" >> {
-    import molecule.tests.core.base.dsl.CoreTest._
-    implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
-
-    {
-      (Ns.int(0) + Ref1.int1(1).Ref2.int2(2).Tx(Ref3.int3(3) + Ref4.int4(4))).save
-      val o = (Ns.int + Ref1.int1.Ref2.int2.Tx(Ref3.int3 + Ref4.int4)).getObj
-      o.Ns.int === 0
-      o.Ref1.int1 === 1
-      o.Ref1.Ref2.int2 === 2
-      o.Ref1.Tx.Ref3.int3 === 3
-      o.Ref1.Tx.Ref4.int4 === 4
-    }
-  }
-
-
-
-
-
-
 
   //
   //
@@ -272,4 +168,3 @@ class AdHocTest extends Specification {
   //    ok
   //  }
 }
-//

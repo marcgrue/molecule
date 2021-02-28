@@ -2,6 +2,7 @@ package molecule.tests.core.obj
 
 import molecule.core.util.Helpers
 import molecule.datomic.api.in1_out12._
+import molecule.datomic.api.in3_out10.m
 import molecule.setup.TestSpec
 import molecule.tests.core.base.dsl.CoreTest._
 
@@ -163,6 +164,28 @@ class Ref extends TestSpec with Helpers {
   }
 
 
+  "Multiple same-name ns composites" in new CoreSetup {
+    (Ns.int + Ns.float.str + Ref1.int1.str1).insert(1, (2f, "a"), (3, "b"))
+
+    // Multiple same-name namespace composites need ++ to allow access to object interface
+    // Can't access object properties from same-name namespace composites
+    (m(Ns.int + Ns.float.str + Ref1.int1.str1).getObj must throwA[molecule.core.exceptions.MoleculeException])
+      .message === "Got the exception molecule.core.exceptions.package$MoleculeException: " +
+      s"Please compose multiple same-name namespaces with `++` instead of `+` to access object properties."
+
+    val o = m(Ns.int ++ Ns.float.str + Ref1.int1.str1).getObj
+    o.Ns.int === 1
+    o.Ns.float === 2f
+    o.Ns.str === "a"
+    o.Ref1.int1 === 3
+    o.Ref1.str1 === "b"
+
+    // Multiple same-name namespace composites behaves equally for tuple output
+    m(Ns.int + Ns.float.str + Ref1.int1.str1).get.head === (1, (2f, "a"), (3, "b"))
+    m(Ns.int ++ Ns.float.str + Ref1.int1.str1).get.head === (1, (2f, "a"), (3, "b"))
+  }
+
+
   "Self-joins" in new SelfJoinSetup {
     import molecule.tests.core.ref.dsl.SelfJoin._
     m(Person.age.name.Likes * Score.beverage.rating) insert List(
@@ -203,4 +226,5 @@ class Ref extends TestSpec with Helpers {
       p.Person.Person.name === "Liz"
     }
   }
+
 }

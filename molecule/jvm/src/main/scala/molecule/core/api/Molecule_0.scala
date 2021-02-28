@@ -1,20 +1,21 @@
 package molecule.core.api
 
-import molecule.core.transform.CastHelpers
 import molecule.core.api
 import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
 import molecule.core.api.getAsync.{GetAsyncArray, GetAsyncIterable, GetAsyncList, GetAsyncRaw}
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
+import molecule.core.macros.MakeMolecule
 import molecule.core.ops.VerifyModel
-import molecule.datomic.base.ast.query.Query
+import molecule.core.transform.{CastHelpers, DynamicMolecule}
 import molecule.datomic.base.api.ShowInspect
+import molecule.datomic.base.ast.query.Query
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.datomic.base.transform.Model2Transaction
 import molecule.datomic.base.util.Inspect
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.implicitConversions
+import scala.language.experimental.macros
 
 
 /** Core molecule interface defining actions that can be called on molecules.
@@ -164,6 +165,12 @@ trait Molecule_0[Obj, Tpl] extends Molecule
   with GetAsyncList[Obj, Tpl]
   with GetAsyncRaw
   with ShowInspect[Obj, Tpl] {
+
+
+  // Dynamic molecule ==========================================================
+
+  def apply(body: Obj => Unit): DynamicMolecule with Obj = macro MakeMolecule.apply[Obj]
+
 
   // Save ============================================================================================================================
 

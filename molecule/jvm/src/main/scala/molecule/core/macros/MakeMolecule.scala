@@ -10,9 +10,129 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-        val z = InspectMacro("MakeMolecule", 9, 8)
-//  val z = InspectMacro("MakeMolecule", 1, 8)
+  //        val z = InspectMacro("MakeMolecule", 9, 8)
+  val z = InspectMacro("MakeMolecule", 1, 8)
   //  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
+
+  object traverser extends Traverser {
+//       var applies = List[Apply]()
+       override def traverse(tree: Tree): Unit = tree match {
+//         case app @ Apply(fun, args) =>
+//           applies = app :: applies
+//           super.traverse(fun)
+//           super.traverseTrees(args)
+         case _ => super.traverse(tree)
+       }
+     }
+
+  final def apply[Obj: W](body: Tree): Tree = {
+
+    var fields  = Seq.empty[TermName]
+    var methods = Seq.empty[(TermName, Seq[TermName])]
+
+    val bodyTree = body match {
+      case Function(_, Block(elements, _)) => elements.map {
+        case ValDef(a, field, c, d) =>
+          fields = fields :+ field
+          ValDef(a, field, c, d)
+
+        case DefDef(a, method, c, paramss, e, f) =>
+          methods = paramss match {
+            case Nil          => methods
+            case List(Nil)    => methods
+            case List(params) =>
+              methods :+ (method, params.map {
+                case ValDef(_, param, _, _) => param
+              })
+          }
+
+          val paramss2: List[List[ValDef]] = paramss match {
+            case Nil          => List()
+            case List(Nil)    => List(List())
+            case List(params) => List(params.map {
+                case ValDef(a, b, c, d) => ValDef(a, b, c, d)
+              })
+          }
+          DefDef(a, method, c, paramss2, e, f)
+
+        case other => abort("Expecting only `def` and `val`s in molecule body. Found:\n" + other)
+      }
+    }
+
+    //    List(
+    //      DefDef(Modifiers(), TermName("a1"), List(), List(), TypeTree(), Literal(Constant(5))),
+    //      DefDef(Modifiers(), TermName("a2"), List(), List(List()), TypeTree(), Literal(Constant(5))),
+    //      DefDef(Modifiers(), TermName("a3"), List(), List(List(ValDef(Modifiers(PARAM), TermName("i"), TypeTree().setOriginal(Select(Ident(scala), scala.Int)), EmptyTree))), TypeTree(), Literal(Constant(5))),
+    //      DefDef(Modifiers(), TermName("a4"), List(TypeDef(Modifiers(PARAM), TypeName("A"), List(), TypeTree().setOriginal(TypeBoundsTree(TypeTree(), TypeTree())))), List(List()), TypeTree(), Literal(Constant(5))),
+    //      DefDef(
+    //        Modifiers(),
+    //        TermName("a5"),
+    //        List(TypeDef(Modifiers(PARAM), TypeName("A"), List(), TypeTree().setOriginal(TypeBoundsTree(TypeTree(), TypeTree())))),
+    //        List(List(ValDef(Modifiers(PARAM), TermName("i"), TypeTree().setOriginal(Select(Ident(scala), scala.Int)), EmptyTree))),
+    //        TypeTree(),
+    //        Literal(Constant(5))),
+    //
+    //      ValDef(Modifiers(MUTABLE), TermName("b"), TypeTree(), Literal(Constant(5))),
+    //      ValDef(Modifiers(), TermName("hej"), TypeTree(), Literal(Constant(5))))
+
+
+
+    val selectDynamic = if(fields.isEmpty) Nil else {
+//      val caseClauses = fields.map(field => cq"${field.toString} => $field")
+      Seq(q"""
+          override def selectDynamic(name: String): Any = name match {
+//            case ..caseClauses
+            case other => throw new IllegalArgumentException("Please implement role method `" + other + "`.")
+          }
+       """)
+    }
+
+    val applyDynamic = if(methods.isEmpty) Nil else {
+//      val caseClauses = methods.map{
+//        case (method, params) => cq"${method.toString} => $method(..$params)"
+//      }
+      Seq(q"""
+           override def applyDynamic(method: String)(i: Any): Any = method match {
+//            case ..caseClauses
+            case "a6" => a6(i.asInstanceOf[Int])
+            case other => throw new IllegalArgumentException("Please implement role method `" + other + "`.")
+          }
+       """)
+    }
+
+    val t =
+      q"""
+        import molecule.core.transform.DynamicMolecule
+        new DynamicMolecule with Init with Ns_int {
+          final override lazy val int: Int = 7
+          ..$bodyTree
+          override def applyDynamic(method: String)(a: Any): Any = method match {
+            case "a6"  => a6(a.asInstanceOf[Int])
+            case other => throw new IllegalArgumentException("Please implement role method `" + other + "`.")
+          }
+
+          override def selectDynamic(name: String): Any = name match {
+            case "a1"  => a1
+            case other => throw new IllegalArgumentException("Please implement role method `" + other + "`.")
+          }
+//          ..{selectDynamic ++ applyDynamic}
+        }
+       """
+
+    z(4
+      //      , body
+      , showRaw(body)
+      //      , y
+      //      , bodyElements
+      //      , showRaw(bodyElements.head)
+      //      , bodyElements.map(showRaw(_)) //.mkString("\n")
+      //      , x
+      , t
+      //      , t2
+    )
+    t
+  }
+
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
     val (
@@ -53,9 +173,20 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
           final class $outMolecule extends $OutMoleculeTpe[$ObjType, ..$TplTypes]($model0, ${Model2Query(model0)}) {
             final override def row2tpl(row: java.util.List[AnyRef]): (..$TplTypes) = $casts
             final override def row2obj(row: java.util.List[AnyRef]): $ObjType = ${objCode(obj)._1}
+
           }
           new $outMolecule
         """
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = ${apply(ObjType, q"body")}
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = macro MakeMolecule(c).apply[$ObjType](body)
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = apply[$ObjType](body)
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = ${doApply(ObjType, q"body")}
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = new DynamicProp with Init with Ns_int {
+        //              final override lazy val int: Int = 7
+        //
+        //              body
+        //            }
+        //            final override def apply(body: $ObjType => Unit): DynamicProp with $ObjType = macro MakeMolecule.apply[$ObjType]
       }
 
     } else if (isOptNested) {
@@ -125,7 +256,7 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
       //      , castss
       , obj
       , objCode(obj)._1
-//      , objCode(obj, isNested = true)._1
+      //      , objCode(obj, isNested = true)._1
       , t
     )
     t

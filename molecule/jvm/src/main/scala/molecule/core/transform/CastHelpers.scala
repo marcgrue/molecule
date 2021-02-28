@@ -7,7 +7,6 @@ import clojure.lang.{Keyword, PersistentHashSet, PersistentVector}
 import com.cognitect.transit.impl.URIImpl
 
 
-
 /** Core molecule interface defining actions that can be called on molecules.
   *
   * Generally we could often have made higher-order methods taking a casting function for
