@@ -105,28 +105,7 @@ class AdHocTest extends Specification {
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
 
-    //    Ns.int(1).save
-    val x = m(Ns.int).apply { self =>
-            def a1 = 1
-      //      def a2() = 2
-      //      def a3(i: Int) = 3
-//            def a4[A]() = 4
-      //      def a5[A](i: Int) = 5
-      def a6(i: Int): Int = a1
-
-      //      def a7(i: Int, s: String) = 7
-
-      //      val hej = 5
-    }
-
-    x.int === 7
-    //    x.hejsa === 3
-    //    x.hej === 5
-    x.a1 === 1
-    x.a6(6) === 1
-//    x.a6(7) === 13
-
-    //    x.a7(42, "hej")
+    Ns.int.getObjList
 
 
     ok
