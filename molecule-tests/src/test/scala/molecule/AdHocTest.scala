@@ -1,30 +1,8 @@
 package molecule
-
-import java.util.Date
-import molecule.core.api.Molecule_0
-import molecule.core.ast.elements._
-import molecule.core.composition.Tx_
-import molecule.core.dsl.base.Init
-import molecule.core.exceptions.MoleculeException
-import molecule.core.ops.exception.VerifyModelException
-import molecule.tests.examples.datomic.dayOfDatomic.dsl.Aggregates.Obj
-//import molecule.core.composition.Tx
-import molecule.tests.core.base.dsl.CoreTest._
-import molecule.tests.core.bidirectionals.schema.BidirectionalSchema
-import molecule.tests.core.ref.schema.SelfJoinSchema
-//import molecule.core.dsl.base.{Init, NS_0_01}
-import molecule.core.dsl.{attributes, base}
-import molecule.core.macros.ObjBuilder
-import molecule.core.util.Helpers
-import molecule.core.util.testing.TxCount.schema.TxCountSchema
 import molecule.datomic.api.in3_out10._
 import molecule.datomic.base.facade.Conn
-import molecule.datomic.base.transform.Model2Query
 import molecule.datomic.peer.facade.Datomic_Peer
-import scala.reflect.runtime.universe._
-//import molecule.tests.core.base.dsl.CoreTest._
 import molecule.tests.core.base.schema.CoreTestSchema
-//import molecule.tests.examples.gremlin.gettingStarted.dsl.ModernGraph2.Person
 import org.specs2.mutable.Specification
 
 
@@ -104,12 +82,12 @@ class AdHocTest extends Specification {
     import molecule.tests.core.base.dsl.CoreTest._
     implicit val conn: Conn = Datomic_Peer.recreateDbFrom(CoreTestSchema)
 
-
-    //    Ns.int(1).save
+    Ns.int(42).Ref1.int1(43).save
 
     val doe = 7
 
-    val x = m(Ns.int).apply { o =>
+    val x = m(Ns.int.Ref1.int1).apply { self =>
+//    val x = m(Ns.int).apply { self =>
       val bar = doe
       val v1  = bar + bar
       def a1 = v1 + 1
@@ -118,7 +96,7 @@ class AdHocTest extends Specification {
       def a4[A]() = a3(2)
       def a5[A](v: A): String = v.toString
       def a6(i: Int): Int = i + a1
-      def a7(i: Int, s: String) = s + i
+      def a7(i: Int, s: String) = s + (i + self.int)
       def a8(ii: List[Int]) = ii.length
       def a9(ii: List[Conn]) = ii.length
     }
@@ -131,9 +109,12 @@ class AdHocTest extends Specification {
     x.a5(1) === "1"
     x.a5(true) === "true"
     x.a6(1) === 16
-    x.a7(1, "hej") === "hej1"
+    x.a7(1, "hej") === "hej43"
     x.a8(List(1, 2, 3)) === 3
     x.a9(List(conn)) === 1
+
+    x.int === 42
+    x.Ref1.int1 === 43
 
     ok
   }

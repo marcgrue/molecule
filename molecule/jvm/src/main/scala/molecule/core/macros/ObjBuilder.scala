@@ -226,7 +226,7 @@ trait ObjBuilder extends Cast {
     } else {
       classes(obj.props) match {
         case Nil                                                                    => q"new Init {}"
-        case List(a)                                                                => q"new DynamicMolecule with Init with $a { ..${properties(obj.props)} }"
+        case List(a)                                                                => q"new Init with $a { ..${properties(obj.props)} }"
         case List(a, b)                                                             => q"new Init with $a with $b { ..${properties(obj.props)} }"
         case List(a, b, c)                                                          => q"new Init with $a with $b with $c { ..${properties(obj.props)} }"
         case List(a, b, c, d)                                                       => q"new Init with $a with $b with $c with $d { ..${properties(obj.props)} }"
