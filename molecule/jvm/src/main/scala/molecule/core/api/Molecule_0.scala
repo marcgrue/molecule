@@ -5,8 +5,9 @@ import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
 import molecule.core.api.getAsync.{GetAsyncArray, GetAsyncIterable, GetAsyncList, GetAsyncRaw}
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
+import molecule.core.macros.MakeMoleculeDynamic
 import molecule.core.ops.VerifyModel
-import molecule.core.transform.CastHelpers
+import molecule.core.transform.{CastHelpers, DynamicMolecule}
 import molecule.datomic.base.api.ShowInspect
 import molecule.datomic.base.ast.query.Query
 import molecule.datomic.base.ast.transactionModel.Statement
@@ -164,6 +165,11 @@ trait Molecule_0[Obj, Tpl] extends Molecule
   with GetAsyncList[Obj, Tpl]
   with GetAsyncRaw
   with ShowInspect[Obj, Tpl] {
+
+
+  // Dynamic molecule ==========================================================
+
+  def apply(body: Obj => Unit): DynamicMolecule with Obj = macro MakeMoleculeDynamic.apply[Obj]
 
 
   // Save ============================================================================================================================

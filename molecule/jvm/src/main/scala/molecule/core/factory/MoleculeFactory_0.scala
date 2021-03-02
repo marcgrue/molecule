@@ -2,7 +2,8 @@ package molecule.core.factory
 
 import molecule.core.api.Molecule_0._
 import molecule.core.dsl.base._
-import molecule.core.macros.MakeMolecule
+import molecule.core.macros.{MakeMolecule, MakeMoleculeDynamic}
+import molecule.core.transform.DynamicMolecule
 import scala.language.experimental.macros
 
 
@@ -147,6 +148,8 @@ trait Molecule_Factory9 {
 }
 
 trait Molecule_Factory10 {
+  final def obj[obj[_], props, A](dsl: NS_0_01[obj, props, A])(body: props => Unit): DynamicMolecule with props = macro MakeMoleculeDynamic.from01attr[props, A]
+
   implicit final def m[obj[_], props, A                           ](dsl: NS_0_01[obj, props, A                           ]): Molecule_0_01[props, A                           ] = macro MakeMolecule.from01attr[props, A                           ]
   implicit final def m[obj[_], props, A, B                        ](dsl: NS_0_02[obj, props, A, B                        ]): Molecule_0_02[props, A, B                        ] = macro MakeMolecule.from02attr[props, A, B                        ]
   implicit final def m[obj[_], props, A, B, C                     ](dsl: NS_0_03[obj, props, A, B, C                     ]): Molecule_0_03[props, A, B, C                     ] = macro MakeMolecule.from03attr[props, A, B, C                     ]

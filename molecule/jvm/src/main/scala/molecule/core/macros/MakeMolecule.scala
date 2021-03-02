@@ -10,9 +10,10 @@ class MakeMolecule(val c: blackbox.Context) extends Base {
 
   import c.universe._
 
-  //        val z = InspectMacro("MakeMolecule", 9, 8)
-  val z = InspectMacro("MakeMolecule", 1, 8)
+  val z = InspectMacro("MakeMolecule", 9, 8)
+  //  val z = InspectMacro("MakeMolecule", 1, 8)
   //  val z = InspectMacro("MakeMolecule", 1, 8, mkError = true)
+
 
   private[this] final def generateMolecule(dsl: Tree, ObjType: Type, TplTypes: Type*): Tree = {
     val (
