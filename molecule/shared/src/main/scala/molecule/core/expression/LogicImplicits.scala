@@ -2,7 +2,6 @@ package molecule.core.expression
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.core.ast.elements
 import molecule.core.ast.elements._
 
 /** Logic expression implicits to build OR/AND logic.
@@ -11,7 +10,7 @@ import molecule.core.ast.elements._
   * }}}
   *
   * @groupname attrLogicImplicits Expression implicits
-  * @groupdesc attrLogicImplicits Turns basic types into `TermValue`'s that can be used in [[elements.Expression Expression]]
+  * @groupdesc attrLogicImplicits Turns basic types into `TermValue`'s that can be used in [[Expression Expression]]
   * @groupprio attrLogicImplicits 21
   */
 trait LogicImplicits {

@@ -1,5 +1,5 @@
 package molecule.datomic.base.ast
-import molecule.core.ast.elements
+import molecule.core.ast.elements.Model
 import molecule.datomic.base.transform.Query2String
 import molecule.core.util.Helpers
 
@@ -19,7 +19,7 @@ object query extends Helpers {
     * <br><br>
     * Custom DSL molecule --> Model --> Query --> Datomic query string
     * <br><br>
-    * Query is thus derived from [[elements.Model Model]] representation.
+    * Query is thus derived from [[Model Model]] representation.
     *
     * @param f  Find parameters
     * @param wi With parameters
