@@ -2,7 +2,6 @@ package molecule.core.api.get
 
 import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
-import molecule.core.api.get.GetArray
 import molecule.core.api.getAsync.GetAsyncList
 import molecule.datomic.base.ast.tempDb._
 import molecule.core.util.Quoted
@@ -18,7 +17,21 @@ import scala.language.implicitConversions
   * For expected smaller result sets it's convenient to return Lists of tuples of data.
   * Considered as the default getter, no postfix has been added (`get` instead of `getList`).
   * */
-trait GetList[Tpl] extends GetArray[Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
+trait GetList[Obj, Tpl] extends GetArray[Obj, Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
+
+
+  def getObjList(implicit conn: Conn): List[Obj] = {
+    val jColl = conn.query(_model, _query)
+    val it    = jColl.iterator
+    val buf   = new ListBuffer[Obj]
+    while (it.hasNext) {
+      buf += row2obj(it.next)
+    }
+    buf.toList
+  }
+
+  def getObj(implicit conn: Conn): Obj = getObjList(conn).head
+
 
 
   // get ================================================================================================

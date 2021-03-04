@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-/** Factory methods to create facade to Datomic Connection for peer api. */
+/** Factory methods to create facade to Datomic Connection. */
 object Conn_Peer {
   def apply(uri: String): Conn_Peer = new Conn_Peer(datomic.Peer.connect(uri))
   def apply(datomicConn: datomic.Connection): Conn_Peer = new Conn_Peer(datomicConn)

@@ -13,19 +13,36 @@ import molecule.tests.core.base.dsl.CoreTest._
   *
   * Dynamically applying a body of method(s) to a molecule allows it to
   * resemble a case class definition body as though you instantiated a domain class
-  * with already populated data according to the molecule structure.
+  * with already populated data according to the molecule structure - plus your
+  * methods.
   *
-  * Properties are available inside the bode through the `self` reference to the
+  * Properties are available inside the body through the `self` reference to the
   * object (you can give it other names too).
   *
-  * Note that the molecule needs to be created explicitly with `m`
-  *
+  * Note that the molecule needs to be created explicitly with `m` and that the
+  * self reference to the molecule object can't be named the same as any of the
+  * top level attributes of the molecule.
   */
 class DynamicObj extends TestSpec with Helpers {
 
+  "Local logic" in new SelfJoinSetup {
+    import molecule.tests.core.ref.dsl.SelfJoin._
+    Person.name("Ben").age(23).save
+
+    val person = m(Person.name.age) { person =>
+      // Local business logic using the molecule object properties
+      def nextAge: Int = person.age + 1
+    }
+
+    person.name === "Ben"
+    person.age === 23
+    person.nextAge === 24
+  }
+
+
   val baz = 2
 
-  "Basics" in new CoreSetup {
+  "Dynamic type tests" in new CoreSetup {
 
     val foo = 5
 
@@ -67,21 +84,6 @@ class DynamicObj extends TestSpec with Helpers {
     // Object properties
     obj.int === 42
     obj.Ref1.int1 === 43
-  }
-
-
-  "Local logic" in new SelfJoinSetup {
-    import molecule.tests.core.ref.dsl.SelfJoin._
-    Person.name("Ben").age(23).save
-
-    val person = m(Person.name.age) { person =>
-      def nextAge = person.age + 1
-    }
-
-    person.name === "Ben"
-    person.age === 23
-    person.nextAge === 24
-
   }
 
   "Mandatory implementation" in new CoreSetup {

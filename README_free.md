@@ -65,14 +65,14 @@ sbt:molecule> testOnly molecule.tests.core.ref.*
 sbt:molecule> test
 
 // Test against scala 2.13
-sbt:molecule> ++2.13.4; testOnly molecule.tests.*
-sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.*
-sbt:molecule> ++2.13.4; testOnly molecule.tests.core.ref.TwoStepQueries
+sbt:molecule> ++2.13.5; testOnly molecule.tests.*
+sbt:molecule> ++2.13.5; testOnly molecule.tests.core.ref.*
+sbt:molecule> ++2.13.5; testOnly molecule.tests.core.ref.TwoStepQueries
 
 // Test against scala 2.12 
-sbt:molecule> ++2.12.12; testOnly molecule.tests.*
-sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.*
-sbt:molecule> ++2.12.12; testOnly molecule.tests.core.ref.TwoStepQueries
+sbt:molecule> ++2.12.13; testOnly molecule.tests.*
+sbt:molecule> ++2.12.13; testOnly molecule.tests.core.ref.*
+sbt:molecule> ++2.12.13; testOnly molecule.tests.core.ref.TwoStepQueries
 ```
 Using sbt is about twice as fast and therefore preferable when running all tests (for peer system only though). 
 

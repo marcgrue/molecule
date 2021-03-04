@@ -6,6 +6,7 @@ import molecule.core.ast.elements._
 import molecule.core.util.JavaUtil
 import scala.collection.JavaConverters._
 
+
 /** Datomic transaction representation and operations. */
 object transactionModel extends JavaUtil {
 

@@ -1,7 +1,6 @@
 package molecule.core.generic
 
 import molecule.core.dsl.base.{FirstNS, Init}
-import molecule.core.generic.AEVT
 import molecule.core.generic.AEVT._
 
 /** AEVT Index.

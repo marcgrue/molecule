@@ -182,19 +182,6 @@ object Model2Query extends Helpers {
     val (q2, e2, v2, prevNs2, prevAttr2, prevRefNs2) = txMetaData.elements.foldLeft((query, txV, w, prevNs, prevAttr, prevRefNs)) {
       case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
         make(model, q1, element, e1, v1, prevNs1, prevAttr1, prevRefNs1)
-
-      //      case ((q1, e1, v1, prevNs1, prevAttr1, prevRefNs1), element) =>
-      //        val nextV = if(first) {
-      //          first = false
-      //          v1
-      //        } else if(prevRefNs == prevRefNs1) {
-      //          v1
-      //        } else {
-      //          // All tx meta data attributes have new `v`
-      //          nextChar(v1, 1)
-      //        }
-      ////        make(model, q1, element, e1, nextV, "","","")
-      //        make(model, q1, element, e1, nextV, prevNs1, prevAttr1, prevRefNs1)
     }
     (q2, e2, nextChar(v2, 1), prevNs2, prevAttr2, prevRefNs2)
   }

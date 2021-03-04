@@ -18,6 +18,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 
+
 /** Inspect methods
   *
   * Call a inspect method on a molecule to see the internal transformations and

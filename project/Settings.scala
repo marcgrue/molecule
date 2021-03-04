@@ -9,9 +9,9 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version in ThisBuild := "0.25.0-SNAPSHOT",
-    crossScalaVersions := Seq("2.12.12", "2.13.4"),
-    scalaVersion in ThisBuild := "2.13.4",
+    version in ThisBuild := "0.25.0",
+    crossScalaVersions := Seq("2.12.13", "2.13.5"),
+    scalaVersion in ThisBuild := "2.13.5",
 
     scalacOptions := List(
       "-feature",
@@ -50,7 +50,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     Seq(
       libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        "org.specs2" %% "specs2-core" % "4.10.5",
+        "org.specs2" %% "specs2-core" % "4.10.6",
         "org.scalamolecule" %% "datomic-client-api-java-scala" % "0.6.1"
       )
     ) ++ (if (datomicProtocol == "free") {

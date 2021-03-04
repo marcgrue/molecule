@@ -26,6 +26,7 @@ import scala.language.implicitConversions
   * */
 trait ShowInspect[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
+
   /** Inspect call to `get` on a molecule (without affecting the db).
     * <br><br>
     * Prints the following to output:

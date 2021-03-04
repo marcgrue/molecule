@@ -56,10 +56,7 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         val nested   = elements.foldLeft("v": Any, Seq[Statement]()) {
           case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
         }._2
-        val add      = Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c))
-
-        //        ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
-        ("e", stmts :+ add)
+        ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
 
       case ("tx", Composite(elements)) =>
         val associated = elements.foldLeft("tx": Any, Seq[Statement]()) {
@@ -1003,19 +1000,17 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
           }
           ("", edgeB, valueStmts(stmts, lastE(stmts, a, forcedE, bi, e), a, tempId(refNs), None, bi, edgeB))
         case Add("v", a, Values(vs, prefix), bi)                                                    => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-
-        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)      => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("tx", a, Values(vs, prefix), bi)                          => (backRef, edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
-        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")    => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)   => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("txRef", a, Values(vs, prefix), bi)                       => (backRef, edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__") => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-
-        case Add("nsFull", backRef, _, _)      => (backRef, edgeB, stmts)
-        case Retract(_, _, _, _)               => (backRef, edgeB, stmts)
-        case Add(id: Long, _, Values(_, _), _) => err("saveStmts", s"With a given id `$id` please use `update` instead.")
-        case Add(_, a, "__arg", _)             => err("saveStmts", s"Attribute `$a` needs a value applied")
-        case unexpected                        => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
+        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)                               => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("tx", a, Values(vs, prefix), bi)                                                   => (backRef, edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
+        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")                             => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)                            => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi)                                                => (backRef, edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__")                          => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("nsFull", backRef, _, _)                                                           => (backRef, edgeB, stmts)
+        case Retract(_, _, _, _)                                                                    => (backRef, edgeB, stmts)
+        case Add(id: Long, _, Values(_, _), _)                                                      => err("saveStmts", s"With a given id `$id` please use `update` instead.")
+        case Add(_, a, "__arg", _)                                                                  => err("saveStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                                                                             => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
       }
     }._3
   }

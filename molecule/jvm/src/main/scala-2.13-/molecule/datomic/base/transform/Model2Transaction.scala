@@ -58,6 +58,12 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
         }._2
         ("e", stmts :+ Add(parentId, s":$nsFull/$refAttr", nested, bi(gs, c)))
 
+      case ("tx", Composite(elements)) =>
+        val associated = elements.foldLeft("tx": Any, Seq[Statement]()) {
+          case ((eSlot1, stmts1), element1) => resolveElement(eSlot1, stmts1, element1)
+        }._2
+        ("tx", stmts ++ associated)
+
       case (_, Composite(elements)) =>
         // Mark the first stmt as having the shared entity for all composite sub molecules
         // Then we can go back and pick up that entity as base for the newt sub-molecule
@@ -977,39 +983,43 @@ case class Model2Transaction(conn: Conn, model: Model) extends Helpers {
 
   def saveStmts(): Seq[Statement] = {
     val txId = "datomic.tx"
-    stmtsModel.foldLeft(None: Option[AnyRef], Seq[Statement]()) { case ((edgeB, stmts), genericStmt) =>
+    stmtsModel.foldLeft("", Option.empty[AnyRef], Seq.empty[Statement]) { case ((backRef, edgeB, stmts), genericStmt) =>
       genericStmt match {
-        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
-        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
-        case Add("e", a, "__tempId", bi)                                                            => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
-        case Add(e, a, "__tempId", bi)                                                              => (edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
-        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB))
-        case Add(e@("e" | "ec"), a, refNs: String, bi@BiEdgeRef(_, _)) if !refNs.startsWith("__")   => val edgeB1 = Some(tempId(a)); (edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB1))
-        case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
-        case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
-        case Add("v", a, Values(vs, prefix), bi)                                                    => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-
-        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)      => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("tx", a, Values(vs, prefix), bi)                          => (edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
-        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")    => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)   => (edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("txRef", a, Values(vs, prefix), bi)                       => (edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
-        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__") => (edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
-
-        case Add("nsFull", _, _, _)            => (edgeB, stmts)
-        case Retract(_, _, _, _)               => (edgeB, stmts)
-        case Add(id: Long, _, Values(_, _), _) => err("saveStmts", s"With a given id `$id` please use `update` instead.")
-        case Add(_, a, "__arg", _)             => err("saveStmts", s"Attribute `$a` needs a value applied")
-        case unexpected                        => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
+        case Add("__tempId", a, Values(vs, pf), bi@BiEdgePropAttr(_))                               => val edgeB1 = Some(tempId(a)); (backRef, edgeB1, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB1))
+        case Add("__tempId", a, Values(vs, pf), bi)                                                 => (backRef, edgeB, valueStmts(stmts, tempId(a), a, vs, pf, bi, edgeB))
+        case Add("e", a, "__tempId", bi)                                                            => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(a), None, bi, edgeB))
+        case Add(e, a, "__tempId", bi)                                                              => (backRef, edgeB, valueStmts(stmts, e, a, tempId(a), None, bi, edgeB))
+        case Add(e@("e" | "ec"), a, Values(vs, prefix), bi)                                         => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, vs, prefix, bi, edgeB))
+        case Add(e@("e" | "ec"), a, refNs: String, bi@BiEdgeRef(_, _)) if !refNs.startsWith("__")   => val edgeB1 = Some(tempId(a)); (backRef, edgeB1, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB1))
+        case Add(e@("e" | "ec"), a, refNs: String, bi@BiTargetRef(_, _)) if !refNs.startsWith("__") => (backRef, None, valueStmts(stmts, lastE(stmts, a, 0, bi, e), a, tempId(refNs), None, bi, edgeB))
+        case Add(e@("e" | "ec"), a, refNs: String, bi) if !refNs.startsWith("__")                   =>
+          val forcedE = if (backRef.isEmpty) 0L else {
+            stmts.reverse.collectFirst {
+              case Add(e: DbId, a, _, _) if a.startsWith(backRef) => e
+            } getOrElse err("saveStmts", s"Couldn't find backref namespace `$backRef` in any previous Add statements.\n" + stmts.mkString("\n"))
+          }
+          ("", edgeB, valueStmts(stmts, lastE(stmts, a, forcedE, bi, e), a, tempId(refNs), None, bi, edgeB))
+        case Add("v", a, Values(vs, prefix), bi)                                                    => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("tx", a, Values(vs, prefix), bi) if txRefAttr(stmts)                               => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("tx", a, Values(vs, prefix), bi)                                                   => (backRef, edgeB, valueStmts(stmts, txId, a, vs, prefix, bi, edgeB))
+        case Add("tx", a, refNs: String, bi) if !refNs.startsWith("__")                             => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi) if txRefAttr(stmts)                            => (backRef, edgeB, valueStmts(stmts, stmts.last.v.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, Values(vs, prefix), bi)                                                => (backRef, edgeB, valueStmts(stmts, stmts.last.e.asInstanceOf[Object], a, vs, prefix, bi, edgeB))
+        case Add("txRef", a, refNs: String, bi) if !refNs.startsWith("__")                          => (backRef, edgeB, valueStmts(stmts, lastE(stmts, a, 0, bi), a, tempId(refNs), None, bi, edgeB))
+        case Add("nsFull", backRef, _, _)                                                           => (backRef, edgeB, stmts)
+        case Retract(_, _, _, _)                                                                    => (backRef, edgeB, stmts)
+        case Add(id: Long, _, Values(_, _), _)                                                      => err("saveStmts", s"With a given id `$id` please use `update` instead.")
+        case Add(_, a, "__arg", _)                                                                  => err("saveStmts", s"Attribute `$a` needs a value applied")
+        case unexpected                                                                             => err("saveStmts", s"Unexpected save statement: $unexpected\nStatements so far:\n" + stmts.mkString("\n"))
       }
-    }._2
+    }._3
   }
 
 
   def updateStmts(): Seq[Statement] = {
     val (genericStmts, genericTxStmts) = splitStmts()
     val dataStmts: Seq[Statement]      = genericStmts.foldLeft(
-      None: Option[AnyRef],
+      Option.empty[AnyRef],
       Seq.empty[Statement],
       0L
     ) { case ((edgeB, stmts, prevE), genericStmt) =>

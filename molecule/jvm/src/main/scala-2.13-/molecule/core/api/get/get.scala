@@ -1,7 +1,5 @@
 package molecule.core.api
 
-import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
-
 /** Synchronous getter methods to retrieve data from Datomic.
   *
   * The Datomic On-Prem(ises) server model provides a Peer that returns data synchronously.
