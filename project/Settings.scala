@@ -9,7 +9,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version in ThisBuild := "0.25.0",
+    version in ThisBuild := "0.25.1",
     crossScalaVersions := Seq("2.12.13", "2.13.5"),
     scalaVersion in ThisBuild := "2.13.5",
 
@@ -80,7 +80,7 @@ object Settings extends SettingsDatomic with SettingsMolecule {
       }
     },
 
-    // Let IntelliJ detect created jars in unmanaged lib directory
+    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directory
     exportJars := true,
 
     // Run sbt tests for all systems sequentially to avoid data locks with db

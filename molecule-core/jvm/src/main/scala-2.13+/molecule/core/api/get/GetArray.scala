@@ -92,7 +92,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
   // get as of ================================================================================================
 
-  /** Get `Array` of all rows as tuples matching molecule as of transaction time `t`.
+  /** Get `Array` of rows as tuples matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -131,58 +131,14 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *     ("Liz", 37)
     *   )
     *
+    *   // Get Array of n (1) rows as of transaction t 1031 (after update)
+    *   Person.name.age.getArrayAsOf(1031, 1) === Array(
+    *     ("Ben", 43)
+    *   )
+    *
     *   // Get Array of all rows as of transaction t 1032 (after retract)
     *   Person.name.age.getArrayAsOf(1032) === Array(
     *     ("Liz", 37)
-    *   )
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArrayAsOf
-    * @param t       Transaction time t
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(t:Long)* getAsyncArrayAsOf]] method.
-    */
-  def getArrayAsOf(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
-
-
-  /** Get `Array` of n rows as tuples matching molecule as of transaction time `t`.
-    * <br><br>
-    * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
-    * <br><br>
-    * `t` can for instance be retrieved in a getHistory call for an attribute and then be
-    * used to get data as of that point in time (including that transaction):
-    * {{{
-    *   // Insert (t 1028)
-    *   val List(ben, liz) = Person.name.age insert List(
-    *     ("Ben", 42),
-    *     ("Liz", 37)
-    *   ) eids
-    *
-    *   // Update (t 1031)
-    *   Person(ben).age(43).update
-    *
-    *   // History of Ben
-    *   Person(ben).age.t.op.getHistory.sortBy(r => (r._2, r._3)) === List(
-    *     (42, 1028, true),  // Insert:  42 asserted
-    *     (42, 1031, false), // Update:  42 retracted
-    *     (43, 1031, true),  //          43 asserted
-    *   )
-    *
-    *   // Get Array of all rows as of transaction t 1031 (after update)
-    *   Person.name.age.getArrayAsOf(1031) === Array(
-    *     ("Ben", 43),
-    *     ("Liz", 37)
-    *   )
-    *
-    *   // Get Array of n rows as of transaction t 1031 (after update)
-    *   Person.name.age.getArrayAsOf(1031, 1) === Array(
-    *     ("Ben", 43)
     *   )
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
@@ -199,14 +155,17 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(t:Long,n:Int)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayAsOf(t: Long, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
 
 
-  /** Get `Array` of all rows as tuples matching molecule as of tx.
+  // Fully qualifying tx parameter (and other parameters below) for Scala Docs to be able to pick it up
+  // when referencing the method from the asynchronous cousin methods.
+
+  /** Get `Array` of rows as tuples matching molecule as of tx.
     * <br><br>
-    * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve
-    * a database value as of that transaction (including).
+    * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
+    * value as of that transaction (including).
     * <br><br>
     * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
     * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
@@ -238,56 +197,14 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *     ("Liz", 37)
     *   )
     *
+    *   // Get Array of n (1) rows as of tx2 (after update)
+    *   Person.name.age.getArrayAsOf(tx2, 1) === Array(
+    *     ("Ben", 43)
+    *   )
+    *
     *   // Get Array of all rows as of tx3 (after retract)
     *   Person.name.age.getArrayAsOf(tx3) === Array(
     *     ("Liz", 37) // Ben gone
-    *   )
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArrayAsOf
-    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArrayAsOf]] method.
-    **/
-  def getArrayAsOf(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
-  // Fully qualifying tx parameter (and other parameters below) for Scala Docs to be able to pick it up
-  // when referencing the method from the asynchronous cousin methods.
-
-  /** Get `Array` of n rows as tuples matching molecule as of tx.
-    * <br><br>
-    * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
-    * value as of that transaction (including).
-    * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]]
-    * that contains the transaction entity id (which is used as argument to Datomic internally). This is more
-    * convenient when using Molecule since we get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction
-    * operations like `get`, `update`, `retract` etc.
-    * {{{
-    *   // Insert (tx report 1)
-    *   val tx1 = Person.name.age insert List(
-    *     ("Ben", 42),
-    *     ("Liz", 37)
-    *   )
-    *   val List(ben, liz) = tx1.eids
-    *
-    *   // Update (tx report 2)
-    *   val tx2 = Person(ben).age(43).update
-    *
-    *   // Get Array of all rows as of tx2 (after update)
-    *   Person.name.age.getArrayAsOf(tx2) === Array(
-    *     ("Ben", 43),
-    *     ("Liz", 37)
-    *   )
-    *
-    *   // Get Array of n rows as of tx2 (after update)
-    *   Person.name.age.getArrayAsOf(tx2, 1) === Array(
-    *     ("Ben", 43)
     *   )
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
@@ -304,11 +221,11 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
     **/
-  def getArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayAsOf(tx: TxReport, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
 
 
-  /** Get `Array` of all rows as tuples matching molecule as of date.
+  /** Get `Array` of rows as tuples matching molecule as of date.
     * <br><br>
     * Get data at a human point in time (a java.util.Date).
     * {{{
@@ -345,53 +262,14 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *     ("Liz", 37)
     *   )
     *
-    *   // Get Array of all rows as of afterRetract
-    *   Person.name.age.getArrayAsOf(afterRetract) === Array(
-    *     ("Liz", 37) // Ben gone
-    *   )
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArrayAsOf
-    * @param date    java.util.Date
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date)* getAsyncArrayAsOf]] method.
-    */
-  def getArrayAsOf(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
-
-
-  /** Get `Array` of n rows as tuples matching molecule as of date.
-    * <br><br>
-    * Get data at a human point in time (a java.util.Date).
-    * {{{
-    *   val beforeInsert = new java.util.Date
-    *
-    *   // Insert
-    *   val tx1 = Person.name.age insert List(
-    *     ("Ben", 42),
-    *     ("Liz", 37)
-    *   )
-    *   val List(ben, liz) = tx1.eids
-    *   val afterInsert = new java.util.Date
-    *
-    *   // Update
-    *   val tx2 = Person(ben).age(43).update
-    *   val afterUpdate = new java.util.Date
-    *
-    *   // Get Array of all rows as of afterUpdate
-    *   Person.name.age.getArrayAsOf(afterUpdate) === Array(
-    *     ("Ben", 43),
-    *     ("Liz", 37)
-    *   )
-    *
     *   // Get Array of n rows as of afterUpdate
     *   Person.name.age.getArrayAsOf(afterUpdate, 1) === Array(
     *     ("Ben", 43)
+    *   )
+    *
+    *   // Get Array of all rows as of afterRetract
+    *   Person.name.age.getArrayAsOf(afterRetract) === Array(
+    *     ("Liz", 37) // Ben gone
     *   )
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
@@ -408,51 +286,13 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date,n:Int)* getAsyncArrayAsOf]] method.
     */
-  def getArrayAsOf(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayAsOf(date: Date, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
 
 
   // get since ================================================================================================
 
-  /** Get `Array` of all rows as tuples matching molecule since transaction time `t`.
-    * <br><br>
-    * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
-    * <br><br>
-    * `t` can for instance be retrieved by calling `t` on the tx report returned from transactional operations
-    * and then be used to get data since that point in time (excluding that transaction):
-    * {{{
-    *   // 3 transaction times `t`
-    *   val t1 = Person.name("Ann").save.t
-    *   val t2 = Person.name("Ben").save.t
-    *   val t3 = Person.name("Cay").save.t
-    *
-    *   // Current values
-    *   Person.name.get === List("Ann", "Ben", "Cay")
-    *
-    *   // Ben and Cay added since transaction time t 1028
-    *   Person.name.getArraySince(t1) === Array("Ben", "Cay")
-    *
-    *   // Cay added since transaction time t 1030
-    *   Person.name.getArraySince(t2) === Array("Cay")
-    *
-    *   // Nothing added since transaction time t 1032
-    *   Person.name.getArraySince(t3) === Nil
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArraySince
-    * @param t       Transaction time t
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(t:Long)* getAsyncArraySince]] method.
-    */
-  def getArraySince(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
-
-  /** Get `Array` of n rows as tuples matching molecule since transaction time `t`.
+  /** Get `Array` of rows as tuples matching molecule since transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -472,6 +312,12 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *
     *   // Ben and Cay added since transaction time t 1028 - only n (1) rows returned
     *   Person.name.getArraySince(t1, 1) === Array("Ben")
+    *
+    *   // Cay added since transaction time t 1030
+    *   Person.name.getArraySince(t2) === Array("Cay")
+    *
+    *   // Nothing added since transaction time t 1032
+    *   Person.name.getArraySince(t3) === Nil
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -487,52 +333,11 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(t:Long,n:Int)* getAsyncArraySince]] method.
     */
-  def getArraySince(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArraySince(t: Long, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
 
 
-  /** Get `Array` of all rows as tuples matching molecule since tx.
-    * <br><br>
-    * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
-    * value since that transaction (excluding the transaction itself).
-    * <br><br>
-    * Instead of supplying the transaction entity id, in Molecule we supply a [[molecule.datomic.base.facade.TxReport TxReport]] that contains
-    * the transaction entity id (which is used as argument to Datomic internally). This is more convenient when using Molecule since we
-    * getAsync a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
-    * {{{
-    *   // Get tx reports for 3 transactions
-    *   val tx1 = Person.name("Ann").save
-    *   val tx2 = Person.name("Ben").save
-    *   val tx3 = Person.name("Cay").save
-    *
-    *   // Current values
-    *   Person.name.get === List("Ann", "Ben", "Cay")
-    *
-    *   // Ben and Cay added since tx1
-    *   Person.name.getArraySince(tx1) === Array("Ben", "Cay")
-    *
-    *   // Cay added since tx2
-    *   Person.name.getArraySince(tx2) === Array("Cay")
-    *
-    *   // Nothing added since tx3
-    *   Person.name.getArraySince(tx3) === Nil
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArraySince
-    * @param tx      [[molecule.datomic.base.facade.TxReport TxReport]]
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArraySince]] method.
-    */
-  def getArraySince(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
-
-
-  /** Get `Array` of n rows as tuples matching molecule since tx.
+  /** Get `Array` of rows as tuples matching molecule since tx.
     * <br><br>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
@@ -554,6 +359,12 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *
     *   // Ben and Cay added since tx1 - only n (1) rows returned
     *   Person.name.getArraySince(tx1, 1) === Array("Ben")
+    *
+    *   // Cay added since tx2
+    *   Person.name.getArraySince(tx2) === Array("Cay")
+    *
+    *   // Nothing added since tx3
+    *   Person.name.getArraySince(tx3) === Nil
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -569,47 +380,11 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
     **/
-  def getArraySince(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArraySince(tx: TxReport, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
 
 
-  /** Get `Array` of all rows as tuples matching molecule since date.
-    * <br><br>
-    * Get data added/retracted since a human point in time (a java.util.Date).
-    * {{{
-    *   // Transact 3 times (`inst` retrieves transaction time/Date from tx report)
-    *   val date1 = Person.name("Ann").save.inst
-    *   val date2 = Person.name("Ben").save.inst
-    *   val date3 = Person.name("Cay").save.inst
-    *
-    *   // Current values
-    *   Person.name.get === List("Ann", "Ben", "Cay")
-    *
-    *   // Ben and Cay added since date1
-    *   Person.name.getArraySince(date1) === Array("Ben", "Cay")
-    *
-    *   // Cay added since date2
-    *   Person.name.getArraySince(date2) === Array("Cay")
-    *
-    *   // Nothing added since date3
-    *   Person.name.getArraySince(date3) === Nil
-    * }}}
-    * Getting a pre-allocated Array populated with typed data is the fastest way to query
-    * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
-    * also be the fastest way to traverse the data set.
-    *
-    * @group getArraySince
-    * @param date    java.util.Date
-    * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
-    * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date)* getAsyncArraySince]] method.
-    */
-  def getArraySince(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
-    getArray(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
-
-
-  /** Get `Array` of n rows as tuples matching molecule since date.
+  /** Get `Array` of rows as tuples matching molecule since date.
     * <br><br>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * {{{
@@ -626,6 +401,12 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *
     *   // Ben and Cay added since date1 - only n (1) rows returned
     *   Person.name.getArraySince(date1, 1) === Array("Ben")
+    *
+    *   // Cay added since date2
+    *   Person.name.getArraySince(date2) === Array("Cay")
+    *
+    *   // Nothing added since date3
+    *   Person.name.getArraySince(date3) === Nil
     * }}}
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -641,7 +422,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date,n:Int)* getAsyncArraySince]] method.
     */
-  def getArraySince(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArraySince(date: Date, n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
 
 
@@ -792,7 +573,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_],n:Int)* getAsyncArrayWith]] method.
     */
-  def getArrayWith(txData: jList[_], n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
+  def getArrayWith(txData: jList[_], n: Int = -1)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), objType, tplType)
 
 
