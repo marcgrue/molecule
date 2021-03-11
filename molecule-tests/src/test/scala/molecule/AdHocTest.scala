@@ -85,10 +85,6 @@ class AdHocTest extends Specification {
     implicit val conn: Conn = recreateDbFrom(CoreTestSchema)
 
 
-    def hej(n: Int = 1) = n + 1
-
-//    val x = hej
-
     ok
   }
 

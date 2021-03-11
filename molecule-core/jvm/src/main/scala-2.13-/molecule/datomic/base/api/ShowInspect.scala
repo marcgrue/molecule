@@ -4,15 +4,14 @@ import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{PersistentHashSet, PersistentVector}
 import molecule.core.api.Molecule_0
 import molecule.core.ast.elements._
-import molecule.datomic.base.ast.query.QueryExpr
-import molecule.datomic.base.ast.tempDb._
 import molecule.core.exceptions.{MoleculeException, QueryException}
 import molecule.core.ops.VerifyModel
-import molecule.datomic.base.ops.QueryOps._
-import molecule.datomic.base.transform._
+import molecule.datomic.base.ast.query.QueryExpr
+import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
-import molecule.datomic.base.transform.Model2Transaction
+import molecule.datomic.base.ops.QueryOps._
+import molecule.datomic.base.transform.{Model2Transaction, _}
 import molecule.datomic.base.util.Inspect
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -390,7 +389,8 @@ trait ShowInspect[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     */
   def inspectGetWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Unit = {
-    inspectGet(conn.usingTempDb(With(seqAsJavaListConverter(txMolecules.flatten.flatten.map(_.toJava)).asJava)))
+//    inspectGet(conn.usingTempDb(With(seqAsJavaListConverter(txMolecules.flatten.flatten.map(_.toJava)).asJava)))
+    inspectGet(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
     txMolecules.zipWithIndex foreach { case (stmts, i) =>
       Inspect(s"Statements, transaction molecule ${i + 1}:", 1)(i + 1, stmts)
     }

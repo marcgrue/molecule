@@ -17,8 +17,7 @@ class Basics extends TestSpec with Helpers {
     // just want the first of more rows
     val o1 = Ns.int.str.Ref1.int1.getObj
 
-    // The above molecule and object getter creates the following code:
-
+    // The above molecule and object getter makes a macro generate the following code:
     val o2 = new Ns_int with Ns_str with Ns__Ref1[Ref1_int1] {
       override lazy val int: Int    = 0
       override lazy val str: String = "x"

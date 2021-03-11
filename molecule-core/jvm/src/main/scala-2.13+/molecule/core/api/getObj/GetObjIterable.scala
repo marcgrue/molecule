@@ -1,20 +1,20 @@
-package molecule.core.api.get
+package molecule.core.api.getObj
 
 import java.util.{Date, Collection => jCollection, Iterator => jIterator, List => jList}
 import molecule.core.api.Molecule_0
-import molecule.core.api.getAsync.GetAsyncIterable
+import molecule.core.api.getAsyncTpl.GetAsyncTplIterable
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 
-/** Data getter methods on molecules that return Iterable[Tpl].
+/** Data getter methods on molecules that return Iterable[Obj].
   * <br><br>
   * Suitable for data sets that are lazily consumed.
   * */
-trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
+trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
   // get obj data ==============================================================
@@ -32,7 +32,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Obj] where Obj is composed of trait types
     *         matching the attributes of the molecule.
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
     */
   def getObjIterable(implicit conn: Conn): Iterable[Obj] = new Iterable[Obj] {
     private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
@@ -46,39 +46,13 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
   }
 
 
-  // get tuple data ============================================================
-
-  /** Get `Iterable` of all rows as tuples matching the molecule.
-    * <br><br>
-    * Rows are lazily type-casted on each call to iterator.next().
-    * {{{
-    *   Person.name.age.getIterable.next === ("Ben", 42)
-    * }}}
-    *
-    * @group get
-    * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
-    */
-  def getIterable(implicit conn: Conn): Iterable[Tpl] = new Iterable[Tpl] {
-    private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
-    override def isEmpty: Boolean = jColl.isEmpty
-    override def size: Int = jColl.size
-    override def iterator: Iterator[Tpl] = new Iterator[Tpl] {
-      private val jIter: jIterator[jList[AnyRef]] = jColl.iterator
-      override def hasNext: Boolean = jIter.hasNext
-      override def next(): Tpl = row2tpl(jIter.next())
-    }
-  }
-
-
   // get as of =================================================================
 
   /** Get `Iterable` of all rows as tuples matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
-    * Call `getIterableAsOf` for large result sets to maximize runtime performance.
+    * Call `getObjIterableAsOf` for large result sets to maximize runtime performance.
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * `t` can for instance be retrieved in a getHistory call for an attribute and then be
@@ -105,7 +79,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   )
     *
     *   // Get Iterable of all rows as of transaction t 1028 (after insert)
-    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(1028)
+    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(1028)
     *   val iterator1: Iterator[(String, Int)] = iterable1.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -113,7 +87,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator1.next === ("Ben", 42)
     *
     *   // Get Iterable of all rows as of transaction t 1031 (after update)
-    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(1031)
+    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(1031)
     *   val iterator2: Iterator[(String, Int)] = iterable2.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -121,7 +95,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator2.next === ("Ben", 43) // Ben now 43
     *
     *   // Get Iterable of all rows as of transaction t 1032 (after retract)
-    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(1032)
+    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(1032)
     *   val iterator3: Iterator[(String, Int)] = iterable3.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -129,14 +103,14 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator3.hasNext === false // Ben gone
     * }}}
     *
-    * @group getIterableAsOf
+    * @group getObjIterableAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableAsOf(t:Long)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(t:Long)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(t: Long)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxLong(t))))
+  def getObjIterableAsOf(t: Long)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(AsOf(TxLong(t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule as of tx.
@@ -161,7 +135,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val tx3 = ben.retract
     *
     *   // Get Iterable of all rows as of tx1 (after insert)
-    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(tx1)
+    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(tx1)
     *   val iterator1: Iterator[(String, Int)] = iterable1.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -169,7 +143,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator1.next === ("Liz", 37)
     *
     *   // Get Iterable of all rows as of tx2 (after update)
-    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(tx2)
+    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(tx2)
     *   val iterator2: Iterator[(String, Int)] = iterable2.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -177,7 +151,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator2.next === ("Liz", 37)
     *
     *   // Get Iterable of all rows as of tx3 (after retract)
-    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(tx3)
+    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(tx3)
     *   val iterator3: Iterator[(String, Int)] = iterable3.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -185,14 +159,14 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator3.hasNext === false // Ben gone
     * }}}
     *
-    * @group getIterableAsOf
+    * @group getObjIterableAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxLong(tx.t))))
+  def getObjIterableAsOf(tx: TxReport)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule as of date.
@@ -218,12 +192,12 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val afterRetract = new java.util.Date
     *
     *   // Get Iterable of all rows as of beforeInsert
-    *   val iterable0: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(beforeInsert)
+    *   val iterable0: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(beforeInsert)
     *   val iterator0: Iterator[(String, Int)] = iterable0.iterator
     *   iterator0.hasNext === false // Nothing yet
     *
     *   // Get Iterable of all rows as of afterInsert
-    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(afterInsert)
+    *   val iterable1: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(afterInsert)
     *   val iterator1: Iterator[(String, Int)] = iterable1.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -231,7 +205,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator1.next === ("Liz", 37)
     *
     *   // Get Iterable of all rows as of afterUpdate
-    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(afterUpdate)
+    *   val iterable2: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(afterUpdate)
     *   val iterator2: Iterator[(String, Int)] = iterable2.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -239,7 +213,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator2.next === ("Liz", 37)
     *
     *   // Get Iterable of all rows as of afterRetract
-    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getIterableAsOf(afterRetract)
+    *   val iterable3: Iterable[(String, Int)] = Person.name.age.getObjIterableAsOf(afterRetract)
     *   val iterator3: Iterator[(String, Int)] = iterable3.iterator
     *
     *   // Type casting lazily performed with each call to `next`
@@ -247,14 +221,14 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   iterator3.hasNext === false // Ben gone
     * }}}
     *
-    * @group getIterableAsOf
+    * @group getObjIterableAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
     */
-  def getIterableAsOf(date: Date)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(AsOf(TxDate(date))))
+  def getObjIterableAsOf(date: Date)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(AsOf(TxDate(date))))
 
 
   // get since ================================================================================================
@@ -263,7 +237,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
-    * Call `getIterableSince` for large result sets to maximize runtime performance.
+    * Call `getObjIterableSince` for large result sets to maximize runtime performance.
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * `t` can for instance be retrieved calling `t` on the tx report returned from transactional operations
@@ -275,26 +249,26 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val t3 = Person.name("Cay").save.t
     *
     *   // Current values as Iterable
-    *   Person.name.getIterable.iterator.toList === List("Ann", "Ben", "Cay")
+    *   Person.name.getObjIterable.iterator.toList === List("Ann", "Ben", "Cay")
     *
     *   // Ben and Cay added since transaction time t1
-    *   Person.name.getIterableSince(t1).iterator.toList === List("Ben", "Cay")
+    *   Person.name.getObjIterableSince(t1).iterator.toList === List("Ben", "Cay")
     *
     *   // Cay added since transaction time t2
-    *   Person.name.getIterableSince(t2).iterator.toList === List("Cay")
+    *   Person.name.getObjIterableSince(t2).iterator.toList === List("Cay")
     *
     *   // Nothing added since transaction time t3
-    *   Person.name.getIterableSince(t3).iterator.toList === Nil
+    *   Person.name.getObjIterableSince(t3).iterator.toList === Nil
     * }}}
     *
-    * @group getIterableSince
+    * @group getObjIterableSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableSince(t:Long)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(t:Long)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(t: Long)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxLong(t))))
+  def getObjIterableSince(t: Long)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(Since(TxLong(t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule since tx.
@@ -312,26 +286,26 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val tx3 = Person.name("Cay").save
     *
     *   // Current values
-    *   Person.name.getIterable.iterator.toList === List("Ann", "Ben", "Cay")
+    *   Person.name.getObjIterable.iterator.toList === List("Ann", "Ben", "Cay")
     *
     *   // Ben and Cay added since tx1
-    *   Person.name.getIterableSince(tx1).iterator.toList === List("Ben", "Cay")
+    *   Person.name.getObjIterableSince(tx1).iterator.toList === List("Ben", "Cay")
     *
     *   // Cay added since tx2
-    *   Person.name.getIterableSince(tx2).iterator.toList === List("Cay")
+    *   Person.name.getObjIterableSince(tx2).iterator.toList === List("Cay")
     *
     *   // Nothing added since tx3
-    *   Person.name.getIterableSince(tx3).iterator.toList === Nil
+    *   Person.name.getObjIterableSince(tx3).iterator.toList === Nil
     * }}}
     *
-    * @group getIterableSince
+    * @group getObjIterableSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(tx: TxReport)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxLong(tx.t))))
+  def getObjIterableSince(tx: TxReport)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(Since(TxLong(tx.t))))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule since date.
@@ -344,26 +318,26 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val date3 = Person.name("Cay").save.inst
     *
     *   // Current values
-    *   Person.name.getIterable.iterator.toList === List("Ann", "Ben", "Cay")
+    *   Person.name.getObjIterable.iterator.toList === List("Ann", "Ben", "Cay")
     *
     *   // Ben and Cay added since date1
-    *   Person.name.getIterableSince(date1).iterator.toList === List("Ben", "Cay")
+    *   Person.name.getObjIterableSince(date1).iterator.toList === List("Ben", "Cay")
     *
     *   // Cay added since date2
-    *   Person.name.getIterableSince(date2).iterator.toList === List("Cay")
+    *   Person.name.getObjIterableSince(date2).iterator.toList === List("Cay")
     *
     *   // Nothing added since date3
-    *   Person.name.getIterableSince(date3).iterator.toList === Nil
+    *   Person.name.getObjIterableSince(date3).iterator.toList === Nil
     * }}}
     *
-    * @group getIterableSince
+    * @group getObjIterableSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is tuple of data matching molecule
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
     */
-  def getIterableSince(date: Date)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(Since(TxDate(date))))
+  def getObjIterableSince(date: Date)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(Since(TxDate(date))))
 
 
   // get with ================================================================================================
@@ -376,7 +350,7 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val ben = Person.name("Ben").likes("pasta").save.eid
     *
     *   // Base data
-    *   Person.name.likes.getIterableWith(
+    *   Person.name.likes.getObjIterableWith(
     *     // apply imaginary transaction data
     *     Person(ben).likes("sushi").getUpdateTx
     *   ).iterator.toList === List(
@@ -391,14 +365,14 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * }}}
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
-    * @group getIterableWith
+    * @group getObjIterableWith
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableWith(txMolecules* getAsyncIterableWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableWith(txMolecules* getAsyncIterableWith]] method.
     */
-  def getIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+  def getObjIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
 
 
   /** Get `Iterable` of all rows as tuples matching molecule with applied raw transaction data.
@@ -413,17 +387,17 @@ trait GetIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     *   val newDataTx = Util.readAll(data_rdr2).get(0).asInstanceOf[java.util.List[Object]]
     *
     *   // Imagine future db - 100 persons would be added, apparently
-    *   Person.name.getIterableWith(newDataTx).size === 250
+    *   Person.name.getObjIterableWith(newDataTx).size === 250
     * }}}
     *
-    * @group getIterableWith
+    * @group getObjIterableWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see Equivalent asynchronous [[GetAsyncIterable.getAsyncIterableWith(txData:java\.util\.List[_])* getAsyncIterableWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableWith(txData:java\.util\.List[_])* getAsyncIterableWith]] method.
     */
-  def getIterableWith(txData: java.util.List[_])(implicit conn: Conn): Iterable[Tpl] =
-    getIterable(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
+  def getObjIterableWith(txData: java.util.List[_])(implicit conn: Conn): Iterable[Obj] =
+    getObjIterable(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
 
 
   // get history ================================================================================================

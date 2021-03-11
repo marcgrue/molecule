@@ -1,11 +1,11 @@
 package molecule.datomic.client.facade
 
 import java.util
-import java.util.stream.{Stream => jStream}
 import java.util.Date
+import java.util.stream.{Stream => jStream}
 import datomic.{Peer, Util}
-import datomicScala.client.api.{Datom => ClientDatom}
 import datomicScala.client.api.sync.Db
+import datomicScala.client.api.{Datom => ClientDatom}
 import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, DatomicDb}
 import scala.collection.JavaConverters._

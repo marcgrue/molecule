@@ -6,8 +6,8 @@ import clojure.lang.{Keyword, PersistentArrayMap}
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements.{Model, TxMetaData}
 import molecule.core.ops.VerifyModel
-import molecule.datomic.base.ast.transactionModel.RetractEntity
 import molecule.core.util.Quoted
+import molecule.datomic.base.ast.transactionModel.RetractEntity
 import molecule.datomic.base.facade.{Conn, TxReport}
 import molecule.datomic.base.transform.Model2Transaction
 import molecule.datomic.base.util.Inspect
@@ -98,7 +98,7 @@ abstract class DatomicEntity(conn: Conn, eid: Any) extends Quoted {
     * <br><br>
     * Apply two or more namespaced attribute names to return a List of unchecked/untyped optional attribute values.
     * <br><br>
-    * Referenced entities can be cast to an Option[Map[String, Any]].
+    * Referenced entities can be cast to an `Option[Map[String, Any]]`.
     * {{{
     *   val List(benId, benAddressId) = Person.name.age.Address.street.insert("Ben", 42, "Hollywood Rd").eids
     *

@@ -1,8 +1,8 @@
-package molecule.core.api.getAsync
+package molecule.core.api.getAsyncObj
 
 import java.util.Date
 import molecule.core.api.Molecule_0
-import molecule.core.api.get.GetIterable
+import molecule.core.api.getObj.GetObjIterable
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -10,65 +10,66 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
-/** Asynchronous data getter methods on molecules returning `Future[Iterable[Tpl]]`.
+/** Asynchronous data getter methods on molecules returning `Future[Iterable[Obj]]`.
   * <br><br>
   * Suitable for data sets that are lazily consumed.
   * {{{
-  *   val iterableFuture: Future[Iterable[(String, Int)]] = Person.name.age.getAsyncIterable
   *   for {
-  *     iterable <- iterableFuture
+  *     personsIterable <- Person.name.age.getAsyncObjIterable
   *   } yield {
-  *     iterable.iterator.next === ("Ben" 42)
+  *     val firstPerson = personsIterable.iterator.next
+  *     firstPerson.name === "Ben"
+  *     firstPerson.age  === 42
   *   }
   * }}}
-  * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter (in the
-  * `get` package) in a Future. `getAsyncIterableAsOf` thus wraps the result of `getIterableAsOf` in a Future and so on.
+  * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter in a Future. 
+  * `getAsyncObjIterableAsOf` thus wraps the result of `getObjIterableAsOf` in a Future and so on.
   * */
-trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[Obj, Tpl] =>
+trait GetAsyncObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetObjIterable[Obj, Tpl] =>
 
 
   // get ================================================================================================
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching the molecule.
+  /** Get `Future` with `Iterable` of all rows as objects matching the molecule.
     * <br><br>
     * Rows are lazily type-casted on each call to iterator.next().
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterable(implicit* getIterable]] method.
+    * [[GetObjIterable.getObjIterable(implicit* getIterable]] method.
     *
     * @group getAsync
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterable(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterable(conn))
+  def getAsyncObjIterable(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterable(conn))
 
 
   // get as of ================================================================================================
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule as of transaction time `t`.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * `t` can for instance be retrieved in a getHistory call for an attribute and then be
     * used to get data as of that point in time (including that transaction).
     * <br><br>
-    * Call `getIterableAsOf` for large result sets to maximize runtime performance.
+    * Call `getObjIterableAsOf` for large result sets to maximize runtime performance.
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableAsOf(t:Long)* getIterableAsOf]] method.
+    * [[GetObjIterable.getObjIterableAsOf(t:Long)* getObjIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableAsOf(t: Long)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableAsOf(t)(conn))
+  def getAsyncObjIterableAsOf(t: Long)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableAsOf(t)(conn))
 
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule as of tx.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule as of tx.
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
@@ -77,36 +78,36 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableAsOf]] method.
+    * [[GetObjIterable.getObjIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getObjIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableAsOf(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableAsOf(tx.t)(conn))
+  def getAsyncObjIterableAsOf(tx: TxReport)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableAsOf(tx.t)(conn))
 
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule as of date.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule as of date.
     * <br><br>
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableAsOf(date:java\.util\.Date)* getIterableAsOf]] method.
+    * [[GetObjIterable.getObjIterableAsOf(date:java\.util\.Date)* getObjIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableAsOf(date: Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableAsOf(date)(conn))
+  def getAsyncObjIterableAsOf(date: Date)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableAsOf(date)(conn))
 
 
   // get since ================================================================================================
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule since transaction time `t`.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule since transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -114,18 +115,18 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableSince(t:Long)* getIterableSince]] method.
+    * [[GetObjIterable.getObjIterableSince(t:Long)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableSince(t: Long)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableSince(t)(conn))
+  def getAsyncObjIterableSince(t: Long)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableSince(t)(conn))
 
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule since tx.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule since tx.
     * <br><br>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
@@ -135,41 +136,41 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableSince]] method.
+    * [[GetObjIterable.getObjIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableSince(tx: TxReport)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableSince(tx.t)(conn))
+  def getAsyncObjIterableSince(tx: TxReport)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableSince(tx.t)(conn))
 
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule since date.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule since date.
     * <br><br>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableSince(date:java\.util\.Date)* getIterableSince]] method.
+    * [[GetObjIterable.getObjIterableSince(date:java\.util\.Date)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[Iterable[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncIterableSince(date: Date)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableSince(date)(conn))
+  def getAsyncObjIterableSince(date: Date)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableSince(date)(conn))
 
 
   // get with ================================================================================================
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule with applied molecule transaction data.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule with applied molecule transaction data.
     * <br><br>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetIterable.getIterableWith(txMolecules* getIterableWith]] method.
+    * [[GetObjIterable.getObjIterableWith(txMolecules* getIterableWith]] method.
     * <br><br>
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
@@ -178,24 +179,24 @@ trait GetAsyncIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetIterable[O
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
     */
-  def getAsyncIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableWith(txMolecules: _*)(conn))
+  def getAsyncObjIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableWith(txMolecules: _*)(conn))
 
 
-  /** Get `Future` with `Iterable` of all rows as tuples matching molecule with applied raw transaction data.
+  /** Get `Future` with `Iterable` of all rows as objects matching molecule with applied raw transaction data.
     * <br><br>
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * * <br><br>
     * * For more info and code examples see equivalent synchronous
-    * * [[GetIterable.getIterableWith(txData:java\.util\.List[_])* getIterableWith]] method.
+    * * [[GetObjIterable.getObjIterableWith(txData:java\.util\.List[_])* getIterableWith]] method.
     *
     * @group getAsyncIterableWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
     */
-  def getAsyncIterableWith(txData: java.util.List[_])(implicit conn: Conn): Future[Iterable[Tpl]] =
-    Future(getIterableWith(txData)(conn))
+  def getAsyncObjIterableWith(txData: java.util.List[_])(implicit conn: Conn): Future[Iterable[Obj]] =
+    Future(getObjIterableWith(txData)(conn))
 
 
   // get history ================================================================================================

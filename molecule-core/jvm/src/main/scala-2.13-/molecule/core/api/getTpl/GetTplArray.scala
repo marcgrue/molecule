@@ -1,8 +1,8 @@
-package molecule.core.api.get
+package molecule.core.api.getTpl
 
 import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
-import molecule.core.api.getAsync.GetAsyncArray
+import molecule.core.api.getAsyncTpl.GetAsyncTplArray
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
   * <br><br>
   * The fastest way of getting a large typed data set. Can then be traversed with a fast `while` loop.
   * */
-trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
+trait GetTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
 
   // get ================================================================================================
@@ -35,7 +35,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArray(implicit* getAsyncArray]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArray(implicit* getAsyncArray]] method.
     */
   def getArray(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] = {
     val jColl = conn.query(_model, _query)
@@ -67,7 +67,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArray(n:Int)* getAsyncArray]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArray(n:Int)* getAsyncArray]] method.
     */
   def getArray(n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] = if (n == -1) {
     getArray(conn, objType, tplType)
@@ -145,7 +145,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(t:Long)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(t:Long)* getAsyncArrayAsOf]] method.
     */
   def getArrayAsOf(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
@@ -197,7 +197,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(t:Long,n:Int)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(t:Long,n:Int)* getAsyncArrayAsOf]] method.
     */
   def getArrayAsOf(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxLong(t))), objType, tplType)
@@ -252,7 +252,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArrayAsOf]] method.
     **/
   def getArrayAsOf(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
@@ -302,7 +302,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArrayAsOf]] method.
     **/
   def getArrayAsOf(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxLong(tx.t))), objType, tplType)
@@ -359,7 +359,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(date:java\.util\.Date)* getAsyncArrayAsOf]] method.
     */
   def getArrayAsOf(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
@@ -406,7 +406,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayAsOf(date:java\.util\.Date,n:Int)* getAsyncArrayAsOf]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayAsOf(date:java\.util\.Date,n:Int)* getAsyncArrayAsOf]] method.
     */
   def getArrayAsOf(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(AsOf(TxDate(date))), objType, tplType)
@@ -447,7 +447,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(t:Long)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(t:Long)* getAsyncArraySince]] method.
     */
   def getArraySince(t: Long)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
@@ -485,7 +485,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(t:Long,n:Int)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(t:Long,n:Int)* getAsyncArraySince]] method.
     */
   def getArraySince(t: Long, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxLong(t))), objType, tplType)
@@ -526,7 +526,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncArraySince]] method.
     */
   def getArraySince(tx: TxReport)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
@@ -567,7 +567,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncArraySince]] method.
     **/
   def getArraySince(tx: TxReport, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxLong(tx.t))), objType, tplType)
@@ -603,7 +603,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(date:java\.util\.Date)* getAsyncArraySince]] method.
     */
   def getArraySince(date: Date)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
@@ -639,7 +639,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArraySince(date:java\.util\.Date,n:Int)* getAsyncArraySince]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArraySince(date:java\.util\.Date,n:Int)* getAsyncArraySince]] method.
     */
   def getArraySince(date: Date, n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(Since(TxDate(date))), objType, tplType)
@@ -679,7 +679,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayWith(txMolecules* getAsyncArrayWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayWith(txMolecules* getAsyncArrayWith]] method.
     */
   def getArrayWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), objType, tplType)
@@ -726,7 +726,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param tplType     Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayWith(n:Int,txMolecules* getAsyncArrayWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayWith(n:Int,txMolecules* getAsyncArrayWith]] method.
     */
   def getArrayWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)), objType, tplType)
@@ -755,7 +755,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_])* getAsyncArrayWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayWith(txData:java\.util\.List[_])* getAsyncArrayWith]] method.
     */
   def getArrayWith(txData: jList[_])(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), objType, tplType)
@@ -790,7 +790,7 @@ trait GetArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @param tplType Implicit `ClassTag[Tpl]` to capture Tuple type for Array
     * @return Array[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncArray.getAsyncArrayWith(txData:java\.util\.List[_],n:Int)* getAsyncArrayWith]] method.
+    * @see Equivalent asynchronous [[GetAsyncTplArray.getAsyncArrayWith(txData:java\.util\.List[_],n:Int)* getAsyncArrayWith]] method.
     */
   def getArrayWith(txData: jList[_], n: Int)(implicit conn: Conn, objType: ClassTag[Obj], tplType: ClassTag[Tpl]): Array[Tpl] =
     getArray(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])), objType, tplType)

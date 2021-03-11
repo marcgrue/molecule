@@ -1,8 +1,10 @@
 package molecule.core.api
 
 import molecule.core.api
-import molecule.core.api.get.{GetArray, GetIterable, GetList, GetRaw}
-import molecule.core.api.getAsync.{GetAsyncArray, GetAsyncIterable, GetAsyncList, GetAsyncRaw}
+import molecule.core.api.getAsyncObj.{GetAsyncObjArray, GetAsyncObjIterable, GetAsyncObjList}
+import molecule.core.api.getTpl.{GetTplArray, GetTplIterable, GetTplList}
+import molecule.core.api.getAsyncTpl.{GetAsyncTplArray, GetAsyncTplIterable, GetAsyncTplList}
+import molecule.core.api.getObj.{GetObjArray, GetObjIterable, GetObjList}
 import molecule.core.ast.Molecule
 import molecule.core.ast.elements._
 import molecule.core.macros.MakeMoleculeDynamic
@@ -156,13 +158,19 @@ import scala.language.experimental.macros
  * */
 trait Molecule_0[Obj, Tpl] extends Molecule
   with CastHelpers[Obj, Tpl]
-  with GetArray[Obj, Tpl]
-  with GetIterable[Obj, Tpl]
-  with GetList[Obj, Tpl]
+  with GetTplArray[Obj, Tpl]
+  with GetTplIterable[Obj, Tpl]
+  with GetTplList[Obj, Tpl]
   with GetRaw
-  with GetAsyncArray[Obj, Tpl]
-  with GetAsyncIterable[Obj, Tpl]
-  with GetAsyncList[Obj, Tpl]
+  with GetObjArray[Obj, Tpl]
+  with GetObjIterable[Obj, Tpl]
+  with GetObjList[Obj, Tpl]
+  with GetAsyncTplArray[Obj, Tpl]
+  with GetAsyncTplIterable[Obj, Tpl]
+  with GetAsyncTplList[Obj, Tpl]
+  with GetAsyncObjArray[Obj, Tpl]
+  with GetAsyncObjIterable[Obj, Tpl]
+  with GetAsyncObjList[Obj, Tpl]
   with GetAsyncRaw
   with ShowInspect[Obj, Tpl] {
 

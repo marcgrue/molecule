@@ -1,9 +1,9 @@
 package molecule.datomic.peer.facade
 
 import java.util.{Date, List => jList, Map => jMap}
-import datomic.{Database, _}
 import datomic.Connection.TEMPIDS
 import datomic.db.{Datum, DbId}
+import datomic.{Database, _}
 import molecule.datomic.base.ast.transactionModel._
 import molecule.datomic.base.facade.TxReport
 import molecule.datomic.base.facade.exception.DatomicFacadeException

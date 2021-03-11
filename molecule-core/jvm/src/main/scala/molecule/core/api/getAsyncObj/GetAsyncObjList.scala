@@ -1,8 +1,8 @@
-package molecule.core.api.getAsync
+package molecule.core.api.getAsyncObj
 
 import java.util.Date
 import molecule.core.api.Molecule_0
-import molecule.core.api.get.GetList
+import molecule.core.api.getObj.GetObjList
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -10,65 +10,57 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
-/** Default asynchronous data getter methods on molecules returning `Future[List[Tpl]]`.
+/** Default asynchronous data getter methods on molecules returning `Future[List[Obj]]`.
   * <br><br>
-  * For expected smaller result sets it's convenient to return Lists of tuples of data.
-  * Considered as the default getter, no postfix has been added (`getAsync` instead of `getAsyncList`).
+  * For expected smaller result sets it's convenient to return Lists of objects of data.
   * {{{
-  *   val futureList: Future[List[(String, Int)]] = Person.name.age.getAsync
   *   for {
-  *     list <- futureList
+  *     persons <- Person.name.age.getAsyncObjList
   *   } yield {
-  *     list === List(
-  *       ("Ben", 42),
-  *       ("Liz", 37)
+  *     persons.map(p => s"${p.name} is ${p.age} years old")) === List(
+  *       "Ben is 42 years old",
+  *       "Liz is 37 years old"
   *     )
   *   }
   * }}}
-  * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter (in the
-  * `get` package) in a Future. `getAsyncAsOf` thus wraps the result of `getAsOf` in a Future and so on.
+  * Each asynchronous getter in this package simply wraps the result of its equivalent synchronous getter in a Future.
+  * `getAsyncObjListAsOf` thus wraps the result of `getObjListAsOf` in a Future and so on.
   * */
-trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj, Tpl] =>
+trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArray[Obj, Tpl] =>
 
 
   // get ================================================================================================
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule.
+  /** Get `Future` with `List` of all rows as objects matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.get(implicit* get]] method.
-    * <br><br>
-    * Since retrieving a List is considered the default fetch format, the getter method is
-    * simply named `get` (and not `getList`).
+    * [[GetObjList.getObjList(implicit* get]] method.
     *
     * @group getAsync
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsync(implicit conn: Conn): Future[List[Tpl]] =
-    Future(get(conn))
+  def getAsyncObjList(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjList(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule.
+  /** Get `Future` with `List` of n rows as objects matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.get(n:Int)* get]] method.
-    * <br><br>
-    * Since retrieving a List is considered the default fetch format, the getter method is
-    * simply named `get` (and not `getList`).
+    * [[GetObjList.getObjList(n:Int)* get]] method.
     *
     * @group getAsync
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsync(n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(get(n)(conn))
+  def getAsyncObjList(n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjList(n)(conn))
 
 
   // get as of ================================================================================================
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule as of transaction time `t`.
+  /** Get `Future` with `List` of all rows as objects matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -76,18 +68,18 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(t:Long)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(t:Long)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncAsOf(t: Long)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(t)(conn))
+  def getAsyncObjListAsOf(t: Long)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(t)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule as of transaction time `t`.
+  /** Get `Future` with `List` of n rows as objects matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -95,19 +87,19 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(t:Long,n:Int)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(t:Long,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Long Transaction time t
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncAsOf(t: Long, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(t, n)(conn))
+  def getAsyncObjListAsOf(t: Long, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(t, n)(conn))
 
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule as of tx.
+  /** Get `Future` with `List` of all rows as objects matching molecule as of tx.
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a
     * database value as of that transaction (including).
@@ -118,18 +110,18 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     * */
-  def getAsyncAsOf(tx: TxReport)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(tx.t)(conn))
+  def getAsyncObjListAsOf(tx: TxReport)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(tx.t)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule as of tx.
+  /** Get `Future` with `List` of n rows as objects matching molecule as of tx.
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database
     * value as of that transaction (including).
@@ -140,87 +132,87 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     * */
-  def getAsyncAsOf(tx: TxReport, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(tx.t, n)(conn))
+  def getAsyncObjListAsOf(tx: TxReport, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(tx.t, n)(conn))
 
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule as of date.
+  /** Get `Future` with `List` of all rows as objects matching molecule as of date.
     * <br><br>
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(date:java\.util\.Date)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(date:java\.util\.Date)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncAsOf(date: Date)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(date)(conn))
+  def getAsyncObjListAsOf(date: Date)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(date)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule as of date.
+  /** Get `Future` with `List` of n rows as objects matching molecule as of date.
     * <br><br>
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
+    * [[GetObjList.getObjListAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncAsOf(date: Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getAsOf(date, n)(conn))
+  def getAsyncObjListAsOf(date: Date, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListAsOf(date, n)(conn))
 
 
   // get since ================================================================================================
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule since transaction time `t`.
+  /** Get `Future` with `List` of all rows as objects matching molecule since transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(t:Long)* getSince]] method.
+    * [[GetObjList.getObjListSince(t:Long)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(t: Long)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(t)(conn))
+  def getAsyncObjListSince(t: Long)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(t)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule since transaction time `t`.
+  /** Get `Future` with `List` of n rows as objects matching molecule since transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(t:Long,n:Int)* getSince]] method.
+    * [[GetObjList.getObjListSince(t:Long,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(t: Long, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(t, n)(conn))
+  def getAsyncObjListSince(t: Long, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(t, n)(conn))
 
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule since tx.
+  /** Get `Future` with `List` of all rows as objects matching molecule since tx.
     * <br><br>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
@@ -230,18 +222,18 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
+    * [[GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(tx: TxReport)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(tx.t)(conn))
+  def getAsyncObjListSince(tx: TxReport)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(tx.t)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule since tx.
+  /** Get `Future` with `List` of n rows as objects matching molecule since tx.
     * <br><br>
     * Datomic's internal `since` can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
@@ -251,118 +243,118 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
+    * [[GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(tx: TxReport, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(tx.t, n)(conn))
+  def getAsyncObjListSince(tx: TxReport, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(tx.t, n)(conn))
 
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule since date.
+  /** Get `Future` with `List` of all rows as objects matching molecule since date.
     * <br><br>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(date:java\.util\.Date)* getSince]] method.
+    * [[GetObjList.getObjListSince(date:java\.util\.Date)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(date: Date)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(date)(conn))
+  def getAsyncObjListSince(date: Date)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(date)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule since date.
+  /** Get `Future` with `List` of n rows as objects matching molecule since date.
     * <br><br>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getSince(date:java\.util\.Date,n:Int)* getSince]] method.
+    * [[GetObjList.getObjListSince(date:java\.util\.Date,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncSince(date: Date, n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getSince(date, n)(conn))
+  def getAsyncObjListSince(date: Date, n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListSince(date, n)(conn))
 
 
   // get with ================================================================================================
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule with applied molecule transaction data.
+  /** Get `Future` with `List` of all rows as objects matching molecule with applied molecule transaction data.
     * <br><br>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getWith(txMolecules* getWith]] method.
+    * [[GetObjList.getObjListWith(txMolecules* getWith]] method.
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
     * @group getAsyncWith
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getWith(txMolecules: _*)(conn))
+  def getAsyncObjListWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListWith(txMolecules: _*)(conn))
 
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule with applied molecule transaction data.
+  /** Get `Future` with `List` of n rows as objects matching molecule with applied molecule transaction data.
     * <br><br>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getWith(n:Int,txMolecules* getWith]] method.
-    * 
+    * [[GetObjList.getObjListWith(n:Int,txMolecules* getWith]] method.
+    *
     * @group getAsyncWith
     * @param n           Int Number of rows returned
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
     */
-  def getAsyncWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getWith(n, txMolecules: _*)(conn))
+  def getAsyncObjListWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListWith(n, txMolecules: _*)(conn))
 
 
-  /** Get `Future` with `List` of all rows as tuples matching molecule with applied raw transaction data.
+  /** Get `Future` with `List` of all rows as objects matching molecule with applied raw transaction data.
     * <br><br>
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getWith(txData:java\.util\.List[_])* getWith]] method.
+    * [[GetObjList.getObjListWith(txData:java\.util\.List[_])* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncWith(txData: java.util.List[_])(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getWith(txData)(conn))
+  def getAsyncObjListWith(txData: java.util.List[_])(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListWith(txData)(conn))
 
-  /** Get `Future` with `List` of n rows as tuples matching molecule with applied raw transaction data.
+  /** Get `Future` with `List` of n rows as objects matching molecule with applied raw transaction data.
     * <br><br>
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
+    * [[GetObjList.getObjListWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
     * @param n      Int Number of rows returned
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is a tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getWith(txData, n)(conn))
+  def getAsyncObjListWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListWith(txData, n)(conn))
 
 
   // get history ================================================================================================
@@ -370,14 +362,14 @@ trait GetAsyncList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncArray[Obj
   /** Get `Future` with history of operations as `List` on an attribute in the db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetList.getHistory(implicit* getHistory]] method.
+    * [[GetObjList.getObjListHistory(implicit* getHistory]] method.
     *
     * @group getHistory
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return List[Tpl] where Tpl is tuple of data matching molecule
+    * @return `Future[List[Obj]]` where Obj is an object type having property types matching the attributes of the molecule
     */
-  def getAsyncHistory(implicit conn: Conn): Future[List[Tpl]] =
-    Future(getHistory(conn))
+  def getAsyncObjListHistory(implicit conn: Conn): Future[List[Obj]] =
+    Future(getObjListHistory(conn))
 
 
   // `getAsyncHistory(n: Int)` is not implemented since the whole data set normally needs to be sorted

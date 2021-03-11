@@ -1,10 +1,10 @@
 package molecule.datomic.client.facade
 
 import java.util.Date
-import datomic.db.DbId
 import datomic.Peer
-import datomicScala.client.api.sync.{Db, TxReport => clientTxReport}
+import datomic.db.DbId
 import datomicScala.client.api.Datom
+import datomicScala.client.api.sync.{Db, TxReport => clientTxReport}
 import molecule.datomic.base.ast.transactionModel._
 import molecule.datomic.base.facade.TxReport
 import molecule.datomic.base.facade.exception.DatomicFacadeException

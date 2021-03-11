@@ -1,20 +1,20 @@
 package molecule.datomic.peer.facade
 
-import java.{lang, util}
 import java.util.{Date, Collection => jCollection, List => jList}
-import datomic.{Database, Datom, ListenableFuture, Peer}
+import java.{lang, util}
 import datomic.Connection.DB_AFTER
 import datomic.Peer._
 import datomic.Util._
+import datomic.{Database, Datom, ListenableFuture, Peer}
 import molecule.core.ast.elements._
+import molecule.core.exceptions._
+import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
+import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.ast.query.{Query, QueryExpr}
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel._
-import molecule.core.exceptions._
-import molecule.datomic.base.transform.{Query2String, QueryOptimizer}
-import molecule.core.util.{BridgeDatomicFuture, Helpers, QueryOpsClojure}
-import molecule.datomic.base.api.DatomicEntity
 import molecule.datomic.base.facade.{Conn, Conn_Datomic, DatomicDb, TxReport}
+import molecule.datomic.base.transform.{Query2String, QueryOptimizer}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
