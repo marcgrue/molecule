@@ -5,8 +5,8 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("molecule-base"))
   .settings(Settings.base ++
-    Publish.withoutDocs // save time without doc creation for publishLocal
-    //    Publish.withDocs // make docs for publishSigned
+    //    Publish.withoutDocs // save time without doc creation for publishLocal
+    Publish.withDocs // make docs for publishSigned
   )
   .jsSettings(Settings.js)
   .jvmSettings(Settings.jvm)
@@ -20,8 +20,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .in(file("molecule-core"))
   .dependsOn(base)
   .settings(Settings.base ++
-    Publish.withoutDocs // save time without doc creation for publishLocal
-    //    Publish.withDocs // make docs for publishSigned
+    //    Publish.withoutDocs // save time without doc creation for publishLocal
+    Publish.withDocs // make docs for publishSigned
   )
   .jsSettings(Settings.js)
   //  .jsConfigure(_.enablePlugins(TzdbPlugin))

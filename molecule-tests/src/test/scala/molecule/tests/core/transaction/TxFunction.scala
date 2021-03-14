@@ -1,13 +1,13 @@
 package molecule.tests.core.transaction
 
-import molecule.datomic.base.ast.transactionModel.Statement
-import molecule.core.macros.exception.TxFnException
-import molecule.tests.core.base.dsl.CoreTest._
-import molecule.datomic.api.out3._
-import molecule.datomic.base.facade.Conn
 import molecule.core.macros.TxFns
+import molecule.core.macros.exception.TxFnException
+import molecule.datomic.api.out3._
+import molecule.datomic.base.ast.transactionModel.Statement
+import molecule.datomic.base.facade.Conn
 import molecule.datomic.base.util.SystemPeer
 import molecule.setup.TestSpec
+import molecule.tests.core.base.dsl.CoreTest._
 import moleculeBuildInfo.BuildInfo
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
