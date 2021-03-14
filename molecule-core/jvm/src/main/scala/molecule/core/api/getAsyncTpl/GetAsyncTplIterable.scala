@@ -34,7 +34,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Rows are lazily type-casted on each call to iterator.next().
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterable(implicit* getIterable]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterable(implicit* getIterable]] method.
     *
     * @group getAsync
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
@@ -57,7 +57,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableAsOf(t:Long)* getIterableAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableAsOf(t:Long)* getIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param t    Transaction time t
@@ -77,7 +77,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -93,7 +93,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableAsOf(date:java\.util\.Date)* getIterableAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableAsOf(date:java\.util\.Date)* getIterableAsOf]] method.
     *
     * @group getAsyncIterableAsOf
     * @param date java.util.Date
@@ -114,7 +114,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Data is lazily type-casted on each call to `next` on the iterator.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableSince(t:Long)* getIterableSince]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableSince(t:Long)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param t    Transaction time t
@@ -135,7 +135,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableSince]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -151,7 +151,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableSince(date:java\.util\.Date)* getIterableSince]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableSince(date:java\.util\.Date)* getIterableSince]] method.
     *
     * @group getAsyncIterableSince
     * @param date java.util.Date
@@ -169,7 +169,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplIterable.getIterableWith(txMolecules* getIterableWith]] method.
+    * [[molecule.core.api.getTpl.GetTplIterable.getIterableWith(txMolecules* getIterableWith]] method.
     * <br><br>
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
@@ -187,7 +187,7 @@ trait GetAsyncTplIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplIter
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * * <br><br>
     * * For more info and code examples see equivalent synchronous
-    * * [[GetTplIterable.getIterableWith(txData:java\.util\.List[_])* getIterableWith]] method.
+    * * [[molecule.core.api.getTpl.GetTplIterable.getIterableWith(txData:java\.util\.List[_])* getIterableWith]] method.
     *
     * @group getAsyncIterableWith
     * @param txData Raw transaction data as java.util.List[Object]

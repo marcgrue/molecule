@@ -2,7 +2,6 @@ package molecule.core.api.getAsyncTpl
 
 import java.util.Date
 import molecule.core.api.Molecule_0
-import molecule.core.api.getTpl.GetTplList
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +35,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
   /** Get `Future` with `List` of all rows as tuples matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.get(implicit* get]] method.
+    * [[molecule.core.api.getTpl.GetTplList.get(implicit* get]] method.
     * <br><br>
     * Since retrieving a List is considered the default fetch format, the getter method is
     * simply named `get` (and not `getList`).
@@ -52,7 +51,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
   /** Get `Future` with `List` of n rows as tuples matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.get(n:Int)* get]] method.
+    * [[molecule.core.api.getTpl.GetTplList.get(n:Int)* get]] method.
     * <br><br>
     * Since retrieving a List is considered the default fetch format, the getter method is
     * simply named `get` (and not `getList`).
@@ -76,7 +75,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(t:Long)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(t:Long)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Transaction time t
@@ -95,7 +94,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(t:Long,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(t:Long,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Long Transaction time t
@@ -118,7 +117,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -140,7 +139,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -157,7 +156,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(date:java\.util\.Date)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(date:java\.util\.Date)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
@@ -173,7 +172,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
@@ -192,7 +191,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(t:Long)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(t:Long)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
@@ -208,7 +207,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(t:Long,n:Int)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(t:Long,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
@@ -230,7 +229,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -251,7 +250,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -268,7 +267,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(date:java\.util\.Date)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(date:java\.util\.Date)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
@@ -284,7 +283,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getSince(date:java\.util\.Date,n:Int)* getSince]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getSince(date:java\.util\.Date,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
@@ -303,7 +302,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getWith(txMolecules* getWith]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getWith(txMolecules* getWith]] method.
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
     * @group getAsyncWith
@@ -320,7 +319,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getWith(n:Int,txMolecules* getWith]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getWith(n:Int,txMolecules* getWith]] method.
     *
     * @group getAsyncWith
     * @param n           Int Number of rows returned
@@ -338,7 +337,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getWith(txData:java\.util\.List[_])* getWith]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getWith(txData:java\.util\.List[_])* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
@@ -353,7 +352,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
@@ -370,7 +369,7 @@ trait GetAsyncTplList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncTplArr
   /** Get `Future` with history of operations as `List` on an attribute in the db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplList.getHistory(implicit* getHistory]] method.
+    * [[molecule.core.api.getTpl.GetTplList.getHistory(implicit* getHistory]] method.
     *
     * @group getHistory
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope

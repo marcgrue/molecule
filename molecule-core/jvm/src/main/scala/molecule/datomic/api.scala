@@ -10,18 +10,18 @@ import molecule.datomic.base.api.EntityOps
   * <br><br>
   * To start using Molecule involves 2 initial steps:
   *
-  *  - Define your schema: [[molecule.core.data.model Docs]]
+  *  - Define your data model
   *  - `sbt compile` your project to let the sbt-molecule plugin generate your custom molecule DSL.
   *
   * Then you can start using your DSL and create molecules by importing the api, your DSL
   * and assign a Datomic connection to an implicit val:
   * {{{
-  *   import molecule.datomic.api._                       // import Molecule API
-  *   import molecule.datomic.peer.facade.Datomic_Peer._  // import system api
-  *   import path.to.dsl.yourDomain._                     // auto-generated custom DSL
-  *   import path.to.schema.YourDomainSchema              // auto-generated custom Schema Transaction data
+  *   import molecule.datomic.api._                     // import Molecule API
+  *   import molecule.datomic.peer.facade.Datomic_Peer  // import system api
+  *   import path.to.dsl.yourDomain._                   // auto-generated custom DSL
+  *   import path.to.schema.YourDomainSchema            // auto-generated custom Schema Transaction data
   *
-  *   implicit val conn = recreateDbFrom(YourDomainDefiniton) // Only once
+  *   implicit val conn = Datomic_Peer.recreateDbFrom(YourDomainSchema)
   *
   *   // Create molecules
   *   Person.name("Ben").age(42).save

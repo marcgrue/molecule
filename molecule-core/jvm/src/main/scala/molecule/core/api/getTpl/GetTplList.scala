@@ -2,13 +2,11 @@ package molecule.core.api.getTpl
 
 import java.util.{Date, List => jList}
 import molecule.core.api.Molecule_0
-import molecule.core.api.getAsyncTpl.GetAsyncTplList
-import molecule.core.util.Quoted
+import molecule.core.util.{JavaUtil, Quoted}
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.collection.mutable.ListBuffer
-import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 
@@ -17,7 +15,7 @@ import scala.language.implicitConversions
   * For expected smaller result sets it's convenient to return Lists of tuples of data.
   * Considered as the default getter, no postfix has been added (`get` instead of `getList`).
   * */
-trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Molecule_0[Obj, Tpl] =>
+trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with JavaUtil with Quoted { self: Molecule_0[Obj, Tpl] =>
 
   // get ================================================================================================
 
@@ -34,7 +32,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @group get
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsync(implicit* getAsync]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsync(implicit* getAsync]] method.
     */
   def get(implicit conn: Conn): List[Tpl] = {
     val jColl = conn.query(_model, _query)
@@ -69,7 +67,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of types matching the attributes of the molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsync(n:Int)* getAsync]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsync(n:Int)* getAsync]] method.
     */
   def get(n: Int)(implicit conn: Conn): List[Tpl] = if (n == -1) {
     get
@@ -143,7 +141,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(t:Long)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(t:Long)* getAsyncAsOf]] method.
     */
   def getAsOf(t: Long)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxLong(t))))
@@ -189,7 +187,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(t:Long,n:Int)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(t:Long,n:Int)* getAsyncAsOf]] method.
     */
   def getAsOf(t: Long, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxLong(t))))
@@ -240,7 +238,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncAsOf]] method.
     * */
   def getAsOf(tx: TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -266,11 +264,6 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     *   // Update (tx report 2)
     *   val tx2 = Person(ben).age(43).update
     *
-    *   // Current data
-    *   Person.name.age.get === List(
-    *     ("Ben", 43),
-    *     ("Liz", 37)
-    *   )
     *
     *   // Get List of all rows as of tx2 (after update)
     *   Person.name.age.getAsOf(tx2) === List(
@@ -289,7 +282,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncAsOf]] method.
     * */
   def getAsOf(tx: TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -342,7 +335,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(date:java\.util\.Date)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(date:java\.util\.Date)* getAsyncAsOf]] method.
     */
   def getAsOf(date: Date)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(AsOf(TxDate(date))))
@@ -383,7 +376,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncAsOf(date:java\.util\.Date,n:Int)* getAsyncAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncAsOf(date:java\.util\.Date,n:Int)* getAsyncAsOf]] method.
     */
   def getAsOf(date: Date, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(AsOf(TxDate(date))))
@@ -406,13 +399,13 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     *   // Current values
     *   Person.name.get === List("Ann", "Ben", "Cay")
     *
-    *   // Ben and Cay added since transaction time t 1028
+    *   // Ben and Cay added since transaction time t1
     *   Person.name.getSince(t1) === List("Ben", "Cay")
     *
-    *   // Cay added since transaction time t 1030
+    *   // Cay added since transaction time t2
     *   Person.name.getSince(t2) === List("Cay")
     *
-    *   // Nothing added since transaction time t 1032
+    *   // Nothing added since transaction time t3
     *   Person.name.getSince(t3) === Nil
     * }}}
     *
@@ -420,7 +413,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(t:Long)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(t:Long)* getAsyncSince]] method.
     */
   def getSince(t: Long)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(Since(TxLong(t))))
@@ -441,10 +434,10 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     *   // Current values
     *   Person.name.get === List("Ann", "Ben", "Cay")
     *
-    *   // Ben and Cay added since transaction time t 1028
+    *   // Ben and Cay added since transaction time t1
     *   Person.name.getSince(t1) === List("Ben", "Cay")
     *
-    *   // Ben and Cay added since transaction time t 1028 - only n (1) rows returned
+    *   // Ben and Cay added since transaction time t1 - only n (1) rows returned
     *   Person.name.getSince(t1, 1) === List("Ben")
     * }}}
     *
@@ -453,7 +446,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(t:Long,n:Int)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(t:Long,n:Int)* getAsyncSince]] method.
     */
   def getSince(t: Long, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(Since(TxLong(t))))
@@ -490,7 +483,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncSince]] method.
     */
   def getSince(tx: TxReport)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(Since(TxLong(tx.t))))
@@ -525,7 +518,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncSince]] method.
     */
   def getSince(tx: TxReport, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(Since(TxLong(tx.t))))
@@ -557,7 +550,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(date:java\.util\.Date)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(date:java\.util\.Date)* getAsyncSince]] method.
     */
   def getSince(date: Date)(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(Since(TxDate(date))))
@@ -587,7 +580,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncSince(date:java\.util\.Date,n:Int)* getAsyncSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncSince(date:java\.util\.Date,n:Int)* getAsyncSince]] method.
     */
   def getSince(date: Date, n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(Since(TxDate(date))))
@@ -620,12 +613,14 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncWith(txMolecules* getAsyncWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncWith(txMolecules* getAsyncWith]] method.
     */
   def getWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): List[Tpl] = {
-    val a = txMolecules.flatten.flatten.map(_.toJava).asJava
-    val x = conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava))
-    get(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    // Manually converting tx statements to avoid 2.12/2.13 versioning
+    //    import scala.jdk.CollectionConverters._ // 2.13
+    //    import scala.collection.JavaConverters._ // 2.12
+    //    get(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    get(conn.usingTempDb(With(toJavaList(txMolecules.flatten.flatten.map(_.toJava)))))
   }
 
 
@@ -664,10 +659,10 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncWith(n:Int,txMolecules* getAsyncWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncWith(n:Int,txMolecules* getAsyncWith]] method.
     */
   def getWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): List[Tpl] =
-    get(n)(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    get(n)(conn.usingTempDb(With(toJavaList(txMolecules.flatten.flatten.map(_.toJava)))))
 
 
   /** Get `List` of all rows as tuples matching molecule with applied raw transaction data.
@@ -689,7 +684,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncWith(txData:java\.util\.List[_])* getAsyncWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncWith(txData:java\.util\.List[_])* getAsyncWith]] method.
     */
   def getWith(txData: java.util.List[_])(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
@@ -718,7 +713,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @param n      Int Number of rows returned
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncWith(txData:java\.util\.List[_],n:Int)* getAsyncWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncWith(txData:java\.util\.List[_],n:Int)* getAsyncWith]] method.
     */
   def getWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): List[Tpl] =
     get(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
@@ -765,7 +760,7 @@ trait GetTplList[Obj, Tpl] extends GetTplArray[Obj, Tpl] with Quoted { self: Mol
     * @group getHistory
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return List[Tpl] where Tpl is a tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplList.getAsyncHistory(implicit* getAsyncHistory]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncTpl.GetAsyncTplList.getAsyncHistory(implicit* getAsyncHistory]] method.
     */
   def getHistory(implicit conn: Conn): List[Tpl] =
     get(conn.usingTempDb(History))

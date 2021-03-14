@@ -42,7 +42,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
   /** Get `Future` with `Array` of all rows as tuples matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArray(implicit* getArray]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArray(implicit* getArray]] method.
     *
     * @group getAsync
     * @param conn    Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
@@ -56,7 +56,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
   /** Get `Future` with `Array` of n rows as tuples matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArray(n:Int)* getArray]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArray(n:Int)* getArray]] method.
     *
     * @group getAsync
     * @param n       Number of rows
@@ -78,7 +78,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(t:Long)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(t:Long)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -102,7 +102,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(t:Long,n:Int)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(t:Long,n:Int)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -132,7 +132,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -159,7 +159,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -183,7 +183,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(date:java\.util\.Date)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(date:java\.util\.Date)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -204,7 +204,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayAsOf(date:java\.util\.Date,n:Int)* getArrayAsOf]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayAsOf(date:java\.util\.Date,n:Int)* getArrayAsOf]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -233,7 +233,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * and then be used to get data since that point in time (excluding that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(t:Long)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(t:Long)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -257,7 +257,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * and then be used to get data since that point in time (excluding that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(t:Long,n:Int)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(t:Long,n:Int)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -286,7 +286,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -312,7 +312,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -336,7 +336,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(date:java\.util\.Date)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(date:java\.util\.Date)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -357,7 +357,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArraySince(date:java\.util\.Date,n:Int)* getArraySince]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArraySince(date:java\.util\.Date,n:Int)* getArraySince]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -383,7 +383,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayWith(txMolecules* getArrayWith]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayWith(txMolecules* getArrayWith]] method.
     * <br><br>
     * Multiple transactions can be applied to test more complex what-if scenarios!
     * <br><br>
@@ -406,7 +406,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayWith(n:Int,txMolecules* getArrayWith]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayWith(n:Int,txMolecules* getArrayWith]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -431,7 +431,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayWith(txData:java\.util\.List[_])* getArrayWith]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayWith(txData:java\.util\.List[_])* getArrayWith]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will
@@ -452,7 +452,7 @@ trait GetAsyncTplArray[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetTplArray[O
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetTplArray.getArrayWith(txData:java\.util\.List[_],n:Int)* getArrayWith]] method.
+    * [[molecule.core.api.getTpl.GetTplArray.getArrayWith(txData:java\.util\.List[_],n:Int)* getArrayWith]] method.
     * <br><br>
     * Getting a pre-allocated Array populated with typed data is the fastest way to query
     * Datomic with Molecule. Looping the Array in a while loop with a mutable index pointer will

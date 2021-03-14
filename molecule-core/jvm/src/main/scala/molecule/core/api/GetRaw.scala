@@ -2,10 +2,10 @@ package molecule.core.api
 
 import java.util.{Date, Collection => jCollection, List => jList}
 import molecule.core.ast.Molecule
+import molecule.core.util.JavaUtil
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
-import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 
@@ -15,7 +15,7 @@ import scala.language.implicitConversions
   * therefore the fastest (but untyped) way of retrieving data. Can be useful where typed data is
   * not needed.
   * */
-trait GetRaw { self: Molecule =>
+trait GetRaw extends JavaUtil { self: Molecule =>
 
 
   // get ================================================================================================
@@ -32,7 +32,7 @@ trait GetRaw { self: Molecule =>
     * @group get
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRaw(implicit* getAsyncRaw]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRaw(implicit* getAsyncRaw]] method.
     */
   def getRaw(implicit conn: Conn): jCollection[jList[AnyRef]] =
     conn.query(_model, _query)
@@ -47,7 +47,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Number of rows
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRaw(n:Int)* getAsyncRaw]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRaw(n:Int)* getAsyncRaw]] method.
     */
   def getRaw(n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] = if (n == -1) {
     getRaw(conn)
@@ -111,7 +111,7 @@ trait GetRaw { self: Molecule =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(t:Long)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(t:Long)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(t: Long)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(AsOf(TxLong(t))))
@@ -154,7 +154,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(t:Long,n:Int)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(t:Long,n:Int)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(t: Long, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(AsOf(TxLong(t))))
@@ -197,7 +197,7 @@ trait GetRaw { self: Molecule =>
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(tx: TxReport)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -239,7 +239,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(tx: TxReport, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(AsOf(TxLong(tx.t))))
@@ -286,7 +286,7 @@ trait GetRaw { self: Molecule =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(date: Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(AsOf(TxDate(date))))
@@ -331,7 +331,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date,n:Int)* getAsyncRawAsOf]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawAsOf(date:java\.util\.Date,n:Int)* getAsyncRawAsOf]] method.
     */
   def getRawAsOf(date: Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(AsOf(TxDate(date))))
@@ -370,7 +370,7 @@ trait GetRaw { self: Molecule =>
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(t:Long)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(t:Long)* getAsyncRawSince]] method.
     */
   def getRawSince(t: Long)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(Since(TxLong(t))))
@@ -405,7 +405,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(t:Long,n:Int)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(t:Long,n:Int)* getAsyncRawSince]] method.
     */
   def getRawSince(t: Long, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(Since(TxLong(t))))
@@ -443,7 +443,7 @@ trait GetRaw { self: Molecule =>
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncRawSince]] method.
     */
   def getRawSince(tx: TxReport)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(Since(TxLong(tx.t))))
@@ -479,7 +479,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsyncRawSince]] method.
     */
   def getRawSince(tx: TxReport, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(Since(TxLong(tx.t))))
@@ -513,7 +513,7 @@ trait GetRaw { self: Molecule =>
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date)* getAsyncRawSince]] method.
     */
   def getRawSince(date: Date)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(Since(TxDate(date))))
@@ -545,7 +545,7 @@ trait GetRaw { self: Molecule =>
     * @param n    Int Number of rows returned
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date,n:Int)* getAsyncRawSince]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawSince(date:java\.util\.Date,n:Int)* getAsyncRawSince]] method.
     */
   def getRawSince(date: Date, n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(Since(TxDate(date))))
@@ -574,10 +574,10 @@ trait GetRaw { self: Molecule =>
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawWith(txMolecules* getAsyncRawWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawWith(txMolecules* getAsyncRawWith]] method.
     */
   def getRawWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): jCollection[jList[AnyRef]] =
-    getRaw(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    getRaw(conn.usingTempDb(With(toJavaList(txMolecules.flatten.flatten.map(_.toJava)))))
 
 
   /** Get `java.util.Collection` of n untyped rows matching molecule with applied molecule transaction data.
@@ -611,10 +611,10 @@ trait GetRaw { self: Molecule =>
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
     * @note Note how the `n` parameter has to come before the `txMolecules` vararg.
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawWith(n:Int,txMolecules* getAsyncRawWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawWith(n:Int,txMolecules* getAsyncRawWith]] method.
     */
   def getRawWith(n: Int, txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): jCollection[jList[AnyRef]] =
-    getRaw(n)(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    getRaw(n)(conn.usingTempDb(With(toJavaList(txMolecules.flatten.flatten.map(_.toJava)))))
 
 
   /** Get `java.util.Collection` of all untyped rows matching molecule with applied raw transaction data.
@@ -636,7 +636,7 @@ trait GetRaw { self: Molecule =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_])* getAsyncRawWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_])* getAsyncRawWith]] method.
     */
   def getRawWith(txData: java.util.List[_])(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))
@@ -665,7 +665,7 @@ trait GetRaw { self: Molecule =>
     * @param n      Int Number of rows returned
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return `java.util.Collection[java.util.List[AnyRef]]`
-    * @see Equivalent asynchronous [[GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_],n:Int)* getAsyncRawWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.GetAsyncRaw.getAsyncRawWith(txData:java\.util\.List[_],n:Int)* getAsyncRawWith]] method.
     */
   def getRawWith(txData: java.util.List[_], n: Int)(implicit conn: Conn): jCollection[jList[AnyRef]] =
     getRaw(n)(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))

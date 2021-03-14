@@ -36,7 +36,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * }}}
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRaw(implicit* getRaw]] method.
+    * [[molecule.core.api.GetRaw.getRaw(implicit* getRaw]] method.
     *
     * @group getAsync
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
@@ -52,7 +52,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * }}}
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRaw(n:Int)* getRaw]] method.
+    * [[molecule.core.api.GetRaw.getRaw(n:Int)* getRaw]] method.
     *
     * @group getAsync
     * @param n    Number of rows
@@ -75,7 +75,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(t:Long)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(t:Long)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param t    Transaction time t
@@ -99,7 +99,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(t:Long,n:Int)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(t:Long,n:Int)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param t    Transaction time t
@@ -122,7 +122,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -144,7 +144,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -163,7 +163,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(date:java\.util\.Date)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(date:java\.util\.Date)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param date java.util.Date
@@ -181,7 +181,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawAsOf(date:java\.util\.Date,n:Int)* getRawAsOf]] method.
+    * [[molecule.core.api.GetRaw.getRawAsOf(date:java\.util\.Date,n:Int)* getRawAsOf]] method.
     *
     * @group getAsyncRawAsOf
     * @param date java.util.Date
@@ -205,7 +205,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * and then be used to get data since that point in time (excluding that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(t:Long)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(t:Long)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param t    Transaction time t
@@ -226,7 +226,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * and then be used to get data since that point in time (excluding that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(t:Long,n:Int)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(t:Long,n:Int)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param t    Transaction time t
@@ -249,7 +249,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -271,7 +271,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -290,7 +290,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(date:java\.util\.Date)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(date:java\.util\.Date)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param date java.util.Date
@@ -308,7 +308,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawSince(date:java\.util\.Date,n:Int)* getRawSince]] method.
+    * [[molecule.core.api.GetRaw.getRawSince(date:java\.util\.Date,n:Int)* getRawSince]] method.
     *
     * @group getAsyncRawSince
     * @param date java.util.Date
@@ -327,7 +327,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawWith(txMolecules* getRawWith]] method.
+    * [[molecule.core.api.GetRaw.getRawWith(txMolecules* getRawWith]] method.
     * <br><br>
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
@@ -345,7 +345,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawWith(n:Int,txMolecules* getRawWith]] method.
+    * [[molecule.core.api.GetRaw.getRawWith(n:Int,txMolecules* getRawWith]] method.
     * <br><br>
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
@@ -365,7 +365,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawWith(txData:java\.util\.List[_])* getRawWith]] method.
+    * [[molecule.core.api.GetRaw.getRawWith(txData:java\.util\.List[_])* getRawWith]] method.
     *
     * @group getAsyncRawWith
     * @param txData Raw transaction data as java.util.List[Object]
@@ -381,7 +381,7 @@ trait GetAsyncRaw { self: Molecule with GetRaw =>
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetRaw.getRawWith(txData:java\.util\.List[_],n:Int)* getRawWith]] method.
+    * [[molecule.core.api.GetRaw.getRawWith(txData:java\.util\.List[_],n:Int)* getRawWith]] method.
     *
     * @group getAsyncRawWith
     * @param txData Raw transaction data as java.util.List[Object]

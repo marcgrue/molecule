@@ -10,7 +10,7 @@ import molecule.core.ast.elements._
   * }}}
   *
   * @groupname attrLogicImplicits Expression implicits
-  * @groupdesc attrLogicImplicits Turns basic types into `TermValue`'s that can be used in [[Expression Expression]]
+  * @groupdesc attrLogicImplicits Turns basic types into `TermValue`'s that can be used in [[molecule.core.ast.elements.Expression Expression]]
   * @groupprio attrLogicImplicits 21
   */
 trait LogicImplicits {

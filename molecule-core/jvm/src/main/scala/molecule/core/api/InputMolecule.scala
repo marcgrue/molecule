@@ -17,9 +17,9 @@ import molecule.datomic.base.ast.query.{DataClause, _}
   * Input molecule queries are cached by Datomic. So there is a runtime performance gain in using input molecules. Furthermore,
   * input molecules are a good fit for re-use for queries where only a few parameters change.
   * <br><br>
-  * Input molecules can await 1, 2 or 3 inputs and are constructed by applying the [[AttrExpressions.? ?]] marker
-  * to attributes. If one marker is applied, we get a [[Molecule_1 Molecule_1]], 2 inputs creates
-  * an [[Molecule_2 Molecule_2]] and 3 an [[Molecule_3 Molecule_3]].
+  * Input molecules can await 1, 2 or 3 inputs and are constructed by applying the `?` marker
+  * to attributes. If one marker is applied, we get a [[molecule.core.api.Molecule_1 Molecule_1]], 2 inputs creates
+  * an [[molecule.core.api.Molecule_2 Molecule_2]] and 3 an [[molecule.core.api.Molecule_3 Molecule_3]].
   * <br><br>
   * The three input molecule interfaces come in arity-versions corresponding to the number of non-?-marked attributes
   * in the input molecule. Let's see a simple example:

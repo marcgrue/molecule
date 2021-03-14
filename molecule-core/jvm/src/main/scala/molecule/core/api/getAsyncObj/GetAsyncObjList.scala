@@ -2,7 +2,6 @@ package molecule.core.api.getAsyncObj
 
 import java.util.Date
 import molecule.core.api.Molecule_0
-import molecule.core.api.getObj.GetObjList
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +33,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
   /** Get `Future` with `List` of all rows as objects matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjList(implicit* get]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjList(implicit* get]] method.
     *
     * @group getAsync
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
@@ -47,7 +46,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
   /** Get `Future` with `List` of n rows as objects matching molecule.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjList(n:Int)* get]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjList(n:Int)* get]] method.
     *
     * @group getAsync
     * @param n    Int Number of rows returned
@@ -62,13 +61,13 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
 
   /** Get `Future` with `List` of all rows as objects matching molecule as of transaction time `t`.
     * <br><br>
-    * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
+    * Transaction time `t` is an auto-πincremented transaction number assigned internally by Datomic.
     * <br><br>
     * `t` can for instance be retrieved in a getHistory call for an attribute and then be
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(t:Long)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(t:Long)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Transaction time t
@@ -87,7 +86,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * used to get data as of that point in time (including that transaction).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(t:Long,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(t:Long,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param t    Long Transaction time t
@@ -110,7 +109,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -132,7 +131,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
@@ -149,7 +148,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(date:java\.util\.Date)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(date:java\.util\.Date)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
@@ -165,7 +164,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Get data at a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListAsOf(date:java\.util\.Date,n:Int)* getAsOf]] method.
     *
     * @group getAsyncAsOf
     * @param date java.util.Date
@@ -184,7 +183,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(t:Long)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(t:Long)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
@@ -200,7 +199,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(t:Long,n:Int)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(t:Long,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param t    Transaction time t
@@ -222,7 +221,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -243,7 +242,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * get a [[molecule.datomic.base.facade.TxReport TxReport]] from transaction operations like `get`, `update`, `retract` etc.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(tx:molecule\.datomic\.base\.facade\.TxReport,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
@@ -260,7 +259,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(date:java\.util\.Date)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(date:java\.util\.Date)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
@@ -276,7 +275,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Get data added/retracted since a human point in time (a java.util.Date).
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListSince(date:java\.util\.Date,n:Int)* getSince]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListSince(date:java\.util\.Date,n:Int)* getSince]] method.
     *
     * @group getAsyncSince
     * @param date java.util.Date
@@ -295,7 +294,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListWith(txMolecules* getWith]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListWith(txMolecules* getWith]] method.
     * Multiple transactions can be applied to test more complex what-if scenarios!
     *
     * @group getAsyncWith
@@ -312,7 +311,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListWith(n:Int,txMolecules* getWith]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListWith(n:Int,txMolecules* getWith]] method.
     *
     * @group getAsyncWith
     * @param n           Int Number of rows returned
@@ -330,7 +329,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListWith(txData:java\.util\.List[_])* getWith]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListWith(txData:java\.util\.List[_])* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
@@ -345,7 +344,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
     * Apply raw transaction data to in-memory "branch" of db without affecting db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListWith(txData:java\.util\.List[_],n:Int)* getWith]] method.
     *
     * @group getAsyncWith
     * @param txData Raw transaction data as java.util.List[Object]
@@ -362,7 +361,7 @@ trait GetAsyncObjList[Obj, Tpl] { self: Molecule_0[Obj, Tpl] with GetAsyncObjArr
   /** Get `Future` with history of operations as `List` on an attribute in the db.
     * <br><br>
     * For more info and code examples see equivalent synchronous
-    * [[GetObjList.getObjListHistory(implicit* getHistory]] method.
+    * [[molecule.core.api.getObj.GetObjList.getObjListHistory(implicit* getHistory]] method.
     *
     * @group getHistory
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope

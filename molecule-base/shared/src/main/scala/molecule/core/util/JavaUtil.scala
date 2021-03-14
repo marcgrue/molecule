@@ -24,6 +24,17 @@ trait JavaUtil {
   }
 
 
+  def toJavaList(scalaList: Seq[jList[_]]): jList[jList[_]] = {
+    val length   = scalaList.length
+    val javaList = new java.util.ArrayList[jList[_]](length)
+    var i        = 0
+    while (i < length) {
+      javaList.add(scalaList(i))
+      i += 1
+    }
+    javaList
+  }
+
   // Raw output has different implementations but same interface. Printing
   // output in tests is therefore formatted differently in tests and this
   // transformer can unify the tested results (here just Int's)

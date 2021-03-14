@@ -2,11 +2,10 @@ package molecule.core.api.getObj
 
 import java.util.{Date, Collection => jCollection, Iterator => jIterator, List => jList}
 import molecule.core.api.Molecule_0
-import molecule.core.api.getAsyncTpl.GetAsyncTplIterable
+import molecule.core.util.JavaUtil
 import molecule.datomic.base.ast.tempDb._
 import molecule.datomic.base.ast.transactionModel.Statement
 import molecule.datomic.base.facade.{Conn, TxReport}
-import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 
@@ -14,7 +13,7 @@ import scala.language.implicitConversions
   * <br><br>
   * Suitable for data sets that are lazily consumed.
   * */
-trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
+trait GetObjIterable[Obj, Tpl] extends JavaUtil { self: Molecule_0[Obj, Tpl] =>
 
 
   // get obj data ==============================================================
@@ -32,7 +31,7 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable[Obj] where Obj is composed of trait types
     *         matching the attributes of the molecule.
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterable(implicit* getAsyncIterable]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterable(implicit* getAsyncIterable]] method.
     */
   def getObjIterable(implicit conn: Conn): Iterable[Obj] = new Iterable[Obj] {
     private val jColl: jCollection[jList[AnyRef]] = conn.query(_model, _query)
@@ -48,7 +47,7 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
   // get as of =================================================================
 
-  /** Get `Iterable` of all rows as tuples matching molecule as of transaction time `t`.
+  /** Get `Iterable` of all rows as objects matching molecule as of transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -106,14 +105,14 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableAsOf
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(t:Long)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableAsOf(t:Long)* getAsyncObjIterableAsOf]] method.
     */
   def getObjIterableAsOf(t: Long)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(AsOf(TxLong(t))))
 
 
-  /** Get `Iterable` of all rows as tuples matching molecule as of tx.
+  /** Get `Iterable` of all rows as objects matching molecule as of tx.
     * <br><br>
     * Datomic's internal `asOf` method can take a transaction entity id as argument to retrieve a database value as of that transaction (including).
     * <br><br>
@@ -162,14 +161,14 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableAsOf
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]] (returned from all molecule transaction operations)
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableAsOf(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncObjIterableAsOf]] method.
     */
   def getObjIterableAsOf(tx: TxReport)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(AsOf(TxLong(tx.t))))
 
 
-  /** Get `Iterable` of all rows as tuples matching molecule as of date.
+  /** Get `Iterable` of all rows as objects matching molecule as of date.
     * <br><br>
     * Get data at a human point in time (a java.util.Date).
     * {{{
@@ -224,8 +223,8 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableAsOf
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableAsOf(date:java\.util\.Date)* getAsyncIterableAsOf]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableAsOf(date:java\.util\.Date)* getAsyncObjIterableAsOf]] method.
     */
   def getObjIterableAsOf(date: Date)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(AsOf(TxDate(date))))
@@ -233,7 +232,7 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
   // get since ================================================================================================
 
-  /** Get `Iterable` of all rows as tuples matching molecule since transaction time `t`.
+  /** Get `Iterable` of all rows as objects matching molecule since transaction time `t`.
     * <br><br>
     * Transaction time `t` is an auto-incremented transaction number assigned internally by Datomic.
     * <br><br>
@@ -264,14 +263,14 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableSince
     * @param t    Transaction time t
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(t:Long)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableSince(t:Long)* getAsyncObjIterableSince]] method.
     */
   def getObjIterableSince(t: Long)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(Since(TxLong(t))))
 
 
-  /** Get `Iterable` of all rows as tuples matching molecule since tx.
+  /** Get `Iterable` of all rows as objects matching molecule since tx.
     * <br><br>
     * Datomic's internal `since` method can take a transaction entity id as argument to retrieve a database
     * value since that transaction (excluding the transaction itself).
@@ -301,14 +300,14 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableSince
     * @param tx   [[molecule.datomic.base.facade.TxReport TxReport]]
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableSince(tx:molecule\.datomic\.base\.facade\.TxReport)* getAsyncObjIterableSince]] method.
     */
   def getObjIterableSince(tx: TxReport)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(Since(TxLong(tx.t))))
 
 
-  /** Get `Iterable` of all rows as tuples matching molecule since date.
+  /** Get `Iterable` of all rows as objects matching molecule since date.
     * <br><br>
     * Get data added/retracted since a human point in time (a java.util.Date).
     * {{{
@@ -333,8 +332,8 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @group getObjIterableSince
     * @param date java.util.Date
     * @param conn Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
-    * @return Iterable[Obj] where Obj is tuple of data matching molecule
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableSince(date:java\.util\.Date)* getAsyncIterableSince]] method.
+    * @return Iterable[Obj] where Obj is an object type having property types matching the attributes of the molecule
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableSince(date:java\.util\.Date)* getAsyncObjIterableSince]] method.
     */
   def getObjIterableSince(date: Date)(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(Since(TxDate(date))))
@@ -342,7 +341,7 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
 
   // get with ================================================================================================
 
-  /** Get `Iterable` of all rows as tuples matching molecule with applied molecule transaction data.
+  /** Get `Iterable` of all rows as objects matching molecule with applied molecule transaction data.
     * <br><br>
     * Apply one or more molecule transactions to in-memory "branch" of db without affecting db to see how it would then look:
     * {{{
@@ -369,13 +368,13 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param txMolecules Transaction statements from applied Molecules with test data
     * @param conn        Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableWith(txMolecules* getAsyncIterableWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableWith(txMolecules* getAsyncObjIterableWith]] method.
     */
   def getObjIterableWith(txMolecules: Seq[Seq[Statement]]*)(implicit conn: Conn): Iterable[Obj] =
-    getObjIterable(conn.usingTempDb(With(txMolecules.flatten.flatten.map(_.toJava).asJava)))
+    getObjIterable(conn.usingTempDb(With(toJavaList(txMolecules.flatten.flatten.map(_.toJava)))))
 
 
-  /** Get `Iterable` of all rows as tuples matching molecule with applied raw transaction data.
+  /** Get `Iterable` of all rows as objects matching molecule with applied raw transaction data.
     * <br><br>
     * Apply raw transaction data to in-memory "branch" of db without affecting db to see how it would then look:
     * {{{
@@ -394,7 +393,7 @@ trait GetObjIterable[Obj, Tpl] { self: Molecule_0[Obj, Tpl] =>
     * @param txData Raw transaction data as java.util.List[Object]
     * @param conn   Implicit [[molecule.datomic.base.facade.Conn Conn]] value in scope
     * @return Iterable of molecule data
-    * @see Equivalent asynchronous [[GetAsyncTplIterable.getAsyncIterableWith(txData:java\.util\.List[_])* getAsyncIterableWith]] method.
+    * @see Equivalent asynchronous [[molecule.core.api.getAsyncObj.GetAsyncObjIterable.getAsyncObjIterableWith(txData:java\.util\.List[_])* getAsyncObjIterableWith]] method.
     */
   def getObjIterableWith(txData: java.util.List[_])(implicit conn: Conn): Iterable[Obj] =
     getObjIterable(conn.usingTempDb(With(txData.asInstanceOf[jList[jList[_]]])))

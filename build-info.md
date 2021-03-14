@@ -11,7 +11,7 @@ Compile to 2.13 only:
 
 Compile to 2.12 only:
 
-    sbt ++2.12.12 clean compile -Dfree=true
+    sbt ++2.12.13 clean compile -Dfree=true
 
 Compile to 2.12 and 2.13:
 
@@ -44,5 +44,5 @@ or
 > sbt publishLocal
 
 // 2.12 only
-> sbt ++2.12.12 publishSigned
+> sbt ++2.12.13 publishSigned
 
