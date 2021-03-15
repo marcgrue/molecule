@@ -4,7 +4,7 @@ import java.util.Date
 import molecule.core.ast.exception.ModelException
 import molecule.core.util.Helpers
 
-/** AST for molecule [[elements.Model Model]] representation.
+/** AST for molecule Model representation.
   * <br><br>
   * Molecule transforms custom boilerplate DSL constructs to Datomic queries in 3 steps:
   * <br><br>

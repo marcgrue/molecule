@@ -18,7 +18,7 @@ object query extends Helpers {
     * <br><br>
     * Custom DSL molecule --> Model --> Query --> Datomic query string
     * <br><br>
-    * Query is thus derived from [[molecule.core.ast.elements.Model Model]] representation.
+    * Query is thus derived from a Model representation.
     *
     * @param f  Find parameters
     * @param wi With parameters
