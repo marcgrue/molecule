@@ -76,7 +76,7 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.4.8
+sbt.version=1.4.9
 ```
 
 `project/buildinfo.sbt`:
